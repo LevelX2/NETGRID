@@ -164,6 +164,51 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
+  it("covers the minimal runtime bridge action families", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 0, { source: "basic_action" }),
+        legalAction("draw_card", 1, { source: "basic_action" }),
+        legalAction("start_run", 2, {
+          source: "basic_action",
+          payload: { serverId: "rd" },
+        }),
+        legalAction("continue_run", 3, { source: "game_rule" }),
+        legalAction("rez_ice", 4, {
+          side: "corp",
+          source: "game_rule",
+          payload: { serverId: "rd" },
+        }),
+        legalAction("advance_card", 5, {
+          side: "corp",
+          source: "basic_action",
+          payload: { cardId: "installed-agenda" },
+        }),
+        legalAction("score_agenda", 6, {
+          side: "corp",
+          source: "game_rule",
+          payload: { cardId: "installed-agenda" },
+        }),
+      ],
+    });
+
+    expect(
+      candidates.map((candidate) => [
+        candidate.actionType,
+        candidate.semanticActionType,
+        candidate.primaryProjectionStatus,
+      ]),
+    ).toEqual([
+      ["gain_credit", "economy.gain_credit", "projected"],
+      ["draw_card", "draw.card", "projected"],
+      ["start_run", "run.start", "projected"],
+      ["continue_run", "run.continue", "projected"],
+      ["rez_ice", "corp_window.rez", "partial_projected"],
+      ["advance_card", "score.advance_card", "partial_projected"],
+      ["score_agenda", "score.agenda", "partial_projected"],
+    ]);
+  });
+
   it("binds card source and ability only from side-safe LegalAction evidence", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

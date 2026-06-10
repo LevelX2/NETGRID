@@ -13727,6 +13727,38 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("surfaces action semantic candidate evidence in semantic runtime choices", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-action-semantic-runtime-bridge",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(rdRun).toBeDefined();
+    if (!rdRun) throw new Error("Missing action semantic bridge run action");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [rdRun] },
+      { persistTacticalPlanMemory: false },
+    );
+
+    expect(decision.evidence).toContain("action_semantic_candidate:run.start");
+    expect(decision.evidence).toContain(
+      "action_semantic_projection:projected",
+    );
+    expect(decision.evidence).toContain(
+      "semantic_runtime_scope:simple_hq_or_rnd_pressure",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("does not phase-exit into a run when the visible path remains unaffordable", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-phase-exit-false-positive-cost",

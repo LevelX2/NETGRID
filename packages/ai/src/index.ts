@@ -3426,12 +3426,12 @@ function chooseSemanticRuntimeAction(
       ],
     };
   }
-  const choices = semanticRuntimeChoices(input);
   const actionSemanticCandidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
   });
+  const choices = semanticRuntimeChoices(input, actionSemanticCandidates);
   const reactiveChoice =
     choices.find(
       (candidate) =>
@@ -4042,10 +4042,21 @@ function semanticRuntimeForcedLegacy(): boolean {
 
 function semanticRuntimeChoices(
   input: AiDecisionInput,
+  actionSemanticCandidates: readonly ActionSemanticCandidate[] = [],
 ): SemanticRuntimeChoice[] {
+  const candidatesByActionId = new Map(
+    actionSemanticCandidates.map((candidate) => [
+      candidate.actionId,
+      candidate,
+    ]),
+  );
   return sortSemanticRuntimeChoices(
     input.legalActions.map((action) =>
-      scoreSemanticRuntimeAction(input, action),
+      scoreSemanticRuntimeAction(
+        input,
+        action,
+        candidatesByActionId.get(action.actionId),
+      ),
     ),
   );
 }
@@ -4093,8 +4104,13 @@ function chooseSemanticRuntimeChoice(
 function scoreSemanticRuntimeAction(
   input: AiDecisionInput,
   action: LegalAction,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): SemanticRuntimeChoice {
-  const scopeId = semanticRuntimeScopeForAction(input, action);
+  const scopeId = semanticRuntimeScopeForAction(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
   const exclusion = semanticRuntimeActionExclusion(input, action);
   const scoreBreakdown = semanticRuntimeScoreBreakdown(
     input,
@@ -4115,6 +4131,12 @@ function scoreSemanticRuntimeAction(
       `semantic_scope:${scopeId}`,
       `semantic_score:${score}`,
       `credit_cost:${actionCreditCost(action)}`,
+      ...(actionSemanticCandidate
+        ? [
+            `action_semantic_candidate:${actionSemanticCandidate.semanticActionType}`,
+            `action_semantic_projection:${actionSemanticCandidate.primaryProjectionStatus}`,
+          ]
+        : []),
       ...(exclusion
         ? [
             "semantic_excluded:true",
@@ -6908,7 +6930,13 @@ function semanticRuntimeScoreFromComponents(
 function semanticRuntimeScopeForAction(
   input: AiDecisionInput,
   action: LegalAction,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): string {
+  const candidateScope = semanticRuntimeScopeFromActionSemanticCandidate(
+    action,
+    actionSemanticCandidate,
+  );
+  if (candidateScope) return candidateScope;
   if (action.type === "mandatory_draw") return "mandatory_draw";
   if (action.type === "resolve_choice") return "choice_resolution";
   if (action.type === "score_agenda") return "simple_score_advance";
@@ -6964,6 +6992,46 @@ function semanticRuntimeScopeForAction(
   }
   if (action.type === "end_turn") return "end_turn";
   return `${input.side}_legal_action`;
+}
+
+function semanticRuntimeScopeFromActionSemanticCandidate(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+): string | undefined {
+  switch (candidate?.semanticActionType) {
+    case "draw.mandatory":
+      return "mandatory_draw";
+    case "choice.resolve":
+      return "choice_resolution";
+    case "score.agenda":
+    case "score.advance_card":
+      return "simple_score_advance";
+    case "corp_window.rez":
+    case "corp_window.decline_rez":
+      return "simple_rez";
+    case "economy.gain_credit":
+    case "draw.card":
+      return "basic_economy_draw";
+    case "run.start": {
+      const serverId = semanticRuntimeServerId(action);
+      if (serverId === "hq" || serverId === "rd")
+        return "simple_hq_or_rnd_pressure";
+      if (isRemoteServerTarget(serverId)) return "remote_contest";
+      return "simple_run_choice";
+    }
+    case "run.continue":
+    case "run.jack_out":
+      return "simple_run_choice";
+    case "access.resolve_card":
+    case "access.steal_agenda":
+    case "access.trash_accessed_card":
+    case "access.decline_trash":
+      return "access_trash_steal";
+    case "turn_flow.end_turn":
+      return "end_turn";
+    default:
+      return undefined;
+  }
 }
 
 function semanticRuntimeRunnerCardActionDisplayScope(
