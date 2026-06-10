@@ -277,3 +277,28 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts`
 - Grün: `git diff --check`
 - Bekannter Baseline-Befund: Der breitere Satz `trace-prevention-assets`, `agenda-scorearea-recurring`, `corp-assets-upgrades-operations` bleibt wegen des bereits bekannten Corolla-Speed-Chip-Tests rot. Der Descriptor-Test bestätigt, dass die betroffenen Definitionen semantisch unverändert bleiben.
+
+### F3 Ergebnis
+
+Umgesetzt:
+
+- Helper in `packages/engine/src/card-implementations/helpers.ts` für die bestehenden Search-/Hidden-Zone-Effektverträge:
+  - `searchStackToGripEffect`
+  - `searchStackInstallEffect`
+  - `chooseStackOrTrashProgramInstallEffect`
+  - `lookTopStackShowToCorpThenInstallMatchingEffect`
+  - `lookTopStackTakeMatchingEffect`
+  - `lookTopStackTakeOneArrangeRestEffect`
+- Elf CardImplementation-Dateien auf diese Helper migriert.
+
+Nicht geändert:
+
+- Keine Hidden-Zone-Choice-Builder.
+- Keine Choice-Source-Strings.
+- Keine Installkosten-, Reveal-, Shuffle- oder Rückgabe-Regel.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts src/game/hidden-zone/search-choice-builders.test.ts src/game/hidden-zone/search-choice-handlers.test.ts src/game/hidden-zone/search-choice-resolvers.test.ts src/game/hidden-zone/search-choice-move-intents.test.ts src/game/hidden-zone/topn-move-intents.test.ts src/game/card-implementation/hidden-zone-runtime-deps.test.ts`
+- Grün: `git diff --check`

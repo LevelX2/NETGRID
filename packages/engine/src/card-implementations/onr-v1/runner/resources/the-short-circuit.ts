@@ -1,4 +1,5 @@
 import type { CardImplementationDefinition } from "../../../types";
+import { searchStackToGripEffect } from "../../../helpers";
 
 // card name: The Short Circuit
 // text: A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.
@@ -14,13 +15,7 @@ export const theShortCircuitImplementation: CardImplementationDefinition = {
       ],
       label: "The Short Circuit: Stack nach Programm durchsuchen",
       effects: [
-        {
-          kind: "search_stack_to_grip",
-          filter: "program",
-          revealToCorp: true,
-          shuffleAfterwards: true,
-          visibility: "hidden_info_barrier",
-        },
+        searchStackToGripEffect({ filter: "program", revealToCorp: true }),
       ],
     },
   ],

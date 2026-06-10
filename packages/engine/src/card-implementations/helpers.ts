@@ -265,3 +265,83 @@ export function restrictedHostedCreditSource(input: {
       : {}),
   };
 }
+
+export function searchStackToGripEffect(input: {
+  filter: "program" | "any_card";
+  revealToCorp: boolean;
+}): Extract<CardEffectImplementation, { kind: "search_stack_to_grip" }> {
+  return {
+    kind: "search_stack_to_grip",
+    filter: input.filter,
+    revealToCorp: input.revealToCorp,
+    shuffleAfterwards: true,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+export function searchStackInstallEffect(input: {
+  installCost: "normal" | "free";
+}): Extract<CardEffectImplementation, { kind: "search_stack_install" }> {
+  return {
+    kind: "search_stack_install",
+    filter: "program",
+    installCost: input.installCost,
+    shuffleAfterwards: true,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+export function chooseStackOrTrashProgramInstallEffect(): Extract<
+  CardEffectImplementation,
+  { kind: "choose_stack_or_trash_program_install" }
+> {
+  return {
+    kind: "choose_stack_or_trash_program_install",
+    installCost: "free",
+    shuffleStackIfSearched: true,
+    returnInstalledCardToGripAtEndOfTurn: true,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+export function lookTopStackShowToCorpThenInstallMatchingEffect(): Extract<
+  CardEffectImplementation,
+  { kind: "look_top_stack_show_to_corp_then_install_matching" }
+> {
+  return {
+    kind: "look_top_stack_show_to_corp_then_install_matching",
+    count: 5,
+    allowedTypes: ["program"],
+    installCost: "free",
+    trashSourceIfInstalled: true,
+    shuffleAfterwards: true,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+export function lookTopStackTakeMatchingEffect(input: {
+  count: number;
+  allowedTypes: readonly ("program" | "event" | "hardware" | "resource")[];
+  costPerTaken: number;
+}): Extract<CardEffectImplementation, { kind: "look_top_stack_take_matching" }> {
+  return {
+    kind: "look_top_stack_take_matching",
+    count: input.count,
+    allowedTypes: input.allowedTypes,
+    costPerTaken: input.costPerTaken,
+    revealTakenToCorp: true,
+    shuffleRemainder: true,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+export function lookTopStackTakeOneArrangeRestEffect(): Extract<
+  CardEffectImplementation,
+  { kind: "look_top_stack_take_one_arrange_rest" }
+> {
+  return {
+    kind: "look_top_stack_take_one_arrange_rest",
+    count: 5,
+    visibility: "hidden_info_barrier",
+  };
+}
