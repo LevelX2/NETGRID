@@ -251,3 +251,49 @@ Nicht-Code-Scope dieses Prozess-Runs:
 ## Akzeptanzmaßstab
 
 Ein `kind` sollte nicht nach einer Karte heißen, wenn der Effekt als Mechanismus mit Parametern beschreibbar ist. Dieser Prozess ersetzt aber nur solche Strukturen direkt, bei denen die vorhandene Runtime bereits generisch genug ist. Alles andere wird als Folgepaket statt als verdeckte Regeländerung behandelt.
+
+## Umsetzungsergebnis dieses Prozess-Runs
+
+### Paket 2 umgesetzt
+
+- `packages/engine/src/card-implementations/helpers.ts` eingeführt.
+- Basic-Icebreaker-Definitionen für elf ONR-v1-Programme und drei Proteus-Programme auf `basicIcebreakerAbilities` migriert.
+- Gedruckte ICE-Subroutine-Fragmente für einfache ETR-, Multi-ETR-, Trash-Program+ETR- und Damage+ETR-ICE auf Helper migriert.
+- Keine Runtime-Datei, kein LegalAction-Vertrag und kein PublicPayload-Vertrag geändert.
+
+### Paket 3 umgesetzt
+
+- Reine Trace->Tag-Definitionen auf `traceTagEffect` oder `traceTagSubroutine` migriert.
+- Migriert wurden:
+  - `Audit of Call Records`
+  - `Chance Observation`
+  - `Blood Cat`
+  - `Netwatch Operations Office`
+  - `Private Cybernet Police`
+  - `Fetch 4.0.1`
+  - `Hunter`
+  - `Jack Attack`
+  - `Pocket Virtual Reality`
+- Nicht migriert wurden Trace-Effekte mit Zusatzkosten, Hidden-Info-Access-Limits oder weiteren Success-Effekten, z. B. `Data Raven`, `Schlaghund Pointers`, `Turbeau Delacroix`, `Homewrecker`, `Manhunt` und `Underworld Mole`.
+
+### Verify-Hinweise
+
+Grün:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts`
+- fokussierte Coverage-Untertests:
+  - `migrates P3.44 simple icebreakers`
+  - `migrates P3.56 remaining Corp ICE longtail subroutines`
+  - `migrates Proteus PRO004 simple icebreakers`
+- fokussierte Trace-Regressionen:
+  - `gates Chance Observation and Audit of Call Records`
+  - `resolves operation traces outside runs`
+  - `starts V1.9.3 agenda trace actions`
+  - `keeps Blood Cat`
+  - `runs each V1.9.14 Trace ICE`
+- `git diff --check`
+
+Bekannter unabhängiger Check-Befund:
+
+- Die vollständige `src/card-implementations/coverage.test.ts` läuft bis auf den bestehenden Proteus-Manifest-Drift `manifestAiSupportDrift: 154` grün. Dieser Drift betrifft die `ai_supported`-Manifestparität aller Proteus-Karten und ist nicht durch den Helper-Refaktor verursacht.
