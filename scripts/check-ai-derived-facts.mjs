@@ -56,6 +56,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "rez_discount",
   "program_trash",
   "ice_trash",
+  "installed_card_trash",
   "hardware_trash",
   "run_lock",
   "no_jack_out",
@@ -1191,6 +1192,70 @@ function deriveFromImplementation(card, implementationText, hint) {
       kind: "requires_rezzed_ice",
       source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
+  }
+
+  const hiddenSuccessfulRunCreditLossBlock =
+    hiddenSuccessfulRunBeforeAccessFactoryBlock(
+      implementationText,
+      "hq",
+      "corp_lose_credits",
+    );
+  if (hiddenSuccessfulRunCreditLossBlock) {
+    addEffect(facts, {
+      kind: "counter_economy",
+      timing: "successful_run",
+      scope: "hq",
+      resource: "credits",
+      amount: propertyNumber(hiddenSuccessfulRunCreditLossBlock, "amount"),
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.corp_lose_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.corp_lose_credits",
+    });
+    facts.derivationNotes.push(
+      "Hidden successful-run HQ credit-loss factory facts describe only effect class, timing and HQ scope; generated facts do not include hidden resource slots, HQ cards or access identities.",
+    );
+  }
+
+  const hiddenSuccessfulRunRemoteTrashBlock =
+    hiddenSuccessfulRunBeforeAccessFactoryBlock(
+      implementationText,
+      "remote",
+      "trash_remote_fort",
+    );
+  if (hiddenSuccessfulRunRemoteTrashBlock) {
+    addEffect(facts, {
+      kind: "installed_card_trash",
+      timing: "successful_run",
+      scope: "remote",
+      target: "remote_fort_root_and_ice",
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.trash_remote_fort",
+    });
+    addEffect(facts, {
+      kind: "ice_trash",
+      timing: "successful_run",
+      scope: "remote",
+      target: "remote_fort_ice",
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.trash_remote_fort",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.trash_remote_fort",
+    });
+    addCondition(facts, {
+      kind: "requires_remote_server",
+      source:
+        "implementation.successfulRunFollowups.hidden_successful_run_before_access.trash_remote_fort",
+    });
+    facts.derivationNotes.push(
+      "Hidden successful-run remote-trash factory facts describe only remote fort disruption classes and timing; generated facts do not include installed card identities, option lists or private board state.",
+    );
   }
 
   if (/kind:\s*"choose_fort_ice_strength_bonus"/.test(implementationText)) {
@@ -4459,6 +4524,26 @@ function functionCallPropertyNumber(text, functionName, field) {
     new RegExp(`${escapedField}:\\s*(\\d+)`),
   );
   return fieldMatch ? Number(fieldMatch[1]) : undefined;
+}
+
+function hiddenSuccessfulRunBeforeAccessFactoryBlock(
+  text,
+  server,
+  effectKind,
+) {
+  const calls = text.matchAll(
+    /hiddenSuccessfulRunBeforeAccessEffect\s*\(\s*\{([\s\S]*?)\}\s*\)/g,
+  );
+  for (const call of calls) {
+    const block = call[1] ?? "";
+    if (
+      new RegExp(`server:\\s*"${server}"`).test(block) &&
+      new RegExp(`kind:\\s*"${effectKind}"`).test(block)
+    ) {
+      return block;
+    }
+  }
+  return undefined;
 }
 
 function countNear(text, kind) {

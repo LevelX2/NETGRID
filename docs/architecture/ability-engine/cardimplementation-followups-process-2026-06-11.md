@@ -319,6 +319,25 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `git diff --check`
 
+## P5 Ergebnis
+
+Umgesetzt:
+
+- `scripts/check-ai-derived-facts.mjs` erkennt `hiddenSuccessfulRunBeforeAccessEffect(...)` für HQ-Credit-Loss und Remote-Fort-Trash.
+- Abgeleitet werden nur side-safe Facts: Effektklasse, Timing, Scope, Ressource/Zielklasse und Conditions.
+- Credit Subversion erzeugt einen `counter_economy`-Fact für erfolgreiche HQ-Runs mit Credit-Verlust.
+- Death from Above erzeugt `installed_card_trash`- und `ice_trash`-Facts für erfolgreiche Remote-Runs.
+- Der AI-Gate-Test nutzt ein temporäres Pilot-Set für beide Hidden-Resource-Karten und prüft, dass die serialisierten Facts keine verdeckten Karten-, Stapel- oder Board-Identitäten enthalten.
+- Die bekannte AI-Warnlage bleibt Warnungslage; rote Gates entstehen dadurch nicht.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/derived-basic-facts-gate.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Grün: `corepack pnpm check:ai-derived-facts`
+- Grün: `corepack pnpm check:ai`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.

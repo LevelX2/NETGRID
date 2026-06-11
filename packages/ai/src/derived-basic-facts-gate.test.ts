@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   validateAiHintOntologyFields,
@@ -20,9 +21,15 @@ const reportPath = path.join(
 
 const hiddenInfoFieldNames = [
   "opponentDeckList",
+  "corpHiddenRndOrder",
+  "runnerHiddenStackOrder",
+  "hiddenHqCards",
   "actualRndOrder",
+  "actualDeckOrder",
+  "actualStackOrder",
   "privatePayload",
   "fullGameState",
+  "cardInstances",
 ];
 
 type DerivedFactsReport = {
@@ -499,6 +506,87 @@ describe("derived basic facts gate report", () => {
       expect(serialized).not.toContain(fieldName);
     }
   });
+
+  it("derives hidden successful-run factory facts without hidden-info identities", () => {
+    const report = runCustomPilotJson([
+      {
+        cardId: "onr_proteus_136_credit-subversion",
+        title: "Credit Subversion",
+        implementationPath:
+          "packages/engine/src/card-implementations/proteus/runner/resources/credit-subversion.ts",
+        expectedDerivableKinds: [
+          "effect:counter_economy",
+          "condition:requires_successful_run",
+        ],
+        expectedManualOverlayNeeded: false,
+        rationale: "Hidden successful HQ-run credit pressure is side-safe.",
+      },
+      {
+        cardId: "onr_proteus_137_death-from-above",
+        title: "Death from Above",
+        implementationPath:
+          "packages/engine/src/card-implementations/proteus/runner/resources/death-from-above.ts",
+        expectedDerivableKinds: [
+          "effect:installed_card_trash",
+          "effect:ice_trash",
+          "condition:requires_successful_run",
+          "condition:requires_remote_server",
+        ],
+        expectedManualOverlayNeeded: false,
+        rationale: "Hidden successful remote-run fort trash is side-safe.",
+      },
+    ]);
+
+    expect(report.hardErrorCount).toBe(0);
+    const creditSubversion = cardById(
+      report,
+      "onr_proteus_136_credit-subversion",
+    );
+    expect(creditSubversion.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "counter_economy",
+        timing: "successful_run",
+        scope: "hq",
+        resource: "credits",
+        amount: 3,
+      }),
+    );
+    expect(creditSubversion.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_successful_run" }),
+    );
+
+    const deathFromAbove = cardById(
+      report,
+      "onr_proteus_137_death-from-above",
+    );
+    expect(deathFromAbove.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "installed_card_trash",
+          timing: "successful_run",
+          scope: "remote",
+        }),
+        expect.objectContaining({
+          kind: "ice_trash",
+          timing: "successful_run",
+          scope: "remote",
+        }),
+      ]),
+    );
+    expect(deathFromAbove.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_successful_run" }),
+        expect.objectContaining({ kind: "requires_remote_server" }),
+      ]),
+    );
+
+    const serializedFacts = JSON.stringify(
+      report.cards.map((card) => card.derivedFacts),
+    );
+    for (const fieldName of hiddenInfoFieldNames) {
+      expect(serializedFacts).not.toContain(fieldName);
+    }
+  });
 });
 
 function runGateJson(): DerivedFactsReport {
@@ -516,6 +604,49 @@ function runGateJson(): DerivedFactsReport {
 
 function readReport(): DerivedFactsReport {
   return JSON.parse(fs.readFileSync(reportPath, "utf8")) as DerivedFactsReport;
+}
+
+function runCustomPilotJson(
+  cards: Array<Record<string, unknown>>,
+): DerivedFactsReport {
+  const tempDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "netgrid-ai-derived-facts-"),
+  );
+  try {
+    const pilotPath = path.join(tempDir, "pilot-cards.json");
+    fs.writeFileSync(
+      pilotPath,
+      JSON.stringify(
+        {
+          schemaVersion: "ai-derived-basic-facts-pilot-cards-v1",
+          scope: "Temporary test pilot for hidden successful-run factories.",
+          cards,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    const scriptUrl = pathToFileURL(
+      path.join(repoRoot, "scripts/check-ai-derived-facts.mjs"),
+    ).href;
+    const code = `
+      import { buildDerivedFactsReport, serializeReport } from ${JSON.stringify(scriptUrl)};
+      const report = buildDerivedFactsReport({
+        repoRoot: ${JSON.stringify(repoRoot)},
+        pilotCardsPath: process.argv.at(-1),
+      });
+      process.stdout.write(serializeReport(report));
+    `;
+    return JSON.parse(
+      execFileSync("node", ["--input-type=module", "-e", code, pilotPath], {
+        cwd: repoRoot,
+        encoding: "utf8",
+      }),
+    ) as DerivedFactsReport;
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 }
 
 function cardById(report: DerivedFactsReport, cardId: string) {
