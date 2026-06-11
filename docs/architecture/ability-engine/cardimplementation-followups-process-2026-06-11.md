@@ -163,7 +163,7 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/card-view.test.ts src/game/events src/game/replay src/game/corp/install-rez-sequence-handlers.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts src/game/events src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts`
 - `corepack pnpm --filter @netgrid/engine typecheck`
 - `git diff --check`
 
@@ -298,6 +298,26 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/install-rez-sequence-handlers.test.ts`
 - Grün: Code-Suche nach alten internen Funktionsnamen in `packages/engine/src`
+
+## P4 Ergebnis
+
+Umgesetzt:
+
+- Choice-Projektionstest für Data Fort Reclamation ergänzt: Corp sieht HQ-Auswahloptionen, Runner sieht weder PendingChoice noch HQ-Optionen, Labels oder DefinitionIds.
+- Choice-Projektionstest für öffentliche Scored-ICE-Mark-Ziele ergänzt: rezzed ICE bleibt in der Runner-View öffentlich, die Corp-Choice trägt `visibility: "public"` und PublicLabels.
+- Hidden-Resource-Hardening für Credit Subversion und Death from Above erweitert:
+  - Runner sieht die eigene Primitive-LegalAction mit Ability-Key.
+  - Corp sieht vor Reveal keine verdeckte Hidden-Resource-Definition oder Primitive-Identität.
+  - PublicEvents nach Reveal tragen öffentliche Source-/Reveal-Felder, aber keine `cardImplementationPrimitiveKind`- oder `cardImplementationAbilityId`-Felder.
+  - Replay ab dem Resolve bleibt deterministisch und StateHash-stabil.
+- Scored-ICE-Mark-Unit-Test pinnt die öffentliche Choice-Option auf bereits rezzed ICE.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts src/game/events src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `git diff --check`
 
 ## Verifikationsregeln
 

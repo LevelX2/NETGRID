@@ -2,14 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
+  DEMO_CARDS_BY_ID,
   getLegalActions,
   getPlayerView,
   replayEvents,
 } from "../../index";
 import {
   choiceRequest,
+  putCorpIceOnServer,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
+import type { CardInstanceId } from "@netgrid/shared";
 
 describe("ChoiceView projection", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
@@ -140,6 +143,111 @@ describe("ChoiceView projection", () => {
     expect(JSON.stringify(runnerOpponentCorpView)).not.toContain(
       corpChoiceTitle,
     );
+  });
+
+  it("keeps Data Fort Reclamation HQ options private to the Corp view", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "choice-view-data-fort-hq" }),
+    );
+    const optionCardIds = state.corp.hq.slice(0, 2) as CardInstanceId[];
+    expect(optionCardIds).toHaveLength(2);
+    const options = optionCardIds.map((cardId) => {
+      const definitionId = state.cardInstances[cardId]?.definitionId;
+      const definition = definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined;
+      if (!definition) throw new Error(`Missing definition for ${cardId}`);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+      };
+    });
+    state.pendingChoice = {
+      choiceId: "choice_card_implementation_hq_to_new_remote_install_rez_1",
+      side: "corp",
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:1",
+      prompt: "Data Fort Reclamation: HQ-Karten fuer neues Data Fort waehlen.",
+      kind: "select_cards",
+      options,
+      minSelections: 0,
+      maxSelections: 2,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+    const runnerViewJson = JSON.stringify(runnerView);
+
+    expect(corpView.pendingChoice?.options.map((option) => option.value)).toEqual(
+      optionCardIds,
+    );
+    expect(corpView.pendingChoice?.options.map((option) => option.label)).toEqual(
+      options.map((option) => option.label),
+    );
+    expect(runnerView.pendingChoice).toBeUndefined();
+    for (const option of options) {
+      expect(runnerViewJson).not.toContain(String(option.value));
+      expect(runnerViewJson).not.toContain(option.label);
+      const definitionId = state.cardInstances[option.value]?.definitionId;
+      if (definitionId) expect(runnerViewJson).not.toContain(definitionId);
+    }
+  });
+
+  it("projects public rezzed ICE choices without hiding already-public targets", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "choice-view-public-rezzed-ice" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.pendingChoice = {
+      choiceId: "choice_card_implementation_select_rezzed_ice_mark_modifier_1",
+      side: "corp",
+      source:
+        "card_implementation_primitive.select_rezzed_ice_mark_modifier:ice_transmutation:1",
+      prompt: "Ice Transmutation: Rezzed ICE wählen.",
+      kind: "select_cards",
+      options: [
+        {
+          id: `card_${iceId}`,
+          label: "Simple Barrier ICE",
+          publicLabel: "Simple Barrier ICE",
+          value: iceId,
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "public",
+    };
+
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    const runnerView = getPlayerView(state, "runner");
+    const runnerRdIce = runnerView.servers.find((server) => server.id === "rd")
+      ?.ice[0];
+
+    expect(corpChoice).toMatchObject({
+      visibility: "public",
+      options: [
+        {
+          id: `card_${iceId}`,
+          label: "Simple Barrier ICE",
+          publicLabel: "Simple Barrier ICE",
+          value: iceId,
+        },
+      ],
+    });
+    expect(runnerView.pendingChoice).toBeUndefined();
+    expect(runnerRdIce).toMatchObject({
+      known: true,
+      title: "Simple Barrier ICE",
+      definitionId: "simple_barrier_ice",
+      rezzed: true,
+    });
   });
 
 });

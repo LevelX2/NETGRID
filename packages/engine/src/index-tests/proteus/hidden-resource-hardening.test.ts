@@ -540,6 +540,21 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
     );
     expect(creditAction).toBeDefined();
+    const runnerCreditAction = getPlayerView(
+      creditState,
+      "runner",
+    ).legalActions.find(
+      (candidate) => candidate.actionId === creditAction?.actionId,
+    );
+    expect(runnerCreditAction?.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      cardImplementationAbilityKey: "successful_run_before_access:0",
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "corp_lose_credits",
+      sourceCardId: creditSourceId,
+      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+    });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
         "onr_proteus_136_credit-subversion:successful_run_before_access:0",
@@ -550,9 +565,18 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       sourceDefinitionId: "onr_proteus_136_credit-subversion",
       proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
     });
-    expect(JSON.stringify(getPlayerView(creditState, "corp"))).not.toContain(
-      "Credit Subversion",
+    const corpCreditViewBeforeReveal = JSON.stringify(
+      getPlayerView(creditState, "corp"),
     );
+    expect(corpCreditViewBeforeReveal).not.toContain("Credit Subversion");
+    expect(corpCreditViewBeforeReveal).not.toContain(
+      "onr_proteus_136_credit-subversion",
+    );
+    expect(corpCreditViewBeforeReveal).not.toContain(
+      "successful_run_before_access",
+    );
+    const creditReplayStart = creditState.eventLog.length;
+    const creditReplayInitial = structuredClone(creditState);
     let result = applyLegal(creditState, "runner", creditAction!);
     expect(result.ok).toBe(true);
     creditState = result.state;
@@ -563,6 +587,30 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
     });
+    const creditPublicPayload = creditState.eventLog.at(-1)?.publicPayload ?? {};
+    expect(creditPublicPayload).toMatchObject({
+      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+      visibility: { class: "hidden_info_barrier", hiddenZoneBarrier: true },
+    });
+    expect(creditPublicPayload).not.toHaveProperty(
+      "cardImplementationPrimitiveKind",
+    );
+    expect(creditPublicPayload).not.toHaveProperty(
+      "cardImplementationAbilityId",
+    );
+    expect(
+      getPlayerView(creditState, "corp").opponent.rig?.some(
+        (card) =>
+          card.known &&
+          card.definitionId === "onr_proteus_136_credit-subversion",
+      ),
+    ).toBe(true);
+    const creditReplay = replayEvents(
+      creditReplayInitial,
+      creditState.eventLog.slice(creditReplayStart),
+    );
+    expect(creditReplay.ok).toBe(true);
+    expect(hashState(creditReplay.state)).toBe(hashState(creditState));
     expect(
       getLegalActions(creditState, "runner").some(
         (candidate) =>
@@ -648,6 +696,16 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       sourceDefinitionId: "onr_proteus_137_death-from-above",
       proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
     });
+    const corpDeathViewBeforeReveal = JSON.stringify(
+      getPlayerView(deathState, "corp"),
+    );
+    expect(corpDeathViewBeforeReveal).not.toContain("Death from Above");
+    expect(corpDeathViewBeforeReveal).not.toContain(
+      "onr_proteus_137_death-from-above",
+    );
+    expect(corpDeathViewBeforeReveal).not.toContain("trash_remote_fort");
+    const deathReplayStart = deathState.eventLog.length;
+    const deathReplayInitial = structuredClone(deathState);
     result = applyLegal(deathState, "runner", deathAction!);
     expect(result.ok).toBe(true);
     deathState = result.state;
@@ -663,6 +721,25 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_137_death-from-above",
     });
+    const deathPublicPayload = deathState.eventLog.at(-1)?.publicPayload ?? {};
+    expect(deathPublicPayload).toMatchObject({
+      sourceDefinitionId: "onr_proteus_137_death-from-above",
+      visibility: { class: "hidden_info_barrier", hiddenZoneBarrier: true },
+    });
+    expect(deathPublicPayload).not.toHaveProperty(
+      "cardImplementationPrimitiveKind",
+    );
+    expect(deathPublicPayload).not.toHaveProperty("cardImplementationAbilityId");
+    const deathPublicPayloadJson = JSON.stringify(deathPublicPayload);
+    expect(deathPublicPayloadJson).not.toContain(String(assetId));
+    expect(deathPublicPayloadJson).not.toContain(String(upgradeId));
+    expect(deathPublicPayloadJson).not.toContain(String(iceId));
+    const deathReplay = replayEvents(
+      deathReplayInitial,
+      deathState.eventLog.slice(deathReplayStart),
+    );
+    expect(deathReplay.ok).toBe(true);
+    expect(hashState(deathReplay.state)).toBe(hashState(deathState));
 
     let emptyDeathState = runnerState("pro012-death-empty-remote");
     installHiddenResource(

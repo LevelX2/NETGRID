@@ -384,6 +384,15 @@ describe("scored agenda flow", () => {
     expect(choice.source).toContain(
       "card_implementation_primitive.select_rezzed_ice_mark_modifier",
     );
+    expect(choice.visibility).toBe("public");
+    expect(choice.options).toEqual([
+      {
+        id: "card_ice_1",
+        label: "ICE 1",
+        publicLabel: "ICE 1",
+        value: "ice_1",
+      },
+    ]);
     expect(choice.prompt).toBe(
       "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
