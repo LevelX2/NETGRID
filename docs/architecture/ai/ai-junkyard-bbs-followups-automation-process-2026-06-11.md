@@ -1,6 +1,6 @@
 # AI Junkyard BBS Follow-ups Automation Process
 
-Status: implemented; pending local main integration
+Status: completed; merged locally to main
 
 Quelle/Vorgabe: Review-Anhang zum Commit `3a3d82501a276c8a2c4553c9332568a28d5c67b1` (`fix(ai): score Junkyard BBS recovery by target`).
 
