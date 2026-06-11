@@ -120,6 +120,7 @@ import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
+import { buildSemanticDecisionDebugDiagnostics } from "./diagnostics/decision-debug";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
   bestSemanticRuntimeChoice,
@@ -3762,36 +3763,37 @@ function semanticRuntimeDecisionDebug(
     selected.action,
     planRuntime,
   );
-  const actionTypesDiffer =
-    (legacyActionType !== undefined &&
-      legacyActionType !== selected.action.type) ||
-    (legacyDebugSelectedActionType !== undefined &&
-      legacyDebugSelectedActionType !== selected.action.type);
-  const warnings = actionTypesDiffer
-    ? ["semantic_runtime_actual_differs_from_legacy_debug"]
-    : [];
-  const detailItems = [
-    `semantic_runtime_scope:${selected.scopeId}`,
-    `semantic_actual_action_type:${selected.action.type}`,
-    ...(coverageSelectionDebug?.evidence ?? []),
-    ...(legacyActionType
-      ? [`legacy_reference_action_type:${legacyActionType}`]
-      : []),
-    ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
-    ...(legacyDebugSelectedActionType
-      ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`]
-      : []),
-    ...scrubEvidence(selected.evidence)
-      .filter(
-        (entry) =>
-          entry.startsWith("run_only_action_") ||
-          entry.startsWith("run_action_spending_cap_"),
-      )
-      .slice(0, 8),
-  ];
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
   const selectedMapping = planRuntime.selectedMapping;
+  const debugDiagnostics = buildSemanticDecisionDebugDiagnostics({
+    scopeId: selected.scopeId,
+    selectedActionType: selected.action.type,
+    ...(coverageSelectionDebug
+      ? { coverageEvidence: coverageSelectionDebug.evidence }
+      : {}),
+    ...(legacyActionType ? { legacyActionType } : {}),
+    ...(legacyPlanKind ? { legacyPlanKind } : {}),
+    ...(legacyDebugSelectedActionType
+      ? { legacyDebugSelectedActionType }
+      : {}),
+    selectedEvidence: scrubEvidence(selected.evidence),
+    ...(selectedPlan
+      ? {
+          selectedPlan: {
+            planId: selectedPlan.planId,
+            type: selectedPlan.type,
+          },
+        }
+      : {}),
+    ...(selectedStep ? { selectedStepKind: selectedStep.kind } : {}),
+    ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
+      ? { tacticalPlanItems: tacticalPlanDebugItems(planRuntime) }
+      : {}),
+    ...(memoryDebug.items.length > 0
+      ? { memoryItems: memoryDebug.items, memorySectionTitle: "KI-Speicher" }
+      : {}),
+  });
   const selectedPlanSelection = semanticRuntimePlanSelectionDisplayContext(
     input,
     planRuntime,
@@ -3851,16 +3853,7 @@ function semanticRuntimeDecisionDebug(
       legacyActionType && legacyActionType !== selected.action.type
         ? [`legacy_reference_action_type:${legacyActionType}`]
         : [],
-    longTermPlan: [
-      ...(selectedPlan
-        ? [
-            `tactical_plan:${selectedPlan.planId}`,
-            `tactical_plan_type:${selectedPlan.type}`,
-            ...(selectedStep ? [`tactical_step:${selectedStep.kind}`] : []),
-          ]
-        : [`semantic_runtime_scope:${selected.scopeId}`]),
-      ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
-    ],
+    longTermPlan: debugDiagnostics.longTermPlan,
     ...(memoryDebug.memoryVersion
       ? { memoryVersion: memoryDebug.memoryVersion }
       : {}),
@@ -3877,32 +3870,10 @@ function semanticRuntimeDecisionDebug(
     ...(memoryDebug.opponentModel
       ? { opponentModel: memoryDebug.opponentModel }
       : {}),
-    ...(warnings.length > 0 ? { warnings } : {}),
-    detailSections: [
-      {
-        id: "semantic_runtime",
-        title: "Semantic Runtime",
-        items: detailItems,
-      },
-      ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
-        ? [
-            {
-              id: "tactical_plan",
-              title: "Tactical Plan",
-              items: tacticalPlanDebugItems(planRuntime),
-            },
-          ]
-        : []),
-      ...(memoryDebug.items.length > 0
-        ? [
-            {
-              id: "semantic_memory",
-              title: "KI-Speicher",
-              items: memoryDebug.items,
-            },
-          ]
-        : []),
-    ],
+    ...(debugDiagnostics.warnings.length > 0
+      ? { warnings: debugDiagnostics.warnings }
+      : {}),
+    detailSections: debugDiagnostics.detailSections,
     evidence: scrubEvidence([
       ...selected.evidence,
       ...(legacyDecision.evidence ?? []).map(
