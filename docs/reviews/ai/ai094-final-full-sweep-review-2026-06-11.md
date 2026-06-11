@@ -4,7 +4,7 @@ Datum: 2026-06-11
 
 Branch: `codex/ai088-ai094-post-stabilization-closure`
 
-HEAD bei Trace-Erzeugung: siehe `gitHead` in `docs/reviews/ai/ai094-final-a-d-5seed-2026-06-11.json`
+HEAD bei Trace-Erzeugung nach lokalem `main`-Merge: siehe `gitHead` in `docs/reviews/ai/ai094-final-a-d-5seed-2026-06-11.json`
 
 ## Ergebnis
 
@@ -34,7 +34,7 @@ Ergebnis:
 - `packages/catalog`: 2 Dateien, 14 Tests grün
 - `packages/engine`: 157 Dateien, 1449 Tests grün
 - `packages/decks`: 1 Datei, 15 Tests grün
-- `packages/ai`: 55 Dateien, 1059 Tests grün
+- `packages/ai`: 55 Dateien, 1062 Tests grün
 - `apps/web`: 33 Dateien, 413 Tests grün
 - `apps/server`: 6 Dateien, 125 Tests grün
 - Root-Specs: 2 Dateien, 5 Tests grün
@@ -104,4 +104,3 @@ Offen bleibt die Reduktion von `actionLimitReached` von 10 auf <=8. Der nächste
 
 - `late_gain_credit_without_funding_need` mit Corp-/Runner-Seitendifferenzierung und konkretem sicheren Alternativzug
 - `late_run_step_stall` mit Replay-Fixture, die zwischen notwendigem Run-Microstep und echtem Stall unterscheidet
-
