@@ -1,6 +1,6 @@
 # AI Junkyard BBS Follow-ups Automation Process
 
-Status: active
+Status: implemented; pending local main integration
 
 Quelle/Vorgabe: Review-Anhang zum Commit `3a3d82501a276c8a2c4553c9332568a28d5c67b1` (`fix(ai): score Junkyard BBS recovery by target`).
 
@@ -133,3 +133,27 @@ Commit-Message: `test(ai): cover generic Junkyard BBS recovery calibration`
 - Arbeitsbranch ist lokal in `main` integriert.
 - Hauptworkspace ist sauber.
 - Keine Remote-Aktion wurde ausgeführt.
+
+## Umsetzungsergebnis
+
+Paketcommits:
+
+- JY-FU-0: `11b49dc5` `docs(ai): plan Junkyard BBS follow-ups`
+- JY-FU-1: `b07ec723` `fix(ai): support Junkyard BBS trigger recovery scoring`
+- JY-FU-2: `b97d5611` `fix(ai): keep Junkyard BBS target scoring top-heap strict`
+- JY-FU-3: `b7332b18` `test(ai): cover generic Junkyard BBS recovery calibration`
+
+Ergebnis:
+
+- `trigger_ability` mit `resourceAbility: "junkyard_bbs_return_top_heap"` wird für Junkyard BBS target-aware bewertet.
+- Ohne konkretes `targetCardId` bewertet der Scorer nur die sichtbare Top-Heap-Karte.
+- `targetCardDefinitionId` allein kann keine tiefer liegende oder sonstige bekannte Karte als Junkyard-Ziel auswählen.
+- Generische Breaker-/Setup-Ziele ohne sichtbaren Coverage-Bedarf werden Junkyard-spezifisch niedriger kalibriert; sichtbarer Coverage-Fix bleibt hoch priorisiert.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Junkyard" --testTimeout 30000`
+- `git diff --check`
+
+Hinweis: Der ursprünglich geplante pnpm-Testaufruf `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts -t "Junkyard"` reicht im Workspace die Argumente so weiter, dass ein breiterer AI-Testlauf startet. Dabei timeoutete einmal unabhängig `src/simulation/simulation-harness.test.ts` nach 5000 ms. Für die Paketabnahme wurde deshalb der gezielte Vitest-Exec-Aufruf gegen `src/index.test.ts` genutzt.
