@@ -6776,6 +6776,8 @@ function semanticRuntimeRunnerScore(
 
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
+const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY =
+  "junkyard_bbs_return_top_heap";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
 
@@ -8294,17 +8296,10 @@ function runnerJunkyardBbsRecoveryScoreComponent(
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (action.type !== "activated_card_ability") return undefined;
-  if (sourceDefinitionIdForAction(input, action) !== JUNKYARD_BBS_CARD_ID) {
-    return undefined;
-  }
+  if (!isRunnerJunkyardBbsRecoveryAction(input, action)) return undefined;
 
   const target = runnerJunkyardBbsRecoveryTarget(input, action);
-  const targetDefinitionId =
-    target?.definitionId ??
-    (typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : undefined);
+  const targetDefinitionId = target?.definitionId;
   const targetRoles = rolesForCardId(targetDefinitionId);
   const targetAssessment = runnerJunkyardBbsRecoveryTargetAssessment(
     input,
@@ -8330,6 +8325,21 @@ function runnerJunkyardBbsRecoveryScoreComponent(
   };
 }
 
+function isRunnerJunkyardBbsRecoveryAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (action.type === "activated_card_ability") {
+    return sourceDefinitionId === JUNKYARD_BBS_CARD_ID;
+  }
+  return (
+    action.type === "trigger_ability" &&
+    action.payload?.resourceAbility === JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY &&
+    sourceDefinitionId === JUNKYARD_BBS_CARD_ID
+  );
+}
+
 function runnerJunkyardBbsRecoveryTarget(
   input: AiDecisionInput,
   action: LegalAction,
@@ -8339,18 +8349,8 @@ function runnerJunkyardBbsRecoveryTarget(
       ? action.payload.targetCardId
       : undefined;
   if (targetCardId) return findVisibleCard(input, targetCardId);
-  const targetDefinitionId =
-    typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : undefined;
-  const visibleTopHeapCard = input.playerView.own.heapOrArchives.find(
+  return input.playerView.own.heapOrArchives.find(
     (card) => card.known,
-  );
-  if (!targetDefinitionId) return visibleTopHeapCard;
-  return (
-    input.playerView.own.heapOrArchives.find(
-      (card) => card.known && card.definitionId === targetDefinitionId,
-    ) ?? visibleTopHeapCard
   );
 }
 
@@ -8370,7 +8370,10 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
       evidence: "target_class:missing_breaker_coverage",
     });
   } else if (targetRoles.some((role) => role.startsWith("breaker_"))) {
-    values.push({ value: 820, evidence: "target_class:breaker" });
+    values.push({
+      value: 80,
+      evidence: "target_class:breaker_no_visible_need",
+    });
   }
   if (targetRoles.some((role) => role === "memory" || role === "memory_support")) {
     const memoryRemaining =
@@ -8402,7 +8405,7 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
   ) {
     const rigSize = input.playerView.own.rig?.length ?? 0;
     values.push({
-      value: rigSize <= 1 ? 520 : 260,
+      value: rigSize <= 1 ? 180 : 80,
       evidence: `target_class:setup:rig_size:${rigSize}`,
     });
   }
