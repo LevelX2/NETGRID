@@ -409,7 +409,7 @@ export function chooseSemanticRuntimeAction(
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
     difficulty: input.difficulty,
-    reason: choice.reasonCode,
+    reason: selectedChoice.reasonCode,
   };
 }
 
