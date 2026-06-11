@@ -287,13 +287,26 @@ describe("corp install rez sequence handlers", () => {
     startDataFortReclamationChoice(host, "data_fort_agenda" as CardInstanceId);
 
     expect(host.state.pendingChoice?.source).toBe(
-      "v1922.data_fort_reclamation:data_fort_agenda:8",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
     );
     expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
       "asset_1",
       "ice_1",
     ]);
     expect(host.legalAction.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "score_install_hq_cards_into_new_remote_then_rez:score_install_hq_cards_into_new_remote_then_rez:install_rez_sequence",
+      cardImplementationPrimitiveKind:
+        "score_install_hq_cards_into_new_remote_then_rez",
+      cardImplementationEffectKind: "install_rez_sequence",
+      sourceCardId: "data_fort_agenda",
+      sourceDefinitionId: "score_install_hq_cards_into_new_remote_then_rez",
+      sourceAgendaId: "data_fort_agenda",
+      cardImplementationSourceZone: "hq",
+      cardImplementationTargetServer: "new_remote",
+      cardImplementationAllowedCards: "corp_installable",
+      cardImplementationMaxCards: 4,
+      cardImplementationTemporaryCreditBudget: 10,
       hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
       dataFortReclamationCandidateCount: 2,
       dataFortReclamationMaxSelections: 2,
@@ -308,7 +321,7 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       pendingChoice: selectCardsChoice(
-        "v1922.data_fort_reclamation:data_fort_agenda:8",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
         ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
         4,
       ),
@@ -324,14 +337,20 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1"]);
     expect(host.state.corp.servers[0]?.root).toEqual(["asset_1"]);
     expect(host.state.pendingChoice?.source).toBe(
-      "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:10:8",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
     );
     expect(host.legalAction.payload).toMatchObject({
+      cardImplementationPrimitiveKind:
+        "score_install_hq_cards_into_new_remote_then_rez",
+      cardImplementationEffectKind: "install_rez_sequence",
+      sourceAgendaId: "data_fort_agenda",
       hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
       selectedCount: 2,
       installedIceCount: 1,
       installedRootCount: 1,
       createdServerId: "remote_1",
+      cardImplementationSequenceCreatedServerId: "remote_1",
+      cardImplementationTemporaryCreditBudget: 10,
       temporaryCreditsProvided: 10,
       temporaryCreditsRemaining: 10,
     });
@@ -397,7 +416,7 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       pendingChoice: selectCardsChoice(
-        "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:10:8",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
         ["ice_1", "asset_1"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_ice_1", "card_asset_1"]),
@@ -411,7 +430,13 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.corp.credits).toBe(5);
     expect(rezRootCalls).toEqual(["asset_1"]);
     expect(host.legalAction.payload).toMatchObject({
+      cardImplementationPrimitiveKind:
+        "score_install_hq_cards_into_new_remote_then_rez",
+      cardImplementationEffectKind: "install_rez_sequence",
+      sourceAgendaId: "data_fort_agenda",
       hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+      cardImplementationSequenceCreatedServerId: "remote_1",
+      cardImplementationTemporaryCreditBudget: 10,
       selectedCount: 2,
       rezzedCount: 2,
       rezzedIceCount: 1,

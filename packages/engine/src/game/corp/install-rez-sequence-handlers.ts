@@ -9,13 +9,17 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import {
+  cardImplementationPrimitivePayload,
+  type HqToNewRemoteInstallRezSequence,
+} from "../../ability-engine/card-implementation-primitives";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 
 type SequencePayload = Record<string, string | number | boolean>;
-type HqToNewRemoteInstallRezSequence = Extract<
-  CardScoredAgendaImplementation,
-  { kind: "score_install_hq_cards_into_new_remote_then_rez" }
->;
+const HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE =
+  "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez";
+const HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE =
+  "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez";
 
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
@@ -55,7 +59,7 @@ export type CorpInstallRezSequenceHandlerHost = {
   };
 };
 
-function hqToNewRemoteInstallRezSequence(
+function requireHqToNewRemoteInstallRezSequence(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): HqToNewRemoteInstallRezSequence {
@@ -99,11 +103,25 @@ export function handleCorpInstallRezSequenceChoice(
   const source = host.state.pendingChoice?.source ?? "";
   if (source.startsWith("v162.priority_requisition"))
     return resolvePriorityRequisitionChoice(host);
-  if (source.startsWith("v1922.data_fort_reclamation_rez"))
+  if (isHqToNewRemoteInstallRezRezChoiceSource(source))
     return resolveDataFortReclamationRezChoice(host);
-  if (source.startsWith("v1922.data_fort_reclamation"))
+  if (isHqToNewRemoteInstallRezChoiceSource(source))
     return resolveDataFortReclamationChoice(host);
   return { handled: false };
+}
+
+function isHqToNewRemoteInstallRezChoiceSource(source: string): boolean {
+  return (
+    source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:`) ||
+    source.startsWith("v1922.data_fort_reclamation")
+  );
+}
+
+function isHqToNewRemoteInstallRezRezChoiceSource(source: string): boolean {
+  return (
+    source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:`) ||
+    source.startsWith("v1922.data_fort_reclamation_rez")
+  );
 }
 
 export function startPriorityRequisitionChoice(
@@ -214,7 +232,14 @@ export function startDataFortReclamationChoice(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
-  const sequence = hqToNewRemoteInstallRezSequence(host, agendaId);
+  const sequence = requireHqToNewRemoteInstallRezSequence(host, agendaId);
+  const agendaDefinition = host.cards.definitionFor(agendaId);
+  const primitivePayload = cardImplementationPrimitivePayload({
+    sourceCardId: agendaId,
+    sourceDefinitionId: agendaDefinition.id,
+    primitiveKind: sequence.kind,
+    effectKind: "install_rez_sequence",
+  });
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.corp.hq
     .filter((cardId) =>
@@ -228,16 +253,18 @@ export function startDataFortReclamationChoice(
   if (options.length === 0) {
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
+      ...primitivePayload,
       v1922CorpAgendaAbility: "data_fort_reclamation",
+      sourceAgendaId: agendaId,
       dataFortReclamationChoiceOpened: false,
       dataFortReclamationCandidateCount: 0,
     };
     return { handled: true, resolvedPayload: host.legalAction.payload ?? {} };
   }
   host.state.pendingChoice = {
-    choiceId: `choice_v1922_data_fort_reclamation_${host.state.stateVersion + 1}`,
+    choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1922.data_fort_reclamation:${agendaId}:${host.state.stateVersion + 1}`,
+    source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
     prompt: "Data Fort Reclamation: HQ-Karten fuer neues Data Fort waehlen.",
     kind: "select_cards",
     options,
@@ -248,7 +275,14 @@ export function startDataFortReclamationChoice(
   };
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
+    ...primitivePayload,
     v1922CorpAgendaAbility: "data_fort_reclamation",
+    sourceAgendaId: agendaId,
+    cardImplementationSourceZone: sequence.sourceZone,
+    cardImplementationTargetServer: sequence.targetServer,
+    cardImplementationAllowedCards: sequence.allowedCards,
+    cardImplementationMaxCards: sequence.maxCards,
+    cardImplementationTemporaryCreditBudget: sequence.temporaryCredits.amount,
     dataFortReclamationChoiceOpened: true,
     dataFortReclamationCandidateCount: options.length,
     dataFortReclamationMaxSelections: Math.min(sequence.maxCards, options.length),
@@ -352,10 +386,16 @@ function resolveDataFortReclamationChoice(
       "score_install_hq_cards_into_new_remote_then_rez"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
-  const sequence = hqToNewRemoteInstallRezSequence(
+  const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
     agendaId as CardInstanceId,
   );
+  const primitivePayload = cardImplementationPrimitivePayload({
+    sourceCardId: agendaId as CardInstanceId,
+    sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+    primitiveKind: sequence.kind,
+    effectKind: "install_rez_sequence",
+  });
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (
     selectedIds.length > choice.maxSelections ||
@@ -413,13 +453,17 @@ function resolveDataFortReclamationChoice(
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
+    ...primitivePayload,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+    sourceAgendaId: agendaId,
     selectedCount: selectedIds.length,
     installedCount: installedIceCount + installedRootCount,
     installedIceCount,
     installedRootCount,
     createdServerId: server.id,
+    cardImplementationSequenceCreatedServerId: server.id,
+    cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
     temporaryCreditsProvided: temporaryCreditAmount,
     temporaryCreditsSpent: 0,
     corpCreditsSpent: 0,
@@ -429,9 +473,9 @@ function resolveDataFortReclamationChoice(
   };
   if (rezCandidates.length > 0) {
     host.state.pendingChoice = {
-      choiceId: `choice_v1922_data_fort_reclamation_rez_${host.state.stateVersion + 1}`,
+      choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_rez_${host.state.stateVersion + 1}`,
       side: "corp",
-      source: `v1922.data_fort_reclamation_rez:${agendaId}:${server.id}:${temporaryCreditAmount}:${host.state.stateVersion + 1}`,
+      source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:${agendaId}:${server.id}:${temporaryCreditAmount}:${host.state.stateVersion + 1}`,
       prompt: "Data Fort Reclamation: installierte Karten rezzen.",
       kind: "select_cards",
       options: rezCandidates.sort().map((cardId) => {
@@ -475,10 +519,16 @@ function resolveDataFortReclamationRezChoice(
       "score_install_hq_cards_into_new_remote_then_rez"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
-  const sequence = hqToNewRemoteInstallRezSequence(
+  const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
     agendaId as CardInstanceId,
   );
+  const primitivePayload = cardImplementationPrimitivePayload({
+    sourceCardId: agendaId as CardInstanceId,
+    sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+    primitiveKind: sequence.kind,
+    effectKind: "install_rez_sequence",
+  });
   host.servers.mustServer(serverId);
   const temporaryCreditAmount = sequence.temporaryCredits.amount;
   if (Math.floor(Number(temporaryCreditText)) !== temporaryCreditAmount)
@@ -530,8 +580,12 @@ function resolveDataFortReclamationRezChoice(
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
+    ...primitivePayload,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+    sourceAgendaId: agendaId,
+    cardImplementationSequenceCreatedServerId: serverId,
+    cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
     selectedCount: selectedIds.length,
     rezzedCount: rezzedIceCount + rezzedRootCount,
     rezzedIceCount,

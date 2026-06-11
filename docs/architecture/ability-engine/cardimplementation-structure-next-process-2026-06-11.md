@@ -292,3 +292,25 @@ Checks:
 
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda-abilities.test.ts src/index-tests/mechanics/agenda-global-random.test.ts src/game/view/card-view.test.ts`
+
+## P4 Ergebnis
+
+Umgesetzt:
+
+- Data-Fort-Reclamation-Install-Choice nutzt jetzt die neutrale Source `card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez`.
+- Rez-Choice nutzt die neutrale Source `card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez`.
+- `handleCorpInstallRezSequenceChoice` akzeptiert neue Sources und toleriert die alten `v1922.data_fort_reclamation*`-Sources als Legacy-Pfade.
+- Start-, Install- und Rez-Payloads enthalten Primitive-Identität, `sourceAgendaId`, Sequence-Server-Kontext und temporäres Credit-Budget.
+- Install- und Rez-Choice validieren weiterhin erneut gegen den ScoredAgenda-Primitive-Vertrag.
+- Tests prüfen neue Sources, Identitätsfelder, HiddenZoneAction-Kompatibilität, Installationszonen und temporäre Credit-Zahlung.
+
+Bewusst stabil gelassen:
+
+- HiddenZoneAction-Werte `v1922_data_fort_reclamation_*` bleiben unverändert.
+- Count-basierte Hidden-Info-Payloads bleiben ohne private HQ-Identitäten für die falsche Seite.
+- Keine KI-Runtime-Wirkung.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|corp install rez sequence handlers|scored agenda flow"`
