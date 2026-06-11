@@ -30,6 +30,18 @@ describe("SemanticDecisionFrame", () => {
       "runner-1",
       "runner-2",
     ]);
+    expect(frame.economyContext).toMatchObject({
+      availableCredits: 5,
+      clicksRemaining: 3,
+      creditPressure: "low",
+    });
+    expect(frame.economyContext?.evidence).toEqual(
+      expect.arrayContaining([
+        "available_credits:5",
+        "clicks_remaining:3",
+        "credit_pressure:low",
+      ]),
+    );
     expect(frame.hiddenInfoPolicy).toBe("player_view_only");
   });
 
@@ -108,6 +120,29 @@ describe("SemanticDecisionFrame", () => {
     expect(corpFrame.side).toBe("corp");
     expect(JSON.stringify(runnerA)).not.toContain("privatePayload");
     expect(JSON.stringify(corpFrame)).not.toContain("cardInstances");
+  });
+
+  it("derives high credit pressure from side-safe runner economy posture", () => {
+    const input = inputFor("runner", [
+      legalAction("runner-1", "gain_credit", "runner"),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      runner: {
+        economyPosture: {
+          minimumCreditFloor: 2,
+          desiredCreditReserve: 5,
+          fundingNeed: true,
+          recommendation: "build_economy",
+          evidence: ["test_economy_posture"],
+        } as any,
+      },
+    });
+
+    expect(frame.economyContext?.creditPressure).toBe("high");
+    expect(JSON.stringify(frame.economyContext)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
   });
 
   it("creates an empty trace without selectedActionId before ranking", () => {

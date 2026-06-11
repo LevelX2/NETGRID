@@ -121,9 +121,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -202,10 +200,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -241,9 +236,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -399,9 +392,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -417,18 +408,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -626,9 +609,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -721,8 +702,10 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
-export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Record<string, any> = {}) {
+export function createScoredEconomyRuntimeHosts(
+  deps: RuntimeDeps,
+  runtime: Record<string, any> = {},
+) {
   const {
     agendaPoints,
     agendaPointsForScoredCard,
@@ -819,8 +802,13 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
         scoredAgendaForDefinition: (definition) =>
           scoredAgendaImplementationForDefinition(definition),
         effectiveAgendaDifficulty: (cardId) =>
-          effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, cardId),
-        hasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+          effectiveAgendaDifficulty(
+            effectiveAgendaDifficultyDeps,
+            state,
+            cardId,
+          ),
+        hasSubtype: (definition, subtype) =>
+          cardHasSubtype(definition, subtype),
         isOveradvanceAgendaDefinition: (definitionId) =>
           OVERADVANCE_AGENDA_CARD_IDS.has(definitionId as CardDefinitionId),
       },
@@ -838,7 +826,8 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
           setCardCounter(state, cardId, counterType, amount),
         addCardCounter: (cardId, counterType, amount) =>
           addCardCounter(state, cardId, counterType, amount),
-        cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
+        cardCounter: (cardId, counterType) =>
+          cardCounter(state, cardId, counterType),
       },
       credits: {
         gainCredits: (side, amount) => credits(state, side, amount),
@@ -851,8 +840,8 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
           ensureCorpTurnFlags(state).scoredBlackOpsAgendaThisTurn = true;
         },
         employeeEmpowermentResolvedSourceIds: () =>
-          ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds ??
-          [],
+          ensureCorpTurnFlags(state)
+            .employeeEmpowermentStartTurnResolvedSourceIds ?? [],
         markEmployeeEmpowermentResolved: (cardId) => {
           const flags = ensureCorpTurnFlags(state);
           flags.employeeEmpowermentStartTurnResolvedSourceIds = [
@@ -891,30 +880,35 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
       },
       choices: {
         startDataFortReclamation: (cardId) => {
-          if (!legalAction) throw new Error("Data Fort Reclamation braucht eine LegalAction.");
+          if (!legalAction)
+            throw new Error("Data Fort Reclamation braucht eine LegalAction.");
           startDataFortReclamationChoice(
             corpInstallRezSequenceHandlerHost(state, legalAction),
             cardId,
           );
         },
         startPriorityRequisition: (cardId) => {
-          if (!legalAction) throw new Error("Priority Requisition braucht eine LegalAction.");
+          if (!legalAction)
+            throw new Error("Priority Requisition braucht eine LegalAction.");
           startPriorityRequisitionChoice(
             corpInstallRezSequenceHandlerHost(state, legalAction),
             cardId,
           );
         },
         startCorporateDownsizing: (cardId, creditPerAgendaPoint) => {
-          if (!legalAction) throw new Error("Corporate Downsizing braucht eine LegalAction.");
+          if (!legalAction)
+            throw new Error("Corporate Downsizing braucht eine LegalAction.");
           startCorporateDownsizingScoreChoice(
             corpZoneChoiceHandlerHost(state, legalAction),
             { sourceCardId: cardId, creditPerAgendaPoint },
           );
         },
-        resolveSecurityPurge: () => {
-          if (!legalAction) throw new Error("Security Purge braucht eine LegalAction.");
+        resolveSecurityPurge: (cardId) => {
+          if (!legalAction)
+            throw new Error("Security Purge braucht eine LegalAction.");
           resolveSecurityPurgeAgendaPurge(
             corpInstallRezSequenceHandlerHost(state, legalAction),
+            cardId,
           );
         },
       },
@@ -942,7 +936,8 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
           action(state, side, type, label, source, costs, payload),
       },
       counters: {
-        cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
+        cardCounter: (cardId, counterType) =>
+          cardCounter(state, cardId, counterType),
         spendVisibleCardCounter: (cardId, counterType, amount) =>
           spendVisibleCardCounter(state, cardId, counterType, amount),
       },
@@ -1070,7 +1065,8 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
       agendaPoints: {
         total: () => corpAgendaPointTotal(state),
         scoredForfeitTargets: () => corpScoredAgendaForfeitTargets(state),
-        pointsForScoredCard: (cardId) => agendaPointsForScoredCard(state, cardId),
+        pointsForScoredCard: (cardId) =>
+          agendaPointsForScoredCard(state, cardId),
         forfeitCorpAgendaForPointCost: (cardId) =>
           forfeitCorpAgendaForPointCost(state, cardId),
       },

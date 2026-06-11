@@ -155,10 +155,19 @@ export function shellTradersPreparedTargetIds(
         return false;
       if (instance.zone.zone !== "set_aside") return false;
       if (instance.zone.visibility !== "public") return false;
-      if (host.counters.cardCounter(host.state, cardId, "shell") <= 0)
-        return false;
+      const shellCounters = host.counters.cardCounter(
+        host.state,
+        cardId,
+        "shell",
+      );
+      if (shellCounters <= 0) return false;
       const definition = host.cards.definitionFor(host.state, cardId);
-      return definition.type === "program" || definition.type === "hardware";
+      if (definition.type !== "program" && definition.type !== "hardware")
+        return false;
+      return (
+        shellCounters > 1 ||
+        shellTradersCanInstallPreparedCardForFree(host, cardId, definition)
+      );
     })
     .sort();
 }
@@ -435,8 +444,7 @@ function installShellTradersPreparedCardForFree(
     throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
   if (
     definition.type === "program" &&
-    state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      host.runner.runnerMemoryLimit(state)
+    !shellTradersCanInstallPreparedCardForFree(host, cardId, definition)
   )
     throw new Error("Nicht genug Memory fuer The Shell Traders.");
 
@@ -474,6 +482,34 @@ function installShellTradersPreparedCardForFree(
     definition.id !== host.constants.SKIVVISS_ID
   )
     host.counters.addCardCounter(state, cardId, "virus", 1);
+}
+
+function shellTradersCanInstallPreparedCardForFree(
+  host: RunnerSpecialTriggerExecutionHost,
+  cardId: CardInstanceId,
+  definition = host.cards.definitionFor(host.state, cardId),
+): boolean {
+  const { state } = host;
+  const instance = state.cardInstances[cardId];
+  if (
+    !instance ||
+    instance.owner !== "runner" ||
+    instance.zone.side !== "special" ||
+    instance.zone.zone !== "set_aside"
+  )
+    return false;
+  if (definition.type !== "program" && definition.type !== "hardware")
+    return false;
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    return false;
+  return (
+    definition.type !== "program" ||
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
+      host.runner.runnerMemoryLimit(state)
+  );
 }
 
 function resolveSelfModifyingCodeAbility(

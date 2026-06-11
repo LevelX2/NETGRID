@@ -20,6 +20,13 @@ export type TacticalGoalLike = RunnerTacticalGoal | {
   evidence?: readonly string[];
 };
 
+export type SemanticDecisionEconomyContext = {
+  availableCredits?: number;
+  clicksRemaining?: number;
+  creditPressure?: "low" | "medium" | "high";
+  evidence: string[];
+};
+
 export type SemanticDecisionFrame = {
   schemaVersion: typeof SEMANTIC_DECISION_FRAME_SCHEMA_VERSION;
   side: Side;
@@ -31,6 +38,7 @@ export type SemanticDecisionFrame = {
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
   beliefSummary?: unknown;
+  economyContext?: SemanticDecisionEconomyContext;
   runner?: {
     runTargets?: RunnerRunTargetEvaluation[];
     economyPosture?: RunnerEconomyPosture;
@@ -86,6 +94,7 @@ export function buildSemanticDecisionFrame(
   const actionCandidates = legalActionIds
     .map((actionId) => candidatesByActionId.get(actionId))
     .filter((candidate): candidate is ActionSemanticCandidate => Boolean(candidate));
+  const economyContext = buildEconomyContext(params);
 
   const frame: SemanticDecisionFrame = {
     schemaVersion: SEMANTIC_DECISION_FRAME_SCHEMA_VERSION,
@@ -102,6 +111,7 @@ export function buildSemanticDecisionFrame(
     ...(params.beliefSummary !== undefined
       ? { beliefSummary: params.beliefSummary }
       : {}),
+    economyContext,
     ...(params.runner
       ? {
           runner: {
@@ -124,6 +134,51 @@ export function buildSemanticDecisionFrame(
   };
   assertSemanticDecisionFrameIsSideSafe(frame);
   return frame;
+}
+
+function buildEconomyContext(
+  params: BuildSemanticDecisionFrameParams,
+): SemanticDecisionEconomyContext {
+  const credits = params.input.playerView.own.credits;
+  const clicks = params.input.playerView.own.clicks;
+  const posture = params.runner?.economyPosture;
+  const creditPressure = classifyCreditPressure(credits, posture);
+  return {
+    availableCredits: credits,
+    clicksRemaining: clicks,
+    creditPressure,
+    evidence: [
+      `available_credits:${credits}`,
+      `clicks_remaining:${clicks}`,
+      `credit_pressure:${creditPressure}`,
+      ...(posture
+        ? [
+            `economy_recommendation:${posture.recommendation}`,
+            `funding_need:${posture.fundingNeed}`,
+          ]
+        : []),
+    ],
+  };
+}
+
+function classifyCreditPressure(
+  credits: number,
+  posture: RunnerEconomyPosture | undefined,
+): NonNullable<SemanticDecisionEconomyContext["creditPressure"]> {
+  if (
+    posture?.fundingNeed ||
+    posture?.recommendation === "build_economy" ||
+    credits <= Math.max(0, posture?.minimumCreditFloor ?? 0)
+  ) {
+    return "high";
+  }
+  if (
+    posture?.recommendation === "cash_out_bank" ||
+    credits < (posture?.desiredCreditReserve ?? 3)
+  ) {
+    return "medium";
+  }
+  return "low";
 }
 
 export function assertSemanticDecisionFrameIsSideSafe(

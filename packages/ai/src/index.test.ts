@@ -7472,6 +7472,61 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("keeps unsafe score evidence separate from credit alternatives", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-unsafe-score-over-credit",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 8;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protect = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(score).toBeDefined();
+    expect(protect).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!score || !protect || !gain)
+      throw new Error("Missing unsafe score credit actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(
+      { ...input, legalActions: [score, protect, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const scoreAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === score.actionId,
+    );
+    const gainAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === gain.actionId,
+    );
+    const safetyGate = scoreAlternative?.scoreBreakdown?.find(
+      (component) =>
+        component.key === "corp_scoreline_safety_gate_blocks_doctrine",
+    );
+
+    expect(gainAlternative).toBeDefined();
+    expect(safetyGate?.value).toBeLessThan(0);
+    expect(String(safetyGate?.reason)).toMatch(
+      /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("keeps legal advance-to-score over economy in a safe remote", () => {
     const input = corpActionPhaseInput(
       "ai-corp-score-terminal-advance",
@@ -13914,7 +13969,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
-  it("penalizes repeated basic credit once a fresh pressure line is ready", () => {
+  it("penalizes late gain credit without funding need when safe progress exists", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-late-credit-repeat-before-pressure",
       (state) => {
@@ -13971,13 +14026,75 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.actionId).toBe(hqRun.actionId);
     expect(lateCreditPenalty?.value).toBeLessThan(0);
     expect(lateCreditPenalty?.reason).toContain("funding_need:false");
-    expect(lateCreditPenalty?.reason).toContain("pressure_ready_targets:hq");
+    expect(lateCreditPenalty?.reason).toContain("safe_progress_targets:hq");
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("penalizes repeated runner pressure on the same server across no-progress setup", () => {
+  it("keeps late gain credit for real rez reserve or funding need", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-late-credit-real-funding-need",
+      (state) => {
+        state.runner.credits = 1;
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(gain).toBeDefined();
+    expect(hqRun).toBeDefined();
+    if (!gain || !hqRun)
+      throw new Error("Missing late-credit funding-need actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const scopedInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          agendaPoints: input.playerView.agendaPointsToWin - 1,
+        },
+        opponent: {
+          ...input.playerView.opponent,
+          handCount: 5,
+        },
+      },
+      eventTail: [
+        ...input.eventTail,
+        syntheticPlanActionEvent(
+          "runner-late-basic-credit-funding-need",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [gain, hqRun],
+    };
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const gainAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === gain.actionId,
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(
+      gainAlternative?.scoreBreakdown?.some(
+        (component) => component.key === "runner_late_no_funding_credit_repeat",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("does not replace credit with repeated no-progress run", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-same-server-no-progress-run",
       (state) => {

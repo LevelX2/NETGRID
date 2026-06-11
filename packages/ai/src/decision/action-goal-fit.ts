@@ -21,6 +21,7 @@ export type ScoreActionGoalFitParams = {
   utility: TacticalGoalUtility;
   legalActionIds?: readonly string[];
   availableCredits?: number;
+  creditPressure?: "low" | "medium" | "high";
   expectedActionSignals?: readonly string[];
 };
 
@@ -44,7 +45,7 @@ export function scoreActionGoalFit(
 
   const components = [
     goalFitComponent(params.candidate, params.utility),
-    costFitComponent(params.candidate, params.utility),
+    costFitComponent(params.candidate, params.utility, params.creditPressure),
     timingFitComponent(params.candidate, params.utility),
     riskAdjustmentComponent(params.candidate, params.utility),
     planAlignmentComponent(params.candidate, params.utility),
@@ -103,16 +104,40 @@ function goalFitComponent(
 function costFitComponent(
   candidate: ActionSemanticCandidate,
   utility: TacticalGoalUtility,
+  creditPressure: ScoreActionGoalFitParams["creditPressure"],
 ): ScoreComponentDelta {
   const creditCost = candidate.costProfile.creditCost ?? 0;
   const creditGain =
     candidate.semanticActionType === "economy.gain_credit" ? 15 : 0;
+  const pressureBonus =
+    candidate.semanticActionType === "economy.gain_credit"
+      ? creditPressureBonus(creditPressure)
+      : 0;
   const costPenalty = utility.family === "economy" ? Math.min(10, creditCost) : creditCost;
   return {
     component: "cost_fit",
-    delta: creditGain - costPenalty,
-    evidence: [`credit_cost:${creditCost}`, `credit_gain_bonus:${creditGain}`],
+    delta: creditGain + pressureBonus - costPenalty,
+    evidence: [
+      `credit_cost:${creditCost}`,
+      `credit_gain_bonus:${creditGain}`,
+      `credit_pressure:${creditPressure ?? "unknown"}`,
+      `credit_pressure_bonus:${pressureBonus}`,
+    ],
   };
+}
+
+function creditPressureBonus(
+  creditPressure: ScoreActionGoalFitParams["creditPressure"],
+): number {
+  switch (creditPressure) {
+    case "high":
+      return 10;
+    case "medium":
+      return 5;
+    case "low":
+    case undefined:
+      return 0;
+  }
 }
 
 function timingFitComponent(

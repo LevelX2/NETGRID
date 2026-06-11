@@ -95,7 +95,7 @@ export type ScoredAgendaFlowHost = {
       cardId: CardInstanceId,
       creditPerAgendaPoint: number,
     ) => void;
-    resolveSecurityPurge: () => void;
+    resolveSecurityPurge: (cardId: CardInstanceId) => void;
   };
 };
 
@@ -431,7 +431,7 @@ function startScoreTimeChoices(
     );
   }
   if (scoredAgenda?.kind === "reveal_top_rd_install_and_rez_ice_trash_rest") {
-    host.choices.resolveSecurityPurge();
+    host.choices.resolveSecurityPurge(cardId);
   }
   void definition;
 }

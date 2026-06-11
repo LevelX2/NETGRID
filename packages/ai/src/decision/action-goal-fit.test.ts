@@ -23,6 +23,29 @@ describe("ActionGoalFit", () => {
     );
   });
 
+  it("raises gain_credit utility under high credit pressure", () => {
+    const candidate = candidateFor("gain-1", "gain_credit");
+    const lowPressureFit = scoreActionGoalFit({
+      candidate,
+      utility: utility("runner.build_economy_base", "economy"),
+      legalActionIds: ["gain-1"],
+      creditPressure: "low",
+    });
+    const highPressureFit = scoreActionGoalFit({
+      candidate,
+      utility: utility("runner.build_economy_base", "economy"),
+      legalActionIds: ["gain-1"],
+      creditPressure: "high",
+    });
+
+    expect(highPressureFit.score).toBeGreaterThan(lowPressureFit.score);
+    expect(
+      highPressureFit.components
+        .find((component) => component.component === "cost_fit")
+        ?.evidence,
+    ).toEqual(expect.arrayContaining(["credit_pressure:high"]));
+  });
+
   it("keeps start_run irrelevant for economy but useful for run access", () => {
     const candidate = candidateFor("run-1", "start_run");
 
@@ -118,6 +141,27 @@ describe("ActionGoalFit", () => {
 
     expect(fit.fitStatus).toBe("blocked");
     expect(fit.blockers).toContain("not_in_legal_actions");
+  });
+
+  it("blocks actions that cost more credits than the side-safe economy context can pay", () => {
+    const base = candidateFor("install-expensive", "install_card");
+    const expensive = {
+      ...base,
+      costProfile: {
+        ...base.costProfile,
+        creditCost: 6,
+      },
+    } satisfies ActionSemanticCandidate;
+
+    const fit = scoreActionGoalFit({
+      candidate: expensive,
+      utility: utility("runner.find_or_install_primary_breaker", "coverage"),
+      legalActionIds: ["install-expensive"],
+      availableCredits: 2,
+    });
+
+    expect(fit.fitStatus).toBe("blocked");
+    expect(fit.blockers).toContain("cannot_pay");
   });
 });
 

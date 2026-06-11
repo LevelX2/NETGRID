@@ -120,7 +120,10 @@ import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
-import { buildSemanticDecisionDebugDiagnostics } from "./diagnostics/decision-debug";
+import {
+  buildSemanticDecisionDebugDiagnostics,
+  buildSemanticDecisionDebugScoreComponent,
+} from "./diagnostics/decision-debug";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
   bestSemanticRuntimeChoice,
@@ -4668,12 +4671,12 @@ function semanticRuntimeCoveragePlanScoreBreakdown(
     return [];
   }
   return [
-    {
+    buildSemanticDecisionDebugScoreComponent({
       key: "runner_coverage_answer_fit",
       label: `Coverage-Suchtreffer: ${coverageSelection.capabilityLabel}`,
       value: 0,
       reason: coverageSelection.evidence.join("|"),
-    },
+    }),
   ];
 }
 
@@ -4764,12 +4767,12 @@ function semanticRuntimePlanSelectionScoreBreakdown(
     .filter(Boolean)
     .join("|");
   return [
-    {
+    buildSemanticDecisionDebugScoreComponent({
       key: selected ? "selected_by_plan_mapping" : "plan_selection_adjustment",
       label: selected ? "Plan-Auswahl" : "Plan-Abgleich",
       value: roundScore(displayScore - choice.score),
       reason,
-    },
+    }),
   ];
 }
 
@@ -4824,39 +4827,39 @@ function semanticRuntimeScoreBreakdown(
   const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
   const costPenalty = -(actionCreditCost(action) * 35);
   return [
-    {
+    buildSemanticDecisionDebugScoreComponent({
       key: "semantic_type_priority",
       label: "Action-Typ-Priorität",
       value: typePriority,
       reason: action.type,
-    },
+    }),
     ...(exclusion
       ? [
-          {
+          buildSemanticDecisionDebugScoreComponent({
             key: "semantic_action_excluded",
             label: `Ausgeschlossen: ${exclusion.label}`,
             value: 0,
             reason: exclusion.reason,
-          },
+          }),
         ]
       : []),
     ...contextComponents,
     ...(privateBonus !== 0
       ? [
-          {
+          buildSemanticDecisionDebugScoreComponent({
             key: "semantic_private_actor_bonus",
             label: "Akteur-private Action",
             value: privateBonus,
             reason: "private_to_actor",
-          },
+          }),
         ]
       : []),
-    {
+    buildSemanticDecisionDebugScoreComponent({
       key: "semantic_credit_cost_penalty",
       label: "Credit-Kosten",
       value: costPenalty,
       reason: String(actionCreditCost(action)),
-    },
+    }),
   ];
 }
 
@@ -8373,15 +8376,8 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
   if (recentCredits <= 0) return undefined;
   const fundingNeed = runnerRecoveryFundingNeedContext(input);
   if (fundingNeed.active) return undefined;
-  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
-  if (!closeout.opportunity || !closeout.target) return undefined;
-  const pressureReadyTargets = assessRunnerPressureReadyForMetrics(
-    input,
-  ).readyTargets.filter(
-    (target) =>
-      target.serverId === closeout.target &&
-      semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) <= 0,
-  );
+  const pressureReadyTargets =
+    runnerLateNoFundingCreditSafeProgressTargets(input);
   if (pressureReadyTargets.length === 0) return undefined;
   const credits = input.playerView.own.credits;
   if (credits < 3 && recentCredits < 2) return undefined;
@@ -8397,12 +8393,29 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
       `recent_basic_credits:${recentCredits}`,
       "funding_need:false",
       `funding_context:${fundingNeed.reason}`,
-      `pressure_ready_targets:${pressureReadyTargets
+      `safe_progress_targets:${pressureReadyTargets
         .map((target) => target.serverId)
+        .join(",")}`,
+      `safe_progress_target_types:${pressureReadyTargets
+        .map((target) => target.targetType)
         .join(",")}`,
       `credits:${credits}`,
     ].join("|"),
   };
+}
+
+function runnerLateNoFundingCreditSafeProgressTargets(
+  input: AiDecisionInput,
+): RunnerPressureReadyTargetForMetrics[] {
+  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
+  if (!closeout.opportunity || !closeout.target) return [];
+  return assessRunnerPressureReadyForMetrics(input).readyTargets.filter(
+    (target) => {
+      if (semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0)
+        return false;
+      return target.serverId === closeout.target;
+    },
+  );
 }
 
 function semanticRuntimeRecentRunnerBasicCreditActions(
@@ -9848,12 +9861,12 @@ function semanticRuntimeDoctrineGateBlocked(
 function semanticRuntimeDoctrineSuppressedComponent(
   evidence: readonly string[],
 ): AiDecisionScoreComponent {
-  return {
+  return buildSemanticDecisionDebugScoreComponent({
     key: "deck_doctrine_runtime_weight_suppressed",
     label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
     value: 0,
     reason: evidence.join("|"),
-  };
+  });
 }
 
 function semanticRuntimeCorpScore(

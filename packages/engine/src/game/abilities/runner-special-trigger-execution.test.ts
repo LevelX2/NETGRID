@@ -6,6 +6,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  ResolvedGameEffect,
   Side,
   SpecialZoneState,
 } from "@netgrid/shared";
@@ -14,6 +15,7 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
+  applyShellTradersStartOfTurn,
   handleRunnerSpecialTriggerExecution,
   shellTradersPreparedTargetIds,
   shellTradersPrepareTargetIds,
@@ -171,6 +173,93 @@ describe("runner special trigger execution", () => {
       remainingCounters: 0,
       runnerCreditsAfter: 1,
     });
+  });
+
+  it("does not remove the final Shell counter when the prepared program cannot fit memory", () => {
+    const sourceId = "shell_1" as CardInstanceId;
+    const targetId = "prepared_program" as CardInstanceId;
+    const state = baseState();
+    state.runner.rig.resources = [sourceId];
+    state.runner.memoryUsed = 4;
+    state.runner.memoryLimit = 4;
+    state.specialZones = { setAside: [targetId] } as SpecialZoneState;
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      SHELL_TRADERS_ID,
+      "runner",
+      "rig",
+    );
+    state.cardInstances[targetId] = {
+      ...instance(targetId, "program_a", "runner", "set_aside"),
+      zone: {
+        side: "special",
+        zone: "set_aside",
+        visibility: "public",
+        returnZone: { side: "runner", zone: "rig" },
+      },
+    } as CardInstance;
+    setCounter(state, targetId, "shell", 1);
+    const host = testHost(state, {
+      [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
+      program_a: definition("program_a", "program", {
+        installCost: 1,
+        memoryCost: 1,
+      }),
+    });
+    const effects: ResolvedGameEffect[] = [];
+
+    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
+    applyShellTradersStartOfTurn(host, effects);
+
+    expect(effects).toEqual([]);
+    expect(counter(state, targetId, "shell")).toBe(1);
+    expect(state.specialZones?.setAside).toEqual([targetId]);
+    expect(state.runner.rig.programs).toEqual([]);
+    expect(state.runner.memoryUsed).toBe(4);
+  });
+
+  it("can progress a non-final Shell counter under memory pressure", () => {
+    const sourceId = "shell_1" as CardInstanceId;
+    const targetId = "prepared_program" as CardInstanceId;
+    const state = baseState();
+    state.runner.rig.resources = [sourceId];
+    state.runner.memoryUsed = 4;
+    state.runner.memoryLimit = 4;
+    state.specialZones = { setAside: [targetId] } as SpecialZoneState;
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      SHELL_TRADERS_ID,
+      "runner",
+      "rig",
+    );
+    state.cardInstances[targetId] = {
+      ...instance(targetId, "program_a", "runner", "set_aside"),
+      zone: {
+        side: "special",
+        zone: "set_aside",
+        visibility: "public",
+        returnZone: { side: "runner", zone: "rig" },
+      },
+    } as CardInstance;
+    setCounter(state, targetId, "shell", 2);
+    const host = testHost(state, {
+      [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
+      program_a: definition("program_a", "program", {
+        installCost: 2,
+        memoryCost: 1,
+      }),
+    });
+    const effects: ResolvedGameEffect[] = [];
+
+    expect(shellTradersPreparedTargetIds(host)).toEqual([targetId]);
+    applyShellTradersStartOfTurn(host, effects);
+
+    expect(counter(state, targetId, "shell")).toBe(1);
+    expect(state.specialZones?.setAside).toEqual([targetId]);
+    expect(state.runner.rig.programs).toEqual([]);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(effects).toHaveLength(1);
+    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
   });
 
   it("starts the same Self-Modifying Code hidden-zone search after trashing source", () => {

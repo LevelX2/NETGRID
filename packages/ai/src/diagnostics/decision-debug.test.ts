@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildSemanticDecisionDebugDiagnostics } from "./decision-debug";
+import {
+  buildSemanticDecisionDebugDiagnostics,
+  buildSemanticDecisionDebugScoreComponent,
+} from "./decision-debug";
 
 describe("DecisionDebug diagnostics", () => {
   it("builds semantic runtime detail sections and long-term plan references", () => {
@@ -84,5 +87,37 @@ describe("DecisionDebug diagnostics", () => {
     expect(diagnostics.detailSections[2]?.items).toEqual([
       "memory_fact:visible",
     ]);
+  });
+
+  it("builds side-safe score components for debug reports", () => {
+    expect(
+      buildSemanticDecisionDebugScoreComponent({
+        key: "semantic_credit_cost_penalty",
+        label: "Credit-Kosten",
+        value: -35,
+        weight: 1,
+        reason: "credits:1",
+      }),
+    ).toEqual({
+      key: "semantic_credit_cost_penalty",
+      label: "Credit-Kosten",
+      value: -35,
+      weight: 1,
+      reason: "credits:1",
+    });
+
+    expect(
+      buildSemanticDecisionDebugScoreComponent({
+        key: "privatePayload_score",
+        label: "sessionToken",
+        value: 0,
+        reason: "fullGameState:bad",
+      }),
+    ).toEqual({
+      key: "[redacted]",
+      label: "[redacted]",
+      value: 0,
+      reason: "[redacted]",
+    });
   });
 });

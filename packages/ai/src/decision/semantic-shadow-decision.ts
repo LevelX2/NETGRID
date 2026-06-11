@@ -100,12 +100,19 @@ function bestFitForCandidate(
   frame: SemanticDecisionFrame,
 ): ActionGoalFit | undefined {
   if (utilities.length === 0) return undefined;
+  const economyContext = frame.economyContext;
   return utilities
     .map((utility) =>
       scoreActionGoalFit({
         candidate,
         utility,
         legalActionIds: frame.legalActionIds,
+        ...(economyContext?.availableCredits !== undefined
+          ? { availableCredits: economyContext.availableCredits }
+          : {}),
+        ...(economyContext?.creditPressure !== undefined
+          ? { creditPressure: economyContext.creditPressure }
+          : {}),
       }),
     )
     .sort(

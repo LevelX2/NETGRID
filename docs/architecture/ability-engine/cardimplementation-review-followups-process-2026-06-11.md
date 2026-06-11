@@ -329,6 +329,7 @@ Checks:
   - Ergebnis: workspace-weite Tests plus Root-Specs, 266 Testdateien, 3138 Tests.
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
+- Main-Integrationscheck: `corepack pnpm format:changed -- origin/main` deckte auf, dass `.mjs` noch nicht auf LF-Zeilenenden festgelegt war. `.gitattributes` erzwingt deshalb jetzt auch `*.mjs text eol=lf`.
 
 ## Verifikationsregeln
 

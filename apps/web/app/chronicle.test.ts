@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleRunGroupLabelFromEvent, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent, shouldSuppressChronicleEventItem } from "./chronicle";
+import {
+  chronicleActionUseByEventId,
+  chronicleRunGroupLabelFromEvent,
+  chronicleTurnNumberByEventId,
+  chronicleTurnSideByEventId,
+  formatChronicleEffectItems,
+  formatChronicleEvent,
+  shouldSuppressChronicleEventItem,
+} from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -30,7 +38,7 @@ const ACTION_TYPES = [
   "change_card_control",
   "end_turn",
   "time_expired",
-  "game_created"
+  "game_created",
 ] as const;
 
 describe("formatChronicleEvent", () => {
@@ -54,9 +62,9 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         winnerSide: "runner",
         loserSide: "corp",
-        label: "Korp verliert durch Zeitablauf."
+        label: "Korp verliert durch Zeitablauf.",
       }),
-      "runner"
+      "runner",
     );
 
     expect(item.title).toBe("Korp verliert durch Zeitablauf.");
@@ -71,33 +79,39 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         setupStep: "mulligan",
         setupSide: "runner",
-        setupDecision: "keep"
+        setupDecision: "keep",
       }),
-      "runner"
+      "runner",
     );
     const corpMulligan = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
         setupStep: "mulligan",
         setupSide: "corp",
-        setupDecision: "mulligan"
+        setupDecision: "mulligan",
       }),
-      "runner"
+      "runner",
     );
     const legacy = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
         setupStep: "mulligan",
-        setupSide: "runner"
+        setupSide: "runner",
       }),
-      "runner"
+      "runner",
     );
 
     expect(runnerKeep.title).toBe("Runner hat die Starthand behalten.");
-    expect(runnerKeep.chips).toEqual(expect.arrayContaining(["Setup", "Starthand", "Behalten"]));
+    expect(runnerKeep.chips).toEqual(
+      expect.arrayContaining(["Setup", "Starthand", "Behalten"]),
+    );
     expect(corpMulligan.title).toBe("Korp hat einen Mulligan genommen.");
-    expect(corpMulligan.chips).toEqual(expect.arrayContaining(["Setup", "Starthand", "Mulligan"]));
-    expect(legacy.title).toBe("Runner hat die Mulligan-Entscheidung abgeschlossen.");
+    expect(corpMulligan.chips).toEqual(
+      expect.arrayContaining(["Setup", "Starthand", "Mulligan"]),
+    );
+    expect(legacy.title).toBe(
+      "Runner hat die Mulligan-Entscheidung abgeschlossen.",
+    );
     expect(legacy.title).not.toContain("Setup-Entscheidung");
   });
 
@@ -106,14 +120,14 @@ describe("formatChronicleEvent", () => {
       makeEvent("install_card", {
         actor: "corp",
         label: "Korp installiert eine Karte.",
-        redactedKind: "installed_card"
+        redactedKind: "installed_card",
       }),
       "runner",
       {
         cardTitle: "Simple Agenda",
         cardText: "2 Agenda-Punkte.",
-        cardDetailLines: ["Korp · agenda"]
-      }
+        cardDetailLines: ["Korp · agenda"],
+      },
     );
 
     expect(item.title).toBe("Die Korp hat eine verdeckte Karte installiert.");
@@ -130,9 +144,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("start_run", {
         actor: "runner",
         label: "Run auf R&D",
-        serverLabel: "R&D"
+        serverLabel: "R&D",
       }),
-      "runner"
+      "runner",
     );
 
     expect(item.title).toBe("Du hast einen Run auf R&D gestartet.");
@@ -151,10 +165,12 @@ describe("formatChronicleEvent", () => {
         runOnlyAction: true,
         runSpendingCap: 3,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat einen Wilson-Run auf HQ gestartet.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat einen Wilson-Run auf HQ gestartet.",
+    );
     expect(item.chips).toEqual(["Runner", "KI", "Run", "HQ"]);
     expect(item.chips).not.toContain("Wilson");
     expect(item.chips).not.toContain("Limit 3 Credits");
@@ -168,17 +184,21 @@ describe("formatChronicleEvent", () => {
       title: "Disgruntled Ice Technician",
       label: "Disgruntled Ice Technician auf Remote 1",
       runnerEventRun: true,
-      serverLabel: "Remote 1"
+      serverLabel: "Remote 1",
     });
     const item = formatChronicleEvent(event, "corp", {
       cardTitle: "Disgruntled Ice Technician",
-      cardType: "event"
+      cardType: "event",
     });
 
-    expect(item.title).toBe("Die Runner-KI hat Disgruntled Ice Technician gespielt und einen Run auf Remote 1 gestartet.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat Disgruntled Ice Technician gespielt und einen Run auf Remote 1 gestartet.",
+    );
     expect(item.category).toBe("run");
     expect(item.importance).toBe("important");
-    expect(item.chips).toEqual(expect.arrayContaining(["Event", "Run", "Remote 1"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Event", "Run", "Remote 1"]),
+    );
     expect(item.groupLabel).toBe("Run auf Remote 1");
     expect(chronicleRunGroupLabelFromEvent(event)).toBe("Run auf Remote 1");
   });
@@ -189,9 +209,9 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         aiReasonCode: "runner.social_engineering",
         sourceDefinitionId: "onr_v1_111_social-engineering",
-        hiddenZoneBarrier: true
+        hiddenZoneBarrier: true,
       }),
-      "corp"
+      "corp",
     );
     const wrongGuess = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -200,13 +220,13 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         amounts: {
           secretHiddenAmountRevealed: 3,
-          secretGuessAmount: 4
+          secretGuessAmount: 4,
         },
         targets: {
-          socialEngineeringGuessCorrect: false
-        }
+          socialEngineeringGuessCorrect: false,
+        },
       }),
-      "corp"
+      "corp",
     );
     const targetChoiceEvent = makeEvent("resolve_choice", {
       actor: "runner",
@@ -217,29 +237,61 @@ describe("formatChronicleEvent", () => {
       serverLabel: "HQ",
       socialEngineeringRun: true,
       amounts: {
-        chosenIcePosition: 0
+        chosenIcePosition: 0,
       },
       targets: {
         socialEngineeringGuessCorrect: false,
-        autoPassChosenIce: true
-      }
+        autoPassChosenIce: true,
+      },
     });
     const targetChoice = formatChronicleEvent(targetChoiceEvent, "corp");
 
-    expect(hiddenChoice.title).toBe("Die Runner-KI hat für Social Engineering verdeckt Credits gewählt.");
-    expect(hiddenChoice.description).toBe("Der Betrag bleibt bis zum Korp-Guess verdeckt.");
-    expect(hiddenChoice.chips).toEqual(expect.arrayContaining(["Social Engineering", "Verdeckte Wahl"]));
-    expect(wrongGuess.title).toBe("Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE.");
-    expect(wrongGuess.description).toBe("Runner versteckte 3 Credits; die Korp riet 4 Credits. Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.");
-    expect(wrongGuess.chips).toEqual(expect.arrayContaining(["Social Engineering", "Guess falsch", "Runner 3", "Korp 4", "Zielwahl"]));
-    expect(targetChoice.title).toBe("Die Runner-KI hat durch Social Engineering HQ und ICE 1 gewählt; Run auf HQ gestartet und das ICE automatisch passiert.");
-    expect(targetChoice.description).toBe("Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.");
+    expect(hiddenChoice.title).toBe(
+      "Die Runner-KI hat für Social Engineering verdeckt Credits gewählt.",
+    );
+    expect(hiddenChoice.description).toBe(
+      "Der Betrag bleibt bis zum Korp-Guess verdeckt.",
+    );
+    expect(hiddenChoice.chips).toEqual(
+      expect.arrayContaining(["Social Engineering", "Verdeckte Wahl"]),
+    );
+    expect(wrongGuess.title).toBe(
+      "Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE.",
+    );
+    expect(wrongGuess.description).toBe(
+      "Runner versteckte 3 Credits; die Korp riet 4 Credits. Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.",
+    );
+    expect(wrongGuess.chips).toEqual(
+      expect.arrayContaining([
+        "Social Engineering",
+        "Guess falsch",
+        "Runner 3",
+        "Korp 4",
+        "Zielwahl",
+      ]),
+    );
+    expect(targetChoice.title).toBe(
+      "Die Runner-KI hat durch Social Engineering HQ und ICE 1 gewählt; Run auf HQ gestartet und das ICE automatisch passiert.",
+    );
+    expect(targetChoice.description).toBe(
+      "Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.",
+    );
     expect(targetChoice.category).toBe("run");
     expect(targetChoice.cardDefinitionId).toBe("onr_v1_111_social-engineering");
     expect(targetChoice.cardTitle).toBe("Social Engineering");
     expect(targetChoice.groupLabel).toBe("Run auf HQ");
-    expect(targetChoice.chips).toEqual(expect.arrayContaining(["Social Engineering", "Run", "HQ", "ICE 1", "Auto-Pass"]));
-    expect(chronicleRunGroupLabelFromEvent(targetChoiceEvent)).toBe("Run auf HQ");
+    expect(targetChoice.chips).toEqual(
+      expect.arrayContaining([
+        "Social Engineering",
+        "Run",
+        "HQ",
+        "ICE 1",
+        "Auto-Pass",
+      ]),
+    );
+    expect(chronicleRunGroupLabelFromEvent(targetChoiceEvent)).toBe(
+      "Run auf HQ",
+    );
   });
 
   it("describes Runner jack-out as a run abort without access", () => {
@@ -247,15 +299,21 @@ describe("formatChronicleEvent", () => {
       makeEvent("jack_out", {
         actor: "runner",
         label: "Jack-out",
-        serverLabel: "R&D"
+        serverLabel: "R&D",
       }),
-      "corp"
+      "corp",
     );
 
     expect(item.title).toBe("Der Runner hat den Run abgebrochen.");
     expect(item.description).toBe("Auf R&D wurde keine Karte zugegriffen.");
     expect(item.category).toBe("run");
-    expect(item.chips).toEqual(["Runner", "Run", "Jack-out", "Kein Zugriff", "R&D"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Run",
+      "Jack-out",
+      "Kein Zugriff",
+      "R&D",
+    ]);
   });
 
   it("describes Viral 15 paid jack-out as rig protection", () => {
@@ -266,15 +324,19 @@ describe("formatChronicleEvent", () => {
         v1922CorpIceAbility: "viral_15_jack_out_tax",
         sourceDefinitionId: "onr_v1_276_viral-15",
         jackOutAdditionalCost: 1,
-        runnerCreditsAfter: 4
+        runnerCreditsAfter: 4,
       }),
-      "corp"
+      "corp",
     );
 
     expect(item.title).toBe("Der Runner hat den Run für 1 Credit abgebrochen.");
-    expect(item.description).toBe("Viral 15: Jack-out bezahlt; auf R&D wurde keine Karte zugegriffen und kein Programm getrasht.");
+    expect(item.description).toBe(
+      "Viral 15: Jack-out bezahlt; auf R&D wurde keine Karte zugegriffen und kein Programm getrasht.",
+    );
     expect(item.cardDefinitionId).toBe("onr_v1_276_viral-15");
-    expect(item.chips).toEqual(expect.arrayContaining(["Viral 15", "1 Credit", "Rig geschützt"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Viral 15", "1 Credit", "Rig geschützt"]),
+    );
   });
 
   it("shows Viral 15 program-trash choice opening and resolution", () => {
@@ -284,9 +346,9 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_276_viral-15",
         hiddenZoneBarrier: true,
         passIceTrashProgramPrompt: true,
-        passIceTrashProgramCandidateCount: 2
+        passIceTrashProgramCandidateCount: 2,
       }),
-      "corp"
+      "corp",
     );
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -294,19 +356,35 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_276_viral-15",
         hiddenZoneAction: "v1922_viral_15_program_trash",
         programTrashCount: 1,
-        trashedCardDefinitionId: "onr_v1_039_krash"
+        trashedCardDefinitionId: "onr_v1_039_krash",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(opened.title).toBe("Der Runner hat trotz Viral 15 weitergemacht; Programmtrash muss gewählt werden.");
-    expect(opened.description).toBe("2 installierte Programme stehen in der Runner-privaten Auswahl.");
-    expect(opened.chips).toEqual(expect.arrayContaining(["Viral 15", "Programmtrash-Choice", "2 Kandidaten"]));
-    expect(resolved.title).toBe("Der Runner hat Krash durch Viral 15 getrasht.");
-    expect(resolved.description).toBe("Der Programmtrash wurde über eine Runner-private Auswahl aufgelöst; verdeckte Hand- oder Stack-Daten bleiben verborgen.");
+    expect(opened.title).toBe(
+      "Der Runner hat trotz Viral 15 weitergemacht; Programmtrash muss gewählt werden.",
+    );
+    expect(opened.description).toBe(
+      "2 installierte Programme stehen in der Runner-privaten Auswahl.",
+    );
+    expect(opened.chips).toEqual(
+      expect.arrayContaining([
+        "Viral 15",
+        "Programmtrash-Choice",
+        "2 Kandidaten",
+      ]),
+    );
+    expect(resolved.title).toBe(
+      "Der Runner hat Krash durch Viral 15 getrasht.",
+    );
+    expect(resolved.description).toBe(
+      "Der Programmtrash wurde über eine Runner-private Auswahl aufgelöst; verdeckte Hand- oder Stack-Daten bleiben verborgen.",
+    );
     expect(resolved.category).toBe("danger");
     expect(resolved.importance).toBe("critical");
-    expect(JSON.stringify(resolved)).not.toMatch(/cardInstances|privatePayload|runner_card_/);
+    expect(JSON.stringify(resolved)).not.toMatch(
+      /cardInstances|privatePayload|runner_card_/,
+    );
   });
 
   it("describes Startup Immolator source, cost and ICE trash movement", () => {
@@ -320,18 +398,29 @@ describe("formatChronicleEvent", () => {
         v1922RunnerProgramAbility: "startup_immolator_trash_ice",
         rezCostPaid: 3,
         trashedCount: 1,
-        startupImmolatorExhausted: true
+        startupImmolatorExhausted: true,
       }),
       "runner",
-      { cardTitle: "Startup Immolator" }
+      { cardTitle: "Startup Immolator" },
     );
 
-    expect(item.title).toBe("Du hast Startup Immolator erschöpft, das passierte ICE getrasht und 3 Credits bezahlt.");
-    expect(item.description).toBe("Quelle und Ziel sind öffentlich: Startup Immolator wurde erschöpft; das Ziel-ICE wurde in die Archive bewegt.");
+    expect(item.title).toBe(
+      "Du hast Startup Immolator erschöpft, das passierte ICE getrasht und 3 Credits bezahlt.",
+    );
+    expect(item.description).toBe(
+      "Quelle und Ziel sind öffentlich: Startup Immolator wurde erschöpft; das Ziel-ICE wurde in die Archive bewegt.",
+    );
     expect(item.category).toBe("run");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("onr_v1_068_startup-immolator");
-    expect(item.chips).toEqual(expect.arrayContaining(["Startup Immolator", "ICE getrasht", "Archive", "3 Credits"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Startup Immolator",
+        "ICE getrasht",
+        "Archive",
+        "3 Credits",
+      ]),
+    );
   });
 
   it("keeps I Spy successful-run follow-up in the run chronicle group", () => {
@@ -344,19 +433,25 @@ describe("formatChronicleEvent", () => {
         runnerUtilityAbility: "i_spy_put_spy_counter",
         counterType: "spy",
         addedCounterAmount: 1,
-        serverLabel: "HQ"
+        serverLabel: "HQ",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat mit I Spy einen Spy-Counter in HQ platziert.");
-    expect(item.description).toBe("Solange der Spy-Counter dort liegt, bleiben installierte Korp-Karten in oder auf HQ für den Runner sichtbar.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat mit I Spy einen Spy-Counter in HQ platziert.",
+    );
+    expect(item.description).toBe(
+      "Solange der Spy-Counter dort liegt, bleiben installierte Korp-Karten in oder auf HQ für den Runner sichtbar.",
+    );
     expect(item.category).toBe("run");
     expect(item.importance).toBe("important");
     expect(item.cardDefinitionId).toBe("onr_v1_032_i-spy");
     expect(item.cardTitle).toBe("I Spy");
     expect(item.groupLabel).toBe("Run auf HQ");
-    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "I Spy", "+1 Spy", "HQ"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Runner", "KI", "I Spy", "+1 Spy", "HQ"]),
+    );
     expect(item.chips).not.toContain("Kartenaktion");
   });
 
@@ -371,15 +466,27 @@ describe("formatChronicleEvent", () => {
         oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
         oliviaSalazarRezCostBase: 4,
         oliviaSalazarTemporaryDerez: true,
-        rezCostPaid: 2
+        rezCostPaid: 2,
       }),
       "corp",
-      { cardTitle: "Crystal Wall", cardType: "ice" }
+      { cardTitle: "Crystal Wall", cardType: "ice" },
     );
 
-    expect(item.title).toBe("Du hast Crystal Wall mit Olivia Salazar für 2 Credits gerezzt. Die Begegnung beginnt.");
-    expect(item.description).toBe("Olivia Salazar reduziert die effektiven Rez-Kosten von 4 Credits auf 2 Credits; das ICE wird am Runende derezzt.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Olivia Salazar", "2 Credits", "Temporär", "Rez", "Begegnung"]));
+    expect(item.title).toBe(
+      "Du hast Crystal Wall mit Olivia Salazar für 2 Credits gerezzt. Die Begegnung beginnt.",
+    );
+    expect(item.description).toBe(
+      "Olivia Salazar reduziert die effektiven Rez-Kosten von 4 Credits auf 2 Credits; das ICE wird am Runende derezzt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Olivia Salazar",
+        "2 Credits",
+        "Temporär",
+        "Rez",
+        "Begegnung",
+      ]),
+    );
   });
 
   it("formats hosted Coup agenda credits with the remaining amount", () => {
@@ -403,14 +510,16 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 9,
             sourceDefinitionId: "onr_v1_209_political-coup",
             sourceTitle: "Political Coup",
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Du hast Political Coup genutzt und 3 Credits von der Karte genommen.");
+    expect(item.title).toBe(
+      "Du hast Political Coup genutzt und 3 Credits von der Karte genommen.",
+    );
     expect(item.category).toBe("economy");
     expect(item.importance).toBe("normal");
     expect(item.chips).toContain("Ability");
@@ -426,10 +535,10 @@ describe("formatChronicleEvent", () => {
         title: "Broker",
         resourceAbility: "broker_load_credits",
         addedCounterAmount: 3,
-        remainingCounters: 3
+        remainingCounters: 3,
       }),
       "runner",
-      { cardTitle: "Broker" }
+      { cardTitle: "Broker" },
     );
     const take = formatChronicleEvent(
       makeEvent("trigger_ability", {
@@ -438,10 +547,10 @@ describe("formatChronicleEvent", () => {
         title: "Broker",
         resourceAbility: "broker_take_credits",
         gainedCredits: 3,
-        remainingCounters: 0
+        remainingCounters: 0,
       }),
       "runner",
-      { cardTitle: "Broker" }
+      { cardTitle: "Broker" },
     );
 
     expect(load.title).toBe("Du hast 3 Credits auf Broker gelegt.");
@@ -461,10 +570,10 @@ describe("formatChronicleEvent", () => {
         label: "The Shell Traders: Simple Fracter beiseitelegen",
         title: "Simple Fracter",
         shellTradersAbility: "set_aside_from_grip",
-        shellCounterAmount: 2
+        shellCounterAmount: 2,
       }),
       "runner",
-      { cardTitle: "Simple Fracter" }
+      { cardTitle: "Simple Fracter" },
     );
     const remove = formatChronicleEvent(
       makeEvent("end_turn", {
@@ -473,17 +582,21 @@ describe("formatChronicleEvent", () => {
         title: "Simple Fracter",
         shellTradersAbility: "start_turn_remove_shell_counter",
         remainingCounters: 0,
-        installedFromSpecialZone: true
+        installedFromSpecialZone: true,
       }),
       "runner",
-      { cardTitle: "Simple Fracter" }
+      { cardTitle: "Simple Fracter" },
     );
 
-    expect(setAside.title).toBe("Du hast Simple Fracter mit 2 Shell-Countern beiseitegelegt.");
+    expect(setAside.title).toBe(
+      "Du hast Simple Fracter mit 2 Shell-Countern beiseitegelegt.",
+    );
     expect(setAside.chips).toContain("Set Aside");
     expect(setAside.chips).toContain("Simple Fracter");
     expect(setAside.chips).toContain("2 Shell");
-    expect(remove.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt; Karte kostenlos installiert.");
+    expect(remove.title).toBe(
+      "Du hast 1 Shell-Counter von Simple Fracter entfernt; Karte kostenlos installiert.",
+    );
     expect(remove.chips).toContain("Shell -1");
     expect(remove.chips).toContain("Installiert");
   });
@@ -497,9 +610,9 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_176_the-shell-traders",
         abilityId: "remove_shell_counter",
         targetCardDefinitionId: "simple_fracter",
-        remainingCounters: 1
+        remainingCounters: 1,
       }),
-      "runner"
+      "runner",
     );
     const startTurn = formatChronicleEvent(
       makeEvent("end_turn", {
@@ -509,14 +622,20 @@ describe("formatChronicleEvent", () => {
         shellTradersAbility: "start_turn_remove_shell_counter",
         targetCardDefinitionId: "simple_decoder",
         remainingCounters: 0,
-        installedFromSpecialZone: true
+        installedFromSpecialZone: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(paid.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
-    expect(startTurn.title).toBe("Du hast 1 Shell-Counter von Simple Decoder entfernt; Karte kostenlos installiert.");
-    expect(JSON.stringify([paid, startTurn])).not.toContain("von The Shell Traders entfernt");
+    expect(paid.title).toBe(
+      "Du hast 1 Shell-Counter von Simple Fracter entfernt.",
+    );
+    expect(startTurn.title).toBe(
+      "Du hast 1 Shell-Counter von Simple Decoder entfernt; Karte kostenlos installiert.",
+    );
+    expect(JSON.stringify([paid, startTurn])).not.toContain(
+      "von The Shell Traders entfernt",
+    );
   });
 
   it("keeps end-turn entries and shows card credit payouts as separate economy entries", () => {
@@ -525,7 +644,7 @@ describe("formatChronicleEvent", () => {
       gainedCredits: 2,
       runnerCreditsAfter: 12,
       corpRezzedIceThisTurnCount: 2,
-      sourceDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data"
+      sourceDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data",
     });
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
@@ -533,23 +652,37 @@ describe("formatChronicleEvent", () => {
     expect(item.title).toBe("Du hast den Zug beendet.");
     expect(item.category).toBe("turn");
     expect(effects).toHaveLength(1);
-    expect(effects[0]?.title).toBe("Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.");
+    expect(effects[0]?.title).toBe(
+      "Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.",
+    );
     expect(effects[0]?.category).toBe("economy");
     expect(effects[0]?.importance).toBe("important");
-    expect(effects[0]?.cardDefinitionId).toBe("onr_v1_162_field-reporter-for-ice-and-data");
-    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Zugende", "+2 Credits", "2 ICE gerezzt", "Field Reporter for Ice and Data"]));
+    expect(effects[0]?.cardDefinitionId).toBe(
+      "onr_v1_162_field-reporter-for-ice-and-data",
+    );
+    expect(effects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Zugende",
+        "+2 Credits",
+        "2 ICE gerezzt",
+        "Field Reporter for Ice and Data",
+      ]),
+    );
   });
 
   it("names generic card abilities from their public action label", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {
         actor: "runner",
-        label: "Self-Modifying Code: trashen und Programm aus Stack installieren"
+        label:
+          "Self-Modifying Code: trashen und Programm aus Stack installieren",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.");
+    expect(item.title).toBe(
+      "Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.",
+    );
     expect(item.category).toBe("card");
     expect(item.chips).toContain("Kartenaktion");
     expect(item.chips).toContain("Self-Modifying Code");
@@ -565,12 +698,14 @@ describe("formatChronicleEvent", () => {
         revealKind: "expose",
         serverLabel: "HQ",
         title: "Simple Barrier ICE",
-        cardDefinitionId: "simple_barrier_ice"
+        cardDefinitionId: "simple_barrier_ice",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Simple Barrier ICE in HQ mit SeeYa aufgedeckt.");
+    expect(item.title).toBe(
+      "Du hast Simple Barrier ICE in HQ mit SeeYa aufgedeckt.",
+    );
     expect(item.category).toBe("card");
     expect(item.chips).toContain("Expose");
     expect(item.chips).toContain("HQ");
@@ -588,19 +723,34 @@ describe("formatChronicleEvent", () => {
         publicRevealKind: "reveal",
         publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
         publicRevealTitles: "Simple Agenda||Hostile Takeover",
-        revealedAgendaDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        revealedAgendaDefinitionIds:
+          "simple_agenda,onr_v1_203_hostile-takeover",
         revealedCount: 2,
-        gainedCredits: 2
+        gainedCredits: 2,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Die Korp hat 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt und 2 Credits erhalten.");
-    expect(item.description).toBe("Gezeigt: Simple Agenda, Hostile Takeover. Timing: Start-of-turn.");
+    expect(item.title).toBe(
+      "Die Korp hat 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt und 2 Credits erhalten.",
+    );
+    expect(item.description).toBe(
+      "Gezeigt: Simple Agenda, Hostile Takeover. Timing: Start-of-turn.",
+    );
     expect(item.category).toBe("agenda");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_314_corporate-negotiating-center");
-    expect(item.chips).toEqual(expect.arrayContaining(["Corporate Negotiating Center", "HQ Reveal", "2 Agenden", "+2 Credits", "Start-of-turn"]));
+    expect(item.cardDefinitionId).toBe(
+      "onr_v1_314_corporate-negotiating-center",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Corporate Negotiating Center",
+        "HQ Reveal",
+        "2 Agenden",
+        "+2 Credits",
+        "Start-of-turn",
+      ]),
+    );
   });
 
   it("shows Smith's Pawnshop choices with the corrected 2-credit gain", () => {
@@ -612,14 +762,18 @@ describe("formatChronicleEvent", () => {
         trashedCardDefinitionId: "onr_v1_028_force-shield",
         trashedCardTitle: "Force Shield",
         creditsGained: 2,
-        gainedCredits: 2
+        gainedCredits: 2,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Force Shield mit Smith's Pawnshop getrasht und 2 Credits erhalten.");
+    expect(item.title).toBe(
+      "Du hast Force Shield mit Smith's Pawnshop getrasht und 2 Credits erhalten.",
+    );
     expect(item.category).toBe("economy");
-    expect(item.chips).toEqual(expect.arrayContaining(["Smith's Pawnshop", "+2 Credits", "Trash"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Smith's Pawnshop", "+2 Credits", "Trash"]),
+    );
     expect(JSON.stringify(item)).not.toContain("1 Credit");
   });
 
@@ -632,9 +786,9 @@ describe("formatChronicleEvent", () => {
         searchDestination: "install_program",
         searchShuffleAfter: true,
         installSucceeded: false,
-        title: "Worm"
+        title: "Worm",
       }),
-      "runner"
+      "runner",
     );
     const installed = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -644,14 +798,18 @@ describe("formatChronicleEvent", () => {
         searchDestination: "install_program",
         searchShuffleAfter: true,
         installSucceeded: true,
-        title: "Worm"
+        title: "Worm",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(failed.title).toBe("Du hast Worm aus dem Stack vorgezeigt, aber nicht installiert.");
+    expect(failed.title).toBe(
+      "Du hast Worm aus dem Stack vorgezeigt, aber nicht installiert.",
+    );
     expect(failed.chips).toContain("Nicht installiert");
-    expect(installed.title).toBe("Du hast Worm aus dem Stack vorgezeigt und im Rig installiert.");
+    expect(installed.title).toBe(
+      "Du hast Worm aus dem Stack vorgezeigt und im Rig installiert.",
+    );
   });
 
   it("shows Self-Modifying Code stack choices with the selected program", () => {
@@ -660,9 +818,10 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Self-Modifying Code",
         sourceDefinitionId: "onr_v1_059_self-modifying-code",
-        label: "Self-Modifying Code: trashen und Programm aus Stack installieren"
+        label:
+          "Self-Modifying Code: trashen und Programm aus Stack installieren",
       }),
-      "runner"
+      "runner",
     );
     const installed = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -672,14 +831,25 @@ describe("formatChronicleEvent", () => {
         installedProgramDefinitionId: "simple_decoder",
         searchDestination: "runner_rig",
         installed: true,
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(activated.title).toBe("Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.");
-    expect(installed.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt und im Rig installiert.");
-    expect(installed.chips).toEqual(expect.arrayContaining(["Self-Modifying Code", "Vorgezeigt", "Installiert", "Shuffle"]));
+    expect(activated.title).toBe(
+      "Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.",
+    );
+    expect(installed.title).toBe(
+      "Du hast Simple Decoder aus dem Stack vorgezeigt und im Rig installiert.",
+    );
+    expect(installed.chips).toEqual(
+      expect.arrayContaining([
+        "Self-Modifying Code",
+        "Vorgezeigt",
+        "Installiert",
+        "Shuffle",
+      ]),
+    );
     expect(installed.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -688,9 +858,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("gain_credit", {
         actor: "runner",
         hiddenZoneAction: "v1911_short_circuit_search",
-        sourceDefinitionId: "onr_v1_177_the-short-circuit"
+        sourceDefinitionId: "onr_v1_177_the-short-circuit",
       }),
-      "runner"
+      "runner",
     );
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -700,16 +870,29 @@ describe("formatChronicleEvent", () => {
         publicRevealDefinitionId: "simple_decoder",
         cardDefinitionId: "simple_decoder",
         searchDestination: "runner_grip",
-        shuffled: true
+        shuffled: true,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(activated.title).toBe("Du hast The Short Circuit genutzt und eine Stack-Suche geöffnet.");
-    expect(activated.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Stack-Suche"]));
-    expect(resolved.title).toBe("Der Runner hat The Short Circuit genutzt, Simple Decoder der Korp gezeigt und in die Hand genommen.");
+    expect(activated.title).toBe(
+      "Du hast The Short Circuit genutzt und eine Stack-Suche geöffnet.",
+    );
+    expect(activated.chips).toEqual(
+      expect.arrayContaining(["The Short Circuit", "Stack-Suche"]),
+    );
+    expect(resolved.title).toBe(
+      "Der Runner hat The Short Circuit genutzt, Simple Decoder der Korp gezeigt und in die Hand genommen.",
+    );
     expect(resolved.description).toBe("Der Stack wurde danach gemischt.");
-    expect(resolved.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Vorgezeigt", "Hand", "Shuffle"]));
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "The Short Circuit",
+        "Vorgezeigt",
+        "Hand",
+        "Shuffle",
+      ]),
+    );
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -717,7 +900,8 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+        hiddenZoneAction:
+          "p3_38_look_top_stack_show_to_corp_then_install_matching",
         sourceDefinitionId: "onr_v1_043_mystery-box",
         revealCount: 5,
         revealedCardDefinitionIds: "simple_decoder,simple_fracter",
@@ -728,17 +912,32 @@ describe("formatChronicleEvent", () => {
         selfTrashed: true,
         shufflePerformed: true,
         shuffled: true,
-        aiReasonCode: "runner_stack_top_program_install"
+        aiReasonCode: "runner_stack_top_program_install",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat Simple Decoder mit Mystery Box gewählt und im Rig installiert.");
-    expect(item.description).toBe("Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box wurde getrasht; der Stack wurde danach gemischt.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat Simple Decoder mit Mystery Box gewählt und im Rig installiert.",
+    );
+    expect(item.description).toBe(
+      "Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box wurde getrasht; der Stack wurde danach gemischt.",
+    );
     expect(item.category).toBe("run");
     expect(item.groupLabel).toBe("Run");
     expect(item.cardDefinitionId).toBe("simple_decoder");
-    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "Mystery Box", "Top 5", "Korp-Reveal", "Installiert", "Source-Trash", "Shuffle"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Runner",
+        "KI",
+        "Mystery Box",
+        "Top 5",
+        "Korp-Reveal",
+        "Installiert",
+        "Source-Trash",
+        "Shuffle",
+      ]),
+    );
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -746,7 +945,8 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+        hiddenZoneAction:
+          "p3_38_look_top_stack_show_to_corp_then_install_matching",
         sourceDefinitionId: "onr_v1_043_mystery-box",
         revealCount: 5,
         revealedCardDefinitionIds: "simple_barrier_ice,simple_economy_event",
@@ -755,17 +955,31 @@ describe("formatChronicleEvent", () => {
         installedProgramCount: 0,
         selfTrashed: false,
         shufflePerformed: true,
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Die Korp hat Mystery Box bestätigt; kein installierbares Programm wurde gefunden.");
-    expect(item.description).toBe("Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box bleibt installiert; der Stack wurde danach gemischt.");
+    expect(item.title).toBe(
+      "Die Korp hat Mystery Box bestätigt; kein installierbares Programm wurde gefunden.",
+    );
+    expect(item.description).toBe(
+      "Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box bleibt installiert; der Stack wurde danach gemischt.",
+    );
     expect(item.category).toBe("run");
     expect(item.groupLabel).toBe("Run");
     expect(item.cardDefinitionId).toBe("onr_v1_043_mystery-box");
-    expect(item.chips).toEqual(expect.arrayContaining(["Korp", "Mystery Box", "Top 5", "Korp-Reveal", "Keine Installation", "Bleibt installiert", "Shuffle"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Korp",
+        "Mystery Box",
+        "Top 5",
+        "Korp-Reveal",
+        "Keine Installation",
+        "Bleibt installiert",
+        "Shuffle",
+      ]),
+    );
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -779,13 +993,21 @@ describe("formatChronicleEvent", () => {
         targetCardDefinitionIds: "onr_v1_196_corporate-war",
         addedAdvancementCounters: 2,
         targetCount: 1,
-        advancementCountersAfter: 2
+        advancementCountersAfter: 2,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(resolved.title).toBe("Du hast 2 Advancement-Counter durch Systematic Layoffs auf Corporate War gelegt.");
-    expect(resolved.chips).toEqual(expect.arrayContaining(["Systematic Layoffs", "+2 Advancement", "1 Ziel"]));
+    expect(resolved.title).toBe(
+      "Du hast 2 Advancement-Counter durch Systematic Layoffs auf Corporate War gelegt.",
+    );
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Systematic Layoffs",
+        "+2 Advancement",
+        "1 Ziel",
+      ]),
+    );
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -798,9 +1020,9 @@ describe("formatChronicleEvent", () => {
         searchDestination: "runner_stack",
         installed: false,
         installBlockedReason: "insufficient_credits",
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
     const memoryPending = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -810,9 +1032,9 @@ describe("formatChronicleEvent", () => {
         searchDestination: "install_program",
         installDeferredForMemory: true,
         installed: false,
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
     const memoryResolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -822,15 +1044,21 @@ describe("formatChronicleEvent", () => {
         installedProgramDefinitionId: "simple_decoder",
         trashedCount: 1,
         trashedCardDefinitionIds: "simple_fracter",
-        installed: true
+        installed: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(blocked.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt, aber nicht installiert.");
+    expect(blocked.title).toBe(
+      "Du hast Simple Decoder aus dem Stack vorgezeigt, aber nicht installiert.",
+    );
     expect(blocked.description).toBe("Grund: nicht genug Credits.");
-    expect(memoryPending.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt; MU muss freigemacht werden.");
-    expect(memoryResolved.title).toBe("Du hast Simple Decoder nach MU-Auswahl im Rig installiert.");
+    expect(memoryPending.title).toBe(
+      "Du hast Simple Decoder aus dem Stack vorgezeigt; MU muss freigemacht werden.",
+    );
+    expect(memoryResolved.title).toBe(
+      "Du hast Simple Decoder nach MU-Auswahl im Rig installiert.",
+    );
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
@@ -846,18 +1074,30 @@ describe("formatChronicleEvent", () => {
         trashedCardDefinitionIds: "simple_fracter",
         installed: true,
         memoryUsedAfter: 4,
-        memoryLimitAfter: 4
+        memoryLimitAfter: 4,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat Highlighter im Rig installiert; Simple Fracter wurde für MU getrasht.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat Highlighter im Rig installiert; Simple Fracter wurde für MU getrasht.",
+    );
     expect(item.description).toBe("MU nach Installation: 4/4.");
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
     expect(item.cardDefinitionId).toBe("onr_proteus_090_highlighter");
     expect(item.cardTitle).toBe("Highlighter");
-    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "Highlighter", "Programmtrash", "Installiert", "MU freigemacht", "Simple Fracter"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Runner",
+        "KI",
+        "Highlighter",
+        "Programmtrash",
+        "Installiert",
+        "MU freigemacht",
+        "Simple Fracter",
+      ]),
+    );
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -866,25 +1106,37 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "corp",
         ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
-        ambushPaidCost: 2
+        ambushPaidCost: 2,
       }),
-      "runner"
+      "runner",
     );
     const declined = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
         ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
         ambushPaidCost: 0,
-        ambushPaymentDeclined: true
+        ambushPaymentDeclined: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(paid.title).toBe("Die Korp hat 2 Credits für den Access-Ambush von Doppelganger Antibody bezahlt.");
-    expect(paid.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "2 Credits"]));
+    expect(paid.title).toBe(
+      "Die Korp hat 2 Credits für den Access-Ambush von Doppelganger Antibody bezahlt.",
+    );
+    expect(paid.chips).toEqual(
+      expect.arrayContaining([
+        "Access-Ambush",
+        "Doppelganger Antibody",
+        "2 Credits",
+      ]),
+    );
     expect(paid.title).not.toContain("Entscheidung beantwortet");
-    expect(declined.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody nicht bezahlt.");
-    expect(declined.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Nicht bezahlt"]));
+    expect(declined.title).toBe(
+      "Die Korp hat den Access-Ambush von Doppelganger Antibody nicht bezahlt.",
+    );
+    expect(declined.chips).toEqual(
+      expect.arrayContaining(["Access-Ambush", "Nicht bezahlt"]),
+    );
   });
 
   it("names access ambush choices from resolved effects when payment payload is missing", () => {
@@ -901,15 +1153,23 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
-            sourceTitle: "Doppelganger Antibody"
-          }
-        ]
+            sourceTitle: "Doppelganger Antibody",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(resolved.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody ausgelöst.");
-    expect(resolved.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "Ausgelöst"]));
+    expect(resolved.title).toBe(
+      "Die Korp hat den Access-Ambush von Doppelganger Antibody ausgelöst.",
+    );
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Access-Ambush",
+        "Doppelganger Antibody",
+        "Ausgelöst",
+      ]),
+    );
     expect(resolved.title).not.toContain("Entscheidung");
   });
 
@@ -928,15 +1188,23 @@ describe("formatChronicleEvent", () => {
           addedCounterAmount: 1,
           remainingCounters: 1,
           sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
-          sourceTitle: "Doppelganger Antibody"
-        }
-      ]
+          sourceTitle: "Doppelganger Antibody",
+        },
+      ],
     });
 
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(effects[0]?.title).toBe("Du hast 1 Doppelganger-Counter durch Doppelganger Antibody erhalten.");
-    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "+1 Doppelganger-Counter"]));
+    expect(effects[0]?.title).toBe(
+      "Du hast 1 Doppelganger-Counter durch Doppelganger Antibody erhalten.",
+    );
+    expect(effects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Access-Ambush",
+        "Doppelganger Antibody",
+        "+1 Doppelganger-Counter",
+      ]),
+    );
     expect(effects[0]?.title).not.toContain("verdeckter Effekt");
   });
 
@@ -959,9 +1227,9 @@ describe("formatChronicleEvent", () => {
           reason: "access_effect",
           sourceDefinitionId: "onr_v1_323_experimental-ai",
           sourceTitle: "Experimental AI",
-          cardDefinitionId: "onr_v1_007_blink"
-        }
-      ]
+          cardDefinitionId: "onr_v1_007_blink",
+        },
+      ],
     });
     const unnamedTargetEvent = makeEvent("access_card", {
       actor: "runner",
@@ -979,19 +1247,33 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           reason: "access_effect",
           sourceDefinitionId: "onr_v1_323_experimental-ai",
-          sourceTitle: "Experimental AI"
-        }
-      ]
+          sourceTitle: "Experimental AI",
+        },
+      ],
     });
 
     const effects = formatChronicleEffectItems(event, "corp");
-    const unnamedEffects = formatChronicleEffectItems(unnamedTargetEvent, "corp");
+    const unnamedEffects = formatChronicleEffectItems(
+      unnamedTargetEvent,
+      "corp",
+    );
 
-    expect(effects[0]?.title).toBe("Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte Blink.");
-    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Experimental AI", "1 Advancement-Counter", "Blink"]));
+    expect(effects[0]?.title).toBe(
+      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte Blink.",
+    );
+    expect(effects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Access-Ambush",
+        "Experimental AI",
+        "1 Advancement-Counter",
+        "Blink",
+      ]),
+    );
     expect(effects[0]?.cardDefinitionId).toBe("onr_v1_323_experimental-ai");
     expect(effects[0]?.title).not.toContain("verdeckte Karte");
-    expect(unnamedEffects[0]?.title).toBe("Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.");
+    expect(unnamedEffects[0]?.title).toBe(
+      "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.",
+    );
     expect(unnamedEffects[0]?.title).not.toContain("Blink");
   });
 
@@ -1003,9 +1285,9 @@ describe("formatChronicleEvent", () => {
         cardDefinitionId: "onr_v1_104_playful-ai",
         abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 3,
-        playfulAiChoiceOpened: true
+        playfulAiChoiceOpened: true,
       }),
-      "runner"
+      "runner",
     );
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1020,17 +1302,34 @@ describe("formatChronicleEvent", () => {
         playfulAiRolledDice: 2,
         playfulAiDiceQueuedBeforeRolls: 2,
         playfulAiDiceQueuedAfterRolls: 0,
-        playfulAiComplete: true
+        playfulAiComplete: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(played.title).toBe("Du hast Playful AI gespielt und eine 3 gewürfelt.");
-    expect(played.description).toBe("Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen.");
-    expect(played.chips).toEqual(expect.arrayContaining(["Playful AI", "Wurf 3", "Choice"]));
-    expect(resolved.title).toBe("Du hast Playful AI aufgelöst: 1 Credit genommen und 2 Würfel beiseitegelegt.");
-    expect(resolved.description).toBe("Danach wurden 2 beiseitegelegte Würfel geworfen: 4, 5. Die Playful-AI-Schleife ist abgeschlossen.");
-    expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+1 Credit", "2 beiseite", "Würfe 4, 5"]));
+    expect(played.title).toBe(
+      "Du hast Playful AI gespielt und eine 3 gewürfelt.",
+    );
+    expect(played.description).toBe(
+      "Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen.",
+    );
+    expect(played.chips).toEqual(
+      expect.arrayContaining(["Playful AI", "Wurf 3", "Choice"]),
+    );
+    expect(resolved.title).toBe(
+      "Du hast Playful AI aufgelöst: 1 Credit genommen und 2 Würfel beiseitegelegt.",
+    );
+    expect(resolved.description).toBe(
+      "Danach wurden 2 beiseitegelegte Würfel geworfen: 4, 5. Die Playful-AI-Schleife ist abgeschlossen.",
+    );
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Playful AI",
+        "+1 Credit",
+        "2 beiseite",
+        "Würfe 4, 5",
+      ]),
+    );
   });
 
   it("shows partial Playful AI queued dice without treating the roll history as newly rolled dice", () => {
@@ -1048,9 +1347,9 @@ describe("formatChronicleEvent", () => {
         playfulAiDiceQueuedBeforeRolls: 2,
         playfulAiDiceQueuedAfterRolls: 1,
         playfulAiRemainingDice: 1,
-        playfulAiChoiceOpened: true
+        playfulAiChoiceOpened: true,
       }),
-      "runner"
+      "runner",
     );
     const gainAll = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1064,14 +1363,20 @@ describe("formatChronicleEvent", () => {
         playfulAiRolledDice: 0,
         playfulAiDiceQueuedBeforeRolls: 0,
         playfulAiDiceQueuedAfterRolls: 0,
-        playfulAiComplete: true
+        playfulAiComplete: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(partial.description).toBe("Danach wurde 1 von 2 beiseitegelegten Würfeln geworfen: 1. Der letzte Wurf öffnet eine weitere Entscheidung; ein Würfel bleibt danach noch offen.");
-    expect(partial.chips).toEqual(expect.arrayContaining(["2 beiseite", "Wurf 1", "1 offen"]));
-    expect(gainAll.description).toBe("Die Playful-AI-Schleife ist abgeschlossen.");
+    expect(partial.description).toBe(
+      "Danach wurde 1 von 2 beiseitegelegten Würfeln geworfen: 1. Der letzte Wurf öffnet eine weitere Entscheidung; ein Würfel bleibt danach noch offen.",
+    );
+    expect(partial.chips).toEqual(
+      expect.arrayContaining(["2 beiseite", "Wurf 1", "1 offen"]),
+    );
+    expect(gainAll.description).toBe(
+      "Die Playful-AI-Schleife ist abgeschlossen.",
+    );
     expect(gainAll.chips).not.toEqual(expect.arrayContaining(["Wurf 3"]));
   });
 
@@ -1088,20 +1393,31 @@ describe("formatChronicleEvent", () => {
         runnerTagsAfter: 1,
         gainedCredits: 10,
         runnerCreditsAfter: 20,
-        hiddenZoneBarrier: true
+        hiddenZoneBarrier: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Edited Shipping Manifests gespielt: Korp verliert 1 Credit, Runner erhält 1 Tag, Runner erhält 10 Credits.");
-    expect(item.description).toBe("Der erfolgreiche Run wurde ohne Zugriff auf verdeckte Korp-Karten ersetzt.");
+    expect(item.title).toBe(
+      "Du hast Edited Shipping Manifests gespielt: Korp verliert 1 Credit, Runner erhält 1 Tag, Runner erhält 10 Credits.",
+    );
+    expect(item.description).toBe(
+      "Der erfolgreiche Run wurde ohne Zugriff auf verdeckte Korp-Karten ersetzt.",
+    );
     expect(item.category).toBe("danger");
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
-    expect(item.chips).toEqual(expect.arrayContaining(["Access ersetzt", "Korp -1", "+1 Tag", "Runner +10"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Access ersetzt",
+        "Korp -1",
+        "+1 Tag",
+        "Runner +10",
+      ]),
+    );
     expect(JSON.stringify(item)).not.toContain("cardInstances");
-    expect(JSON.stringify(item)).not.toContain("\"hq\"");
-    expect(JSON.stringify(item)).not.toContain("\"rd\"");
+    expect(JSON.stringify(item)).not.toContain('"hq"');
+    expect(JSON.stringify(item)).not.toContain('"rd"');
   });
 
   it("describes Record Reconstructor Archives replacement on immediate and protected runs", () => {
@@ -1113,9 +1429,9 @@ describe("formatChronicleEvent", () => {
         accessReplacement: "archives_faceup_to_rd",
         shuffledFaceUpArchivesCount: 4,
         movedCount: 2,
-        hiddenZoneBarrier: true
+        hiddenZoneBarrier: true,
       }),
-      "runner"
+      "runner",
     );
     const protectedRun = formatChronicleEvent(
       makeEvent("continue_run", {
@@ -1124,16 +1440,31 @@ describe("formatChronicleEvent", () => {
         accessReplacement: "archives_faceup_to_rd",
         shuffledFaceUpArchivesCount: 3,
         movedCount: 2,
-        hiddenZoneBarrier: true
+        hiddenZoneBarrier: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(immediate.title).toBe("Du hast Record Reconstructor genutzt: 2 offene Archives-Karten oben auf R&D gelegt.");
-    expect(immediate.description).toBe("4 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
-    expect(immediate.chips).toEqual(expect.arrayContaining(["Record Reconstructor", "Archives", "R&D", "2 bewegt"]));
-    expect(protectedRun.title).toBe("Du hast Record Reconstructor abgeschlossen: 2 offene Archives-Karten oben auf R&D gelegt.");
-    expect(protectedRun.description).toBe("3 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
+    expect(immediate.title).toBe(
+      "Du hast Record Reconstructor genutzt: 2 offene Archives-Karten oben auf R&D gelegt.",
+    );
+    expect(immediate.description).toBe(
+      "4 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.",
+    );
+    expect(immediate.chips).toEqual(
+      expect.arrayContaining([
+        "Record Reconstructor",
+        "Archives",
+        "R&D",
+        "2 bewegt",
+      ]),
+    );
+    expect(protectedRun.title).toBe(
+      "Du hast Record Reconstructor abgeschlossen: 2 offene Archives-Karten oben auf R&D gelegt.",
+    );
+    expect(protectedRun.description).toBe(
+      "3 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.",
+    );
     expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
   });
 
@@ -1150,14 +1481,20 @@ describe("formatChronicleEvent", () => {
         damageResolved: true,
         damageType: "meat",
         damageAmount: 10,
-        selfTrashed: true
+        selfTrashed: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Die Korp hat Schlaghund aktiviert und eine 4 gewürfelt.");
-    expect(item.description).toBe("6 Tags reichen aus: 10 Meat Damage und Schlaghund wird getrasht.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Schlaghund", "Wurf 4", "6 Tags", "Damage"]));
+    expect(item.title).toBe(
+      "Die Korp hat Schlaghund aktiviert und eine 4 gewürfelt.",
+    );
+    expect(item.description).toBe(
+      "6 Tags reichen aus: 10 Meat Damage und Schlaghund wird getrasht.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Schlaghund", "Wurf 4", "6 Tags", "Damage"]),
+    );
     expect(JSON.stringify(item)).not.toContain("cardInstances");
   });
 
@@ -1170,16 +1507,22 @@ describe("formatChronicleEvent", () => {
         passedIceDefinitionId: "simple_barrier_ice",
         serverLabel: "Remote 1",
         v1921DieRoll: 1,
-        rioRunEnded: true
+        rioRunEnded: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.");
-    expect(item.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
+    expect(item.title).toBe(
+      "Du hast Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.",
+    );
+    expect(item.description).toBe(
+      "Der Run endet durch Rio de Janeiro City Grid.",
+    );
     expect(item.cardDefinitionId).toBe("simple_barrier_ice");
     expect(item.cardTitle).toBe("Simple Barrier ICE");
-    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]),
+    );
   });
 
   it("shows Vacuum Link die rolls and their run-rewind meaning", () => {
@@ -1190,30 +1533,46 @@ describe("formatChronicleEvent", () => {
         vacuumLinkDieRoll: 3,
         vacuumLinkRewindApplied: true,
         vacuumLinkRewindRezzedIceBack: 3,
-        vacuumLinkTargetIceIndex: 1
+        vacuumLinkTargetIceIndex: 1,
       }),
-      "runner"
+      "runner",
     );
     const noRewind = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
         serverLabel: "HQ",
         vacuumLinkDieRoll: 5,
-        vacuumLinkRewindApplied: false
+        vacuumLinkRewindApplied: false,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(rewound.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt: 3 gerezzte ICE zurück, sonst zum ersten ICE; Runner darf ausstöpseln.");
+    expect(rewound.title).toBe(
+      "Du hast Vacuum Link ausgelöst und eine 3 gewürfelt: 3 gerezzte ICE zurück, sonst zum ersten ICE; Runner darf ausstöpseln.",
+    );
     expect(rewound.description).toBe(
-      "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2."
+      "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2.",
     );
     expect(rewound.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
     expect(rewound.cardTitle).toBe("Vacuum Link");
-    expect(rewound.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 3", "Run zurückgesetzt", "3 ICE zurück", "Ziel ICE 2"]));
-    expect(noRewind.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 5 gewürfelt: kein Zurücksetzen.");
-    expect(noRewind.description).toBe("Wurf 5: Kein Zurücksetzen; der Run läuft weiter.");
-    expect(noRewind.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 5", "Weiter"]));
+    expect(rewound.chips).toEqual(
+      expect.arrayContaining([
+        "Vacuum Link",
+        "Wurf 3",
+        "Run zurückgesetzt",
+        "3 ICE zurück",
+        "Ziel ICE 2",
+      ]),
+    );
+    expect(noRewind.title).toBe(
+      "Der Runner hat Vacuum Link ausgelöst und eine 5 gewürfelt: kein Zurücksetzen.",
+    );
+    expect(noRewind.description).toBe(
+      "Wurf 5: Kein Zurücksetzen; der Run läuft weiter.",
+    );
+    expect(noRewind.chips).toEqual(
+      expect.arrayContaining(["Vacuum Link", "Wurf 5", "Weiter"]),
+    );
     expect(JSON.stringify(rewound)).not.toContain("cardInstances");
   });
 
@@ -1237,7 +1596,7 @@ describe("formatChronicleEvent", () => {
             subroutineType: "do_damage",
             damageType: "net",
             amount: 2,
-            cardsTrashed: 2
+            cardsTrashed: 2,
           },
           {
             effectId: "subroutine_2",
@@ -1250,7 +1609,7 @@ describe("formatChronicleEvent", () => {
             subroutineType: "do_damage",
             damageType: "net",
             amount: 2,
-            cardsTrashed: 2
+            cardsTrashed: 2,
           },
           {
             effectId: "subroutine_3",
@@ -1261,20 +1620,27 @@ describe("formatChronicleEvent", () => {
             sourceTitle: "Wall of Ice",
             subroutineIndex: 2,
             subroutineType: "end_the_run",
-            endedRun: true
-          }
-        ]
+            endedRun: true,
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items.map((item) => item.title)).toEqual([
       "Wall of Ice: Subroutine 1 macht 2 Net Damage.",
       "Wall of Ice: Subroutine 2 macht 2 Net Damage.",
-      "Wall of Ice: Subroutine 3 beendet den Run."
+      "Wall of Ice: Subroutine 3 beendet den Run.",
     ]);
     expect(items[0]?.description).toBe("2 Karten wurden in den Heap bewegt.");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "2 Net Damage", "2 Heap", "Wall of Ice"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "2 Net Damage",
+        "2 Heap",
+        "Wall of Ice",
+      ]),
+    );
     expect(JSON.stringify(items)).not.toContain("runner_card_");
   });
 
@@ -1296,7 +1662,7 @@ describe("formatChronicleEvent", () => {
             subroutineType: "trash_installed_program",
             cardDefinitionId: "simple_decoder",
             cardTitle: "Simple Decoder",
-            cardsTrashed: 1
+            cardsTrashed: 1,
           },
           {
             effectId: "subroutine_2",
@@ -1307,19 +1673,28 @@ describe("formatChronicleEvent", () => {
             sourceTitle: "Banpei",
             subroutineIndex: 1,
             subroutineType: "end_the_run",
-            endedRun: true
-          }
-        ]
+            endedRun: true,
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items.map((item) => item.title)).toEqual([
       "Banpei: Subroutine 1 trasht Simple Decoder.",
-      "Banpei: Subroutine 2 beendet den Run."
+      "Banpei: Subroutine 2 beendet den Run.",
     ]);
-    expect(items[0]?.description).toBe("Simple Decoder wurde in den Heap bewegt.");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "Simple Decoder", "Programm getrasht", "Banpei"]));
+    expect(items[0]?.description).toBe(
+      "Simple Decoder wurde in den Heap bewegt.",
+    );
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "Simple Decoder",
+        "Programm getrasht",
+        "Banpei",
+      ]),
+    );
   });
 
   it("suppresses redundant Encounter summaries when concrete subroutine lines exist", () => {
@@ -1343,7 +1718,7 @@ describe("formatChronicleEvent", () => {
           subroutineType: "trash_installed_program",
           cardDefinitionId: "onr_v1_042_self-modifying-code",
           cardTitle: "Self-Modifying Code",
-          cardsTrashed: 1
+          cardsTrashed: 1,
         },
         {
           effectId: "subroutine_2",
@@ -1354,30 +1729,38 @@ describe("formatChronicleEvent", () => {
           sourceTitle: "Banpei",
           subroutineIndex: 1,
           subroutineType: "end_the_run",
-          endedRun: true
-        }
-      ]
+          endedRun: true,
+        },
+      ],
     });
     const eventItem = formatChronicleEvent(event, "runner");
-    const visibleItems = shouldSuppressChronicleEventItem(event) ? formatChronicleEffectItems(event, "runner") : [eventItem, ...formatChronicleEffectItems(event, "runner")];
+    const visibleItems = shouldSuppressChronicleEventItem(event)
+      ? formatChronicleEffectItems(event, "runner")
+      : [eventItem, ...formatChronicleEffectItems(event, "runner")];
 
     expect(shouldSuppressChronicleEventItem(event)).toBe(true);
     expect(visibleItems.map((item) => item.title)).toEqual([
       "Banpei: Subroutine 1 trasht Self-Modifying Code.",
-      "Banpei: Subroutine 2 beendet den Run."
+      "Banpei: Subroutine 2 beendet den Run.",
     ]);
-    expect(JSON.stringify(visibleItems)).not.toContain("ungebrochene Subroutinen ausgelöst");
-    expect(visibleItems[0]?.chips).toEqual(expect.arrayContaining(["Banpei", "Self-Modifying Code", "Subroutine 1"]));
+    expect(JSON.stringify(visibleItems)).not.toContain(
+      "ungebrochene Subroutinen ausgelöst",
+    );
+    expect(visibleItems[0]?.chips).toEqual(
+      expect.arrayContaining(["Banpei", "Self-Modifying Code", "Subroutine 1"]),
+    );
   });
 
   it("suppresses declined rez windows as non-events in the visible chronicle", () => {
     const event = makeEvent("decline_rez", {
       actor: "corp",
       label: "Nicht rezzen",
-      serverLabel: "Remote 1"
+      serverLabel: "Remote 1",
     });
 
-    expect(formatChronicleEvent(event, "corp").title).toBe("Du hast nicht gerezzt. Der Run geht weiter.");
+    expect(formatChronicleEvent(event, "corp").title).toBe(
+      "Du hast nicht gerezzt. Der Run geht weiter.",
+    );
     expect(shouldSuppressChronicleEventItem(event)).toBe(true);
   });
 
@@ -1385,21 +1768,30 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        v1922RunnerEventAbility:
+          "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
         targetCardDefinitionId: "simple_barrier_ice",
         targetServerLabel: "R&D",
         rezCostPaid: 3,
-        trashedCount: 1
+        trashedCount: 1,
       }),
       "runner",
-      { cardTitle: "Simple Barrier ICE" }
+      { cardTitle: "Simple Barrier ICE" },
     );
 
-    expect(item.title).toBe("Du hast Simple Barrier ICE in R&D getrasht und 3 Credits bezahlt.");
+    expect(item.title).toBe(
+      "Du hast Simple Barrier ICE in R&D getrasht und 3 Credits bezahlt.",
+    );
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
     expect(item.cardDefinitionId).toBe("simple_barrier_ice");
-    expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Core Command",
+      "Trash",
+      "3 Credits",
+      "R&D",
+    ]);
   });
 
   it("summarizes Synchronized Attack on HQ retain choices without hidden card details", () => {
@@ -1410,28 +1802,41 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
         retainedCount: 2,
         discardedCount: 3,
-        aiExplanation: "legal choice"
+        aiExplanation: "legal choice",
       }),
-      "runner"
+      "runner",
     );
     const humanChoice = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
         v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
         retainedCount: 1,
-        discardedCount: 1
+        discardedCount: 1,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(aiChoice.title).toBe("Die Korp-KI behält mit Synchronized Attack on HQ 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.");
+    expect(aiChoice.title).toBe(
+      "Die Korp-KI behält mit Synchronized Attack on HQ 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.",
+    );
     expect(aiChoice.category).toBe("hidden");
     expect(aiChoice.visibility).toBe("public");
-    expect(aiChoice.cardDefinitionId).toBe("onr_v1_113_synchronized-attack-on-hq");
-    expect(aiChoice.chips).toEqual(["Korp", "KI", "Synchronized Attack", "2 behalten", "3 verdeckt abgeworfen", "4 Credits"]);
+    expect(aiChoice.cardDefinitionId).toBe(
+      "onr_v1_113_synchronized-attack-on-hq",
+    );
+    expect(aiChoice.chips).toEqual([
+      "Korp",
+      "KI",
+      "Synchronized Attack",
+      "2 behalten",
+      "3 verdeckt abgeworfen",
+      "4 Credits",
+    ]);
     expect(JSON.stringify(aiChoice)).not.toContain("card-");
     expect(aiChoice.title).not.toContain("Entscheidung beantwortet");
-    expect(humanChoice.title).toBe("Die Korp behält mit Synchronized Attack on HQ 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.");
+    expect(humanChoice.title).toBe(
+      "Die Korp behält mit Synchronized Attack on HQ 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.",
+    );
   });
 
   it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
@@ -1441,9 +1846,9 @@ describe("formatChronicleEvent", () => {
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
         targetServerLabel: "HQ",
         targetIcePositionLabel: "ICE 2 in HQ",
-        targetVisibility: "installed_ice_position"
+        targetVisibility: "installed_ice_position",
       }),
-      "runner"
+      "runner",
     );
     const corpRez = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1454,9 +1859,9 @@ describe("formatChronicleEvent", () => {
         targetServerLabel: "HQ",
         targetIcePositionLabel: "ICE 2 in HQ",
         rezCostPaid: 3,
-        aiExplanation: "legal choice"
+        aiExplanation: "legal choice",
       }),
-      "runner"
+      "runner",
     );
     const corpTrash = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1467,19 +1872,43 @@ describe("formatChronicleEvent", () => {
         targetServerLabel: "HQ",
         targetIcePositionLabel: "ICE 2 in HQ",
         trashedCount: 1,
-        aiExplanation: "legal choice"
+        aiExplanation: "legal choice",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(runnerChoice.title).toBe("Du hast ICE 2 in HQ für Forged Activation Orders gewählt.");
+    expect(runnerChoice.title).toBe(
+      "Du hast ICE 2 in HQ für Forged Activation Orders gewählt.",
+    );
     expect(runnerChoice.title).not.toContain("Entscheidung beantwortet");
-    expect(runnerChoice.chips).toEqual(["Runner", "Forged Activation Orders", "Ziel", "ICE 2 in HQ"]);
-    expect(corpRez.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu rezzen.");
+    expect(runnerChoice.chips).toEqual([
+      "Runner",
+      "Forged Activation Orders",
+      "Ziel",
+      "ICE 2 in HQ",
+    ]);
+    expect(corpRez.title).toBe(
+      "Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu rezzen.",
+    );
     expect(corpRez.description).toBe("Rez-Kosten: 3 Credits.");
-    expect(corpRez.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Rez", "3 Credits", "ICE 2 in HQ"]);
-    expect(corpTrash.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu trashen.");
-    expect(corpTrash.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Trash", "ICE 2 in HQ"]);
+    expect(corpRez.chips).toEqual([
+      "Korp",
+      "KI",
+      "Forged Activation Orders",
+      "Rez",
+      "3 Credits",
+      "ICE 2 in HQ",
+    ]);
+    expect(corpTrash.title).toBe(
+      "Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu trashen.",
+    );
+    expect(corpTrash.chips).toEqual([
+      "Korp",
+      "KI",
+      "Forged Activation Orders",
+      "Trash",
+      "ICE 2 in HQ",
+    ]);
   });
 
   it("describes V1.8.1 Pattel and Pox run-success counters", () => {
@@ -1498,40 +1927,59 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 2,
             reason: "cockroach_successful_hq_run",
             sourceDefinitionId: "onr_v1_013_cockroach",
-            sourceTitle: "Cockroach"
-          }
-        ]
+            sourceTitle: "Cockroach",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     )[0]!;
     const pattel = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
         v181RunnerProgramAbility: "pattels_virus_counter",
         targetCardDefinitionId: "onr_v1_279_wall-of-static",
-        remainingCounters: 2
+        remainingCounters: 2,
       }),
       "runner",
-      { cardTitle: "Wall of Static" }
+      { cardTitle: "Wall of Static" },
     );
     const pox = formatChronicleEvent(
       makeEvent("access_card", {
         actor: "runner",
         v181RunnerProgramAbility: "pox_counter",
         targetServerLabel: "R&D",
-        poxCountersAfter: 3
+        poxCountersAfter: 3,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(cockroach.title).toBe("Die Korp hat 1 Cockroach-Counter durch Cockroach erhalten.");
-    expect(cockroach.description).toBe("Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.");
-    expect(cockroach.chips).toEqual(expect.arrayContaining(["Korp", "Cockroach", "+1 Cockroach-Counter", "2 gesamt", "Virus/Purge", "Erfolgreicher HQ-Run"]));
-    expect(pattel.title).toBe("Du hast 1 Virus-Counter mit Pattel's Virus auf Wall of Static gelegt.");
+    expect(cockroach.title).toBe(
+      "Die Korp hat 1 Cockroach-Counter durch Cockroach erhalten.",
+    );
+    expect(cockroach.description).toBe(
+      "Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.",
+    );
+    expect(cockroach.chips).toEqual(
+      expect.arrayContaining([
+        "Korp",
+        "Cockroach",
+        "+1 Cockroach-Counter",
+        "2 gesamt",
+        "Virus/Purge",
+        "Erfolgreicher HQ-Run",
+      ]),
+    );
+    expect(pattel.title).toBe(
+      "Du hast 1 Virus-Counter mit Pattel's Virus auf Wall of Static gelegt.",
+    );
     expect(pattel.cardDefinitionId).toBe("onr_v1_279_wall-of-static");
-    expect(pattel.chips).toEqual(expect.arrayContaining(["Pattel's Virus", "+1 Virus", "2 auf ICE"]));
+    expect(pattel.chips).toEqual(
+      expect.arrayContaining(["Pattel's Virus", "+1 Virus", "2 auf ICE"]),
+    );
     expect(pox.title).toBe("Du hast 1 Pox-Counter auf R&D gelegt.");
-    expect(pox.chips).toEqual(expect.arrayContaining(["Pox", "+1 Virus", "R&D", "3 dort"]));
+    expect(pox.chips).toEqual(
+      expect.arrayContaining(["Pox", "+1 Virus", "R&D", "3 dort"]),
+    );
   });
 
   it("describes recurring-credit installs and Pox ICE install tax", () => {
@@ -1540,10 +1988,10 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Invisibility",
         zoneLabel: "Rig",
-        recurringCreditsLoaded: 9
+        recurringCreditsLoaded: 9,
       }),
       "runner",
-      { cardTitle: "Invisibility" }
+      { cardTitle: "Invisibility" },
     );
     const taxedIce = formatChronicleEvent(
       makeEvent("install_card", {
@@ -1552,16 +2000,22 @@ describe("formatChronicleEvent", () => {
         serverLabel: "R&D",
         zoneLabel: "ICE",
         iceInstallAdditionalCost: 2,
-        iceInstallTotalCost: 5
+        iceInstallTotalCost: 5,
       }),
       "corp",
-      { cardTitle: "Wall of Static" }
+      { cardTitle: "Wall of Static" },
     );
 
-    expect(invisibility.description).toBe("9 Recurring Credits wurden auf die Karte gelegt.");
+    expect(invisibility.description).toBe(
+      "9 Recurring Credits wurden auf die Karte gelegt.",
+    );
     expect(invisibility.chips).toContain("9 Recurring");
-    expect(taxedIce.description).toBe("Die Installation enthält 2 Credits Zusatzkosten; Gesamtkosten: 5 Credits.");
-    expect(taxedIce.chips).toEqual(expect.arrayContaining(["+2 Installkosten", "5 gesamt"]));
+    expect(taxedIce.description).toBe(
+      "Die Installation enthält 2 Credits Zusatzkosten; Gesamtkosten: 5 Credits.",
+    );
+    expect(taxedIce.chips).toEqual(
+      expect.arrayContaining(["+2 Installkosten", "5 gesamt"]),
+    );
   });
 
   it("names older hardware decks trashed by Runner deck replacement", () => {
@@ -1572,14 +2026,18 @@ describe("formatChronicleEvent", () => {
         cardDefinitionId: "onr_v1_122_artemis-2020",
         zoneLabel: "Rig",
         deckUniqueReplacement: true,
-        trashedDeckDefinitionIds: "onr_v1_137_parraline-5750"
+        trashedDeckDefinitionIds: "onr_v1_137_parraline-5750",
       }),
       "runner",
-      { cardTitle: "Artemis 2020" }
+      { cardTitle: "Artemis 2020" },
     );
 
-    expect(item.title).toBe("Du hast Artemis 2020 im Rig installiert; Parraline 5750 wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Deck-Einzigartigkeit", "Trash", "1 Deck"]));
+    expect(item.title).toBe(
+      "Du hast Artemis 2020 im Rig installiert; Parraline 5750 wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Deck-Einzigartigkeit", "Trash", "1 Deck"]),
+    );
   });
 
   it("names Restrictive Net Zoning selected servers in the chronicle", () => {
@@ -1589,14 +2047,18 @@ describe("formatChronicleEvent", () => {
         title: "Restrictive Net Zoning",
         zoneLabel: "Resource",
         selectedServerId: "remote_1",
-        selectedServerLabel: "Remote 1"
+        selectedServerLabel: "Remote 1",
       }),
       "runner",
-      { cardTitle: "Restrictive Net Zoning" }
+      { cardTitle: "Restrictive Net Zoning" },
     );
 
-    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote 1 ausgerichtet installiert.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote 1"]));
+    expect(item.title).toBe(
+      "Du hast Restrictive Net Zoning auf Remote 1 ausgerichtet installiert.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Install", "Resource", "Remote 1"]),
+    );
   });
 
   it("names Security Net Optimization selected servers in the chronicle", () => {
@@ -1606,13 +2068,15 @@ describe("formatChronicleEvent", () => {
         title: "Security Net Optimization",
         cardDefinitionId: "onr_v1_215_security-net-optimization",
         selectedServerId: "remote_1",
-        selectedServerLabel: "Remote 1"
+        selectedServerLabel: "Remote 1",
       }),
       "runner",
-      { cardTitle: "Security Net Optimization" }
+      { cardTitle: "Security Net Optimization" },
     );
 
-    expect(item.title).toBe("Die Korp hat Security Net Optimization gescored und Remote 1 gewählt.");
+    expect(item.title).toBe(
+      "Die Korp hat Security Net Optimization gescored und Remote 1 gewählt.",
+    );
     expect(item.chips).toEqual(expect.arrayContaining(["Score", "Remote 1"]));
   });
 
@@ -1621,13 +2085,15 @@ describe("formatChronicleEvent", () => {
       makeEvent("score_agenda", {
         actor: "corp",
         title: "AI Chief Financial Officer",
-        cardDefinitionId: "onr_v1_188_ai-chief-financial-officer"
+        cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
       }),
       "runner",
-      { agendaPoints: 2, cardTitle: "KI-Finanzvorstand" }
+      { agendaPoints: 2, cardTitle: "KI-Finanzvorstand" },
     );
 
-    expect(item.title).toBe("Die Korp hat KI-Finanzvorstand gescored und 2 Agenda-Punkte erhalten.");
+    expect(item.title).toBe(
+      "Die Korp hat KI-Finanzvorstand gescored und 2 Agenda-Punkte erhalten.",
+    );
     expect(item.cardTitle).toBe("KI-Finanzvorstand");
     expect(item.chips).toEqual(expect.arrayContaining(["Score", "+2 Agenda"]));
   });
@@ -1642,9 +2108,9 @@ describe("formatChronicleEvent", () => {
         installedIceCount: 2,
         installedRootCount: 1,
         temporaryCreditsProvided: 12,
-        dataFortReclamationRezCandidateCount: 2
+        dataFortReclamationRezCandidateCount: 2,
       }),
-      "runner"
+      "runner",
     );
     const dataFortRez = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1655,28 +2121,45 @@ describe("formatChronicleEvent", () => {
         rezzedIceCount: 1,
         rezzedRootCount: 1,
         temporaryCreditsSpent: 4,
-        corpCreditsSpent: 2
+        corpCreditsSpent: 2,
       }),
-      "corp"
+      "corp",
     );
     const aardvark = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "aardvark_rez_trash_worm",
-        publicRevealDefinitionId: "onr_v1_327_aardvark"
+        publicRevealDefinitionId: "onr_v1_327_aardvark",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(dataFortInstall.title).toBe("Die Korp hat 3 Karten mit Data Fort Reclamation installiert.");
+    expect(dataFortInstall.title).toBe(
+      "Die Korp hat 3 Karten mit Data Fort Reclamation installiert.",
+    );
     expect(dataFortInstall.visibility).toBe("redacted");
-    expect(dataFortInstall.chips).toEqual(expect.arrayContaining(["Data Fort", "3 Install", "2 ICE", "12 Temp-Credits"]));
-    expect(dataFortRez.title).toBe("Du hast 2 Karten aus Data Fort Reclamation gerezzt.");
-    expect(dataFortRez.chips).toEqual(expect.arrayContaining(["Data Fort", "2 Rez", "4 Temp", "2 Credits"]));
-    expect(aardvark.title).toBe("Die Korp hat Aardvark gerezzt und Worm getrasht.");
+    expect(dataFortInstall.chips).toEqual(
+      expect.arrayContaining([
+        "Data Fort",
+        "3 Install",
+        "2 ICE",
+        "12 Temp-Credits",
+      ]),
+    );
+    expect(dataFortRez.title).toBe(
+      "Du hast 2 Karten aus Data Fort Reclamation gerezzt.",
+    );
+    expect(dataFortRez.chips).toEqual(
+      expect.arrayContaining(["Data Fort", "2 Rez", "4 Temp", "2 Credits"]),
+    );
+    expect(aardvark.title).toBe(
+      "Die Korp hat Aardvark gerezzt und Worm getrasht.",
+    );
     expect(aardvark.cardDefinitionId).toBe("onr_v1_327_aardvark");
-    expect(aardvark.chips).toEqual(expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]));
+    expect(aardvark.chips).toEqual(
+      expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]),
+    );
   });
 
   it("names the ICE rezzed by Priority Requisition", () => {
@@ -1687,17 +2170,21 @@ describe("formatChronicleEvent", () => {
         hiddenZoneAction: "v162_priority_requisition_free_rez",
         priorityRequisitionFreeRez: true,
         priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
-        rezCostPaid: 0
+        rezCostPaid: 0,
       }),
       "corp",
-      { cardTitle: "Cortical Scanner" }
+      { cardTitle: "Cortical Scanner" },
     );
 
-    expect(item.title).toBe("Du hast Cortical Scanner durch Priority Requisition kostenlos gerezzt.");
+    expect(item.title).toBe(
+      "Du hast Cortical Scanner durch Priority Requisition kostenlos gerezzt.",
+    );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("onr_v1_230_cortical-scanner");
-    expect(item.chips).toEqual(expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]),
+    );
   });
 
   it("summarizes Superior Net Barriers reveal and credit counts", () => {
@@ -1710,16 +2197,27 @@ describe("formatChronicleEvent", () => {
         revealedCount: 2,
         rezzedMatchingIceCount: 1,
         countedMatchingIceCount: 3,
-        gainedCredits: 3
+        gainedCredits: 3,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Du hast Superior Net Barriers genutzt: 2 Walls aufgedeckt, 3 Credits erhalten.");
+    expect(item.title).toBe(
+      "Du hast Superior Net Barriers genutzt: 2 Walls aufgedeckt, 3 Credits erhalten.",
+    );
     expect(item.category).toBe("agenda");
     expect(item.visibility).toBe("public");
-    expect(item.description).toBe("3 Walls waren aufgedeckt oder gerezzt; davon 1 bereits gerezzt.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Superior Net Barriers", "2 Reveal", "1 Rez", "+3 Credits"]));
+    expect(item.description).toBe(
+      "3 Walls waren aufgedeckt oder gerezzt; davon 1 bereits gerezzt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Superior Net Barriers",
+        "2 Reveal",
+        "1 Rez",
+        "+3 Credits",
+      ]),
+    );
   });
 
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
@@ -1729,12 +2227,14 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         encounterContinue: true,
         encounterWillEndRun: true,
-        unbrokenSubroutineCount: 1
+        unbrokenSubroutineCount: 1,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst und der Run endete.");
+    expect(item.title).toBe(
+      "Du hast ungebrochene Subroutinen ausgelöst und der Run endete.",
+    );
     expect(item.chips).toContain("Subroutinen");
   });
 
@@ -1748,13 +2248,21 @@ describe("formatChronicleEvent", () => {
         unbrokenSubroutineCount: 2,
         trashedCardDefinitionId: "simple_decoder",
         trashedCardType: "program",
-        trashedCount: 1
+        trashedCount: 1,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst, Simple Decoder getrasht und der Run endete.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Subroutinen", "Simple Decoder", "Programm getrasht"]));
+    expect(item.title).toBe(
+      "Du hast ungebrochene Subroutinen ausgelöst, Simple Decoder getrasht und der Run endete.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutinen",
+        "Simple Decoder",
+        "Programm getrasht",
+      ]),
+    );
   });
 
   it("shows fully broken Encounter continuation as passed ICE", () => {
@@ -1764,9 +2272,9 @@ describe("formatChronicleEvent", () => {
         result: "continued",
         encounterContinue: true,
         encounterWillEndRun: false,
-        unbrokenSubroutineCount: 0
+        unbrokenSubroutineCount: 0,
       }),
-      "runner"
+      "runner",
     );
 
     expect(item.title).toBe("Du hast das ICE passiert.");
@@ -1782,9 +2290,9 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner.encounter.pump_breaker",
         pumpStrengthAmount: 1,
         pumpBreakerCreditCost: 2,
-        breakerStrengthAfter: 1
+        breakerStrengthAfter: 1,
       }),
-      "corp"
+      "corp",
     );
     const breakAction = formatChronicleEvent(
       makeEvent("break_subroutine", {
@@ -1793,17 +2301,34 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner.encounter.break_etr",
         breakSubroutineBaseCost: 2,
         subroutineIndex: 0,
-        targetIceTitle: "Filter"
+        targetIceTitle: "Filter",
       }),
-      "corp"
+      "corp",
     );
 
     expect(pump.title).toBe("Die Runner-KI hat Krash gepumpt.");
-    expect(pump.description).toBe("2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.");
-    expect(pump.chips).toEqual(expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]));
-    expect(breakAction.title).toBe("Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.");
-    expect(breakAction.description).toBe("2 Credits: Subroutine 1 auf Filter gebrochen.");
-    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Subroutine 1", "Gebrochen", "2 Credits", "Krash", "Filter"]));
+    expect(pump.description).toBe(
+      "2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.",
+    );
+    expect(pump.chips).toEqual(
+      expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]),
+    );
+    expect(breakAction.title).toBe(
+      "Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.",
+    );
+    expect(breakAction.description).toBe(
+      "2 Credits: Subroutine 1 auf Filter gebrochen.",
+    );
+    expect(breakAction.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine",
+        "Subroutine 1",
+        "Gebrochen",
+        "2 Credits",
+        "Krash",
+        "Filter",
+      ]),
+    );
   });
 
   it("describes successful Blink die rolls on break actions", () => {
@@ -1816,16 +2341,22 @@ describe("formatChronicleEvent", () => {
         subroutineIndex: 0,
         blinkDieRoll: 5,
         blinkBreakSuccess: true,
-        blinkDamageAmount: 0
+        blinkDamageAmount: 0,
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat mit Blink Subroutine 1 auf Crystal Wall nach Wurf 5 gebrochen.");
-    expect(item.description).toBe("Blink würfelt eine 5: Subroutine 1 auf Crystal Wall wurde gebrochen.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat mit Blink Subroutine 1 auf Crystal Wall nach Wurf 5 gebrochen.",
+    );
+    expect(item.description).toBe(
+      "Blink würfelt eine 5: Subroutine 1 auf Crystal Wall wurde gebrochen.",
+    );
     expect(item.cardDefinitionId).toBe("onr_v1_007_blink");
     expect(item.cardTitle).toBe("Blink");
-    expect(item.chips).toEqual(expect.arrayContaining(["Blink", "Wurf 5", "Gebrochen", "Crystal Wall"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Blink", "Wurf 5", "Gebrochen", "Crystal Wall"]),
+    );
     expect(JSON.stringify(item)).not.toContain("Net Damage");
   });
 
@@ -1838,15 +2369,27 @@ describe("formatChronicleEvent", () => {
         subroutineIndex: 0,
         blinkDieRoll: 2,
         blinkBreakSuccess: false,
-        blinkDamageAmount: 2
+        blinkDamageAmount: 2,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast mit Blink Subroutine 1 auf Crystal Wall nach Wurf 2 nicht gebrochen.");
-    expect(item.description).toBe("Blink würfelt eine 2: Subroutine 1 auf Crystal Wall wurde nicht gebrochen; der Runner erleidet 2 Net Damage.");
+    expect(item.title).toBe(
+      "Du hast mit Blink Subroutine 1 auf Crystal Wall nach Wurf 2 nicht gebrochen.",
+    );
+    expect(item.description).toBe(
+      "Blink würfelt eine 2: Subroutine 1 auf Crystal Wall wurde nicht gebrochen; der Runner erleidet 2 Net Damage.",
+    );
     expect(item.importance).toBe("critical");
-    expect(item.chips).toEqual(expect.arrayContaining(["Blink", "Wurf 2", "Nicht gebrochen", "2 Net Damage", "Crystal Wall"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Blink",
+        "Wurf 2",
+        "Nicht gebrochen",
+        "2 Net Damage",
+        "Crystal Wall",
+      ]),
+    );
     expect(JSON.stringify(item)).not.toContain("Grip");
     expect(JSON.stringify(item)).not.toContain("Heap");
   });
@@ -1862,14 +2405,28 @@ describe("formatChronicleEvent", () => {
         subroutineIndexes: "0,1",
         breakAllMatchingSubroutines: true,
         breakerEndsRunAfterBreak: true,
-        targetIceTitle: "Banpei"
+        targetIceTitle: "Banpei",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat mit Dropp™ alle Subroutinen auf Banpei gebrochen und den Run beendet.");
-    expect(item.description).toBe("0 Credits: alle Subroutinen auf Banpei gebrochen; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Subroutine", "alle Subroutinen", "Gebrochen", "Run endet", "ICE nicht passiert", "Dropp™", "Banpei"]));
+    expect(item.title).toBe(
+      "Die Runner-KI hat mit Dropp™ alle Subroutinen auf Banpei gebrochen und den Run beendet.",
+    );
+    expect(item.description).toBe(
+      "0 Credits: alle Subroutinen auf Banpei gebrochen; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine",
+        "alle Subroutinen",
+        "Gebrochen",
+        "Run endet",
+        "ICE nicht passiert",
+        "Dropp™",
+        "Banpei",
+      ]),
+    );
   });
 
   it("names visible Runner installs from the public label and Rig zone", () => {
@@ -1877,9 +2434,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("install_card", {
         actor: "runner",
         label: "Simple Killer installieren",
-        zoneLabel: "Rig"
+        zoneLabel: "Rig",
       }),
-      "runner"
+      "runner",
     );
 
     expect(item.title).toBe("Du hast Simple Killer im Rig installiert.");
@@ -1893,19 +2450,23 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         title: "Simple Economy Operation",
         aiReasonCode: "corp.economy.operation",
-        aiExplanation: "Credits verbessern Rez- und Score-Fenster."
+        aiExplanation: "Credits verbessern Rez- und Score-Fenster.",
       }),
       "runner",
       {
         cardTitle: "Simple Economy Operation",
-        cardText: "Erhalte 4 Credits."
-      }
+        cardText: "Erhalte 4 Credits.",
+      },
     );
 
-    expect(item.title).toBe("Die Korp-KI hat Simple Economy Operation gespielt und Credits erhalten.");
+    expect(item.title).toBe(
+      "Die Korp-KI hat Simple Economy Operation gespielt und Credits erhalten.",
+    );
     expect(item.description).toBeUndefined();
     expect(item.chips).toContain("KI");
-    expect(JSON.stringify(item)).not.toContain("Credits verbessern Rez- und Score-Fenster.");
+    expect(JSON.stringify(item)).not.toContain(
+      "Credits verbessern Rez- und Score-Fenster.",
+    );
     expect(JSON.stringify(item)).not.toContain("corp.economy.operation");
   });
 
@@ -1924,15 +2485,19 @@ describe("formatChronicleEvent", () => {
           amount: 3,
           sourceDefinitionId: "onr_v1_282_annual-reviews",
           sourceTitle: "Annual Reviews",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Annual Reviews" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Annual Reviews",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp-KI hat Annual Reviews gespielt und 3 Karten gezogen.");
+    expect(item.title).toBe(
+      "Die Korp-KI hat Annual Reviews gespielt und 3 Karten gezogen.",
+    );
     expect(item.chips).toContain("Operation");
     expect(item.chips).toContain("3 Karten");
     expect(effects).toEqual([]);
@@ -1950,16 +2515,26 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_064_skivviss",
           sourceTitle: "Skivviss",
-          reason: "start_of_turn"
-        }
-      ]
+          reason: "start_of_turn",
+        },
+      ],
     });
 
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(effects[0]?.title).toBe("Skivviss zwingt die Korp zu 2 zusätzlichen Karten.");
-    expect(effects[0]?.description).toBe("Grund: 2 Skivviss-Counter auf der Korp.");
-    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Skivviss", "2 Skivviss-Counter", "2 Zusatzkarten"]));
+    expect(effects[0]?.title).toBe(
+      "Skivviss zwingt die Korp zu 2 zusätzlichen Karten.",
+    );
+    expect(effects[0]?.description).toBe(
+      "Grund: 2 Skivviss-Counter auf der Korp.",
+    );
+    expect(effects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Skivviss",
+        "2 Skivviss-Counter",
+        "2 Zusatzkarten",
+      ]),
+    );
   });
 
   it("merges simple play credit effects into the played card entry", () => {
@@ -1976,15 +2551,19 @@ describe("formatChronicleEvent", () => {
           amount: 3,
           sourceDefinitionId: "onr_v1_097_livewires-contacts",
           sourceTitle: "Livewire's Contacts",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Livewire's Contacts" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Livewire's Contacts",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Du hast Livewire's Contacts gespielt und 3 Credits erhalten.");
+    expect(item.title).toBe(
+      "Du hast Livewire's Contacts gespielt und 3 Credits erhalten.",
+    );
     expect(item.category).toBe("economy");
     expect(item.chips).toContain("Event");
     expect(item.chips).toContain("+3 Credits");
@@ -2007,17 +2586,23 @@ describe("formatChronicleEvent", () => {
           amount: 7,
           sourceDefinitionId: "onr_v1_285_closed-accounts",
           sourceTitle: "Closed Accounts",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Closed Accounts" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Closed Accounts",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Closed Accounts gespielt und Runner verliert 7 Credits.");
+    expect(item.title).toBe(
+      "Die Korp hat Closed Accounts gespielt und Runner verliert 7 Credits.",
+    );
     expect(item.category).toBe("danger");
-    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "Runner -7 Credits"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Operation", "Runner -7 Credits"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2038,17 +2623,23 @@ describe("formatChronicleEvent", () => {
           runnerTagsAfter: 3,
           sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
           sourceTitle: "Datapool® by Zetatech",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Datapool® by Zetatech" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Datapool® by Zetatech",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Datapool® by Zetatech gespielt und Runner erhält 2 Tags.");
+    expect(item.title).toBe(
+      "Die Korp hat Datapool® by Zetatech gespielt und Runner erhält 2 Tags.",
+    );
     expect(item.category).toBe("danger");
-    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+2 Tags"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Operation", "+2 Tags"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2071,7 +2662,7 @@ describe("formatChronicleEvent", () => {
           runnerTagsAfter: 2,
           sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
           sourceTitle: "Netwatch Credit Voucher",
-          reason: "card_resolver"
+          reason: "card_resolver",
         },
         {
           effectId: "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
@@ -2081,18 +2672,26 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
           sourceTitle: "Netwatch Credit Voucher",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Netwatch Credit Voucher" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Netwatch Credit Voucher",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Netwatch Credit Voucher gespielt und Runner erhält 1 Tag und Korp erhält 1 Credit.");
-    expect(item.title.indexOf("Runner erhält 1 Tag")).toBeLessThan(item.title.indexOf("Korp erhält 1 Credit"));
+    expect(item.title).toBe(
+      "Die Korp hat Netwatch Credit Voucher gespielt und Runner erhält 1 Tag und Korp erhält 1 Credit.",
+    );
+    expect(item.title.indexOf("Runner erhält 1 Tag")).toBeLessThan(
+      item.title.indexOf("Korp erhält 1 Credit"),
+    );
     expect(item.category).toBe("danger");
-    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+1 Tag", "+1 Credit"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Operation", "+1 Tag", "+1 Credit"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2121,18 +2720,24 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: amount,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
       const effects = formatChronicleEffectItems(event, "runner");
 
-      expect(item.title).toBe(`Die Korp hat ${title} gespielt und Runner erleidet ${amount} Meat Damage.`);
+      expect(item.title).toBe(
+        `Die Korp hat ${title} gespielt und Runner erleidet ${amount} Meat Damage.`,
+      );
       expect(item.category).toBe("danger");
-      expect(item.chips).toEqual(expect.arrayContaining(["Operation", `${amount} Meat Damage`]));
-      expect(JSON.stringify(item)).not.toMatch(/grip|stack|cardInstances|privatePayload/);
+      expect(item.chips).toEqual(
+        expect.arrayContaining(["Operation", `${amount} Meat Damage`]),
+      );
+      expect(JSON.stringify(item)).not.toMatch(
+        /grip|stack|cardInstances|privatePayload/,
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2163,19 +2768,25 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: amount,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
       const effects = formatChronicleEffectItems(event, "runner");
 
-      expect(item.title).toBe(`Die Korp hat ${title} genutzt und Runner erleidet ${amount} Meat Damage.`);
+      expect(item.title).toBe(
+        `Die Korp hat ${title} genutzt und Runner erleidet ${amount} Meat Damage.`,
+      );
       expect(item.title).not.toContain("gespielt");
       expect(item.category).toBe("danger");
-      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `${amount} Meat Damage`]));
-      expect(JSON.stringify(item)).not.toMatch(/grip|stack|cardInstances|privatePayload/);
+      expect(item.chips).toEqual(
+        expect.arrayContaining(["Ability", `${amount} Meat Damage`]),
+      );
+      expect(JSON.stringify(item)).not.toMatch(
+        /grip|stack|cardInstances|privatePayload/,
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2196,7 +2807,7 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_288_day-shift",
           sourceTitle: "Day Shift",
-          reason: "card_resolver"
+          reason: "card_resolver",
         },
         {
           effectId: "onr_v1_288_day-shift.effect.1.gain_credits",
@@ -2206,17 +2817,23 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_288_day-shift",
           sourceTitle: "Day Shift",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Day Shift gespielt und 2 Karten gezogen und 1 Credit erhalten.");
-    expect(item.title.indexOf("2 Karten gezogen")).toBeLessThan(item.title.indexOf("1 Credit erhalten"));
-    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "2 Karten", "+1 Credit"]));
+    expect(item.title).toBe(
+      "Die Korp hat Day Shift gespielt und 2 Karten gezogen und 1 Credit erhalten.",
+    );
+    expect(item.title.indexOf("2 Karten gezogen")).toBeLessThan(
+      item.title.indexOf("1 Credit erhalten"),
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Operation", "2 Karten", "+1 Credit"]),
+    );
     expect(JSON.stringify(item)).not.toContain("Jack 'n' Joe");
     expect(effects).toEqual([]);
   });
@@ -2237,7 +2854,7 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_295_night-shift",
           sourceTitle: "Night Shift",
-          reason: "card_resolver"
+          reason: "card_resolver",
         },
         {
           effectId: "onr_v1_295_night-shift.effect.1.draw_cards",
@@ -2247,17 +2864,23 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_295_night-shift",
           sourceTitle: "Night Shift",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Night Shift gespielt und 2 Credits erhalten und eine Karte gezogen.");
-    expect(item.title.indexOf("2 Credits erhalten")).toBeLessThan(item.title.indexOf("eine Karte gezogen"));
-    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+2 Credits", "Karte ziehen"]));
+    expect(item.title).toBe(
+      "Die Korp hat Night Shift gespielt und 2 Credits erhalten und eine Karte gezogen.",
+    );
+    expect(item.title.indexOf("2 Credits erhalten")).toBeLessThan(
+      item.title.indexOf("eine Karte gezogen"),
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Operation", "+2 Credits", "Karte ziehen"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2275,16 +2898,18 @@ describe("formatChronicleEvent", () => {
           amount: 3,
           sourceDefinitionId: "onr_v1_095_jack-n-joe",
           sourceTitle: "Jack 'n' Joe",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "corp");
     const effects = formatChronicleEffectItems(event, "corp");
     const serialized = JSON.stringify(item);
 
-    expect(item.title).toBe("Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.");
+    expect(item.title).toBe(
+      "Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.",
+    );
     expect(serialized).toContain("Jack 'n' Joe");
     expect(serialized).toContain("3 Karten");
     expect(serialized).not.toContain("Score!");
@@ -2312,18 +2937,24 @@ describe("formatChronicleEvent", () => {
           amount: 3,
           sourceDefinitionId: "onr_v1_095_jack-n-joe",
           sourceTitle: "Jack 'n' Joe",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "corp");
     const effects = formatChronicleEffectItems(event, "corp");
 
-    expect(item.title).toBe("Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.");
-    expect(item.description).toBe("City Surveillance: Der Runner hat 2 Credits gezahlt und 1 Tag erhalten.");
+    expect(item.title).toBe(
+      "Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.",
+    );
+    expect(item.description).toBe(
+      "City Surveillance: Der Runner hat 2 Credits gezahlt und 1 Tag erhalten.",
+    );
     expect(item.importance).toBe("important");
-    expect(item.chips).toEqual(expect.arrayContaining(["City Surveillance", "-2 Credits", "+1 Tag"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["City Surveillance", "-2 Credits", "+1 Tag"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2348,16 +2979,22 @@ describe("formatChronicleEvent", () => {
           amount: 5,
           sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
           sourceTitle: "Bodyweight™ Synthetic Blood",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "corp");
 
-    expect(item.title).toBe("Der Runner hat Bodyweight™ Synthetic Blood gespielt und 5 Karten gezogen.");
-    expect(item.description).toBe("City Surveillance: Der Runner hat 5 Credits gezahlt und keinen Tag erhalten.");
-    expect(item.chips).toEqual(expect.arrayContaining(["City Surveillance", "-5 Credits", "Kein Tag"]));
+    expect(item.title).toBe(
+      "Der Runner hat Bodyweight™ Synthetic Blood gespielt und 5 Karten gezogen.",
+    );
+    expect(item.description).toBe(
+      "City Surveillance: Der Runner hat 5 Credits gezahlt und keinen Tag erhalten.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["City Surveillance", "-5 Credits", "Kein Tag"]),
+    );
   });
 
   it("merges activated card implementation credit effects with card context", () => {
@@ -2377,17 +3014,21 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_045_newsgroup-filter",
           sourceTitle: "Newsgroup Filter",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Du hast Newsgroup Filter genutzt und 2 Credits erhalten.");
+    expect(item.title).toBe(
+      "Du hast Newsgroup Filter genutzt und 2 Credits erhalten.",
+    );
     expect(item.category).toBe("economy");
-    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+2 Credits"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Ability", "+2 Credits"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2407,16 +3048,18 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_321_esa-contract",
           sourceTitle: "ESA Contract",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
     const serialized = JSON.stringify(item);
 
-    expect(item.title).toBe("Die Korp hat ESA Contract genutzt und 2 Karten gezogen.");
+    expect(item.title).toBe(
+      "Die Korp hat ESA Contract genutzt und 2 Karten gezogen.",
+    );
     expect(item.chips).toEqual(expect.arrayContaining(["Ability", "2 Karten"]));
     expect(serialized).not.toContain("simple_agenda");
     expect(serialized).not.toContain("simple_economy_operation");
@@ -2439,15 +3082,15 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_199_employee-empowerment",
           sourceTitle: "Employee Empowerment",
-          reason: "start_of_turn"
-        }
-      ]
+          reason: "start_of_turn",
+        },
+      ],
     });
     const skip = makeEvent("resolve_choice", {
       actor: "corp",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
       cardDefinitionId: "onr_v1_199_employee-empowerment",
-      employeeEmpowermentStartDrawDecision: "skip"
+      employeeEmpowermentStartDrawDecision: "skip",
     });
     const action = makeEvent("activated_card_ability", {
       actor: "corp",
@@ -2464,15 +3107,23 @@ describe("formatChronicleEvent", () => {
           amount: 2,
           sourceDefinitionId: "onr_v1_199_employee-empowerment",
           sourceTitle: "Employee Empowerment",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
-    expect(formatChronicleEvent(optionalDraw, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und eine Karte zusätzlich gezogen.");
-    expect(formatChronicleEvent(optionalDraw, "runner").chips).toEqual(expect.arrayContaining(["Start-of-turn", "Zusatzkarte"]));
-    expect(formatChronicleEvent(skip, "runner").title).toBe("Die Korp hat Employee Empowerment übersprungen.");
-    expect(formatChronicleEvent(action, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und 2 Karten gezogen.");
+    expect(formatChronicleEvent(optionalDraw, "runner").title).toBe(
+      "Die Korp hat Employee Empowerment genutzt und eine Karte zusätzlich gezogen.",
+    );
+    expect(formatChronicleEvent(optionalDraw, "runner").chips).toEqual(
+      expect.arrayContaining(["Start-of-turn", "Zusatzkarte"]),
+    );
+    expect(formatChronicleEvent(skip, "runner").title).toBe(
+      "Die Korp hat Employee Empowerment übersprungen.",
+    );
+    expect(formatChronicleEvent(action, "runner").title).toBe(
+      "Die Korp hat Employee Empowerment genutzt und 2 Karten gezogen.",
+    );
   });
 
   it("merges activated economy ability effects with card context", () => {
@@ -2497,17 +3148,21 @@ describe("formatChronicleEvent", () => {
             amount,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
       const effects = formatChronicleEffectItems(event, "runner");
 
-      expect(item.title).toBe(`Die Korp hat ${title} genutzt und ${amount} Credits erhalten.`);
+      expect(item.title).toBe(
+        `Die Korp hat ${title} genutzt und ${amount} Credits erhalten.`,
+      );
       expect(item.title).not.toContain("gespielt");
-      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`]));
+      expect(item.chips).toEqual(
+        expect.arrayContaining(["Ability", `+${amount} Credits`]),
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2521,19 +3176,24 @@ describe("formatChronicleEvent", () => {
       secretSpendRunner: 2,
       tooManyDoorsEndRun: true,
       corpCreditsAfter: 4,
-      runnerCreditsAfter: 3
+      runnerCreditsAfter: 3,
     });
 
     const item = formatChronicleEvent(event, "runner");
 
     expect(item.title).toBe(
-      "Too Many Doors aufgedeckt: Korp 1 Credit, Runner 2 Credits; Run endet."
+      "Too Many Doors aufgedeckt: Korp 1 Credit, Runner 2 Credits; Run endet.",
     );
     expect(item.description).toBe(
-      "Nach der Zahlung: Korp 4 Credits, Runner 3 Credits."
+      "Nach der Zahlung: Korp 4 Credits, Runner 3 Credits.",
     );
     expect(item.chips).toEqual(
-      expect.arrayContaining(["Too Many Doors", "Korp -1", "Runner -2", "Run endet"])
+      expect.arrayContaining([
+        "Too Many Doors",
+        "Korp -1",
+        "Runner -2",
+        "Run endet",
+      ]),
     );
   });
 
@@ -2556,7 +3216,7 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
           sourceTitle: "Silicon Saloon Franchise",
-          reason: "card_resolver"
+          reason: "card_resolver",
         },
         {
           effectId: "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
@@ -2566,34 +3226,49 @@ describe("formatChronicleEvent", () => {
           amount: 1,
           sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
           sourceTitle: "Silicon Saloon Franchise",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "corp", {
-      cardTitle: "Silicon Saloon Franchise"
+      cardTitle: "Silicon Saloon Franchise",
     });
     const effects = formatChronicleEffectItems(event, "corp");
     const serialized = JSON.stringify(item);
 
-    expect(item.title).toBe("Der Runner hat Silicon Saloon Franchise genutzt und 1 Credit erhalten und eine Karte gezogen.");
+    expect(item.title).toBe(
+      "Der Runner hat Silicon Saloon Franchise genutzt und 1 Credit erhalten und eine Karte gezogen.",
+    );
     expect(item.title).not.toContain("gespielt");
-    expect(item.title.indexOf("1 Credit erhalten")).toBeLessThan(item.title.indexOf("eine Karte gezogen"));
-    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+1 Credit", "Karte ziehen"]));
-    expect(serialized).not.toMatch(/grip|stack|cardInstances|privatePayload|drawnCardDefinitionId/);
+    expect(item.title.indexOf("1 Credit erhalten")).toBeLessThan(
+      item.title.indexOf("eine Karte gezogen"),
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Ability", "+1 Credit", "Karte ziehen"]),
+    );
+    expect(serialized).not.toMatch(
+      /grip|stack|cardInstances|privatePayload|drawnCardDefinitionId/,
+    );
     expect(effects).toEqual([]);
   });
 
   it("merges hosted-credit lifecycle effects into rez, install and score entries", () => {
-    for (const [actionType, actor, title, cardDefinitionId, amount, expectedTitle] of [
+    for (const [
+      actionType,
+      actor,
+      title,
+      cardDefinitionId,
+      amount,
+      expectedTitle,
+    ] of [
       [
         "rez_ice",
         "corp",
         "BBS Whispering Campaign",
         "onr_v1_309_bbs-whispering-campaign",
         16,
-        "Die Korp hat BBS Whispering Campaign gerezzt und 16 Credits auf die Karte gelegt."
+        "Die Korp hat BBS Whispering Campaign gerezzt und 16 Credits auf die Karte gelegt.",
       ],
       [
         "rez_ice",
@@ -2601,7 +3276,7 @@ describe("formatChronicleEvent", () => {
         "Rockerboy Promotion",
         "onr_v1_337_rockerboy-promotion",
         15,
-        "Die Korp hat Rockerboy Promotion gerezzt und 15 Credits auf die Karte gelegt."
+        "Die Korp hat Rockerboy Promotion gerezzt und 15 Credits auf die Karte gelegt.",
       ],
       [
         "install_card",
@@ -2609,7 +3284,7 @@ describe("formatChronicleEvent", () => {
         "Short-Term Contract",
         "onr_v1_178_short-term-contract",
         12,
-        "Du hast Short-Term Contract im Rig installiert und 12 Credits auf die Karte gelegt."
+        "Du hast Short-Term Contract im Rig installiert und 12 Credits auf die Karte gelegt.",
       ],
       [
         "score_agenda",
@@ -2617,7 +3292,7 @@ describe("formatChronicleEvent", () => {
         "Corporate Coup",
         "onr_v1_193_corporate-coup",
         15,
-        "Die Korp hat Corporate Coup gescored und 15 Credits auf die Karte gelegt."
+        "Die Korp hat Corporate Coup gescored und 15 Credits auf die Karte gelegt.",
       ],
       [
         "score_agenda",
@@ -2625,7 +3300,7 @@ describe("formatChronicleEvent", () => {
         "Political Coup",
         "onr_v1_209_political-coup",
         12,
-        "Die Korp hat Political Coup gescored und 12 Credits auf die Karte gelegt."
+        "Die Korp hat Political Coup gescored und 12 Credits auf die Karte gelegt.",
       ],
       [
         "rez_ice",
@@ -2633,7 +3308,7 @@ describe("formatChronicleEvent", () => {
         "Braindance Campaign",
         "onr_v1_311_braindance-campaign",
         12,
-        "Die Korp hat Braindance Campaign gerezzt und 12 Credits auf die Karte gelegt."
+        "Die Korp hat Braindance Campaign gerezzt und 12 Credits auf die Karte gelegt.",
       ],
       [
         "rez_ice",
@@ -2641,7 +3316,7 @@ describe("formatChronicleEvent", () => {
         "Holovid Campaign",
         "onr_v1_326_holovid-campaign",
         12,
-        "Die Korp hat Holovid Campaign gerezzt und 12 Credits auf die Karte gelegt."
+        "Die Korp hat Holovid Campaign gerezzt und 12 Credits auf die Karte gelegt.",
       ],
       [
         "score_agenda",
@@ -2649,7 +3324,7 @@ describe("formatChronicleEvent", () => {
         "Detroit Police Contract",
         "onr_v1_198_detroit-police-contract",
         12,
-        "Die Korp hat Detroit Police Contract gescored und 12 Credits auf die Karte gelegt."
+        "Die Korp hat Detroit Police Contract gescored und 12 Credits auf die Karte gelegt.",
       ],
     ] as const) {
       const event = makeEvent(actionType, {
@@ -2668,17 +3343,21 @@ describe("formatChronicleEvent", () => {
             remainingCounters: amount,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
       const effects = formatChronicleEffectItems(event, "runner");
 
       expect(item.title).toBe(expectedTitle);
-      expect(item.chips).toEqual(expect.arrayContaining([`+${amount} Credits auf Karte`]));
-      expect(JSON.stringify(item)).not.toMatch(/"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/);
+      expect(item.chips).toEqual(
+        expect.arrayContaining([`+${amount} Credits auf Karte`]),
+      );
+      expect(JSON.stringify(item)).not.toMatch(
+        /"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/,
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2691,10 +3370,10 @@ describe("formatChronicleEvent", () => {
         cardDefinitionId: "onr_v1_196_corporate-war",
         corporateWarThresholdMet: true,
         onScoreGainCredits: 12,
-        corpCreditsAfter: 24
+        corpCreditsAfter: 24,
       }),
       "runner",
-      { cardTitle: "Corporate War" }
+      { cardTitle: "Corporate War" },
     );
     const miss = formatChronicleEvent(
       makeEvent("score_agenda", {
@@ -2704,19 +3383,29 @@ describe("formatChronicleEvent", () => {
         corporateWarThresholdMet: false,
         onScoreGainCredits: 0,
         onScoreLostAllCredits: true,
-        corpCreditsAfter: 0
+        corpCreditsAfter: 0,
       }),
       "runner",
-      { cardTitle: "Corporate War" }
+      { cardTitle: "Corporate War" },
     );
 
-    expect(success.title).toBe("Die Korp hat Corporate War gescored und 12 Credits erhalten.");
+    expect(success.title).toBe(
+      "Die Korp hat Corporate War gescored und 12 Credits erhalten.",
+    );
     expect(success.category).toBe("economy");
-    expect(success.chips).toEqual(expect.arrayContaining(["Score", "+12 Credits"]));
-    expect(miss.title).toBe("Die Korp hat Corporate War gescored und alle Credits verloren.");
+    expect(success.chips).toEqual(
+      expect.arrayContaining(["Score", "+12 Credits"]),
+    );
+    expect(miss.title).toBe(
+      "Die Korp hat Corporate War gescored und alle Credits verloren.",
+    );
     expect(miss.category).toBe("danger");
-    expect(miss.chips).toEqual(expect.arrayContaining(["Score", "Alle Credits verloren"]));
-    expect(JSON.stringify([success, miss])).not.toMatch(/"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/);
+    expect(miss.chips).toEqual(
+      expect.arrayContaining(["Score", "Alle Credits verloren"]),
+    );
+    expect(JSON.stringify([success, miss])).not.toMatch(
+      /"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/,
+    );
   });
 
   it("merges score-agenda credit resolver effects into score entries", () => {
@@ -2733,29 +3422,40 @@ describe("formatChronicleEvent", () => {
           amount: 5,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_203_hostile-takeover",
-          sourceTitle: "Hostile Takeover"
-        }
-      ]
+          sourceTitle: "Hostile Takeover",
+        },
+      ],
     });
 
-    const item = formatChronicleEvent(event, "runner", { cardTitle: "Hostile Takeover" });
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Hostile Takeover",
+    });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Hostile Takeover gescored und 5 Credits erhalten.");
+    expect(item.title).toBe(
+      "Die Korp hat Hostile Takeover gescored und 5 Credits erhalten.",
+    );
     expect(item.category).toBe("economy");
     expect(item.chips).toEqual(expect.arrayContaining(["Score", "+5 Credits"]));
     expect(effects).toEqual([]);
   });
 
   it("merges hosted-credit take effects into activated ability entries", () => {
-    for (const [actor, title, cardDefinitionId, amount, remaining, expectedTitle] of [
+    for (const [
+      actor,
+      title,
+      cardDefinitionId,
+      amount,
+      remaining,
+      expectedTitle,
+    ] of [
       [
         "corp",
         "BBS Whispering Campaign",
         "onr_v1_309_bbs-whispering-campaign",
         2,
         14,
-        "Die Korp hat BBS Whispering Campaign genutzt und 2 Credits von der Karte genommen."
+        "Die Korp hat BBS Whispering Campaign genutzt und 2 Credits von der Karte genommen.",
       ],
       [
         "corp",
@@ -2763,7 +3463,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_337_rockerboy-promotion",
         3,
         12,
-        "Die Korp hat Rockerboy Promotion genutzt und 3 Credits von der Karte genommen."
+        "Die Korp hat Rockerboy Promotion genutzt und 3 Credits von der Karte genommen.",
       ],
       [
         "runner",
@@ -2771,7 +3471,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_178_short-term-contract",
         2,
         10,
-        "Du hast Short-Term Contract genutzt und 2 Credits von der Karte genommen."
+        "Du hast Short-Term Contract genutzt und 2 Credits von der Karte genommen.",
       ],
       [
         "corp",
@@ -2779,7 +3479,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_193_corporate-coup",
         3,
         12,
-        "Die Korp hat Corporate Coup genutzt und 3 Credits von der Karte genommen."
+        "Die Korp hat Corporate Coup genutzt und 3 Credits von der Karte genommen.",
       ],
       [
         "corp",
@@ -2787,7 +3487,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_209_political-coup",
         3,
         9,
-        "Die Korp hat Political Coup genutzt und 3 Credits von der Karte genommen."
+        "Die Korp hat Political Coup genutzt und 3 Credits von der Karte genommen.",
       ],
       [
         "runner",
@@ -2795,7 +3495,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_154_broker",
         6,
         0,
-        "Du hast Broker genutzt und 6 Credits von der Karte genommen."
+        "Du hast Broker genutzt und 6 Credits von der Karte genommen.",
       ],
       [
         "corp",
@@ -2803,7 +3503,7 @@ describe("formatChronicleEvent", () => {
         "onr_v1_318_department-of-truth-enhancement",
         6,
         0,
-        "Die Korp hat Department of Truth Enhancement genutzt und 6 Credits von der Karte genommen."
+        "Die Korp hat Department of Truth Enhancement genutzt und 6 Credits von der Karte genommen.",
       ],
     ] as const) {
       const event = makeEvent("activated_card_ability", {
@@ -2824,9 +3524,9 @@ describe("formatChronicleEvent", () => {
             remainingCounters: remaining,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
@@ -2834,7 +3534,14 @@ describe("formatChronicleEvent", () => {
 
       expect(item.title).toBe(expectedTitle);
       expect(item.title).not.toContain("gespielt");
-      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`, `${amount} Credits von Karte`, `${remaining} Credits übrig`]));
+      expect(item.chips).toEqual(
+        expect.arrayContaining([
+          "Ability",
+          `+${amount} Credits`,
+          `${amount} Credits von Karte`,
+          `${remaining} Credits übrig`,
+        ]),
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2849,7 +3556,8 @@ describe("formatChronicleEvent", () => {
       hostedCreditsAfter: 3,
       resolvedEffects: [
         {
-          effectId: "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+          effectId:
+            "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
           kind: "add_hosted_credits",
           visibility: "public",
           side: "corp",
@@ -2857,19 +3565,23 @@ describe("formatChronicleEvent", () => {
           remainingCounters: 3,
           sourceDefinitionId: "onr_v1_344_spinn-public-relations",
           sourceTitle: "Spinn Public Relations",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "runner", {
-      cardTitle: "Spinn Public Relations"
+      cardTitle: "Spinn Public Relations",
     });
     const effects = formatChronicleEffectItems(event, "runner");
 
-    expect(item.title).toBe("Die Korp hat Spinn Public Relations genutzt und 3 Credits auf die Karte gelegt.");
+    expect(item.title).toBe(
+      "Die Korp hat Spinn Public Relations genutzt und 3 Credits auf die Karte gelegt.",
+    );
     expect(item.title).not.toContain("gespielt");
-    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+3 Credits auf Karte"]));
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Ability", "+3 Credits auf Karte"]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2879,13 +3591,13 @@ describe("formatChronicleEvent", () => {
         "runner",
         "Broker",
         "onr_v1_154_broker",
-        "Du hast Broker genutzt und 3 Credits auf die Karte gelegt."
+        "Du hast Broker genutzt und 3 Credits auf die Karte gelegt.",
       ],
       [
         "corp",
         "Department of Truth Enhancement",
         "onr_v1_318_department-of-truth-enhancement",
-        "Die Korp hat Department of Truth Enhancement genutzt und 3 Credits auf die Karte gelegt."
+        "Die Korp hat Department of Truth Enhancement genutzt und 3 Credits auf die Karte gelegt.",
       ],
     ] as const) {
       const event = makeEvent("activated_card_ability", {
@@ -2905,9 +3617,9 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 3,
             sourceDefinitionId: cardDefinitionId,
             sourceTitle: title,
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       });
 
       const item = formatChronicleEvent(event, "runner", { cardTitle: title });
@@ -2915,7 +3627,9 @@ describe("formatChronicleEvent", () => {
 
       expect(item.title).toBe(expectedTitle);
       expect(item.title).not.toContain("gespielt");
-      expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+3 Credits auf Karte"]));
+      expect(item.chips).toEqual(
+        expect.arrayContaining(["Ability", "+3 Credits auf Karte"]),
+      );
       expect(effects).toEqual([]);
     }
   });
@@ -2932,7 +3646,8 @@ describe("formatChronicleEvent", () => {
       sourceTrashed: true,
       resolvedEffects: [
         {
-          effectId: "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+          effectId:
+            "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
           kind: "take_hosted_credits",
           visibility: "public",
           side: "runner",
@@ -2940,28 +3655,37 @@ describe("formatChronicleEvent", () => {
           remainingCounters: 0,
           sourceDefinitionId: "onr_v1_178_short-term-contract",
           sourceTitle: "Short-Term Contract",
-          reason: "card_resolver"
+          reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+          effectId:
+            "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
           kind: "trash_source_when_empty",
           visibility: "public",
           side: "runner",
           amount: 1,
           sourceDefinitionId: "onr_v1_178_short-term-contract",
           sourceTitle: "Short-Term Contract",
-          reason: "card_resolver"
-        }
-      ]
+          reason: "card_resolver",
+        },
+      ],
     });
 
     const item = formatChronicleEvent(event, "corp", {
-      cardTitle: "Short-Term Contract"
+      cardTitle: "Short-Term Contract",
     });
     const effects = formatChronicleEffectItems(event, "corp");
 
-    expect(item.title).toBe("Der Runner hat Short-Term Contract genutzt und 1 Credit von der Karte genommen und Short-Term Contract getrasht.");
-    expect(item.chips).toEqual(expect.arrayContaining(["1 Credit von Karte", "0 Credits übrig", "Quelle getrasht"]));
+    expect(item.title).toBe(
+      "Der Runner hat Short-Term Contract genutzt und 1 Credit von der Karte genommen und Short-Term Contract getrasht.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "1 Credit von Karte",
+        "0 Credits übrig",
+        "Quelle getrasht",
+      ]),
+    );
     expect(effects).toEqual([]);
   });
 
@@ -2980,15 +3704,17 @@ describe("formatChronicleEvent", () => {
             amount: 12,
             sourceDefinitionId: "onr_v1_168_loan-from-chiba",
             sourceTitle: "Loan from Chiba",
-            reason: "card_resolver"
-          }
-        ]
+            reason: "card_resolver",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Du hast 12 Credits durch Loan from Chiba erhalten.");
+    expect(items[0]?.title).toBe(
+      "Du hast 12 Credits durch Loan from Chiba erhalten.",
+    );
     expect(items[0]?.category).toBe("economy");
     expect(items[0]?.cardDefinitionId).toBe("onr_v1_168_loan-from-chiba");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["+12 Credits"]));
@@ -3011,14 +3737,18 @@ describe("formatChronicleEvent", () => {
             gameLost: false,
             sourceDefinitionId: "onr_v1_168_loan-from-chiba",
             sourceTitle: "Loan from Chiba",
-            reason: "source_left_play"
-          }
-        ]
+            reason: "source_left_play",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
-    expect(paidItems[0]?.title).toBe("Loan from Chiba verlässt das Spiel; Runner zahlt 10 Credits.");
-    expect(paidItems[0]?.chips).toEqual(expect.arrayContaining(["10 Credits gezahlt"]));
+    expect(paidItems[0]?.title).toBe(
+      "Loan from Chiba verlässt das Spiel; Runner zahlt 10 Credits.",
+    );
+    expect(paidItems[0]?.chips).toEqual(
+      expect.arrayContaining(["10 Credits gezahlt"]),
+    );
 
     const lostItems = formatChronicleEffectItems(
       makeEvent("end_turn", {
@@ -3037,15 +3767,19 @@ describe("formatChronicleEvent", () => {
             winner: "corp",
             sourceDefinitionId: "onr_v1_168_loan-from-chiba",
             sourceTitle: "Loan from Chiba",
-            reason: "source_left_play"
-          }
-        ]
+            reason: "source_left_play",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
-    expect(lostItems[0]?.title).toBe("Loan from Chiba verlässt das Spiel; Runner verliert das Spiel.");
+    expect(lostItems[0]?.title).toBe(
+      "Loan from Chiba verlässt das Spiel; Runner verliert das Spiel.",
+    );
     expect(lostItems[0]?.importance).toBe("critical");
-    expect(lostItems[0]?.chips).toEqual(expect.arrayContaining(["Spielverlust"]));
+    expect(lostItems[0]?.chips).toEqual(
+      expect.arrayContaining(["Spielverlust"]),
+    );
   });
 
   it("highlights stolen agendas with visible agenda points", () => {
@@ -3053,15 +3787,17 @@ describe("formatChronicleEvent", () => {
       makeEvent("steal_agenda", {
         actor: "runner",
         title: "Project Agenda",
-        agendaPoints: 2
+        agendaPoints: 2,
       }),
       "runner",
       {
-        cardTitle: "Project Agenda"
-      }
+        cardTitle: "Project Agenda",
+      },
     );
 
-    expect(item.title).toBe("Du hast Project Agenda gestohlen und 2 Agenda-Punkte erhalten.");
+    expect(item.title).toBe(
+      "Du hast Project Agenda gestohlen und 2 Agenda-Punkte erhalten.",
+    );
     expect(item.category).toBe("agenda");
     expect(item.importance).toBe("critical");
     expect(item.chips).toContain("+2 Agenda");
@@ -3072,15 +3808,17 @@ describe("formatChronicleEvent", () => {
       makeEvent("access_card", {
         actor: "runner",
         title: "Simple Economy Operation",
-        serverLabel: "HQ"
+        serverLabel: "HQ",
       }),
       "runner",
       {
-        cardTitle: "Simple Economy Operation"
-      }
+        cardTitle: "Simple Economy Operation",
+      },
     );
 
-    expect(item.title).toBe("Du hast auf Simple Economy Operation zugegriffen.");
+    expect(item.title).toBe(
+      "Du hast auf Simple Economy Operation zugegriffen.",
+    );
     expect(item.cardTitle).toBe("Simple Economy Operation");
     expect(item.chips).toContain("HQ");
   });
@@ -3096,16 +3834,24 @@ describe("formatChronicleEvent", () => {
         searchShuffleAfter: true,
         selectedCount: 1,
         cardDefinitionId: "onr_v1_036_jackhammer",
-        title: "Jackhammer"
+        title: "Jackhammer",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Jackhammer aus dem Stack vorgezeigt und in den Grip genommen.");
+    expect(item.title).toBe(
+      "Du hast Jackhammer aus dem Stack vorgezeigt und in den Grip genommen.",
+    );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("onr_v1_036_jackhammer");
-    expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Stack",
+      "Vorgezeigt",
+      "den Grip",
+      "Shuffle",
+    ]);
   });
 
   it("describes card-implementation stack-to-hand searches with the revealed selected card", () => {
@@ -3122,16 +3868,25 @@ describe("formatChronicleEvent", () => {
         publicRevealDefinitionId: "onr_v1_039_krash",
         cardDefinitionId: "onr_v1_039_krash",
         shuffled: true,
-        aiReasonCode: "runner_stack_search_program"
+        aiReasonCode: "runner_stack_search_program",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat Krash aus dem Stack vorgezeigt und auf die Hand genommen.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat Krash aus dem Stack vorgezeigt und auf die Hand genommen.",
+    );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("onr_v1_039_krash");
-    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Vorgezeigt", "Hand", "Shuffle"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "KI",
+      "Stack",
+      "Vorgezeigt",
+      "Hand",
+      "Shuffle",
+    ]);
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -3146,17 +3901,26 @@ describe("formatChronicleEvent", () => {
         movedCardCount: 1,
         searchDestination: "runner_grip",
         shuffled: true,
-        aiReasonCode: "runner_stack_search_card"
+        aiReasonCode: "runner_stack_search_card",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Die Runner-KI hat eine Karte verdeckt aus dem Stack auf die Hand genommen.");
+    expect(item.title).toBe(
+      "Die Runner-KI hat eine Karte verdeckt aus dem Stack auf die Hand genommen.",
+    );
     expect(item.category).toBe("hidden");
     expect(item.visibility).toBe("redacted");
     expect(item.cardDefinitionId).toBeUndefined();
     expect(JSON.stringify(item)).not.toContain("Mantis");
-    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Verdeckt", "Hand", "Shuffle"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "KI",
+      "Stack",
+      "Verdeckt",
+      "Hand",
+      "Shuffle",
+    ]);
   });
 
   it("names the public heap card returned by Junkyard BBS", () => {
@@ -3171,18 +3935,28 @@ describe("formatChronicleEvent", () => {
         returnedCount: 1,
         sourceZone: "heap",
         destinationZone: "grip",
-        returnedToGrip: true
+        returnedToGrip: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Junkyard BBS genutzt und Crash Everett, Inventive Fixer aus dem Heap in den Grip genommen.");
+    expect(item.title).toBe(
+      "Du hast Junkyard BBS genutzt und Crash Everett, Inventive Fixer aus dem Heap in den Grip genommen.",
+    );
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_157_crash-everett-inventive-fixer");
+    expect(item.cardDefinitionId).toBe(
+      "onr_v1_157_crash-everett-inventive-fixer",
+    );
     expect(item.cardTitle).toBe("Crash Everett, Inventive Fixer");
-    expect(item.chips).toEqual(["Runner", "Junkyard BBS", "Heap", "Grip", "Crash Everett, Inventive Fixer"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Junkyard BBS",
+      "Heap",
+      "Grip",
+      "Crash Everett, Inventive Fixer",
+    ]);
   });
 
   it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
@@ -3196,16 +3970,26 @@ describe("formatChronicleEvent", () => {
         publicRevealKind: "reveal",
         publicRevealDefinitionId: "simple_decoder",
         publicRevealDefinitionIds: "simple_decoder,simple_fracter",
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt, in den Grip genommen und danach den Stack gemischt.");
+    expect(item.title).toBe(
+      "Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt, in den Grip genommen und danach den Stack gemischt.",
+    );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("simple_decoder");
-    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "2 Programme", "Vorgezeigt", "Grip", "Shuffle"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Aujourd'Oui",
+      "Top 5",
+      "2 Programme",
+      "Vorgezeigt",
+      "Grip",
+      "Shuffle",
+    ]);
   });
 
   it("describes Aujourd'Oui empty top-five choices with the required shuffle", () => {
@@ -3216,15 +4000,24 @@ describe("formatChronicleEvent", () => {
         hiddenZoneAction: "v1911_aujourdoui_top5",
         sourceDefinitionId: "onr_v1_151_aujourdoui",
         selectedCount: 0,
-        shuffled: true
+        shuffled: true,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, keine Programme aus den obersten 5 genommen und danach den Stack gemischt.");
+    expect(item.title).toBe(
+      "Du hast Aujourd'Oui genutzt, keine Programme aus den obersten 5 genommen und danach den Stack gemischt.",
+    );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
-    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "0 Programme", "Keine Auswahl", "Shuffle"]);
+    expect(item.chips).toEqual([
+      "Runner",
+      "Aujourd'Oui",
+      "Top 5",
+      "0 Programme",
+      "Keine Auswahl",
+      "Shuffle",
+    ]);
   });
 
   it("describes hidden stack-search moves without leaking the selected card", () => {
@@ -3237,12 +4030,14 @@ describe("formatChronicleEvent", () => {
         searchDestination: "grip",
         selectedCount: 1,
         cardDefinitionId: "onr_v1_036_jackhammer",
-        title: "Jackhammer"
+        title: "Jackhammer",
       }),
-      "corp"
+      "corp",
     );
 
-    expect(item.title).toBe("Der Runner hat eine Karte verdeckt aus dem Stack in den Grip genommen.");
+    expect(item.title).toBe(
+      "Der Runner hat eine Karte verdeckt aus dem Stack in den Grip genommen.",
+    );
     expect(item.category).toBe("hidden");
     expect(item.visibility).toBe("redacted");
     expect(item.cardDefinitionId).toBeUndefined();
@@ -3257,10 +4052,10 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         traceStarted: true,
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4
+        baseTraceStrength: 4,
       }),
       "runner",
-      { cardTitle: "Hunter" }
+      { cardTitle: "Hunter" },
     );
     const corpBid = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3271,9 +4066,9 @@ describe("formatChronicleEvent", () => {
         baseTraceStrength: 4,
         corpBid: 2,
         traceStrength: 6,
-        runnerLink: 0
+        runnerLink: 0,
       }),
-      "runner"
+      "runner",
     );
     const runnerBid = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3287,9 +4082,9 @@ describe("formatChronicleEvent", () => {
         runnerBid: 1,
         runnerStrength: 1,
         traceSuccessful: true,
-        tagsAdded: 1
+        tagsAdded: 1,
       }),
-      "runner"
+      "runner",
     );
 
     expect(started.title).toBe("Du hast mit Hunter einen Trace 4 ausgelöst.");
@@ -3298,9 +4093,21 @@ describe("formatChronicleEvent", () => {
     expect(corpBid.title).toBe("Die Korp-KI hat im Trace 2 Credits geboten.");
     expect(corpBid.description).toBe("Trace-Stärke: 6, Runner-Link: 0.");
     expect(corpBid.chips).toContain("Korp-Gebot 2");
-    expect(runnerBid.title).toBe("Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.");
-    expect(runnerBid.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 1.");
-    expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
+    expect(runnerBid.title).toBe(
+      "Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.",
+    );
+    expect(runnerBid.description).toBe(
+      "Endstand: Trace 6 gegen Runner-Stärke 1.",
+    );
+    expect(runnerBid.chips).toEqual([
+      "Runner",
+      "Trace",
+      "Korp 2",
+      "Runner 1",
+      "6:1",
+      "Erfolg",
+      "+1 Tag",
+    ]);
   });
 
   it("describes trace base-link and post-bid link choices", () => {
@@ -3315,9 +4122,9 @@ describe("formatChronicleEvent", () => {
         traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
         traceBaseLinkCostPaid: 0,
         baseLinkValue: 1,
-        runnerLink: 1
+        runnerLink: 1,
       }),
-      "runner"
+      "runner",
     );
     const postBidLink = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3335,9 +4142,9 @@ describe("formatChronicleEvent", () => {
         runnerBid: 4,
         runnerStrength: 6,
         traceSuccessful: false,
-        tagsAdded: 0
+        tagsAdded: 0,
       }),
-      "runner"
+      "runner",
     );
     const postBidPass = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3350,21 +4157,47 @@ describe("formatChronicleEvent", () => {
         runnerLink: 2,
         runnerBid: 4,
         runnerStrength: 6,
-        traceSuccessful: false
+        traceSuccessful: false,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(baseLink.title).toBe("Du hast Baedeker's Net Map als Base Link 1 genutzt.");
+    expect(baseLink.title).toBe(
+      "Du hast Baedeker's Net Map als Base Link 1 genutzt.",
+    );
     expect(baseLink.description).toBe("Runner-Link: 1.");
-    expect(baseLink.chips).toEqual(expect.arrayContaining(["Trace", "Base Link", "Baedeker's Net Map", "Link 1"]));
+    expect(baseLink.chips).toEqual(
+      expect.arrayContaining([
+        "Trace",
+        "Base Link",
+        "Baedeker's Net Map",
+        "Link 1",
+      ]),
+    );
     expect(baseLink.title).not.toContain("Entscheidung beantwortet");
-    expect(postBidLink.title).toBe("Du hast Baedeker's Net Map für +1 Link genutzt; Trace abgewehrt.");
-    expect(postBidLink.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.");
-    expect(postBidLink.chips).toEqual(expect.arrayContaining(["Trace", "Baedeker's Net Map", "+1 Link", "-1 Credit", "6:6", "Fehlschlag"]));
+    expect(postBidLink.title).toBe(
+      "Du hast Baedeker's Net Map für +1 Link genutzt; Trace abgewehrt.",
+    );
+    expect(postBidLink.description).toBe(
+      "Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.",
+    );
+    expect(postBidLink.chips).toEqual(
+      expect.arrayContaining([
+        "Trace",
+        "Baedeker's Net Map",
+        "+1 Link",
+        "-1 Credit",
+        "6:6",
+        "Fehlschlag",
+      ]),
+    );
     expect(postBidLink.title).not.toContain("Entscheidung beantwortet");
-    expect(postBidPass.title).toBe("Trace entschieden: Korp 1 Credit, Du 4 Credits; Trace abgewehrt.");
-    expect(postBidPass.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.");
+    expect(postBidPass.title).toBe(
+      "Trace entschieden: Korp 1 Credit, Du 4 Credits; Trace abgewehrt.",
+    );
+    expect(postBidPass.description).toBe(
+      "Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.",
+    );
   });
 
   it("keeps Cinderella trace outcome and break costs distinct", () => {
@@ -3382,7 +4215,7 @@ describe("formatChronicleEvent", () => {
       trashedCardDefinitionId: "onr_v1_028_force-shield",
       damageAmount: 2,
       damageType: "meat",
-      damageCannotBePrevented: true
+      damageCannotBePrevented: true,
     });
     const trace = formatChronicleEvent(traceEvent, "runner");
     const traceEffects = formatChronicleEffectItems(traceEvent, "runner");
@@ -3392,21 +4225,56 @@ describe("formatChronicleEvent", () => {
         title: "Replicator",
         subroutineIndex: 0,
         targetIceTitle: "Cinderella",
-        breakSubroutineBaseCost: 0
+        breakSubroutineBaseCost: 0,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(trace.title).toBe("Trace entschieden: Korp 1 Credit, Du 0 Credits; Trace erfolgreich.");
-    expect(trace.description).toBe("Endstand: Trace 7 gegen Runner-Stärke 0; Karteneffekt: 1 Hardware getrasht, 2 Meat-Schaden nicht verhinderbar, Run endet.");
-    expect(trace.chips).toEqual(expect.arrayContaining(["Trace", "Erfolg", "Hardware -1", "2 Schaden", "Run endet"]));
+    expect(trace.title).toBe(
+      "Trace entschieden: Korp 1 Credit, Du 0 Credits; Trace erfolgreich.",
+    );
+    expect(trace.description).toBe(
+      "Endstand: Trace 7 gegen Runner-Stärke 0; Karteneffekt: 1 Hardware getrasht, 2 Meat-Schaden nicht verhinderbar, Run endet.",
+    );
+    expect(trace.chips).toEqual(
+      expect.arrayContaining([
+        "Trace",
+        "Erfolg",
+        "Hardware -1",
+        "2 Schaden",
+        "Run endet",
+      ]),
+    );
     expect(traceEffects).toHaveLength(1);
-    expect(traceEffects[0]?.title).toBe("Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.");
-    expect(traceEffects[0]?.description).toBe("Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.");
-    expect(traceEffects[0]?.chips).toEqual(expect.arrayContaining(["Trace-Erfolg", "Force Shield", "2 Meat Damage", "Nicht verhinderbar", "Run endet"]));
-    expect(breakAction.title).toBe("Du hast mit Replicator Subroutine 1 auf Cinderella gebrochen.");
-    expect(breakAction.description).toBe("0 Credits: Subroutine 1 auf Cinderella gebrochen.");
-    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine 1", "0 Credits", "Replicator", "Cinderella"]));
+    expect(traceEffects[0]?.title).toBe(
+      "Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.",
+    );
+    expect(traceEffects[0]?.description).toBe(
+      "Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.",
+    );
+    expect(traceEffects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Trace-Erfolg",
+        "Force Shield",
+        "2 Meat Damage",
+        "Nicht verhinderbar",
+        "Run endet",
+      ]),
+    );
+    expect(breakAction.title).toBe(
+      "Du hast mit Replicator Subroutine 1 auf Cinderella gebrochen.",
+    );
+    expect(breakAction.description).toBe(
+      "0 Credits: Subroutine 1 auf Cinderella gebrochen.",
+    );
+    expect(breakAction.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "0 Credits",
+        "Replicator",
+        "Cinderella",
+      ]),
+    );
   });
 
   it("describes Hacker Tracker, Fang 2.0 and Arasaka Owns You follow-up payloads", () => {
@@ -3423,18 +4291,18 @@ describe("formatChronicleEvent", () => {
         tagsAdded: 0,
         fangRunEnded: true,
         fangRunLockCreditCost: 2,
-        hackerTrackerCountersAdded: 1
+        hackerTrackerCountersAdded: 1,
       }),
-      "runner"
+      "runner",
     );
     const lockCleared = formatChronicleEvent(
       makeEvent("trigger_ability", {
         actor: "runner",
         v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
         fangRunLockCreditCost: 2,
-        fangRunLockCleared: true
+        fangRunLockCleared: true,
       }),
-      "runner"
+      "runner",
     );
     const arasaka = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3446,16 +4314,20 @@ describe("formatChronicleEvent", () => {
         drawnCards: 4,
         removedTags: 2,
         coreDamageRemoved: 1,
-        futureAgendaPointForfeitPending: 3
+        futureAgendaPointForfeitPending: 3,
       }),
       "runner",
-      { cardTitle: "Arasaka Owns You" }
+      { cardTitle: "Arasaka Owns You" },
     );
 
     expect(trace.description).toContain("Karteneffekt beendet den Run");
     expect(trace.chips).toContain("HTC +1");
-    expect(lockCleared.title).toBe("Du hast die Run-Sperre für 2 Credits entfernt.");
-    expect(arasaka.title).toBe("Du hast Arasaka Owns You gespielt und 4 Schaden ersetzt.");
+    expect(lockCleared.title).toBe(
+      "Du hast die Run-Sperre für 2 Credits entfernt.",
+    );
+    expect(arasaka.title).toBe(
+      "Du hast Arasaka Owns You gespielt und 4 Schaden ersetzt.",
+    );
     expect(arasaka.chips).toContain("Flatline verhindert");
   });
 
@@ -3475,19 +4347,31 @@ describe("formatChronicleEvent", () => {
       accessEffectSourceDefinitionId: "onr_proteus_005_marked-accounts",
       accessedFromZone: "rd",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_access_ambush"
+      hiddenZoneAction: "v1917_access_ambush",
     });
 
     const runnerItem = formatChronicleEvent(event, "runner");
     const corpItem = formatChronicleEvent(event, "corp");
 
-    expect(runnerItem.title).toBe("Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.");
-    expect(corpItem.title).toBe("Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.");
+    expect(runnerItem.title).toBe(
+      "Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+    );
+    expect(corpItem.title).toBe(
+      "Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+    );
     expect(runnerItem.category).toBe("danger");
     expect(runnerItem.importance).toBe("important");
     expect(runnerItem.cardDefinitionId).toBe("onr_v1_161_fall-guy");
     expect(runnerItem.cardTitle).toBe("Fall Guy");
-    expect(runnerItem.chips).toEqual(expect.arrayContaining(["Tag verhindert", "1 verhindert", "Fall Guy", "Marked Accounts", "Source-Trash"]));
+    expect(runnerItem.chips).toEqual(
+      expect.arrayContaining([
+        "Tag verhindert",
+        "1 verhindert",
+        "Fall Guy",
+        "Marked Accounts",
+        "Source-Trash",
+      ]),
+    );
     expect(runnerItem.title).not.toContain("Entscheidung beantwortet");
   });
 
@@ -3500,9 +4384,9 @@ describe("formatChronicleEvent", () => {
         v1922RunnerEventAbility: "program_install_action_bundle",
         gainedActions: 5,
         temporaryProgramInstallCredits: 1,
-        valuPakProgramInstallActionsRemaining: 5
+        valuPakProgramInstallActionsRemaining: 5,
       }),
-      "runner"
+      "runner",
     );
     const edgerunner = formatChronicleEvent(
       makeEvent("play_operation", {
@@ -3511,9 +4395,9 @@ describe("formatChronicleEvent", () => {
         title: "Edgerunner, Inc., Temps",
         v1922CorpOperationAbility: "install_action_bundle",
         gainedActions: 3,
-        edgerunnerTempsInstallActionsRemaining: 3
+        edgerunnerTempsInstallActionsRemaining: 3,
       }),
-      "runner"
+      "runner",
     );
     const securityPurge = formatChronicleEvent(
       makeEvent("score_agenda", {
@@ -3522,10 +4406,30 @@ describe("formatChronicleEvent", () => {
         title: "Security Purge",
         agendaAbility: "v1922_security_purge",
         revealedCount: 3,
-        installedIceCount: 2,
-        trashedCount: 1
+        revealedIceCount: 1,
+        pendingTrashCount: 2,
+        installedIceCount: 0,
+        trashedCount: 0,
+        securityPurgeTargetChoiceOpened: true,
       }),
-      "runner"
+      "runner",
+    );
+    const securityPurgeResolve = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_216_security-purge",
+        agendaAbility: "v1922_security_purge",
+        hiddenZoneAction: "v1922_security_purge_install_targets",
+        revealedCount: 3,
+        revealedIceCount: 1,
+        installedIceCount: 1,
+        trashedCount: 2,
+        securityPurgeTargetChoiceResolved: true,
+        installedIceDefinitionIds: "onr_v1_274_tutor",
+        installedIceServerLabels: "R&D",
+        trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
+      }),
+      "runner",
     );
     const shield = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -3534,9 +4438,9 @@ describe("formatChronicleEvent", () => {
         title: "Shield",
         eventModificationDecision: "apply",
         preventedAmount: 2,
-        damageAmount: 0
+        damageAmount: 0,
       }),
-      "runner"
+      "runner",
     );
     const boardwalk = formatChronicleEvent(
       makeEvent("gain_credit", {
@@ -3544,29 +4448,48 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_008_boardwalk",
         title: "Boardwalk",
         v1921RunnerProgramAbility: "deterministic_die_probe",
-        v1921DieRoll: 4
+        v1921DieRoll: 4,
       }),
-      "runner"
+      "runner",
     );
     const flak = formatChronicleEvent(
       makeEvent("break_subroutine", {
         actor: "runner",
         cardDefinitionId: "onr_v1_027_flak",
-        title: "Flak"
+        title: "Flak",
       }),
-      "runner"
+      "runner",
     );
 
-    expect(valuPak.title).toBe("Du hast Valu-Pak Software Bundle gespielt und 5 Programminstall-Aktionen erhalten.");
-    expect(valuPak.description).toBe("1 temporärer Credit ist nur für Programminstallationen verfügbar.");
+    expect(valuPak.title).toBe(
+      "Du hast Valu-Pak Software Bundle gespielt und 5 Programminstall-Aktionen erhalten.",
+    );
+    expect(valuPak.description).toBe(
+      "1 temporärer Credit ist nur für Programminstallationen verfügbar.",
+    );
     expect(valuPak.chips).toContain("+5 Aktionen");
-    expect(edgerunner.title).toBe("Die Korp hat Edgerunner, Inc., Temps gespielt und 3 Installaktionen erhalten.");
+    expect(edgerunner.title).toBe(
+      "Die Korp hat Edgerunner, Inc., Temps gespielt und 3 Installaktionen erhalten.",
+    );
     expect(edgerunner.chips).toContain("3 offen");
-    expect(securityPurge.title).toBe("Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.");
-    expect(securityPurge.description).toBe("2 ICE installiert und gerezzt; 1 Nicht-ICE getrasht.");
+    expect(securityPurge.title).toBe(
+      "Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.",
+    );
+    expect(securityPurge.description).toBe(
+      "1 ICE gefunden; die Korp wählt Zielserver. 2 Nicht-ICE werden anschließend getrasht.",
+    );
+    expect(securityPurgeResolve.title).toBe(
+      "Die Korp hat Tutor durch Security Purge vor R&D installiert und gerezzt.",
+    );
+    expect(securityPurgeResolve.description).toContain(
+      "Installiert und gerezzt: Tutor vor R&D.",
+    );
+    expect(securityPurgeResolve.description).toContain("Getrasht:");
     expect(shield.title).toBe("Du hast 2 Schaden mit Shield verhindert.");
     expect(shield.chips).toContain("2 verhindert");
-    expect(boardwalk.title).toBe("Du hast Boardwalk aktiviert und eine 4 gewürfelt.");
+    expect(boardwalk.title).toBe(
+      "Du hast Boardwalk aktiviert und eine 4 gewürfelt.",
+    );
     expect(boardwalk.chips).toContain("Wurf 4");
     expect(flak.title).toBe("Du hast mit Flak eine Subroutine gebrochen.");
   });
@@ -3577,31 +4500,40 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         serverLabel: "Remote 2",
         redactedKind: "installed_card",
-        title: "Simple Agenda"
+        title: "Simple Agenda",
       }),
       "runner",
       {
         cardTitle: "Simple Agenda",
-        cardType: "agenda"
-      }
+        cardType: "agenda",
+      },
     );
     const visibleAgenda = formatChronicleEvent(
       makeEvent("advance_card", {
         actor: "corp",
-        serverLabel: "Remote 2"
+        serverLabel: "Remote 2",
       }),
       "runner",
       {
         cardTitle: "Hostile Takeover",
-        cardType: "agenda"
-      }
+        cardType: "agenda",
+      },
     );
 
-    expect(hidden.title).toBe("Die Korp hat eine Installation in Remote 2 ausgebaut.");
+    expect(hidden.title).toBe(
+      "Die Korp hat eine Installation in Remote 2 ausgebaut.",
+    );
     expect(hidden.visibility).toBe("redacted");
-    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Remote 2", "Verdeckt"]);
+    expect(hidden.chips).toEqual([
+      "Korp",
+      "+1 Entwicklung",
+      "Remote 2",
+      "Verdeckt",
+    ]);
     expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
-    expect(visibleAgenda.title).toBe("Die Korp hat das Projekt Hostile Takeover weiterentwickelt.");
+    expect(visibleAgenda.title).toBe(
+      "Die Korp hat das Projekt Hostile Takeover weiterentwickelt.",
+    );
     expect(visibleAgenda.chips).toContain("+1 Entwicklung");
   });
 
@@ -3612,11 +4544,14 @@ describe("formatChronicleEvent", () => {
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
-        redactedKind: "installed_card"
+        redactedKind: "installed_card",
       }),
-      "runner"
+      "runner",
     );
-    const free = formatChronicleEvent(makeEvent("rez_ice", { actor: "corp" }), "runner");
+    const free = formatChronicleEvent(
+      makeEvent("rez_ice", { actor: "corp" }),
+      "runner",
+    );
     const multi = formatChronicleEvent(
       makeEvent("purge_virus_counters", {
         actor: "corp",
@@ -3624,17 +4559,27 @@ describe("formatChronicleEvent", () => {
         purgedCounterType: "virus",
         purgedVirusCounters: 4,
         turnActionOrdinalStart: 1,
-        turnActionOrdinalEnd: 3
+        turnActionOrdinalEnd: 3,
       }),
-      "runner"
+      "runner",
     );
 
-    expect(paid.actionUse).toMatchObject({ label: "2", title: "2. Aktion in diesem Zug", clicks: 1 });
+    expect(paid.actionUse).toMatchObject({
+      label: "2",
+      title: "2. Aktion in diesem Zug",
+      clicks: 1,
+    });
     expect(free.actionUse).toBeUndefined();
-    expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
+    expect(multi.actionUse).toMatchObject({
+      label: "1-3",
+      title: "Aktionen 1 bis 3 in diesem Zug",
+      clicks: 3,
+    });
     expect(multi.title).toBe("Die Korp hat 4 Virus-Counter entfernt.");
     expect(multi.description).toBe("Kosten: 3 Aktionen; keine Credits.");
-    expect(multi.chips).toEqual(expect.arrayContaining(["Purge", "3 Aktionen", "4 entfernt"]));
+    expect(multi.chips).toEqual(
+      expect.arrayContaining(["Purge", "3 Aktionen", "4 entfernt"]),
+    );
   });
 
   it("derives chronicle action numbers across extra actions when payload ordinals reset", () => {
@@ -3644,14 +4589,14 @@ describe("formatChronicleEvent", () => {
         eventId: "evt_1",
         actionCostClicks: 1,
         turnActionOrdinalStart: 1,
-        turnActionOrdinalEnd: 1
+        turnActionOrdinalEnd: 1,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
         eventId: "evt_2",
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
-        turnActionOrdinalEnd: 2
+        turnActionOrdinalEnd: 2,
       }),
       makeEvent("play_operation", {
         actor: "corp",
@@ -3660,22 +4605,22 @@ describe("formatChronicleEvent", () => {
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
         cardDefinitionId: "onr_v1_297_overtime-incentives",
-        title: "Overtime Incentives"
+        title: "Overtime Incentives",
       }),
       makeEvent("gain_credit", {
         actor: "corp",
         eventId: "evt_extra_1",
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
-        turnActionOrdinalEnd: 2
+        turnActionOrdinalEnd: 2,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
         eventId: "evt_extra_2",
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
-        turnActionOrdinalEnd: 3
-      })
+        turnActionOrdinalEnd: 3,
+      }),
     ];
     const actionUseByEventId = chronicleActionUseByEventId(events);
     const firstExtraActionUse = actionUseByEventId.evt_extra_1;
@@ -3683,34 +4628,45 @@ describe("formatChronicleEvent", () => {
     expect(firstExtraActionUse).toBeDefined();
     expect(secondExtraActionUse).toBeDefined();
     const firstExtra = formatChronicleEvent(events[3]!, "runner", {
-      actionUse: firstExtraActionUse ?? null
+      actionUse: firstExtraActionUse ?? null,
     });
     const secondExtra = formatChronicleEvent(events[4]!, "runner", {
-      actionUse: secondExtraActionUse ?? null
+      actionUse: secondExtraActionUse ?? null,
     });
 
-    expect(actionUseByEventId.evt_overtime).toMatchObject({ label: "3", title: "3. Aktion in diesem Zug" });
-    expect(firstExtra.actionUse).toMatchObject({ label: "4", title: "4. Aktion in diesem Zug" });
-    expect(secondExtra.actionUse).toMatchObject({ label: "5", title: "5. Aktion in diesem Zug" });
+    expect(actionUseByEventId.evt_overtime).toMatchObject({
+      label: "3",
+      title: "3. Aktion in diesem Zug",
+    });
+    expect(firstExtra.actionUse).toMatchObject({
+      label: "4",
+      title: "4. Aktion in diesem Zug",
+    });
+    expect(secondExtra.actionUse).toMatchObject({
+      label: "5",
+      title: "5. Aktion in diesem Zug",
+    });
   });
 
   it("shows turn numbers for turn entries when provided by context", () => {
     const runnerTurnEnd = formatChronicleEvent(
       makeEvent("end_turn", {
-        actor: "runner"
+        actor: "runner",
       }),
       "runner",
-      { turnNumber: 6 }
+      { turnNumber: 6 },
     );
     const corpMandatoryDraw = formatChronicleEvent(
       makeEvent("mandatory_draw", {
-        actor: "corp"
+        actor: "corp",
       }),
       "runner",
-      { turnNumber: 5 }
+      { turnNumber: 5 },
     );
 
-    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Zug 6 - Runner).");
+    expect(runnerTurnEnd.title).toBe(
+      "Du hast den Zug beendet (Zug 6 - Runner).",
+    );
     expect(runnerTurnEnd.chips).toContain("Zug 6 - Runner");
     expect(runnerTurnEnd.groupLabel).toBe("Zug 6 - Runner");
     expect(corpMandatoryDraw.chips).toContain("Zug 5 - Korp");
@@ -3719,18 +4675,42 @@ describe("formatChronicleEvent", () => {
 
   it("counts Korp and Runner turns as one shared sequence", () => {
     const events = [
-      makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_1" }),
+      makeEvent("mandatory_draw", {
+        actor: "corp",
+        eventId: "evt_corp_draw_1",
+      }),
       makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
-      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        eventId: "evt_corp_discard_1",
+        discardResolved: true,
+        hiddenZoneAction: "discard_phase",
+      }),
       makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
-      makeEvent("play_event", { actor: "runner", eventId: "evt_runner_forged", cardDefinitionId: "onr_v1_086_forged-activation-orders" }),
-      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_forged_response", v1922RunnerEventAbility: "force_rez_or_trash_ice" }),
+      makeEvent("play_event", {
+        actor: "runner",
+        eventId: "evt_runner_forged",
+        cardDefinitionId: "onr_v1_086_forged-activation-orders",
+      }),
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        eventId: "evt_corp_forged_response",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
-      makeEvent("resolve_choice", { actor: "runner", eventId: "evt_runner_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
-      makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_2" }),
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        eventId: "evt_runner_discard_1",
+        discardResolved: true,
+        hiddenZoneAction: "discard_phase",
+      }),
+      makeEvent("mandatory_draw", {
+        actor: "corp",
+        eventId: "evt_corp_draw_2",
+      }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
-      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" })
+      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" }),
     ];
     const turnNumbers = chronicleTurnNumberByEventId(events);
     const turnSides = chronicleTurnSideByEventId(events);
@@ -3746,7 +4726,7 @@ describe("formatChronicleEvent", () => {
       evt_runner_discard_1: 2,
       evt_corp_draw_2: 3,
       evt_corp_end_2: 3,
-      evt_runner_end_2: 4
+      evt_runner_end_2: 4,
     });
     expect(turnSides.evt_corp_forged_response).toBe("runner");
 
@@ -3768,17 +4748,21 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
             sourceTitle: "Tokyo-Chiba Infighting",
             serverLabel: "Remote 1",
-            reason: "unsuccessful_run"
-          }
-        ]
+            reason: "unsuccessful_run",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Du hast 2 Credits durch Tokyo-Chiba Infighting erhalten.");
+    expect(items[0]?.title).toBe(
+      "Du hast 2 Credits durch Tokyo-Chiba Infighting erhalten.",
+    );
     expect(items[0]?.category).toBe("economy");
-    expect(items[0]?.cardDefinitionId).toBe("onr_v1_371_tokyo-chiba-infighting");
+    expect(items[0]?.cardDefinitionId).toBe(
+      "onr_v1_371_tokyo-chiba-infighting",
+    );
     expect(items[0]?.cardTitle).toBe("Tokyo-Chiba Infighting");
     expect(items[0]?.chips).toContain("+2 Credits");
   });
@@ -3798,7 +4782,7 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 4,
-            questForCattekinOutcome: "no_effect"
+            questForCattekinOutcome: "no_effect",
           },
           {
             effectId: "quest-core",
@@ -3812,7 +4796,7 @@ describe("formatChronicleEvent", () => {
             v1921DieRoll: 1,
             questForCattekinOutcome: "core_damage",
             damageCannotBePrevented: true,
-            damageType: "core"
+            damageType: "core",
           },
           {
             effectId: "quest-net",
@@ -3826,7 +4810,7 @@ describe("formatChronicleEvent", () => {
             v1921DieRoll: 2,
             questForCattekinOutcome: "net_damage",
             damageCannotBePrevented: true,
-            damageType: "net"
+            damageType: "net",
           },
           {
             effectId: "quest-action",
@@ -3840,22 +4824,28 @@ describe("formatChronicleEvent", () => {
             v1921DieRoll: 6,
             questForCattekinOutcome: "permanent_action",
             sourceTrashed: true,
-            permanentActionGain: true
-          }
-        ]
+            permanentActionGain: true,
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items.map((item) => item.title)).toEqual([
       "Quest for Cattekin würfelt eine 4: kein weiterer Effekt.",
       "Quest for Cattekin würfelt eine 1: Du erleidest 1 Core Damage.",
       "Quest for Cattekin würfelt eine 2: Du erleidest 1 Net Damage.",
-      "Quest for Cattekin würfelt eine 6: Du erhältst dauerhaft 1 zusätzliche Aktion."
+      "Quest for Cattekin würfelt eine 6: Du erhältst dauerhaft 1 zusätzliche Aktion.",
     ]);
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Quest for Cattekin", "Wurf 4", "Kein Effekt"]));
-    expect(items[1]?.description).toBe("Der Schaden von Quest for Cattekin kann nicht verhindert werden.");
-    expect(items[3]?.chips).toEqual(expect.arrayContaining(["Wurf 6", "Extra-Aktion", "Dauerhaft", "Trash"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining(["Quest for Cattekin", "Wurf 4", "Kein Effekt"]),
+    );
+    expect(items[1]?.description).toBe(
+      "Der Schaden von Quest for Cattekin kann nicht verhindert werden.",
+    );
+    expect(items[3]?.chips).toEqual(
+      expect.arrayContaining(["Wurf 6", "Extra-Aktion", "Dauerhaft", "Trash"]),
+    );
   });
 
   it("formats auto-rezzed region effects", () => {
@@ -3872,14 +4862,16 @@ describe("formatChronicleEvent", () => {
             cardTitle: "Tokyo-Chiba Infighting",
             sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
             sourceTitle: "Tokyo-Chiba Infighting",
-            reason: "region_install"
-          }
-        ]
+            reason: "region_install",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
 
-    expect(items[0]?.title).toBe("Tokyo-Chiba Infighting wurde sofort gerezzt.");
+    expect(items[0]?.title).toBe(
+      "Tokyo-Chiba Infighting wurde sofort gerezzt.",
+    );
     expect(items[0]?.importance).toBe("important");
     expect(items[0]?.chips).toContain("Automatisch");
   });
@@ -3898,17 +4890,19 @@ describe("formatChronicleEvent", () => {
             cardTitle: "Namatoki Plaza",
             sourceDefinitionId: "onr_v1_356_namatoki-plaza",
             sourceTitle: "Namatoki Plaza",
-            reason: "install_rez"
-          }
-        ]
+            reason: "install_rez",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items[0]?.title).toBe("Namatoki Plaza wurde sofort gerezzt.");
     expect(items[0]?.importance).toBe("important");
     expect(items[0]?.visibility).toBe("public");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Rez", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining(["Rez", "Automatisch"]),
+    );
   });
 
   it("formats region replacement trash effects without leaking hidden old names", () => {
@@ -3926,13 +4920,15 @@ describe("formatChronicleEvent", () => {
             cardTitle: "Crystal Palace Station Grid",
             sourceDefinitionId: "onr_v1_365_paris-city-grid",
             sourceTitle: "Paris City Grid",
-            serverLabel: "Remote 1"
-          }
-        ]
+            serverLabel: "Remote 1",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
-    expect(visibleItems[0]?.title).toBe("Crystal Palace Station Grid wurde durch Paris City Grid ins Archiv gelegt.");
+    expect(visibleItems[0]?.title).toBe(
+      "Crystal Palace Station Grid wurde durch Paris City Grid ins Archiv gelegt.",
+    );
     expect(visibleItems[0]?.chips).toContain("Region");
 
     const hiddenItems = formatChronicleEffectItems(
@@ -3948,15 +4944,21 @@ describe("formatChronicleEvent", () => {
             redactedKind: "installed_card",
             sourceDefinitionId: "onr_v1_365_paris-city-grid",
             sourceTitle: "Paris City Grid",
-            serverLabel: "Remote 1"
-          }
-        ]
+            serverLabel: "Remote 1",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
-    expect(hiddenItems[0]?.title).toBe("Eine vorhandene Region wurde durch Paris City Grid ins Archiv gelegt.");
-    expect(JSON.stringify(hiddenItems)).not.toContain("Crystal Palace Station Grid");
-    expect(JSON.stringify(hiddenItems)).not.toContain("onr_v1_355_crystal-palace-station-grid");
+    expect(hiddenItems[0]?.title).toBe(
+      "Eine vorhandene Region wurde durch Paris City Grid ins Archiv gelegt.",
+    );
+    expect(JSON.stringify(hiddenItems)).not.toContain(
+      "Crystal Palace Station Grid",
+    );
+    expect(JSON.stringify(hiddenItems)).not.toContain(
+      "onr_v1_355_crystal-palace-station-grid",
+    );
   });
 
   it("formats self-trash effects without repeating the source card name", () => {
@@ -3971,14 +4973,16 @@ describe("formatChronicleEvent", () => {
             side: "runner",
             sourceDefinitionId: "onr_v1_184_top-runners-conference",
             sourceTitle: "Top Runners' Conference",
-            reason: "run_start"
-          }
-        ]
+            reason: "run_start",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(items[0]?.title).toBe("Top Runners' Conference wurde getrasht, weil Runner einen Run startet.");
+    expect(items[0]?.title).toBe(
+      "Top Runners' Conference wurde getrasht, weil Runner einen Run startet.",
+    );
     expect(items[0]?.chips).toContain("Automatisch");
   });
 
@@ -3996,11 +5000,11 @@ describe("formatChronicleEvent", () => {
             cardTitle: "Simple Agenda",
             sourceDefinitionId: "secret_region_upgrade",
             sourceTitle: "Secret Region Upgrade",
-            redactedKind: "region_replacement"
-          }
-        ]
+            redactedKind: "region_replacement",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
     const privateSideItems = formatChronicleEffectItems(
       makeEvent("end_turn", {
@@ -4014,22 +5018,30 @@ describe("formatChronicleEvent", () => {
             cardDefinitionId: "onr_v1_036_jackhammer",
             cardTitle: "Jackhammer",
             sourceDefinitionId: "runner_secret_source",
-            sourceTitle: "Runner Secret Source"
-          }
-        ]
+            sourceTitle: "Runner Secret Source",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
 
-    expect(hiddenBarrierItems[0]?.title).toBe("Ein verdecktes Region Upgrade wurde ersetzt.");
+    expect(hiddenBarrierItems[0]?.title).toBe(
+      "Ein verdecktes Region Upgrade wurde ersetzt.",
+    );
     expect(hiddenBarrierItems[0]?.visibility).toBe("redacted");
     expect(hiddenBarrierItems[0]?.category).toBe("hidden");
     expect(hiddenBarrierItems[0]?.cardDefinitionId).toBeUndefined();
     expect(hiddenBarrierItems[0]?.cardTitle).toBeUndefined();
-    expect(JSON.stringify(hiddenBarrierItems[0])).not.toMatch(/Simple Agenda|simple_agenda|Secret Region Upgrade|secret_region_upgrade/);
-    expect(privateSideItems[0]?.title).toBe("Eine verdeckte Karte wurde in den Heap gelegt.");
+    expect(JSON.stringify(hiddenBarrierItems[0])).not.toMatch(
+      /Simple Agenda|simple_agenda|Secret Region Upgrade|secret_region_upgrade/,
+    );
+    expect(privateSideItems[0]?.title).toBe(
+      "Eine verdeckte Karte wurde in den Heap gelegt.",
+    );
     expect(privateSideItems[0]?.visibility).toBe("redacted");
-    expect(JSON.stringify(privateSideItems[0])).not.toMatch(/Jackhammer|onr_v1_036_jackhammer|Runner Secret Source|runner_secret_source/);
+    expect(JSON.stringify(privateSideItems[0])).not.toMatch(
+      /Jackhammer|onr_v1_036_jackhammer|Runner Secret Source|runner_secret_source/,
+    );
   });
 
   it("shows Top Runners' Conference start-of-turn credits from automatic effects", () => {
@@ -4045,18 +5057,24 @@ describe("formatChronicleEvent", () => {
             amount: 2,
             sourceDefinitionId: "onr_v1_184_top-runners-conference",
             sourceTitle: "Top Runners' Conference",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Top Runners' Conference gibt Runner 2 Credits.");
+    expect(items[0]?.title).toBe(
+      "Top Runners' Conference gibt Runner 2 Credits.",
+    );
     expect(items[0]?.category).toBe("economy");
-    expect(items[0]?.cardDefinitionId).toBe("onr_v1_184_top-runners-conference");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "Automatisch"]));
+    expect(items[0]?.cardDefinitionId).toBe(
+      "onr_v1_184_top-runners-conference",
+    );
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining(["+2 Credits", "Automatisch"]),
+    );
   });
 
   it("shows P3.7 turn-start credit and action effects with card names", () => {
@@ -4072,7 +5090,7 @@ describe("formatChronicleEvent", () => {
             amount: 1,
             sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
             sourceTitle: "Polymer Breakthrough",
-            reason: "start_of_turn"
+            reason: "start_of_turn",
           },
           {
             effectId: "corp.start.remote.card_335",
@@ -4082,7 +5100,7 @@ describe("formatChronicleEvent", () => {
             amount: 1,
             sourceDefinitionId: "onr_v1_335_remote-facility",
             sourceTitle: "Remote Facility",
-            reason: "start_of_turn"
+            reason: "start_of_turn",
           },
           {
             effectId: "corp.start.subsidiary.card_218",
@@ -4092,11 +5110,11 @@ describe("formatChronicleEvent", () => {
             amount: 1,
             sourceDefinitionId: "onr_v1_218_subsidiary-branch",
             sourceTitle: "Subsidiary Branch",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items).toHaveLength(3);
@@ -4119,7 +5137,7 @@ describe("formatChronicleEvent", () => {
             amount: 1,
             sourceDefinitionId: "onr_v1_163_floating-runner-bbs",
             sourceTitle: "Floating Runner BBS",
-            reason: "start_of_turn"
+            reason: "start_of_turn",
           },
           {
             effectId: "runner.start.rigged.card_174",
@@ -4132,17 +5150,26 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 11,
             sourceDefinitionId: "onr_v1_174_rigged-investments",
             sourceTitle: "Rigged Investments",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items).toHaveLength(2);
     expect(items[0]?.title).toBe("Floating Runner BBS gibt Runner 1 Credit.");
-    expect(items[1]?.title).toBe("Rigged Investments gibt Runner 1 Credit von der Karte.");
-    expect(items[1]?.chips).toEqual(expect.arrayContaining(["+1 Credit", "1 Credit von Karte", "11 Credits übrig", "Automatisch"]));
+    expect(items[1]?.title).toBe(
+      "Rigged Investments gibt Runner 1 Credit von der Karte.",
+    );
+    expect(items[1]?.chips).toEqual(
+      expect.arrayContaining([
+        "+1 Credit",
+        "1 Credit von Karte",
+        "11 Credits übrig",
+        "Automatisch",
+      ]),
+    );
   });
 
   it("shows recurring-credit refreshes from automatic start-of-turn effects", () => {
@@ -4161,16 +5188,25 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             sourceDefinitionId: "onr_v1_176_the-shell-traders",
             sourceTitle: "The Shell Traders",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(items[0]?.title).toBe("Du hast Recurring Credits auf The Shell Traders aufgefrischt.");
+    expect(items[0]?.title).toBe(
+      "Du hast Recurring Credits auf The Shell Traders aufgefrischt.",
+    );
     expect(items[0]?.category).toBe("card");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Recurring Credits",
+        "1 bereit",
+        "+1",
+        "Automatisch",
+      ]),
+    );
   });
 
   it("shows Shell Traders start-of-turn counter removal on the prepared target card", () => {
@@ -4191,18 +5227,27 @@ describe("formatChronicleEvent", () => {
             sourceTitle: "The Shell Traders",
             cardDefinitionId: "simple_fracter",
             cardTitle: "Simple Fracter",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(items[0]?.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
+    expect(items[0]?.title).toBe(
+      "Du hast 1 Shell-Counter von Simple Fracter entfernt.",
+    );
     expect(items[0]?.groupLabel).toBe("Zug - Runner");
     expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
     expect(items[0]?.cardTitle).toBe("Simple Fracter");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["The Shell Traders", "Shell-Counter", "1 entfernt", "1 übrig"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "The Shell Traders",
+        "Shell-Counter",
+        "1 entfernt",
+        "1 übrig",
+      ]),
+    );
   });
 
   it("shows Braindance Campaign turn-start drain as one credit message", () => {
@@ -4221,17 +5266,26 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 10,
             sourceDefinitionId: "onr_v1_311_braindance-campaign",
             sourceTitle: "Braindance Campaign",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "corp"
+      "corp",
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Braindance Campaign gibt Korp 2 Credits von der Karte.");
+    expect(items[0]?.title).toBe(
+      "Braindance Campaign gibt Korp 2 Credits von der Karte.",
+    );
     expect(items[0]?.category).toBe("economy");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "2 Credits von Karte", "10 Credits übrig", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "+2 Credits",
+        "2 Credits von Karte",
+        "10 Credits übrig",
+        "Automatisch",
+      ]),
+    );
     expect(JSON.stringify(items)).not.toContain("genutzt");
     expect(JSON.stringify(items)).not.toContain("gespielt");
   });
@@ -4252,7 +5306,7 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 0,
             sourceDefinitionId: "onr_v1_326_holovid-campaign",
             sourceTitle: "Holovid Campaign",
-            reason: "start_of_turn"
+            reason: "start_of_turn",
           },
           {
             effectId: "corp.start.holovid_campaign.trash.card_326",
@@ -4262,15 +5316,17 @@ describe("formatChronicleEvent", () => {
             amount: 1,
             sourceDefinitionId: "onr_v1_326_holovid-campaign",
             sourceTitle: "Holovid Campaign",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items).toHaveLength(2);
-    expect(items[0]?.title).toBe("Holovid Campaign gibt Korp 1 Credit von der Karte.");
+    expect(items[0]?.title).toBe(
+      "Holovid Campaign gibt Korp 1 Credit von der Karte.",
+    );
     expect(items[1]?.title).toBe("Holovid Campaign wurde getrasht.");
   });
 
@@ -4281,14 +5337,14 @@ describe("formatChronicleEvent", () => {
         "onr_v1_198_detroit-police-contract",
         2,
         10,
-        "Detroit Police Contract gibt Korp 2 Credits von der Karte."
+        "Detroit Police Contract gibt Korp 2 Credits von der Karte.",
       ],
       [
         "Spinn Public Relations",
         "onr_v1_344_spinn-public-relations",
         1,
         2,
-        "Spinn Public Relations gibt Korp 1 Credit von der Karte."
+        "Spinn Public Relations gibt Korp 1 Credit von der Karte.",
       ],
     ] as const) {
       const items = formatChronicleEffectItems(
@@ -4306,11 +5362,11 @@ describe("formatChronicleEvent", () => {
               remainingCounters: remaining,
               sourceDefinitionId: definitionId,
               sourceTitle: title,
-              reason: "start_of_turn"
-            }
-          ]
+              reason: "start_of_turn",
+            },
+          ],
         }),
-        "runner"
+        "runner",
       );
 
       expect(items).toHaveLength(1);
@@ -4335,16 +5391,20 @@ describe("formatChronicleEvent", () => {
             cardTitle: "Hostile Takeover",
             sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
             sourceTitle: "Bizarre Encryption Scheme",
-            reason: "start_of_turn"
-          }
-        ]
+            reason: "start_of_turn",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(items[0]?.title).toBe("Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.");
+    expect(items[0]?.title).toBe(
+      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.",
+    );
     expect(items[0]?.category).toBe("agenda");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Agenda", "+2 Agenda", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining(["Agenda", "+2 Agenda", "Automatisch"]),
+    );
   });
 
   it("names access-effect damage with source and discarded cards", () => {
@@ -4362,16 +5422,22 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 1,
             reason: "access_effect",
             sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
-            sourceTitle: "Bel-Digmo Antibody"
-          }
-        ]
+            sourceTitle: "Bel-Digmo Antibody",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(items[0]?.title).toBe("Du hast 1 Net Damage durch Bel-Digmo Antibody erlitten.");
-    expect(items[0]?.description).toBe("eine Karte wurde dadurch in den Heap bewegt.");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Access-Effekt", "Bel-Digmo Antibody", "1 Heap"]));
+    expect(items[0]?.title).toBe(
+      "Du hast 1 Net Damage durch Bel-Digmo Antibody erlitten.",
+    );
+    expect(items[0]?.description).toBe(
+      "eine Karte wurde dadurch in den Heap bewegt.",
+    );
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining(["Access-Effekt", "Bel-Digmo Antibody", "1 Heap"]),
+    );
     expect(items[0]?.groupLabel).toBe("Run");
   });
 
@@ -4386,9 +5452,9 @@ describe("formatChronicleEvent", () => {
         baseAccessCount: 1,
         highlighterCounterCount: 3,
         highlighterAccessBonus: 2,
-        effectiveAccessCount: 3
+        effectiveAccessCount: 3,
       }),
-      "runner"
+      "runner",
     );
     const secondAccess = formatChronicleEvent(
       makeEvent("access_card", {
@@ -4400,15 +5466,21 @@ describe("formatChronicleEvent", () => {
         baseAccessCount: 1,
         highlighterCounterCount: 3,
         highlighterAccessBonus: 2,
-        effectiveAccessCount: 3
+        effectiveAccessCount: 3,
       }),
-      "runner"
+      "runner",
     );
 
     expect(firstAccess.title).toBe("Du hast auf Pattel Antibody zugegriffen.");
-    expect(secondAccess.title).toBe("Du hast auf Bel-Digmo Antibody zugegriffen, weil die Korp 3 Highlighter-Counter hat.");
-    expect(secondAccess.description).toBe("Das ist Zugriff 2 von 3; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.");
-    expect(secondAccess.chips).toEqual(expect.arrayContaining(["3 Highlighter", "Zugriff 2/3"]));
+    expect(secondAccess.title).toBe(
+      "Du hast auf Bel-Digmo Antibody zugegriffen, weil die Korp 3 Highlighter-Counter hat.",
+    );
+    expect(secondAccess.description).toBe(
+      "Das ist Zugriff 2 von 3; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.",
+    );
+    expect(secondAccess.chips).toEqual(
+      expect.arrayContaining(["3 Highlighter", "Zugriff 2/3"]),
+    );
   });
 
   it("explains Proteus free trash for normally untrashable access cards", () => {
@@ -4417,14 +5489,18 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Dog Pile",
         freeAccessTrash: true,
-        proteusRunnerVirusFreeTrashCounterType: "garbage"
+        proteusRunnerVirusFreeTrashCounterType: "garbage",
       }),
-      "runner"
+      "runner",
     );
 
     expect(item.title).toBe("Du hast Dog Pile getrasht.");
-    expect(item.description).toBe("Garbage In erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Trash", "Garbage In", "Kostenlos"]));
+    expect(item.description).toBe(
+      "Garbage In erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Trash", "Garbage In", "Kostenlos"]),
+    );
   });
 
   it("shows Proteus successful-run counters with their concrete target", () => {
@@ -4443,7 +5519,7 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 1,
             reason: "proteus_runner_virus_successful_run",
             sourceDefinitionId: "onr_proteus_090_highlighter",
-            sourceTitle: "Highlighter"
+            sourceTitle: "Highlighter",
           },
           {
             effectId: "run_rd.viral_pipeline.successful_run.socket_rd",
@@ -4457,7 +5533,7 @@ describe("formatChronicleEvent", () => {
             reason: "proteus_runner_virus_successful_run",
             sourceDefinitionId: "onr_proteus_099_viral-pipeline",
             sourceTitle: "Viral Pipeline",
-            serverLabel: "R&D"
+            serverLabel: "R&D",
           },
           {
             effectId: "run_rd.cascade.successful_run.cascade",
@@ -4471,20 +5547,20 @@ describe("formatChronicleEvent", () => {
             reason: "proteus_runner_virus_successful_run",
             sourceDefinitionId: "onr_v1_010_cascade",
             sourceTitle: "Cascade",
-            serverLabel: "R&D"
-          }
-        ]
+            serverLabel: "R&D",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
     expect(items.map((item) => item.title)).toEqual([
       "Die Korp hat 1 Highlighter-Counter durch Highlighter erhalten.",
       "R&D hat 1 Socket-Counter durch Viral Pipeline erhalten.",
-      "Die Korp hat 1 Cascade-Counter durch Cascade erhalten."
+      "Die Korp hat 1 Cascade-Counter durch Cascade erhalten.",
     ]);
     expect(items.at(2)?.description).toBe(
-      "Nach einem erfolgreichen Run auf R&D hat die Korp 1 Cascade-Counter erhalten. Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen."
+      "Nach einem erfolgreichen Run auf R&D hat die Korp 1 Cascade-Counter erhalten. Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen.",
     );
   });
 
@@ -4493,7 +5569,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "corp",
         targetCount: 2,
-        targetCardDefinitionIds: "onr_v1_005_bartmoss-memorial-icebreaker,onr_v1_074_worm",
+        targetCardDefinitionIds:
+          "onr_v1_005_bartmoss-memorial-icebreaker,onr_v1_074_worm",
         resolvedEffects: [
           {
             effectId: "pattel.access.counters",
@@ -4505,11 +5582,11 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 2,
             remainingCounters: 2,
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
-            sourceTitle: "Pattel Antibody"
-          }
-        ]
+            sourceTitle: "Pattel Antibody",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
     const withoutTargets = formatChronicleEffectItems(
       makeEvent("resolve_choice", {
@@ -4528,17 +5605,23 @@ describe("formatChronicleEvent", () => {
             remainingCounters: 0,
             reason: "access_effect",
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
-            sourceTitle: "Pattel Antibody"
-          }
-        ]
+            sourceTitle: "Pattel Antibody",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(withTargets[0]?.title).toBe("1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.");
-    expect(withTargets[0]?.description).toBe("Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.");
+    expect(withTargets[0]?.title).toBe(
+      "1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.",
+    );
+    expect(withTargets[0]?.description).toBe(
+      "Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.",
+    );
     expect(withTargets[0]?.groupLabel).toBe("Run");
-    expect(withoutTargets[0]?.title).toBe("Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren.");
+    expect(withoutTargets[0]?.title).toBe(
+      "Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren.",
+    );
   });
 
   it("names legacy Pattel payment choices from counter effects", () => {
@@ -4556,21 +5639,33 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
-            sourceTitle: "Pattel Antibody"
-          }
-        ]
+            sourceTitle: "Pattel Antibody",
+          },
+        ],
       }),
-      "runner"
+      "runner",
     );
 
-    expect(item.title).toBe("Die Korp hat 3 Credits für den Access-Ambush von Pattel Antibody bezahlt.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Pattel Antibody", "3 Credits"]));
+    expect(item.title).toBe(
+      "Die Korp hat 3 Credits für den Access-Ambush von Pattel Antibody bezahlt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Access-Ambush", "Pattel Antibody", "3 Credits"]),
+    );
   });
 });
 
-function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
-  const actor = sideValue(payload.actor) ?? (actionType === "mandatory_draw" || actionType === "play_operation" ? "corp" : "runner");
-  const eventId = typeof payload.eventId === "string" ? payload.eventId : `evt_${actionType}`;
+function makeEvent(
+  actionType: string,
+  payload: Record<string, unknown> = {},
+): PublicGameEvent {
+  const actor =
+    sideValue(payload.actor) ??
+    (actionType === "mandatory_draw" || actionType === "play_operation"
+      ? "corp"
+      : "runner");
+  const eventId =
+    typeof payload.eventId === "string" ? payload.eventId : `evt_${actionType}`;
   const payloadWithoutEventId = { ...payload };
   delete payloadWithoutEventId.eventId;
   return {
@@ -4583,8 +5678,8 @@ function makeEvent(actionType: string, payload: Record<string, unknown> = {}): P
       actor,
       actionType,
       label: `${actor}.${actionType}`,
-      ...payloadWithoutEventId
-    }
+      ...payloadWithoutEventId,
+    },
   };
 }
 
