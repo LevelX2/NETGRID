@@ -51,7 +51,9 @@ export type CardInstallTargetBindingImplementation = {
     | "choose_installed_ice_on_install"
     | "choose_icebreaker_subtype_on_install";
   stores: "selectedServerId" | "selectedCardId" | "selectedSubtype";
-  choices?: readonly "code_gate"[] | readonly ("code_gate" | "sentry" | "wall")[];
+  choices?:
+    | readonly "code_gate"[]
+    | readonly ("code_gate" | "sentry" | "wall")[];
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -663,7 +665,13 @@ export type CardVirusCounterKindImplementation =
 export type CardVirusCounterImplementation = {
   counterKind: CardVirusCounterKindImplementation;
   addOnSuccessfulRun?: {
-    server: "hq" | "rd" | "archives" | "central" | "any" | "subsidiary_data_fort";
+    server:
+      | "hq"
+      | "rd"
+      | "archives"
+      | "central"
+      | "any"
+      | "subsidiary_data_fort";
     target:
       | "source"
       | "successful_run_server"
@@ -1237,12 +1245,13 @@ export type GainRunnerEventAgendaPointEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
-export type GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation = {
-  kind: "gain_runner_event_agenda_point_if_liberated_agenda_subtype";
-  subtype: "black_ops";
-  amount: 1;
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation =
+  {
+    kind: "gain_runner_event_agenda_point_if_liberated_agenda_subtype";
+    subtype: "black_ops";
+    amount: 1;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
 
 export type CorpRandomDiscardFromHqEffectImplementation = {
   kind: "corp_random_discard_from_hq";
@@ -1338,13 +1347,14 @@ export type GainTemporaryTraceCreditsEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
-export type RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation = {
-  kind: "remove_same_fort_advancement_counters_for_run_credits";
-  creditsPerCounter: number;
-  maxAmount: "all";
-  cleanup: "run_end";
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation =
+  {
+    kind: "remove_same_fort_advancement_counters_for_run_credits";
+    creditsPerCounter: number;
+    maxAmount: "all";
+    cleanup: "run_end";
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
 
 export type CopySameFortIceSubroutineForRunEffectImplementation = {
   kind: "copy_same_fort_ice_subroutine_for_run";
@@ -1624,12 +1634,14 @@ export type TraceEffectImplementation = {
 
 export type MakeRunEffectImplementation = {
   kind: "make_run";
-  target: {
-    kind: "central_server";
-    server: Extract<ServerId, "hq" | "rd" | "archives">;
-  } | {
-    kind: "chosen_server";
-  };
+  target:
+    | {
+        kind: "central_server";
+        server: Extract<ServerId, "hq" | "rd" | "archives">;
+      }
+    | {
+        kind: "chosen_server";
+      };
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
@@ -1707,11 +1719,12 @@ export type CorpChoiceRezOrTrashIceEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
-export type CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation = {
-  kind: "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity";
-  badPublicity: 2;
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation =
+  {
+    kind: "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity";
+    badPublicity: 2;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
 
 export type PrivateLookEffectImplementation = {
   kind: "private_look";
@@ -1955,8 +1968,8 @@ export type CardSubroutineImplementation =
       kind: "end_the_run_unless_runner_pays";
       amount: number;
       text: `*End the run unless Runner pays [${number}].`;
-  visibility: EventVisibilityClass;
-};
+      visibility: EventVisibilityClass;
+    };
 
 export type CardAccessCountModifierImplementation = {
   kind: "access_count";
@@ -2137,7 +2150,10 @@ export type CardTagPreventionSourceImplementation = {
 
 export type CardTrashPreventionSourceImplementation = {
   kind: "prevent_installed_card_trash";
-  protectsCardTypes: readonly Extract<CardType, "program" | "hardware" | "resource">[];
+  protectsCardTypes: readonly Extract<
+    CardType,
+    "program" | "hardware" | "resource"
+  >[];
   excludesSelf?: true;
   activeOnlyDuring?: "corp_turn";
   mode: "one_card" | "one_or_more_simultaneous";

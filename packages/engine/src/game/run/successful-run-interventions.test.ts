@@ -36,7 +36,12 @@ function definition(
   type: CardDefinition["type"],
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
-  return { id: id as CardDefinitionId, title, type, ...options } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    title,
+    type,
+    ...options,
+  } as CardDefinition;
 }
 
 function instance(
@@ -49,7 +54,8 @@ function instance(
     id: id as CardInstanceId,
     definitionId: definitionId as CardDefinitionId,
     owner: options.owner ?? (zone.side === "runner" ? "runner" : "corp"),
-    controller: options.controller ?? (zone.side === "runner" ? "runner" : "corp"),
+    controller:
+      options.controller ?? (zone.side === "runner" ? "runner" : "corp"),
     zone,
     faceup: options.faceup ?? false,
     rezzed: options.rezzed ?? false,
@@ -57,12 +63,14 @@ function instance(
   } as CardInstance;
 }
 
-function makeHost(options: {
-  sourceDefinitionId?: string;
-  sourceTitle?: string;
-  hqIceRezCost?: number;
-  existingIceCount?: number;
-} = {}): {
+function makeHost(
+  options: {
+    sourceDefinitionId?: string;
+    sourceTitle?: string;
+    hqIceRezCost?: number;
+    existingIceCount?: number;
+  } = {},
+): {
   state: GameState;
   host: SuccessfulRunInterventionHost;
   servers: CorpServer[];
@@ -79,7 +87,11 @@ function makeHost(options: {
   const hqIceRezCost = options.hqIceRezCost ?? 5;
   const existingIceCount = options.existingIceCount ?? 1;
   const definitions: Record<string, CardDefinition> = {
-    [sourceDefinitionId]: definition(sourceDefinitionId, sourceTitle, "upgrade"),
+    [sourceDefinitionId]: definition(
+      sourceDefinitionId,
+      sourceTitle,
+      "upgrade",
+    ),
     hq_ice_def: definition("hq_ice_def", "HQ ICE", "ice", {
       rezCost: hqIceRezCost,
     }),
@@ -112,7 +124,7 @@ function makeHost(options: {
       "Credit Subversion",
       "resource",
     ),
-    "onr_proteus_078_armageddon": definition(
+    onr_proteus_078_armageddon: definition(
       "onr_proteus_078_armageddon",
       "Armageddon",
       "program",
@@ -157,11 +169,10 @@ function makeHost(options: {
       side: "runner",
       zone: "rig",
     }),
-    bodyweight: instance(
-      "bodyweight",
-      "onr_v1_123_bodyweight-data-creche",
-      { side: "runner", zone: "rig" },
-    ),
+    bodyweight: instance("bodyweight", "onr_v1_123_bodyweight-data-creche", {
+      side: "runner",
+      zone: "rig",
+    }),
     karl: instance("karl", "onr_v1_166_karl-de-veres-corporate-stooge", {
       side: "runner",
       zone: "rig",
@@ -180,15 +191,11 @@ function makeHost(options: {
     }),
   };
   for (const iceId of existingIceIds) {
-    cardInstances[iceId] = instance(
-      iceId,
-      "existing_ice_def",
-      {
-        side: "corp",
-        zone: "serverIce",
-        serverId: "remote_1",
-      } as CardInstance["zone"],
-    );
+    cardInstances[iceId] = instance(iceId, "existing_ice_def", {
+      side: "corp",
+      zone: "serverIce",
+      serverId: "remote_1",
+    } as CardInstance["zone"]);
   }
   const state = {
     stateVersion: 3,
@@ -261,8 +268,9 @@ function makeHost(options: {
     },
     choices: {
       selectedChoiceIds: (selectedChoices) => {
-        const raw = (selectedChoices as { selectedOptionIds?: unknown } | undefined)
-          ?.selectedOptionIds;
+        const raw = (
+          selectedChoices as { selectedOptionIds?: unknown } | undefined
+        )?.selectedOptionIds;
         return Array.isArray(raw)
           ? raw.filter((value): value is string => typeof value === "string")
           : [];
@@ -270,8 +278,8 @@ function makeHost(options: {
     },
     costs: {
       creditCostForAction: (legalAction) => legalAction.costs[0]?.credits ?? 0,
-      rezCostForCard: (cardId) => definitions[cardInstances[cardId]!.definitionId]!
-        .rezCost ?? 0,
+      rezCostForCard: (cardId) =>
+        definitions[cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
     },
     credits: {
       spend: (side, amount) => {
@@ -323,7 +331,9 @@ function makeHost(options: {
     },
     zones: {
       removeFromAllZones: (cardId) => {
-        state.corp.hq = state.corp.hq.filter((candidate) => candidate !== cardId);
+        state.corp.hq = state.corp.hq.filter(
+          (candidate) => candidate !== cardId,
+        );
         for (const server of servers) {
           server.ice = server.ice.filter((candidate) => candidate !== cardId);
           server.root = server.root.filter((candidate) => candidate !== cardId);
@@ -382,7 +392,8 @@ function configureSuccessfulRunDamageCoreHost(
 ): void {
   configureDamageCoreHost({
     cards: {
-      definitionFor: (_state, cardId) => fixture.host.cards.definitionFor(cardId),
+      definitionFor: (_state, cardId) =>
+        fixture.host.cards.definitionFor(cardId),
       runnerInstalledCardIds: (state) => [
         ...state.runner.rig.programs,
         ...state.runner.rig.hardware,
@@ -402,8 +413,9 @@ function configureSuccessfulRunDamageCoreHost(
     runner: {
       drawRunnerCard: () => undefined,
       ensureRunnerTurnFlags: (state) =>
-        (state.runnerTurnFlags ??=
-          {} as NonNullable<GameState["runnerTurnFlags"]>),
+        (state.runnerTurnFlags ??= {} as NonNullable<
+          GameState["runnerTurnFlags"]
+        >),
       addFutureActionDebt: () => undefined,
     },
     corp: {
@@ -442,7 +454,12 @@ function delayedChoice(
     prompt: "Delayed success",
     kind: "select_option",
     options: [
-      { id: "decline", label: "Decline", publicLabel: "Decline", value: "decline" },
+      {
+        id: "decline",
+        label: "Decline",
+        publicLabel: "Decline",
+        value: "decline",
+      },
       {
         id: "ice_hq_ice",
         label: "ICE aus HQ",
@@ -574,16 +591,21 @@ describe("successful run interventions", () => {
 
     expect(actions.map((action) => action.payload)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ v1922RunnerProgramAbility: "false_echo_force_rez" }),
+        expect.objectContaining({
+          v1922RunnerProgramAbility: "false_echo_force_rez",
+        }),
         expect.objectContaining({
           v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
         }),
-        expect.objectContaining({ runnerUtilityAbility: "i_spy_put_spy_counter" }),
+        expect.objectContaining({
+          runnerUtilityAbility: "i_spy_put_spy_counter",
+        }),
       ]),
     );
 
     const falseEchoAction = actions.find(
-      (action) => action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
+      (action) =>
+        action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, falseEchoAction);
     expect(fixture.state.runner.credits).toBe(3);
@@ -613,7 +635,8 @@ describe("successful run interventions", () => {
       successfulRunAbilityUsedSourceIds: [],
     };
     const iSpyAction = actions.find(
-      (action) => action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter",
+      (action) =>
+        action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, iSpyAction);
     expect(fixture.trashedRunnerIds).toEqual(["i_spy"]);
@@ -657,7 +680,9 @@ describe("successful run interventions", () => {
         },
       } as LegalAction),
     ).toThrow("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
-    expect(fixture.state.cardInstances.credit_subversion?.tapped).not.toBe(true);
+    expect(fixture.state.cardInstances.credit_subversion?.tapped).not.toBe(
+      true,
+    );
 
     const legacyFixture = makeHost();
     configureSuccessfulRunDamageCoreHost(legacyFixture);
@@ -673,10 +698,13 @@ describe("successful run interventions", () => {
       (candidate) =>
         candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
     );
-    if (!legacyAction) throw new Error("Missing legacy Credit Subversion action");
+    if (!legacyAction)
+      throw new Error("Missing legacy Credit Subversion action");
     const legacyPayload = { ...(legacyAction.payload ?? {}) };
-    delete (legacyPayload as Record<string, unknown>).cardImplementationAbilityKey;
-    delete (legacyPayload as Record<string, unknown>).cardImplementationAbilityId;
+    delete (legacyPayload as Record<string, unknown>)
+      .cardImplementationAbilityKey;
+    delete (legacyPayload as Record<string, unknown>)
+      .cardImplementationAbilityId;
 
     const result = resolveSuccessfulRunFollowupAbility(legacyFixture.host, {
       ...legacyAction,
@@ -684,7 +712,9 @@ describe("successful run interventions", () => {
     } as LegalAction);
 
     expect(result.handled).toBe(true);
-    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).toBe(true);
+    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).toBe(
+      true,
+    );
   });
 
   it("builds and resolves Armageddon R&D access replacement through Runner followups", () => {
@@ -762,7 +792,10 @@ describe("successful run interventions", () => {
     );
 
     expect(karl).toMatchObject({ handled: true, creditsGained: 1 });
-    expect(bodyweight).toMatchObject({ handled: true, sourceCardId: "bodyweight" });
+    expect(bodyweight).toMatchObject({
+      handled: true,
+      sourceCardId: "bodyweight",
+    });
     expect(fixture.state.runner.credits).toBe(6);
     expect(fixture.state.runnerTurnFlags).toMatchObject({
       bodyweightDataCrecheExtraRunPending: true,

@@ -555,10 +555,7 @@ describe("derived basic facts gate report", () => {
       expect.objectContaining({ kind: "requires_successful_run" }),
     );
 
-    const deathFromAbove = cardById(
-      report,
-      "onr_proteus_137_death-from-above",
-    );
+    const deathFromAbove = cardById(report, "onr_proteus_137_death-from-above");
     expect(deathFromAbove.derivedFacts.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

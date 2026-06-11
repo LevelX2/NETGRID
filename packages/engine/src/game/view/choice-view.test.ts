@@ -105,9 +105,7 @@ describe("ChoiceView projection", () => {
     expect(runnerChoiceTitle).toBeTruthy();
     expect(runnerChoiceCard?.rulesText).toBeTruthy();
     expect(runnerOpponentView.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(runnerOpponentView)).not.toContain(
-      runnerChoiceTitle,
-    );
+    expect(JSON.stringify(runnerOpponentView)).not.toContain(runnerChoiceTitle);
 
     const corpState = toRunnerTurn(
       createGameAfterSetup({ seed: "choice-view-corp-rd-top5" }),
@@ -153,7 +151,9 @@ describe("ChoiceView projection", () => {
     expect(optionCardIds).toHaveLength(2);
     const options = optionCardIds.map((cardId) => {
       const definitionId = state.cardInstances[cardId]?.definitionId;
-      const definition = definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined;
+      const definition = definitionId
+        ? DEMO_CARDS_BY_ID[definitionId]
+        : undefined;
       if (!definition) throw new Error(`Missing definition for ${cardId}`);
       return {
         id: `card_${cardId}`,
@@ -179,12 +179,12 @@ describe("ChoiceView projection", () => {
     const runnerView = getPlayerView(state, "runner");
     const runnerViewJson = JSON.stringify(runnerView);
 
-    expect(corpView.pendingChoice?.options.map((option) => option.value)).toEqual(
-      optionCardIds,
-    );
-    expect(corpView.pendingChoice?.options.map((option) => option.label)).toEqual(
-      options.map((option) => option.label),
-    );
+    expect(
+      corpView.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(optionCardIds);
+    expect(
+      corpView.pendingChoice?.options.map((option) => option.label),
+    ).toEqual(options.map((option) => option.label));
     expect(runnerView.pendingChoice).toBeUndefined();
     for (const option of options) {
       expect(runnerViewJson).not.toContain(String(option.value));
@@ -249,5 +249,4 @@ describe("ChoiceView projection", () => {
       rezzed: true,
     });
   });
-
 });

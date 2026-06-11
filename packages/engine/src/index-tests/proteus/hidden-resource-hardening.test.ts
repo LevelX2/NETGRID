@@ -109,7 +109,9 @@ function addCorpServerCard(
   serverId: "remote_1" | "rd" | "hq",
   slot: "root" | "ice",
 ): CardInstanceId {
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
     server = {
       id: serverId,
@@ -141,7 +143,11 @@ function addCorpServerCard(
   return cardId;
 }
 
-function applyLegal(state: GameState, side: "corp" | "runner", action: LegalAction) {
+function applyLegal(
+  state: GameState,
+  side: "corp" | "runner",
+  action: LegalAction,
+) {
   return applyAction(state, {
     matchId: state.matchId,
     side,
@@ -301,12 +307,18 @@ describe("PRO011 hidden resource timing hardening", () => {
       (candidate) => candidate.payload?.cardId === hqMoleId,
     );
     expect(moleAction).toBeDefined();
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("HQ Mole");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "HQ Mole",
+    );
     expect(getPlayerView(state, "runner").run?.breach).toBeUndefined();
 
     const replayStart = state.eventLog.length;
     const replayInitial = structuredClone(state);
-    state = apply(state, "runner", (candidate) => candidate.actionId === moleAction!.actionId);
+    state = apply(
+      state,
+      "runner",
+      (candidate) => candidate.actionId === moleAction!.actionId,
+    );
     expect(state.run?.accessCount).toBe(3);
     expect(state.corp.hq).toEqual(hqBefore);
     const continueAction = getLegalActions(state, "runner").find(
@@ -315,12 +327,19 @@ describe("PRO011 hidden resource timing hardening", () => {
         candidate.payload?.hiddenRunnerResourceAccessStartContinue === true,
     );
     expect(continueAction).toBeDefined();
-    state = apply(state, "runner", (candidate) => candidate.actionId === continueAction!.actionId);
-    expect(state.run?.breach?.serverId).toBe("hq");
-    expect(state.run?.breach?.queue.filter((entry) => entry.zone === "hq")).toHaveLength(
-      Math.min(3, hqBefore.length),
+    state = apply(
+      state,
+      "runner",
+      (candidate) => candidate.actionId === continueAction!.actionId,
     );
-    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    expect(state.run?.breach?.serverId).toBe("hq");
+    expect(
+      state.run?.breach?.queue.filter((entry) => entry.zone === "hq"),
+    ).toHaveLength(Math.min(3, hqBefore.length));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -396,7 +415,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "onr_proteus_132_bolt-hole",
       "pro012_bolt",
     );
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Bolt-Hole");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Bolt-Hole",
+    );
 
     const action = {
       side: "corp",
@@ -443,7 +464,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       sourceRef: { instanceId: boltId },
       preventAmount: 2,
     });
-    state.pendingChoice = { ...state.pendingChoice!, stateVersion: state.stateVersion };
+    state.pendingChoice = {
+      ...state.pendingChoice!,
+      stateVersion: state.stateVersion,
+    };
     const before = structuredClone(state);
     const optionId = state.pendingChoice!.options.find((option) =>
       option.id.includes(String(boltId)),
@@ -461,7 +485,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_132_bolt-hole",
     });
-    const replay = replayEvents(before, state.eventLog.slice(before.eventLog.length));
+    const replay = replayEvents(
+      before,
+      state.eventLog.slice(before.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -491,7 +518,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
       "Expendable Family Member",
     );
-    state.pendingChoice = { ...state.pendingChoice!, stateVersion: state.stateVersion };
+    state.pendingChoice = {
+      ...state.pendingChoice!,
+      stateVersion: state.stateVersion,
+    };
     const optionId = state.pendingChoice!.options.find((option) =>
       option.id.includes(String(expendableId)),
     )!.id;
@@ -587,7 +617,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
     });
-    const creditPublicPayload = creditState.eventLog.at(-1)?.publicPayload ?? {};
+    const creditPublicPayload =
+      creditState.eventLog.at(-1)?.publicPayload ?? {};
     expect(creditPublicPayload).toMatchObject({
       sourceDefinitionId: "onr_proteus_136_credit-subversion",
       visibility: { class: "hidden_info_barrier", hiddenZoneBarrier: true },
@@ -616,7 +647,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         (candidate) =>
           candidate.payload?.cardImplementationPrimitiveKind ===
             "successful_run_before_access_effect" &&
-          candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
+          candidate.payload?.cardImplementationEffectKind ===
+            "corp_lose_credits",
       ),
     ).toBe(false);
 
@@ -637,7 +669,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         (candidate) =>
           candidate.payload?.cardImplementationPrimitiveKind ===
             "successful_run_before_access_effect" &&
-          candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
+          candidate.payload?.cardImplementationEffectKind ===
+            "corp_lose_credits",
       ),
     ).toBe(false);
 
@@ -729,7 +762,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathPublicPayload).not.toHaveProperty(
       "cardImplementationPrimitiveKind",
     );
-    expect(deathPublicPayload).not.toHaveProperty("cardImplementationAbilityId");
+    expect(deathPublicPayload).not.toHaveProperty(
+      "cardImplementationAbilityId",
+    );
     const deathPublicPayloadJson = JSON.stringify(deathPublicPayload);
     expect(deathPublicPayloadJson).not.toContain(String(assetId));
     expect(deathPublicPayloadJson).not.toContain(String(upgradeId));
@@ -773,7 +808,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
         (candidate) =>
           candidate.payload?.cardImplementationPrimitiveKind ===
             "successful_run_before_access_effect" &&
-          candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
+          candidate.payload?.cardImplementationEffectKind ===
+            "trash_remote_fort",
       ),
     ).toBe(false);
 
@@ -800,7 +836,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
           (candidate) =>
             candidate.payload?.cardImplementationPrimitiveKind ===
               "successful_run_before_access_effect" &&
-            candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
+            candidate.payload?.cardImplementationEffectKind ===
+              "trash_remote_fort",
         ),
       ).toBe(false);
     }
@@ -820,9 +857,15 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "root",
     );
     mercenaryState.corp.rd = [operationId, ...mercenaryState.corp.rd];
-    const rdServer = mercenaryState.corp.servers.find((server) => server.id === "rd");
-    if (rdServer) rdServer.root = rdServer.root.filter((id) => id !== operationId);
-    mercenaryState.cardInstances[operationId]!.zone = { side: "corp", zone: "rd" };
+    const rdServer = mercenaryState.corp.servers.find(
+      (server) => server.id === "rd",
+    );
+    if (rdServer)
+      rdServer.root = rdServer.root.filter((id) => id !== operationId);
+    mercenaryState.cardInstances[operationId]!.zone = {
+      side: "corp",
+      zone: "rd",
+    };
     mercenaryState.run = {
       runId: "pro012_current_access",
       attackedServerId: "rd",
@@ -880,7 +923,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     agendaState.timingPoint = "access.resolve_card";
     expect(
       getLegalActions(agendaState, "runner").some(
-        (candidate) => candidate.payload?.hiddenResourceCurrentAccessTrash === true,
+        (candidate) =>
+          candidate.payload?.hiddenResourceCurrentAccessTrash === true,
       ),
     ).toBe(false);
   });
@@ -947,7 +991,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       publicRevealDefinitionId: "onr_proteus_129_back-door-to-netwatch",
       badPublicityAdded: 1,
     });
-    const replay = replayEvents(before, state.eventLog.slice(before.eventLog.length));
+    const replay = replayEvents(
+      before,
+      state.eventLog.slice(before.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
@@ -1010,9 +1057,21 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     addRunnerGripCard(state, "onr_v1_010_cascade", "pro012_grip_1");
     addRunnerGripCard(state, "onr_v1_011_cloak", "pro012_grip_2");
     addRunnerGripCard(state, "onr_v1_012_clown", "pro012_grip_3");
-    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_1");
-    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_2");
-    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_3");
+    addCorpHqCard(
+      state,
+      "onr_v1_188_ai-chief-financial-officer",
+      "pro012_hq_1",
+    );
+    addCorpHqCard(
+      state,
+      "onr_v1_188_ai-chief-financial-officer",
+      "pro012_hq_2",
+    );
+    addCorpHqCard(
+      state,
+      "onr_v1_188_ai-chief-financial-officer",
+      "pro012_hq_3",
+    );
     const hqCountBefore = state.corp.hq.length;
     const archivesCountBefore = state.corp.archives.length;
     const randomBefore = state.randomCounter;
@@ -1023,7 +1082,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       source: "pro012_test",
     });
     expect(summary.flatline).toBe(false);
-    expect(state.pendingChoice?.source).toContain("hidden_resource.post_meat_damage");
+    expect(state.pendingChoice?.source).toContain(
+      "hidden_resource.post_meat_damage",
+    );
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
       "Get Ready to Rumble",
     );

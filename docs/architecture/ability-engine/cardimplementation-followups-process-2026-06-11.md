@@ -338,6 +338,24 @@ Checks:
 - Grün: `corepack pnpm check:ai`
 - Grün: `git diff --check`
 
+## P6 Ergebnis
+
+Umgesetzt:
+
+- Alle durch den Arbeitsbranch veränderten TS-/MJS-/MD-Dateien gezielt mit Prettier formatiert.
+- Die sichtbare Einrückung in `scored-agenda-flow.ts` ist korrigiert; der `choices.startDataFortReclamation`-Eintrag steht wieder in der Host-Struktur.
+- Primitive-Payload-Felder bleiben konsistent: `cardImplementationAbilityId` und `cardImplementationAbilityKey` werden intern weitergegeben, öffentliche Hidden-Resource-Payloads geben diese Felder nicht preis.
+- Keine öffentliche Legacy-Payload wurde umbenannt.
+
+Checks:
+
+- Rot, Baseline außerhalb dieses Pakets: `corepack pnpm format:check` meldet repo-weit 1774 nicht formatierte Dateien.
+- Rot, Baseline außerhalb dieses Pakets: `corepack pnpm exec prettier --check --end-of-line auto .` meldet repo-weit 1734 nicht formatierte Dateien.
+- Grün: `corepack pnpm exec prettier --check -- $(git diff --name-only main...HEAD)`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.

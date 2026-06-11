@@ -83,7 +83,9 @@ function requireHqToNewRemoteInstallRezSequence(
     sequence.temporaryCredits.returnUnused !== true ||
     sequence.optionalRez !== true
   )
-    throw new Error("Der Hidden-Zone-Install-/Rez-Sequenzvertrag ist ungueltig.");
+    throw new Error(
+      "Der Hidden-Zone-Install-/Rez-Sequenzvertrag ist ungueltig.",
+    );
   return sequence;
 }
 
@@ -228,7 +230,9 @@ export function resolveSecurityPurgeAgendaPurge(
     stateChanged: true,
     installedCardIds: installedIce.map((entry) => entry.cardId),
     trashedCardIds: trashedIds,
-    shownCardDefinitionIds: revealedIds.map((id) => host.cards.definitionFor(id).id),
+    shownCardDefinitionIds: revealedIds.map(
+      (id) => host.cards.definitionFor(id).id,
+    ),
     shownCount: revealedIds.length,
     resolvedPayload: host.legalAction.payload ?? {},
   };
@@ -247,7 +251,8 @@ export function startDataFortReclamationChoice(
     effectKind: "install_rez_sequence",
     abilityKey: sequence.abilityKey,
   });
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.corp.hq
     .filter((cardId) =>
       host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
@@ -292,7 +297,10 @@ export function startDataFortReclamationChoice(
     cardImplementationTemporaryCreditBudget: sequence.temporaryCredits.amount,
     dataFortReclamationChoiceOpened: true,
     dataFortReclamationCandidateCount: options.length,
-    dataFortReclamationMaxSelections: Math.min(sequence.maxCards, options.length),
+    dataFortReclamationMaxSelections: Math.min(
+      sequence.maxCards,
+      options.length,
+    ),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
   };
@@ -302,7 +310,10 @@ export function startDataFortReclamationChoice(
 function resolvePriorityRequisitionChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine Priority-Requisition-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine Priority-Requisition-Choice offen.",
+  );
   if (host.legalAction.side !== "corp")
     throw new Error("Nur die Korp darf Priority Requisition resolven.");
   const [, agendaId] = choice.source.split(":");
@@ -312,7 +323,9 @@ function resolvePriorityRequisitionChoice(
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
       "score_rez_installed_ice_at_no_cost"
   ) {
-    throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
+    throw new Error(
+      "Priority Requisition ist nicht mehr in der Korp-ScoreArea.",
+    );
   }
   const selectedOptionIds = selectedChoiceIds(
     requirePlayerAction(host).selectedChoices,
@@ -354,7 +367,10 @@ function resolvePriorityRequisitionChoice(
       .map((option) => option.value)
       .filter((value): value is string => typeof value === "string"),
   );
-  if (!optionValues.has(targetId) || !host.cards.isPriorityRequisitionCandidate(targetId))
+  if (
+    !optionValues.has(targetId) ||
+    !host.cards.isPriorityRequisitionCandidate(targetId)
+  )
     throw new Error("Das Priority-Requisition-Ziel ist nicht mehr gueltig.");
   const instance = host.cards.mustInstance(targetId);
   host.state.cardInstances[targetId] = {
@@ -369,7 +385,8 @@ function resolvePriorityRequisitionChoice(
     hiddenZoneAction: "v162_priority_requisition_free_rez",
     priorityRequisitionFreeRez: true,
     priorityRequisitionTarget: targetId,
-    priorityRequisitionTargetDefinitionId: host.cards.definitionFor(targetId).id,
+    priorityRequisitionTargetDefinitionId:
+      host.cards.definitionFor(targetId).id,
     rezCostPaid: 0,
   };
   return {
@@ -614,8 +631,8 @@ function resolveHqToNewRemoteInstallRezRezChoice(
   if (selectedSet.size !== selectedIds.length)
     throw new Error("Eine Rez-Karte wurde doppelt gewaehlt.");
   if (
-    selectedIds.some((cardId) =>
-      !isDataFortReclamationRezCandidate(host, cardId, serverId),
+    selectedIds.some(
+      (cardId) => !isDataFortReclamationRezCandidate(host, cardId, serverId),
     )
   )
     throw new Error("Eine gewaehlte Karte kann nicht gerezzed werden.");
@@ -705,10 +722,7 @@ function isDataFortReclamationRezCandidate(
   const definition = host.cards.definitionFor(cardId);
   if (instance.rezzed) return false;
   if (instance.zone.side !== "corp") return false;
-  if (
-    instance.zone.zone !== "serverIce" &&
-    instance.zone.zone !== "serverRoot"
-  )
+  if (instance.zone.zone !== "serverIce" && instance.zone.zone !== "serverRoot")
     return false;
   if (instance.zone.serverId !== serverId) return false;
   if (definition.type === "ice") return instance.zone.zone === "serverIce";
@@ -727,7 +741,9 @@ function requireChoice(
   return choice;
 }
 
-function requirePlayerAction(host: CorpInstallRezSequenceHandlerHost): PlayerAction {
+function requirePlayerAction(
+  host: CorpInstallRezSequenceHandlerHost,
+): PlayerAction {
   if (!host.playerAction) throw new Error("Diese Choice hat keine Auswahl.");
   return host.playerAction;
 }
@@ -738,7 +754,9 @@ function selectedChoiceCardIds(
 ): CardInstanceId[] {
   return selectedChoiceIds(requirePlayerAction(host).selectedChoices).map(
     (optionId) => {
-      const option = choice.options.find((candidate) => candidate.id === optionId);
+      const option = choice.options.find(
+        (candidate) => candidate.id === optionId,
+      );
       if (typeof option?.value !== "string")
         throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
       return option.value;

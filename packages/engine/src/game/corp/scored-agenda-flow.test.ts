@@ -85,7 +85,11 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     babylon: definition("project_babylon", "agenda", "Project Babylon"),
     boon: definition("corporate_boon", "agenda", "Corporate Boon"),
     code_agenda: definition("encryption_breakthrough", "agenda", "Encryption"),
-    ice_transmutation: definition("ice_transmutation", "agenda", "Transmutation"),
+    ice_transmutation: definition(
+      "ice_transmutation",
+      "agenda",
+      "Transmutation",
+    ),
     code_gate_1: definition("code_gate_1_def", "ice", "Code Gate 1", [
       "code_gate",
     ]),
@@ -114,11 +118,15 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       advancementCounters: 7,
     },
     code_gate_1: {
-      ...instance("code_gate_1" as CardInstanceId, definitions.code_gate_1!.id, {
-        side: "corp",
-        zone: "serverIce",
-        serverId: "remote_1" as Exclude<ServerId, "new_remote">,
-      }),
+      ...instance(
+        "code_gate_1" as CardInstanceId,
+        definitions.code_gate_1!.id,
+        {
+          side: "corp",
+          zone: "serverIce",
+          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+        },
+      ),
       faceup: false,
       rezzed: false,
     },
@@ -139,7 +147,10 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
   const callbacks = {
     dataFort: [] as CardInstanceId[],
     priority: [] as CardInstanceId[],
-    downsizing: [] as Array<{ cardId: CardInstanceId; creditPerAgendaPoint: number }>,
+    downsizing: [] as Array<{
+      cardId: CardInstanceId;
+      creditPerAgendaPoint: number;
+    }>,
     securityPurge: 0,
     cleanup: 0,
   };
@@ -162,7 +173,8 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
       definitionFor: (cardId) =>
-        definitions[cardId] ?? definitions[cardInstances[cardId]?.definitionId ?? ""]!,
+        definitions[cardId] ??
+        definitions[cardInstances[cardId]?.definitionId ?? ""]!,
       mustInstance: (cardId) => cardInstances[cardId]!,
       scoredAgendaForDefinition: (cardDefinition) =>
         input.implementations?.[cardDefinition.id],
@@ -208,7 +220,8 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     flags: {
       markScoredBlackOpsAgendaThisTurn: () => undefined,
       employeeEmpowermentResolvedSourceIds: () => employeeResolved,
-      markEmployeeEmpowermentResolved: (cardId) => employeeResolved.push(cardId),
+      markEmployeeEmpowermentResolved: (cardId) =>
+        employeeResolved.push(cardId),
     },
     effects: {
       executeOnScore: () => undefined,
@@ -276,11 +289,15 @@ describe("scored agenda flow", () => {
       legalAction,
       instances: {
         boon: {
-          ...instance("boon" as CardInstanceId, "corporate_boon" as CardDefinitionId, {
-            side: "corp",
-            zone: "serverRoot",
-            serverId: "remote_1" as Exclude<ServerId, "new_remote">,
-          }),
+          ...instance(
+            "boon" as CardInstanceId,
+            "corporate_boon" as CardDefinitionId,
+            {
+              side: "corp",
+              zone: "serverRoot",
+              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+            },
+          ),
           advancementCounters: 3,
         },
       },
@@ -309,11 +326,15 @@ describe("scored agenda flow", () => {
       legalAction,
       instances: {
         code_agenda: {
-          ...instance("code_agenda" as CardInstanceId, "encryption_breakthrough" as CardDefinitionId, {
-            side: "corp",
-            zone: "serverRoot",
-            serverId: "remote_1" as Exclude<ServerId, "new_remote">,
-          }),
+          ...instance(
+            "code_agenda" as CardInstanceId,
+            "encryption_breakthrough" as CardDefinitionId,
+            {
+              side: "corp",
+              zone: "serverRoot",
+              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+            },
+          ),
           advancementCounters: 3,
         },
       },
@@ -397,8 +418,7 @@ describe("scored agenda flow", () => {
       "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
     expect(legalAction.payload).toMatchObject({
-      cardImplementationAbilityId:
-        "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
@@ -416,8 +436,7 @@ describe("scored agenda flow", () => {
     expect(result.handled).toBe(true);
     expect(host.state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
-      cardImplementationAbilityId:
-        "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
@@ -447,11 +466,15 @@ describe("scored agenda flow", () => {
       },
       instances: {
         ice_1: {
-          ...instance("ice_1" as CardInstanceId, "simple_ice" as CardDefinitionId, {
-            side: "corp",
-            zone: "serverIce",
-            serverId: "remote_1" as Exclude<ServerId, "new_remote">,
-          }),
+          ...instance(
+            "ice_1" as CardInstanceId,
+            "simple_ice" as CardDefinitionId,
+            {
+              side: "corp",
+              zone: "serverIce",
+              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+            },
+          ),
           rezzed: false,
           faceup: false,
         },

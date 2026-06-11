@@ -61,7 +61,10 @@ export type ScoredAgendaFlowHost = {
       counterType: "boon" | "mark",
       amount: number,
     ) => void;
-    cardCounter: (cardId: CardInstanceId, counterType: "boon" | "mark") => number;
+    cardCounter: (
+      cardId: CardInstanceId,
+      counterType: "boon" | "mark",
+    ) => number;
   };
   credits: {
     gainCredits: (side: "corp", amount: number) => void;
@@ -73,7 +76,10 @@ export type ScoredAgendaFlowHost = {
     markEmployeeEmpowermentResolved: (cardId: CardInstanceId) => void;
   };
   effects: {
-    executeOnScore: (definition: CardDefinition, cardId: CardInstanceId) => void;
+    executeOnScore: (
+      definition: CardDefinition,
+      cardId: CardInstanceId,
+    ) => void;
     appendEmployeeEmpowermentDrawEffect: (
       cardId: CardInstanceId,
       drawnCount: number,
@@ -83,7 +89,7 @@ export type ScoredAgendaFlowHost = {
     drawCorpCard: () => void;
   };
   choices: {
-  startDataFortReclamation: (cardId: CardInstanceId) => void;
+    startDataFortReclamation: (cardId: CardInstanceId) => void;
     startPriorityRequisition: (cardId: CardInstanceId) => void;
     startCorporateDownsizing: (
       cardId: CardInstanceId,
@@ -238,7 +244,8 @@ export function scoreAgenda(
     overadvancedBy,
   };
   if (state.pendingChoice) result.pendingChoice = state.pendingChoice;
-  if (legalAction?.payload) result.resolvedPayload = legalAction.payload as ScoredAgendaPayload;
+  if (legalAction?.payload)
+    result.resolvedPayload = legalAction.payload as ScoredAgendaPayload;
   return result;
 }
 
@@ -366,7 +373,9 @@ function startScoreTimeChoices(
 ): void {
   const legalAction = host.legalAction;
   if (!legalAction) return;
-  if (scoredAgenda?.kind === "score_install_hq_cards_into_new_remote_then_rez") {
+  if (
+    scoredAgenda?.kind === "score_install_hq_cards_into_new_remote_then_rez"
+  ) {
     host.choices.startDataFortReclamation(cardId);
   }
   if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {
@@ -398,7 +407,9 @@ function startScoreTimeChoices(
           ? instanceBefore.zone.serverId
           : undefined;
     if (!selectedServerId || selectedServerId === "new_remote")
-      throw new Error("Security Net Optimization braucht ein gueltiges Remote.");
+      throw new Error(
+        "Security Net Optimization braucht ein gueltiges Remote.",
+      );
     host.zones.mustServer(selectedServerId as Exclude<ServerId, "new_remote">);
     host.state.cardInstances[cardId] = {
       ...host.cards.mustInstance(cardId),
@@ -411,7 +422,9 @@ function startScoreTimeChoices(
       securityNetOptimizationServerId: selectedServerId,
     };
   }
-  if (scoredAgenda?.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits") {
+  if (
+    scoredAgenda?.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits"
+  ) {
     host.choices.startCorporateDownsizing(
       cardId,
       scoredAgenda.creditPerAgendaPoint,
@@ -429,21 +442,30 @@ export function handleScoredAgendaFlowChoice(
   const source = host.state.pendingChoice?.source ?? "";
   if (source.startsWith("v162.scored_subtype_reveal")) {
     resolveScoredSubtypeRevealChoice(host);
-    const result: ScoredAgendaFlowResult = { handled: true, stateChanged: true };
+    const result: ScoredAgendaFlowResult = {
+      handled: true,
+      stateChanged: true,
+    };
     if (host.legalAction?.payload)
       result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
     return result;
   }
   if (isScoredIceMarkModifierChoiceSource(source)) {
     resolveScoredRezzedIceMarkModifierChoice(host);
-    const result: ScoredAgendaFlowResult = { handled: true, stateChanged: true };
+    const result: ScoredAgendaFlowResult = {
+      handled: true,
+      stateChanged: true,
+    };
     if (host.legalAction?.payload)
       result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
     return result;
   }
   if (source.startsWith("v1912.employee_empowerment_start_draw")) {
     resolveEmployeeEmpowermentStartDrawChoice(host);
-    const result: ScoredAgendaFlowResult = { handled: true, stateChanged: true };
+    const result: ScoredAgendaFlowResult = {
+      handled: true,
+      stateChanged: true,
+    };
     if (host.legalAction?.payload)
       result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
     return result;
@@ -504,8 +526,7 @@ function scoredEmployeeEmpowermentSourceIds(
     .filter(
       (cardId) =>
         host.cards.definitionFor(cardId).id ===
-          host.constants.employeeEmpowermentId &&
-        !resolved.has(cardId),
+          host.constants.employeeEmpowermentId && !resolved.has(cardId),
     )
     .sort();
 }
@@ -516,7 +537,10 @@ function resolveEmployeeEmpowermentStartDrawChoice(
   const legalAction = requireLegalAction(host);
   const playerAction = requirePlayerAction(host);
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1912.employee_empowerment_start_draw"))
+  if (
+    !choice ||
+    !choice.source.startsWith("v1912.employee_empowerment_start_draw")
+  )
     throw new Error("Es ist keine Employee-Empowerment-Choice offen.");
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf Employee Empowerment nutzen.");
@@ -524,7 +548,9 @@ function resolveEmployeeEmpowermentStartDrawChoice(
     host.state.phase !== "corp_draw_phase" ||
     host.state.timingPoint !== "corp_draw.mandatory_draw"
   )
-    throw new Error("Employee Empowerment ist nur am Start des Korp-Zugs nutzbar.");
+    throw new Error(
+      "Employee Empowerment ist nur am Start des Korp-Zugs nutzbar.",
+    );
   const [, sourceCardId] = choice.source.split(":");
   if (
     !sourceCardId ||
@@ -532,7 +558,9 @@ function resolveEmployeeEmpowermentStartDrawChoice(
     host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
       host.constants.employeeEmpowermentId
   )
-    throw new Error("Employee Empowerment ist nicht mehr in der Korp-ScoreArea.");
+    throw new Error(
+      "Employee Empowerment ist nicht mehr in der Korp-ScoreArea.",
+    );
 
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
   const useDraw = selected === "draw";
@@ -562,7 +590,9 @@ function resolveEmployeeEmpowermentStartDrawChoice(
 function scoredSubtypeRevealAgendaAbility(
   subtype: ScoredSubtypeRevealSubtype,
 ): "encryption_breakthrough" | "superior_net_barriers" {
-  return subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough";
+  return subtype === "wall"
+    ? "superior_net_barriers"
+    : "encryption_breakthrough";
 }
 
 function scoredSubtypeRevealHiddenZoneAction(
@@ -575,7 +605,9 @@ function scoredSubtypeRevealHiddenZoneAction(
     : "encryption_breakthrough_reveal_code_gates";
 }
 
-function scoredSubtypeRevealPrompt(subtype: ScoredSubtypeRevealSubtype): string {
+function scoredSubtypeRevealPrompt(
+  subtype: ScoredSubtypeRevealSubtype,
+): string {
   return subtype === "wall"
     ? "Superior Net Barriers: Walls aufdecken"
     : "Encryption Breakthrough: Code Gates aufdecken";
@@ -655,7 +687,9 @@ function resolveScoredSubtypeRevealChoice(host: ScoredAgendaFlowHost): void {
     throw new Error("Nur die Korp darf diese Reveal-Choice resolven.");
   const [, agendaId, rawSubtype, rawCreditPer] = choice.source.split(":");
   const subtype =
-    rawSubtype === "wall" || rawSubtype === "code_gate" ? rawSubtype : undefined;
+    rawSubtype === "wall" || rawSubtype === "code_gate"
+      ? rawSubtype
+      : undefined;
   const creditPer = Number(rawCreditPer);
   if (!agendaId || !subtype || !Number.isInteger(creditPer) || creditPer < 0)
     throw new Error("Die Scored-Subtype-Reveal-Choice ist ungueltig.");
@@ -838,7 +872,9 @@ function resolveScoredRezzedIceMarkModifierChoice(
       host.cards.definitionFor(agendaId as CardInstanceId),
     )?.kind !== "select_rezzed_ice_mark_modifier"
   )
-    throw new Error("Das Scored-ICE-Mark-Modifier-Primitive ist nicht gescored.");
+    throw new Error(
+      "Das Scored-ICE-Mark-Modifier-Primitive ist nicht gescored.",
+    );
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length !== 1)
     throw new Error(
@@ -868,12 +904,16 @@ function resolveScoredRezzedIceMarkModifierChoice(
     scoredAgenda.counterAmount,
   );
   delete host.state.pendingChoice;
-  const markCount = host.counters.cardCounter(targetIceId, scoredAgenda.counterType);
+  const markCount = host.counters.cardCounter(
+    targetIceId,
+    scoredAgenda.counterType,
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...cardImplementationPrimitivePayload({
       sourceCardId: agendaId as CardInstanceId,
-      sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+      sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId)
+        .id,
       primitiveKind: scoredAgenda.kind,
       effectKind: "mark_modifier",
       abilityKey: scoredAgenda.abilityKey,

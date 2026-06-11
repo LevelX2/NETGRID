@@ -42,7 +42,8 @@ export function cardImplementationPrimitivePayload(input: {
   effectKind?: CardImplementationEffectKind;
   abilityKey?: string | undefined;
 }): PrimitivePayload {
-  const abilityKey = input.abilityKey ?? defaultCardImplementationAbilityKey(input);
+  const abilityKey =
+    input.abilityKey ?? defaultCardImplementationAbilityKey(input);
   return {
     cardImplementationAbilityId: `${input.sourceDefinitionId}:${abilityKey}`,
     cardImplementationAbilityKey: abilityKey,
@@ -94,9 +95,11 @@ export function hiddenSuccessfulRunBeforeAccessEffect(
   } as SuccessfulRunBeforeAccessEffect;
 }
 
-export function scoredRezzedIceMarkModifier(input: {
-  abilityKey?: string;
-} = {}): ScoredRezzedIceMarkModifier {
+export function scoredRezzedIceMarkModifier(
+  input: {
+    abilityKey?: string;
+  } = {},
+): ScoredRezzedIceMarkModifier {
   return {
     kind: "select_rezzed_ice_mark_modifier",
     abilityKey: input.abilityKey ?? "scored_ice_mark:0",

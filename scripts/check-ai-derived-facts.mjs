@@ -837,9 +837,8 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  const hasScoredAgendaDefinition = /scoredAgenda:\s*(?:\{|[A-Za-z_$][\w$]*\s*\()/.test(
-    implementationText,
-  );
+  const hasScoredAgendaDefinition =
+    /scoredAgenda:\s*(?:\{|[A-Za-z_$][\w$]*\s*\()/.test(implementationText);
   if (
     hasScoredAgendaDefinition ||
     (/lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText) &&
@@ -945,9 +944,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     /kind:\s*"priority_requisition_rez_ice_at_no_cost"/.test(
       implementationText,
     ) ||
-    /kind:\s*"score_rez_installed_ice_at_no_cost"/.test(
-      implementationText,
-    ) ||
+    /kind:\s*"score_rez_installed_ice_at_no_cost"/.test(implementationText) ||
     (expectsKind("effect:rez") &&
       expectsKind("effect:rez_discount") &&
       /lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText))
@@ -1483,7 +1480,9 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"shuffle_hq_into_rd_then_draw_same_count"/.test(implementationText)) {
+  if (
+    /kind:\s*"shuffle_hq_into_rd_then_draw_same_count"/.test(implementationText)
+  ) {
     addEffect(facts, {
       kind: "zone_shuffle",
       timing: "action",
@@ -1709,11 +1708,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     const coverageCandidates = subtypeChoiceValues(implementationText);
     const configurableCoverage =
       coverageCandidates.length > 0 &&
-      /matches:\s*\{\s*kind:\s*"selected_ice_subtype"/.test(
-        implementationText,
-      );
+      /matches:\s*\{\s*kind:\s*"selected_ice_subtype"/.test(implementationText);
     const oneTimeModeChoice =
-      configurableCoverage && /limit:\s*"once_until_selected"/.test(implementationText);
+      configurableCoverage &&
+      /limit:\s*"once_until_selected"/.test(implementationText);
     const reconfigurableType =
       configurableCoverage &&
       /icebreakerSubtypeChange:\s*\{/.test(implementationText) &&
@@ -1733,7 +1731,8 @@ function deriveFromImplementation(card, implementationText, hint) {
     facts.breakerProfile = {
       pumpCost,
       breakCost,
-      confidence: coverage.length > 0 || configurableCoverage ? "high" : "medium",
+      confidence:
+        coverage.length > 0 || configurableCoverage ? "high" : "medium",
       source: "implementation.icebreakerAbilities",
     };
     if (coverage.length > 0) {
@@ -1825,12 +1824,14 @@ function deriveFromImplementation(card, implementationText, hint) {
 
   if (/hostedProgramCapacity:\s*\{/.test(implementationText)) {
     const rawHostedCapacity = propertyNumber(implementationText, "capacityMu");
-    const hostedCapacity = rawHostedCapacity === 99 ? undefined : rawHostedCapacity;
-    const hostTarget = /allowedProgramSubtypes:\s*\[[\s\S]{0,120}?"icebreaker"/.test(
-      implementationText,
-    )
-      ? "icebreaker"
-      : "program";
+    const hostedCapacity =
+      rawHostedCapacity === 99 ? undefined : rawHostedCapacity;
+    const hostTarget =
+      /allowedProgramSubtypes:\s*\[[\s\S]{0,120}?"icebreaker"/.test(
+        implementationText,
+      )
+        ? "icebreaker"
+        : "program";
     addEffect(facts, {
       kind: "program_host",
       timing: "persistent",
@@ -1853,7 +1854,11 @@ function deriveFromImplementation(card, implementationText, hint) {
       avoid: ["target_would_break_host_limit"],
       hiddenInfoPolicy: "public_or_controller_known_only",
     });
-    if (/hostedProgramModifiers:\s*\[[\s\S]*?icebreaker_strength[\s\S]*?reduce/.test(implementationText)) {
+    if (
+      /hostedProgramModifiers:\s*\[[\s\S]*?icebreaker_strength[\s\S]*?reduce/.test(
+        implementationText,
+      )
+    ) {
       addEffect(facts, {
         kind: "global_modifier",
         timing: "persistent",
@@ -2247,10 +2252,9 @@ function deriveFromImplementation(card, implementationText, hint) {
         ? "during_run"
         : "action",
       scope: "runner",
-      source:
-        /search_stack_install|searchStackInstallEffect/.test(
-          implementationText,
-        )
+      source: /search_stack_install|searchStackInstallEffect/.test(
+        implementationText,
+      )
         ? "implementation.effect.search_stack_install"
         : "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
@@ -2266,8 +2270,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     ) {
       addTargetProfile(facts, {
         zone: "stack",
-        targetCardType:
-          valueNear(implementationText, "filter") ?? "program",
+        targetCardType: valueNear(implementationText, "filter") ?? "program",
         installsTarget: true,
         installCost: valueNear(implementationText, "installCost"),
         shuffleAfter:
@@ -2297,7 +2300,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       scope: searchesTrash ? "heap" : "stack",
       resource: "cards",
       amount: looksTopStack
-        ? propertyNumber(implementationText, "count") ?? 5
+        ? (propertyNumber(implementationText, "count") ?? 5)
         : undefined,
       source: searchesTrash
         ? "implementation.effect.search_trash_to_grip"
@@ -3833,15 +3836,12 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (facts.breakerProfile?.sideEffects)
     facts.breakerProfile.sideEffects.sort();
   if (facts.targetProfiles) {
-    facts.targetProfiles = uniqueBy(
-      facts.targetProfiles,
-      (targetProfile) =>
-        targetProfile.schemaVersion === "target-profile-v1"
-          ? JSON.stringify(targetProfile)
-          :
-        `${targetProfile.zone ?? ""}:${targetProfile.targetCardType ?? ""}:${
-          targetProfile.installsTarget ?? ""
-        }:${targetProfile.lookCount ?? ""}`,
+    facts.targetProfiles = uniqueBy(facts.targetProfiles, (targetProfile) =>
+      targetProfile.schemaVersion === "target-profile-v1"
+        ? JSON.stringify(targetProfile)
+        : `${targetProfile.zone ?? ""}:${targetProfile.targetCardType ?? ""}:${
+            targetProfile.installsTarget ?? ""
+          }:${targetProfile.lookCount ?? ""}`,
     ).sort((a, b) =>
       `${a.zone ?? ""}:${a.targetCardType ?? ""}`.localeCompare(
         `${b.zone ?? ""}:${b.targetCardType ?? ""}`,
@@ -4293,7 +4293,10 @@ function validateDerivedFacts(derivedFacts) {
         "unknown_target_profile_target_type",
         issues,
       );
-      if (typeof targetProfile.purpose !== "string" || targetProfile.purpose === "") {
+      if (
+        typeof targetProfile.purpose !== "string" ||
+        targetProfile.purpose === ""
+      ) {
         issues.push({
           kind: "invalid_target_profile_shape",
           message: `Expected non-empty string at targetProfiles[${index}].purpose.`,
@@ -4310,9 +4313,7 @@ function validateDerivedFacts(derivedFacts) {
           issues,
         );
       }
-      for (const [avoidIndex, avoid] of (
-        targetProfile.avoid ?? []
-      ).entries()) {
+      for (const [avoidIndex, avoid] of (targetProfile.avoid ?? []).entries()) {
         validateKnown(
           avoid,
           KNOWN_TARGET_PROFILE_AVOIDS,
@@ -4507,9 +4508,7 @@ function functionCallNumber(text, functionName, argumentIndex = 0) {
   const escaped = functionName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const match = text.match(new RegExp(`${escaped}\\s*\\(([^)]*)\\)`));
   if (!match) return undefined;
-  const numbers = [...match[1].matchAll(/\d+/g)].map((item) =>
-    Number(item[0]),
-  );
+  const numbers = [...match[1].matchAll(/\d+/g)].map((item) => Number(item[0]));
   return numbers[argumentIndex];
 }
 
@@ -4520,17 +4519,11 @@ function functionCallPropertyNumber(text, functionName, field) {
     new RegExp(`${escapedFunction}\\s*\\(\\s*\\{([\\s\\S]*?)\\}\\s*\\)`),
   );
   if (!match) return undefined;
-  const fieldMatch = match[1].match(
-    new RegExp(`${escapedField}:\\s*(\\d+)`),
-  );
+  const fieldMatch = match[1].match(new RegExp(`${escapedField}:\\s*(\\d+)`));
   return fieldMatch ? Number(fieldMatch[1]) : undefined;
 }
 
-function hiddenSuccessfulRunBeforeAccessFactoryBlock(
-  text,
-  server,
-  effectKind,
-) {
+function hiddenSuccessfulRunBeforeAccessFactoryBlock(text, server, effectKind) {
   const calls = text.matchAll(
     /hiddenSuccessfulRunBeforeAccessEffect\s*\(\s*\{([\s\S]*?)\}\s*\)/g,
   );

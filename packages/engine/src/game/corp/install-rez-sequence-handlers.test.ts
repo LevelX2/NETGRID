@@ -106,7 +106,9 @@ type MakeHostInput = {
   rezRootCalls?: CardInstanceId[];
 };
 
-function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost {
+function makeHost(
+  input: MakeHostInput = {},
+): CorpInstallRezSequenceHandlerHost {
   const definitions: Record<string, CardDefinition> = {
     data_fort_agenda: definition(
       "score_install_hq_cards_into_new_remote_then_rez",
@@ -118,7 +120,11 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
       "agenda",
       "Priority Requisition",
     ),
-    security_purge_agenda: definition("security_purge", "agenda", "Security Purge"),
+    security_purge_agenda: definition(
+      "security_purge",
+      "agenda",
+      "Security Purge",
+    ),
     ice_1: definition("ice_1_def", "ice", "ICE 1", 3),
     ice_2: definition("ice_2_def", "ice", "ICE 2", 4),
     asset_1: definition("asset_1_def", "asset", "Asset 1", 6),
@@ -173,7 +179,8 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
-      definitionFor: (cardId) => definitions[cardId] ?? definition(cardId, "operation"),
+      definitionFor: (cardId) =>
+        definitions[cardId] ?? definition(cardId, "operation"),
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);
@@ -192,7 +199,8 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
         cardDefinition.type === "agenda" ||
         cardDefinition.type === "upgrade",
       canInstallCorpRootCardInServer: (cardDefinition, server) => {
-        if (cardDefinition.type === "upgrade") return server.kind !== "archives";
+        if (cardDefinition.type === "upgrade")
+          return server.kind !== "archives";
         if (
           server.kind !== "remote" ||
           (cardDefinition.type !== "asset" && cardDefinition.type !== "agenda")
@@ -254,7 +262,9 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
         return server;
       },
       mustServer: (serverId) => {
-        const found = state.corp.servers.find((server) => server.id === serverId);
+        const found = state.corp.servers.find(
+          (server) => server.id === serverId,
+        );
         if (!found) throw new Error(`missing server ${serverId}`);
         return found;
       },
@@ -302,10 +312,9 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.pendingChoice?.source).toBe(
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
     );
-    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
-      "asset_1",
-      "ice_1",
-    ]);
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
         "score_install_hq_cards_into_new_remote_then_rez:hq_to_new_remote_install_rez:0",
@@ -455,7 +464,13 @@ describe("corp install rez sequence handlers", () => {
       },
       pendingChoice: selectCardsChoice(
         "v1922.data_fort_reclamation:data_fort_agenda:8",
-        ["asset_1", "ice_1", "upgrade_1", "extra_1", "extra_2"] as CardInstanceId[],
+        [
+          "asset_1",
+          "ice_1",
+          "upgrade_1",
+          "extra_1",
+          "extra_2",
+        ] as CardInstanceId[],
         4,
       ),
       playerAction: playerAction([
