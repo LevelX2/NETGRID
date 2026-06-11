@@ -836,8 +836,11 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
+  const hasScoredAgendaDefinition = /scoredAgenda:\s*(?:\{|[A-Za-z_$][\w$]*\s*\()/.test(
+    implementationText,
+  );
   if (
-    /scoredAgenda:\s*\{/.test(implementationText) ||
+    hasScoredAgendaDefinition ||
     (/lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText) &&
       expectsKind("condition:requires_scored_agenda"))
   ) {
@@ -1014,13 +1017,18 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (
+  const hasHqToNewRemoteInstallRezSequence =
     /kind:\s*"score_install_hq_cards_into_new_remote_then_rez"/.test(
       implementationText,
-    )
-  ) {
+    ) || /hqToNewRemoteInstallRezSequence\s*\(/.test(implementationText);
+  if (hasHqToNewRemoteInstallRezSequence) {
     const temporaryCreditAmount =
       propertyNumber(implementationText, "temporaryCredits") ??
+      functionCallPropertyNumber(
+        implementationText,
+        "hqToNewRemoteInstallRezSequence",
+        "temporaryCredits",
+      ) ??
       propertyNumber(implementationText, "amount");
     addEffect(facts, {
       kind: "economy",
@@ -1160,9 +1168,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (
-    /kind:\s*"select_rezzed_ice_mark_modifier"/.test(implementationText)
-  ) {
+  const hasScoredRezzedIceMarkModifier =
+    /kind:\s*"select_rezzed_ice_mark_modifier"/.test(implementationText) ||
+    /scoredRezzedIceMarkModifier\s*\(/.test(implementationText);
+  if (hasScoredRezzedIceMarkModifier) {
     addEffect(facts, {
       kind: "global_modifier",
       timing: "when_scored",

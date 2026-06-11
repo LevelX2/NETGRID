@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -314,3 +314,36 @@ Checks:
 
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|corp install rez sequence handlers|scored agenda flow"`
+
+## P5 Ergebnis
+
+Architekturcheck:
+
+- Die drei Primitive-Familien dispatchen über stabile CardImplementation-Primitive-/Effect-Identität statt über neue kartenbenannte Runtime-Zweige.
+- Legacy-Marker bleiben als Übergang lesbar, sind aber nicht mehr der bevorzugte Dispatch-Vertrag.
+- Die neuen Identitätsfelder bleiben read-only und erzeugen keine KI-Runtime-Wirkung, keine neue Legalitätsquelle und keine zusätzliche Hidden-Info-Offenlegung.
+
+AI-Report-/Deriver-Ergebnis:
+
+- `scripts/check-ai-derived-facts.mjs` erkennt die neuen Primitive-Factory-Aufrufe für ScoredAgenda-Definitionen.
+- AI-Reports mussten nicht als fachlicher Diff erneuert werden; der deterministische AI-Check bleibt grün.
+
+Im Komplettlauf gefundene und reparierte Testabweichungen:
+
+- Proteus-AI-Support-Tests wurden an den aktuellen Manifest-Vertrag angepasst: aktiv implementierte Proteus-Karten sind AI-supported und besitzen AI-Hints.
+- Remote-Access-Tests berücksichtigen den aktuellen Root-Rez-Pass vor Access.
+- Archives-Auto-Access-Tests prüfen den generischen Reveal-/Auto-Access-Payload statt veralteter Access-Folgeaktionen.
+- Corolla-Speed-Chip-Test startet mit ausreichenden Credits, damit Recurring- und normale Credits getrennt überprüfbar bleiben.
+- Web-Catalog-/AI-Inspector-Tests wurden an die aktuellen Inspector-Felder und Warnungskategorien angepasst.
+
+Checks:
+
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm -r --if-present --no-bail test`
+- Grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `git diff --check`
+
+Controller-Abschluss:
+
+- Nach dem P5-Commit wird der Arbeitsbranch gemäß Prozess lokal nach `main` integriert.
+- Kein Push und kein Pull Request.

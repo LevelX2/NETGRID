@@ -1674,7 +1674,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         agendaPointsToWin: 7,
       }),
     );
-    state.runner.credits = 1;
+    state.runner.credits = 2;
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 10;

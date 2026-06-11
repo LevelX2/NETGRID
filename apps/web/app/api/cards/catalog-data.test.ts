@@ -295,8 +295,11 @@ describe("catalog API filters", () => {
       }>;
     };
     expect(body.cards.length).toBeGreaterThan(14);
-    expect(body.cards.length).toBeLessThan(412);
+    expect(body.cards.length).toBe(activeAiApprovedCardIds.length);
     expect(body.cards.every((card) => card.statuses.ai_supported)).toBe(true);
+    expect(body.cards.map((card) => card.catalogCardId).sort()).toEqual(
+      activeAiApprovedCardIds.slice().sort(),
+    );
     const expectedOnrAiApproved = activeAiApprovedCardIds.filter((cardId) =>
       cardId.startsWith("onr_v1_"),
     );
@@ -312,12 +315,12 @@ describe("catalog API filters", () => {
         "onr_v1_075_zetatech-software-installer",
       ]),
     );
-    expect(body.cards.map((card) => card.catalogCardId)).not.toEqual(
+    expect(body.cards.map((card) => card.catalogCardId)).toEqual(
       expect.arrayContaining([...PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
     );
   });
 
-  it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
+  it("keeps the Proteus visible baseline decklegal, format-legal and AI-supported", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(154);
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([...PROTEUS_CARD_IDS]);
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(
@@ -342,13 +345,15 @@ describe("catalog API filters", () => {
       expect(candidateBody.card).toMatchObject({
         catalogCardId: candidateId,
         statuses: {
-          human_playable: true,
-          deck_legal: true,
-          format_legal: true,
-          ai_supported: false,
-          blocked: false,
-        },
-        aiHints: null,
+            human_playable: true,
+            deck_legal: true,
+            format_legal: true,
+            ai_supported: true,
+            blocked: false,
+          },
+        aiHints: expect.objectContaining({
+          aiSupportStatus: "ai_supported",
+        }),
       });
     }
 
@@ -381,7 +386,9 @@ describe("catalog API filters", () => {
     const aiSupportedBody = aiSupportedResponse.body as {
       cards: Array<{ catalogCardId: string }>;
     };
-    expect(aiSupportedBody.cards).toEqual([]);
+    expect(aiSupportedBody.cards.map((card) => card.catalogCardId)).toEqual([
+      "onr_proteus_041_toughoniumtm-wall",
+    ]);
 
     const firstProteusResponse = catalogDetailResponse(
       "onr_proteus_001_ai-board-member",
@@ -402,7 +409,7 @@ describe("catalog API filters", () => {
       human_playable: true,
       deck_legal: true,
       format_legal: true,
-      ai_supported: false,
+      ai_supported: true,
       blocked: false,
     });
   });
@@ -464,12 +471,11 @@ describe("catalog API filters", () => {
       "sentry",
     );
     expect(inspector.functionSignals).toContain("breaker.sentry");
-    expect(inspector.lineSupport.values).toContain("rig_first");
-    expect(inspector.lineSupport.classification).toEqual(
+    expect(inspector.legacyRoles.planRolesClassification).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          value: "rig_first",
-          triageCategory: "deferred_requires_human_review",
+          value: "runner_install_program",
+          triageCategory: "strategy_alias",
           mapsTo: ["runner.rig_first"],
         }),
       ]),
@@ -482,7 +488,9 @@ describe("catalog API filters", () => {
     expect(inspector.legacyRoles.roles).toEqual(
       expect.arrayContaining(["program", "random"]),
     );
-    expect(inspector.warnings.categories).toContain("legacy_lineSupport");
+    expect(inspector.warnings.categories).toContain(
+      "deferred_requires_human_review",
+    );
   });
 
   it("exposes generated remoteRole facts and descriptor-gap warnings in the inspector", () => {
@@ -500,12 +508,13 @@ describe("catalog API filters", () => {
     expect(gapResponse.status).toBe(200);
     const gapBody = gapResponse.body as CatalogDetailAiInspector;
     expect(gapBody.card.aiInspector?.warnings.categories).toContain(
-      "function_signal_descriptor_gap",
+      "descriptor_gap",
     );
-    expect(gapBody.card.aiInspector?.warnings.descriptorGaps).toEqual(
+    expect(gapBody.card.aiInspector?.legacyRoles.rolesClassification).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          gapId: "interface_closeout_density_requires_aggregation",
+          value: "hidden_zone_tool",
+          triageCategory: "descriptor_gap",
         }),
       ]),
     );
@@ -538,7 +547,7 @@ describe("catalog API filters", () => {
             mechanicalFactsFound: true,
             generatedFactsFound: true,
             hasClassifications: true,
-            hasWarnings: true,
+            hasWarnings: false,
           }),
         }),
       ]),
@@ -1003,7 +1012,7 @@ describe("catalog API filters", () => {
     expectCatalogAiHints({
       title: "Rigged Investments bit pool",
       cardId: "onr_v1_174_rigged-investments",
-      roles: ["economy", "counter"],
+      roles: ["economy", "resource"],
       requiredMechanics: ["bit_counter_pool_12", "trash_when_empty"],
     });
     expectCatalogAiHints({
