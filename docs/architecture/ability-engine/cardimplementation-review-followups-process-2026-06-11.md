@@ -295,6 +295,21 @@ Checks:
 - Grün: `corepack pnpm check:ai`
 - Grün: `git diff --check`
 
+## P5 Ergebnis
+
+Umgesetzt:
+
+- `docs/architecture/ability-engine/data-fort-reclamation-sequence-boundary-review-2026-06-11.md` ergänzt.
+- Ergebnis: Der aktuelle MVP-Schnitt bleibt für den getesteten Hauptpfad tragfähig.
+- Dokumentierte Sequenzgrenze: Regionen und andere install-on-install/rez-on-install Interaktionen benötigen einen neuen ordered-install/rez-Sequenzvertrag.
+- Kein stiller Runtime-Umbau in diesem Paket, weil der Umbau neue fachliche Runtime-Schritte, Payment-Ledger-Führung und Hidden-Info-/Replay-Verträge bräuchte.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die angegebenen Checks.
