@@ -52,6 +52,13 @@ export type AiSelfplayActionLimitSubclusterId =
   | "late_ability_reuse_low_delta"
   | "late_install_low_delta"
   | "late_run_step_stall"
+  | "run_microstep_required"
+  | "continue_chain_to_access"
+  | "break_pump_required"
+  | "jackout_loop"
+  | "continue_without_progress"
+  | "access_pending"
+  | "breach_pending"
   | "mixed_unknown";
 
 export type AiSelfplaySuspiciousDecision = {
@@ -151,6 +158,13 @@ export const SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS: AiSelfplayActionLimitSubclust
     "late_ability_reuse_low_delta",
     "late_install_low_delta",
     "late_run_step_stall",
+    "run_microstep_required",
+    "continue_chain_to_access",
+    "break_pump_required",
+    "jackout_loop",
+    "continue_without_progress",
+    "access_pending",
+    "breach_pending",
     "mixed_unknown",
   ];
 
@@ -351,8 +365,12 @@ function classifySelfplayActionLimitSubcluster(
   const counts = Object.fromEntries(
     SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
   ) as Record<AiSelfplayActionLimitSubclusterId, number>;
-  for (const entry of window) {
-    const subcluster = classifySelfplayActionLimitSubclusterEntry(entry);
+  for (const [index, entry] of window.entries()) {
+    const subcluster = classifySelfplayActionLimitSubclusterEntry(
+      entry,
+      window,
+      index,
+    );
     if (subcluster) counts[subcluster] += 1;
   }
   const ranked = SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.filter(
@@ -374,6 +392,8 @@ function classifySelfplayActionLimitSubcluster(
 
 function classifySelfplayActionLimitSubclusterEntry(
   entry: AiSimulationSummary["actionSequence"][number],
+  window: readonly AiSimulationSummary["actionSequence"][number][],
+  windowIndex: number,
 ): AiSelfplayActionLimitSubclusterId | undefined {
   const text = selfplayEntryText(entry);
   if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(text)) {
@@ -391,21 +411,73 @@ function classifySelfplayActionLimitSubclusterEntry(
   if (
     (entry.actionType === "install_card" ||
       entry.actionType === "play_event") &&
-    entryHasLowDeltaSignal(text)
+      entryHasLowDeltaSignal(text)
   ) {
     return "late_install_low_delta";
   }
+  const runStepSubcluster = classifyLateRunStepSubclusterEntry(
+    entry,
+    window,
+    windowIndex,
+    text,
+  );
+  if (runStepSubcluster) return runStepSubcluster;
+  return undefined;
+}
+
+function classifyLateRunStepSubclusterEntry(
+  entry: AiSimulationSummary["actionSequence"][number],
+  window: readonly AiSimulationSummary["actionSequence"][number][],
+  windowIndex: number,
+  text: string,
+): AiSelfplayActionLimitSubclusterId | undefined {
+  if (entry.actionType === "break_subroutine" || entry.actionType === "pump_breaker") {
+    return "break_pump_required";
+  }
+  if (entry.actionType === "jack_out") {
+    return "jackout_loop";
+  }
+  if (entry.actionType === "access_card") {
+    return /breach|remainingcount|access_queue/.test(text)
+      ? "breach_pending"
+      : "access_pending";
+  }
+  if (entry.actionType === "continue_run") {
+    if (runWindowHasAccessOrBreachAfter(window, windowIndex)) {
+      return "continue_chain_to_access";
+    }
+    if (
+      /simple_run_choice|simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest/.test(
+        text,
+      )
+    ) {
+      return "continue_without_progress";
+    }
+  }
   if (
-    (entry.actionType === "start_run" ||
-      entry.actionType === "continue_run" ||
-      entry.actionType === "access_card") &&
+    entry.actionType === "start_run" &&
     /simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest|simple_run_choice/.test(
       text,
     )
   ) {
-    return "late_run_step_stall";
+    return "run_microstep_required";
   }
   return undefined;
+}
+
+function runWindowHasAccessOrBreachAfter(
+  window: readonly AiSimulationSummary["actionSequence"][number][],
+  windowIndex: number,
+): boolean {
+  return window.slice(windowIndex + 1, windowIndex + 5).some(
+    (entry) =>
+      entry.side === "runner" &&
+      (entry.actionType === "access_card" ||
+        entry.actionType === "steal_agenda" ||
+        entry.actionType === "trash_accessed_card" ||
+        entry.actionType === "decline_trash" ||
+        /breach/.test(selfplayEntryText(entry))),
+  );
 }
 
 function classifyLateGainCreditSubclusterEntry(

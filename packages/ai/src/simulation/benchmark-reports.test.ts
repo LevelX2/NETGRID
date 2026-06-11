@@ -643,6 +643,110 @@ describe("benchmark report formatting", () => {
       subclusters.corp_late_gain_credit_without_rez_score_protection_need,
     ).toBe(1);
   });
+
+  it("does not treat run microsteps as stalls when access follows", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-run-microstep-subcluster",
+      winner: "action_limit_reached",
+      actions: 5,
+      turns: 2,
+      finalAgendaPoints: { runner: 4, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-run-microstep-subcluster",
+      eventLogLength: 5,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "start_run", {
+          selectedActionId: "run-rd",
+          targetServerId: "rd",
+          reasonCode: "runner.semantic.simple_hq_or_rnd_pressure",
+        }),
+        selfplayAction("runner", 2, "continue_run", {
+          selectedActionId: "continue-rd-1",
+          reasonCode: "runner.semantic.simple_run_choice",
+        }),
+        selfplayAction("runner", 3, "continue_run", {
+          selectedActionId: "continue-rd-2",
+          reasonCode: "runner.semantic.simple_run_choice",
+        }),
+        selfplayAction("runner", 4, "access_card", {
+          selectedActionId: "access-rd",
+          reasonCode: "runner.semantic.access_trash_steal",
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([summary]);
+
+    expect(subclusters.continue_chain_to_access).toBe(1);
+    expect(subclusters.late_run_step_stall).toBe(0);
+    expect(JSON.stringify(subclusters)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
+  it("catches continue and jack-out loops without progress", () => {
+    const continueLoop: AiSimulationSummary = {
+      seed: "selfplay-action-limit-continue-loop-subcluster",
+      winner: "action_limit_reached",
+      actions: 5,
+      turns: 2,
+      finalAgendaPoints: { runner: 4, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-continue-loop-subcluster",
+      eventLogLength: 5,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "start_run", {
+          selectedActionId: "run-rd-loop",
+          targetServerId: "rd",
+          reasonCode: "runner.semantic.simple_hq_or_rnd_pressure",
+        }),
+        selfplayAction("runner", 2, "continue_run", {
+          selectedActionId: "continue-loop-1",
+          reasonCode: "runner.semantic.simple_run_choice",
+        }),
+        selfplayAction("runner", 3, "continue_run", {
+          selectedActionId: "continue-loop-2",
+          reasonCode: "runner.semantic.simple_run_choice",
+        }),
+        selfplayAction("runner", 4, "continue_run", {
+          selectedActionId: "continue-loop-3",
+          reasonCode: "runner.semantic.simple_run_choice",
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+    const jackOutLoop: AiSimulationSummary = {
+      ...continueLoop,
+      seed: "selfplay-action-limit-jackout-loop-subcluster",
+      finalStateHash: "fnv1a:selfplay-action-limit-jackout-loop-subcluster",
+      actionSequence: [
+        selfplayAction("runner", 1, "jack_out", {
+          selectedActionId: "jackout-loop-1",
+          reasonCode: "runner.run.jack_out_safe_exit",
+        }),
+        selfplayAction("runner", 2, "jack_out", {
+          selectedActionId: "jackout-loop-2",
+          reasonCode: "runner.run.jack_out_safe_exit",
+        }),
+      ],
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([
+      continueLoop,
+      jackOutLoop,
+    ]);
+
+    expect(subclusters.continue_without_progress).toBe(1);
+    expect(subclusters.jackout_loop).toBe(1);
+    expect(subclusters.late_run_step_stall).toBe(0);
+  });
 });
 
 function selfplayAction(
