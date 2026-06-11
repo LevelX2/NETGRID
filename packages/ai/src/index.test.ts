@@ -13974,6 +13974,147 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("does not use fresh Junkyard BBS recovery for low-value top heap over basic credit", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-junkyard-low-value-target",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_junkyard_low_value_runner",
+          name: "AI Junkyard Low Value Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(recovery).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!recovery || !gain)
+      throw new Error("Missing fresh low-value Junkyard fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [recovery, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+    const targetComponent = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_junkyard_bbs_recovery_target",
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(targetComponent?.value).toBeLessThan(0);
+    expect(targetComponent?.reason).toContain("target:simple_economy_event");
+    expect(targetComponent?.reason).toContain("funding_need:false");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("uses Junkyard BBS recovery when the top heap card fixes visible breaker coverage", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-junkyard-breaker-target",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_fracter");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[ice] = {
+          ...state.cardInstances[ice]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_junkyard_breaker_runner",
+          name: "AI Junkyard Breaker Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_fracter", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_junkyard_breaker_corp",
+          name: "AI Junkyard Breaker Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_barrier_ice", quantity: 4 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(recovery).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!recovery || !gain)
+      throw new Error("Missing breaker-target Junkyard fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [recovery, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+    const targetComponent = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_junkyard_bbs_recovery_target",
+    );
+
+    expect(decision.actionId).toBe(recovery.actionId);
+    expect(targetComponent?.value).toBeGreaterThan(0);
+    expect(targetComponent?.reason).toContain(
+      "target_class:missing_breaker_coverage",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("keeps repeated runner recovery when a real funding need remains", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-funded-recovery-repeat",

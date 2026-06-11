@@ -6775,6 +6775,7 @@ function semanticRuntimeRunnerScore(
 }
 
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
+const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
 
@@ -6897,6 +6898,11 @@ function semanticRuntimeRunnerScoreComponents(
   }
   const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(input, action);
   if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
+  const junkyardRecoveryComponent = runnerJunkyardBbsRecoveryScoreComponent(
+    input,
+    action,
+  );
+  if (junkyardRecoveryComponent) components.push(junkyardRecoveryComponent);
   const lowValueRecoveryRepeatComponent =
     runnerLowValueRecoveryRepeatScoreComponent(input, action);
   if (lowValueRecoveryRepeatComponent) {
@@ -8281,6 +8287,162 @@ function runnerLowValueRecoveryRepeatScoreComponent(
       `source:${sourceDefinitionIdForAction(input, action) || action.type}`,
     ].join("|"),
   };
+}
+
+function runnerJunkyardBbsRecoveryScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (action.type !== "activated_card_ability") return undefined;
+  if (sourceDefinitionIdForAction(input, action) !== JUNKYARD_BBS_CARD_ID) {
+    return undefined;
+  }
+
+  const target = runnerJunkyardBbsRecoveryTarget(input, action);
+  const targetDefinitionId =
+    target?.definitionId ??
+    (typeof action.payload?.targetCardDefinitionId === "string"
+      ? action.payload.targetCardDefinitionId
+      : undefined);
+  const targetRoles = rolesForCardId(targetDefinitionId);
+  const targetAssessment = runnerJunkyardBbsRecoveryTargetAssessment(
+    input,
+    target,
+    targetDefinitionId,
+    targetRoles,
+  );
+  const actionOpportunityCost =
+    700 + actionClickCost(action) * 130 + actionCreditCost(action) * 110;
+  const value = targetAssessment.value - actionOpportunityCost;
+  return {
+    key: "runner_junkyard_bbs_recovery_target",
+    label: "Junkyard-BBS-Zielwert",
+    value,
+    reason: sortedUnique([
+      `target:${targetDefinitionId ?? "unknown"}`,
+      `target_value:${targetAssessment.value}`,
+      `opportunity_cost:${actionOpportunityCost}`,
+      `click_cost:${actionClickCost(action)}`,
+      `credit_cost:${actionCreditCost(action)}`,
+      ...targetAssessment.evidence,
+    ]).join("|"),
+  };
+}
+
+function runnerJunkyardBbsRecoveryTarget(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  const targetCardId =
+    typeof action.payload?.targetCardId === "string"
+      ? action.payload.targetCardId
+      : undefined;
+  if (targetCardId) return findVisibleCard(input, targetCardId);
+  const targetDefinitionId =
+    typeof action.payload?.targetCardDefinitionId === "string"
+      ? action.payload.targetCardDefinitionId
+      : undefined;
+  const visibleTopHeapCard = input.playerView.own.heapOrArchives.find(
+    (card) => card.known,
+  );
+  if (!targetDefinitionId) return visibleTopHeapCard;
+  return (
+    input.playerView.own.heapOrArchives.find(
+      (card) => card.known && card.definitionId === targetDefinitionId,
+    ) ?? visibleTopHeapCard
+  );
+}
+
+function runnerJunkyardBbsRecoveryTargetAssessment(
+  input: AiDecisionInput,
+  target: VisibleCard | undefined,
+  targetDefinitionId: string | undefined,
+  targetRoles: readonly string[],
+): { value: number; evidence: string[] } {
+  if (!targetDefinitionId) {
+    return { value: 0, evidence: ["target_class:unknown"] };
+  }
+  const values: Array<{ value: number; evidence: string }> = [];
+  if (target && runnerCardAddressesVisibleBreakerNeed(input, target)) {
+    values.push({
+      value: 1350,
+      evidence: "target_class:missing_breaker_coverage",
+    });
+  } else if (targetRoles.some((role) => role.startsWith("breaker_"))) {
+    values.push({ value: 820, evidence: "target_class:breaker" });
+  }
+  if (targetRoles.some((role) => role === "memory" || role === "memory_support")) {
+    const memoryRemaining =
+      (input.playerView.own.memoryLimit ?? 0) -
+      (input.playerView.own.memoryUsed ?? 0);
+    values.push({
+      value: memoryRemaining <= 1 ? 780 : 420,
+      evidence: `target_class:memory_support:memory_remaining:${memoryRemaining}`,
+    });
+  }
+  if (targetRoles.some((role) => isRunnerPressureRole(role))) {
+    values.push({ value: 650, evidence: "target_class:pressure" });
+  }
+  if (targetRoles.some((role) => isRunnerEconomyRole(role))) {
+    const fundingNeed = runnerRecoveryFundingNeedContext(input);
+    values.push({
+      value: fundingNeed.active
+        ? 900
+        : input.playerView.own.credits < 5
+          ? 420
+          : 120,
+      evidence: `target_class:economy:funding_need:${fundingNeed.active}:${fundingNeed.reason}`,
+    });
+  }
+  if (
+    targetRoles.some(
+      (role) => role === "setup" || role === "build_rig" || role.includes("setup"),
+    )
+  ) {
+    const rigSize = input.playerView.own.rig?.length ?? 0;
+    values.push({
+      value: rigSize <= 1 ? 520 : 260,
+      evidence: `target_class:setup:rig_size:${rigSize}`,
+    });
+  }
+  if (runnerBadPublicityOrTraceTechCard(target, targetRoles)) {
+    values.push({
+      value: 430,
+      evidence: "target_class:bad_publicity_or_trace",
+    });
+  }
+
+  const duplicatePenalty = runnerJunkyardBbsRecoveredDefinitionAlreadyHeld(
+    input,
+    targetDefinitionId,
+  )
+    ? 180
+    : 0;
+  const best = values.sort((left, right) => right.value - left.value)[0] ?? {
+    value: 80,
+    evidence: "target_class:low_value",
+  };
+  const value = Math.max(0, best.value - duplicatePenalty);
+  return {
+    value,
+    evidence: [
+      best.evidence,
+      ...(duplicatePenalty > 0
+        ? [`target_duplicate_penalty:${duplicatePenalty}`]
+        : []),
+    ],
+  };
+}
+
+function runnerJunkyardBbsRecoveredDefinitionAlreadyHeld(
+  input: AiDecisionInput,
+  targetDefinitionId: string,
+): boolean {
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...(input.playerView.own.rig ?? []),
+  ].some((card) => card.known && card.definitionId === targetDefinitionId);
 }
 
 function runnerActionLooksLikeRecovery(
