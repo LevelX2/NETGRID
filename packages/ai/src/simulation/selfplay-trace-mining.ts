@@ -42,6 +42,12 @@ export type AiSelfplayActionLimitClusterId =
 
 export type AiSelfplayActionLimitSubclusterId =
   | "late_gain_credit_without_funding_need"
+  | "runner_late_gain_credit_without_funding_need"
+  | "runner_late_gain_credit_real_reserve"
+  | "runner_late_gain_credit_no_safe_alternative"
+  | "corp_late_gain_credit_without_rez_score_protection_need"
+  | "corp_late_gain_credit_real_rez_or_protection_reserve"
+  | "corp_late_gain_credit_no_safe_alternative"
   | "late_draw_without_coverage_or_hand_goal"
   | "late_ability_reuse_low_delta"
   | "late_install_low_delta"
@@ -135,6 +141,12 @@ export const SELFPLAY_ACTION_LIMIT_CLUSTER_IDS: AiSelfplayActionLimitClusterId[]
 export const SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS: AiSelfplayActionLimitSubclusterId[] =
   [
     "late_gain_credit_without_funding_need",
+    "runner_late_gain_credit_without_funding_need",
+    "runner_late_gain_credit_real_reserve",
+    "runner_late_gain_credit_no_safe_alternative",
+    "corp_late_gain_credit_without_rez_score_protection_need",
+    "corp_late_gain_credit_real_rez_or_protection_reserve",
+    "corp_late_gain_credit_no_safe_alternative",
     "late_draw_without_coverage_or_hand_goal",
     "late_ability_reuse_low_delta",
     "late_install_low_delta",
@@ -365,7 +377,7 @@ function classifySelfplayActionLimitSubclusterEntry(
 ): AiSelfplayActionLimitSubclusterId | undefined {
   const text = selfplayEntryText(entry);
   if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(text)) {
-    return "late_gain_credit_without_funding_need";
+    return classifyLateGainCreditSubclusterEntry(entry, text);
   }
   if (entry.actionType === "draw_card" && !entryHasDrawOrCoverageNeed(text)) {
     return "late_draw_without_coverage_or_hand_goal";
@@ -394,6 +406,86 @@ function classifySelfplayActionLimitSubclusterEntry(
     return "late_run_step_stall";
   }
   return undefined;
+}
+
+function classifyLateGainCreditSubclusterEntry(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): AiSelfplayActionLimitSubclusterId {
+  if (entry.side === "runner") {
+    if (runnerLateGainCreditHasReserveOrSafetyNeed(entry, text)) {
+      return "runner_late_gain_credit_real_reserve";
+    }
+    if (!runnerLateGainCreditHasSafeProgressAlternative(entry)) {
+      return "runner_late_gain_credit_no_safe_alternative";
+    }
+    return "runner_late_gain_credit_without_funding_need";
+  }
+  if (entry.side === "corp") {
+    if (corpLateGainCreditHasRezScoreOrProtectionNeed(entry, text)) {
+      return "corp_late_gain_credit_real_rez_or_protection_reserve";
+    }
+    if (!corpLateGainCreditHasSafeProgressAlternative(entry)) {
+      return "corp_late_gain_credit_no_safe_alternative";
+    }
+    return "corp_late_gain_credit_without_rez_score_protection_need";
+  }
+  return "late_gain_credit_without_funding_need";
+}
+
+function runnerLateGainCreditHasReserveOrSafetyNeed(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): boolean {
+  return (
+    entry.runnerEconomyTakenToReachRunReserve === true ||
+    entry.runnerReservePreservingEconomy === true ||
+    entry.runnerBelowReserveBefore === true ||
+    entry.runnerCreditStarvedWithLegalEconomy === true ||
+    entry.runnerEconomyChoicePlausible === true ||
+    (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
+    /known_unaffordable_path:true|missing_breaker_coverage:true|debtrepaymentrisk:high|encounter_survival/.test(
+      text,
+    )
+  );
+}
+
+function runnerLateGainCreditHasSafeProgressAlternative(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return (
+    entry.runnerPressureReadyTrue === true &&
+    (entry.runnerPressureReadyByTargetRemote === true ||
+      entry.runnerPressureReadyByTargetRnd === true ||
+      entry.runnerPressureReadyByTargetHq === true ||
+      entry.runnerPressureReadyByTargetArchives === true)
+  );
+}
+
+function corpLateGainCreditHasRezScoreOrProtectionNeed(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): boolean {
+  return (
+    entry.corpCreditsBelowCheapestRelevantRez === true ||
+    entry.corpCreditsBelowEstimatedCentralRezNeed === true ||
+    entry.corpCannotRezAnyNewlyInstalledIce === true ||
+    entry.corpScoreConversionFixGateBlockedByCredits === true ||
+    entry.corpEconomyBeforeScorePlausibleRezOrAdvanceReserve === true ||
+    /rez_reserve|corperezreserve|creditsbelow|blockedbycredits|protection|install_ice/.test(
+      text,
+    )
+  );
+}
+
+function corpLateGainCreditHasSafeProgressAlternative(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return (
+    entry.corpScoreTerminalWindowScoreLegal === true ||
+    entry.corpScoreTerminalWindowAdvanceToScoreLegal === true ||
+    entry.corpScoreTerminalWindowAgendaInstallLegal === true
+  );
 }
 
 function entryHasFundingNeedSignal(text: string): boolean {

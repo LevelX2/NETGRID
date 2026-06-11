@@ -8373,15 +8373,8 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
   if (recentCredits <= 0) return undefined;
   const fundingNeed = runnerRecoveryFundingNeedContext(input);
   if (fundingNeed.active) return undefined;
-  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
-  if (!closeout.opportunity || !closeout.target) return undefined;
-  const pressureReadyTargets = assessRunnerPressureReadyForMetrics(
-    input,
-  ).readyTargets.filter(
-    (target) =>
-      target.serverId === closeout.target &&
-      semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) <= 0,
-  );
+  const pressureReadyTargets =
+    runnerLateNoFundingCreditSafeProgressTargets(input);
   if (pressureReadyTargets.length === 0) return undefined;
   const credits = input.playerView.own.credits;
   if (credits < 3 && recentCredits < 2) return undefined;
@@ -8397,12 +8390,29 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
       `recent_basic_credits:${recentCredits}`,
       "funding_need:false",
       `funding_context:${fundingNeed.reason}`,
-      `pressure_ready_targets:${pressureReadyTargets
+      `safe_progress_targets:${pressureReadyTargets
         .map((target) => target.serverId)
+        .join(",")}`,
+      `safe_progress_target_types:${pressureReadyTargets
+        .map((target) => target.targetType)
         .join(",")}`,
       `credits:${credits}`,
     ].join("|"),
   };
+}
+
+function runnerLateNoFundingCreditSafeProgressTargets(
+  input: AiDecisionInput,
+): RunnerPressureReadyTargetForMetrics[] {
+  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
+  if (!closeout.opportunity || !closeout.target) return [];
+  return assessRunnerPressureReadyForMetrics(input).readyTargets.filter(
+    (target) => {
+      if (semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0)
+        return false;
+      return target.serverId === closeout.target;
+    },
+  );
 }
 
 function semanticRuntimeRecentRunnerBasicCreditActions(

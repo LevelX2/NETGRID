@@ -504,11 +504,15 @@ describe("benchmark report formatting", () => {
           selectedActionId: "runner-gain-1",
           reasonCode: "runner.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRemote: true,
         }),
         selfplayAction("runner", 2, "gain_credit", {
           selectedActionId: "runner-gain-2",
           reasonCode: "runner.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRemote: true,
         }),
         selfplayAction("runner", 3, "start_run", {
           selectedActionId: "run-rd",
@@ -531,13 +535,113 @@ describe("benchmark report formatting", () => {
 
     const subclusters = summarizeSelfplayActionLimitSubclusters([summary]);
 
-    expect(subclusters.late_gain_credit_without_funding_need).toBe(1);
+    expect(subclusters.runner_late_gain_credit_without_funding_need).toBe(1);
+    expect(subclusters.late_gain_credit_without_funding_need).toBe(0);
     expect(
       Object.values(subclusters).reduce((sum, count) => sum + count, 0),
     ).toBe(1);
     expect(JSON.stringify(subclusters)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
+  });
+
+  it("keeps reserve and no-alternative gain-credit cases out of no-need subclusters", () => {
+    const reserveSummary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-runner-reserve-subcluster",
+      winner: "action_limit_reached",
+      actions: 3,
+      turns: 2,
+      finalAgendaPoints: { runner: 3, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-runner-reserve-subcluster",
+      eventLogLength: 3,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit", {
+          selectedActionId: "runner-reserve-gain",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          runnerEconomyTakenToReachRunReserve: true,
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRemote: true,
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+    const noAlternativeSummary: AiSimulationSummary = {
+      ...reserveSummary,
+      seed: "selfplay-action-limit-runner-no-alternative-subcluster",
+      finalStateHash: "fnv1a:selfplay-action-limit-runner-no-alternative-subcluster",
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit", {
+          selectedActionId: "runner-no-alternative-gain",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+        }),
+      ],
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([
+      reserveSummary,
+      noAlternativeSummary,
+    ]);
+
+    expect(subclusters.runner_late_gain_credit_real_reserve).toBe(1);
+    expect(subclusters.runner_late_gain_credit_no_safe_alternative).toBe(1);
+    expect(subclusters.runner_late_gain_credit_without_funding_need).toBe(0);
+  });
+
+  it("splits corp gain-credit stalls by rez or scoreline alternative", () => {
+    const reserveSummary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-corp-reserve-subcluster",
+      winner: "action_limit_reached",
+      actions: 3,
+      turns: 2,
+      finalAgendaPoints: { runner: 3, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-corp-reserve-subcluster",
+      eventLogLength: 3,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("corp", 1, "gain_credit", {
+          selectedActionId: "corp-reserve-gain",
+          reasonCode: "corp.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          corpCreditsBelowCheapestRelevantRez: true,
+          corpScoreTerminalWindowScoreLegal: true,
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+    const noNeedSummary: AiSimulationSummary = {
+      ...reserveSummary,
+      seed: "selfplay-action-limit-corp-no-need-subcluster",
+      finalStateHash: "fnv1a:selfplay-action-limit-corp-no-need-subcluster",
+      actionSequence: [
+        selfplayAction("corp", 1, "gain_credit", {
+          selectedActionId: "corp-no-need-gain",
+          reasonCode: "corp.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          corpScoreTerminalWindowScoreLegal: true,
+        }),
+      ],
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([
+      reserveSummary,
+      noNeedSummary,
+    ]);
+
+    expect(
+      subclusters.corp_late_gain_credit_real_rez_or_protection_reserve,
+    ).toBe(1);
+    expect(
+      subclusters.corp_late_gain_credit_without_rez_score_protection_need,
+    ).toBe(1);
   });
 });
 
