@@ -250,3 +250,24 @@ Bewusst stabil gelassen:
 Checks:
 
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+
+## P2 Ergebnis
+
+Umgesetzt:
+
+- `buildSuccessfulRunFollowupActions` versieht Credit Subversion und Death from Above mit `cardImplementationAbilityId`, `cardImplementationPrimitiveKind`, `cardImplementationEffectKind`, `sourceCardId` und `sourceDefinitionId`.
+- `resolveSuccessfulRunFollowupAbility` bevorzugt die neue Primitive-/Effect-Identität und toleriert `proteusHiddenSuccessfulRunFollowup` als Legacy-Fallback.
+- Resolve lädt über `sourceCardId` die CardImplementation erneut, validiert `successful_run_before_access_effect`, Server, Timing, Quelle, Reveal-/Tap-Kosten und genutzte Quelle erneut.
+- Death from Above revalidiert jetzt auch, dass das Remote beim Resolve nicht leer ist.
+- Proteus-Hidden-Resource-Test prüft neue Identitätsfelder, Legacy-Marker-Kompatibilität, zweite Nutzung und Death-from-Above-Negativfälle.
+
+Bewusst stabil gelassen:
+
+- Alte Payload-Marker bleiben in LegalActions enthalten.
+- HiddenZoneAction-Werte bleiben unverändert.
+- Keine KI-Runtime-Wirkung.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/run/successful-run-interventions.test.ts src/game/run/run-access-transition.test.ts`

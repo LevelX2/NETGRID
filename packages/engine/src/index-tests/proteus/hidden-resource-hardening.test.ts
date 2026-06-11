@@ -535,10 +535,20 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     creditState.timingPoint = "access.resolve_card";
     const creditAction = getLegalActions(creditState, "runner").find(
       (candidate) =>
-        candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
-        "corp_lose_credits",
+        candidate.payload?.cardImplementationPrimitiveKind ===
+          "successful_run_before_access_effect" &&
+        candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
     );
     expect(creditAction).toBeDefined();
+    expect(creditAction?.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "onr_proteus_136_credit-subversion:successful_run_before_access_effect:corp_lose_credits",
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "corp_lose_credits",
+      sourceCardId: creditSourceId,
+      sourceDefinitionId: "onr_proteus_136_credit-subversion",
+      proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
+    });
     expect(JSON.stringify(getPlayerView(creditState, "corp"))).not.toContain(
       "Credit Subversion",
     );
@@ -552,6 +562,14 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
     });
+    expect(
+      getLegalActions(creditState, "runner").some(
+        (candidate) =>
+          candidate.payload?.cardImplementationPrimitiveKind ===
+            "successful_run_before_access_effect" &&
+          candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
+      ),
+    ).toBe(false);
 
     const wrongHqTiming = runnerState("pro012-credit-subversion-rd");
     installHiddenResource(
@@ -568,8 +586,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(
       getLegalActions(wrongHqTiming, "runner").some(
         (candidate) =>
-          candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
-          "corp_lose_credits",
+          candidate.payload?.cardImplementationPrimitiveKind ===
+            "successful_run_before_access_effect" &&
+          candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
       ),
     ).toBe(false);
 
@@ -613,10 +632,20 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     deathState.timingPoint = "access.resolve_card";
     const deathAction = getLegalActions(deathState, "runner").find(
       (candidate) =>
-        candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
-        "trash_remote_fort",
+        candidate.payload?.cardImplementationPrimitiveKind ===
+          "successful_run_before_access_effect" &&
+        candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
     );
     expect(deathAction).toBeDefined();
+    expect(deathAction?.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "onr_proteus_137_death-from-above:successful_run_before_access_effect:trash_remote_fort",
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "trash_remote_fort",
+      sourceCardId: deathSourceId,
+      sourceDefinitionId: "onr_proteus_137_death-from-above",
+      proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
+    });
     result = applyLegal(deathState, "runner", deathAction!);
     expect(result.ok).toBe(true);
     deathState = result.state;
@@ -632,6 +661,70 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_137_death-from-above",
     });
+
+    let emptyDeathState = runnerState("pro012-death-empty-remote");
+    installHiddenResource(
+      emptyDeathState,
+      "onr_proteus_137_death-from-above",
+      "pro012_death_empty",
+    );
+    emptyDeathState.corp.servers = emptyDeathState.corp.servers.filter(
+      (server) => server.id !== "remote_1",
+    );
+    emptyDeathState.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "remote_1",
+      ice: [],
+      root: [],
+    });
+    emptyDeathState.run = {
+      runId: "pro012_empty_remote_success",
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    emptyDeathState.activeSide = "runner";
+    emptyDeathState.timingPoint = "access.resolve_card";
+    expect(
+      getLegalActions(emptyDeathState, "runner").some(
+        (candidate) =>
+          candidate.payload?.cardImplementationPrimitiveKind ===
+            "successful_run_before_access_effect" &&
+          candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
+      ),
+    ).toBe(false);
+
+    for (const serverId of ["hq", "rd", "archives"] as const) {
+      const wrongServerState = runnerState(`pro012-death-${serverId}`);
+      installHiddenResource(
+        wrongServerState,
+        "onr_proteus_137_death-from-above",
+        `pro012_death_${serverId}`,
+      );
+      wrongServerState.run = {
+        runId: `pro012_${serverId}_success`,
+        attackedServerId: serverId,
+        phase: "access",
+        position: { kind: "server", serverId },
+        brokenSubroutineIndexes: [],
+        resolvedSubroutineIndexes: [],
+        successful: true,
+      };
+      wrongServerState.activeSide = "runner";
+      wrongServerState.timingPoint = "access.resolve_card";
+      expect(
+        getLegalActions(wrongServerState, "runner").some(
+          (candidate) =>
+            candidate.payload?.cardImplementationPrimitiveKind ===
+              "successful_run_before_access_effect" &&
+            candidate.payload?.cardImplementationEffectKind === "trash_remote_fort",
+        ),
+      ).toBe(false);
+    }
 
     let mercenaryState = runnerState("pro012-mercenary");
     mercenaryState.runner.credits = 4;
