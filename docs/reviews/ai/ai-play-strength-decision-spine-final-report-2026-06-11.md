@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_report_written_pending_final_green`
+`final_green_passed_pending_main_merge`
 
 Branch: `codex/ai-play-strength-decision-spine`
 
@@ -68,7 +68,24 @@ AI-PLAY-7: semantic-basic-setup-pilot.test.ts, semantic-ai-runtime-cutover.test.
 AI-PLAY-8: diagnostics/decision-debug.test.ts, semantic-ai-runtime-cutover.test.ts, index.test.ts, @netgrid/ai typecheck, git diff --check
 ```
 
-`FINAL-GREEN` folgt als eigenes Abschlussgate nach diesem Report und muss den vollständigen `@netgrid/ai`-Testlauf, Typecheck, Diffcheck sowie die zentralen Runtime-Contract-Tests erneut bestätigen.
+## FINAL-GREEN
+
+Grün im Arbeits-Worktree:
+
+```text
+corepack pnpm --filter @netgrid/ai test
+  63 Testdateien, 1094 Tests bestanden
+corepack pnpm --filter @netgrid/ai typecheck
+  bestanden
+git diff --check
+  bestanden
+corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  484 Tests bestanden
+corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+  37 Tests bestanden
+```
+
+Der lokale Merge nach `main` folgt als letzter Prozessschritt.
 
 ## Offene Grenzen
 

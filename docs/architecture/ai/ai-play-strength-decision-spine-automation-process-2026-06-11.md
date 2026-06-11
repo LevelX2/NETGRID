@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_report_written_pending_final_green`
+`final_green_passed_pending_main_merge`
 
 Arbeitsbranch: `codex/ai-play-strength-decision-spine`
 
