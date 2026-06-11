@@ -228,3 +228,25 @@ Commit: `test(engine): verify card implementation primitive consolidation`
   - Runtime: `packages/engine/src/game/corp/install-rez-sequence-handlers.ts`, Start in `scored-agenda-flow.ts`.
   - Legacy-Marker: `v1922.data_fort_reclamation`, `v1922_data_fort_reclamation_*`.
   - Tests: `install-rez-sequence-handlers.test.ts`, `scored-agenda-flow.test.ts`, `per-card-longtail.test.ts`.
+
+## P1 Ergebnis
+
+Umgesetzt:
+
+- Neuer Helper `packages/engine/src/ability-engine/card-implementation-primitives.ts`.
+- Read-only Payload-Identität über `cardImplementationPrimitivePayload(...)` vorbereitet.
+- Factorys:
+  - `hiddenSuccessfulRunBeforeAccessEffect(...)`
+  - `scoredRezzedIceMarkModifier()`
+  - `hqToNewRemoteInstallRezSequence(...)`
+- `Credit Subversion`, `Death from Above`, `Ice Transmutation` und `Data Fort Reclamation` nutzen die Factorys.
+
+Bewusst stabil gelassen:
+
+- Keine Runtime-Dispatch-Änderung in P1.
+- Keine LegalAction-IDs oder Legacy-Payload-Marker geändert.
+- Keine AI-Runtime-Wirkung.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
