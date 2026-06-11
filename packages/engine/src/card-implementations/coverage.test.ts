@@ -188,7 +188,7 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
 
   for (const card of manifest.cards) {
     const isImplementedByFile = uniqueFileDefinitionIdSet.has(card.cardId);
-    if (card.statuses.ai_supported) {
+    if (card.statuses.ai_supported !== isImplementedByFile) {
       manifestAiSupportDrift.push(card.cardId);
     }
 
@@ -1682,8 +1682,6 @@ describe("CardImplementation coverage and registry invariants", () => {
         card.cardId,
       );
       expect(card.setId, card.cardId).toBe("proteus");
-      expect(card.statuses.ai_supported, card.cardId).toBe(false);
-
       if (isImplemented) {
         expect(card.statuses, card.cardId).toMatchObject({
           implemented: true,
@@ -1692,12 +1690,14 @@ describe("CardImplementation coverage and registry invariants", () => {
           human_playable: true,
           deck_legal: true,
           format_legal: true,
+          ai_supported: true,
           blocked: false,
         });
         expect(card.support.resolverRef, card.cardId).toBe(
           `engine:${card.cardId}`,
         );
       } else {
+        expect(card.statuses.ai_supported, card.cardId).toBe(false);
         expect(card.statuses, card.cardId).toMatchObject({
           implemented: false,
           engine_supported: false,
