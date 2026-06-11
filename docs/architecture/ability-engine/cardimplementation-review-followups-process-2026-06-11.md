@@ -271,6 +271,30 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `git diff --check`
 
+## P4 Ergebnis
+
+Umgesetzt:
+
+- `ActionSemanticCandidate` trägt neue read-only Felder:
+  - `abilityKey`
+  - `primitiveKind`
+  - `effectKind`
+- `applyCardActionSourceBinding(...)` übernimmt side-safe CardImplementation-Payload-Felder aus `LegalAction.payload`:
+  - `cardImplementationAbilityId` als `abilityId`
+  - `cardImplementationAbilityKey` als `abilityKey`
+  - `cardImplementationPrimitiveKind` als `primitiveKind`
+  - `cardImplementationEffectKind` als `effectKind`
+  - `sourceCardId` als `sourceCardInstanceId`, wenn die LegalAction ihn explizit trägt.
+- Die Erweiterung bleibt read-only: keine Action-Erzeugung, keine Planner-Gewichte, keine Scoring-Wirkung.
+- Smoke-Test ergänzt, der Hidden-Info-Feldnamen, Plan-/Scoring-Gewichte und Semantik-Nebenwirkungen ausschließt.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Grün: `corepack pnpm check:ai`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die angegebenen Checks.

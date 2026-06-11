@@ -117,7 +117,13 @@ export type ActionCostProfile = {
   beneficiary?: "runner" | "corp" | "none" | "unknown";
   costKnownStatus: "known" | "partial" | "unknown" | "not_applicable";
   variableCost?: {
-    kind: "x" | "trace_boost" | "trash_cost" | "rez_cost" | "choice" | "unknown";
+    kind:
+      | "x"
+      | "trace_boost"
+      | "trash_cost"
+      | "rez_cost"
+      | "choice"
+      | "unknown";
     min?: number;
     max?: number;
     chosen?: number;
@@ -235,6 +241,9 @@ export type ActionSemanticCandidate = {
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   abilityId?: string;
+  abilityKey?: string;
+  primitiveKind?: string;
+  effectKind?: string;
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
   cardContextSignals: string[];
@@ -368,7 +377,10 @@ function projectActionSemanticCandidate(
     selectedTargets,
     availableTargets,
   );
-  const costTimingCandidate = applyCostAndTimingProfiles(targetCandidate, action);
+  const costTimingCandidate = applyCostAndTimingProfiles(
+    targetCandidate,
+    action,
+  );
   return applyCardSemanticJoin(
     costTimingCandidate,
     cardSemanticProfilesByDefinitionId,
@@ -454,7 +466,8 @@ function neutralHardGates(action: LegalAction): ActionGateResult[] {
       gateId: "hidden_info",
       status: "pass",
       severity: "info",
-      reason: "No full game state, hidden zone or private opponent data is read.",
+      reason:
+        "No full game state, hidden zone or private opponent data is read.",
     },
     {
       gateId: "source_resolution",
