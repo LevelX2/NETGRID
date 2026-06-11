@@ -6,6 +6,8 @@ Branch: `codex/ai095-ai100-action-limit-closure`
 
 Finaler Trace: `docs/reviews/ai/ai100-final-a-d-5seed-2026-06-11.json`
 
+Integrationshinweis: Nach dem ersten AI100-Sweep wurde der inzwischen weitergelaufene lokale `main` konfliktfrei in den Arbeitsbranch gemergt. Die Root-Tests, der Workspace-Typecheck und der finale Trace wurden danach erneut auf dem gemergten HEAD ausgeführt.
+
 ## Ergebnis
 
 AI100 schließt den Folgeblock AI095-AI100 technisch grün ab:
@@ -42,9 +44,9 @@ Ergebnis:
 
 - `packages/shared`: 1 Datei, 3 Tests grün
 - `packages/catalog`: 2 Dateien, 14 Tests grün
-- `packages/engine`: 157 Dateien, 1458 Tests grün
+- `packages/engine`: 158 Dateien, 1459 Tests grün
 - `packages/decks`: 1 Datei, 15 Tests grün
-- `packages/ai`: 63 Dateien, 1107 Tests grün
+- `packages/ai`: 63 Dateien, 1108 Tests grün
 - `apps/web`: 33 Dateien, 415 Tests grün
 - `apps/server`: 6 Dateien, 127 Tests grün
 - Root-Specs: 2 Dateien, 5 Tests grün
@@ -84,8 +86,8 @@ corepack pnpm --filter @netgrid/web test
 
 Ergebnis:
 
-- `@netgrid/ai`: 63 Dateien, 1107 Tests grün
-- `@netgrid/engine`: 157 Dateien, 1458 Tests grün
+- `@netgrid/ai`: 63 Dateien, 1108 Tests grün
+- `@netgrid/engine`: 158 Dateien, 1459 Tests grün
 - `@netgrid/server`: 6 Dateien, 127 Tests grün
 - `@netgrid/web`: 33 Dateien, 415 Tests grün
 
