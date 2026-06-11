@@ -356,6 +356,34 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/ai typecheck`
 - Grün: `git diff --check`
 
+## P7 Ergebnis
+
+Umgesetzt:
+
+- Vollständiger Testblock ausgeführt.
+- Es sind keine durch die Änderungen verursachten roten Tests oder Typecheck-Fehler entstanden.
+- AI-Checks bleiben grün; die bestehenden AI-Warnungen bleiben nicht blockierend.
+- Der volle Repo-Format-Check bleibt wegen vorbestehender Format-Baseline rot. Die durch diesen Arbeitsbranch veränderten Dateien sind Prettier-konform.
+
+Checks:
+
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `corepack pnpm -r --if-present --no-bail test`
+  - `packages/shared`: 1 Datei, 3 Tests grün.
+  - `packages/catalog`: 2 Dateien, 14 Tests grün.
+  - `packages/engine`: 157 Dateien, 1455 Tests grün.
+  - `packages/decks`: 1 Datei, 15 Tests grün.
+  - `packages/ai`: 63 Dateien, 1100 Tests grün.
+  - `apps/web`: 33 Dateien, 413 Tests grün.
+  - `apps/server`: 6 Dateien, 125 Tests grün.
+- Grün: `corepack pnpm test`
+  - rekursive Pakettests grün.
+  - Root-Specs `phase1-artifacts` und `visibility-contract`: 2 Dateien, 5 Tests grün.
+- Rot, Baseline außerhalb dieses Pakets: `corepack pnpm format:check` meldet repo-weit 1762 nicht formatierte Dateien.
+- Grün: `corepack pnpm exec prettier --check -- $(git diff --name-only main...HEAD)`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.
