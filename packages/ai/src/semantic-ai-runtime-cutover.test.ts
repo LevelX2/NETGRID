@@ -65,8 +65,8 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
-  it("keeps reason aligned with reasonCode when the basic setup pilot overrides the runtime choice", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+  it("keeps the runtime choice unchanged when the basic setup pilot flag is unset", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const run = legalAction(
       "run-hq",
       "runner",
@@ -89,13 +89,104 @@ describe("Semantic AI runtime cutover", () => {
       input,
       legacyDecision("run-hq", "legacy.runner.run"),
       {},
-      semanticRuntimeDependencies(runtimeChoices, run.actionId),
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: run.actionId,
+      }),
     );
+
+    expect(decision.actionId).toBe("run-hq");
+    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(decision.reason).toBe(decision.reasonCode);
+    expect(decision.evidence).not.toEqual(
+      expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
+    );
+  });
+
+  it("keeps reason aligned with reasonCode when the basic setup pilot overrides the runtime choice", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+    const rememberedActions: string[] = [];
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0 },
+      { payload: { serverId: "hq" } },
+    );
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [run, gain]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const runtimeChoices = [
+      semanticRuntimeChoice(run, 70, "runner.semantic.simple_run_choice"),
+      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("run-hq", "legacy.runner.run"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: run.actionId,
+        rememberedActions,
+      }),
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe("gain-credit");
     expect(decision.reasonCode).toBe("ai_play_strength.basic_setup_pilot");
     expect(decision.reason).toBe(decision.reasonCode);
     expect(decision.evidence).toEqual(
+      expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
+    );
+    expect(rememberedActions).toEqual(["gain-credit"]);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
+  });
+
+  it("does not let a forbidden run top action override through the basic setup pilot", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0 },
+      { payload: { serverId: "hq" } },
+    );
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [run, gain]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const runtimeChoices = [
+      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
+      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("run-hq", "legacy.runner.run"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+        goal: {
+          goalId: "runner.pressure_good_central_target",
+          family: "pressure",
+          priority: 980,
+          urgency: "high",
+          source: "run_target_evaluation",
+          evidence: ["test_goal:run_access"],
+        },
+      }),
+    );
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.reasonCode).toBe("runner.semantic.basic_economy_draw");
+    expect(decision.reason).toBe(decision.reasonCode);
+    expect(decision.evidence).not.toEqual(
       expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
     );
   });
@@ -2011,7 +2102,18 @@ function semanticRuntimeChoice(
 
 function semanticRuntimeDependencies(
   choices: SemanticRuntimeChoice[],
-  initiallySelectedActionId: string,
+  options: {
+    initiallySelectedActionId: string;
+    goal?: {
+      goalId: string;
+      family: string;
+      priority: number;
+      urgency: string;
+      source: string;
+      evidence: string[];
+    };
+    rememberedActions?: string[];
+  },
 ): SemanticRuntimeDependencies {
   return {
     semanticRuntimeChoices: () => choices,
@@ -2030,7 +2132,7 @@ function semanticRuntimeDependencies(
     evaluateRunnerRunTargets: () => [],
     buildRunnerTacticalGoals: () =>
       [
-        {
+        options.goal ?? {
           goalId: "runner.build_economy_base",
           family: "economy",
           priority: 940,
@@ -2044,7 +2146,9 @@ function semanticRuntimeDependencies(
       blockedPlans: [],
     }),
     bestSemanticRuntimeChoice: () =>
-      choices.find((choice) => choice.action.actionId === initiallySelectedActionId),
+      choices.find(
+        (choice) => choice.action.actionId === options.initiallySelectedActionId,
+      ),
     bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
     tacticalPlanMappedChoice: () => ({}),
     runnerSelfDamageImmediateWinSemanticChoice: () => undefined,
@@ -2068,7 +2172,10 @@ function semanticRuntimeDependencies(
     }),
     semanticRuntimeCoverageSelectionDebug: () => undefined,
     selectedChoicesForDecision: () => undefined,
-    rememberTacticalPlanRuntime: () => undefined,
+    rememberTacticalPlanRuntime: (_input, _result, selectedAction) => {
+      options.rememberedActions?.push(selectedAction.actionId);
+      return undefined;
+    },
     scrubEvidence: (evidence) => evidence,
     semanticRuntimeDecisionDebug: () =>
       ({
