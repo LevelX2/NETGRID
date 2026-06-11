@@ -249,6 +249,20 @@ Commit: `test(engine): verify card implementation follow-ups`
   - Script: `scripts/check-ai-derived-facts.mjs`.
   - Aktuelle Schwäche: Factory-Erkennung fokussiert ScoredAgenda-Factorys; Hidden-Successful-Run-Factory braucht side-safe Erkennung.
 
+## P1 Ergebnis
+
+Umgesetzt:
+
+- `resolveDataFortReclamationChoice` validiert Auswahl, Limit, Eindeutigkeit, HQ-Zone, Installierbarkeit und Root-Kapazität vollständig vor der ersten State-Mutation.
+- Bei `0` gewählten HQ-Karten wird kein Remote erzeugt; die Choice wird sauber geschlossen und ungenutzte temporäre Credits werden vollständig zurückgemeldet.
+- Die eigentliche Install-Mutation läuft erst nach erfolgreicher Prevalidation.
+- Tests decken Nullauswahl ohne Remote sowie ungültige Mehrfach-Root-Auswahl ohne teilweise Mutation von HQ, Serverliste, CardInstances oder PendingChoice ab.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts -t "Data Fort Reclamation"`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.

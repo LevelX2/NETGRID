@@ -21,6 +21,12 @@ const HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE =
 const HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE =
   "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez";
 
+type PrevalidatedHqToNewRemoteInstall = {
+  cardId: CardInstanceId;
+  definition: CardDefinition;
+  destination: "ice" | "root";
+};
+
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
     GameState,
@@ -405,24 +411,49 @@ function resolveDataFortReclamationChoice(
   const selectedSet = new Set(selectedIds);
   if (selectedSet.size !== selectedIds.length)
     throw new Error("Eine HQ-Karte wurde doppelt gewaehlt.");
-  if (selectedIds.some((cardId) => !host.state.corp.hq.includes(cardId)))
-    throw new Error("Eine gewaehlte Karte liegt nicht mehr in HQ.");
-  if (
-    selectedIds.some(
-      (cardId) =>
-        !host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
-    )
-  )
-    throw new Error("Eine gewaehlte Karte ist nicht installierbar.");
+  const selectedCards = prevalidateHqToNewRemoteInstallSelection(
+    host,
+    selectedIds,
+  );
+  const temporaryCreditAmount = sequence.temporaryCredits.amount;
+  if (selectedCards.length === 0) {
+    delete host.state.pendingChoice;
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      ...primitivePayload,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      sourceAgendaId: agendaId,
+      selectedCount: 0,
+      installedCount: 0,
+      installedIceCount: 0,
+      installedRootCount: 0,
+      cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
+      temporaryCreditsProvided: temporaryCreditAmount,
+      temporaryCreditsSpent: 0,
+      corpCreditsSpent: 0,
+      temporaryCreditsRemaining: temporaryCreditAmount,
+      temporaryCreditsReturned: temporaryCreditAmount,
+      dataFortReclamationRezChoiceOpened: false,
+      dataFortReclamationRezCandidateCount: 0,
+    };
+    return {
+      handled: true,
+      stateChanged: true,
+      deletePendingChoice: true,
+      selectedCardIds: [],
+      installedCardIds: [],
+      temporaryCreditsGranted: temporaryCreditAmount,
+      temporaryCreditsReturned: temporaryCreditAmount,
+      resolvedPayload: host.legalAction.payload ?? {},
+    };
+  }
 
   const server = host.servers.createRemote();
-  let installedIceCount = 0;
-  let installedRootCount = 0;
   const installedIds: CardInstanceId[] = [];
-  for (const cardId of selectedIds) {
-    const definition = host.cards.definitionFor(cardId);
+  for (const { cardId, definition, destination } of selectedCards) {
     host.zones.removeFromAllZones(cardId);
-    if (definition.type === "ice") {
+    if (destination === "ice") {
       server.ice.push(cardId);
       host.state.cardInstances[cardId] = {
         ...host.cards.mustInstance(cardId),
@@ -430,12 +461,9 @@ function resolveDataFortReclamationChoice(
         rezzed: false,
         zone: { side: "corp", zone: "serverIce", serverId: server.id },
       };
-      installedIceCount += 1;
       installedIds.push(cardId);
       continue;
     }
-    if (!host.cards.canInstallCorpRootCardInServer(definition, server))
-      throw new Error("Diese Root-Karte kann nicht in das neue Remote.");
     server.root.push(cardId);
     host.state.cardInstances[cardId] = {
       ...host.cards.mustInstance(cardId),
@@ -443,13 +471,15 @@ function resolveDataFortReclamationChoice(
       rezzed: false,
       zone: { side: "corp", zone: "serverRoot", serverId: server.id },
     };
-    installedRootCount += 1;
     installedIds.push(cardId);
   }
+  const installedIceCount = selectedCards.filter(
+    (card) => card.destination === "ice",
+  ).length;
+  const installedRootCount = selectedCards.length - installedIceCount;
   const rezCandidates = installedIds.filter((cardId) =>
     isDataFortReclamationRezCandidate(host, cardId, server.id),
   );
-  const temporaryCreditAmount = sequence.temporaryCredits.amount;
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -501,6 +531,37 @@ function resolveDataFortReclamationChoice(
       : {}),
     resolvedPayload: host.legalAction.payload ?? {},
   };
+}
+
+function prevalidateHqToNewRemoteInstallSelection(
+  host: CorpInstallRezSequenceHandlerHost,
+  selectedIds: readonly CardInstanceId[],
+): PrevalidatedHqToNewRemoteInstall[] {
+  const simulatedServer: CorpServer = {
+    id: "new_remote_preview" as Exclude<ServerId, "new_remote">,
+    label: "New Remote Preview",
+    kind: "remote",
+    ice: [],
+    root: [],
+  };
+  const selectedCards: PrevalidatedHqToNewRemoteInstall[] = [];
+  for (const cardId of selectedIds) {
+    if (!host.state.corp.hq.includes(cardId))
+      throw new Error("Eine gewaehlte Karte liegt nicht mehr in HQ.");
+    const definition = host.cards.definitionFor(cardId);
+    if (!host.cards.isCorpInstallableCardType(definition))
+      throw new Error("Eine gewaehlte Karte ist nicht installierbar.");
+    if (definition.type === "ice") {
+      simulatedServer.ice.push(cardId);
+      selectedCards.push({ cardId, definition, destination: "ice" });
+      continue;
+    }
+    if (!host.cards.canInstallCorpRootCardInServer(definition, simulatedServer))
+      throw new Error("Diese Root-Karte kann nicht in das neue Remote.");
+    simulatedServer.root.push(cardId);
+    selectedCards.push({ cardId, definition, destination: "root" });
+  }
+  return selectedCards;
 }
 
 function resolveDataFortReclamationRezChoice(

@@ -122,6 +122,7 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
     ice_1: definition("ice_1_def", "ice", "ICE 1", 3),
     ice_2: definition("ice_2_def", "ice", "ICE 2", 4),
     asset_1: definition("asset_1_def", "asset", "Asset 1", 6),
+    asset_2: definition("asset_2_def", "asset", "Asset 2", 1),
     upgrade_1: definition("upgrade_1_def", "upgrade", "Upgrade 1", 2),
     operation_1: definition("operation_1_def", "operation", "Operation 1"),
     ...input.definitions,
@@ -190,11 +191,23 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
         cardDefinition.type === "asset" ||
         cardDefinition.type === "agenda" ||
         cardDefinition.type === "upgrade",
-      canInstallCorpRootCardInServer: (cardDefinition, server) =>
-        server.kind === "remote" &&
-        (cardDefinition.type === "asset" ||
-          cardDefinition.type === "agenda" ||
-          cardDefinition.type === "upgrade"),
+      canInstallCorpRootCardInServer: (cardDefinition, server) => {
+        if (cardDefinition.type === "upgrade") return server.kind !== "archives";
+        if (
+          server.kind !== "remote" ||
+          (cardDefinition.type !== "asset" && cardDefinition.type !== "agenda")
+        )
+          return false;
+        const rootMainCount = server.root.filter((cardId) => {
+          const definition = definitions[cardId];
+          return definition?.type === "asset" || definition?.type === "agenda";
+        }).length;
+        if (rootMainCount === 0) return true;
+        return (
+          cardDefinition.type === "agenda" &&
+          !server.root.some((cardId) => definitions[cardId]?.type === "agenda")
+        );
+      },
       rezCostForCard: (cardId) => definitions[cardId]?.rezCost ?? 0,
       isPriorityRequisitionCandidate: (cardId) => {
         const cardInstance = cardInstances[cardId];
@@ -355,6 +368,81 @@ describe("corp install rez sequence handlers", () => {
       temporaryCreditsRemaining: 10,
     });
     expect(JSON.stringify(host.legalAction.payload)).not.toContain("upgrade_1");
+  });
+
+  it("resolves empty Data Fort Reclamation selection without creating a remote", () => {
+    const host = makeHost({
+      hq: ["asset_1", "ice_1"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["asset_1", "ice_1"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction([]),
+    });
+
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.handled).toBe(true);
+    expect(result.deletePendingChoice).toBe(true);
+    expect(result.createdServerId).toBeUndefined();
+    expect(result.selectedCardIds).toEqual([]);
+    expect(result.installedCardIds).toEqual([]);
+    expect(result.temporaryCreditsReturned).toBe(10);
+    expect(host.state.pendingChoice).toBeUndefined();
+    expect(host.state.corp.hq).toEqual(["asset_1", "ice_1"]);
+    expect(host.state.corp.servers).toEqual([]);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      selectedCount: 0,
+      installedCount: 0,
+      installedIceCount: 0,
+      installedRootCount: 0,
+      cardImplementationTemporaryCreditBudget: 10,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsRemaining: 10,
+      temporaryCreditsReturned: 10,
+      dataFortReclamationRezChoiceOpened: false,
+      dataFortReclamationRezCandidateCount: 0,
+    });
+    expect(host.legalAction.payload).not.toHaveProperty("createdServerId");
+    expect(host.legalAction.payload).not.toHaveProperty(
+      "cardImplementationSequenceCreatedServerId",
+    );
+  });
+
+  it("rejects invalid Data Fort Reclamation root selections without partial mutation", () => {
+    const host = makeHost({
+      hq: ["asset_1", "asset_2", "ice_1"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["asset_1", "asset_2", "ice_1"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction(["card_asset_1", "card_asset_2"]),
+    });
+    const hqBefore = [...host.state.corp.hq];
+    const serversBefore = structuredClone(host.state.corp.servers);
+    const cardInstancesBefore = structuredClone(host.state.cardInstances);
+    const pendingChoiceBefore = structuredClone(host.state.pendingChoice);
+
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "Diese Root-Karte kann nicht in das neue Remote.",
+    );
+
+    expect(host.state.corp.hq).toEqual(hqBefore);
+    expect(host.state.corp.servers).toEqual(serversBefore);
+    expect(host.state.cardInstances).toEqual(cardInstancesBefore);
+    expect(host.state.pendingChoice).toEqual(pendingChoiceBefore);
+    expect(host.legalAction.payload).toEqual({});
   });
 
   it("rejects Data Fort Reclamation non-HQ and over-limit selections", () => {
