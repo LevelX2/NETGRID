@@ -389,7 +389,8 @@ describe("scored agenda flow", () => {
     );
     expect(legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "ice_transmutation:select_rezzed_ice_mark_modifier:mark_modifier",
+        "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
       sourceCardId: "transmutation_agenda",
@@ -407,7 +408,8 @@ describe("scored agenda flow", () => {
     expect(host.state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "ice_transmutation:select_rezzed_ice_mark_modifier:mark_modifier",
+        "ice_transmutation:scored_ice_mark:0",
+      cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
       agendaAbility: "v1920_ice_transmutation",

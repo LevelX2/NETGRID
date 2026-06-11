@@ -772,6 +772,7 @@ function startScoredRezzedIceMarkModifierChoice(
     sourceDefinitionId: agendaDefinition.id,
     primitiveKind: scoredAgenda.kind,
     effectKind: "mark_modifier",
+    abilityKey: scoredAgenda.abilityKey,
   });
   if (targets.length === 0) {
     legalAction.payload = {
@@ -867,6 +868,7 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
       sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
       primitiveKind: scoredAgenda.kind,
       effectKind: "mark_modifier",
+      abilityKey: scoredAgenda.abilityKey,
     }),
     agendaAbility: "v1920_ice_transmutation",
     sourceAgendaId: agendaId,

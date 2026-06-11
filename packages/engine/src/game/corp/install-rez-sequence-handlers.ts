@@ -245,6 +245,7 @@ export function startDataFortReclamationChoice(
     sourceDefinitionId: agendaDefinition.id,
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
+    abilityKey: sequence.abilityKey,
   });
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.corp.hq
@@ -401,6 +402,7 @@ function resolveDataFortReclamationChoice(
     sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
+    abilityKey: sequence.abilityKey,
   });
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (
@@ -589,6 +591,7 @@ function resolveDataFortReclamationRezChoice(
     sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
+    abilityKey: sequence.abilityKey,
   });
   host.servers.mustServer(serverId);
   const temporaryCreditAmount = sequence.temporaryCredits.amount;

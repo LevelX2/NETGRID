@@ -40,10 +40,12 @@ export function cardImplementationPrimitivePayload(input: {
   sourceDefinitionId: CardDefinitionId;
   primitiveKind: CardImplementationPrimitiveKind;
   effectKind?: CardImplementationEffectKind;
+  abilityKey?: string | undefined;
 }): PrimitivePayload {
-  const effectSuffix = input.effectKind ? `:${input.effectKind}` : "";
+  const abilityKey = input.abilityKey ?? defaultCardImplementationAbilityKey(input);
   return {
-    cardImplementationAbilityId: `${input.sourceDefinitionId}:${input.primitiveKind}${effectSuffix}`,
+    cardImplementationAbilityId: `${input.sourceDefinitionId}:${abilityKey}`,
+    cardImplementationAbilityKey: abilityKey,
     cardImplementationPrimitiveKind: input.primitiveKind,
     ...(input.effectKind
       ? { cardImplementationEffectKind: input.effectKind }
@@ -53,19 +55,36 @@ export function cardImplementationPrimitivePayload(input: {
   };
 }
 
+function defaultCardImplementationAbilityKey(input: {
+  primitiveKind: CardImplementationPrimitiveKind;
+  effectKind?: CardImplementationEffectKind;
+}): string {
+  if (input.primitiveKind === "successful_run_before_access_effect")
+    return "successful_run_before_access:0";
+  if (input.primitiveKind === "select_rezzed_ice_mark_modifier")
+    return "scored_ice_mark:0";
+  if (input.primitiveKind === "score_install_hq_cards_into_new_remote_then_rez")
+    return "hq_to_new_remote_install_rez:0";
+  const effectSuffix = input.effectKind ? `:${input.effectKind}` : "";
+  return `${input.primitiveKind}${effectSuffix}:0`;
+}
+
 export function hiddenSuccessfulRunBeforeAccessEffect(
   input:
     | {
         server: "hq";
         effect: { kind: "corp_lose_credits"; amount: number };
+        abilityKey?: string;
       }
     | {
         server: "remote";
         effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
+        abilityKey?: string;
       },
 ): SuccessfulRunBeforeAccessEffect {
   return {
     kind: "successful_run_before_access_effect",
+    abilityKey: input.abilityKey ?? "successful_run_before_access:0",
     timing: "immediately_after_successful_run_before_access",
     server: input.server,
     source: "installed_hidden_runner_resource",
@@ -75,9 +94,12 @@ export function hiddenSuccessfulRunBeforeAccessEffect(
   } as SuccessfulRunBeforeAccessEffect;
 }
 
-export function scoredRezzedIceMarkModifier(): ScoredRezzedIceMarkModifier {
+export function scoredRezzedIceMarkModifier(input: {
+  abilityKey?: string;
+} = {}): ScoredRezzedIceMarkModifier {
   return {
     kind: "select_rezzed_ice_mark_modifier",
+    abilityKey: input.abilityKey ?? "scored_ice_mark:0",
     target: "rezzed_installed_ice",
     counterType: "mark",
     counterAmount: 1,
@@ -90,9 +112,11 @@ export function scoredRezzedIceMarkModifier(): ScoredRezzedIceMarkModifier {
 export function hqToNewRemoteInstallRezSequence(input: {
   maxCards: number;
   temporaryCredits: number;
+  abilityKey?: string;
 }): HqToNewRemoteInstallRezSequence {
   return {
     kind: "score_install_hq_cards_into_new_remote_then_rez",
+    abilityKey: input.abilityKey ?? "hq_to_new_remote_install_rez:0",
     sourceZone: "hq",
     targetServer: "new_remote",
     allowedCards: "corp_installable",

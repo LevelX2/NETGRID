@@ -542,7 +542,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(creditAction).toBeDefined();
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access_effect:corp_lose_credits",
+        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      cardImplementationAbilityKey: "successful_run_before_access:0",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
@@ -639,7 +640,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathAction).toBeDefined();
     expect(deathAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_137_death-from-above:successful_run_before_access_effect:trash_remote_fort",
+        "onr_proteus_137_death-from-above:successful_run_before_access:0",
+      cardImplementationAbilityKey: "successful_run_before_access:0",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "trash_remote_fort",
       sourceCardId: deathSourceId,

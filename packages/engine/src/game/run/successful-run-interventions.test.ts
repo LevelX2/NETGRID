@@ -10,7 +10,12 @@ import type {
   ServerId,
   CounterType,
 } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  configureDamageCoreHost,
+  resetDamageCoreHostForTests,
+  type DamageCoreHost,
+} from "../damage/damage-core";
 import {
   applyBodyweightDataCrecheSuccessfulRun,
   applyDirectSuccessfulRunTriggers,
@@ -20,6 +25,10 @@ import {
   resolveSuccessfulRunInterventionChoice,
   type SuccessfulRunInterventionHost,
 } from "./successful-run-interventions";
+
+afterEach(() => {
+  resetDamageCoreHostForTests();
+});
 
 function definition(
   id: string,
@@ -98,6 +107,11 @@ function makeHost(options: {
       "Karl de Veres",
       "resource",
     ),
+    "onr_proteus_136_credit-subversion": definition(
+      "onr_proteus_136_credit-subversion",
+      "Credit Subversion",
+      "resource",
+    ),
     "onr_proteus_078_armageddon": definition(
       "onr_proteus_078_armageddon",
       "Armageddon",
@@ -152,6 +166,14 @@ function makeHost(options: {
       side: "runner",
       zone: "rig",
     }),
+    credit_subversion: instance(
+      "credit_subversion",
+      "onr_proteus_136_credit-subversion",
+      {
+        side: "runner",
+        zone: "rig",
+      },
+    ),
     armageddon: instance("armageddon", "onr_proteus_078_armageddon", {
       side: "runner",
       zone: "rig",
@@ -186,7 +208,7 @@ function makeHost(options: {
       rig: {
         programs: ["false_echo", "netspace", "i_spy", "armageddon"],
         hardware: ["bodyweight"],
-        resources: ["karl"],
+        resources: ["karl", "credit_subversion"],
       },
     },
     cardInstances,
@@ -353,6 +375,59 @@ function makeHost(options: {
     trashedRunnerIds,
     finishedRuns,
   };
+}
+
+function configureSuccessfulRunDamageCoreHost(
+  fixture: ReturnType<typeof makeHost>,
+): void {
+  configureDamageCoreHost({
+    cards: {
+      definitionFor: (_state, cardId) => fixture.host.cards.definitionFor(cardId),
+      runnerInstalledCardIds: (state) => [
+        ...state.runner.rig.programs,
+        ...state.runner.rig.hardware,
+        ...state.runner.rig.resources,
+      ],
+      scoredCorpAgendaIds: (state) => state.corp.scoreArea,
+      scoredAgendaKindForDefinition: () => undefined,
+    },
+    zones: {
+      removeFromAllZones: (_state, cardId) => {
+        fixture.state.runner.rig.resources =
+          fixture.state.runner.rig.resources.filter((id) => id !== cardId);
+      },
+      trashRunnerInstalledCardToHeap: () => undefined,
+      returnRunnerInstalledCardToGrip: () => undefined,
+    },
+    runner: {
+      drawRunnerCard: () => undefined,
+      ensureRunnerTurnFlags: (state) =>
+        (state.runnerTurnFlags ??=
+          {} as NonNullable<GameState["runnerTurnFlags"]>),
+      addFutureActionDebt: () => undefined,
+    },
+    corp: {
+      agendaPointTotal: () => 0,
+      chooseAgendasForPointCost: () => [],
+      agendaPointsForScoredCard: () => 0,
+      forfeitAgendaForPointCost: () => undefined,
+    },
+    counters: {
+      cardCounter: () => 0,
+      spendCardCounter: () => undefined,
+    },
+    credits: {
+      gain: (state, side, amount) => {
+        state[side].credits += amount;
+      },
+      spend: (state, side, amount) => {
+        state[side].credits -= amount;
+      },
+    },
+    rng: {
+      nextRandom: () => 0,
+    },
+  } satisfies DamageCoreHost);
 }
 
 function delayedChoice(
@@ -548,6 +623,68 @@ describe("successful run interventions", () => {
       addedCounterAmount: 1,
       exposedServerId: "remote_1",
     });
+  });
+
+  it("uses primitive ability keys for hidden successful-run followups and keeps legacy fallback", () => {
+    const fixture = makeHost();
+    fixture.state.run = {
+      ...(fixture.state.run as NonNullable<GameState["run"]>),
+      attackedServerId: "hq",
+      position: { kind: "server", serverId: "hq" },
+    };
+    const action = buildSuccessfulRunFollowupActions(
+      fixture.host,
+      fixture.state.run as NonNullable<GameState["run"]>,
+    ).find(
+      (candidate) =>
+        candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
+    );
+    expect(action?.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+      cardImplementationAbilityKey: "successful_run_before_access:0",
+      cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+      cardImplementationEffectKind: "corp_lose_credits",
+    });
+    if (!action) throw new Error("Missing Credit Subversion action");
+
+    expect(() =>
+      resolveSuccessfulRunFollowupAbility(fixture.host, {
+        ...action,
+        payload: {
+          ...(action.payload ?? {}),
+          cardImplementationAbilityKey: "successful_run_before_access:wrong",
+        },
+      } as LegalAction),
+    ).toThrow("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
+    expect(fixture.state.cardInstances.credit_subversion?.tapped).not.toBe(true);
+
+    const legacyFixture = makeHost();
+    configureSuccessfulRunDamageCoreHost(legacyFixture);
+    legacyFixture.state.run = {
+      ...(legacyFixture.state.run as NonNullable<GameState["run"]>),
+      attackedServerId: "hq",
+      position: { kind: "server", serverId: "hq" },
+    };
+    const legacyAction = buildSuccessfulRunFollowupActions(
+      legacyFixture.host,
+      legacyFixture.state.run as NonNullable<GameState["run"]>,
+    ).find(
+      (candidate) =>
+        candidate.payload?.cardImplementationEffectKind === "corp_lose_credits",
+    );
+    if (!legacyAction) throw new Error("Missing legacy Credit Subversion action");
+    const legacyPayload = { ...(legacyAction.payload ?? {}) };
+    delete (legacyPayload as Record<string, unknown>).cardImplementationAbilityKey;
+    delete (legacyPayload as Record<string, unknown>).cardImplementationAbilityId;
+
+    const result = resolveSuccessfulRunFollowupAbility(legacyFixture.host, {
+      ...legacyAction,
+      payload: legacyPayload,
+    } as LegalAction);
+
+    expect(result.handled).toBe(true);
+    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).toBe(true);
   });
 
   it("builds and resolves Armageddon R&D access replacement through Runner followups", () => {

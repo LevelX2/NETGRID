@@ -134,8 +134,9 @@ function remoteTrashFortBeforeAccessEffect(
 function successfulRunBeforeAccessEffectByEffectKind(
   followups: readonly CardSuccessfulRunFollowupImplementation[] | undefined,
   effectKind: SuccessfulRunBeforeAccessEffect["effect"]["kind"],
+  abilityKey?: string,
 ): SuccessfulRunBeforeAccessEffect | undefined {
-  return followups?.find(
+  const matches = followups?.filter(
     (followup): followup is SuccessfulRunBeforeAccessEffect =>
       followup.kind === "successful_run_before_access_effect" &&
       followup.timing === "immediately_after_successful_run_before_access" &&
@@ -143,6 +144,10 @@ function successfulRunBeforeAccessEffectByEffectKind(
       followup.cost.kind === "reveal_and_tap_source" &&
       followup.effect.kind === effectKind,
   );
+  if (abilityKey) {
+    return matches?.find((followup) => followup.abilityKey === abilityKey);
+  }
+  return matches?.[0];
 }
 
 export type SuccessfulRunInterventionExecutionResult = {
@@ -281,6 +286,7 @@ export function buildSuccessfulRunFollowupActions(
               sourceDefinitionId: definition.id,
               primitiveKind: hqCreditLossFollowup.kind,
               effectKind: hqCreditLossFollowup.effect.kind,
+              abilityKey: hqCreditLossFollowup.abilityKey,
             }),
             cardId: sourceCardId,
             serverId: run.attackedServerId,
@@ -312,6 +318,7 @@ export function buildSuccessfulRunFollowupActions(
                 sourceDefinitionId: definition.id,
                 primitiveKind: remoteTrashFortFollowup.kind,
                 effectKind: remoteTrashFortFollowup.effect.kind,
+                abilityKey: remoteTrashFortFollowup.abilityKey,
               }),
               cardId: sourceCardId,
               serverId: run.attackedServerId,
@@ -500,6 +507,9 @@ function resolveHiddenSuccessfulRunBeforeAccessEffect(
     cardImplementationForDefinitionId(sourceDefinition.id)
       ?.successfulRunFollowups,
     effectKind,
+    typeof legalAction.payload?.cardImplementationAbilityKey === "string"
+      ? legalAction.payload.cardImplementationAbilityKey
+      : undefined,
   );
   if (!followup)
     throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
@@ -541,6 +551,7 @@ function resolveHiddenSuccessfulRunBeforeAccessEffect(
       sourceDefinitionId: sourceDefinition.id,
       primitiveKind: followup.kind,
       effectKind: followup.effect.kind,
+      abilityKey: followup.abilityKey,
     }),
     ...revealPayload,
     cardId: sourceCardId,
@@ -590,6 +601,7 @@ function resolveHiddenSuccessfulRunTrashRemoteFortEffect(
       sourceDefinitionId,
       primitiveKind: followup.kind,
       effectKind: followup.effect.kind,
+      abilityKey: followup.abilityKey,
     }),
     ...revealPayload,
     cardId: sourceCardId,

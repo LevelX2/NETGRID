@@ -308,7 +308,8 @@ describe("corp install rez sequence handlers", () => {
     ]);
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "score_install_hq_cards_into_new_remote_then_rez:score_install_hq_cards_into_new_remote_then_rez:install_rez_sequence",
+        "score_install_hq_cards_into_new_remote_then_rez:hq_to_new_remote_install_rez:0",
+      cardImplementationAbilityKey: "hq_to_new_remote_install_rez:0",
       cardImplementationPrimitiveKind:
         "score_install_hq_cards_into_new_remote_then_rez",
       cardImplementationEffectKind: "install_rez_sequence",

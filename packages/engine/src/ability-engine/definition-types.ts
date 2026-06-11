@@ -386,6 +386,7 @@ export type CardSuccessfulRunFollowupImplementation =
     }
   | {
       kind: "successful_run_before_access_effect";
+      abilityKey?: string;
       timing: "immediately_after_successful_run_before_access";
       server: "hq";
       source: "installed_hidden_runner_resource";
@@ -395,6 +396,7 @@ export type CardSuccessfulRunFollowupImplementation =
     }
   | {
       kind: "successful_run_before_access_effect";
+      abilityKey?: string;
       timing: "immediately_after_successful_run_before_access";
       server: "remote";
       source: "installed_hidden_runner_resource";
@@ -829,6 +831,7 @@ export type CardScoredAgendaImplementation =
     }
   | {
       kind: "select_rezzed_ice_mark_modifier";
+      abilityKey?: string;
       target: "rezzed_installed_ice";
       counterType: Extract<CounterType, "mark">;
       counterAmount: 1;
@@ -849,6 +852,7 @@ export type CardScoredAgendaImplementation =
     }
   | {
       kind: "score_install_hq_cards_into_new_remote_then_rez";
+      abilityKey?: string;
       sourceZone: "hq";
       targetServer: "new_remote";
       allowedCards: "corp_installable";

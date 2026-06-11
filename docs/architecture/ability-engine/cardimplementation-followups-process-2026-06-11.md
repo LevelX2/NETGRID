@@ -263,6 +263,26 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts -t "Data Fort Reclamation"`
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 
+## P2 Ergebnis
+
+Umgesetzt:
+
+- Relevante Primitive-Definitionen tragen optional `abilityKey`.
+- `cardImplementationPrimitivePayload` schreibt `cardImplementationAbilityKey` und baut `cardImplementationAbilityId` aus `sourceDefinitionId` plus Ability-Key.
+- Factory-Defaults:
+  - `successful_run_before_access:0`
+  - `scored_ice_mark:0`
+  - `hq_to_new_remote_install_rez:0`
+- Successful-Run-Resolver bevorzugt bei neuen Payloads den Ability-Key; falsche neue Keys fallen nicht auf `effectKind` zurück.
+- Legacy-Payloads ohne Ability-Key bleiben funktionsfähig.
+- Scored-ICE-Mark- und HQ-to-New-Remote-Install-Rez-Payloads tragen den neuen Key.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/successful-run-interventions.test.ts src/game/corp/scored-agenda-flow.test.ts src/game/corp/install-rez-sequence-handlers.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.
