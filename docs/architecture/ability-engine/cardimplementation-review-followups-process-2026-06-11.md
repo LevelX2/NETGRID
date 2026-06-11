@@ -224,6 +224,35 @@ Checks:
 
 Commit: `test(engine): verify card implementation review follow-ups`
 
+## P1 Ergebnis
+
+Umgesetzt:
+
+- `docs/architecture/ability-engine/cardimplementation-followups-process-2026-06-11.md` steht jetzt auf `complete`.
+- Gesamtziel, P6/P7-Checks, Controller-Prompt und Abschlusskriterien nennen changed-file-Formatchecks statt repo-weitem Format-Grün.
+- Der repo-weite `format:check` bleibt ausdrücklich als bekannte Baseline außerhalb des Pakets dokumentiert.
+
+Checks:
+
+- Grün: `corepack pnpm exec prettier --check -- docs/architecture/ability-engine/cardimplementation-followups-process-2026-06-11.md`
+- Grün: `git diff --check`
+
+## P2 Ergebnis
+
+Umgesetzt:
+
+- `scripts/check-format-changed.mjs` ergänzt.
+- `package.json` ergänzt `format:changed`.
+- Das Script prüft geänderte versionierte Prettier-Dateien aus Branch-Diff, staged Diff und Arbeitsbaum-Diff gegen einen Basis-Ref.
+- Windows-robust: Prettier wird über die lokale `prettier.cjs` mit `node` gestartet.
+- `pnpm`-Argumenttrenner `--` wird nicht als Basis-Ref interpretiert.
+
+Checks:
+
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `node scripts/check-format-changed.mjs main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die angegebenen Checks.
