@@ -2,7 +2,7 @@
 
 ## Status
 
-`active`
+`final_report_written_pending_final_green`
 
 Arbeitsbranch: `codex/ai-play-strength-decision-spine`
 
