@@ -1,6 +1,9 @@
 import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame";
+import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildAiOpportunityProjections } from "../decision/opportunity-projection";
+import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { buildTacticalGoalUtilities } from "../decision/tactical-goal-utility";
 import { buildAiThreatProjections } from "../decision/threat-projection";
 import type { DecisionSnapshot } from "./decision-snapshot";
@@ -53,6 +56,32 @@ export function evaluateDecisionSnapshot(params: {
       `preferred_goal_family_matched:${preferredGoalFamilyMatched}`,
     ],
   };
+}
+
+export function buildDecisionSnapshotFrame(
+  snapshot: DecisionSnapshot,
+): SemanticDecisionFrame {
+  const input = snapshot.inputBuilder();
+  if (snapshot.frameBuilder) return snapshot.frameBuilder(input);
+  return buildSemanticDecisionFrame({
+    input,
+    actionCandidates: buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: input.side,
+      stateVersion: input.playerView.stateVersion,
+    }),
+  });
+}
+
+export function evaluateDecisionSnapshotFromBuilder(
+  snapshot: DecisionSnapshot,
+): DecisionSnapshotEvaluation {
+  const frame = buildDecisionSnapshotFrame(snapshot);
+  return evaluateDecisionSnapshot({
+    snapshot,
+    frame,
+    trace: buildSemanticShadowDecision(frame),
+  });
 }
 
 export function classifyDecisionTraceMistakes(
