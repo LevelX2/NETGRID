@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -307,6 +307,26 @@ Umgesetzt:
 Checks:
 
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+## P6 Ergebnis
+
+Umgesetzt:
+
+- Finaler Abschlussblock ausgeführt.
+- Keine durch diese Änderungen verursachten roten Tests gefunden.
+- Repo-weites `format:check` bleibt bewusst kein Blocker dieses Prozesses; die aktuelle Paketgrenze nutzt das neue changed-file-Format-Gate.
+
+Checks:
+
+- Grün: `corepack pnpm check:ai`
+  - Ergebnis: Fehler `0`; bestehende Warnbaseline bleibt Warnung.
+- Grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `corepack pnpm -r --if-present --no-bail test`
+  - Ergebnis: 264 Testdateien, 3133 Tests.
+- Grün: `corepack pnpm test`
+  - Ergebnis: workspace-weite Tests plus Root-Specs, 266 Testdateien, 3138 Tests.
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
 
