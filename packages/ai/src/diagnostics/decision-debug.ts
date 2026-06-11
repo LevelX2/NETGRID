@@ -1,4 +1,4 @@
-import type { AiDecisionDebug } from "@netgrid/shared";
+import type { AiDecisionDebug, AiDecisionScoreComponent } from "@netgrid/shared";
 
 type AiDecisionDetailSection = NonNullable<
   AiDecisionDebug["detailSections"]
@@ -45,6 +45,28 @@ export type SemanticDecisionDebugDiagnostics = {
   detailSections: AiDecisionDetailSection[];
   longTermPlan: string[];
 };
+
+export type SemanticDecisionDebugScoreComponentInput = {
+  key: string;
+  label: string;
+  value: number;
+  weight?: number;
+  reason?: string;
+};
+
+export function buildSemanticDecisionDebugScoreComponent(
+  input: SemanticDecisionDebugScoreComponentInput,
+): AiDecisionScoreComponent {
+  return {
+    key: sideSafeDebugValue(input.key),
+    label: sideSafeDebugValue(input.label),
+    value: input.value,
+    ...(input.weight !== undefined ? { weight: input.weight } : {}),
+    ...(input.reason !== undefined
+      ? { reason: sideSafeDebugValue(input.reason) }
+      : {}),
+  };
+}
 
 export function buildSemanticDecisionDebugDiagnostics(
   input: SemanticDecisionDebugDiagnosticsInput,
@@ -136,4 +158,11 @@ function sideSafeDebugItems(items: readonly string[]): string[] {
       normalized.includes(marker),
     );
   });
+}
+
+function sideSafeDebugValue(value: string): string {
+  const normalized = value.toLowerCase();
+  return FORBIDDEN_DEBUG_MARKERS.some((marker) => normalized.includes(marker))
+    ? "[redacted]"
+    : value;
 }
