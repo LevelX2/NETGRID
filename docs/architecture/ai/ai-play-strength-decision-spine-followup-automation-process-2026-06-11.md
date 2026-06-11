@@ -2,7 +2,7 @@
 
 ## Status
 
-`active`
+`final_green_passed_pending_local_main_merge`
 
 Arbeitsbranch: `codex/ai-play-strength-followup-fixes`
 
@@ -137,7 +137,7 @@ process_prepared
 | `AI-PLAY-NEXT-2` | Snapshot-Korpus erweitern | neue Mistake-Fixtures und Review-Artefakt vorhanden | `test(ai): expand play strength decision snapshot corpus` |
 | `AI-PLAY-NEXT-3` | Shadow-vs-Runtime Decision Report | report-only Vergleich mit Redaction und Tests | `feat(ai): add semantic shadow runtime comparison report` |
 | `AI-PLAY-NEXT-4` | Heuristik-Kalibrierung vorbereiten | Benchmark misst Komponenten ohne produktive Gewichtung | `test(ai): add play strength calibration benchmark` |
-| `AI-PLAY-NEXT-5` | Weitere pure Debug-/Report-Helfer extrahieren | `index.ts` nur risikoarm entlastet; Contracts grün | `refactor(ai): extract remaining pure debug report helpers` |
+| `AI-PLAY-NEXT-5` | Weitere pure Debug-/Report-Helfer extrahieren | `index.ts` nur risikoarm entlastet; Contracts grün | `refactor(ai): extract debug score component builder` |
 | `FINAL-GREEN` | Vollständiger AI-Green-Lauf | vollständiger `@netgrid/ai test`, Typecheck, Diffcheck und Runtime-Contract-Tests grün; lokal nach `main` integriert | `docs(ai): record play strength followup final green` |
 
 ## Paketdetails
