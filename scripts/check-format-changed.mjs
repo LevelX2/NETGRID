@@ -26,7 +26,12 @@ const prettierExtensions = new Set([
 ]);
 
 const files = unique([
-  ...gitLines(["diff", "--name-only", "--diff-filter=ACMRTUXB", `${baseRef}...HEAD`]),
+  ...gitLines([
+    "diff",
+    "--name-only",
+    "--diff-filter=ACMRTUXB",
+    `${baseRef}...HEAD`,
+  ]),
   ...gitLines(["diff", "--name-only", "--diff-filter=ACMRTUXB", "--cached"]),
   ...gitLines(["diff", "--name-only", "--diff-filter=ACMRTUXB"]),
 ]).filter(isPrettierSupportedFile);
@@ -40,14 +45,20 @@ if (files.length === 0) {
 
 const prettier = prettierBinary();
 console.log(`FORMAT_CHANGED checking base=${baseRef} files=${files.length}`);
-const result = spawnSync(prettier.command, [...prettier.args, "--check", "--", ...files], {
-  cwd: repoRoot,
-  stdio: "inherit",
-  shell: false,
-});
+const result = spawnSync(
+  prettier.command,
+  [...prettier.args, "--check", "--", ...files],
+  {
+    cwd: repoRoot,
+    stdio: "inherit",
+    shell: false,
+  },
+);
 
 if (result.error) {
-  console.error(`FORMAT_CHANGED failed to start prettier: ${result.error.message}`);
+  console.error(
+    `FORMAT_CHANGED failed to start prettier: ${result.error.message}`,
+  );
   process.exit(1);
 }
 process.exit(result.status ?? 1);
@@ -84,7 +95,8 @@ function prettierBinary() {
     "bin",
     "prettier.cjs",
   );
-  if (fs.existsSync(localCli)) return { command: process.execPath, args: [localCli] };
+  if (fs.existsSync(localCli))
+    return { command: process.execPath, args: [localCli] };
   return { command: "prettier", args: [] };
 }
 

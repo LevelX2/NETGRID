@@ -253,6 +253,24 @@ Checks:
 - Grün: `node scripts/check-format-changed.mjs main`
 - Grün: `git diff --check`
 
+## P3 Ergebnis
+
+Umgesetzt:
+
+- `packages/engine/src/ability-engine/card-implementation-primitives.test.ts` ergänzt.
+- Der Test scannt `CARD_IMPLEMENTATIONS` und sammelt primitive-nahe Ability-Keys aus:
+  - `successfulRunFollowups` für `successful_run_before_access_effect`;
+  - `scoredAgenda` für `select_rezzed_ice_mark_modifier`;
+  - `scoredAgenda` für `score_install_hq_cards_into_new_remote_then_rez`.
+- Fehlende `abilityKey`s werden wie die Builder-Defaults normalisiert.
+- Leere Ability-Keys und doppelte Ability-Keys pro `cardDefinitionId` erzeugen harte Testfehler mit Scope.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/ability-engine/card-implementation-primitives.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die angegebenen Checks.
