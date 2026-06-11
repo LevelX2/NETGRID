@@ -258,6 +258,57 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Run", "Jack-out", "Kein Zugriff", "R&D"]);
   });
 
+  it("describes Viral 15 paid jack-out as rig protection", () => {
+    const item = formatChronicleEvent(
+      makeEvent("jack_out", {
+        actor: "runner",
+        serverLabel: "R&D",
+        v1922CorpIceAbility: "viral_15_jack_out_tax",
+        sourceDefinitionId: "onr_v1_276_viral-15",
+        jackOutAdditionalCost: 1,
+        runnerCreditsAfter: 4
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Der Runner hat den Run für 1 Credit abgebrochen.");
+    expect(item.description).toBe("Viral 15: Jack-out bezahlt; auf R&D wurde keine Karte zugegriffen und kein Programm getrasht.");
+    expect(item.cardDefinitionId).toBe("onr_v1_276_viral-15");
+    expect(item.chips).toEqual(expect.arrayContaining(["Viral 15", "1 Credit", "Rig geschützt"]));
+  });
+
+  it("shows Viral 15 program-trash choice opening and resolution", () => {
+    const opened = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_276_viral-15",
+        hiddenZoneBarrier: true,
+        passIceTrashProgramPrompt: true,
+        passIceTrashProgramCandidateCount: 2
+      }),
+      "corp"
+    );
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_276_viral-15",
+        hiddenZoneAction: "v1922_viral_15_program_trash",
+        programTrashCount: 1,
+        trashedCardDefinitionId: "onr_v1_039_krash"
+      }),
+      "corp"
+    );
+
+    expect(opened.title).toBe("Der Runner hat trotz Viral 15 weitergemacht; Programmtrash muss gewählt werden.");
+    expect(opened.description).toBe("2 installierte Programme stehen in der Runner-privaten Auswahl.");
+    expect(opened.chips).toEqual(expect.arrayContaining(["Viral 15", "Programmtrash-Choice", "2 Kandidaten"]));
+    expect(resolved.title).toBe("Der Runner hat Krash durch Viral 15 getrasht.");
+    expect(resolved.description).toBe("Der Programmtrash wurde über eine Runner-private Auswahl aufgelöst; verdeckte Hand- oder Stack-Daten bleiben verborgen.");
+    expect(resolved.category).toBe("danger");
+    expect(resolved.importance).toBe("critical");
+    expect(JSON.stringify(resolved)).not.toMatch(/cardInstances|privatePayload|runner_card_/);
+  });
+
   it("describes Startup Immolator source, cost and ICE trash movement", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {

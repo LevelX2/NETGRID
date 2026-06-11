@@ -68,6 +68,7 @@ const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const BLINK_ID = "onr_v1_007_blink";
 const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
+const VIRAL_15_ID = "onr_v1_276_viral-15";
 
 export function isISpySuccessfulRunFollowupPayload(payload: Record<string, unknown>): boolean {
   return payload.runnerUtilityAbility === "i_spy_put_spy_counter";
@@ -350,6 +351,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ...trashedTitles,
         );
         break;
+      }
+      {
+        const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
+        const programTrashCount = numberValue(payload.programTrashCount);
+        const isViral15ProgramTrash =
+          hiddenZoneAction === "v1922_viral_15_program_trash" ||
+          (sourceDefinitionId === VIRAL_15_ID && programTrashCount !== undefined);
+        if (isViral15ProgramTrash && programTrashCount !== undefined) {
+          const source = titleForDefinitionId(sourceDefinitionId ?? VIRAL_15_ID) ?? sourceTitle ?? cardTitle ?? "Viral 15";
+          const trashedDefinitionId = stringValue(payload.trashedCardDefinitionId);
+          const trashedTitle = titleForDefinitionId(trashedDefinitionId) ?? stringValue(payload.trashedTitle) ?? `${programTrashCount} Programm${programTrashCount === 1 ? "" : "e"}`;
+          category = "danger";
+          importance = "critical";
+          visibility = "public";
+          cardDefinitionId = sourceDefinitionId ?? VIRAL_15_ID;
+          cardTitle = source;
+          title = phrase(subject, `${trashedTitle} durch ${source} getrasht`);
+          description = "Der Programmtrash wurde über eine Runner-private Auswahl aufgelöst; verdeckte Hand- oder Stack-Daten bleiben verborgen.";
+          chips.push(source, "Programm getrasht", trashedTitle);
+          break;
+        }
       }
       {
         const ambushEffect = resolvedEffectsFromPayload(payload.resolvedEffects).find(
@@ -1441,6 +1463,28 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Social Engineering", "Auto-Pass", ...(target ? [target] : []), chosenIceLabel);
         break;
       }
+      if (
+        payload.passIceTrashProgramPrompt === true &&
+        payload.hiddenZoneBarrier === true
+      ) {
+        const source = titleForDefinitionId(sourceDefinitionId ?? VIRAL_15_ID) ?? sourceTitle ?? cardTitle ?? "Viral 15";
+        const candidateCount = numberValue(payload.passIceTrashProgramCandidateCount);
+        category = "run";
+        importance = "critical";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? VIRAL_15_ID;
+        cardTitle = source;
+        title = phrase(subject, `trotz ${source} weitergemacht; Programmtrash muss gewählt werden`);
+        description = candidateCount !== undefined
+          ? `${candidateCount} installierte Programme stehen in der Runner-privaten Auswahl.`
+          : "Der Runner muss ein installiertes Programm über eine private Auswahl trashen.";
+        chips.push(
+          source,
+          "Programmtrash-Choice",
+          ...(candidateCount !== undefined ? [`${candidateCount} Kandidaten`] : []),
+        );
+        break;
+      }
       if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
         const movedCount = numberValue(payload.movedCount) ?? 0;
         const shuffledCount =
@@ -1541,6 +1585,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "jack_out": {
       const target = serverLabel ?? "dem angegriffenen Server";
       category = "run";
+      if (payload.v1922CorpIceAbility === "viral_15_jack_out_tax") {
+        const jackOutAdditionalCost = numberValue(payload.jackOutAdditionalCost);
+        const cost = jackOutAdditionalCost ?? 1;
+        cardDefinitionId = sourceDefinitionId ?? VIRAL_15_ID;
+        cardTitle = titleForDefinitionId(cardDefinitionId) ?? sourceTitle ?? cardTitle ?? "Viral 15";
+        title = phrase(subject, `den Run für ${creditText(cost)} abgebrochen`);
+        description = `Viral 15: Jack-out bezahlt; auf ${target} wurde keine Karte zugegriffen und kein Programm getrasht.`;
+        chips.push("Run", "Jack-out", "Viral 15", creditText(cost), "Rig geschützt", ...(serverLabel ? [serverLabel] : []));
+        break;
+      }
       title = phrase(subject, "den Run abgebrochen");
       description = `Auf ${target} wurde keine Karte zugegriffen.`;
       chips.push("Run", "Jack-out", "Kein Zugriff", ...(serverLabel ? [serverLabel] : []));

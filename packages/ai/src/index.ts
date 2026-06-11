@@ -6913,6 +6913,8 @@ function semanticRuntimeRunnerScoreComponents(
   if (lowValueRecoveryRepeatComponent) {
     components.push(lowValueRecoveryRepeatComponent);
   }
+  const viral15JackOutComponent = runnerViral15JackOutScoreComponent(input, action);
+  if (viral15JackOutComponent) components.push(viral15JackOutComponent);
   const lateNoFundingCreditRepeatComponent =
     runnerLateNoFundingCreditRepeatScoreComponent(input, action);
   if (lateNoFundingCreditRepeatComponent) {
@@ -13252,6 +13254,19 @@ function selectedChoicesForDecision(
     };
   }
   if (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("p3_56.pass_ice_program_trash") ||
+      choice.source.startsWith("v1922.viral_15_program_trash"))
+  ) {
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedRunnerForcedProgramTrashOptionIds(
+        input,
+        selectableOptions,
+      ),
+    };
+  }
+  if (
     input.side === "corp" &&
     (choice.source.startsWith("p3_34.distribute_advancement") ||
       choice.source.startsWith("v1919.systematic_layoffs_advancement"))
@@ -13904,6 +13919,41 @@ function selectedRunnerProgramInstallTrashOptionIds(
     .filter((id): id is string => typeof id === "string");
 }
 
+function selectedRunnerForcedProgramTrashOptionIds(
+  input: AiDecisionInput,
+  selectableOptions: NonNullable<
+    AiDecisionInput["playerView"]["pendingChoice"]
+  >["options"],
+): string[] {
+  const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
+  const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(
+    input.playerView.own.rig ?? [],
+  );
+  const selected = selectableOptions
+    .map((option) => {
+      const card =
+        typeof option.value === "string"
+          ? installedCards.get(option.value)
+          : option.card;
+      return programSacrificeCandidateForAi(
+        input,
+        card,
+        installedBreakerRoleCounts,
+        option,
+      );
+    })
+    .filter((candidate) => candidate.option)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        sacrificeCandidateLabel(left).localeCompare(
+          sacrificeCandidateLabel(right),
+          "de",
+        ),
+    )[0];
+  return selected?.option?.id ? [selected.option.id] : [];
+}
+
 function selectedCorpAdvancementCounterChoiceOptionId(
   input: AiDecisionInput,
   selectableOptions: NonNullable<
@@ -14337,6 +14387,36 @@ function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
     card.type === "program" &&
     visibleBreakerRolesForAi(card).length > 0
   );
+}
+
+function runnerViral15JackOutScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (
+    input.side !== "runner" ||
+    action.type !== "jack_out" ||
+    action.payload?.v1922CorpIceAbility !== "viral_15_jack_out_tax"
+  ) {
+    return undefined;
+  }
+  const cost = actionCreditCost(action);
+  if (cost > input.playerView.own.credits) return undefined;
+  const installedPrograms = (input.playerView.own.rig ?? []).filter(
+    (card) => card.known === true && card.type === "program",
+  );
+  if (installedPrograms.length === 0) return undefined;
+  const protectedBreakers = installedPrograms.filter(isVisibleIcebreakerProgram).length;
+  return {
+    key: "runner_viral15_jack_out_prevents_program_trash",
+    label: "Viral-15-Rigschutz",
+    value: 1350 + Math.min(2, protectedBreakers) * 120,
+    reason: [
+      `jack_out_cost:${cost}`,
+      `installed_programs:${installedPrograms.length}`,
+      `visible_breakers:${protectedBreakers}`,
+    ].join("|"),
+  };
 }
 
 function visibleBreakerRoleCountsForAi(

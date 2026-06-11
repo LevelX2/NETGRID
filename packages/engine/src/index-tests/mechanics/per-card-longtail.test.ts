@@ -6209,6 +6209,117 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("preserves Krash and Cyfermaster when Runner pays Viral 15 jack-out on R&D after Tutor", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-viral-15-rd-tutor-jack-out",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_viral_15_krash_cyfermaster",
+          name: "O:NR V1.9.22 Viral 15 Krash Cyfermaster Runner",
+          cards: [
+            { id: "onr_v1_039_krash", quantity: 1 },
+            { id: "onr_v1_016_cyfermaster", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1922_viral_15_tutor_rd",
+          name: "O:NR V1.9.22 Viral 15 Tutor R&D Corp",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_276_viral-15", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 7;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    const krashId = installRunnerProgramForTest(state, "onr_v1_039_krash");
+    const cyfermasterId = installRunnerProgramForTest(
+      state,
+      "onr_v1_016_cyfermaster",
+    );
+    const viralId = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === tutorId,
+    );
+    state = enterEncounterFromMovementWindow(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_016_cyfermaster",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunAction(state);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === viralId,
+    );
+    state = enterEncounterFromMovementWindow(state);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const jackOut = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "jack_out" &&
+        action.payload?.v1922CorpIceAbility === "viral_15_jack_out_tax",
+    );
+    expect(jackOut.costs[0]?.credits).toBe(1);
+    expect(state.runner.credits).toBe(5);
+    expect(state.runner.rig.programs).toEqual(
+      expect.arrayContaining([krashId, cyfermasterId]),
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === jackOut.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.runner.credits).toBe(4);
+    expect(state.runner.rig.programs).toEqual(
+      expect.arrayContaining([krashId, cyfermasterId]),
+    );
+    expect(state.runner.heap).not.toContain(krashId);
+    expect(state.runner.heap).not.toContain(cyfermasterId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "jack_out",
+      v1922CorpIceAbility: "viral_15_jack_out_tax",
+      jackOutAdditionalCost: 1,
+      runnerCreditsAfter: 4,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps V1.9.22 Corp longtail runtime WIPs out of release promotion until gates close", () => {
     const corpLongtailIds = ["onr_v1_276_viral-15"] as const;
 

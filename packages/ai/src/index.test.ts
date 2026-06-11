@@ -21580,6 +21580,136 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("jacks out for Viral 15 on R&D instead of sacrificing Krash and Cyfermaster", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-viral15-rd-jack-out-protect-rig",
+        runnerDeck: {
+          id: "semantic_viral15_rd_runner",
+          name: "Semantic Viral 15 R&D Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_039_krash", quantity: 1 },
+            { id: "onr_v1_016_cyfermaster", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_viral15_rd_corp",
+          name: "Semantic Viral 15 R&D Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_276_viral-15", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 7;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    const krashId = moveRunnerProgramToRig(state, "onr_v1_039_krash");
+    const cyfermasterId = moveRunnerProgramToRig(
+      state,
+      "onr_v1_016_cyfermaster",
+    );
+    const viral15Id = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === tutorId,
+    );
+    state = enterEncounterFromMovementWindow(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_016_cyfermaster",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunAction(state);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === viral15Id,
+    );
+    state = enterEncounterFromMovementWindow(state);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.runner.credits).toBe(5);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const jackOut = input.legalActions.find(
+      (action) =>
+        action.type === "jack_out" &&
+        action.payload?.v1922CorpIceAbility === "viral_15_jack_out_tax",
+    );
+    const continueRun = input.legalActions.find(
+      (action) => action.type === "continue_run",
+    );
+    expect(jackOut).toBeDefined();
+    expect(continueRun).toBeDefined();
+    if (!jackOut || !continueRun) {
+      throw new Error("Missing Viral 15 jack-out fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [continueRun, jackOut],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const jackAlternative = alternatives.get(jackOut.actionId);
+
+    expect(decision.actionId).toBe(jackOut.actionId);
+    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(jackAlternative?.scoreBreakdown).toContainEqual(
+      expect.objectContaining({
+        key: "runner_viral15_jack_out_prevents_program_trash",
+      }),
+    );
+
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: decision.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "ai-viral15-rd-jack-out",
+    });
+    expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.state.runner.rig.programs).toEqual(
+      expect.arrayContaining([krashId, cyfermasterId]),
+    );
+    expect(result.state.runner.heap).not.toContain(krashId);
+    expect(result.state.runner.heap).not.toContain(cyfermasterId);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|decklist/,
+    );
+  });
+
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -28278,7 +28408,25 @@ function continueRunAction(state: GameState): GameState {
 }
 
 function enterEncounterFromMovementWindow(state: GameState): GameState {
-  return continueRunAction(state);
+  let next = state;
+  for (let i = 0; i < 3; i += 1) {
+    if (
+      next.timingPoint !== "run.jack_out_window" ||
+      next.run?.phase !== "movement"
+    ) {
+      return next;
+    }
+    const continueAction = getLegalActions(next, "runner").find(
+      (action) => action.type === "continue_run",
+    );
+    if (!continueAction) return next;
+    next = apply(
+      next,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+  }
+  return next;
 }
 
 function installRunnerCard(state: GameState, definitionId: string): GameState {
