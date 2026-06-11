@@ -1296,6 +1296,54 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
+    let noUnrezzedTargetState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-forged-activation-orders-no-unrezzed-target",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_forged_activation_orders_no_unrezzed",
+          name: "O:NR V1.9.22 Forged Activation Orders No Unrezzed",
+          cards: [
+            { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1922_forged_activation_orders_no_unrezzed",
+          name: "O:NR V1.9.22 Forged Activation Orders No Unrezzed Corp",
+          cards: [
+            { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    noUnrezzedTargetState.runner.credits = 2;
+    const onlyRezzedTargetId = putCorpIceOnServer(
+      noUnrezzedTargetState,
+      "hq",
+      "onr_v1_263_reinforced-wall",
+    );
+    noUnrezzedTargetState.cardInstances[onlyRezzedTargetId] = {
+      ...noUnrezzedTargetState.cardInstances[onlyRezzedTargetId]!,
+      rezzed: true,
+      faceup: true,
+    };
+    moveRunnerCardToGrip(
+      noUnrezzedTargetState,
+      "onr_v1_086_forged-activation-orders",
+    );
+    expect(
+      getLegalActions(noUnrezzedTargetState, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(noUnrezzedTargetState, action) ===
+            "onr_v1_086_forged-activation-orders",
+      ),
+    ).toBe(false);
+
     let trashState = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-forged-activation-orders-trash",
