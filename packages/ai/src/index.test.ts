@@ -798,7 +798,9 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("projects Tutor's unbroken run-duration ETR onto later ICE before choosing access reachability", () => {
     const cardsById = createRuntimeCardsById();
-    const innerViral15 = runtimeVisibleIce(cardsById["onr_v1_276_viral-15"]);
+    const innerTooManyDoors = runtimeVisibleIce(
+      cardsById["onr_v1_272_too-many-doors"],
+    );
     const outerTutor = {
       ...runtimeVisibleIce(cardsById["onr_v1_274_tutor"]),
       effectiveRunQuote: {
@@ -820,16 +822,16 @@ describe("MVP 0.3 AI controller contract", () => {
     const evilTwin = runtimeVisibleBreaker(cardsById["onr_v1_023_evil-twin"]);
 
     expect(
-      assessKnownRezzedIcePath([innerViral15, outerTutor], [], 9),
+      assessKnownRezzedIcePath([innerTooManyDoors, outerTutor], [], 9),
     ).toMatchObject({
       blocked: true,
       canReachAccess: false,
       knownPathBlockedByMissingCoverage: true,
       missingCoverage: ["sentry"],
-      unbreakableIceTitle: "Viral 15",
+      unbreakableIceTitle: "Too Many Doors",
     });
     expect(
-      assessKnownRezzedIcePath([innerViral15, outerTutor], [codecracker], 5),
+      assessKnownRezzedIcePath([innerTooManyDoors, outerTutor], [codecracker], 5),
     ).toMatchObject({
       blocked: false,
       canReachAccess: true,
@@ -837,12 +839,85 @@ describe("MVP 0.3 AI controller contract", () => {
       creditsAfterPath: 0,
     });
     expect(
-      assessKnownRezzedIcePath([innerViral15, outerTutor], [evilTwin], 3),
+      assessKnownRezzedIcePath([innerTooManyDoors, outerTutor], [evilTwin], 3),
     ).toMatchObject({
       blocked: false,
       canReachAccess: true,
       visibleBreakCost: 3,
       creditsAfterPath: 0,
+    });
+  });
+
+  it("blocks the visible Viral 15 R&D path before counting Haunting Inquisition as safe access", () => {
+    const cardsById = createRuntimeCardsById();
+    const innerVirizz = runtimeVisibleIce(cardsById["onr_v1_277_virizz"]);
+    const middleHaunting = runtimeVisibleIce(
+      cardsById["onr_v1_247_haunting-inquisition"],
+    );
+    const outerViral15 = runtimeVisibleIce(cardsById["onr_v1_276_viral-15"]);
+    const cyfermaster = runtimeVisibleBreaker(
+      cardsById["onr_v1_016_cyfermaster"],
+    );
+    const rig = [
+      { ...cyfermaster, instanceId: "cyfermaster_visible_1" },
+      { ...cyfermaster, instanceId: "cyfermaster_visible_2" },
+      {
+        instanceId: "force_shield_visible",
+        definitionId: "onr_v1_028_force-shield",
+        known: true,
+        type: "program",
+        subtypes: [],
+      },
+    ] satisfies VisibleCard[];
+
+    const assessment = assessKnownRezzedIcePath(
+      [innerVirizz, middleHaunting, outerViral15],
+      rig,
+      5,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByHardUnbrokenEffect: true,
+      hardUnbrokenRunEffects: ["damage_or_program_trash"],
+      noAccessReason: "harmful_unbroken_run_effect",
+      hardUnbrokenEffectIceIndex: 2,
+      hardUnbrokenEffectIceTitle: "Viral 15",
+      missingCoverage: ["sentry"],
+    });
+    expect(assessment.visibleBreakCost).not.toBe(3);
+  });
+
+  it("treats a non-ETR harmful visible subroutine as unsafe when it cannot be broken", () => {
+    const harmfulCodeGate = {
+      definitionId: "onr_v1_261_quandary",
+      known: true,
+      rezzed: true,
+      subtypes: ["code_gate"],
+      strength: 2,
+      effectiveRunQuote: {
+        iceInstanceId: "synthetic_harmful_code_gate",
+        iceDefinitionId: "onr_v1_261_quandary",
+        effectiveStrength: 2,
+        subroutines: [
+          {
+            id: "synthetic_run_lock",
+            type: "set_runner_run_lock_actions",
+            amount: 2,
+            unbrokenRunEffect: { createsRunLockOrActionTax: 2 },
+          },
+        ],
+      } satisfies VisibleEffectiveIceRunQuote,
+    };
+
+    expect(assessKnownRezzedIcePath([harmfulCodeGate], [], 6)).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByHardUnbrokenEffect: true,
+      hardUnbrokenRunEffects: ["run_lock_or_action_tax"],
+      noAccessReason: "harmful_unbroken_run_effect",
+      missingCoverage: ["code_gate"],
     });
   });
 

@@ -21,6 +21,10 @@ type RootCardLike = { definitionId?: string; rezzed?: boolean; known: boolean };
 type RunPathProjectionEffect = NonNullable<
   VisibleEffectiveSubroutine["unbrokenRunEffect"]
 >;
+type HardUnbrokenRunEffectKind =
+  | "damage_or_program_trash"
+  | "run_lock_or_action_tax"
+  | "jack_out_lock";
 type BreakAssessment = {
   cost: number;
   breakerInstanceId: string;
@@ -34,11 +38,15 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByUnbreakableIce: boolean;
   knownPathBlockedByMissingCoverage: boolean;
   knownPathBlockedByEtr: boolean;
+  knownPathBlockedByHardUnbrokenEffect?: boolean;
+  hardUnbrokenRunEffects?: HardUnbrokenRunEffectKind[];
   creditsAfterPath: number;
   canBreakNextIceButNotFullPath: boolean;
   unpayableIceIndex?: number;
   unbreakableIceIndex?: number;
   unbreakableIceTitle?: string;
+  hardUnbrokenEffectIceIndex?: number;
+  hardUnbrokenEffectIceTitle?: string;
   missingCoverage?: Array<
     "wall" | "code_gate" | "sentry" | "ap" | "trace" | "unknown_special"
   >;
@@ -48,7 +56,8 @@ export type KnownRezzedIcePathAssessment = {
     | "known_path_unpayable"
     | "known_path_unbreakable"
     | "missing_breaker_coverage"
-    | "known_etr_without_breaker";
+    | "known_etr_without_breaker"
+    | "harmful_unbroken_run_effect";
   creditsSpentBeforeUnpayableIce: number;
   unpayableReason?:
     | "ice_unbreakable"
@@ -132,7 +141,7 @@ function assessKnownRezzedIcePathInternal(
     );
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
-    const quote = effectiveRunQuoteForIce(effectiveIce);
+    const quote = runQuoteForIce(effectiveIce, iceIndex);
     const endTheRunCount = quote
       ? quote.subroutines.filter(
           (subroutine) => subroutine.type === "end_the_run",
@@ -266,6 +275,56 @@ function assessKnownRezzedIcePathInternal(
       (effect) => !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
     );
     for (const effect of runPathEffects) {
+      const hardEffectKinds = hardUnbrokenRunEffectKinds(
+        effect,
+        futureIce.length,
+      );
+      if (hardEffectKinds.length > 0) {
+        const breakAssessment =
+          options.allowBreakingRunPathEffects &&
+          !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
+            ? minimumCreditsToBreakEndTheRunSubroutines(
+                effectiveIceForQuote(effectiveIce, quote),
+                rigCards,
+                1,
+                breakerStrengths,
+                additionalBreakCostPerSubroutine,
+              )
+            : undefined;
+        if (breakAssessment && breakAssessment.cost <= remainingCredits) {
+          visibleBreakCost += breakAssessment.cost;
+          remainingCredits -= breakAssessment.cost;
+          firstKnownIceBreakable = true;
+          if (breakAssessment.carriesStrengthAcrossIce) {
+            breakerStrengths.set(
+              breakAssessment.breakerInstanceId,
+              breakAssessment.endingStrength,
+            );
+          }
+          continue;
+        }
+        return hardUnbrokenEffectBlockedPathAssessment({
+          visibleBreakCost:
+            visibleBreakCost + Math.max(0, breakAssessment?.cost ?? 0),
+          creditsAfterPath:
+            breakAssessment && breakAssessment.cost > remainingCredits
+              ? remainingCredits - breakAssessment.cost
+              : remainingCredits,
+          iceIndex,
+          iceDefinitionId: effectiveIce.definitionId,
+          iceSubtypes: effectiveIce.subtypes,
+          creditsSpentBeforeUnpayableIce: visibleBreakCost,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          effectKinds: hardEffectKinds,
+          unpayableReason:
+            breakAssessment === undefined
+              ? "ice_unbreakable"
+              : visibleBreakCost > 0
+                ? "later_ice_unaffordable_after_prior_ice_cost"
+                : "ice_unaffordable",
+        });
+      }
       const breakAssessment =
         options.allowBreakingRunPathEffects
           ? runPathEffectBreakAssessment({
@@ -440,8 +499,25 @@ function runPathProjectionEffectCanMatter(
     (effect.increasesFutureBreakCostPerSubroutine ?? 0) > 0 ||
     (effect.increasesFutureIceStrength ?? 0) > 0 ||
     (effect.addsFutureEncounterCost ?? 0) > 0 ||
-    effect.preventsFutureBreaking === true
+    effect.preventsFutureBreaking === true ||
+    effect.preventsJackOut === true ||
+    effect.causesDamageOrProgramTrash === true ||
+    (effect.createsRunLockOrActionTax ?? 0) > 0
   );
+}
+
+function hardUnbrokenRunEffectKinds(
+  effect: RunPathProjectionEffect,
+  futureIceCount: number,
+): HardUnbrokenRunEffectKind[] {
+  const kinds: HardUnbrokenRunEffectKind[] = [];
+  if (effect.causesDamageOrProgramTrash === true)
+    kinds.push("damage_or_program_trash");
+  if ((effect.createsRunLockOrActionTax ?? 0) > 0)
+    kinds.push("run_lock_or_action_tax");
+  if (effect.preventsJackOut === true && futureIceCount > 0)
+    kinds.push("jack_out_lock");
+  return kinds;
 }
 
 function projectIceForRunPathEffects(
@@ -571,6 +647,59 @@ function blockedPathAssessment(
   };
 }
 
+function hardUnbrokenEffectBlockedPathAssessment(params: {
+  visibleBreakCost: number;
+  creditsAfterPath: number;
+  iceIndex: number;
+  iceDefinitionId: string | undefined;
+  iceSubtypes: string[] | undefined;
+  creditsSpentBeforeUnpayableIce: number;
+  firstKnownIceBreakable: boolean;
+  assessedKnownIceCount: number;
+  effectKinds: HardUnbrokenRunEffectKind[];
+  unpayableReason: NonNullable<KnownRezzedIcePathAssessment["unpayableReason"]>;
+}): KnownRezzedIcePathAssessment {
+  const unbreakable = params.unpayableReason === "ice_unbreakable";
+  const missingCoverage = unbreakable
+    ? missingCoverageForIceSubtypes(params.iceSubtypes ?? [])
+    : undefined;
+  const title = params.iceDefinitionId
+    ? visibleRunCardDefinition(params.iceDefinitionId)?.title ??
+      params.iceDefinitionId
+    : undefined;
+  return {
+    blocked: true,
+    ...(params.visibleBreakCost > 0
+      ? { visibleBreakCost: params.visibleBreakCost }
+      : {}),
+    canReachAccess: false,
+    knownPathBlockedByUnbreakableIce: unbreakable,
+    knownPathBlockedByMissingCoverage:
+      unbreakable && Boolean(missingCoverage?.length),
+    knownPathBlockedByEtr: false,
+    knownPathBlockedByHardUnbrokenEffect: true,
+    hardUnbrokenRunEffects: [...new Set(params.effectKinds)].sort(),
+    creditsAfterPath: params.creditsAfterPath,
+    canBreakNextIceButNotFullPath:
+      params.firstKnownIceBreakable &&
+      params.creditsSpentBeforeUnpayableIce > 0 &&
+      params.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost",
+    unpayableIceIndex: params.iceIndex,
+    ...(unbreakable ? { unbreakableIceIndex: params.iceIndex } : {}),
+    ...(unbreakable && title ? { unbreakableIceTitle: title } : {}),
+    hardUnbrokenEffectIceIndex: params.iceIndex,
+    ...(title ? { hardUnbrokenEffectIceTitle: title } : {}),
+    ...(missingCoverage && missingCoverage.length > 0
+      ? { missingCoverage }
+      : {}),
+    hasBypassOrSpecialAccessPlan: false,
+    noAccessReason: "harmful_unbroken_run_effect",
+    creditsSpentBeforeUnpayableIce: params.creditsSpentBeforeUnpayableIce,
+    unpayableReason: params.unpayableReason,
+    assessedKnownIceCount: params.assessedKnownIceCount,
+  };
+}
+
 function missingCoverageForIceSubtypes(
   subtypes: string[],
 ): NonNullable<KnownRezzedIcePathAssessment["missingCoverage"]> {
@@ -597,6 +726,92 @@ function effectiveRunQuoteForIce(
   const quote = ice.effectiveRunQuote;
   if (!quote || quote.iceDefinitionId !== ice.definitionId) return undefined;
   return quote;
+}
+
+function runQuoteForIce(
+  ice: IceCardLike,
+  iceIndex: number,
+): VisibleEffectiveIceRunQuote | undefined {
+  const quote = effectiveRunQuoteForIce(ice);
+  if (quote) return quoteWithFallbackUnbrokenRunEffects(quote);
+  if (!ice.definitionId) return undefined;
+  const definition = visibleRunCardDefinition(ice.definitionId);
+  if (!definition || definition.type !== "ice") return undefined;
+  return {
+    iceInstanceId: `visible_path.${ice.definitionId}.${iceIndex}`,
+    iceDefinitionId: ice.definitionId,
+    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
+    subroutines:
+      definition.subroutines?.map((subroutine) =>
+        visibleSubroutineWithFallbackUnbrokenRunEffect({
+          id: subroutine.id,
+          type: subroutine.type,
+          ...(subroutine.amount !== undefined
+            ? { amount: subroutine.amount }
+            : {}),
+          ...(subroutine.breakTags
+            ? { breakTags: subroutine.breakTags.slice() }
+            : {}),
+        }),
+      ) ?? [],
+  };
+}
+
+function quoteWithFallbackUnbrokenRunEffects(
+  quote: VisibleEffectiveIceRunQuote,
+): VisibleEffectiveIceRunQuote {
+  return {
+    ...quote,
+    subroutines: quote.subroutines.map(
+      visibleSubroutineWithFallbackUnbrokenRunEffect,
+    ),
+  };
+}
+
+function visibleSubroutineWithFallbackUnbrokenRunEffect(
+  subroutine: VisibleEffectiveSubroutine,
+): VisibleEffectiveSubroutine {
+  const unbrokenRunEffect =
+    subroutine.unbrokenRunEffect ??
+    fallbackUnbrokenRunEffectForSubroutine(subroutine);
+  return unbrokenRunEffect ? { ...subroutine, unbrokenRunEffect } : subroutine;
+}
+
+function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
+  type: VisibleEffectiveSubroutine["type"];
+  amount?: number;
+}): RunPathProjectionEffect | undefined {
+  const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+  switch (subroutine.type) {
+    case "set_run_future_end_the_run_subroutine":
+      return { addsFutureEndTheRunSubroutines: 1 };
+    case "set_run_break_subroutine_cost_modifier":
+      return amount > 0
+        ? { increasesFutureBreakCostPerSubroutine: amount }
+        : undefined;
+    case "set_run_future_strength_bonus":
+      return amount > 0 ? { increasesFutureIceStrength: amount } : undefined;
+    case "set_next_encounter_no_break_subroutines":
+      return { preventsFutureBreaking: true };
+    case "set_run_encounter_tax":
+      return amount > 0 ? { addsFutureEncounterCost: amount } : undefined;
+    case "set_run_jack_out_lock":
+    case "set_next_encounter_lock":
+      return { preventsJackOut: true };
+    case "set_next_encounter_unless_fully_break_damage":
+    case "set_run_pass_rezzed_ice_program_trash":
+    case "set_run_viral_15":
+    case "do_damage":
+    case "trash_installed_program":
+    case "trash_installed_program_unless_runner_pays":
+      return { causesDamageOrProgramTrash: true };
+    case "set_runner_run_lock_actions":
+      return { createsRunLockOrActionTax: Math.max(1, amount) };
+    case "set_runner_forgo_next_action":
+      return { createsRunLockOrActionTax: 1 };
+    default:
+      return undefined;
+  }
 }
 
 function effectiveIceForQuote(
