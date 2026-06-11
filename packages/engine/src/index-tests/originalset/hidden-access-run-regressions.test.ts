@@ -285,8 +285,10 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "archives",
     );
+    archivesState = passRootRezWindowBeforeAccessIfOpen(archivesState);
     expect(archivesState.runner.grip.length).toBe(archivesGripBefore);
     expect(archivesState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealDefinitionIds: "onr_v1_348_virus-test-site",
       archivesAutoAccessedCount: 1,
@@ -306,9 +308,11 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "archives",
     );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
 
     expect(state.runner.grip.length).toBe(gripBefore);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealDefinitionIds: "onr_v1_340_setup",
       archivesAutoAccessedCount: 1,
@@ -378,10 +382,12 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "archives",
     );
+    archivesState = passRootRezWindowBeforeAccessIfOpen(archivesState);
 
     expect(archivesState.runner.grip.length).toBe(archivesGripBefore);
     expect(archivesState.runner.tags).toBe(archivesTagsBefore);
     expect(archivesState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealDefinitionIds: "onr_v1_345_trap",
       archivesAutoAccessedCount: 1,

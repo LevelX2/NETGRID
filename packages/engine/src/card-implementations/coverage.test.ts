@@ -1692,12 +1692,14 @@ describe("CardImplementation coverage and registry invariants", () => {
           human_playable: true,
           deck_legal: true,
           format_legal: true,
+          ai_supported: true,
           blocked: false,
         });
         expect(card.support.resolverRef, card.cardId).toBe(
           `engine:${card.cardId}`,
         );
       } else {
+        expect(card.statuses.ai_supported, card.cardId).toBe(false);
         expect(card.statuses, card.cardId).toMatchObject({
           implemented: false,
           engine_supported: false,

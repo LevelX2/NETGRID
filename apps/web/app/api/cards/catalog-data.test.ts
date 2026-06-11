@@ -313,6 +313,7 @@ describe("catalog API filters", () => {
       expect.arrayContaining([
         "onr_v1_026_false-echo",
         "onr_v1_075_zetatech-software-installer",
+        "onr_proteus_001_ai-board-member",
       ]),
     );
     expect(body.cards.map((card) => card.catalogCardId)).toEqual(
@@ -320,7 +321,7 @@ describe("catalog API filters", () => {
     );
   });
 
-  it("keeps the Proteus visible baseline decklegal, format-legal and AI-supported", () => {
+  it("promotes the Proteus visible baseline for deck legality and AI support", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(154);
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([...PROTEUS_CARD_IDS]);
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(
@@ -345,15 +346,13 @@ describe("catalog API filters", () => {
       expect(candidateBody.card).toMatchObject({
         catalogCardId: candidateId,
         statuses: {
-            human_playable: true,
-            deck_legal: true,
-            format_legal: true,
-            ai_supported: true,
-            blocked: false,
-          },
-        aiHints: expect.objectContaining({
-          aiSupportStatus: "ai_supported",
-        }),
+          human_playable: true,
+          deck_legal: true,
+          format_legal: true,
+          ai_supported: true,
+          blocked: false,
+        },
+        aiHints: { aiSupportStatus: "ai_supported" },
       });
     }
 
@@ -471,6 +470,8 @@ describe("catalog API filters", () => {
       "sentry",
     );
     expect(inspector.functionSignals).toContain("breaker.sentry");
+    expect(inspector.lineSupport.values).toEqual([]);
+    expect(inspector.lineSupport.classification).toEqual([]);
     expect(inspector.legacyRoles.planRolesClassification).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -518,6 +519,7 @@ describe("catalog API filters", () => {
         }),
       ]),
     );
+    expect(gapBody.card.aiInspector?.warnings.descriptorGaps).toEqual([]);
   });
 
   it("exposes lightweight AI inspector summaries for catalog filtering", () => {

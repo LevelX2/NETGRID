@@ -40,6 +40,14 @@ export type AiSelfplayActionLimitClusterId =
   | "action_limit_low_value_repeat"
   | "action_limit_mixed_or_unknown";
 
+export type AiSelfplayActionLimitSubclusterId =
+  | "late_gain_credit_without_funding_need"
+  | "late_draw_without_coverage_or_hand_goal"
+  | "late_ability_reuse_low_delta"
+  | "late_install_low_delta"
+  | "late_run_step_stall"
+  | "mixed_unknown";
+
 export type AiSelfplaySuspiciousDecision = {
   matchId: string;
   seed: string;
@@ -110,6 +118,7 @@ export type AiSelfplayTraceMiningResult = {
     unsafeScoreChosen: number;
     passiveActionWithScoreLineAvailable: number;
     actionLimitClusters: Record<AiSelfplayActionLimitClusterId, number>;
+    actionLimitSubclusters: Record<AiSelfplayActionLimitSubclusterId, number>;
   };
 };
 
@@ -121,6 +130,16 @@ export const SELFPLAY_ACTION_LIMIT_CLUSTER_IDS: AiSelfplayActionLimitClusterId[]
     "action_limit_setup_economy_loop",
     "action_limit_low_value_repeat",
     "action_limit_mixed_or_unknown",
+  ];
+
+export const SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS: AiSelfplayActionLimitSubclusterId[] =
+  [
+    "late_gain_credit_without_funding_need",
+    "late_draw_without_coverage_or_hand_goal",
+    "late_ability_reuse_low_delta",
+    "late_install_low_delta",
+    "late_run_step_stall",
+    "mixed_unknown",
   ];
 
 export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetectorId[] =
@@ -219,12 +238,26 @@ export function summarizeSelfplayActionLimitClusters(
   return counts;
 }
 
+export function summarizeSelfplayActionLimitSubclusters(
+  summaries: readonly AiSimulationSummary[],
+): Record<AiSelfplayActionLimitSubclusterId, number> {
+  const counts = Object.fromEntries(
+    SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
+  ) as Record<AiSelfplayActionLimitSubclusterId, number>;
+  for (const summary of summaries) {
+    if (summary.winner !== "action_limit_reached") continue;
+    counts[classifySelfplayActionLimitSubcluster(summary)] += 1;
+  }
+  return counts;
+}
+
 function classifySelfplayActionLimitCluster(
   summary: AiSimulationSummary,
 ): AiSelfplayActionLimitClusterId {
   const window = summary.actionSequence.slice(-30);
   const repeatedRuns = window.filter((entry, index) => {
-    if (entry.side !== "runner" || entry.actionType !== "start_run") return false;
+    if (entry.side !== "runner" || entry.actionType !== "start_run")
+      return false;
     const globalIndex = summary.actionSequence.length - window.length + index;
     const previous = previousRunnerRunOnSameServer(
       summary.actionSequence,
@@ -261,31 +294,33 @@ function classifySelfplayActionLimitCluster(
     window.filter(actionLimitLowValueRepeatEntry).length +
     countRepeatedActionReasonsWithoutProgress(window);
 
-  const scored = ([
-    {
-      cluster: "action_limit_corp_scoreline_stall",
-      score: corpScorelineStall * 3,
-    },
-    {
-      cluster: "action_limit_runner_repeated_no_progress_run",
-      score: repeatedRuns * 3,
-    },
-    {
-      cluster: "action_limit_runner_remote_contest_blocked",
-      score: remoteContestBlocked * 3,
-    },
-    {
-      cluster: "action_limit_low_value_repeat",
-      score: lowValueRepeat * 2,
-    },
-    {
-      cluster: "action_limit_setup_economy_loop",
-      score: setupEconomy,
-    },
-  ] satisfies Array<{
-    cluster: AiSelfplayActionLimitClusterId;
-    score: number;
-  }>).sort(
+  const scored = (
+    [
+      {
+        cluster: "action_limit_corp_scoreline_stall",
+        score: corpScorelineStall * 3,
+      },
+      {
+        cluster: "action_limit_runner_repeated_no_progress_run",
+        score: repeatedRuns * 3,
+      },
+      {
+        cluster: "action_limit_runner_remote_contest_blocked",
+        score: remoteContestBlocked * 3,
+      },
+      {
+        cluster: "action_limit_low_value_repeat",
+        score: lowValueRepeat * 2,
+      },
+      {
+        cluster: "action_limit_setup_economy_loop",
+        score: setupEconomy,
+      },
+    ] satisfies Array<{
+      cluster: AiSelfplayActionLimitClusterId;
+      score: number;
+    }>
+  ).sort(
     (left, right) =>
       right.score - left.score || left.cluster.localeCompare(right.cluster),
   );
@@ -295,6 +330,88 @@ function classifySelfplayActionLimitCluster(
     return "action_limit_mixed_or_unknown";
   }
   return best.cluster;
+}
+
+function classifySelfplayActionLimitSubcluster(
+  summary: AiSimulationSummary,
+): AiSelfplayActionLimitSubclusterId {
+  const window = summary.actionSequence.slice(-40);
+  const counts = Object.fromEntries(
+    SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
+  ) as Record<AiSelfplayActionLimitSubclusterId, number>;
+  for (const entry of window) {
+    const subcluster = classifySelfplayActionLimitSubclusterEntry(entry);
+    if (subcluster) counts[subcluster] += 1;
+  }
+  const ranked = SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.filter(
+    (subcluster) => subcluster !== "mixed_unknown",
+  )
+    .map((subcluster) => ({ subcluster, count: counts[subcluster] }))
+    .sort(
+      (left, right) =>
+        right.count - left.count ||
+        left.subcluster.localeCompare(right.subcluster),
+    );
+  const [best, second] = ranked;
+  if (!best || best.count <= 0) return "mixed_unknown";
+  if (second && second.count > 0 && best.count === second.count) {
+    return "mixed_unknown";
+  }
+  return best.subcluster;
+}
+
+function classifySelfplayActionLimitSubclusterEntry(
+  entry: AiSimulationSummary["actionSequence"][number],
+): AiSelfplayActionLimitSubclusterId | undefined {
+  const text = selfplayEntryText(entry);
+  if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(text)) {
+    return "late_gain_credit_without_funding_need";
+  }
+  if (entry.actionType === "draw_card" && !entryHasDrawOrCoverageNeed(text)) {
+    return "late_draw_without_coverage_or_hand_goal";
+  }
+  if (
+    entry.actionType === "activated_card_ability" &&
+    entryHasLowDeltaSignal(text)
+  ) {
+    return "late_ability_reuse_low_delta";
+  }
+  if (
+    (entry.actionType === "install_card" ||
+      entry.actionType === "play_event") &&
+    entryHasLowDeltaSignal(text)
+  ) {
+    return "late_install_low_delta";
+  }
+  if (
+    (entry.actionType === "start_run" ||
+      entry.actionType === "continue_run" ||
+      entry.actionType === "access_card") &&
+    /simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest|simple_run_choice/.test(
+      text,
+    )
+  ) {
+    return "late_run_step_stall";
+  }
+  return undefined;
+}
+
+function entryHasFundingNeedSignal(text: string): boolean {
+  return /activefundingneed:true|funding_need:true|fundingneed:true|credit_base_funding_need:true|runner_economy_funding_need:true/.test(
+    text,
+  );
+}
+
+function entryHasDrawOrCoverageNeed(text: string): boolean {
+  return /coverage|hand_goal|draw_for_answer|search_or_draw|supportsdraworsearchneed:true|answer/.test(
+    text,
+  );
+}
+
+function entryHasLowDeltaSignal(text: string): boolean {
+  return /known_low_value|low_value|low_delta|no_current_payoff|stale|repeat/.test(
+    text,
+  );
 }
 
 function actionLimitSetupOrEconomyEntry(
@@ -627,7 +744,8 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("blink_low_hand_buffer_run") &&
     entry.side === "runner" &&
-    (entry.actionType === "start_run" || entry.actionType === "trigger_ability") &&
+    (entry.actionType === "start_run" ||
+      entry.actionType === "trigger_ability") &&
     (text.includes("blocked_by_blink_hand_buffer:true") ||
       text.includes("blinkriskseverity:lethal") ||
       text.includes("blink_break_self_net_damage_risk"))
@@ -763,7 +881,9 @@ function selfplayEntryFinding(
 ): AiSelfplaySuspiciousDecision {
   const entry = summary.actionSequence[actionIndex];
   const stateVersion =
-    entry?.stateVersionBefore ?? summary.actionSequence.at(-1)?.stateVersionBefore ?? 0;
+    entry?.stateVersionBefore ??
+    summary.actionSequence.at(-1)?.stateVersionBefore ??
+    0;
   const selectedActionType = entry?.actionType ?? "none";
   const selectedActionId =
     entry?.selectedActionId ?? `${selectedActionType}:${stateVersion}`;
@@ -829,9 +949,10 @@ function groupSelfplayFindings(
         ...existing.detectorIds,
         ...finding.detectorIds,
       ]),
-      shortReason: sortedUnique([existing.shortReason, finding.shortReason]).join(
-        " | ",
-      ),
+      shortReason: sortedUnique([
+        existing.shortReason,
+        finding.shortReason,
+      ]).join(" | "),
       relevantDebugFacts: safeSelfplayFacts([
         ...existing.relevantDebugFacts,
         ...finding.relevantDebugFacts,
@@ -1108,9 +1229,9 @@ export function isSelfplayTraceRedactionSafe(value: unknown): boolean {
   if (!serialized) return true;
   if (
     FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
-      serialized.toLocaleLowerCase("en-US").includes(
-        needle.toLocaleLowerCase("en-US"),
-      ),
+      serialized
+        .toLocaleLowerCase("en-US")
+        .includes(needle.toLocaleLowerCase("en-US")),
     )
   )
     return false;

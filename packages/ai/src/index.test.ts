@@ -2302,7 +2302,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(alternative)).toContain(
       "program_sacrifice_best_category:critical",
     );
-    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
   });
 
   it("does not voluntarily trash installed programs when runner program install has enough MU", () => {
@@ -7218,7 +7220,9 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(decision.actionId).toBe(score.actionId);
     expect(passivePenalty?.value).toBeLessThan(0);
     expect(passivePenalty?.reason).toBe("economy");
-    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
   });
 
   it("applies deck doctrine to semantic Corp scoreline actions", () => {
@@ -7243,11 +7247,9 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     if (!score || !gain)
       throw new Error("Missing doctrine scoreline fixture actions");
 
-    const doctrine = corpDoctrineForTest(
-      "semantic-scoreline",
-      ["rush"],
-      { score_now: 24 },
-    );
+    const doctrine = corpDoctrineForTest("semantic-scoreline", ["rush"], {
+      score_now: 24,
+    });
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const decision = chooseCorpAction(
       { ...input, ownDeckDoctrine: doctrine, legalActions: [score, gain] },
@@ -7368,10 +7370,12 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
     const suppressed = scoreAlternative?.scoreBreakdown?.find(
-      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+      (component) =>
+        component.key === "deck_doctrine_runtime_weight_suppressed",
     );
     const safetyGate = scoreAlternative?.scoreBreakdown?.find(
-      (component) => component.key === "corp_scoreline_safety_gate_blocks_doctrine",
+      (component) =>
+        component.key === "corp_scoreline_safety_gate_blocks_doctrine",
     );
 
     expect(input.legalActions.map((action) => action.actionId)).toContain(
@@ -11584,7 +11588,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(access.reasons).toContain("known_remote_trash_target");
     expect(access.reasons).not.toContain("remote_known_no_current_payoff");
     expect(access.evidence).toContain("remote_memory_payoff:trash_affordable");
-    expect(access.evidence).toContain("known_remote_root_credits_after_trash:5");
+    expect(access.evidence).toContain(
+      "known_remote_root_credits_after_trash:5",
+    );
     expect(access.evidence).toContain(
       "known_remote_root_trash_preserves_reserve:true",
     );
@@ -11777,9 +11783,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       });
 
       expect(decision.actionId).toBe(gainCredit.actionId);
-      expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
-        decision.actionId,
-      );
+      expect(
+        scopedInput.legalActions.map((action) => action.actionId),
+      ).toContain(decision.actionId);
       const debug = JSON.stringify(decision.decisionDebug);
       expect(debug).toContain("blink_run_self_net_damage_risk");
       expect(debug).toContain(`currentHandCount:${handCards}`);
@@ -11817,7 +11823,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(serialized).toContain(
       "why_blink_run_allowed_despite_risk:hand_buffer",
     );
-    expect(serialized).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(serialized).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("excludes lethal Blink break actions during encounters", () => {
@@ -11938,13 +11946,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
   it("keeps Faked Hit survival-safe but de-prioritizes support-only Bad Publicity", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
-    const input = fakedHitSelfDamageInput(
-      "ai-faked-hit-self-damage-survives",
-      {
-        badPublicityBefore: 0,
-        extraHandCards: 2,
-      },
-    );
+    const input = fakedHitSelfDamageInput("ai-faked-hit-self-damage-survives", {
+      badPublicityBefore: 0,
+      extraHandCards: 2,
+    });
     const fakedHit = fakedHitAction(input);
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -13834,6 +13839,69 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("penalizes repeated basic credit once a fresh pressure line is ready", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-late-credit-repeat-before-pressure",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(gain).toBeDefined();
+    expect(hqRun).toBeDefined();
+    if (!gain || !hqRun)
+      throw new Error("Missing late-credit pressure actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const scopedInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          agendaPoints: input.playerView.agendaPointsToWin - 1,
+        },
+        opponent: {
+          ...input.playerView.opponent,
+          handCount: 5,
+        },
+      },
+      eventTail: [
+        ...input.eventTail,
+        syntheticPlanActionEvent(
+          "runner-late-basic-credit",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [gain, hqRun],
+    };
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const gainAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === gain.actionId,
+    );
+    const lateCreditPenalty = gainAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_late_no_funding_credit_repeat",
+    );
+
+    expect(decision.actionId).toBe(hqRun.actionId);
+    expect(lateCreditPenalty?.value).toBeLessThan(0);
+    expect(lateCreditPenalty?.reason).toContain("funding_need:false");
+    expect(lateCreditPenalty?.reason).toContain("pressure_ready_targets:hq");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("penalizes repeated runner pressure on the same server across no-progress setup", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-same-server-no-progress-run",
@@ -13889,10 +13957,18 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const repeatedRunPenalty = runAlternative?.scoreBreakdown?.find(
       (component) => component.key === "runner_recent_same_server_runs",
     );
+    const gainAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === gain.actionId,
+    );
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(repeatedRunPenalty?.value).toBeLessThan(0);
     expect(String(repeatedRunPenalty?.reason)).toContain("rd");
+    expect(
+      gainAlternative?.scoreBreakdown?.some(
+        (component) => component.key === "runner_late_no_funding_credit_repeat",
+      ),
+    ).toBe(false);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -13931,7 +14007,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(recovery).toBeDefined();
     expect(draw).toBeDefined();
     if (!recovery || !draw)
@@ -14007,7 +14085,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(recovery).toBeDefined();
     expect(gain).toBeDefined();
     if (!recovery || !gain)
@@ -14324,7 +14404,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(recovery).toBeDefined();
     expect(gain).toBeDefined();
     if (!recovery || !gain)
@@ -14386,7 +14468,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(recovery).toBeDefined();
     expect(draw).toBeDefined();
     if (!recovery || !draw)
@@ -14450,9 +14534,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(decision.evidence).toContain("action_semantic_candidate:run.start");
-    expect(decision.evidence).toContain(
-      "action_semantic_projection:projected",
-    );
+    expect(decision.evidence).toContain("action_semantic_projection:projected");
     expect(decision.evidence).toContain(
       "semantic_runtime_scope:simple_hq_or_rnd_pressure",
     );
@@ -14521,8 +14603,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     const remoteRun = input.legalActions.find(
       (action) =>
-        action.type === "start_run" &&
-        action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     const gain = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -14571,7 +14652,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(remoteRun).toBeDefined();
     expect(gain).toBeDefined();
     if (!remoteRun || !gain)
@@ -14594,7 +14677,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
     const suppressed = runAlternative?.scoreBreakdown?.find(
-      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+      (component) =>
+        component.key === "deck_doctrine_runtime_weight_suppressed",
     );
 
     expect(doctrineWeight).toBeUndefined();
@@ -14623,7 +14707,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(remoteRun).toBeDefined();
     expect(gain).toBeDefined();
     if (!remoteRun || !gain)
@@ -14784,11 +14870,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
         moveRunnerCardToGrip(state, "onr_v1_076_all-nighter");
         ensureRemoteServer(state, "remote_1");
         putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
-        const ice = putCorpIceOnServer(
-          state,
-          "remote_1",
-          "simple_barrier_ice",
-        );
+        const ice = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
         state.cardInstances[ice] = {
           ...state.cardInstances[ice]!,
           faceup: true,
@@ -14806,7 +14888,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     if (!allNighterRemote || !gainCredit)
       throw new Error("Missing All-Nighter no-coverage fixture actions");
 
-    const scopedInput = scopedLegalActions(input, [allNighterRemote, gainCredit]);
+    const scopedInput = scopedLegalActions(input, [
+      allNighterRemote,
+      gainCredit,
+    ]);
     const decision = chooseRunnerAction(scopedInput, {
       persistTacticalPlanMemory: false,
     });
@@ -14841,7 +14926,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     if (!allNighterRemote || !gainCredit)
       throw new Error("Missing All-Nighter high-payoff fixture actions");
 
-    const scopedInput = scopedLegalActions(input, [allNighterRemote, gainCredit]);
+    const scopedInput = scopedLegalActions(input, [
+      allNighterRemote,
+      gainCredit,
+    ]);
     const decision = chooseRunnerAction(scopedInput, {
       persistTacticalPlanMemory: false,
     });
@@ -14864,11 +14952,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
         state.runner.credits = 1;
         ensureRemoteServer(state, "remote_1");
         putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
-        const ice = putCorpIceOnServer(
-          state,
-          "remote_1",
-          "simple_barrier_ice",
-        );
+        const ice = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
         state.cardInstances[ice] = {
           ...state.cardInstances[ice]!,
           faceup: true,
@@ -17172,9 +17256,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
       decision.actionId,
     );
-    expect(JSON.stringify(loanAlternative)).toContain(
-      "loanUseCase:bad_use",
-    );
+    expect(JSON.stringify(loanAlternative)).toContain("loanUseCase:bad_use");
     expect(JSON.stringify(loanAlternative)).toContain(
       "why_loan_blocked_or_deferred:no_active_funding_need",
     );
@@ -17360,7 +17442,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(loan).toBeDefined();
     expect(gain).toBeDefined();
     expect(rdRun).toBeDefined();
-    if (!loan || !gain || !rdRun) throw new Error("Missing closeout Loan fixture");
+    if (!loan || !gain || !rdRun)
+      throw new Error("Missing closeout Loan fixture");
 
     const scopedInput = scopedLegalActions(input, [loan, gain, rdRun]);
     const decision = chooseRunnerAction(scopedInput);
@@ -17404,10 +17487,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     const scopedInput = scopedLegalActions(input, [memoryInstall, gain]);
     const decision = chooseRunnerAction(scopedInput);
-    const memoryAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (entry) => entry.actionId === memoryInstall.actionId,
-      );
+    const memoryAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === memoryInstall.actionId,
+    );
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
@@ -17818,7 +17900,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const gain = input.legalActions.find(
       (action) => action.type === "gain_credit",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     const tychoInstall = input.legalActions.find(
       (action) =>
         action.type === "install_card" &&
@@ -20893,22 +20977,19 @@ describe("V1.4.2 belief state and opponent model", () => {
       (action) =>
         action.type === "play_event" &&
         action.payload?.serverId === "archives" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_094_inside-job",
+        sourceDefinitionFromInput(input, action) === "onr_v1_094_inside-job",
     );
     const insideJobHq = input.legalActions.find(
       (action) =>
         action.type === "play_event" &&
         action.payload?.serverId === "hq" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_094_inside-job",
+        sourceDefinitionFromInput(input, action) === "onr_v1_094_inside-job",
     );
     const insideJobRd = input.legalActions.find(
       (action) =>
         action.type === "play_event" &&
         action.payload?.serverId === "rd" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_094_inside-job",
+        sourceDefinitionFromInput(input, action) === "onr_v1_094_inside-job",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -20925,12 +21006,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const decision = chooseRunnerAction(
       {
         ...input,
-        legalActions: [
-          insideJobArchives,
-          insideJobHq,
-          insideJobRd,
-          gainCredit,
-        ],
+        legalActions: [insideJobArchives, insideJobHq, insideJobRd, gainCredit],
       },
       { persistTacticalPlanMemory: false },
     );
@@ -21023,7 +21099,9 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(eventHq).toBeDefined();
     expect(gainCredit).toBeDefined();
     if (!eventArchives || !eventHq || !gainCredit) {
-      throw new Error("Missing generic run-event empty Archives fixture actions");
+      throw new Error(
+        "Missing generic run-event empty Archives fixture actions",
+      );
     }
 
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -26331,8 +26409,7 @@ function loanFromChibaInstallAction(
   return input.legalActions.find(
     (action) =>
       action.type === "install_card" &&
-      sourceDefinitionFromInput(input, action) ===
-        "onr_v1_168_loan-from-chiba",
+      sourceDefinitionFromInput(input, action) === "onr_v1_168_loan-from-chiba",
   );
 }
 
@@ -27916,7 +27993,8 @@ function blinkRiskEncounterInput(
   state = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
   );
   state = apply(
     state,
@@ -27979,21 +28057,12 @@ function blinkRiskDeckConfig(seed: string): CreateGameConfig {
   };
 }
 
-function addRunnerGripCardsForBlinkRisk(
-  state: GameState,
-  count: number,
-): void {
+function addRunnerGripCardsForBlinkRisk(state: GameState, count: number): void {
   const moved: CardInstanceId[] = [];
   const sequence = ["simple_economy_event", "simple_run_event"] as const;
   for (let index = 0; index < count; index += 1) {
     const definitionId = sequence[index % sequence.length] ?? sequence[0];
-    moved.push(
-      moveRunnerCardCopyToGrip(
-        state,
-        definitionId,
-        moved,
-      ),
-    );
+    moved.push(moveRunnerCardCopyToGrip(state, definitionId, moved));
   }
 }
 

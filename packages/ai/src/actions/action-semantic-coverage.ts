@@ -31,6 +31,13 @@ export type ActionSemanticTargetContextStatus =
   | "target_context_unavailable"
   | "missing";
 
+export const ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES = [
+  "engine_provided",
+  "not_available",
+  "target_context_unavailable",
+  "missing",
+] as const satisfies readonly ActionSemanticTargetContextStatus[];
+
 export type ActionSemanticCandidateCoverageRow = {
   actionType: string;
   semanticActionType: string;
@@ -67,6 +74,10 @@ export type ActionSemanticCandidateCoverageSummary = {
   primaryProjectionStatuses: Record<string, number>;
   sourceKinds: Record<string, number>;
   targetContextStatuses: Record<string, number>;
+  targetContextByGroup: Record<
+    ActionSemanticCoverageGroup,
+    Record<ActionSemanticTargetContextStatus, number>
+  >;
   groups: Record<ActionSemanticCoverageGroup, number>;
   rows: ActionSemanticCandidateCoverageRow[];
 };
@@ -114,6 +125,7 @@ export function summarizeActionSemanticCandidateCoverage(
     ),
     sourceKinds: countBy(rows, (row) => row.sourceKind),
     targetContextStatuses: countBy(rows, (row) => row.targetContextStatus),
+    targetContextByGroup: targetContextCountsByGroup(rows),
     groups: groupCounts(rows),
     rows,
   };
@@ -137,6 +149,12 @@ export function formatActionSemanticCandidateCoverageReport(
   );
   const groupRows = ACTION_SEMANTIC_COVERAGE_GROUPS.map(
     (group) => `| ${group} | ${summary.groups[group]} |`,
+  );
+  const targetContextByGroupRows = ACTION_SEMANTIC_COVERAGE_GROUPS.map(
+    (group) =>
+      `| ${group} | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.map(
+        (status) => summary.targetContextByGroup[group][status],
+      ).join(" | ")} |`,
   );
   return [
     "# Action Semantic Candidate Coverage Report",
@@ -169,6 +187,12 @@ export function formatActionSemanticCandidateCoverageReport(
     "## Target Context",
     "",
     countMapTable(summary.targetContextStatuses),
+    "",
+    "## Target Context By Group",
+    "",
+    `| Group | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.join(" | ")} |`,
+    `| --- | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.map(() => "---:").join(" | ")} |`,
+    ...targetContextByGroupRows,
   ].join("\n");
 }
 
@@ -206,11 +230,16 @@ function groupsForCandidate(
   const groups = new Set<ActionSemanticCoverageGroup>();
   if (candidate.sourceKind === "basic_action") groups.add("basic_action");
   if (candidate.sourceKind === "game_rule") groups.add("game_rule");
-  if (candidate.sourceKind === "choice" || candidate.actionType === "resolve_choice")
+  if (
+    candidate.sourceKind === "choice" ||
+    candidate.actionType === "resolve_choice"
+  )
     groups.add("choice_resolution");
   if (candidate.sourceKind === "card") {
     groups.add(
-      candidate.actorSide === "corp" ? "corp_card_action" : "runner_card_action",
+      candidate.actorSide === "corp"
+        ? "corp_card_action"
+        : "runner_card_action",
     );
   }
 
@@ -248,7 +277,10 @@ function groupsForCandidate(
   }
   if (candidate.actionType === "install_card") groups.add("install_action");
   if (candidate.actionType === "advance_card") groups.add("advance_action");
-  if (candidate.actionType === "rez_ice" || candidate.actionType === "decline_rez")
+  if (
+    candidate.actionType === "rez_ice" ||
+    candidate.actionType === "decline_rez"
+  )
     groups.add("rez_action");
 
   return [...groups].sort();
@@ -290,6 +322,31 @@ function groupCounts(
   ) as Record<ActionSemanticCoverageGroup, number>;
   for (const row of rows) {
     for (const group of row.groups) counts[group] += 1;
+  }
+  return counts;
+}
+
+function targetContextCountsByGroup(
+  rows: readonly ActionSemanticCandidateCoverageRow[],
+): Record<
+  ActionSemanticCoverageGroup,
+  Record<ActionSemanticTargetContextStatus, number>
+> {
+  const counts = Object.fromEntries(
+    ACTION_SEMANTIC_COVERAGE_GROUPS.map((group) => [
+      group,
+      Object.fromEntries(
+        ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.map((status) => [status, 0]),
+      ),
+    ]),
+  ) as Record<
+    ActionSemanticCoverageGroup,
+    Record<ActionSemanticTargetContextStatus, number>
+  >;
+  for (const row of rows) {
+    for (const group of row.groups) {
+      counts[group][row.targetContextStatus] += 1;
+    }
   }
   return counts;
 }
