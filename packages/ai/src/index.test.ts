@@ -14109,6 +14109,109 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("keeps Junkyard BBS scoring tied to the visible top heap card", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-junkyard-top-heap-strict",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const topHeapCard = findCard(state, "simple_economy_event");
+        const lowerHeapCard = findCard(state, "simple_fracter");
+        removeEverywhere(state, topHeapCard);
+        removeEverywhere(state, lowerHeapCard);
+        state.runner.heap.unshift(lowerHeapCard);
+        state.runner.heap.unshift(topHeapCard);
+        state.cardInstances[topHeapCard] = {
+          ...state.cardInstances[topHeapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+        state.cardInstances[lowerHeapCard] = {
+          ...state.cardInstances[lowerHeapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+        const ice = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[ice] = {
+          ...state.cardInstances[ice]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_junkyard_top_heap_strict_runner",
+          name: "AI Junkyard Top Heap Strict Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_fracter", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_junkyard_top_heap_strict_corp",
+          name: "AI Junkyard Top Heap Strict Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_barrier_ice", quantity: 4 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const activatedRecovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(activatedRecovery).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!activatedRecovery || !gain)
+      throw new Error("Missing top-heap-strict Junkyard fixture actions");
+
+    const payloadWithoutTargetCardId: Record<string, unknown> = {
+      ...(activatedRecovery.payload ?? {}),
+    };
+    delete payloadWithoutTargetCardId.targetCardId;
+    const mismatchedRecovery: LegalAction = {
+      ...activatedRecovery,
+      actionId: `${activatedRecovery.actionId}.definition_mismatch`,
+      payload: {
+        ...payloadWithoutTargetCardId,
+        targetCardDefinitionId: "simple_fracter",
+      },
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [mismatchedRecovery, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === mismatchedRecovery.actionId,
+      );
+    const targetComponent = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_junkyard_bbs_recovery_target",
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(targetComponent?.value).toBeLessThan(0);
+    expect(targetComponent?.reason).toContain("target:simple_economy_event");
+    expect(targetComponent?.reason).not.toContain("target:simple_fracter");
+    expect(targetComponent?.reason).not.toContain(
+      "target_class:missing_breaker_coverage",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("uses Junkyard BBS recovery when the top heap card fixes visible breaker coverage", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-junkyard-breaker-target",

@@ -8299,11 +8299,7 @@ function runnerJunkyardBbsRecoveryScoreComponent(
   if (!isRunnerJunkyardBbsRecoveryAction(input, action)) return undefined;
 
   const target = runnerJunkyardBbsRecoveryTarget(input, action);
-  const targetDefinitionId =
-    target?.definitionId ??
-    (typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : undefined);
+  const targetDefinitionId = target?.definitionId;
   const targetRoles = rolesForCardId(targetDefinitionId);
   const targetAssessment = runnerJunkyardBbsRecoveryTargetAssessment(
     input,
@@ -8353,18 +8349,8 @@ function runnerJunkyardBbsRecoveryTarget(
       ? action.payload.targetCardId
       : undefined;
   if (targetCardId) return findVisibleCard(input, targetCardId);
-  const targetDefinitionId =
-    typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : undefined;
-  const visibleTopHeapCard = input.playerView.own.heapOrArchives.find(
+  return input.playerView.own.heapOrArchives.find(
     (card) => card.known,
-  );
-  if (!targetDefinitionId) return visibleTopHeapCard;
-  return (
-    input.playerView.own.heapOrArchives.find(
-      (card) => card.known && card.definitionId === targetDefinitionId,
-    ) ?? visibleTopHeapCard
   );
 }
 
