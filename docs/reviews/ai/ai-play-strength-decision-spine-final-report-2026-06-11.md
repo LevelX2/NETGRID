@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_passed_pending_main_merge`
+`complete`
 
 Branch: `codex/ai-play-strength-decision-spine`
 
@@ -85,7 +85,20 @@ corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutov
   37 Tests bestanden
 ```
 
-Der lokale Merge nach `main` folgt als letzter Prozessschritt.
+Nach lokalem Merge in den Hauptworkspace ebenfalls grün:
+
+```text
+corepack pnpm --filter @netgrid/ai test
+  63 Testdateien, 1099 Tests bestanden
+corepack pnpm --filter @netgrid/ai typecheck
+  bestanden
+git diff --check
+  bestanden
+git status
+  sauber
+```
+
+Der Arbeitsbranch wurde lokal nach `main` integriert, der temporäre Worktree entfernt. Kein Push oder Pull Request war Teil dieses Prozessabschlusses; der Remote-Stand kann unabhängig vom lokalen Abschluss weitergelaufen oder später synchronisiert worden sein.
 
 ## Offene Grenzen
 
