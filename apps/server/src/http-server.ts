@@ -1101,7 +1101,8 @@ function defaultService(deploymentConfig: DeploymentConfig): MultiplayerService 
   return new MultiplayerService(createConfiguredStorage(), {
     ...(deploymentConfig.tokenSalt ? { tokenSalt: deploymentConfig.tokenSalt } : {}),
     publicWebBaseUrl: deploymentConfig.webBaseUrl,
-    publicServerBaseUrl: deploymentConfig.serverBaseUrl
+    publicServerBaseUrl: deploymentConfig.serverBaseUrl,
+    allowHiddenInfoUndo: deploymentConfig.profile === "local"
   });
 }
 

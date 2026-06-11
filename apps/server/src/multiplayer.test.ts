@@ -654,6 +654,87 @@ describe("Backend 0.5 private storage maintenance", () => {
     }
   });
 
+  it("prunes SQLite AI decision traces when auto-accepted Human-vs-KI undo removes an AI event", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "sqlite-ai-undo-trace-prune" });
+    try {
+      const created = await service.createMatch({
+        mode: "human_corp_vs_runner_ai",
+        hostSide: "corp",
+        seed: "sqlite-ai-undo-trace-prune",
+        runnerDifficulty: "normal",
+        aiTraceMode: "detailed"
+      });
+      const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+      await submitChoice(service, created.matchId, corp, "keep", "sqlite-ai-undo-trace-setup");
+      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "sqlite-ai-undo-trace-mandatory");
+      const endTurn = await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "sqlite-ai-undo-trace-end-turn");
+      const humanReadyPayload = endTurn.actorPayload.playerView.pendingChoice
+        ? await submitFirstChoice(service, created.matchId, corp, "sqlite-ai-undo-trace-discard")
+        : endTurn.actorPayload;
+
+      const advanced = await service.advanceAi({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: humanReadyPayload.playerView.stateVersion,
+        mode: "single_step"
+      });
+      expect(advanced.ok).toBe(true);
+      if (!advanced.ok) throw new Error(advanced.error.message);
+      const aiEventId = advanced.publicEvent?.eventId;
+      expect(aiEventId).toBeTruthy();
+      if (!aiEventId) throw new Error("Missing AI event id");
+      const beforeUndo = await storage.load(created.matchId);
+      expect(beforeUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(true);
+      expect(beforeUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(true);
+
+      const undo = await service.requestUndo({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        targetEventId: aiEventId,
+        reason: "KI-Zug zurücknehmen"
+      });
+      expect(undo.ok).toBe(true);
+      if (!undo.ok) throw new Error(undo.error.message);
+
+      const afterUndo = await storage.load(created.matchId);
+      expect(afterUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(false);
+      expect(afterUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(false);
+      expect(afterUndo?.aiDecisionTraces?.every((trace) => afterUndo.eventLog.some((event) => event.eventId === trace.eventId))).toBe(true);
+
+      const db = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        const stored = db
+          .prepare(
+            `SELECT
+              (SELECT COUNT(*) FROM events WHERE match_id = ? AND event_id = ?) AS removedEventRows,
+              (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ? AND event_id = ?) AS removedTraceRows,
+              (SELECT COUNT(*)
+               FROM ai_decision_traces t
+               LEFT JOIN events e ON e.match_id = t.match_id AND e.event_id = t.event_id
+               WHERE t.match_id = ? AND e.event_id IS NULL) AS orphanTraceRows`
+          )
+          .get(created.matchId, aiEventId, created.matchId, aiEventId, created.matchId) as {
+          removedEventRows: number;
+          removedTraceRows: number;
+          orphanTraceRows: number;
+        };
+        expect(Number(stored.removedEventRows)).toBe(0);
+        expect(Number(stored.removedTraceRows)).toBe(0);
+        expect(Number(stored.orphanTraceRows)).toBe(0);
+      } finally {
+        db.close();
+      }
+    } finally {
+      service.closeStorage();
+    }
+  });
+
   it("issues a local recovery access from maintenance without listing raw token fields", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
@@ -2566,6 +2647,41 @@ describe("MVP 0.2 multiplayer service", () => {
     if (blocked.ok) throw new Error("Expected hidden-info barrier");
     expect(blocked.error.code).toBe("undo_blocked");
     expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
+  });
+
+  it("allows undo across hidden information when the local debug option is enabled", async () => {
+    const match = await joinedMatch("undo-local-hidden-debug", undefined, { allowHiddenInfoUndo: true });
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "local-debug-mandatory");
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "local-debug-end-turn");
+    await submitFirstChoice(match.service, match.matchId, match.corp, "local-debug-discard");
+    const run = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "local-debug-run-rd");
+    const access = await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "local-debug-access");
+
+    const requested = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      targetEventId: `evt_${run.receipt.stateVersionAfter}`,
+      reason: "Lokale Debug-Zurücknahme über Access hinweg"
+    });
+    expect(requested.ok).toBe(true);
+    if (!requested.ok || !requested.undoRequest) throw new Error("Expected local hidden-info undo request");
+    const storedWithRequest = await match.service.loadForTest(match.matchId);
+    expect(storedWithRequest?.pendingUndo?.undoRequestId).toBe(requested.undoRequest.undoRequestId);
+    expect(storedWithRequest?.undoSnapshots.find((snapshot) => snapshot.undoRequestId === requested.undoRequest?.undoRequestId)?.hiddenInfoSafe).toBe(false);
+
+    const accepted = await match.service.acceptUndo({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      undoRequestId: requested.undoRequest.undoRequestId
+    });
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error.message);
+
+    const afterUndo = await match.service.loadForTest(match.matchId);
+    expect(afterUndo?.eventLog.some((event) => event.eventId === `evt_${run.receipt.stateVersionAfter}`)).toBe(false);
+    expect(afterUndo?.eventLog.some((event) => event.eventId === `evt_${access.receipt.stateVersionAfter}`)).toBe(false);
   });
 
   it("keeps undo snapshots free of embedded engine event history", async () => {
@@ -6162,11 +6278,12 @@ const V095_CORP_DECK: DeckDefinition = {
   ]
 };
 
-async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>) {
+async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>, serviceOptions?: ConstructorParameters<typeof MultiplayerService>[1]) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: "test-salt",
     publicWebBaseUrl: "http://127.0.0.1:3100",
-    publicServerBaseUrl: "http://127.0.0.1:8787"
+    publicServerBaseUrl: "http://127.0.0.1:8787",
+    ...serviceOptions
   });
   const created = await service.createMatch({ hostSide: "corp", seed, ...(settings ? { settings } : {}) });
   expect(created.joinUrl).toBeTruthy();

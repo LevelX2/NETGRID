@@ -9319,6 +9319,15 @@ select {
   font-size: 12px;
 }
 
+.undoNotice {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 3px 0 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
 .undoBox {
   display: flex;
   align-items: center;

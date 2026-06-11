@@ -689,15 +689,17 @@ export class MultiplayerService {
   private readonly tokenSalt: string;
   private readonly webBaseUrl: string;
   private readonly serverBaseUrl: string;
+  private readonly allowHiddenInfoUndo: boolean;
   private readonly now: () => string;
 
   constructor(
     private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
-    options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; now?: () => string } = {}
+    options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; allowHiddenInfoUndo?: boolean; now?: () => string } = {}
   ) {
     this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
     this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? envValue(process.env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
     this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? envValue(process.env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
+    this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
     this.now = options.now ?? (() => new Date().toISOString());
   }
 
@@ -1695,8 +1697,8 @@ export class MultiplayerService {
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Undo ist aktuell nicht möglich.") };
       const targetIndex = record.eventLog.findIndex((event) => event.eventId === input.targetEventId);
       if (targetIndex < 0) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
-      const blocked = record.eventLog.slice(targetIndex).some((event) => event.hiddenInfoBarrier);
-      if (blocked) {
+      const crossesHiddenInfoBarrier = record.eventLog.slice(targetIndex).some((event) => event.hiddenInfoBarrier);
+      if (crossesHiddenInfoBarrier && !this.allowHiddenInfoUndo) {
         const blockedSnapshot: UndoSnapshot = {
           undoRequestId: randomId("undo"),
           matchId: input.matchId,
@@ -1725,7 +1727,7 @@ export class MultiplayerService {
         snapshotId: snapshot.snapshotId,
         requestedBy: input.side,
         status: "requested",
-        hiddenInfoSafe: true
+        hiddenInfoSafe: !crossesHiddenInfoBarrier
       };
       record.undoSnapshots.push(undoSnapshot);
       const opponentSide = opposite(input.side);
@@ -2091,6 +2093,10 @@ export class MultiplayerService {
     const eventLog = record.gameState.eventLog.filter((event) => event.stateVersionAfter <= snapshot.stateVersion);
     record.gameState = { ...clone(snapshot.gameState), eventLog };
     record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
+    const retainedEventIds = new Set(record.eventLog.map((event) => event.eventId));
+    if (record.aiDecisionTraces) {
+      record.aiDecisionTraces = record.aiDecisionTraces.filter((trace) => retainedEventIds.has(trace.eventId));
+    }
     record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
     record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
     return true;

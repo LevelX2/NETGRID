@@ -2309,6 +2309,7 @@ export default function Page() {
   const [simulationPending, setSimulationPending] = useState(false);
   const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
   const [notice, setNotice] = useState("");
+  const [undoNotice, setUndoNotice] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
@@ -4609,11 +4610,13 @@ export default function Page() {
 
   const requestUndo = () => {
     if (!latestEventId || !ensureSocketConnected()) return;
+    setUndoNotice("");
     socketRef.current?.send(JSON.stringify({ type: "request_undo", payload: { targetEventId: latestEventId } }));
   };
 
   const resolveUndo = (accepted: boolean) => {
     if (!payload?.pendingUndo || !ensureSocketConnected()) return;
+    setUndoNotice("");
     socketRef.current?.send(
       JSON.stringify({
         type: accepted ? "accept_undo" : "decline_undo",
@@ -5049,6 +5052,10 @@ export default function Page() {
     if (message.type === "error") {
       pendingAiAdvanceKeyRef.current = null;
       setNotice(message.payload.message);
+      if (message.payload.code.startsWith("undo_")) {
+        setUndoNotice(message.payload.message);
+        setUndoPanelOpen(true);
+      }
       if (message.payload.playerView) {
         setPayload((current) => (current ? { ...current, playerView: message.payload.playerView!, legalActions: message.payload.playerView!.legalActions } : current));
       }
@@ -5870,6 +5877,7 @@ export default function Page() {
       <UndoPanel
         open={undoPanelOpen}
         pendingUndo={payload.pendingUndo}
+        undoNotice={undoNotice}
         latestEventId={latestEventId}
         connection={connection}
         onRequest={requestUndo}
@@ -11684,6 +11692,7 @@ function setupWaitingLabel(view: PlayerView): string {
 function UndoPanel({
   open,
   pendingUndo,
+  undoNotice,
   latestEventId,
   connection,
   onRequest,
@@ -11691,6 +11700,7 @@ function UndoPanel({
 }: {
   open: boolean;
   pendingUndo: ClientPayload["pendingUndo"] | undefined;
+  undoNotice: string;
   latestEventId: string | undefined;
   connection: "offline" | "connecting" | "online";
   onRequest(): void;
@@ -11712,6 +11722,12 @@ function UndoPanel({
       <div className="undoPanelHeader">
         <h2>{undoTitle}</h2>
         <p className="meta">{undoDescription}</p>
+        {undoNotice ? (
+          <p className="undoNotice" role="alert">
+            <AlertTriangle size={13} />
+            {undoNotice}
+          </p>
+        ) : null}
       </div>
       {hasIncomingRequest ? (
         <div className="undoBox">
