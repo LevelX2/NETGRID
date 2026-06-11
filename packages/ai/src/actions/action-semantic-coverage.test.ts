@@ -61,9 +61,9 @@ describe("Action semantic coverage", () => {
     });
 
     expect(candidates).toHaveLength(actions.length);
-    expect(new Set(candidates.map((candidate) => candidate.actionId)).size).toBe(
-      actions.length,
-    );
+    expect(
+      new Set(candidates.map((candidate) => candidate.actionId)).size,
+    ).toBe(actions.length);
 
     for (const [index, candidate] of candidates.entries()) {
       const action = actions[index];
@@ -358,7 +358,10 @@ describe("Action semantic coverage", () => {
     for (const group of ACTION_SEMANTIC_COVERAGE_GROUPS) {
       expect(summary.groups[group]).toBeGreaterThan(0);
     }
+    expect(summary.targetContextByGroup.run_action.engine_provided).toBe(1);
+    expect(summary.targetContextByGroup.install_action.missing).toBe(1);
     expect(report).toContain("## Coverage Groups");
+    expect(report).toContain("## Target Context By Group");
     expect(report).not.toContain("runner-hidden-instance");
     expect(report).not.toContain("corp-hidden-instance");
     expect(report).not.toContain("sourceCardInstanceId");
@@ -434,10 +437,18 @@ function collectRealEngineLegalActions(): LegalAction[] {
   const actions: LegalAction[] = [];
   collectActiveActions(state, actions);
 
-  state = applyRealAction(state, "corp", (action) => action.type === "mandatory_draw");
+  state = applyRealAction(
+    state,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
   collectActiveActions(state, actions);
 
-  state = applyRealAction(state, "corp", (action) => action.type === "end_turn");
+  state = applyRealAction(
+    state,
+    "corp",
+    (action) => action.type === "end_turn",
+  );
   collectActiveActions(state, actions);
 
   if (state.pendingChoice?.source === "discard_phase") {
@@ -460,7 +471,8 @@ function collectRealEngineLegalActions(): LegalAction[] {
     "runner",
     (action) =>
       action.type === "start_run" &&
-      (action.payload?.serverId === "hq" || action.label.toLowerCase().includes("hq")),
+      (action.payload?.serverId === "hq" ||
+        action.label.toLowerCase().includes("hq")),
   );
   collectActiveActions(state, actions);
 
