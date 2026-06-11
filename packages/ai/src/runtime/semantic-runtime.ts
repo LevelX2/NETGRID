@@ -18,6 +18,12 @@ import type {
   TacticalPlanMemorySnapshot,
   TacticalPlanRuntimeResult,
 } from "../tactical-plans";
+import {
+  semanticBasicSetupPilotChoice,
+  semanticBasicSetupPilotEnabled,
+} from "../decision/semantic-basic-setup-pilot";
+import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
+import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import type {
@@ -303,10 +309,37 @@ export function chooseSemanticRuntimeAction(
       initialChoice,
     );
   const choice = runOnlyActionAdjusted.choice;
+  const pilotChoice = semanticBasicSetupPilotEnabled()
+    ? (() => {
+        const pilotFrame = buildSemanticDecisionFrame({
+          input,
+          actionCandidates: actionSemanticCandidates,
+          tacticalGoals: runnerTacticalGoals ?? [],
+          tacticalPlan: effectivePlanRuntime,
+          deckCapabilities,
+          runner: {
+            ...(runnerRunTargetEvaluations
+              ? { runTargets: runnerRunTargetEvaluations }
+              : {}),
+            ...(runnerEconomyPosture
+              ? { economyPosture: runnerEconomyPosture }
+              : {}),
+          },
+          evidence: ["semantic_runtime:basic_setup_pilot_candidate"],
+        });
+        return semanticBasicSetupPilotChoice({
+          frame: pilotFrame,
+          trace: buildSemanticShadowDecision(pilotFrame),
+          currentChoice: choice,
+          choices: runOnlyActionAdjusted.rankedChoices,
+        });
+      })()
+    : undefined;
+  const selectedChoice = pilotChoice?.choice ?? choice;
   const coverageSelectionDebug =
     dependencies.semanticRuntimeCoverageSelectionDebug(
       input,
-      choice.action,
+      selectedChoice.action,
       effectivePlanRuntime,
     );
   const legacyActionType = input.legalActions.find(
@@ -314,31 +347,33 @@ export function chooseSemanticRuntimeAction(
   )?.type;
   const selectedChoices = dependencies.selectedChoicesForDecision(
     input,
-    choice.action,
+    selectedChoice.action,
   );
   const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
   const updatedPlanMemory = persistTacticalPlanMemory
     ? dependencies.rememberTacticalPlanRuntime(
         input,
         effectivePlanRuntime,
-        runOnlyActionAdjusted.memoryAction ?? choice.action,
+        pilotChoice
+          ? selectedChoice.action
+          : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
   return {
-    actionId: choice.action.actionId,
+    actionId: selectedChoice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: choice.reasonCode,
-    explanation: choice.explanation,
+    reasonCode: selectedChoice.reasonCode,
+    explanation: selectedChoice.explanation,
     consideredActionIds: [],
     fallbackUsed: false,
-    ...(choice.confidence !== undefined
-      ? { confidence: choice.confidence }
+    ...(selectedChoice.confidence !== undefined
+      ? { confidence: selectedChoice.confidence }
       : {}),
     evidence: dependencies.scrubEvidence([
-      ...choice.evidence,
+      ...selectedChoice.evidence,
       ...(coverageSelectionDebug?.evidence ?? []),
       `semantic_runtime_default:true`,
-      `semantic_runtime_scope:${choice.scopeId}`,
+      `semantic_runtime_scope:${selectedChoice.scopeId}`,
       ...(effectivePlanRuntime.selectedPlan
         ? [
             `tactical_plan:${effectivePlanRuntime.selectedPlan.planId}`,
@@ -357,6 +392,7 @@ export function chooseSemanticRuntimeAction(
       ...(!persistTacticalPlanMemory && effectivePlanRuntime.selectedPlan
         ? ["tactical_plan_memory_preview_only:true"]
         : []),
+      ...(pilotChoice ? pilotChoice.evidence : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
       ...(legacyActionType
         ? [`legacy_reference_action_type:${legacyActionType}`]
@@ -364,7 +400,7 @@ export function chooseSemanticRuntimeAction(
     ]),
     decisionDebug: dependencies.semanticRuntimeDecisionDebug(
       input,
-      choice,
+      selectedChoice,
       runOnlyActionAdjusted.rankedChoices,
       legacyDecision,
       legacyActionType,
