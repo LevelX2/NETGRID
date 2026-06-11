@@ -14035,6 +14035,80 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("scores legacy trigger Junkyard BBS recovery by target", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-junkyard-trigger-low-value-target",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_junkyard_trigger_low_value_runner",
+          name: "AI Junkyard Trigger Low Value Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const activatedRecovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(activatedRecovery).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!activatedRecovery || !gain)
+      throw new Error("Missing legacy-trigger Junkyard fixture actions");
+
+    const legacyRecovery: LegalAction = {
+      ...activatedRecovery,
+      actionId: `${activatedRecovery.actionId}.legacy_trigger`,
+      type: "trigger_ability",
+      label: "Junkyard BBS: oberste Heap-Karte in die Grip nehmen",
+      payload: {
+        ...(activatedRecovery.payload ?? {}),
+        cardId: activatedRecovery.source,
+        resourceAbility: "junkyard_bbs_return_top_heap",
+        sourceZone: "heap",
+        destinationZone: "grip",
+      },
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [legacyRecovery, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === legacyRecovery.actionId,
+      );
+    const targetComponent = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_junkyard_bbs_recovery_target",
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(targetComponent?.value).toBeLessThan(0);
+    expect(targetComponent?.reason).toContain("target:simple_economy_event");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("uses Junkyard BBS recovery when the top heap card fixes visible breaker coverage", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-junkyard-breaker-target",

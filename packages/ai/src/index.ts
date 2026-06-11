@@ -6776,6 +6776,8 @@ function semanticRuntimeRunnerScore(
 
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
+const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY =
+  "junkyard_bbs_return_top_heap";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
 
@@ -8294,10 +8296,7 @@ function runnerJunkyardBbsRecoveryScoreComponent(
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (action.type !== "activated_card_ability") return undefined;
-  if (sourceDefinitionIdForAction(input, action) !== JUNKYARD_BBS_CARD_ID) {
-    return undefined;
-  }
+  if (!isRunnerJunkyardBbsRecoveryAction(input, action)) return undefined;
 
   const target = runnerJunkyardBbsRecoveryTarget(input, action);
   const targetDefinitionId =
@@ -8328,6 +8327,21 @@ function runnerJunkyardBbsRecoveryScoreComponent(
       ...targetAssessment.evidence,
     ]).join("|"),
   };
+}
+
+function isRunnerJunkyardBbsRecoveryAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (action.type === "activated_card_ability") {
+    return sourceDefinitionId === JUNKYARD_BBS_CARD_ID;
+  }
+  return (
+    action.type === "trigger_ability" &&
+    action.payload?.resourceAbility === JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY &&
+    sourceDefinitionId === JUNKYARD_BBS_CARD_ID
+  );
 }
 
 function runnerJunkyardBbsRecoveryTarget(
