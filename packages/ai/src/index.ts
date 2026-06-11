@@ -142,6 +142,7 @@ import {
   safeSelfplayFacts,
   sortedUniqueSelfplayDetectors,
   summarizeSelfplayActionLimitClusters,
+  summarizeSelfplayActionLimitSubclusters,
   type AiSelfplayTraceMiningConfig,
   type AiSelfplayTraceMiningResult,
 } from "./simulation/selfplay-trace-mining";
@@ -205,6 +206,7 @@ export {
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
   AiSelfplayActionLimitClusterId,
+  AiSelfplayActionLimitSubclusterId,
   AiSelfplaySuspicionSeverity,
   AiSelfplaySuspiciousDecision,
   AiSelfplayTraceMiningConfig,
@@ -2168,7 +2170,7 @@ export type {
   SimulationControllerMode,
   SimulationBenchmarkProfileId,
   SimulationBenchmarkProfile,
-  SimulationWorld
+  SimulationWorld,
 } from "./simulation/simulation-types";
 
 export type V143SimulationRunResult = {
@@ -3406,32 +3408,37 @@ function chooseSemanticRuntimeAction(
   legacyDecision: AiDecision,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
-  return chooseSemanticRuntimeActionFromRuntime(input, legacyDecision, options, {
-    semanticRuntimeChoices,
-    semanticRuntimeChoiceIsReactive,
-    buildActionSemanticCandidates,
-    getTacticalPlanMemorySnapshot,
-    deckCapabilitiesForInput,
-    runnerStrategicIntentForInput,
-    evaluateRunnerHandDevelopment,
-    buildRunnerEconomyPosture,
-    evaluateRunnerRunTargets,
-    buildRunnerTacticalGoals,
-    evaluateTacticalPlans,
-    bestSemanticRuntimeChoice,
-    bestSemanticRuntimeChoiceForTacticalPlanOverride,
-    tacticalPlanMappedChoice,
-    runnerSelfDamageImmediateWinSemanticChoice,
-    semanticRuntimeChoiceWithEvidence,
-    tacticalPlanMappingOverrideEvidence,
-    tacticalPlanRuntimeAlignedToChoice,
-    runnerRunOnlyActionAdjustedSemanticChoice,
-    semanticRuntimeCoverageSelectionDebug,
-    selectedChoicesForDecision,
-    rememberTacticalPlanRuntime,
-    scrubEvidence,
-    semanticRuntimeDecisionDebug,
-  });
+  return chooseSemanticRuntimeActionFromRuntime(
+    input,
+    legacyDecision,
+    options,
+    {
+      semanticRuntimeChoices,
+      semanticRuntimeChoiceIsReactive,
+      buildActionSemanticCandidates,
+      getTacticalPlanMemorySnapshot,
+      deckCapabilitiesForInput,
+      runnerStrategicIntentForInput,
+      evaluateRunnerHandDevelopment,
+      buildRunnerEconomyPosture,
+      evaluateRunnerRunTargets,
+      buildRunnerTacticalGoals,
+      evaluateTacticalPlans,
+      bestSemanticRuntimeChoice,
+      bestSemanticRuntimeChoiceForTacticalPlanOverride,
+      tacticalPlanMappedChoice,
+      runnerSelfDamageImmediateWinSemanticChoice,
+      semanticRuntimeChoiceWithEvidence,
+      tacticalPlanMappingOverrideEvidence,
+      tacticalPlanRuntimeAlignedToChoice,
+      runnerRunOnlyActionAdjustedSemanticChoice,
+      semanticRuntimeCoverageSelectionDebug,
+      selectedChoicesForDecision,
+      rememberTacticalPlanRuntime,
+      scrubEvidence,
+      semanticRuntimeDecisionDebug,
+    },
+  );
 }
 
 function runnerSelfDamageImmediateWinSemanticChoice(
@@ -3442,10 +3449,8 @@ function runnerSelfDamageImmediateWinSemanticChoice(
   const choice = bestSemanticRuntimeChoice(
     choices.filter((candidate) => {
       if (candidate.exclusion) return false;
-      return runnerSelfDamageSurvivalAssessment(
-        input,
-        candidate.action,
-      )?.immediateWinByAction;
+      return runnerSelfDamageSurvivalAssessment(input, candidate.action)
+        ?.immediateWinByAction;
     }),
   );
   if (!choice) return undefined;
@@ -4507,9 +4512,7 @@ function semanticRuntimeActionAlternatives(
       actionType: choice.action.type,
       label: choice.action.label,
       source: String(choice.action.source),
-      ...(sourceCard?.title
-        ? { sourceTitle: sourceCard.title }
-        : {}),
+      ...(sourceCard?.title ? { sourceTitle: sourceCard.title } : {}),
       selected,
       ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
       scoreBreakdown: [
@@ -4530,7 +4533,11 @@ function semanticRuntimeActionAlternatives(
                   `semantic_excluded:${choice.exclusion.key}`,
                   choice.exclusion.reason,
                 ]
-              : semanticRuntimeActionWhyNot(choice, displayScore, planSelection),
+              : semanticRuntimeActionWhyNot(
+                  choice,
+                  displayScore,
+                  planSelection,
+                ),
           }),
     };
   });
@@ -4585,7 +4592,10 @@ function semanticRuntimeCoverageSelectionDebug(
     sourceTitle,
     sourceCard?.definitionId,
     String(action.source),
-  ].filter(Boolean).join(" ").toLowerCase();
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
   const evidence = [
     `activeRequiredCapability:${capabilityLabel}`,
     `activeRequiredCapabilityRaw:${capabilityKind}`,
@@ -4707,7 +4717,11 @@ function semanticRuntimePlanSelectionDisplayContext(
     mappedActions.map((action, index) => [action.actionId, index]),
   );
   const coverageSelection = selectedChoice
-    ? semanticRuntimeCoverageSelectionDebug(input, selectedChoice.action, planRuntime)
+    ? semanticRuntimeCoverageSelectionDebug(
+        input,
+        selectedChoice.action,
+        planRuntime,
+      )
     : undefined;
   const selectedByPlanMapping =
     mappedActionOrder.has(selectedActionId) &&
@@ -4738,8 +4752,8 @@ function semanticRuntimeActionDisplayScore(
 ): number {
   if (choice.exclusion) return choice.score;
   if (!context.selectedByPlanMapping) return choice.score;
-  const selectedFinalScore = context.selectedRawScore +
-    context.planMatchDisplayBoost;
+  const selectedFinalScore =
+    context.selectedRawScore + context.planMatchDisplayBoost;
   if (selected) return selectedFinalScore;
   const selectedOrder = context.mappedActionOrder.get(context.selectedActionId);
   const choiceOrder = context.mappedActionOrder.get(choice.action.actionId);
@@ -4747,7 +4761,7 @@ function semanticRuntimeActionDisplayScore(
     if (choiceOrder > selectedOrder) {
       return Math.min(
         choice.score,
-        selectedFinalScore - ((choiceOrder - selectedOrder) * 25),
+        selectedFinalScore - (choiceOrder - selectedOrder) * 25,
       );
     }
     return choice.score;
@@ -4775,7 +4789,9 @@ function semanticRuntimePlanSelectionScoreBreakdown(
     context.mappedActionOrder.has(choice.action.actionId)
       ? "selected_by_plan_mapping_candidate:true"
       : "plan_mismatch:true",
-  ].filter(Boolean).join("|");
+  ]
+    .filter(Boolean)
+    .join("|");
   return [
     {
       key: selected ? "selected_by_plan_mapping" : "plan_selection_adjustment",
@@ -4893,8 +4909,10 @@ function semanticRuntimeActionExclusion(
   const programSacrificeExclusion =
     semanticRuntimeRunnerProgramSacrificeExclusion(input, action);
   if (programSacrificeExclusion) return programSacrificeExclusion;
-  const multiRunEventExclusion =
-    semanticRuntimeRunnerMultiRunEventExclusion(input, action);
+  const multiRunEventExclusion = semanticRuntimeRunnerMultiRunEventExclusion(
+    input,
+    action,
+  );
   if (multiRunEventExclusion) return multiRunEventExclusion;
   const runTargetEvaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
     input,
@@ -4977,7 +4995,8 @@ function semanticRuntimeRunnerBlinkRunExclusion(
     targetServerId,
   );
   const assessment =
-    evaluation?.blinkRiskAssessment ?? assessBlinkRiskForRunAction(input, action);
+    evaluation?.blinkRiskAssessment ??
+    assessBlinkRiskForRunAction(input, action);
   if (!blinkRiskShouldAvoidRun(assessment)) return undefined;
   return {
     key: "blink_run_self_net_damage_risk",
@@ -4994,7 +5013,10 @@ function semanticRuntimeRunnerProgramSacrificeExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const assessment = runnerProgramInstallTrashAssessmentForAction(input, action);
+  const assessment = runnerProgramInstallTrashAssessmentForAction(
+    input,
+    action,
+  );
   if (!assessment?.memoryRequired || assessment.canFreeRequiredMemory) {
     return undefined;
   }
@@ -5117,10 +5139,7 @@ function blinkRiskAssessmentForEncounterBreak(
     input,
     action,
   );
-  const payoffOverride = blinkEncounterPayoffOverride(
-    input,
-    targetSubroutines,
-  );
+  const payoffOverride = blinkEncounterPayoffOverride(input, targetSubroutines);
 
   return buildBlinkRiskAssessment({
     currentHandCount,
@@ -5464,10 +5483,8 @@ function semanticRuntimeKnownCentralPayoffExclusion(
         .filter(
           (entry) =>
             entry === "rd_run_suppressed_by_known_low_value_top:true" ||
-            entry ===
-              "hq_run_suppressed_by_fully_known_low_value_hand:true" ||
-            entry ===
-              "hq_run_suppressed_by_known_unaffordable_trash:true" ||
+            entry === "hq_run_suppressed_by_fully_known_low_value_hand:true" ||
+            entry === "hq_run_suppressed_by_known_unaffordable_trash:true" ||
             entry.startsWith("central_memory_payoff:"),
         )
         .slice(0, 3),
@@ -5702,10 +5719,10 @@ function runnerBankInvestmentCommitmentAssessment(
     concreteFundingNeed,
     criticalReserve,
   });
-  const overDesiredTarget = storedCredits > 0 && storedCredits >= desiredBankTarget;
+  const overDesiredTarget =
+    storedCredits > 0 && storedCredits >= desiredBankTarget;
   const combinedCreditAccess = input.playerView.own.credits + storedCredits;
-  const cashOutThresholdMet =
-    storedCredits >= 6 && !comfortableCreditPool;
+  const cashOutThresholdMet = storedCredits >= 6 && !comfortableCreditPool;
   const runOverride =
     action.type === "start_run"
       ? runnerBankCommitmentRunOverride(input, action)
@@ -6287,7 +6304,10 @@ function runnerNoRunEconomyCommitmentAssessment(
   const realizedValueEstimate = sourceCard
     ? runnerNoRunEconomyRealizedCredits(input, sourceCard.definitionId)
     : 0;
-  const expectedFutureValue = Math.max(0, expectedValue - realizedValueEstimate);
+  const expectedFutureValue = Math.max(
+    0,
+    expectedValue - realizedValueEstimate,
+  );
   const runOverride =
     action.type === "start_run"
       ? runnerBankCommitmentRunOverride(input, action)
@@ -6299,9 +6319,7 @@ function runnerNoRunEconomyCommitmentAssessment(
     ? Math.max(1, Math.min(3, expectedFutureValue + 1))
     : 0;
   const noRunCommitmentPenalty =
-    expectedFutureValue > 0
-      ? -(1400 + expectedFutureValue * 500)
-      : -850;
+    expectedFutureValue > 0 ? -(1400 + expectedFutureValue * 500) : -850;
 
   if (!active) {
     return {
@@ -6378,9 +6396,10 @@ function runnerCardHasNoRunEconomyCommitment(
 ): boolean {
   if (!definitionId) return false;
   const hint = AI_HINTS.get(definitionId);
-  const effectTargets = hint?.effects
-    ?.map((effect) => stringRecordValue(effect, "target") ?? "")
-    .filter(Boolean) ?? [];
+  const effectTargets =
+    hint?.effects
+      ?.map((effect) => stringRecordValue(effect, "target") ?? "")
+      .filter(Boolean) ?? [];
   const mechanics = runnerCardMechanicsForAi(definitionId);
   const hasTurnStartEconomy =
     effectTargets.some((target) =>
@@ -6411,7 +6430,8 @@ function runnerNoRunEconomyExpectedCredits(
   definitionId: string | undefined,
 ): number {
   if (!definitionId) return 0;
-  const definition = RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
+  const definition =
+    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
   const text = [
     "rulesText" in (definition ?? {})
       ? (definition as { rulesText?: string } | undefined)?.rulesText
@@ -6435,7 +6455,10 @@ function runnerNoRunEconomyRealizedCredits(
     const resolvedEffects = event.publicPayload?.resolvedEffects;
     if (!Array.isArray(resolvedEffects)) continue;
     for (const effect of resolvedEffects) {
-      const sourceDefinitionId = stringRecordValue(effect, "sourceDefinitionId");
+      const sourceDefinitionId = stringRecordValue(
+        effect,
+        "sourceDefinitionId",
+      );
       const reason = stringRecordValue(effect, "reason");
       const kind = stringRecordValue(effect, "kind");
       const amount = numberRecordValue(effect, "amount");
@@ -6659,11 +6682,12 @@ function semanticRuntimeRunnerSourceCardAnswerRole(
   action: LegalAction,
 ): "search" | "draw" | undefined {
   const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
-  const sourceDefinitionId = sourceCard?.definitionId ||
-    sourceDefinitionIdForAction(input, action);
+  const sourceDefinitionId =
+    sourceCard?.definitionId || sourceDefinitionIdForAction(input, action);
   const roles = rolesForCardId(sourceDefinitionId);
   const definition = sourceDefinitionId
-    ? RUNTIME_CARDS[sourceDefinitionId] ?? DEMO_CARDS_BY_ID[sourceDefinitionId]
+    ? (RUNTIME_CARDS[sourceDefinitionId] ??
+      DEMO_CARDS_BY_ID[sourceDefinitionId])
     : undefined;
   const definitionDisplay = definition as
     | {
@@ -6686,7 +6710,10 @@ function semanticRuntimeRunnerSourceCardAnswerRole(
     ...(definitionDisplay?.mechanics ?? []),
     ...roles,
     action.label,
-  ].filter(Boolean).join(" ").toLowerCase();
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
   if (
     /runner\.search\.breaker|program_search|search_stack|stack_search|search|tutor/.test(
       text,
@@ -6884,8 +6911,10 @@ function semanticRuntimeRunnerScoreComponents(
         reason: fundingTarget.reason,
       });
     }
-    const muPressureFunding =
-      runnerMuPressureFundingScoreComponent(input, action);
+    const muPressureFunding = runnerMuPressureFundingScoreComponent(
+      input,
+      action,
+    );
     if (muPressureFunding) components.push(muPressureFunding);
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
@@ -6896,7 +6925,10 @@ function semanticRuntimeRunnerScoreComponents(
       reason: `hand:${input.playerView.own.gripOrHq.length}`,
     });
   }
-  const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(input, action);
+  const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(
+    input,
+    action,
+  );
   if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
   const junkyardRecoveryComponent = runnerJunkyardBbsRecoveryScoreComponent(
     input,
@@ -6908,7 +6940,15 @@ function semanticRuntimeRunnerScoreComponents(
   if (lowValueRecoveryRepeatComponent) {
     components.push(lowValueRecoveryRepeatComponent);
   }
-  const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
+  const lateNoFundingCreditRepeatComponent =
+    runnerLateNoFundingCreditRepeatScoreComponent(input, action);
+  if (lateNoFundingCreditRepeatComponent) {
+    components.push(lateNoFundingCreditRepeatComponent);
+  }
+  const multiRunEventComponent = runnerMultiRunEventScoreComponent(
+    input,
+    action,
+  );
   if (multiRunEventComponent) components.push(multiRunEventComponent);
   components.push(
     ...runnerBankInvestmentCommitmentScoreComponents(input, action),
@@ -6923,10 +6963,14 @@ function semanticRuntimeRunnerScoreComponents(
       input,
       action,
     );
-    const muPressureMemorySupport =
-      runnerMuPressureInstallScoreComponent(input, action);
-    const persistentInstallFit =
-      runnerPersistentInstallFitScoreComponent(input, action);
+    const muPressureMemorySupport = runnerMuPressureInstallScoreComponent(
+      input,
+      action,
+    );
+    const persistentInstallFit = runnerPersistentInstallFitScoreComponent(
+      input,
+      action,
+    );
     if (muPressureMemorySupport) components.push(muPressureMemorySupport);
     if (persistentInstallFit) components.push(persistentInstallFit);
     if (roles.some((role) => role.startsWith("breaker_"))) {
@@ -7040,8 +7084,10 @@ function semanticRuntimeRunnerScoreComponents(
       ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
     );
   }
-  const runTargetGuidance =
-    semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
+  const runTargetGuidance = semanticRuntimeRunnerRunTargetGuidanceComponent(
+    input,
+    action,
+  );
   if (runTargetGuidance) components.push(runTargetGuidance);
   if (action.type === "trash_accessed_card") {
     components.push(
@@ -7053,8 +7099,10 @@ function semanticRuntimeRunnerScoreComponents(
       ...semanticRuntimeRunnerAccessTrashComponents(input, action),
     );
   }
-  const badPublicityRelevance =
-    runnerBadPublicityRelevanceScoreComponent(input, action);
+  const badPublicityRelevance = runnerBadPublicityRelevanceScoreComponent(
+    input,
+    action,
+  );
   if (badPublicityRelevance) components.push(badPublicityRelevance);
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {
     components.push({
@@ -7102,7 +7150,9 @@ function runnerLoanLiabilityAssessment(
   const loanAlreadyInstalled = installedLoan !== undefined;
   if (!loanInstallAction && !loanAlreadyInstalled) return undefined;
 
-  const hint = AI_HINTS.get(loanDefinitionId ?? installedLoan?.definitionId ?? "");
+  const hint = AI_HINTS.get(
+    loanDefinitionId ?? installedLoan?.definitionId ?? "",
+  );
   const installCreditGain = loanInstallAction
     ? runnerLoanValueHint(hint, "installCreditGain", 12)
     : 0;
@@ -7129,10 +7179,10 @@ function runnerLoanLiabilityAssessment(
   const resourceTrashRisk = runnerLoanResourceTrashRisk(input);
   const criticalBreakerFunding = loanInstallAction
     ? runnerLoanCriticalBreakerFundingNeed(
-      input,
-      creditsAfterLoan,
-      runtimeContext.runFunding.remoteScoreThreat !== "none",
-    )
+        input,
+        creditsAfterLoan,
+        runtimeContext.runFunding.remoteScoreThreat !== "none",
+      )
     : { active: false, evidence: [] };
   const emergencyFunding =
     loanInstallAction &&
@@ -7224,8 +7274,9 @@ function runnerLoanLiabilityAssessment(
     `liabilitySeverity:${liabilitySeverity}`,
     `loanScoreValue:${scoreValue}`,
     "loan_not_build_credit_base:true",
-    ...(runnerLoanSemanticEvidence(loanDefinitionId ?? installedLoan?.definitionId)
-      ?? []),
+    ...(runnerLoanSemanticEvidence(
+      loanDefinitionId ?? installedLoan?.definitionId,
+    ) ?? []),
     ...runtimeContext.evidence,
     ...runtimeContext.runFunding.evidence,
     ...projectedSpend.evidence,
@@ -7278,16 +7329,22 @@ function runnerLoanDefinitionIdForAction(
 ): string | undefined {
   if (action.type !== "install_card") return undefined;
   const definitionId = sourceDefinitionIdForAction(input, action);
-  return runnerDefinitionIsHighRiskLoan(definitionId) ? definitionId : undefined;
+  return runnerDefinitionIsHighRiskLoan(definitionId)
+    ? definitionId
+    : undefined;
 }
 
-function runnerDefinitionIsHighRiskLoan(definitionId: string | undefined): boolean {
+function runnerDefinitionIsHighRiskLoan(
+  definitionId: string | undefined,
+): boolean {
   if (!definitionId) return false;
   if (definitionId === LOAN_FROM_CHIBA_CARD_ID) return true;
   const hint = AI_HINTS.get(definitionId);
   const targets = new Set(
     (hint?.effects ?? [])
-      .map((effect) => stringRecordValue(effect as Record<string, unknown>, "target"))
+      .map((effect) =>
+        stringRecordValue(effect as Record<string, unknown>, "target"),
+      )
       .filter((target): target is string => target !== undefined),
   );
   return (
@@ -7312,7 +7369,9 @@ function runnerLoanSemanticEvidence(
   if (!hint) return [`loanSource:${definitionId}`];
   const targets = sortedUnique(
     (hint.effects ?? [])
-      .map((effect) => stringRecordValue(effect as Record<string, unknown>, "target"))
+      .map((effect) =>
+        stringRecordValue(effect as Record<string, unknown>, "target"),
+      )
       .filter((target): target is string => target !== undefined)
       .filter(
         (target) =>
@@ -7345,14 +7404,20 @@ function runnerLoanValueHint(
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function runnerLoanRuntimeContext(input: AiDecisionInput, creditsAfterLoan: number): {
+function runnerLoanRuntimeContext(
+  input: AiDecisionInput,
+  creditsAfterLoan: number,
+): {
   desiredCreditReserve: number;
   contestReserve: number;
   runFunding: RunnerLoanRunFundingContext;
   evidence: string[];
 } {
   const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(input, deckCapabilities);
+  const strategicIntent = runnerStrategicIntentForInput(
+    input,
+    deckCapabilities,
+  );
   const handDevelopmentEvaluations = evaluateRunnerHandDevelopment({
     input,
     deckCapabilities,
@@ -7398,7 +7463,8 @@ function runnerLoanRunFundingContext(params: {
   contestReserve: number;
 }): RunnerLoanRunFundingContext {
   const rankedTargets = [...params.runTargets].sort(
-    (left, right) => right.score - left.score || left.actionId.localeCompare(right.actionId),
+    (left, right) =>
+      right.score - left.score || left.actionId.localeCompare(right.actionId),
   );
   const scoreThreatTarget = rankedTargets.find((target) => target.scoreThreat);
   const agendaTarget = rankedTargets.find(
@@ -7407,7 +7473,8 @@ function runnerLoanRunFundingContext(params: {
   const closeoutTarget = rankedTargets.find((target) =>
     runnerLoanCloseoutTarget(params.input, target),
   );
-  const bestTarget = scoreThreatTarget ?? agendaTarget ?? closeoutTarget ?? rankedTargets[0];
+  const bestTarget =
+    scoreThreatTarget ?? agendaTarget ?? closeoutTarget ?? rankedTargets[0];
   const remoteContestFunding =
     scoreThreatTarget !== undefined &&
     params.creditsAfterLoan >=
@@ -7445,9 +7512,12 @@ function runnerLoanRunFundingContext(params: {
     closeoutFunding,
     ...(bestTarget ? { bestTargetId: bestTarget.targetServerId } : {}),
     ...(bestTarget ? { bestTargetPayoff: bestTarget.accessPayoff } : {}),
-    ...(bestTarget ? { bestTargetRecommendation: bestTarget.recommendation } : {}),
+    ...(bestTarget
+      ? { bestTargetRecommendation: bestTarget.recommendation }
+      : {}),
     bestTargetPathCost: bestTarget?.pathCost ?? 0,
-    bestTargetCreditsAfterRun: bestTarget?.creditsAfterRun ?? params.input.playerView.own.credits,
+    bestTargetCreditsAfterRun:
+      bestTarget?.creditsAfterRun ?? params.input.playerView.own.credits,
     evidence: [
       `loanRunTargets:${params.runTargets.length}`,
       `loanBestTarget:${bestTarget?.targetServerId ?? "none"}`,
@@ -7465,7 +7535,10 @@ function runnerLoanCloseoutTarget(
   input: AiDecisionInput,
   target: RunnerRunTargetEvaluation,
 ): boolean {
-  if (input.playerView.own.agendaPoints < input.playerView.agendaPointsToWin - 2) {
+  if (
+    input.playerView.own.agendaPoints <
+    input.playerView.agendaPointsToWin - 2
+  ) {
     return false;
   }
   return (
@@ -7507,8 +7580,8 @@ function runnerLoanProjectedSpendAfterLoan(
     )
     .sort(
       (left, right) =>
-        runnerLoanSpendKindRank(right.kind) - runnerLoanSpendKindRank(left.kind) ||
-        right.cost - left.cost,
+        runnerLoanSpendKindRank(right.kind) -
+          runnerLoanSpendKindRank(left.kind) || right.cost - left.cost,
     )
     .slice(0, remainingClicks);
   const genericSetupSpendAfterLoan = spendCandidates
@@ -7542,8 +7615,13 @@ function runnerLoanProjectedSpendAfterLoan(
   };
 }
 
-function runnerInstalledLoanActionSpend(action: LegalAction): RunnerLoanProjectedSpend {
-  const spend = Math.max(0, actionCreditCost(action) - runnerProjectedCreditGainForAction(action));
+function runnerInstalledLoanActionSpend(
+  action: LegalAction,
+): RunnerLoanProjectedSpend {
+  const spend = Math.max(
+    0,
+    actionCreditCost(action) - runnerProjectedCreditGainForAction(action),
+  );
   return {
     plannedSpendAfterLoan: spend,
     directPlanSpendAfterLoan: 0,
@@ -7585,7 +7663,11 @@ function runnerLoanSpendCandidateKind(
   ) {
     return "generic_setup";
   }
-  if (card.type === "program" || card.type === "hardware" || card.type === "resource") {
+  if (
+    card.type === "program" ||
+    card.type === "hardware" ||
+    card.type === "resource"
+  ) {
     return "generic_setup";
   }
   return "ignore";
@@ -7773,7 +7855,14 @@ function runnerLoanLiabilityScoreValue(params: {
       actionCreditCost(params.action) > 0 &&
       params.creditsAfterPlannedSpend < params.desiredCreditReserve
     ) {
-      return -1250 - Math.max(0, params.desiredCreditReserve - params.creditsAfterPlannedSpend) * 90;
+      return (
+        -1250 -
+        Math.max(
+          0,
+          params.desiredCreditReserve - params.creditsAfterPlannedSpend,
+        ) *
+          90
+      );
     }
     return 0;
   }
@@ -7811,7 +7900,10 @@ function runnerLoanLiabilityScoreValue(params: {
   ) {
     value -= 1250;
   }
-  if (params.plannedSpendAfterLoan > 0 && params.creditsAfterPlannedSpend <= 3) {
+  if (
+    params.plannedSpendAfterLoan > 0 &&
+    params.creditsAfterPlannedSpend <= 3
+  ) {
     value -= 700;
   }
   if (
@@ -7835,7 +7927,9 @@ function runnerLoanLiabilityScoreValue(params: {
   return value;
 }
 
-function runnerLoanAllowedReason(useCase: RunnerLoanUseCase): string | undefined {
+function runnerLoanAllowedReason(
+  useCase: RunnerLoanUseCase,
+): string | undefined {
   switch (useCase) {
     case "remote_contest_funding":
       return "funds_remote_contest";
@@ -7886,8 +7980,10 @@ function runnerLoanBlockedReason(params: {
 
 function runnerLoanGamePhase(input: AiDecisionInput): RunnerLoanGamePhase {
   if (
-    input.playerView.own.agendaPoints >= input.playerView.agendaPointsToWin - 2 ||
-    input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2 ||
+    input.playerView.own.agendaPoints >=
+      input.playerView.agendaPointsToWin - 2 ||
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 2 ||
     input.actionNumber >= 40
   ) {
     return "late";
@@ -8271,7 +8367,10 @@ function runnerLowValueRecoveryRepeatScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (!runnerActionLooksLikeRecovery(input, action)) return undefined;
-  const recentRepeats = semanticRuntimeRecentRunnerRecoveryActions(input, action);
+  const recentRepeats = semanticRuntimeRecentRunnerRecoveryActions(
+    input,
+    action,
+  );
   if (recentRepeats <= 0) return undefined;
   const fundingNeed = runnerRecoveryFundingNeedContext(input);
   if (fundingNeed.active) return undefined;
@@ -8287,6 +8386,74 @@ function runnerLowValueRecoveryRepeatScoreComponent(
       `source:${sourceDefinitionIdForAction(input, action) || action.type}`,
     ].join("|"),
   };
+}
+
+function runnerLateNoFundingCreditRepeatScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (action.type !== "gain_credit") return undefined;
+  const recentCredits = semanticRuntimeRecentRunnerBasicCreditActions(input);
+  if (recentCredits <= 0) return undefined;
+  const fundingNeed = runnerRecoveryFundingNeedContext(input);
+  if (fundingNeed.active) return undefined;
+  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
+  if (!closeout.opportunity || !closeout.target) return undefined;
+  const pressureReadyTargets = assessRunnerPressureReadyForMetrics(
+    input,
+  ).readyTargets.filter(
+    (target) =>
+      target.serverId === closeout.target &&
+      semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) <= 0,
+  );
+  if (pressureReadyTargets.length === 0) return undefined;
+  const credits = input.playerView.own.credits;
+  if (credits < 3 && recentCredits < 2) return undefined;
+  const penalty = Math.min(
+    860,
+    260 + recentCredits * 180 + Math.max(0, credits - 4) * 60,
+  );
+  return {
+    key: "runner_late_no_funding_credit_repeat",
+    label: "Credit-Wiederholung ohne Funding Need",
+    value: -penalty,
+    reason: [
+      `recent_basic_credits:${recentCredits}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+      `pressure_ready_targets:${pressureReadyTargets
+        .map((target) => target.serverId)
+        .join(",")}`,
+      `credits:${credits}`,
+    ].join("|"),
+  };
+}
+
+function semanticRuntimeRecentRunnerBasicCreditActions(
+  input: AiDecisionInput,
+): number {
+  const history = mergedAiPublicHistory(input);
+  let count = 0;
+  let seenRunnerActions = 0;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (actor !== "runner") continue;
+    seenRunnerActions += 1;
+    if (actionType === "gain_credit") count += 1;
+    if (seenRunnerActions >= 8) break;
+  }
+  return count;
 }
 
 function runnerJunkyardBbsRecoveryScoreComponent(
@@ -8372,7 +8539,9 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
   } else if (targetRoles.some((role) => role.startsWith("breaker_"))) {
     values.push({ value: 820, evidence: "target_class:breaker" });
   }
-  if (targetRoles.some((role) => role === "memory" || role === "memory_support")) {
+  if (
+    targetRoles.some((role) => role === "memory" || role === "memory_support")
+  ) {
     const memoryRemaining =
       (input.playerView.own.memoryLimit ?? 0) -
       (input.playerView.own.memoryUsed ?? 0);
@@ -8397,7 +8566,8 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
   }
   if (
     targetRoles.some(
-      (role) => role === "setup" || role === "build_rig" || role.includes("setup"),
+      (role) =>
+        role === "setup" || role === "build_rig" || role.includes("setup"),
     )
   ) {
     const rigSize = input.playerView.own.rig?.length ?? 0;
@@ -8449,7 +8619,10 @@ function runnerActionLooksLikeRecovery(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.type !== "trigger_ability" && action.type !== "activated_card_ability")
+  if (
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  )
     return false;
   const source = findVisibleCard(input, action.source);
   const roles = rolesForAction(input, action);
@@ -8476,7 +8649,10 @@ function runnerRecoveryFundingNeedContext(input: AiDecisionInput): {
   if (runnerBankHasConcreteFundingNeed(input)) {
     return { active: true, reason: "concrete_bank_funding_need" };
   }
-  if (input.playerView.own.credits <= 2 && runnerHasKnownUnaffordableLegalRun(input)) {
+  if (
+    input.playerView.own.credits <= 2 &&
+    runnerHasKnownUnaffordableLegalRun(input)
+  ) {
     return { active: true, reason: "known_unaffordable_run" };
   }
   if (input.playerView.own.credits <= 1) {
@@ -8517,7 +8693,9 @@ function semanticRuntimeRecentRunnerRecoveryActions(
   return count;
 }
 
-function semanticRuntimeRunnerRecoveryProgressEvent(actionType: string): boolean {
+function semanticRuntimeRunnerRecoveryProgressEvent(
+  actionType: string,
+): boolean {
   return (
     actionType === "steal_agenda" ||
     actionType === "score_agenda" ||
@@ -8622,9 +8800,10 @@ function runnerPersistentInstallFitScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   const evaluation = runnerPersistentInstallEvaluationForAction(input, action);
   if (!evaluation) return undefined;
-  const scoreValue = evaluation.finalInstallFit < 0
-    ? evaluation.finalInstallFit
-    : Math.min(250, Math.round(evaluation.finalInstallFit / 4));
+  const scoreValue =
+    evaluation.finalInstallFit < 0
+      ? evaluation.finalInstallFit
+      : Math.min(250, Math.round(evaluation.finalInstallFit / 4));
   return {
     key: "runner_persistent_install_fit",
     label: "Install-Grenznutzen",
@@ -8675,7 +8854,10 @@ function runnerPersistentInstallEvaluationForAction(
     return undefined;
   }
   const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(input, deckCapabilities);
+  const strategicIntent = runnerStrategicIntentForInput(
+    input,
+    deckCapabilities,
+  );
   return evaluateRunnerHandDevelopment({
     input,
     deckCapabilities,
@@ -9227,9 +9409,15 @@ function semanticRuntimeRunnerDoctrineRunWeight(
   if (!planKey) return undefined;
   const consumer = semanticRuntimeDoctrineConsumerForPlan(planKey);
   const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
-  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer, {
-    serverId,
-  });
+  const gate = semanticRuntimeDoctrineActionGate(
+    input,
+    action,
+    planKey,
+    consumer,
+    {
+      serverId,
+    },
+  );
   if (raw > 0 && !gate.allowed) {
     return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
   }
@@ -9268,11 +9456,10 @@ function semanticRuntimeRunnerRemoteContestDoctrineGuard(
     evaluation.knownAccessState === "known_no_current_payoff" ||
     evaluation.accessPayoff === "known_low_value";
   const blocked =
-    evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0;
-  const repeated = semanticRuntimeRecentRunnerStartRunsOnServer(
-    input,
-    serverId,
-  ) > 0;
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.creditsAfterRun < 0;
+  const repeated =
+    semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
   const plausiblePayoff =
     evaluation.accessPayoff === "agenda" ||
     evaluation.accessPayoff === "score_threat" ||
@@ -9281,14 +9468,17 @@ function semanticRuntimeRunnerRemoteContestDoctrineGuard(
     evaluation.accessPayoff === "access_bonus" ||
     (evaluation.accessPayoff === "unknown" &&
       evaluation.recommendation === "run_now");
-  if (knownNoPayoff || blocked || (repeated && !plausiblePayoff) || !plausiblePayoff) {
+  if (
+    knownNoPayoff ||
+    blocked ||
+    (repeated && !plausiblePayoff) ||
+    !plausiblePayoff
+  ) {
     return {
       allowed: false,
       evidence: [
         "deck_doctrine_remote_contest_suppressed:true",
-        ...(knownNoPayoff
-          ? ["runner_known_remote_no_payoff_guard:true"]
-          : []),
+        ...(knownNoPayoff ? ["runner_known_remote_no_payoff_guard:true"] : []),
         `deck_doctrine_remote_contest_suppressed_reason:${
           knownNoPayoff
             ? "known_no_payoff"
@@ -9326,7 +9516,12 @@ function semanticRuntimeCorpDoctrineWeight(
   if (input.side !== "corp" || input.ownDeckDoctrine?.side !== "corp")
     return undefined;
   const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
-  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer);
+  const gate = semanticRuntimeDoctrineActionGate(
+    input,
+    action,
+    planKey,
+    consumer,
+  );
   if (raw > 0 && !gate.allowed) {
     return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
   }
@@ -9491,23 +9686,35 @@ function semanticRuntimeDoctrineActionGate(
   context: { serverId?: string | undefined } = {},
 ): { allowed: boolean; evidence: string[] } {
   if (
-    !input.legalActions.some((legalAction) => legalAction.actionId === action.actionId)
+    !input.legalActions.some(
+      (legalAction) => legalAction.actionId === action.actionId,
+    )
   ) {
-    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "illegal_action", [
-      `action:${action.actionId}`,
-    ]);
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "illegal_action",
+      [`action:${action.actionId}`],
+    );
   }
   if (action.side !== input.side) {
-    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "side_mismatch", [
-      `input_side:${input.side}`,
-      `action_side:${action.side}`,
-    ]);
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "side_mismatch",
+      [`input_side:${input.side}`, `action_side:${action.side}`],
+    );
   }
   if (actionCreditCost(action) > input.playerView.own.credits) {
-    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "cost_blocked", [
-      `credits:${input.playerView.own.credits}`,
-      `cost:${actionCreditCost(action)}`,
-    ]);
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "cost_blocked",
+      [
+        `credits:${input.playerView.own.credits}`,
+        `cost:${actionCreditCost(action)}`,
+      ],
+    );
   }
 
   if (
@@ -9538,7 +9745,10 @@ function semanticRuntimeDoctrineActionGate(
       );
     }
   }
-  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+  return {
+    allowed: true,
+    evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`],
+  };
 }
 
 function semanticRuntimeRunnerDoctrineActionGate(
@@ -9549,10 +9759,18 @@ function semanticRuntimeRunnerDoctrineActionGate(
   serverId: string | undefined,
 ): { allowed: boolean; evidence: string[] } {
   if (action.type !== "start_run") {
-    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "not_run_action");
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "not_run_action",
+    );
   }
   if (!serverId) {
-    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "missing_server");
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "missing_server",
+    );
   }
   const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
     input,
@@ -9561,7 +9779,8 @@ function semanticRuntimeRunnerDoctrineActionGate(
   );
   if (
     evaluation &&
-    (evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0)
+    (evaluation.pathPassability !== "reachable" ||
+      evaluation.creditsAfterRun < 0)
   ) {
     return semanticRuntimeDoctrineGateBlocked(
       planKey,
@@ -9575,8 +9794,7 @@ function semanticRuntimeRunnerDoctrineActionGate(
     );
   }
   if (
-    (consumer === "runner_pressure_rnd" ||
-      consumer === "runner_pressure_hq") &&
+    (consumer === "runner_pressure_rnd" || consumer === "runner_pressure_hq") &&
     semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0
   ) {
     return semanticRuntimeDoctrineGateBlocked(
@@ -9603,12 +9821,16 @@ function semanticRuntimeRunnerDoctrineActionGate(
     );
     if (!remoteContestGate.allowed) return remoteContestGate;
   }
-  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+  return {
+    allowed: true,
+    evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`],
+  };
 }
 
-function semanticRuntimeRunnerLowValueRecoveryContext(
-  input: AiDecisionInput,
-): { active: boolean; evidence: string[] } {
+function semanticRuntimeRunnerLowValueRecoveryContext(input: AiDecisionInput): {
+  active: boolean;
+  evidence: string[];
+} {
   const recentRecovery = semanticRuntimeRecentRunnerRecoveryActions(input);
   if (recentRecovery <= 1) return { active: false, evidence: [] };
   const fundingNeed = runnerRecoveryFundingNeedContext(input);
@@ -9805,8 +10027,10 @@ function semanticRuntimeCorpScoreComponents(
       });
     }
   }
-  const passiveScoreLinePenalty =
-    semanticRuntimeCorpPassiveScoreLinePenalty(input, action);
+  const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
+    input,
+    action,
+  );
   if (passiveScoreLinePenalty) components.push(passiveScoreLinePenalty);
   if (action.type === "decline_rez" && scopeId === "simple_rez") {
     components.push({
@@ -9838,7 +10062,8 @@ function semanticRuntimeCorpPassiveScoreLinePenalty(
     ...terminal.advanceToScoreActionIds,
     ...terminal.agendaInstallActionIds,
   ]);
-  if (!terminal.terminalWindow || terminalActionIds.size === 0) return undefined;
+  if (!terminal.terminalWindow || terminalActionIds.size === 0)
+    return undefined;
   if (terminalActionIds.has(action.actionId)) return undefined;
   if (
     terminal.blockedByCheapContest ||
@@ -10213,15 +10438,19 @@ function semanticRuntimeRunnerEvidence(
     input,
     action,
   );
-  const noRunEconomyCommitmentEvidence =
-    runnerNoRunEconomyCommitmentEvidence(input, action);
+  const noRunEconomyCommitmentEvidence = runnerNoRunEconomyCommitmentEvidence(
+    input,
+    action,
+  );
   const selfDamageSurvivalEvidence =
     runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
   const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
   const loanLiabilityEvidence =
     runnerLoanLiabilityAssessment(input, action)?.evidence ?? [];
-  const persistentInstallEvidence =
-    runnerPersistentInstallEvidenceForAction(input, action);
+  const persistentInstallEvidence = runnerPersistentInstallEvidenceForAction(
+    input,
+    action,
+  );
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
@@ -10686,26 +10915,17 @@ function damageTypeFromHintResource(
   }
 }
 
-function stringRecordValue(
-  value: unknown,
-  key: string,
-): string | undefined {
+function stringRecordValue(value: unknown, key: string): string | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "string" ? record[key] : undefined;
 }
 
-function numberRecordValue(
-  value: unknown,
-  key: string,
-): number | undefined {
+function numberRecordValue(value: unknown, key: string): number | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "number" ? record[key] : undefined;
 }
 
-function booleanRecordValue(
-  value: unknown,
-  key: string,
-): boolean | undefined {
+function booleanRecordValue(value: unknown, key: string): boolean | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "boolean" ? record[key] : undefined;
 }
@@ -10733,8 +10953,10 @@ function semanticRuntimeCorpEvidence(
   if (action.type === "draw_card") {
     evidence.push("corp_safe_alternative:draw");
   }
-  const passiveScoreLinePenalty =
-    semanticRuntimeCorpPassiveScoreLinePenalty(input, action);
+  const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
+    input,
+    action,
+  );
   if (passiveScoreLinePenalty) {
     evidence.push("corp_passive_scoreline_available:true");
     evidence.push(
@@ -10916,9 +11138,10 @@ export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
   return true;
 }
 
-function selfplayTraceFactsForDecision(
-  decision: AiDecision,
-): { planKind?: string; debugFacts?: string[] } {
+function selfplayTraceFactsForDecision(decision: AiDecision): {
+  planKind?: string;
+  debugFacts?: string[];
+} {
   const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
   if (!safeDebug) return {};
   const debugFacts = safeSelfplayFacts([
@@ -11192,10 +11415,7 @@ export function simulateAiGame(
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
-      selectedActionId: simulationSafeSelectedActionId(
-        action,
-        targetServerId,
-      ),
+      selectedActionId: simulationSafeSelectedActionId(action, targetServerId),
       actionType: action.type,
       eventType: result.event.type,
       timingPoint: action.timingPoint,
@@ -11893,7 +12113,9 @@ export function runAiSelfplayTraceMining(
       ...(config.runnerDifficulty
         ? { runnerDifficulty: config.runnerDifficulty }
         : {}),
-      ...(config.corpDifficulty ? { corpDifficulty: config.corpDifficulty } : {}),
+      ...(config.corpDifficulty
+        ? { corpDifficulty: config.corpDifficulty }
+        : {}),
       ...(config.runnerProfileId
         ? { runnerProfileId: config.runnerProfileId }
         : {}),
@@ -11906,7 +12128,9 @@ export function runAiSelfplayTraceMining(
           }),
       ...(config.corpDeck
         ? { corpDeck: config.corpDeck }
-        : { corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId }),
+        : {
+            corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+          }),
       ...(config.runnerDeckMetadata
         ? { runnerDeckMetadata: config.runnerDeckMetadata }
         : {}),
@@ -11924,7 +12148,8 @@ export function runAiSelfplayTraceMining(
   const findings = detectAiSelfplaySuspiciousDecisions(summaries, {
     ...(config.detectorIds ? { detectorIds: config.detectorIds } : {}),
     longGameActionThreshold:
-      config.longGameActionThreshold ?? Math.max(20, Math.floor(maxActions * 0.75)),
+      config.longGameActionThreshold ??
+      Math.max(20, Math.floor(maxActions * 0.75)),
   });
   const topFindings = findings.slice(0, config.maxFindings ?? 20);
   const enabledDetectors =
@@ -11964,6 +12189,7 @@ export function runAiSelfplayTraceMining(
     passiveActionWithScoreLineAvailable:
       countPassiveActionWithScoreLineAvailable(summaries),
     actionLimitClusters: summarizeSelfplayActionLimitClusters(summaries),
+    actionLimitSubclusters: summarizeSelfplayActionLimitSubclusters(summaries),
   };
   return {
     version: "ai-selfplay-trace-mining-v1",
@@ -12028,7 +12254,10 @@ function countPassiveActionWithScoreLineAvailable(
 function isPassiveCorpScoreLineSkip(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
-  if (entry.actionType === "score_agenda" || entry.actionType === "advance_card")
+  if (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "advance_card"
+  )
     return false;
   return (
     entry.corpScoreTerminalSkippedForEconomy === true ||
@@ -13217,11 +13446,11 @@ function runnerMuPressureAssessment(
     memoryUsed + pendingProgramInstallMemory - memoryLimit,
   );
   const sacrificeAssessments = programInstallActions
-    .map((action) => runnerProgramInstallTrashAssessmentForAction(input, action))
+    .map((action) =>
+      runnerProgramInstallTrashAssessmentForAction(input, action),
+    )
     .filter(
-      (
-        assessment,
-      ): assessment is RunnerProgramInstallTrashAssessment =>
+      (assessment): assessment is RunnerProgramInstallTrashAssessment =>
         assessment !== undefined,
     );
   const requiresProgramTrash =
@@ -13231,16 +13460,18 @@ function runnerMuPressureAssessment(
         visibleMemoryCostForAi(findVisibleCard(input, action.source)) >
         memoryAvailable,
     );
-  const criticalProgramSacrificeRisk = sacrificeAssessments.some((assessment) => {
-    const bestCandidate =
-      assessment.selectedCandidates[0] ?? assessment.candidates[0];
-    return (
-      assessment.memoryRequired &&
-      (!assessment.canFreeRequiredMemory ||
-        bestCandidate?.category === "critical" ||
-        bestCandidate?.category === "high")
-    );
-  });
+  const criticalProgramSacrificeRisk = sacrificeAssessments.some(
+    (assessment) => {
+      const bestCandidate =
+        assessment.selectedCandidates[0] ?? assessment.candidates[0];
+      return (
+        assessment.memoryRequired &&
+        (!assessment.canFreeRequiredMemory ||
+          bestCandidate?.category === "critical" ||
+          bestCandidate?.category === "high")
+      );
+    },
+  );
   const usefulProgramsInHand = input.playerView.own.gripOrHq.filter((card) =>
     isUsefulRunnerProgramInHandForMuPressure(input, card),
   ).length;
@@ -13250,8 +13481,8 @@ function runnerMuPressureAssessment(
   const affordableMemorySupportActions = memorySupportLegalActions.filter(
     (action) => actionCreditCost(action) <= input.playerView.own.credits,
   );
-  const memorySupportCardsInHand = input.playerView.own.gripOrHq.filter((card) =>
-    isRunnerMemorySupportCardForAi(card),
+  const memorySupportCardsInHand = input.playerView.own.gripOrHq.filter(
+    (card) => isRunnerMemorySupportCardForAi(card),
   );
   const missingCreditsForCheapestMemorySupport =
     affordableMemorySupportActions.length > 0
@@ -13578,7 +13809,9 @@ function isRunnerMemorySupportAction(
   return isRunnerMemorySupportCardForAi(findVisibleCard(input, action.source));
 }
 
-function isRunnerMemorySupportCardForAi(card: VisibleCard | undefined): boolean {
+function isRunnerMemorySupportCardForAi(
+  card: VisibleCard | undefined,
+): boolean {
   if (!card || card.known === false) return false;
   const roles = rolesForCardId(card.definitionId);
   const text = [
@@ -13814,7 +14047,10 @@ function runnerProgramInstallTrashAssessmentFromCards(
   const memoryUsed = safeNonNegativeInteger(input.playerView.own.memoryUsed);
   const memoryLimit = safeNonNegativeInteger(input.playerView.own.memoryLimit);
   const sourceMemoryCost = visibleMemoryCostForAi(source);
-  const requiredMemoryToFree = Math.max(0, memoryUsed + sourceMemoryCost - memoryLimit);
+  const requiredMemoryToFree = Math.max(
+    0,
+    memoryUsed + sourceMemoryCost - memoryLimit,
+  );
   const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
   const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(
     input.playerView.own.rig ?? [],
@@ -13886,7 +14122,10 @@ function programSacrificeCandidateForAi(
   if (protectedRole) {
     sacrificePenalty += 1500;
     reasonCategories.push("unique_breaker_coverage");
-  } else if (breakerRoles.length > 0 || roles.some((role) => role.startsWith("breaker_"))) {
+  } else if (
+    breakerRoles.length > 0 ||
+    roles.some((role) => role.startsWith("breaker_"))
+  ) {
     sacrificePenalty += 420;
     reasonCategories.push("breaker_coverage");
   }
@@ -13931,7 +14170,11 @@ function programSacrificeCandidateForAi(
     reasonCategories.push("sunk_install_cost");
   }
 
-  const redundant = programSacrificeCandidateIsRedundant(input, card, breakerRoles);
+  const redundant = programSacrificeCandidateIsRedundant(
+    input,
+    card,
+    breakerRoles,
+  );
   if (redundant) {
     sacrificePenalty = Math.max(20, sacrificePenalty - 260);
     reasonCategories.push("redundant_or_replaceable");
@@ -13988,7 +14231,8 @@ function runnerProgramInstallTrashAssessmentEvidence(params: {
   candidates: readonly ProgramSacrificeCandidate[];
   selection: ReturnType<typeof selectedProgramSacrificeCandidates>;
 }): string[] {
-  const bestCandidate = params.selection.selectedCandidates[0] ?? params.candidates[0];
+  const bestCandidate =
+    params.selection.selectedCandidates[0] ?? params.candidates[0];
   return [
     "choice_source:runner_program_trash_before_install",
     "runner_program_trash_before_install:true",
@@ -13997,10 +14241,11 @@ function runnerProgramInstallTrashAssessmentEvidence(params: {
     `protected_icebreakers:${params.candidates.filter((candidate) => candidate.protectedRole).length}`,
     `program_sacrifice_candidates:${params.candidates.length}`,
     `program_sacrifice_acceptable_candidates:${params.candidates.filter((candidate) => candidate.acceptable).length}`,
-    `program_sacrifice_counter_value_candidates:${params.candidates.filter(
-      (candidate) =>
+    `program_sacrifice_counter_value_candidates:${
+      params.candidates.filter((candidate) =>
         candidate.reasonCategories.includes("counters_or_stored_value"),
-    ).length}`,
+      ).length
+    }`,
     `program_sacrifice_can_free_required:${params.selection.canFreeRequiredMemory}`,
     `program_sacrifice_memory_freed:${params.selection.memoryFreed}`,
     `program_sacrifice_selected_candidates:${params.selection.selectedCandidates.length}`,
@@ -14048,7 +14293,8 @@ function programSacrificeCandidateIsRedundant(
   const rig = input.playerView.own.rig ?? [];
   if (
     card.definitionId &&
-    rig.filter((candidate) => candidate.definitionId === card.definitionId).length > 1
+    rig.filter((candidate) => candidate.definitionId === card.definitionId)
+      .length > 1
   ) {
     return true;
   }
@@ -14085,7 +14331,12 @@ function safeNonNegativeInteger(value: number | undefined): number {
 }
 
 function sacrificeCandidateLabel(candidate: ProgramSacrificeCandidate): string {
-  return candidate.option?.label ?? candidate.card?.title ?? candidate.card?.definitionId ?? "";
+  return (
+    candidate.option?.label ??
+    candidate.card?.title ??
+    candidate.card?.definitionId ??
+    ""
+  );
 }
 
 function visibleCardsByInstanceIdForAi(
@@ -15011,10 +15262,8 @@ function scoreRunnerAction(
       break;
     case "install_card":
       {
-        const sacrificeAssessment = runnerProgramInstallTrashAssessmentForAction(
-          input,
-          action,
-        );
+        const sacrificeAssessment =
+          runnerProgramInstallTrashAssessmentForAction(input, action);
         const sacrificePenalty =
           runnerProgramInstallDisplacementPenalty(sacrificeAssessment);
         const muPressureBonus = runnerMuPressureInstallPriorityBonus(
@@ -15037,14 +15286,16 @@ function scoreRunnerAction(
           explanation =
             "Die Installation wuerde ein wichtiges installiertes Programm opfern; die KI bricht den Pflicht-Trash-Pfad ab.";
         } else {
-          reasonCode = muPressureBonus.value > 0
-            ? "runner.setup.install_memory_support"
-            : roles.some((role) => role.startsWith("breaker_"))
-            ? "runner.setup.install_missing_breaker"
-            : "runner.setup.install_support";
-          explanation = muPressureBonus.value > 0
-            ? "Die Runner-KI baut bei sichtbarem MU-Druck Memory-Support auf."
-            : "Die Runner-KI verbessert sichtbare Rig- oder Setup-Rollen.";
+          reasonCode =
+            muPressureBonus.value > 0
+              ? "runner.setup.install_memory_support"
+              : roles.some((role) => role.startsWith("breaker_"))
+                ? "runner.setup.install_missing_breaker"
+                : "runner.setup.install_support";
+          explanation =
+            muPressureBonus.value > 0
+              ? "Die Runner-KI baut bei sichtbarem MU-Druck Memory-Support auf."
+              : "Die Runner-KI verbessert sichtbare Rig- oder Setup-Rollen.";
         }
         evidence.push(
           "own_card_role_known",
@@ -15184,14 +15435,19 @@ function scoreRunnerAction(
           action,
         );
         score =
-          (input.difficulty === "easy" ? 560 : features.credits < 4 ? 540 : 380) +
-          muPressureFunding.value;
-        reasonCode = muPressureFunding.value > 0
-          ? "runner.setup.fund_memory_support"
-          : "runner.economy.basic_credit";
-        explanation = muPressureFunding.value > 0
-          ? "Credits finanzieren sichtbaren Memory-Support gegen aktuellen MU-Druck."
-          : "Credits verbessern die sichtbare Handlungsfähigkeit.";
+          (input.difficulty === "easy"
+            ? 560
+            : features.credits < 4
+              ? 540
+              : 380) + muPressureFunding.value;
+        reasonCode =
+          muPressureFunding.value > 0
+            ? "runner.setup.fund_memory_support"
+            : "runner.economy.basic_credit";
+        explanation =
+          muPressureFunding.value > 0
+            ? "Credits finanzieren sichtbaren Memory-Support gegen aktuellen MU-Druck."
+            : "Credits verbessern die sichtbare Handlungsfähigkeit.";
         evidence.push("basic_economy", ...muPressureFunding.evidence);
       }
       break;

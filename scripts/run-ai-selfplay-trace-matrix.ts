@@ -1,9 +1,5 @@
 import { execFileSync } from "node:child_process";
-import {
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   benchmarkDeckFromFrozenLocalSnapshot,
@@ -73,6 +69,7 @@ const matrix = pairs.map(({ pair }) => {
         result.summaries,
       ),
       actionLimitClusters: result.aggregate.actionLimitClusters,
+      actionLimitSubclusters: result.aggregate.actionLimitSubclusters,
     },
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
@@ -87,6 +84,9 @@ const matrix = pairs.map(({ pair }) => {
       actionLimitReached: summary.actionLimitReached,
       lastActionTypes: summary.actionSequence
         .slice(-10)
+        .map((entry) => entry.actionType),
+      last40ActionTypes: summary.actionSequence
+        .slice(-40)
         .map((entry) => entry.actionType),
     })),
     topFindings: result.topFindings.map((finding) => ({
@@ -230,15 +230,14 @@ function git(args: string[]): string {
   }).trim();
 }
 
-function combineAggregates(
-  aggregates: Array<TraceMiningResult["aggregate"]>,
-) {
+function combineAggregates(aggregates: Array<TraceMiningResult["aggregate"]>) {
   const games = sum(aggregates, (entry) => entry.games);
   const decisions = sum(aggregates, (entry) => entry.decisions);
   const findings = sum(aggregates, (entry) => entry.findings);
   const averageGameLength =
     games > 0
-      ? sum(aggregates, (entry) => entry.averageGameLength * entry.games) / games
+      ? sum(aggregates, (entry) => entry.averageGameLength * entry.games) /
+        games
       : 0;
   return {
     games,
@@ -267,6 +266,9 @@ function combineAggregates(
     ),
     actionLimitClusters: mergeCounts(
       aggregates.map((entry) => entry.actionLimitClusters),
+    ),
+    actionLimitSubclusters: mergeCounts(
+      aggregates.map((entry) => entry.actionLimitSubclusters),
     ),
   };
 }
@@ -314,7 +316,9 @@ function unsafeScoreChosenReasons(entry: TraceMiningActionEntry): string[] {
   if (entry.corpScoreConversionFixGateBlockedByHqThreat === true) {
     reasons.push("unsafe_score_hq_or_rnd_threat");
   }
-  return reasons.length > 0 ? sortedUnique(reasons) : ["unsafe_score_unknown_higher_priority"];
+  return reasons.length > 0
+    ? sortedUnique(reasons)
+    : ["unsafe_score_unknown_higher_priority"];
 }
 
 function sum<T>(entries: readonly T[], value: (entry: T) => number): number {
