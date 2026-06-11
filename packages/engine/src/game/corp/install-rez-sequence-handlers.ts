@@ -110,9 +110,9 @@ export function handleCorpInstallRezSequenceChoice(
   if (source.startsWith("v162.priority_requisition"))
     return resolvePriorityRequisitionChoice(host);
   if (isHqToNewRemoteInstallRezRezChoiceSource(source))
-    return resolveDataFortReclamationRezChoice(host);
+    return resolveHqToNewRemoteInstallRezRezChoice(host);
   if (isHqToNewRemoteInstallRezChoiceSource(source))
-    return resolveDataFortReclamationChoice(host);
+    return resolveHqToNewRemoteInstallRezChoice(host);
   return { handled: false };
 }
 
@@ -381,10 +381,13 @@ function resolvePriorityRequisitionChoice(
   };
 }
 
-function resolveDataFortReclamationChoice(
+function resolveHqToNewRemoteInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
-  const choice = requireChoice(host, "Data-Fort-Reclamation-Choice ist nicht offen.");
+  const choice = requireChoice(
+    host,
+    "HQ-to-new-remote-Install-Choice ist nicht offen.",
+  );
   const [, agendaId] = choice.source.split(":");
   if (
     !agendaId ||
@@ -392,7 +395,9 @@ function resolveDataFortReclamationChoice(
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
       "score_install_hq_cards_into_new_remote_then_rez"
   )
-    throw new Error("Data Fort Reclamation ist nicht gescored.");
+    throw new Error(
+      "Das HQ-to-new-remote-Install-/Rez-Primitive ist nicht gescored.",
+    );
   const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
     agendaId as CardInstanceId,
@@ -409,7 +414,9 @@ function resolveDataFortReclamationChoice(
     selectedIds.length > choice.maxSelections ||
     selectedIds.length > sequence.maxCards
   )
-    throw new Error("Data Fort Reclamation darf hoechstens vier HQ-Karten waehlen.");
+    throw new Error(
+      "Das HQ-to-new-remote-Install-Primitive darf hoechstens vier HQ-Karten waehlen.",
+    );
   const selectedSet = new Set(selectedIds);
   if (selectedSet.size !== selectedIds.length)
     throw new Error("Eine HQ-Karte wurde doppelt gewaehlt.");
@@ -566,12 +573,12 @@ function prevalidateHqToNewRemoteInstallSelection(
   return selectedCards;
 }
 
-function resolveDataFortReclamationRezChoice(
+function resolveHqToNewRemoteInstallRezRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
   const choice = requireChoice(
     host,
-    "Data-Fort-Reclamation-Rez-Choice ist nicht offen.",
+    "HQ-to-new-remote-Install-/Rez-Choice ist nicht offen.",
   );
   const [, agendaId, serverId, temporaryCreditText] = choice.source.split(":");
   if (
@@ -581,7 +588,9 @@ function resolveDataFortReclamationRezChoice(
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
       "score_install_hq_cards_into_new_remote_then_rez"
   )
-    throw new Error("Data Fort Reclamation ist nicht gescored.");
+    throw new Error(
+      "Das HQ-to-new-remote-Install-/Rez-Primitive ist nicht gescored.",
+    );
   const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
     agendaId as CardInstanceId,
@@ -596,7 +605,9 @@ function resolveDataFortReclamationRezChoice(
   host.servers.mustServer(serverId);
   const temporaryCreditAmount = sequence.temporaryCredits.amount;
   if (Math.floor(Number(temporaryCreditText)) !== temporaryCreditAmount)
-    throw new Error("Die temporaeren Rez-Credits passen nicht zur Agenda.");
+    throw new Error(
+      "Die temporaeren Rez-Credits passen nicht zum Install-/Rez-Primitive.",
+    );
   let temporaryCreditsRemaining = temporaryCreditAmount;
   const selectedIds = selectedChoiceCardIds(host, choice);
   const selectedSet = new Set(selectedIds);
@@ -619,7 +630,7 @@ function resolveDataFortReclamationRezChoice(
     const corp = rezCost - temporary;
     if (host.state.corp.credits < corp)
       throw new Error(
-        "Die Korp kann die Data-Fort-Reclamation-Rez-Kosten nicht bezahlen.",
+        "Die Korp kann die Install-/Rez-Primitive-Rez-Kosten nicht bezahlen.",
       );
     temporaryCreditsRemaining -= temporary;
     temporaryCreditsSpent += temporary;

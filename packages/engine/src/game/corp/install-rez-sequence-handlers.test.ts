@@ -467,7 +467,7 @@ describe("corp install rez sequence handlers", () => {
       ]),
     });
     expect(() => handleCorpInstallRezSequenceChoice(overLimitHost)).toThrow(
-      "Data Fort Reclamation darf hoechstens vier HQ-Karten waehlen.",
+      "Das HQ-to-new-remote-Install-Primitive darf hoechstens vier HQ-Karten waehlen.",
     );
 
     const nonHqHost = makeHost({

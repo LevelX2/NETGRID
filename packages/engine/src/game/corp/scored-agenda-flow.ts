@@ -435,7 +435,7 @@ export function handleScoredAgendaFlowChoice(
     return result;
   }
   if (isScoredIceMarkModifierChoiceSource(source)) {
-    resolveIceTransmutationChoice(host);
+    resolveScoredRezzedIceMarkModifierChoice(host);
     const result: ScoredAgendaFlowResult = { handled: true, stateChanged: true };
     if (host.legalAction?.payload)
       result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
@@ -734,7 +734,9 @@ function resolveScoredSubtypeReveal(
   };
 }
 
-function iceTransmutationTargetIds(host: ScoredAgendaFlowHost): CardInstanceId[] {
+function rezzedInstalledIceMarkModifierTargetIds(
+  host: ScoredAgendaFlowHost,
+): CardInstanceId[] {
   return Object.entries(host.state.cardInstances)
     .filter(([, instance]) => {
       return (
@@ -765,7 +767,7 @@ function startScoredRezzedIceMarkModifierChoice(
     scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag ist ungueltig.");
-  const targets = iceTransmutationTargetIds(host);
+  const targets = rezzedInstalledIceMarkModifierTargetIds(host);
   const agendaDefinition = host.cards.definitionFor(agendaId);
   const primitivePayload = cardImplementationPrimitivePayload({
     sourceCardId: agendaId,
@@ -820,12 +822,14 @@ function startScoredRezzedIceMarkModifierChoice(
   };
 }
 
-function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
+function resolveScoredRezzedIceMarkModifierChoice(
+  host: ScoredAgendaFlowHost,
+): void {
   const legalAction = requireLegalAction(host);
   const playerAction = requirePlayerAction(host);
   const choice = host.state.pendingChoice;
   if (!choice || !isScoredIceMarkModifierChoiceSource(choice.source))
-    throw new Error("Es ist keine Ice-Transmutation-Choice offen.");
+    throw new Error("Es ist keine Scored-ICE-Mark-Modifier-Choice offen.");
   const [, agendaId] = choice.source.split(":");
   if (
     !agendaId ||
@@ -834,14 +838,18 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
       host.cards.definitionFor(agendaId as CardInstanceId),
     )?.kind !== "select_rezzed_ice_mark_modifier"
   )
-    throw new Error("Ice Transmutation ist nicht gescored.");
+    throw new Error("Das Scored-ICE-Mark-Modifier-Primitive ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length !== 1)
-    throw new Error("Ice Transmutation braucht genau ein ICE-Ziel.");
+    throw new Error(
+      "Das Scored-ICE-Mark-Modifier-Primitive braucht genau ein ICE-Ziel.",
+    );
   const targetIceId = selectedIds[0];
-  if (!targetIceId) throw new Error("Ice-Transmutation-Ziel fehlt.");
-  if (!iceTransmutationTargetIds(host).includes(targetIceId))
-    throw new Error("Ice Transmutation darf nur rezzed ICE wählen.");
+  if (!targetIceId) throw new Error("Scored-ICE-Mark-Modifier-Ziel fehlt.");
+  if (!rezzedInstalledIceMarkModifierTargetIds(host).includes(targetIceId))
+    throw new Error(
+      "Das Scored-ICE-Mark-Modifier-Primitive darf nur rezzed ICE wählen.",
+    );
   const scoredAgenda = host.cards.scoredAgendaForDefinition(
     host.cards.definitionFor(agendaId as CardInstanceId),
   );

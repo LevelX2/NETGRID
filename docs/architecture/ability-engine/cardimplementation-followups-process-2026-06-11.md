@@ -283,6 +283,22 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts`
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 
+## P3 Ergebnis
+
+Umgesetzt:
+
+- `iceTransmutationTargetIds` wurde zu `rezzedInstalledIceMarkModifierTargetIds`.
+- `resolveIceTransmutationChoice` wurde zu `resolveScoredRezzedIceMarkModifierChoice`.
+- `resolveDataFortReclamationChoice` wurde zu `resolveHqToNewRemoteInstallRezChoice`.
+- `resolveDataFortReclamationRezChoice` wurde zu `resolveHqToNewRemoteInstallRezRezChoice`.
+- Fehlertexte in den umbenannten Resolve-Pfaden sind primitive-neutraler; Prompts und Legacy-Payload-/Source-Werte bleiben kompatibel.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/install-rez-sequence-handlers.test.ts`
+- Grün: Code-Suche nach alten internen Funktionsnamen in `packages/engine/src`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.
