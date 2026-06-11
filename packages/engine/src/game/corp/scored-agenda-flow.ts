@@ -9,10 +9,13 @@ import type {
   ResolvedGameEffect,
   ServerId,
 } from "@netgrid/shared";
+import { cardImplementationPrimitivePayload } from "../../ability-engine/card-implementation-primitives";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 
 type ScoredAgendaPayload = Record<string, string | number | boolean>;
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
+const SCORED_ICE_MARK_CHOICE_SOURCE =
+  "card_implementation_primitive.select_rezzed_ice_mark_modifier";
 
 export type ScoredAgendaFlowHost = {
   state: Pick<
@@ -431,7 +434,7 @@ export function handleScoredAgendaFlowChoice(
       result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
     return result;
   }
-  if (source.startsWith("v1920.ice_transmutation")) {
+  if (isScoredIceMarkModifierChoiceSource(source)) {
     resolveIceTransmutationChoice(host);
     const result: ScoredAgendaFlowResult = { handled: true, stateChanged: true };
     if (host.legalAction?.payload)
@@ -446,6 +449,13 @@ export function handleScoredAgendaFlowChoice(
     return result;
   }
   return { handled: false };
+}
+
+function isScoredIceMarkModifierChoiceSource(source: string): boolean {
+  return (
+    source.startsWith(`${SCORED_ICE_MARK_CHOICE_SOURCE}:`) ||
+    source.startsWith("v1920.ice_transmutation")
+  );
 }
 
 export function startEmployeeEmpowermentStartDrawChoice(
@@ -756,18 +766,27 @@ function startScoredRezzedIceMarkModifierChoice(
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag ist ungueltig.");
   const targets = iceTransmutationTargetIds(host);
+  const agendaDefinition = host.cards.definitionFor(agendaId);
+  const primitivePayload = cardImplementationPrimitivePayload({
+    sourceCardId: agendaId,
+    sourceDefinitionId: agendaDefinition.id,
+    primitiveKind: scoredAgenda.kind,
+    effectKind: "mark_modifier",
+  });
   if (targets.length === 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      ...primitivePayload,
       agendaAbility: "v1920_ice_transmutation",
+      scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
       iceTransmutationSkippedReason: "no_rezzed_ice",
     };
     return;
   }
   host.state.pendingChoice = {
-    choiceId: `v1920_ice_transmutation_${host.state.stateVersion + 1}`,
+    choiceId: `choice_card_implementation_select_rezzed_ice_mark_modifier_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1920.ice_transmutation:${agendaId}:${host.state.stateVersion + 1}`,
+    source: `${SCORED_ICE_MARK_CHOICE_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
     prompt:
       "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     kind: "select_cards",
@@ -787,7 +806,15 @@ function startScoredRezzedIceMarkModifierChoice(
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
+    ...primitivePayload,
     agendaAbility: "v1920_ice_transmutation_choice",
+    cardImplementationTargetKind: scoredAgenda.target,
+    cardImplementationCounterType: scoredAgenda.counterType,
+    cardImplementationCounterAmount: scoredAgenda.counterAmount,
+    cardImplementationStrengthBonusPerCounter:
+      scoredAgenda.strengthBonusPerCounter,
+    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
+      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
     eligibleIceCount: targets.length,
   };
 }
@@ -796,7 +823,7 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
   const legalAction = requireLegalAction(host);
   const playerAction = requirePlayerAction(host);
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1920.ice_transmutation"))
+  if (!choice || !isScoredIceMarkModifierChoiceSource(choice.source))
     throw new Error("Es ist keine Ice-Transmutation-Choice offen.");
   const [, agendaId] = choice.source.split(":");
   if (
@@ -835,10 +862,23 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
   const markCount = host.counters.cardCounter(targetIceId, scoredAgenda.counterType);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
+    ...cardImplementationPrimitivePayload({
+      sourceCardId: agendaId as CardInstanceId,
+      sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
+      primitiveKind: scoredAgenda.kind,
+      effectKind: "mark_modifier",
+    }),
     agendaAbility: "v1920_ice_transmutation",
     sourceAgendaId: agendaId,
     targetIceId,
     targetIceDefinitionId: host.cards.definitionFor(targetIceId).id,
+    cardImplementationTargetKind: scoredAgenda.target,
+    cardImplementationCounterType: scoredAgenda.counterType,
+    cardImplementationCounterAmount: scoredAgenda.counterAmount,
+    cardImplementationStrengthBonusPerCounter:
+      scoredAgenda.strengthBonusPerCounter,
+    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
+      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
     strengthBonus: markCount * scoredAgenda.strengthBonusPerCounter,
     duplicatedSubroutineCount:
       (host.cards.definitionFor(targetIceId).subroutines?.length ?? 0) *

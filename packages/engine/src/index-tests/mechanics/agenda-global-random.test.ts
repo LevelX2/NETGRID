@@ -1592,7 +1592,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "score_agenda" && action.payload?.cardId === agendaId,
     );
 
-    expect(state.pendingChoice?.source).toContain("v1920.ice_transmutation");
+    expect(state.pendingChoice?.source).toContain(
+      "card_implementation_primitive.select_rezzed_ice_mark_modifier",
+    );
     expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
       iceId,
     );

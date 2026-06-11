@@ -381,10 +381,22 @@ describe("scored agenda flow", () => {
     });
     scoreAgenda(host, "transmutation_agenda" as CardInstanceId);
     const choice = host.state.pendingChoice!;
-    expect(choice.source).toContain("v1920.ice_transmutation");
+    expect(choice.source).toContain(
+      "card_implementation_primitive.select_rezzed_ice_mark_modifier",
+    );
     expect(choice.prompt).toBe(
       "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
+    expect(legalAction.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "ice_transmutation:select_rezzed_ice_mark_modifier:mark_modifier",
+      cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
+      cardImplementationEffectKind: "mark_modifier",
+      sourceCardId: "transmutation_agenda",
+      sourceDefinitionId: "ice_transmutation",
+      cardImplementationTargetKind: "rezzed_installed_ice",
+      eligibleIceCount: 1,
+    });
 
     const result = handleScoredAgendaFlowChoice({
       ...host,
@@ -394,10 +406,67 @@ describe("scored agenda flow", () => {
     expect(result.handled).toBe(true);
     expect(host.state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
+      cardImplementationAbilityId:
+        "ice_transmutation:select_rezzed_ice_mark_modifier:mark_modifier",
+      cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
+      cardImplementationEffectKind: "mark_modifier",
       agendaAbility: "v1920_ice_transmutation",
       targetIceId: "ice_1",
+      cardImplementationTargetKind: "rezzed_installed_ice",
+      cardImplementationCounterType: "mark",
       strengthBonus: 1,
       duplicatedSubroutineCount: 1,
+    });
+  });
+
+  it("skips Ice Transmutation without leaking a pending choice when no rezzed ICE exists", () => {
+    const legalAction = makeLegalAction();
+    const host = makeHost({
+      legalAction,
+      implementations: {
+        ice_transmutation: {
+          kind: "select_rezzed_ice_mark_modifier",
+          target: "rezzed_installed_ice",
+          counterType: "mark",
+          counterAmount: 1,
+          strengthBonusPerCounter: 1,
+          duplicateEachPrintedSubroutinePerCounter: true,
+          visibility: "public",
+        },
+      },
+      instances: {
+        ice_1: {
+          ...instance("ice_1" as CardInstanceId, "simple_ice" as CardDefinitionId, {
+            side: "corp",
+            zone: "serverIce",
+            serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          }),
+          rezzed: false,
+          faceup: false,
+        },
+        transmutation_agenda: {
+          ...instance(
+            "transmutation_agenda" as CardInstanceId,
+            "ice_transmutation" as CardDefinitionId,
+            {
+              side: "corp",
+              zone: "serverRoot",
+              serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+            },
+          ),
+          advancementCounters: 3,
+        },
+      },
+    });
+
+    scoreAgenda(host, "transmutation_agenda" as CardInstanceId);
+
+    expect(host.state.pendingChoice).toBeUndefined();
+    expect(legalAction.payload).toMatchObject({
+      cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
+      cardImplementationEffectKind: "mark_modifier",
+      scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
+      iceTransmutationSkippedReason: "no_rezzed_ice",
     });
   });
 

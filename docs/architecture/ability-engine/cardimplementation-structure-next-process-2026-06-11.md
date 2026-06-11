@@ -271,3 +271,24 @@ Checks:
 
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/run/successful-run-interventions.test.ts src/game/run/run-access-transition.test.ts`
+
+## P3 Ergebnis
+
+Umgesetzt:
+
+- Scored-ICE-Mark-Choice nutzt jetzt die neutrale Source `card_implementation_primitive.select_rezzed_ice_mark_modifier`.
+- `handleScoredAgendaFlowChoice` akzeptiert die neue Source und toleriert `v1920.ice_transmutation` als Legacy-Pfad.
+- Start- und Resolve-Payloads enthalten `cardImplementationAbilityId`, `cardImplementationPrimitiveKind`, `cardImplementationEffectKind`, `sourceCardId`, `sourceDefinitionId` und Ziel-/Counter-Metadaten.
+- Ice-Transmutation-Tests prüfen die neue Primitive-Identität und den Skip-Fall ohne rezzed ICE.
+- PublicEvent-Smoke bleibt auf fachliche öffentliche Felder beschränkt; die neuen Identity-Felder sind LegalAction-/Runtime-Payload-Daten und keine zusätzliche PublicEvent-Pflicht.
+
+Bewusst stabil gelassen:
+
+- `agendaAbility: "v1920_ice_transmutation"` bleibt für bestehende Auswertung und Event-Kompatibilität erhalten.
+- Kartenfreundliche Prompt-Texte bleiben unverändert.
+- Keine KI-Runtime-Wirkung.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda-abilities.test.ts src/index-tests/mechanics/agenda-global-random.test.ts src/game/view/card-view.test.ts`
