@@ -6144,12 +6144,29 @@ function runnerShouldContinueCurrentRemoteRun(input: AiDecisionInput): boolean {
   if (currentIce?.known && currentIce.rezzed === true) {
     return runnerCanAffordCurrentMovementIce(input);
   }
+  const remainingKnownPath = assessKnownRezzedIcePath(
+    server.ice.slice(0, run.position.iceIndex + 1),
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (
+    remainingKnownPath.assessedKnownIceCount > 0 &&
+    !remainingKnownPath.canReachAccess
+  ) {
+    return false;
+  }
   const profile = runnerRemoteContestProfile(input, run.attackedServerId);
+  const hasNoRemainingKnownIce = remainingKnownPath.assessedKnownIceCount === 0;
+  const visibleScoreThreat = remoteServerHasVisibleScoreThreat(
+    input,
+    run.attackedServerId,
+  );
   return (
-    (profile.contestable || profile.relevantTrash) &&
-    !profile.blockedByBreakerCoverage &&
-    !profile.blockedByKnownIceCost &&
-    !profile.blockedByPostRunReserve
+    (profile.contestable || profile.relevantTrash || visibleScoreThreat) &&
+    (!profile.blockedByBreakerCoverage || hasNoRemainingKnownIce) &&
+    (!profile.blockedByKnownIceCost || hasNoRemainingKnownIce) &&
+    (!profile.blockedByPostRunReserve || hasNoRemainingKnownIce)
   );
 }
 

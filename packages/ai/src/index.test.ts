@@ -21655,6 +21655,131 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("excludes the visible Viral 15 R&D path before opportunistic central pressure can choose it", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-rd-viral15-haunting-virizz-no-killer",
+        runnerDeck: {
+          id: "semantic_rd_viral15_path_runner",
+          name: "Semantic R&D Viral 15 Path Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_016_cyfermaster", quantity: 2 },
+            { id: "onr_v1_028_force-shield", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_rd_viral15_path_corp",
+          name: "Semantic R&D Viral 15 Path Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
+            { id: "onr_v1_276_viral-15", quantity: 1 },
+            { id: "onr_v1_277_virizz", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 5;
+    state.runner.clicks = 4;
+    state.corp.credits = 20;
+    const firstCyfermasterId = moveRunnerProgramToRig(
+      state,
+      "onr_v1_016_cyfermaster",
+    );
+    moveRunnerProgramCopyToRig(state, "onr_v1_016_cyfermaster", [
+      firstCyfermasterId,
+    ]);
+    moveRunnerProgramToRig(state, "onr_v1_028_force-shield");
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    const hauntingId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_247_haunting-inquisition",
+    );
+    const viral15Id = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
+    for (const iceId of [virizzId, hauntingId, viral15Id]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const rdServer = input.playerView.servers.find(
+      (server) => server.id === "rd",
+    );
+    expect(
+      assessKnownRezzedIcePath(
+        rdServer?.ice ?? [],
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        rdServer?.root ?? [],
+      ),
+    ).toMatchObject({
+      canReachAccess: false,
+      noAccessReason: "harmful_unbroken_run_effect",
+      hardUnbrokenEffectIceTitle: "Viral 15",
+    });
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!rdRun || !gainCredit || !drawCard) {
+      throw new Error("Missing Viral 15 R&D path fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [rdRun, gainCredit, drawCard],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const rdAlternative = alternatives.get(rdRun.actionId);
+
+    expect(decision.actionId).not.toBe(rdRun.actionId);
+    expect(rdAlternative?.excluded).toBe(true);
+    expect(rdAlternative?.whyNot).toContain(
+      "semantic_excluded:known_ice_path_no_access",
+    );
+    expect(
+      rdAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason?.includes("reason:harmful_unbroken_run_effect") &&
+          component.reason.includes("hard_effect_ice:Viral 15") &&
+          component.reason.includes("hard_effect:damage_or_program_trash"),
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(rdAlternative)).not.toMatch(
+      /cardInstances|privatePayload|decklist|simple_agenda_1/,
+    );
+  });
+
   it("jacks out for Viral 15 on R&D instead of sacrificing Krash and Cyfermaster", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -28800,6 +28925,29 @@ function moveRunnerProgramToRig(
   definitionId: string,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.programs.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function moveRunnerProgramCopyToRig(
+  state: GameState,
+  definitionId: string,
+  excludeIds: CardInstanceId[],
+): CardInstanceId {
+  const excluded = new Set(excludeIds);
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) => card.definitionId === definitionId && !excluded.has(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing ${definitionId} copy`);
+  const id = entry[0] as CardInstanceId;
   removeEverywhere(state, id);
   state.runner.rig.programs.unshift(id);
   state.cardInstances[id] = {

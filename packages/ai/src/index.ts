@@ -9196,6 +9196,12 @@ function semanticRuntimeKnownIcePathReason(
     ...(assessment.unbreakableIceTitle
       ? [`ice:${assessment.unbreakableIceTitle}`]
       : []),
+    ...(assessment.hardUnbrokenEffectIceTitle
+      ? [`hard_effect_ice:${assessment.hardUnbrokenEffectIceTitle}`]
+      : []),
+    ...(assessment.hardUnbrokenRunEffects?.length
+      ? [`hard_effect:${assessment.hardUnbrokenRunEffects.join("|")}`]
+      : []),
   ].join(";");
 }
 
