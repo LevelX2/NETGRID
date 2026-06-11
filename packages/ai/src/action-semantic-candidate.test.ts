@@ -52,9 +52,9 @@ describe("buildActionSemanticCandidates", () => {
     });
 
     expect(candidates).toHaveLength(actions.length);
-    expect(new Set(candidates.map((candidate) => candidate.actionId)).size).toBe(
-      actions.length,
-    );
+    expect(
+      new Set(candidates.map((candidate) => candidate.actionId)).size,
+    ).toBe(actions.length);
 
     for (const [index, candidate] of candidates.entries()) {
       const action = actions[index];
@@ -93,12 +93,14 @@ describe("buildActionSemanticCandidates", () => {
   });
 
   it("keeps LegalAction payload values out of the neutral candidate", () => {
-    const [action] = [legalAction("play_event", 0, {
-      payload: {
-        serverId: "hq",
-        targetCardId: "secret-unseen-card",
-      },
-    })];
+    const [action] = [
+      legalAction("play_event", 0, {
+        payload: {
+          serverId: "hq",
+          targetCardId: "secret-unseen-card",
+        },
+      }),
+    ];
 
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [action],
@@ -153,9 +155,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(install.primaryProjectionStatus).toBe("partial_projected");
     expect(install.projectionIssues).toEqual(["target_context_unavailable"]);
 
-    expect(breakSubroutine.semanticActionType).toBe(
-      "breaker.break_subroutine",
-    );
+    expect(breakSubroutine.semanticActionType).toBe("breaker.break_subroutine");
     expect(breakSubroutine.sourceKind).toBe("card");
     expect(breakSubroutine.sourceCardId).toBe("breaker-source");
     expect(breakSubroutine.projectionIssues).toEqual([
@@ -264,14 +264,77 @@ describe("buildActionSemanticCandidates", () => {
 
     expect(inferred.sourceCardId).toBe("single-ability-card");
     expect(inferred.abilityId).toBe("single.legal.ability");
-    expect(inferred.abilityBindingMethod).toBe(
-      "single_legal_ability_inferred",
-    );
+    expect(inferred.abilityBindingMethod).toBe("single_legal_ability_inferred");
 
     expect(unresolved.sourceCardId).toBe("ambiguous-card");
     expect(unresolved.abilityId).toBeUndefined();
     expect(unresolved.abilityBindingMethod).toBe("unresolved");
     expect(unresolved.projectionIssues).toContain("ability_unresolved");
+  });
+
+  it("projects card implementation primitive payload fields read-only", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("resolve_choice", 0, {
+          source: "game_rule",
+          visibility: "private_to_actor",
+          payload: {
+            sourceCardId: "runner-resource-1",
+            sourceDefinitionId: "onr_proteus_136_credit-subversion",
+            cardImplementationAbilityId:
+              "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+            cardImplementationAbilityKey: "successful_run_before_access:0",
+            cardImplementationPrimitiveKind:
+              "successful_run_before_access_effect",
+            cardImplementationEffectKind: "corp_lose_credits",
+          },
+        }),
+      ],
+    });
+    if (!candidate) throw new Error("Expected primitive payload candidate");
+
+    expect(candidate.sourceKind).toBe("card");
+    expect(candidate.sourceCardId).toBe("runner-resource-1");
+    expect(candidate.sourceCardInstanceId).toBe("runner-resource-1");
+    expect(candidate.sourceDefinitionId).toBe(
+      "onr_proteus_136_credit-subversion",
+    );
+    expect(candidate.abilityId).toBe(
+      "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+    );
+    expect(candidate.abilityKey).toBe("successful_run_before_access:0");
+    expect(candidate.primitiveKind).toBe("successful_run_before_access_effect");
+    expect(candidate.effectKind).toBe("corp_lose_credits");
+    expect(candidate.abilityBindingMethod).toBe("engine_payload");
+    expect(candidate.visibilityScope).toBe("actor_private");
+    expect(candidate.actionTacticSignals).toEqual([]);
+    expect(candidate.strategySupport).toEqual([]);
+    expect(candidate.evidence).toEqual(
+      expect.arrayContaining([
+        "AI038 source instance bound from LegalAction: runner-resource-1",
+        "AI038 source definition bound from LegalAction: onr_proteus_136_credit-subversion",
+        "AI038 payload cardImplementationAbilityId: onr_proteus_136_credit-subversion:successful_run_before_access:0",
+        "AI038 payload cardImplementationAbilityKey: successful_run_before_access:0",
+        "AI038 payload cardImplementationPrimitiveKind: successful_run_before_access_effect",
+        "AI038 payload cardImplementationEffectKind: corp_lose_credits",
+      ]),
+    );
+
+    const serialized = JSON.stringify(candidate);
+    for (const hiddenInfoField of [
+      "corpHiddenRndOrder",
+      "runnerHiddenStackOrder",
+      "hiddenHqCards",
+      "actualDeckOrder",
+      "actualStackOrder",
+      "cardInstances",
+      "fullGameState",
+      "privatePayload",
+    ]) {
+      expect(serialized).not.toContain(hiddenInfoField);
+    }
+    expect(serialized).not.toContain("planWeight");
+    expect(serialized).not.toContain("scoringWeight");
   });
 
   it("projects target context only from selected or engine-provided targets", () => {
@@ -733,7 +796,7 @@ describe("buildActionSemanticCandidates", () => {
         },
       },
       cardSemanticProfilesByDefinitionId: {
-        "onr_v1_019_dropp": {
+        onr_v1_019_dropp: {
           cardId: "onr_v1_019_dropp",
           tacticSignals: [],
           strategySupport: [],
