@@ -8370,7 +8370,10 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
       evidence: "target_class:missing_breaker_coverage",
     });
   } else if (targetRoles.some((role) => role.startsWith("breaker_"))) {
-    values.push({ value: 820, evidence: "target_class:breaker" });
+    values.push({
+      value: 80,
+      evidence: "target_class:breaker_no_visible_need",
+    });
   }
   if (targetRoles.some((role) => role === "memory" || role === "memory_support")) {
     const memoryRemaining =
@@ -8402,7 +8405,7 @@ function runnerJunkyardBbsRecoveryTargetAssessment(
   ) {
     const rigSize = input.playerView.own.rig?.length ?? 0;
     values.push({
-      value: rigSize <= 1 ? 520 : 260,
+      value: rigSize <= 1 ? 180 : 80,
       evidence: `target_class:setup:rig_size:${rigSize}`,
     });
   }
