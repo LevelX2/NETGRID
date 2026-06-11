@@ -37,7 +37,8 @@
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests",
     "build": "corepack pnpm -r --if-present build",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "format:changed": "node scripts/check-format-changed.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",

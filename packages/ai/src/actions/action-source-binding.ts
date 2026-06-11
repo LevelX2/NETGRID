@@ -14,6 +14,8 @@ export function applyCardActionSourceBinding(
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
 ): ActionSemanticCandidate {
   const sourceCardInstanceId = sourceCardInstanceIdForAction(action);
+  const primitiveMetadata =
+    cardImplementationPrimitiveMetadataForAction(action);
   const abilityBinding = abilityBindingForAction(
     action,
     sourceCardInstanceId,
@@ -43,6 +45,15 @@ export function applyCardActionSourceBinding(
     ...(abilityBinding?.abilityId !== undefined
       ? { abilityId: abilityBinding.abilityId }
       : {}),
+    ...(primitiveMetadata.abilityKey !== undefined
+      ? { abilityKey: primitiveMetadata.abilityKey }
+      : {}),
+    ...(primitiveMetadata.primitiveKind !== undefined
+      ? { primitiveKind: primitiveMetadata.primitiveKind }
+      : {}),
+    ...(primitiveMetadata.effectKind !== undefined
+      ? { effectKind: primitiveMetadata.effectKind }
+      : {}),
     abilityBindingMethod:
       abilityBinding?.method ?? candidate.abilityBindingMethod,
     projectionIssues,
@@ -55,23 +66,32 @@ export function applyCardActionSourceBinding(
     evidence: [
       ...candidate.evidence,
       ...(sourceCardInstanceId !== undefined
-        ? [`AI038 source instance bound from LegalAction: ${sourceCardInstanceId}`]
+        ? [
+            `AI038 source instance bound from LegalAction: ${sourceCardInstanceId}`,
+          ]
         : []),
       ...(sourceDefinitionId !== undefined
-        ? [`AI038 source definition bound from LegalAction: ${sourceDefinitionId}`]
+        ? [
+            `AI038 source definition bound from LegalAction: ${sourceDefinitionId}`,
+          ]
         : []),
       ...(abilityBinding !== undefined ? abilityBinding.evidence : []),
+      ...primitiveMetadata.evidence,
     ],
   };
 }
 
-function sourceCardInstanceIdForAction(action: LegalAction): string | undefined {
+function sourceCardInstanceIdForAction(
+  action: LegalAction,
+): string | undefined {
   if (
     action.abilityRef?.sourceCardInstanceId !== undefined &&
     action.abilityRef.sourceCardInstanceId.length > 0
   ) {
     return action.abilityRef.sourceCardInstanceId;
   }
+  const payloadSourceCardId = stringPayload(action, "sourceCardId");
+  if (payloadSourceCardId !== undefined) return payloadSourceCardId;
   if (action.source === "basic_action" || action.source === "game_rule") {
     return undefined;
   }
@@ -107,6 +127,20 @@ function abilityBindingForAction(
     };
   }
 
+  const cardImplementationAbilityId = stringPayload(
+    action,
+    "cardImplementationAbilityId",
+  );
+  if (cardImplementationAbilityId !== undefined) {
+    return {
+      abilityId: cardImplementationAbilityId,
+      method: "engine_payload",
+      evidence: [
+        `AI038 payload cardImplementationAbilityId: ${cardImplementationAbilityId}`,
+      ],
+    };
+  }
+
   if (sourceCardInstanceId === undefined) return undefined;
   const matchingBindings = sideSafeAbilityBindings.filter(
     (binding) =>
@@ -128,10 +162,37 @@ function abilityBindingForAction(
   };
 }
 
-function stringPayload(
-  action: LegalAction,
-  key: string,
-): string | undefined {
+function cardImplementationPrimitiveMetadataForAction(action: LegalAction): {
+  abilityKey?: string;
+  primitiveKind?: string;
+  effectKind?: string;
+  evidence: string[];
+} {
+  const abilityKey = stringPayload(action, "cardImplementationAbilityKey");
+  const primitiveKind = stringPayload(
+    action,
+    "cardImplementationPrimitiveKind",
+  );
+  const effectKind = stringPayload(action, "cardImplementationEffectKind");
+  return {
+    ...(abilityKey !== undefined ? { abilityKey } : {}),
+    ...(primitiveKind !== undefined ? { primitiveKind } : {}),
+    ...(effectKind !== undefined ? { effectKind } : {}),
+    evidence: [
+      ...(abilityKey !== undefined
+        ? [`AI038 payload cardImplementationAbilityKey: ${abilityKey}`]
+        : []),
+      ...(primitiveKind !== undefined
+        ? [`AI038 payload cardImplementationPrimitiveKind: ${primitiveKind}`]
+        : []),
+      ...(effectKind !== undefined
+        ? [`AI038 payload cardImplementationEffectKind: ${effectKind}`]
+        : []),
+    ],
+  };
+}
+
+function stringPayload(action: LegalAction, key: string): string | undefined {
   const value = action.payload?.[key];
   if (typeof value !== "string" || value.length === 0) return undefined;
   return value;

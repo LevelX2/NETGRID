@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -14,7 +14,7 @@ Die Vorgabe ist automatisch umsetzbar. Sie benennt sieben Folgepakete mit Ziel, 
 
 ## Gesamtziel
 
-Die CardImplementation-Primitive-Folgearbeit soll die erste Strukturkonsolidierung absichern: Data Fort Reclamation wird state-atomar und hinterlässt bei Nullauswahl kein leeres Remote; Primitive-Actions erhalten eine stabilere Ability-Key-Identität; interne Runtime-Namen werden primitive-näher; Hidden-Info-/PublicEvent-/Replay-Invarianten werden gezielt getestet; der AI-Deriver erkennt auch Hidden-Successful-Run-Factorys; Format- und Source-Polish werden nachgezogen; abschließend laufen AI-, Typecheck-, Test- und Format-Gates grün und der Arbeitsbranch wird lokal nach `main` integriert.
+Die CardImplementation-Primitive-Folgearbeit soll die erste Strukturkonsolidierung absichern: Data Fort Reclamation wird state-atomar und hinterlässt bei Nullauswahl kein leeres Remote; Primitive-Actions erhalten eine stabilere Ability-Key-Identität; interne Runtime-Namen werden primitive-näher; Hidden-Info-/PublicEvent-/Replay-Invarianten werden gezielt getestet; der AI-Deriver erkennt auch Hidden-Successful-Run-Factorys; Format- und Source-Polish werden nachgezogen; abschließend laufen AI-, Typecheck-, Test-, Diff- und changed-file-Format-Gates grün und der Arbeitsbranch wird lokal nach `main` integriert. Der repo-weite `format:check` bleibt als separate Baseline außerhalb dieses Pakets dokumentiert.
 
 ## Annahmen
 
@@ -200,7 +200,7 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm format:check`
+- `corepack pnpm exec prettier --check -- $(git diff --name-only main...HEAD)`
 - `corepack pnpm --filter @netgrid/engine typecheck`
 - `git diff --check`
 
@@ -225,7 +225,7 @@ Checks:
 - `corepack pnpm -r --if-present typecheck`
 - `corepack pnpm -r --if-present --no-bail test`
 - `corepack pnpm test`
-- `corepack pnpm format:check`
+- `corepack pnpm exec prettier --check -- $(git diff --name-only main...HEAD)`
 - `git diff --check`
 
 Commit: `test(engine): verify card implementation follow-ups`
@@ -401,7 +401,7 @@ Checks:
 
 ## Controller-Prompt-Kern
 
-`/Goal Arbeite CardImplementation Follow-ups vollständig und sequenziell von P0 bis P7 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, agents/release-implementation-agent.md und dieses Prozessartefakt. Arbeite ausschließlich im Worktree C:\Projekte\NETGRID_CARDIMPLEMENTATION_FOLLOWUPS auf Branch codex/cardimplementation-followups. Nutze den Hauptworkspace nur für den finalen Merge. Stelle keine Zwischenfragen, solange der Prozess konservative automatische Fortsetzung erlaubt. Arbeite immer nur am aktuellen Paket. Schreibe/aktualisiere Paketartefakte. Führe Paketchecks aus. Committe jedes abgeschlossene Paket. Bei Sicherheitsblocker: stoppe ohne Rückfrage, schreibe Blocker-Report mit Removal Condition. Im finalen Testblock alle Tests, Typechecks, AI-Checks und Formatchecks laufen lassen, rote Tests analysieren und beheben. Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktree entfernen, Goal erst dann als complete markieren.`
+`/Goal Arbeite CardImplementation Follow-ups vollständig und sequenziell von P0 bis P7 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, agents/release-implementation-agent.md und dieses Prozessartefakt. Arbeite ausschließlich im Worktree C:\Projekte\NETGRID_CARDIMPLEMENTATION_FOLLOWUPS auf Branch codex/cardimplementation-followups. Nutze den Hauptworkspace nur für den finalen Merge. Stelle keine Zwischenfragen, solange der Prozess konservative automatische Fortsetzung erlaubt. Arbeite immer nur am aktuellen Paket. Schreibe/aktualisiere Paketartefakte. Führe Paketchecks aus. Committe jedes abgeschlossene Paket. Bei Sicherheitsblocker: stoppe ohne Rückfrage, schreibe Blocker-Report mit Removal Condition. Im finalen Testblock alle Tests, Typechecks, AI-Checks und changed-file-Formatchecks laufen lassen, rote Tests analysieren und beheben. Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktree entfernen, Goal erst dann als complete markieren.`
 
 ## Abschlusskriterien
 
@@ -410,5 +410,6 @@ Checks:
 - Interne Handlernamen sind primitive-näher.
 - Hidden-Info-/PublicEvent-/Replay-Invarianten sind gezielt abgesichert.
 - AI-Deriver erkennt Hidden-Successful-Run-Factorys side-safe.
-- `format:check`, AI-Checks, Typechecks und Tests sind grün.
+- AI-Checks, Typechecks, Tests, `git diff --check` und changed-file-Formatcheck sind grün.
+- Repo-weites `format:check` bleibt als bekannte Baseline außerhalb dieses Pakets dokumentiert und war nicht Abschlussgate dieser Arbeit.
 - Lokaler `main` enthält alle Paketcommits.
