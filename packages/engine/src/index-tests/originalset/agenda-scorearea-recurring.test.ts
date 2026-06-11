@@ -1674,7 +1674,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         agendaPointsToWin: 7,
       }),
     );
-    state.runner.credits = 1;
+    state.runner.credits = 2;
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 10;
@@ -1693,6 +1693,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_124_corolla-speed-chip",
     );
+    expect(state.runner.credits).toBe(1);
     expect(cardCounterAmount(state, corollaId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hostedCreditsAdded: 1,

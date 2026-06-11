@@ -18,6 +18,7 @@ import {
   removeEverywhere,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
+import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
 import type { CardInstanceId } from "@netgrid/shared";
 
 describe("PlayerView projection", () => {
@@ -183,6 +184,7 @@ describe("PlayerView projection", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
 
     expect(state.run?.breach?.queue.map((entry) => entry.cardInstanceId)).toEqual([
       firstUpgradeId,
