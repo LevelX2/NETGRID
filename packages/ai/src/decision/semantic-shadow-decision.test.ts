@@ -79,6 +79,41 @@ describe("SemanticShadowDecision", () => {
     );
   });
 
+  it("uses frame economy context to reject unaffordable setup actions", () => {
+    const input = inputFor("runner", [
+      legalAction("install-expensive", "install_card", "runner", 6),
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
+    input.playerView.own.credits = 2;
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      tacticalGoals: [
+        {
+          goalId: "runner.find_or_install_primary_breaker",
+          family: "coverage",
+          priority: 940,
+          urgency: "high",
+          source: "boardstate",
+          evidence: ["missing_coverage:true"],
+        },
+      ],
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rejectedActions).toContainEqual(
+      expect.objectContaining({
+        actionId: "install-expensive",
+        blockers: expect.arrayContaining(["cannot_pay"]),
+      }),
+    );
+  });
+
   it("is deterministic for equivalent frames", () => {
     const frame = frameForEconomyChoice();
 
@@ -178,6 +213,7 @@ function legalAction(
   actionId: string,
   type: LegalAction["type"],
   side: "runner" | "corp",
+  credits = 0,
 ): LegalAction {
   return {
     actionId,
@@ -186,7 +222,7 @@ function legalAction(
     label: type,
     source: "basic_action",
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
-    costs: [],
+    costs: credits > 0 ? [{ credits }] : [],
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 5,
