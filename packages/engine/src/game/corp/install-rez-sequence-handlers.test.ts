@@ -158,6 +158,10 @@ function makeHost(
       kind: "score_rez_installed_ice_at_no_cost",
       visibility: "hidden_info_barrier",
     },
+    security_purge_agenda: {
+      kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
+      visibility: "hidden_info_barrier",
+    },
     ...input.scoredAgendas,
   };
   const state = {
@@ -248,12 +252,12 @@ function makeHost(
     },
     servers: {
       createRemote: () => {
+        const nextRemoteNumber =
+          state.corp.servers.filter((server) => server.kind === "remote")
+            .length + 1;
         const server = {
-          id: `remote_${state.corp.servers.length + 1}` as Exclude<
-            ServerId,
-            "new_remote"
-          >,
-          label: `Remote ${state.corp.servers.length + 1}`,
+          id: `remote_${nextRemoteNumber}` as Exclude<ServerId, "new_remote">,
+          label: `Remote ${nextRemoteNumber}`,
           kind: "remote",
           ice: [],
           root: [],
@@ -553,29 +557,157 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
-  it("resolves Security Purge top 3 into free installed rezzed ICE and archives rest", () => {
+  it("opens Security Purge target choices for each revealed ICE", () => {
+    const servers = [
+      { id: "hq", label: "HQ", kind: "hq", ice: [], root: [] },
+      { id: "rd", label: "R&D", kind: "rd", ice: [], root: [] },
+      {
+        id: "archives",
+        label: "Archives",
+        kind: "archives",
+        ice: [],
+        root: [],
+      },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        kind: "remote",
+        ice: [],
+        root: [],
+      },
+    ] as CorpServer[];
     const host = makeHost({
       rd: ["ice_1", "operation_1", "ice_2", "asset_1"] as CardInstanceId[],
       scoreArea: ["security_purge_agenda"] as CardInstanceId[],
+      servers,
     });
 
-    const result = resolveSecurityPurgeAgendaPurge(host);
+    const result = resolveSecurityPurgeAgendaPurge(
+      host,
+      "security_purge_agenda" as CardInstanceId,
+    );
 
-    expect(result.installedCardIds).toEqual(["ice_1", "ice_2"]);
-    expect(result.trashedCardIds).toEqual(["operation_1"]);
-    expect(host.state.corp.rd).toEqual(["asset_1"]);
-    expect(host.state.corp.archives).toEqual(["operation_1"]);
-    expect(host.state.corp.servers.map((server) => server.ice)).toEqual([
-      ["ice_1"],
-      ["ice_2"],
+    expect(result.installedCardIds).toBeUndefined();
+    expect(host.state.corp.rd).toEqual([
+      "ice_1",
+      "operation_1",
+      "ice_2",
+      "asset_1",
+    ]);
+    expect(host.state.corp.archives).toEqual([]);
+    expect(host.state.pendingChoice).toMatchObject({
+      side: "corp",
+      source:
+        "v1922.security_purge_install_targets:security_purge_agenda:ice_1,operation_1,ice_2:8",
+      kind: "select_option",
+      minSelections: 2,
+      maxSelections: 2,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual([
+      "ice_1|hq",
+      "ice_1|rd",
+      "ice_1|archives",
+      "ice_1|remote_1",
+      "ice_1|new_remote",
+      "ice_2|hq",
+      "ice_2|rd",
+      "ice_2|archives",
+      "ice_2|remote_1",
+      "ice_2|new_remote",
     ]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "v1922_security_purge_rd_top3",
+      hiddenZoneAction: "v1922_security_purge_rd_top3_target_choice",
       revealedCount: 3,
+      revealedIceCount: 2,
+      pendingTrashCount: 1,
+      installedIceCount: 0,
+      trashedCount: 0,
+      securityPurgeInstallContract: "corp_server_choice_per_ice",
+      securityPurgeTargetChoiceOpened: true,
+      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
+    });
+  });
+
+  it("resolves Security Purge target choices into chosen servers and archives rest", () => {
+    const servers = [
+      { id: "hq", label: "HQ", kind: "hq", ice: [], root: [] },
+      { id: "rd", label: "R&D", kind: "rd", ice: [], root: [] },
+      {
+        id: "archives",
+        label: "Archives",
+        kind: "archives",
+        ice: [],
+        root: [],
+      },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        kind: "remote",
+        ice: [],
+        root: [],
+      },
+    ] as CorpServer[];
+    const host = makeHost({
+      rd: ["ice_1", "operation_1", "ice_2", "asset_1"] as CardInstanceId[],
+      scoreArea: ["security_purge_agenda"] as CardInstanceId[],
+      servers,
+    });
+    resolveSecurityPurgeAgendaPurge(
+      host,
+      "security_purge_agenda" as CardInstanceId,
+    );
+    const rdOption = host.state.pendingChoice?.options.find(
+      (option) => option.value === "ice_1|rd",
+    )?.id;
+    const newRemoteOption = host.state.pendingChoice?.options.find(
+      (option) => option.value === "ice_2|new_remote",
+    )?.id;
+    expect(rdOption).toBeDefined();
+    expect(newRemoteOption).toBeDefined();
+    host.playerAction = playerAction([rdOption!, newRemoteOption!]);
+    host.legalAction.payload = {};
+
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.installedCardIds).toEqual(["ice_1", "ice_2"]);
+    expect(result.rezzedCardIds).toEqual(["ice_1", "ice_2"]);
+    expect(result.trashedCardIds).toEqual(["operation_1"]);
+    expect(result.deletePendingChoice).toBe(true);
+    expect(host.state.pendingChoice).toBeUndefined();
+    expect(host.state.corp.rd).toEqual(["asset_1"]);
+    expect(host.state.corp.archives).toEqual(["operation_1"]);
+    expect(
+      host.state.corp.servers.find((server) => server.id === "rd")?.ice,
+    ).toEqual(["ice_1"]);
+    expect(
+      host.state.corp.servers.find((server) => server.id === "remote_2")?.ice,
+    ).toEqual(["ice_2"]);
+    expect(host.state.cardInstances.ice_1?.rezzed).toBe(true);
+    expect(host.state.cardInstances.ice_1?.zone).toEqual({
+      side: "corp",
+      zone: "serverIce",
+      serverId: "rd",
+    });
+    expect(host.state.cardInstances.ice_2?.rezzed).toBe(true);
+    expect(host.state.cardInstances.ice_2?.zone).toEqual({
+      side: "corp",
+      zone: "serverIce",
+      serverId: "remote_2",
+    });
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "v1922_security_purge_install_targets",
+      revealedCount: 3,
+      revealedIceCount: 2,
       installedIceCount: 2,
       trashedCount: 1,
+      securityPurgeInstallContract: "corp_server_choice_per_ice",
+      securityPurgeTargetChoiceResolved: true,
       publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
       installedIceDefinitionIds: "ice_1_def,ice_2_def",
+      installedIceServerLabels: "R&D,Remote 2",
       trashedDefinitionIds: "operation_1_def",
     });
   });

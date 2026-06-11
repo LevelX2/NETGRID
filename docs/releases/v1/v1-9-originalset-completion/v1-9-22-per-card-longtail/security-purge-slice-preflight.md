@@ -26,6 +26,12 @@ Der naechste sichere Code-Schnitt ist ein On-score-Resolver fuer `score_agenda`,
 
 Der Runtime-WIP nutzt bewusst den engen lokalen Serverzielvertrag: revealed ICE werden in Reveal-Reihenfolge jeweils in ein neues Remote installiert und sofort rezzed; Nicht-ICE wird faceup nach Archives getrasht. Das ist runtime-seitig dokumentiert und keine Catalog-, AI- oder Release-Promotion. Eine explizite Korp-Choice fuer Serverziele bleibt Folgearbeit, falls dieser lokale WIP-Vertrag spaeter ersetzt werden soll.
 
+## Nachklaerung 2026-06-11
+
+Ein Playtest-Fund ersetzt die fachliche Annahme fuer die spaetere Promotion: Der neue-Remote-je-ICE-Vertrag darf nicht fuehrend bleiben. Security Purge erzwingt weiterhin, revealed ICE zu installieren und zu rezzen, soweit das moeglich ist; die normale Installationsentscheidung fuer ICE bleibt aber eine Korp-seitige Serverzielwahl. Die Comprehensive-Rules-Referenz bestaetigt fuer Korp-Installationen: Beim Installieren einer Agenda, eines Assets, Upgrades oder ICE waehlt die Korp einen Zielserver; ein neues Remote entsteht nur, wenn die Korp es als Zielserver fuer die Installation ansagt; ICE wird, falls nicht anders angegeben, in die aeusserste Position vor dem gewaehlten Server installiert.
+
+Der naechste Security-Purge-Schnitt soll daher fuer jedes revealed ICE eine Korp-Choice anbieten: vorhandene Zentralserver, vorhandene Remotes, sofern legal, sowie ein neues Remote. Die Choice muss LegalAction-/applyAction-revalidiert, side-sicher und replay-stabil sein. Die Chronik muss ausserdem die revealed Karten, die installierten und gerezzten ICE inklusive Zielserver sowie die getrashten Restkarten beziehungsweise deren Count/Titel oeffentlich nachvollziehbar ausgeben.
+
 ## Removal Condition
 
 Security Purge bleibt bis zur Finalisierung in WIP. Removal Condition fuer Promotion:
