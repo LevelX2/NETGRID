@@ -61,7 +61,7 @@ const DATA_FORT_RECLAMATION_STEPS = {
 export function isHqToNewRemoteInstallRezChoiceSource(source: string): boolean {
   return (
     source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:`) ||
-    source.startsWith("v1922.data_fort_reclamation")
+    source.startsWith("v1922.data_fort_reclamation:")
   );
 }
 
