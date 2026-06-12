@@ -316,9 +316,17 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts src/evaluation/real-engine-decision-corpus.test.ts`
-- `corepack pnpm check:ai`
-- `git diff --check`
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts src/evaluation/real-engine-decision-corpus.test.ts`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+Ergebnis:
+
+- Der Real-Engine-Decision-Corpus wurde von 12 auf 18 Entscheidungspunkte erweitert.
+- Jedes Sample kann nun eine DeckDoctrine-v2-Diagnose als reinen Diagnosekontext tragen; die Trace-/Ranking-Logik konsumiert daraus keine produktiven Gewichte.
+- Die Tests erzwingen LegalAction-Bindung, Candidate-Count-Gleichlauf, Side-Safety, `trace.noRuntimeEffect=true` und kein produktives `selectedActionId`.
+- Neue Real-Engine-Situationen decken Runner-Click-/Remote-/R&D-Druck sowie Corp-Remote-Defense-, Install-Credit-Pressure- und High-Credit-Main-Window ab.
 
 Done-Gate: Trace bleibt no-effect und real-engine-backed lesbar.
 
