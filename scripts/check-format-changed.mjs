@@ -152,6 +152,8 @@ function warnIfTrivialBaseRef(ref) {
 }
 
 function isPrettierSupportedFile(file) {
+  if (file.startsWith("packages/engine/src/game/engine-runtime-internal/"))
+    return false;
   const absolute = path.join(repoRoot, file);
   if (!fs.existsSync(absolute)) return false;
   if (!fs.statSync(absolute).isFile()) return false;

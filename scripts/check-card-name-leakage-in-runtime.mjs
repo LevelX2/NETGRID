@@ -218,8 +218,7 @@ const abstractionPlan = [
       advanceOnSuccessfulRun: true,
       failOnUnsuccessfulRun: true,
     },
-    notes:
-      "Größerer Sequenz-State; nicht in denselben Slice ziehen.",
+    notes: "Größerer Sequenz-State; nicht in denselben Slice ziehen.",
   },
   {
     priority: "deferred_refactor_required",
@@ -248,8 +247,7 @@ const abstractionPlan = [
       interruptedEvent: "corp_purge_virus_counters",
       runnerVirusCounterCleanup: true,
     },
-    notes:
-      "Purge-Replacement bleibt als eigene Event-/Replacement-Familie.",
+    notes: "Purge-Replacement bleibt als eigene Event-/Replacement-Familie.",
   },
   {
     priority: "deferred_refactor_required",
@@ -298,7 +296,10 @@ const abstractionPlan = [
   {
     priority: "deferred_refactor_required",
     cardTitle: "Corporate War / Project Babylon",
-    currentNames: ["corporate_war_credit_swing", "project_babylon_bonus_points"],
+    currentNames: [
+      "corporate_war_credit_swing",
+      "project_babylon_bonus_points",
+    ],
     targetKind:
       "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
     targetState: ["scoredAgendaAbilities[]"],
@@ -364,13 +365,21 @@ function classify({ path, token, snippet }) {
     return "allowed_catalog_reference";
   }
   if (snippet.includes("kind:")) return "functional_kind_uses_card_name";
-  if (snippet.includes("runnerUtilityAbility") || snippet.includes("corpAbility"))
+  if (
+    snippet.includes("runnerUtilityAbility") ||
+    snippet.includes("corpAbility")
+  )
     return "payload_key_uses_card_name";
-  if (snippet.match(/\bfunction\s+resolve[A-Z]/) || snippet.match(/\bconst\s+resolve[A-Z]/))
+  if (
+    snippet.match(/\bfunction\s+resolve[A-Z]/) ||
+    snippet.match(/\bconst\s+resolve[A-Z]/)
+  )
     return "resolver_function_uses_card_name";
   if (
     functionalFiles.has(path) &&
-    (snippet.includes("?:") || snippet.includes(": {") || snippet.includes("= {"))
+    (snippet.includes("?:") ||
+      snippet.includes(": {") ||
+      snippet.includes("= {"))
   )
     return "runtime_state_field_uses_card_name";
   if (token === token.toUpperCase() && snippet.includes(token))
@@ -494,7 +503,10 @@ const report = {
 
 if (writeReport) {
   mkdirSync(`${repoRoot}/docs/reviews/engine`, { recursive: true });
-  writeFileSync(`${repoRoot}/${reportJsonPath}`, `${JSON.stringify(report, null, 2)}\n`);
+  writeFileSync(
+    `${repoRoot}/${reportJsonPath}`,
+    `${JSON.stringify(report, null, 2)}\n`,
+  );
   writeFileSync(`${repoRoot}/${reportMdPath}`, renderMarkdown(report));
   console.log(
     `Wrote ${report.findings.length} findings to ${reportJsonPath} and ${reportMdPath}.`,
@@ -503,11 +515,15 @@ if (writeReport) {
 }
 
 if (!existsSync(`${repoRoot}/${reportJsonPath}`)) {
-  console.error(`Missing baseline report ${reportJsonPath}. Run with --write-report.`);
+  console.error(
+    `Missing baseline report ${reportJsonPath}. Run with --write-report.`,
+  );
   process.exit(1);
 }
 
-const expected = JSON.parse(readFileSync(`${repoRoot}/${reportJsonPath}`, "utf8"));
+const expected = JSON.parse(
+  readFileSync(`${repoRoot}/${reportJsonPath}`, "utf8"),
+);
 const normalize = (value) =>
   JSON.stringify({ ...value, generatedAt: "baseline" }, null, 2);
 if (normalize(report) !== normalize(expected)) {

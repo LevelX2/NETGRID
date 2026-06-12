@@ -8,15 +8,15 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 
 ## Zählung
 
-| Kategorie | Anzahl |
-| --- | ---: |
-| functional_kind_uses_card_name | 35 |
-| false_positive | 33 |
-| test_only_card_name | 103 |
-| allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 263 |
-| mechanics_constant_controls_behavior_by_card_id | 49 |
-| payload_key_uses_card_name | 2 |
+| Kategorie                                       | Anzahl |
+| ----------------------------------------------- | -----: |
+| functional_kind_uses_card_name                  |     35 |
+| false_positive                                  |     33 |
+| test_only_card_name                             |    103 |
+| allowed_catalog_reference                       |     43 |
+| runtime_state_field_uses_card_name              |    263 |
+| mechanics_constant_controls_behavior_by_card_id |     49 |
+| payload_key_uses_card_name                      |      2 |
 
 ## Problemstellen
 
@@ -316,7 +316,7 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:61` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:107` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:206` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:207` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:206` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:240` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:240` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:279` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
@@ -331,58 +331,58 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:299` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:300` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:308` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:579` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1083` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1112` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1113` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1114` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1179` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1179` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1197` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1198` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1205` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1206` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1252` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1253` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1255` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1261` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1275` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1296` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:593` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1105` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1134` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1135` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1136` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1201` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1202` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1219` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1220` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1227` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1228` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1274` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1275` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1277` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1283` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1297` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1298` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1304` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1308` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1317` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1318` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1319` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1325` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1329` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:1` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:9` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:120` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1133` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1144` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1191` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1198` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1356` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1402` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1433` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1443` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1457` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1143` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1154` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1198` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1205` Siren / `siren` -> `start_run_redirect_to_source_fort`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1363` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1409` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1440` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1450` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1464` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
 ## Abstraktionsplan
 
-| Priorität | Fundklasse | Zielbaustein | State-Ziel |
-| --- | --- | --- | --- |
-| slice_now | Preying Mantis | `optional_extra_action_with_delayed_damage` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
-| deferred_refactor_required | Quest for Cattekin | `start_turn_random_effect_table` | `runnerTurnFlags.persistentModifiers[]` |
-| deferred_refactor_required | Pirate Broadcast | `multi_server_success_sequence` | `runnerTurnFlags.pendingSequences[]` |
-| deferred_refactor_required | Bizarre Encryption Scheme | `delayed_agenda_access_replacement` | `runDurationEffects[]`, `delayedAccessEffects[]` |
-| deferred_refactor_required | Code Viral Cache | `purge_replacement_with_runner_virus_counter_cleanup` | `replacementEffects[]` |
-| deferred_refactor_required | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
-| deferred_refactor_required | Krumz | `recurring_trace_credit_pool` | `recurringCreditPools[]` |
-| deferred_refactor_required | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
-| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
+| Priorität                  | Fundklasse                      | Zielbaustein                                                                        | State-Ziel                                                                                            |
+| -------------------------- | ------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| slice_now                  | Preying Mantis                  | `optional_extra_action_with_delayed_damage`                                         | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
+| deferred_refactor_required | Quest for Cattekin              | `start_turn_random_effect_table`                                                    | `runnerTurnFlags.persistentModifiers[]`                                                               |
+| deferred_refactor_required | Pirate Broadcast                | `multi_server_success_sequence`                                                     | `runnerTurnFlags.pendingSequences[]`                                                                  |
+| deferred_refactor_required | Bizarre Encryption Scheme       | `delayed_agenda_access_replacement`                                                 | `runDurationEffects[]`, `delayedAccessEffects[]`                                                      |
+| deferred_refactor_required | Code Viral Cache                | `purge_replacement_with_runner_virus_counter_cleanup`                               | `replacementEffects[]`                                                                                |
+| deferred_refactor_required | Startup Immolator               | `trash_fully_broken_passed_ice`                                                     | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`                                            |
+| deferred_refactor_required | Krumz                           | `recurring_trace_credit_pool`                                                       | `recurringCreditPools[]`                                                                              |
+| deferred_refactor_required | Siren                           | `start_run_redirect_to_source_fort`                                                 | `runStartInterventions[]`                                                                             |
+| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]`                                                                             |
 
 ## Nächste Umsetzung
 

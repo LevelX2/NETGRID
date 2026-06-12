@@ -63,9 +63,7 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": [
-        "runnerTurnFlags.persistentModifiers[]"
-      ],
+      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -80,14 +78,9 @@
     {
       "priority": "deferred_refactor_required",
       "cardTitle": "Pirate Broadcast",
-      "currentNames": [
-        "pirateBroadcastPending",
-        "pirateBroadcastRun"
-      ],
+      "currentNames": ["pirateBroadcastPending", "pirateBroadcastRun"],
       "targetKind": "multi_server_success_sequence",
-      "targetState": [
-        "runnerTurnFlags.pendingSequences[]"
-      ],
+      "targetState": ["runnerTurnFlags.pendingSequences[]"],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -104,10 +97,7 @@
         "bizarreEncryptionDelayedAgendas"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": [
-        "runDurationEffects[]",
-        "delayedAccessEffects[]"
-      ],
+      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -122,9 +112,7 @@
         "CODE_VIRAL_CACHE_ID"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": [
-        "replacementEffects[]"
-      ],
+      "targetState": ["replacementEffects[]"],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -152,14 +140,9 @@
     {
       "priority": "deferred_refactor_required",
       "cardTitle": "Krumz",
-      "currentNames": [
-        "krumz_trace_bit",
-        "spendKrumzTraceBits"
-      ],
+      "currentNames": ["krumz_trace_bit", "spendKrumzTraceBits"],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": [
-        "recurringCreditPools[]"
-      ],
+      "targetState": ["recurringCreditPools[]"],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -170,13 +153,9 @@
     {
       "priority": "deferred_refactor_required",
       "cardTitle": "Siren",
-      "currentNames": [
-        "siren_start_run_redirect"
-      ],
+      "currentNames": ["siren_start_run_redirect"],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": [
-        "runStartInterventions[]"
-      ],
+      "targetState": ["runStartInterventions[]"],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -191,9 +170,7 @@
         "project_babylon_bonus_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": [
-        "scoredAgendaAbilities[]"
-      ],
+      "targetState": ["scoredAgendaAbilities[]"],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -1084,7 +1061,7 @@
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 41,
+      "line": 43,
       "column": 23,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
@@ -1094,17 +1071,17 @@
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 45,
-      "column": 57,
+      "line": 49,
+      "column": 8,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
       "category": "test_only_card_name",
       "targetAbstraction": "optional_extra_action_with_delayed_damage",
-      "snippet": "state.cardInstances[sourceId] = instance(sourceId, \"preying_mantis\", \"runner\");"
+      "snippet": "\"preying_mantis\","
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 55,
+      "line": 61,
       "column": 13,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
@@ -1114,7 +1091,7 @@
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 55,
+      "line": 61,
       "column": 41,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
@@ -1124,7 +1101,7 @@
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 81,
+      "line": 87,
       "column": 30,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
@@ -1134,7 +1111,7 @@
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
-      "line": 90,
+      "line": 96,
       "column": 28,
       "token": "preying_mantis",
       "cardTitle": "Preying Mantis",
@@ -4590,17 +4567,17 @@
       "cardTitle": "Newsgroup Taunting",
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "run_start_tax",
-      "snippet": "const newsgroupTauntingRunStartTax ="
+      "snippet": "const newsgroupTauntingRunStartTax = host.run.newsgroupTauntingRunStartTax;"
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 207,
-      "column": 14,
+      "line": 206,
+      "column": 49,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "run_start_tax",
-      "snippet": "host.run.newsgroupTauntingRunStartTax;"
+      "snippet": "const newsgroupTauntingRunStartTax = host.run.newsgroupTauntingRunStartTax;"
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
@@ -4744,7 +4721,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 579,
+      "line": 593,
       "column": 27,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -4754,7 +4731,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1083,
+      "line": 1105,
       "column": 29,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4764,7 +4741,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1112,
+      "line": 1134,
       "column": 33,
       "token": "newsgroup_taunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4774,7 +4751,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1113,
+      "line": 1135,
       "column": 13,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4784,7 +4761,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1114,
+      "line": 1136,
       "column": 13,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4794,38 +4771,38 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1179,
+      "line": 1201,
       "column": 9,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "(!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&"
+      "snippet": "(!pirateBroadcastNextServerId ||"
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1179,
-      "column": 40,
+      "line": 1202,
+      "column": 9,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "(!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&"
+      "snippet": "pirateBroadcastNextServerId === server.id) &&"
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1197,
-      "column": 15,
+      "line": 1219,
+      "column": 29,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "pirateBroadcastNextServerId"
+      "snippet": "bonusRunSource: pirateBroadcastNextServerId"
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1198,
-      "column": 19,
+      "line": 1220,
+      "column": 17,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
       "category": "runtime_state_field_uses_card_name",
@@ -4834,7 +4811,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1205,
+      "line": 1227,
       "column": 17,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4844,7 +4821,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1206,
+      "line": 1228,
       "column": 19,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4854,7 +4831,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1252,
+      "line": 1274,
       "column": 5,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4864,7 +4841,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1253,
+      "line": 1275,
       "column": 50,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4874,7 +4851,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1255,
+      "line": 1277,
       "column": 5,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4884,7 +4861,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1261,
+      "line": 1283,
       "column": 43,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4894,7 +4871,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1275,
+      "line": 1297,
       "column": 36,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4904,7 +4881,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1296,
+      "line": 1317,
       "column": 31,
       "token": "newsgroup_taunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4914,7 +4891,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1297,
+      "line": 1318,
       "column": 11,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4924,7 +4901,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1298,
+      "line": 1319,
       "column": 11,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -4934,7 +4911,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1304,
+      "line": 1325,
       "column": 27,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -4944,7 +4921,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.ts",
-      "line": 1308,
+      "line": 1329,
       "column": 5,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -5104,7 +5081,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1133,
+      "line": 1143,
       "column": 3,
       "token": "startupImmolator",
       "cardTitle": "Startup Immolator",
@@ -5114,7 +5091,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1144,
+      "line": 1154,
       "column": 3,
       "token": "bizarreEncryption",
       "cardTitle": "Bizarre Encryption Scheme",
@@ -5124,7 +5101,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1191,
+      "line": 1198,
       "column": 3,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -5134,7 +5111,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1198,
+      "line": 1205,
       "column": 3,
       "token": "siren",
       "cardTitle": "Siren",
@@ -5144,7 +5121,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1356,
+      "line": 1363,
       "column": 3,
       "token": "bizarreEncryption",
       "cardTitle": "Bizarre Encryption Scheme",
@@ -5154,7 +5131,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1402,
+      "line": 1409,
       "column": 5,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
@@ -5164,7 +5141,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1433,
+      "line": 1440,
       "column": 5,
       "token": "startupImmolator",
       "cardTitle": "Startup Immolator",
@@ -5174,7 +5151,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1443,
+      "line": 1450,
       "column": 5,
       "token": "questForCattekin",
       "cardTitle": "Quest for Cattekin",
@@ -5184,7 +5161,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 1457,
+      "line": 1464,
       "column": 5,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -5194,7 +5171,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 4582,
+      "line": 4718,
       "column": 21,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -5204,7 +5181,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 4674,
+      "line": 4810,
       "column": 21,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -5214,7 +5191,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 4675,
+      "line": 4811,
       "column": 13,
       "token": "Krumz",
       "cardTitle": "Krumz",
@@ -5224,7 +5201,7 @@
     },
     {
       "path": "packages/shared/src/index.ts",
-      "line": 4683,
+      "line": 4819,
       "column": 34,
       "token": "Krumz",
       "cardTitle": "Krumz",

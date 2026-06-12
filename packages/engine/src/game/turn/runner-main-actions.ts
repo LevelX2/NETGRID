@@ -203,8 +203,7 @@ export function buildRunnerMainActions(
   const fortRunSideFamiliesHostForState =
     host.run.fortRunSideFamiliesHostForState;
   const runStartTaxForServerUpgrades = host.run.runStartTaxForServerUpgrades;
-  const newsgroupTauntingRunStartTax =
-    host.run.newsgroupTauntingRunStartTax;
+  const newsgroupTauntingRunStartTax = host.run.newsgroupTauntingRunStartTax;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
   const canOverlayProgramOnZetatechSoftwareInstaller =
@@ -214,7 +213,8 @@ export function buildRunnerMainActions(
     host.install.cardImplementationAgendaPointInstallCost;
   const pickRunnerAgendaForAgendaPointCost =
     host.install.pickRunnerAgendaForAgendaPointCost;
-  const requiresDataFortInstallTarget = host.install.requiresDataFortInstallTarget;
+  const requiresDataFortInstallTarget =
+    host.install.requiresDataFortInstallTarget;
   const cardImplementationRuntimeDeps = host.cardImplementation.runtimeDeps;
   const pushCardImplementationEndOfRunnerTurnActions =
     host.cardImplementation.pushEndOfRunnerTurnActions;
@@ -306,7 +306,11 @@ export function buildRunnerMainActions(
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
     pirateBroadcastNextServerId !== undefined;
-  if (!hasClicks && !bonusRunPending && unusedRunOnlyActionSourceIds.length === 0) {
+  if (
+    !hasClicks &&
+    !bonusRunPending &&
+    unusedRunOnlyActionSourceIds.length === 0
+  ) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
       state,
@@ -342,7 +346,10 @@ export function buildRunnerMainActions(
     if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(buildRunnerRemoveTagAction(state));
     }
-    if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 2) {
+    if (
+      cardCounter(state, state.runner.identity, "crying") > 0 &&
+      state.runner.credits >= 2
+    ) {
       actions.push(
         action(
           state,
@@ -362,9 +369,12 @@ export function buildRunnerMainActions(
         ),
       );
     }
-  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+    for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
       if (counterEffect.counterType === "crying") continue;
-      if (cardCounter(state, state.runner.identity, counterEffect.counterType) <= 0)
+      if (
+        cardCounter(state, state.runner.identity, counterEffect.counterType) <=
+        0
+      )
         continue;
       if (state.runner.credits < counterEffect.removeCost) continue;
       actions.push(
@@ -389,8 +399,9 @@ export function buildRunnerMainActions(
   }
   for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
     const sourceDefinition = definitionFor(state, sourceCardId);
-    const subtypeChange =
-      cardImplementationForDefinitionId(sourceDefinition.id)?.icebreakerSubtypeChange;
+    const subtypeChange = cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    )?.icebreakerSubtypeChange;
     if (!subtypeChange || subtypeChange.timing !== "runner_main") continue;
     const clickCost = subtypeChange.cost.clicks;
     if (clickCost > 0 && !hasClicks) continue;
@@ -441,8 +452,9 @@ export function buildRunnerMainActions(
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
     ) {
-      const installBinding =
-        cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
+      const installBinding = cardImplementationForDefinitionId(
+        definition.id,
+      )?.installTargetBinding;
       if (installBinding?.kind === "choose_installed_ice_on_install") {
         for (const targetIceId of installedCorpIceTargetIds(state)) {
           actions.push(
@@ -468,7 +480,9 @@ export function buildRunnerMainActions(
             ),
           );
         }
-      } else if (installBinding?.kind === "choose_icebreaker_subtype_on_install") {
+      } else if (
+        installBinding?.kind === "choose_icebreaker_subtype_on_install"
+      ) {
         for (const subtype of installBinding.choices ?? [
           "code_gate",
           "sentry",
@@ -513,33 +527,33 @@ export function buildRunnerMainActions(
         ...state.runner.rig.programs,
         ...state.runner.rig.hardware,
       ]) {
-        if (canOverlayProgramOnZetatechSoftwareInstaller(state, hostId, definition)) {
+        if (
+          canOverlayProgramOnZetatechSoftwareInstaller(
+            state,
+            hostId,
+            definition,
+          )
+        ) {
           const hostDefinition = definitionFor(state, hostId);
           actions.push(
-            buildRunnerZetatechOverlayInstallAction(
-              state,
-              {
-                cardId: id,
-                definition,
-                hostCardId: hostId,
-                hostTitle: hostDefinition.title,
-              },
-            ),
+            buildRunnerZetatechOverlayInstallAction(state, {
+              cardId: id,
+              definition,
+              hostCardId: hostId,
+              hostTitle: hostDefinition.title,
+            }),
           );
           continue;
         }
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
         actions.push(
-          buildRunnerHostedProgramInstallAction(
-            state,
-            {
-              cardId: id,
-              definition,
-              hostCardId: hostId,
-              hostTitle: hostDefinition.title,
-            },
-          ),
+          buildRunnerHostedProgramInstallAction(state, {
+            cardId: id,
+            definition,
+            hostCardId: hostId,
+            hostTitle: hostDefinition.title,
+          }),
         );
       }
     }
@@ -623,9 +637,12 @@ export function buildRunnerMainActions(
         state,
         definition,
       );
-      const targetedEvent =
-        cardImplementationForDefinitionId(definition.id)?.runnerEventTargetedEffect;
-      if (targetedEvent?.kind === "add_strength_counter_to_installed_icebreaker") {
+      const targetedEvent = cardImplementationForDefinitionId(
+        definition.id,
+      )?.runnerEventTargetedEffect;
+      if (
+        targetedEvent?.kind === "add_strength_counter_to_installed_icebreaker"
+      ) {
         for (const targetCardId of installedRunnerIcebreakerIds(state)) {
           const targetDefinition = definitionFor(state, targetCardId);
           actions.push(
@@ -646,7 +663,11 @@ export function buildRunnerMainActions(
         cardImplementationRunnerEventResolver(definition) ??
         RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver && !canPlayCardImplementation) continue;
-      if (!canPlayCardImplementation && resolver?.canPlay && !resolver.canPlay(state))
+      if (
+        !canPlayCardImplementation &&
+        resolver?.canPlay &&
+        !resolver.canPlay(state)
+      )
         continue;
       if (!canPlayCardImplementation && resolver?.requiresServer) {
         for (const server of state.corp.servers) {
@@ -668,7 +689,8 @@ export function buildRunnerMainActions(
           );
         }
       } else {
-        const makeRunEffect = printedCostCardImplementationMakeRunEffect(definition);
+        const makeRunEffect =
+          printedCostCardImplementationMakeRunEffect(definition);
         if (makeRunEffect?.target.kind === "central_server") {
           const server = mustServer(state, makeRunEffect.target.server);
           actions.push(
@@ -700,8 +722,8 @@ export function buildRunnerMainActions(
           }
           continue;
         }
-      actions.push(
-        action(
+        actions.push(
+          action(
             state,
             "runner",
             "play_event",
@@ -736,27 +758,24 @@ export function buildRunnerMainActions(
             ))
       ) {
         actions.push(
-          buildRunnerStackSearchProgramToGripAction(
-            state,
-            {
-              cardId,
-              definition,
-              mode:
-                definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
-                  ? "top5_programs"
-                  : "stack_program",
-              creditCost:
-                definition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID ? 1 : 0,
-            },
-          ),
+          buildRunnerStackSearchProgramToGripAction(state, {
+            cardId,
+            definition,
+            mode:
+              definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+                ? "top5_programs"
+                : "stack_program",
+            creditCost:
+              definition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID ? 1 : 0,
+          }),
         );
       }
-    if (
-      SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      state.corp.servers.some(
-        (server) => exposedCorpCardInServer(state, server.id) !== undefined,
-      )
+      if (
+        SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
+        !cardImplementationForDefinitionId(definition.id) &&
+        state.corp.servers.some(
+          (server) => exposedCorpCardInServer(state, server.id) !== undefined,
+        )
       ) {
         for (const server of state.corp.servers) {
           if (exposedCorpCardInServer(state, server.id) === undefined) continue;
@@ -914,7 +933,8 @@ export function buildRunnerMainActions(
               [],
               {
                 cardId,
-                runnerUtilityAbility: "optional_extra_action_with_delayed_damage",
+                runnerUtilityAbility:
+                  "optional_extra_action_with_delayed_damage",
                 gainedActions: 1,
                 delayedDamageAmount: 1,
                 delayedDamageType: "core",
@@ -946,8 +966,10 @@ export function buildRunnerMainActions(
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
-      const uniqueDirectLongtail =
-        uniqueDirectLongtailImplementationForCard(state, resourceId);
+      const uniqueDirectLongtail = uniqueDirectLongtailImplementationForCard(
+        state,
+        resourceId,
+      );
       if (uniqueDirectLongtail?.kind === "databroker_agenda_point_credits") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -1176,11 +1198,12 @@ export function buildRunnerMainActions(
     }
     if (
       bonusRunPending &&
-      (!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&
+      (!pirateBroadcastNextServerId ||
+        pirateBroadcastNextServerId === server.id) &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
-        runStartTaxCredits)
+          runStartTaxCredits)
     ) {
       actions.push(
         action(
@@ -1193,10 +1216,9 @@ export function buildRunnerMainActions(
           {
             ...runPayload,
             bonusRunNoClick: true,
-            bonusRunSource:
-              pirateBroadcastNextServerId
-                ? pirateBroadcastPending?.sourceDefinitionId
-                : flags.bodyweightDataCrecheExtraRunPending === true
+            bonusRunSource: pirateBroadcastNextServerId
+              ? pirateBroadcastPending?.sourceDefinitionId
+              : flags.bodyweightDataCrecheExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
             restrictedActionGrantActionType: "start_run",
@@ -1273,8 +1295,7 @@ function buildPirateBroadcastForcedRunActions(
     server.id,
   );
   const newsgroupRunTax = host.run.newsgroupTauntingRunStartTax(state);
-  const runStartTaxCredits =
-    upgradeRunStartTax.amount + newsgroupRunTax.amount;
+  const runStartTaxCredits = upgradeRunStartTax.amount + newsgroupRunTax.amount;
   if (
     runStartTaxCredits > 0 &&
     host.runner.availableRunnerRunStartCredits(input.runDurationPaymentHost) <
@@ -1330,7 +1351,9 @@ function installedRunnerIcebreakerIds(state: GameState): string[] {
   return state.runner.rig.programs
     .filter((cardId) => {
       const definitionId = state.cardInstances[cardId]?.definitionId;
-      const definition = definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined;
+      const definition = definitionId
+        ? DEMO_CARDS_BY_ID[definitionId]
+        : undefined;
       return definition?.subtypes.includes("icebreaker") === true;
     })
     .sort();

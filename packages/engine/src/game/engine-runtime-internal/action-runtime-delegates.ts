@@ -1,4 +1,4 @@
-import { runtimeDelegates } from "./runtime-delegate-store";
+﻿import { runtimeDelegates } from "./runtime-delegate-store";
 
 export function corpRunnerActionPaidWindowActions(...args: any[]): any {
   return (

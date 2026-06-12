@@ -48,9 +48,7 @@ export type CounterUtilityTriggerExecutionHost = {
       state: GameState,
       serverId: Exclude<ServerId, "new_remote">,
     ) => number;
-    traceCounterEffectDefinitionFor: (
-      counterType: unknown,
-    ) =>
+    traceCounterEffectDefinitionFor: (counterType: unknown) =>
       | {
           counterType: CounterType;
           removeCost: number;
@@ -127,11 +125,15 @@ function resolveOptionalExtraActionWithDelayedDamage(
   const { state } = host;
   if (legalAction.side !== "runner")
     throw new Error("Nur der Runner darf diese Zusatzaktion nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("Die Quelle der Zusatzaktion ist nicht installiert.");
-  const implementation =
-    host.cards.runnerUtilityLongtailImplementationForCard(state, sourceCardId);
+  const implementation = host.cards.runnerUtilityLongtailImplementationForCard(
+    state,
+    sourceCardId,
+  );
   if (implementation?.kind !== "optional_extra_action_with_delayed_damage")
     throw new Error("Die Zusatzaktion passt nicht zur Quelle.");
   if (
@@ -194,8 +196,13 @@ function resolveCorpRemoveSpyCounter(
   const server = host.servers.mustServer(state, serverId);
   if (host.counters.spyCountersForServer(state, server.id) <= 0)
     throw new Error("In diesem Fort liegt kein Spy-Counter.");
-  if (clickCostForAction(legalAction) !== 1 || creditCostForAction(legalAction) !== 4)
-    throw new Error("Spy-Counter entfernen kostet genau 1 Aktion und 4 Credits.");
+  if (
+    clickCostForAction(legalAction) !== 1 ||
+    creditCostForAction(legalAction) !== 4
+  )
+    throw new Error(
+      "Spy-Counter entfernen kostet genau 1 Aktion und 4 Credits.",
+    );
   host.actions.spendClick(state, "corp");
   host.credits.spend(state, "corp", 4);
   state.spyCountersByServer = {
@@ -224,12 +231,21 @@ function resolveCorpTrashNewDataFortCreationLockSource(
   const { state } = host;
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese Lock-Quelle trashen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Die Lock-Quelle ist nicht als Runner-Resource installiert.");
-  const lock = host.dataFort.newDataFortCreationLockForSource(state, sourceCardId);
+    throw new Error(
+      "Die Lock-Quelle ist nicht als Runner-Resource installiert.",
+    );
+  const lock = host.dataFort.newDataFortCreationLockForSource(
+    state,
+    sourceCardId,
+  );
   if (!lock)
-    throw new Error("Diese Resource erzeugt aktuell keinen Data-Fort-Creation-Lock.");
+    throw new Error(
+      "Diese Resource erzeugt aktuell keinen Data-Fort-Creation-Lock.",
+    );
   const cost = lock.modifier.corpTrashSourceCost;
   if (
     clickCostForAction(legalAction) !== cost.clicks ||
@@ -271,7 +287,13 @@ function resolveRemoveRunnerTraceCounter(
   const cost = Number(legalAction.payload?.counterRemoveCreditCost ?? 0);
   if (!Number.isInteger(cost) || cost !== counterEffect.removeCost)
     throw new Error("Der Counter verlangt den aktuellen Entfernen-Betrag.");
-  if (host.counters.cardCounter(state, state.runner.identity, counterEffect.counterType) < 1)
+  if (
+    host.counters.cardCounter(
+      state,
+      state.runner.identity,
+      counterEffect.counterType,
+    ) < 1
+  )
     throw new Error("Es ist kein passender Counter vorhanden.");
   host.actions.spendClick(state, "runner");
   host.credits.spend(state, "runner", counterEffect.removeCost);
