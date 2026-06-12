@@ -331,6 +331,12 @@ Checks:
 - Grün: `git diff --check`
 - Main-Integrationscheck: `corepack pnpm format:changed -- origin/main` deckte auf, dass `.mjs` noch nicht auf LF-Zeilenenden festgelegt war. `.gitattributes` erzwingt deshalb jetzt auch `*.mjs text eol=lf`.
 
+## Format-Gate-Konvention 2026-06-12
+
+- Während eines Paket-Worktrees prüft `format:changed` gegen den lokalen Integrationsstand `main`.
+- Nach lokalem Merge auf `main` prüft der Main-Integrationscheck gegen `origin/main`.
+- Ein Abschlussdokument soll beide Checks getrennt benennen, damit ein leerer `main...HEAD`-Vergleich auf `main` nicht als belastbares Remote-Diff-Gate missverstanden wird.
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die angegebenen Checks.

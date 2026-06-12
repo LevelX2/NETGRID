@@ -405,6 +405,25 @@ Done-Gate: Keine durch diesen Branch verursachten roten Tests. Arbeitsbranch ist
 
 Commit: `test(ai): verify action semantics ordered sequence foundation`
 
+## P1 Ergebnis
+
+Umgesetzt:
+
+- `scripts/check-format-changed.mjs` prüft jetzt auch untracked Prettier-Dateien.
+- `--list` gibt die geprüften Dateien aus.
+- `--self-test` deckt den `--`-Argumenttrenner und die Flag-Parsing-Regeln ab.
+- Wenn `baseRef` auf `HEAD` zeigt und keine staged/working-tree versionierten Änderungen existieren, warnt das Script vor einem trivialen Vergleich.
+- Format-Gate-Konvention für diesen Prozess:
+  - im Arbeitsbranch: `corepack pnpm format:changed -- main`;
+  - nach lokalem Merge auf `main`: `corepack pnpm format:changed -- origin/main`.
+
+Checks:
+
+- Grün: `node scripts/check-format-changed.mjs --self-test`
+- Grün: `node scripts/check-format-changed.mjs origin/main --list`
+- Grün: `corepack pnpm format:changed -- origin/main`
+- Grün: `git diff --check origin/main..HEAD`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.

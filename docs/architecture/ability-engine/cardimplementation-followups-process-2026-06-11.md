@@ -384,6 +384,13 @@ Checks:
 - Grün: `corepack pnpm exec prettier --check -- $(git diff --name-only main...HEAD)`
 - Grün: `git diff --check`
 
+## Format-Gate-Konvention 2026-06-12
+
+- Das damalige changed-file-Formatgate war ein direkter Prettier-Aufruf über `git diff --name-only main...HEAD`.
+- Für neue Paketprozesse ersetzt `corepack pnpm format:changed -- main` diesen Arbeitsbranch-Check.
+- Nach lokalem Merge auf `main` ist `corepack pnpm format:changed -- origin/main` das passende Integrationsgate.
+- Repo-weites `format:check` bleibt nur dann hartes Gate, wenn die Format-Baseline separat bereinigt wurde.
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens Typecheck plus passende Focustests.
