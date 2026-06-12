@@ -197,6 +197,29 @@ Done-Gate: Prozessdokument ist formal abgeschlossen und beschreibt lokale/remote
 
 Commit: `docs(ai): close action semantics followup process`
 
+#### P3 Ergebnis
+
+Umgesetzt:
+
+- `docs/architecture/ai/action-semantics-followup-quality-process-2026-06-12.md` von `in_progress` auf `complete` gesetzt.
+- Abschluss- und Remote-Nachtrag ergänzt:
+  - Arbeitsbranch `codex/action-semantics-followup-quality`.
+  - Branch-Head `3822c63f`.
+  - Merge-Commit `b3c004d7`.
+  - `b3c004d7` ist Ancestor von `origin/main`.
+  - `origin/codex/action-semantics-followup-quality` ist remote sichtbar.
+- Formatbaseline entwirrt:
+  - `format:changed -- main` war vor Merge im Arbeitsbranch sinnvoll.
+  - Nach Merge auf `main` ist dieser Vergleich leer/trivial.
+  - Für Remote-Hygiene ist `origin/main` beziehungsweise der dokumentierte Vergleich `b3c004d7^1..codex/action-semantics-followup-quality` maßgeblich.
+- AI022-/Hints-Stash bleibt ausdrücklich out-of-scope.
+
+Checks:
+
+- Grün: `rg -n "in_progress|GitHub geprüft|format:changed -- main" docs/architecture/ai/action-semantics-followup-quality-process-2026-06-12.md`
+- Grün: `corepack pnpm format:changed -- origin/main`
+- Grün: `git diff --check origin/main..HEAD`
+
 ### P4 Final Verify und lokale Integration
 
 Ziel: Hygieneprozess abschließend prüfen und lokal nach `main` integrieren.
