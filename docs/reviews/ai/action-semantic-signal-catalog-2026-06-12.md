@@ -6,15 +6,19 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 ## Summary
 
-| Metric                       | Count |
-| ---------------------------- | ----: |
-| Active cards                 |   564 |
-| covered                      |   539 |
-| deferred                     |    45 |
-| no_signal_reason != none     |    25 |
-| target_profile_gap           |    84 |
-| structural signal violations |     0 |
-| unknown signals              |     0 |
+| Metric                                                         | Count |
+| -------------------------------------------------------------- | ----: |
+| Active cards                                                   |   564 |
+| covered                                                        |   539 |
+| deferred                                                       |    45 |
+| no_signal_reason != none                                       |    25 |
+| target_profile_gap                                             |    84 |
+| structural signal violations                                   |     0 |
+| unknown signals                                                |     0 |
+| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |     0 |
+| deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |     0 |
+| no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |     0 |
+| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |     0 |
 
 ## No Signal Reasons
 
@@ -59,6 +63,43 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_v1_017_deep-thought`                      | runner | program  | `access.rnd_top_card`, `info.rnd_information`                             |
 | `onr_v1_020_dupre`                             | runner | program  | `breaker.scaling_strength`                                                |
 
+## No Signal Review Start
+
+| Card                                       | Side   | Type      | Reason                 |
+| ------------------------------------------ | ------ | --------- | ---------------------- |
+| `corp_identity_001`                        | corp   | identity  | `legacy_fallback_only` |
+| `onr_proteus_034_riddler`                  | corp   | ice       | `legacy_fallback_only` |
+| `onr_proteus_074_siren`                    | corp   | asset     | `no_function_signal`   |
+| `onr_v1_291_falsified-transactions-expert` | corp   | operation | `no_function_signal`   |
+| `runner_identity_001`                      | runner | identity  | `legacy_fallback_only` |
+| `simple_agenda`                            | corp   | agenda    | `legacy_fallback_only` |
+| `simple_barrier_ice`                       | corp   | ice       | `legacy_fallback_only` |
+| `simple_code_gate_ice`                     | corp   | ice       | `legacy_fallback_only` |
+| `simple_draw_event`                        | runner | event     | `legacy_fallback_only` |
+| `simple_economy_event`                     | runner | event     | `legacy_fallback_only` |
+| `simple_priority_agenda`                   | corp   | agenda    | `legacy_fallback_only` |
+| `simple_run_event`                         | runner | event     | `legacy_fallback_only` |
+| `simple_sentry_ice`                        | corp   | ice       | `legacy_fallback_only` |
+| `simple_setup_hardware`                    | runner | hardware  | `legacy_fallback_only` |
+| `simple_tag_ice`                           | corp   | ice       | `legacy_fallback_only` |
+| `simple_taxing_barrier_ice`                | corp   | ice       | `legacy_fallback_only` |
+| `simple_upgrade`                           | corp   | upgrade   | `legacy_fallback_only` |
+| `v08_burst_credit_event`                   | runner | event     | `legacy_fallback_only` |
+| `v08_deep_draw_event`                      | runner | event     | `legacy_fallback_only` |
+| `v08_gate_ice`                             | corp   | ice       | `legacy_fallback_only` |
+| `v08_memory_chip`                          | runner | hardware  | `legacy_fallback_only` |
+| `v08_overclock_run_event`                  | runner | event     | `legacy_fallback_only` |
+| `v08_project_agenda`                       | corp   | agenda    | `legacy_fallback_only` |
+| `v08_wall_ice`                             | corp   | ice       | `legacy_fallback_only` |
+| `v08_watchdog_ice`                         | corp   | ice       | `legacy_fallback_only` |
+
+## Deferred Review Scope
+
+| Scope                                       | Cards |
+| ------------------------------------------- | ----: |
+| `inspector_warning_and_active_hint_quality` |    43 |
+| `inspector_warning`                         |     2 |
+
 ## Row Contract
 
-Every JSON row contains `covered`, `deferred`, `no_signal_reason` and `target_profile_gap`.
+Every JSON row contains `covered`, `deferred`, `deferred_review_scope`, `deferred_owner`, `no_signal_reason` and `target_profile_gap`.

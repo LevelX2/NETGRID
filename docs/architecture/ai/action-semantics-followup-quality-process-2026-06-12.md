@@ -259,9 +259,18 @@ Arbeit:
 
 Checks:
 
-- `node scripts/check-ai-action-semantic-signal-catalog.mjs --check`
-- `corepack pnpm check:ai`
-- `git diff --check`
+- Grün: `node scripts/check-ai-action-semantic-signal-catalog.mjs --write-report`
+- Grün: `node scripts/check-ai-action-semantic-signal-catalog.mjs --check`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+Ergebnis:
+
+- Das Signal-Catalog-Gate validiert erlaubte `no_signal_reason`-Werte, verbietet unbekannte/strukturreine Signale und prüft TargetProfile-Gaps auf echte target-relevante Signale.
+- Deferred Rows erhalten `deferred_review_scope` und `deferred_owner`; der Report muss jede deferred Karte in `qualityGate.deferredReviewRows` ausweisen.
+- Die 25 No-Signal-Karten werden in `qualityGate.noSignalReviewStart` und im Markdown als Review-Startpunkt aufgeführt.
+- Der Report enthält Deltas gegen die P2-Baseline; P5 selbst verändert keine Semantikzahlen: covered 539, deferred 45, no-signal 25, TargetProfile-Gaps 84.
 
 Done-Gate: Quality-Gate läuft ohne Fehler und Report enthält Deltas.
 
