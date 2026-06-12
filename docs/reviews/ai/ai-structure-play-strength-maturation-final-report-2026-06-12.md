@@ -2,7 +2,7 @@
 
 Datum: 2026-06-12
 
-Status: AI-MAT-0 bis AI-MAT-20 umgesetzt, paketweise committed und FINAL-GREEN im Arbeitsbranch gruen. Lokaler Main-Merge folgt als separater Integrationsschritt.
+Status: AI-MAT-0 bis AI-MAT-20 umgesetzt, paketweise committed, FINAL-GREEN grün und lokal nach `main` integriert.
 
 Arbeitsbranch: `codex/ai-structure-play-strength-maturation`
 
@@ -15,7 +15,7 @@ Die Paketserie hat den Play-Strength-Spine strukturell breiter, messbarer und si
 Umgesetzt wurden:
 
 - Pilot-Scopes sind aus der alten Einzeldatei in eigene Scope-Module verschoben; der alte Importpfad bleibt als Fassade erhalten.
-- `AI_PLAY_STRENGTH_PILOT_SCOPE` unterstuetzt mehrere lokale Scopes und `all`.
+- `NETGRID_AI_PLAY_STRENGTH_PILOT` unterstuetzt mehrere lokale Scopes und `all`.
 - RunnerSafeAccess blockt jetzt riskante Universal-Coverage, negative Credit-Projektionen und unaffordbare Access-Trash-Faelle granular.
 - Remote-Contest bleibt report-only als Shadow-League-Kandidat sichtbar.
 - RunTarget-Alignment und TargetChoiceShadow nutzen strukturierte Target-Kontexte vor Evidence-Fallbacks.
@@ -88,9 +88,12 @@ FINAL-GREEN im Arbeitsbranch:
 - `corepack pnpm --filter @netgrid/ai typecheck`: gruen.
 - `git diff --check`: gruen.
 
+Nachgezogene lokale Main-Verifikation in `AI-MAT2-0` am 2026-06-13:
+
+- `corepack pnpm --filter @netgrid/ai test`: 80 Testdateien, 1236 Tests, gruen.
+- `corepack pnpm --filter @netgrid/ai typecheck`: gruen.
+- `git diff --check`: gruen.
+
 ## Noch offen
 
-- Arbeitsbranch mit aktuellem `main` abgleichen.
-- Lokal nach `main` integrieren.
-- Main erneut pruefen.
-- Arbeits-Worktree entfernen.
+- Keine offene AI-MAT-Integrationsarbeit. AI Play-Strength Maturation II läuft als separate Folgehaertung auf dem lokal integrierten Stand.
