@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -234,6 +234,21 @@ Checks:
 Done-Gate: Keine durch diesen Prozess verursachten roten Checks. Branch ist lokal nach `main` integriert, Worktree entfernt, Goal complete.
 
 Commit: `test(ai): verify review baseline hygiene`
+
+#### P4 Ergebnis
+
+Umgesetzt:
+
+- Finalchecks im Hygiene-Worktree ausgeführt.
+- Keine Code- oder Semantikänderung in diesem Paket.
+- Der Branch ist bereit für lokale Integration nach `main`.
+
+Checks:
+
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `corepack pnpm format:changed -- origin/main`
+- Grün: `git diff --check origin/main..HEAD`
 
 ## Verifikationsregeln
 
