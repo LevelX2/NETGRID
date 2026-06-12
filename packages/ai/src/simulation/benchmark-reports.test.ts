@@ -808,6 +808,35 @@ describe("benchmark report formatting", () => {
     expect(subclusters.runner_late_gain_credit_real_reserve).toBe(0);
     expect(subclusters.mixed_unknown).toBe(0);
   });
+
+  it("keeps late draws with coverage gaps out of no-goal draw subclusters", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-coverage-draw-subcluster",
+      winner: "action_limit_reached",
+      actions: 2,
+      turns: 2,
+      finalAgendaPoints: { runner: 4, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-coverage-draw-subcluster",
+      eventLogLength: 2,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "draw_card", {
+          selectedActionId: "coverage-draw",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          runnerSetupMissingCoverageTypes: ["wall"],
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([summary]);
+
+    expect(subclusters.late_draw_for_coverage_or_hand_goal).toBe(1);
+    expect(subclusters.late_draw_without_coverage_or_hand_goal).toBe(0);
+  });
 });
 
 function selfplayAction(
