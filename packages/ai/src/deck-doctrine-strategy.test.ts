@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
-import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
+import {
+  buildDeckDoctrineV2Diagnostic,
+  buildDeckStrategyProfile,
+} from "./deck-doctrine-strategy";
 
 const snapshots = snapshotsData08.snapshots as Array<{
   deckSnapshotId: string;
@@ -17,7 +20,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       snapshotById("onr_origin_runner_ai_snapshot_v1"),
     );
 
-    expect(profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence).toEqual(
+    expect(
+      profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence,
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           cardId: "onr_v1_081_custodial-position",
@@ -26,9 +31,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       ]),
     );
     expect(
-      profile.strategyScores[
-        "runner.interface_closeout"
-      ]?.anchorEvidence.some(
+      profile.strategyScores["runner.interface_closeout"]?.anchorEvidence.some(
         (entry) =>
           entry.cardId === "onr_v1_081_custodial-position" ||
           entry.cardId === "onr_v1_085_executive-wiretaps",
@@ -49,9 +52,15 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       ],
     });
 
-    expect(profile.strategyScores["runner.search.breaker"]?.anchorScore).toBeGreaterThan(0);
-    expect(profile.strategyScores["runner.search.breaker"]?.supportScore).toBeGreaterThan(70);
-    expect(profile.strategyScores["runner.rig_first"]?.supportScore).toBeGreaterThan(60);
+    expect(
+      profile.strategyScores["runner.search.breaker"]?.anchorScore,
+    ).toBeGreaterThan(0);
+    expect(
+      profile.strategyScores["runner.search.breaker"]?.supportScore,
+    ).toBeGreaterThan(70);
+    expect(
+      profile.strategyScores["runner.rig_first"]?.supportScore,
+    ).toBeGreaterThan(60);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
   });
 
@@ -63,9 +72,13 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     });
 
     expect(profile.functionSignalCounts["economy.generic"]).toBe(3);
-    expect(profile.strategyScores["runner.economy_first"]?.supportScore).toBeGreaterThan(0);
+    expect(
+      profile.strategyScores["runner.economy_first"]?.supportScore,
+    ).toBeGreaterThan(0);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
-    expect(profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence).toEqual([]);
+    expect(
+      profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence,
+    ).toEqual([]);
   });
 
   it("reports Runner coverage gaps when a deck has no wall coverage", () => {
@@ -87,7 +100,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     });
 
     expect(profile.functionSignalCounts["breaker.ends_run_after_use"]).toBe(3);
-    expect(profile.functionSignalCounts["breaker.break_any_subroutine"]).toBe(3);
+    expect(profile.functionSignalCounts["breaker.break_any_subroutine"]).toBe(
+      3,
+    );
     expect(profile.functionSignalCounts["breaker.universal"] ?? 0).toBe(0);
     expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(0);
     expect(profile.runnerProfile?.coverageProfile.wall.count).toBe(0);
@@ -106,8 +121,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       snapshotById("onr_origin_corp_ai_tag_ops_snapshot_v1"),
     );
 
-    expect(profile.strategyScores["corp.tag_trace_punish"]?.anchorScore).toBeGreaterThan(0);
-    expect(profile.strategyScores["corp.tag_trace_punish"]?.supportScore).toBeGreaterThan(70);
+    expect(
+      profile.strategyScores["corp.tag_trace_punish"]?.anchorScore,
+    ).toBeGreaterThan(0);
+    expect(
+      profile.strategyScores["corp.tag_trace_punish"]?.supportScore,
+    ).toBeGreaterThan(70);
     expect(profile.corpProfile?.punishProfile.tagSources).toBeGreaterThan(0);
     expect(profile.corpProfile?.punishProfile.tagPayoff).toBeGreaterThan(0);
   });
@@ -124,7 +143,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       ],
     });
 
-    expect(profile.strategyScores["corp.remote_scoring"]?.anchorEvidence).toEqual(
+    expect(
+      profile.strategyScores["corp.remote_scoring"]?.anchorEvidence,
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           cardId: "onr_v1_355_crystal-palace-station-grid",
@@ -132,7 +153,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
         }),
       ]),
     );
-    expect(profile.corpProfile?.scoreProfile.remoteScoringProtection).toBeGreaterThan(0);
+    expect(
+      profile.corpProfile?.scoreProfile.remoteScoringProtection,
+    ).toBeGreaterThan(0);
   });
 
   it("reports Corp economy/rez-reserve support from structured function signals", () => {
@@ -140,8 +163,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       snapshotById("onr_origin_corp_ai_snapshot_v1"),
     );
 
-    expect(profile.strategyScores["corp.economy_rez_reserve"]?.supportScore).toBeGreaterThan(50);
-    expect(profile.strategyScores["corp.economy_rez_reserve"]?.supportEvidence).toEqual(
+    expect(
+      profile.strategyScores["corp.economy_rez_reserve"]?.supportScore,
+    ).toBeGreaterThan(50);
+    expect(
+      profile.strategyScores["corp.economy_rez_reserve"]?.supportEvidence,
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           cardId: "onr_v1_317_data-masons",
@@ -164,7 +191,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     });
 
     expect(profile.functionSignalCounts["ice.etr"]).toBeGreaterThan(0);
-    expect(profile.strategyScores["corp.ice_tax_glacier"]?.supportScore).toBeGreaterThan(0);
+    expect(
+      profile.strategyScores["corp.ice_tax_glacier"]?.supportScore,
+    ).toBeGreaterThan(0);
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorScore).toBe(0);
   });
 
@@ -177,7 +206,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
 
     expect(profile.legacySignalCounts["planRole:pressure_rnd"]).toBe(3);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
-    expect(profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence).toEqual([]);
+    expect(
+      profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence,
+    ).toEqual([]);
   });
 
   it("keeps the diagnostic output side-safe and deterministic", () => {
@@ -188,6 +219,87 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(JSON.stringify(profile)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|deckHash|legalActions/i,
     );
+  });
+
+  it("builds a report-only DeckDoctrine v2 diagnostic with role status", () => {
+    const diagnostic = buildDeckDoctrineV2Diagnostic(
+      snapshotById("proteus_corp_region_fast_score_snapshot_v2026_05_25"),
+    );
+    const serialized = JSON.stringify(diagnostic);
+
+    expect(diagnostic).toMatchObject({
+      schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+      side: "corp",
+      status: "partial",
+      neutralDoctrine: false,
+      source: {
+        strategyProfile: "buildDeckStrategyProfile",
+        mode: "report_only",
+        plannerEffect: "none",
+      },
+      noEffectFlags: {
+        actionSelection: false,
+        plannerWeights: false,
+        scoring: false,
+        legalActionGeneration: false,
+        engineMutation: false,
+        hiddenInfoProjection: false,
+      },
+    });
+    expect(diagnostic.rolesStatus).toMatchObject({
+      status: "partial",
+      cardRows: expect.any(Number),
+      strategyAnchorCount: expect.any(Number),
+    });
+    expect(diagnostic.rolesStatus.strategyAnchorCount).toBeGreaterThan(0);
+    expect(diagnostic.strategyDiagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategyId: "corp.remote_scoring",
+          status: "complete",
+        }),
+      ]),
+    );
+    expect(serialized).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|legalActions/i,
+    );
+  });
+
+  it("keeps NeutralDoctrine anchorless when a deck has no strategy anchors", () => {
+    const diagnostic = buildDeckDoctrineV2Diagnostic({
+      deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
+      side: "runner",
+      cards: [{ cardId: "simple_run_event", quantity: 3 }],
+    });
+
+    expect(diagnostic.status).toBe("anchorless");
+    expect(diagnostic.neutralDoctrine).toBe(true);
+    expect(diagnostic.rolesStatus.status).toBe("anchorless");
+    expect(
+      diagnostic.strategyDiagnostics.every(
+        (entry) => entry.status === "anchorless",
+      ),
+    ).toBe(true);
+    expect(diagnostic.warnings).toContain(
+      "NeutralDoctrine: no strategy anchor",
+    );
+  });
+
+  it("reports unknown_snapshot without inventing doctrine evidence", () => {
+    const diagnostic = buildDeckDoctrineV2Diagnostic();
+
+    expect(diagnostic).toMatchObject({
+      deckSnapshotId: "unknown_snapshot",
+      side: "unknown",
+      status: "unknown_snapshot",
+      neutralDoctrine: true,
+      strategyDiagnostics: [],
+      cardRoles: [],
+      warnings: ["unknown_snapshot"],
+    });
+    expect(diagnostic.rolesStatus.status).toBe("unknown_snapshot");
   });
 });
 

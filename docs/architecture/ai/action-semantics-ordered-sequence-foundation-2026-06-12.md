@@ -452,6 +452,22 @@ Done-Gate: Doctrine-v2-Diagnostik ist isoliert und no-effect.
 
 Commit: `feat(ai): add deck doctrine v2 diagnostics`
 
+Ergebnis 2026-06-12:
+
+- `buildDeckDoctrineV2Diagnostic(...)` ergänzt eine report-only Deckdiagnose auf Basis von `buildDeckStrategyProfile(...)`.
+- Der Bericht modelliert die geforderten Statuswerte `anchorless`, `partial`, `complete` und `unknown_snapshot`, inklusive `neutralDoctrine`-Flag.
+- Rollenstatus wird pro Deck und pro Kartenzeile ausgewiesen: Rollen, Function-Signals, Strategy Anchors, Warning-Kategorien und aggregierte Lücken.
+- Keine Runtime-Anbindung: keine Action-Auswahl, keine PlannerWeights, kein Scoring, keine LegalAction-Erzeugung, keine Engine-Mutation, keine Hidden-Info-Projektion.
+
+Checks 2026-06-12:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-strategy.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `corepack pnpm check:ai` (PASS mit bestehenden AI-Warnungen)
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P14 Semantic Shadow Decision Trace
 
 Ziel: Erklärbares Ranking für Vergleichszwecke vorbereiten, ohne Action-Ausführung.
