@@ -183,6 +183,7 @@ import {
   DEMO_DECKS,
   type AiDeckDoctrineProfile,
   type AiDecision,
+  type AiDecisionActionAlternative,
   type AiDecisionDebug,
   type AiDecisionInput,
   type AiDecisionScoreComponent,
@@ -2542,6 +2543,8 @@ export type AiSimulationConfig = {
   corpControllerMode?: SimulationControllerMode;
   simulationRngSeed?: string;
   beliefWorld?: SimulationWorld;
+  includeActionAlternativesForFindings?: boolean;
+  maxAlternativesPerFinding?: number;
 };
 
 export type AiSimulationSummary = {
@@ -2569,6 +2572,7 @@ export type AiSimulationSummary = {
     confidence: number;
     evidence: string[];
     debugFacts?: string[];
+    actionAlternatives?: AiDecisionActionAlternative[];
     fallbackUsed: boolean;
     timeoutUsed: boolean;
     targetServerId?: string;
@@ -11127,6 +11131,7 @@ export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
 function selfplayTraceFactsForDecision(decision: AiDecision): {
   planKind?: string;
   debugFacts?: string[];
+  actionAlternatives?: AiDecisionActionAlternative[];
 } {
   const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
   if (!safeDebug) return {};
@@ -11145,7 +11150,66 @@ function selfplayTraceFactsForDecision(decision: AiDecision): {
   return {
     ...(safeDebug.planKind ? { planKind: safeDebug.planKind } : {}),
     ...(debugFacts.length > 0 ? { debugFacts } : {}),
+    ...(safeDebug.actionAlternatives && safeDebug.actionAlternatives.length > 0
+      ? { actionAlternatives: safeDebug.actionAlternatives }
+      : {}),
   };
+}
+
+function selfplayTraceFactsForSimulationDecision(
+  decision: AiDecision,
+  config: AiSimulationConfig,
+): {
+  planKind?: string;
+  debugFacts?: string[];
+  actionAlternatives?: AiDecisionActionAlternative[];
+} {
+  const facts = selfplayTraceFactsForDecision(decision);
+  if (config.includeActionAlternativesForFindings === true) return facts;
+  const { actionAlternatives: _actionAlternatives, ...withoutAlternatives } =
+    facts;
+  return withoutAlternatives;
+}
+
+function stripSelfplayActionAlternatives(
+  summaries: AiSimulationSummary[],
+): void {
+  for (const summary of summaries) {
+    for (const entry of summary.actionSequence) {
+      delete entry.actionAlternatives;
+    }
+  }
+}
+
+function retainActionAlternativesForFindingWindows(
+  summaries: AiSimulationSummary[],
+  findings: { summaryIndex: number; actionIndex: number }[],
+  maxAlternativesPerFinding: number,
+): void {
+  const keep = new Set<string>();
+  for (const finding of findings) {
+    const summary = summaries[finding.summaryIndex];
+    if (!summary) continue;
+    const from = Math.max(0, finding.actionIndex - 1);
+    const to = Math.min(summary.actionSequence.length - 1, finding.actionIndex + 1);
+    for (let index = from; index <= to; index += 1) {
+      keep.add(`${finding.summaryIndex}:${index}`);
+    }
+  }
+  for (const [summaryIndex, summary] of summaries.entries()) {
+    for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+      if (!keep.has(`${summaryIndex}:${actionIndex}`)) {
+        delete entry.actionAlternatives;
+        continue;
+      }
+      if (entry.actionAlternatives) {
+        entry.actionAlternatives = entry.actionAlternatives.slice(
+          0,
+          Math.max(1, maxAlternativesPerFinding),
+        );
+      }
+    }
+  }
 }
 
 export function simulateAiGame(
@@ -11407,7 +11471,7 @@ export function simulateAiGame(
       timingPoint: action.timingPoint,
       turnNumber:
         state.eventLog.filter((event) => event.type === "end_turn").length + 1,
-      ...selfplayTraceFactsForDecision(decision),
+      ...selfplayTraceFactsForSimulationDecision(decision, config),
       reasonCode: decision.reasonCode,
       explanation: decision.explanation,
       confidence: decision.confidence ?? 0,
@@ -12137,6 +12201,15 @@ export function runAiSelfplayTraceMining(
       config.longGameActionThreshold ??
       Math.max(20, Math.floor(maxActions * 0.75)),
   });
+  if (config.includeActionAlternativesForFindings === true) {
+    retainActionAlternativesForFindingWindows(
+      summaries,
+      findings,
+      config.maxAlternativesPerFinding ?? 5,
+    );
+  } else {
+    stripSelfplayActionAlternatives(summaries);
+  }
   const topFindings = findings.slice(0, config.maxFindings ?? 20);
   const enabledDetectors =
     config.detectorIds && config.detectorIds.length > 0
@@ -12196,6 +12269,9 @@ export function runAiSelfplayTraceMining(
       runnerControllerMode,
       corpControllerMode,
       enabledDetectors,
+      includeActionAlternativesForFindings:
+        config.includeActionAlternativesForFindings === true,
+      maxAlternativesPerFinding: config.maxAlternativesPerFinding ?? 5,
     },
     summaries,
     findings,

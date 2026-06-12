@@ -109,6 +109,8 @@ export type AiSelfplayTraceMiningResult = {
     runnerControllerMode: SimulationControllerMode;
     corpControllerMode: SimulationControllerMode;
     enabledDetectors: AiSelfplayTraceMiningDetectorId[];
+    includeActionAlternativesForFindings: boolean;
+    maxAlternativesPerFinding: number;
   };
   summaries: AiSimulationSummary[];
   findings: AiSelfplaySuspiciousDecision[];
