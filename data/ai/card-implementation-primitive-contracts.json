@@ -53,6 +53,6 @@
     "requiresTarget": true,
     "targetKind": "rezzed_installed_ice",
     "hiddenInfoClass": "public",
-    "resolverModule": "scored-agenda-flow"
+    "resolverModule": "scored-agenda/ice-transmutation-sequence"
   }
 ]

@@ -18,8 +18,11 @@ import {
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
-} from "../install-rez-sequence-handlers";
-import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
+} from "./scored-agenda-sequence-host";
+import {
+  applySequencePayloadPatch,
+  corpSequenceContextPayload,
+} from "./scored-agenda-sequence-types";
 
 /**
  * @contract Data Fort Reclamation owns the hidden HQ install/rez sequence.
@@ -40,10 +43,25 @@ type PrevalidatedHqToNewRemoteInstall = {
   destination: "ice" | "root";
 };
 
+export type DataFortReclamationStep =
+  | "select_hq_cards"
+  | "install_selected_cards"
+  | "required_rez_on_install"
+  | "optional_rez_batch"
+  | "return_unused_credits"
+  | "complete";
+
+const DATA_FORT_RECLAMATION_STEPS = {
+  selectHqCards: "select_hq_cards",
+  installSelectedCards: "install_selected_cards",
+  optionalRezBatch: "optional_rez_batch",
+  returnUnusedCredits: "return_unused_credits",
+} satisfies Record<string, DataFortReclamationStep>;
+
 export function isHqToNewRemoteInstallRezChoiceSource(source: string): boolean {
   return (
     source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:`) ||
-    source.startsWith("v1922.data_fort_reclamation")
+    source.startsWith("v1922.data_fort_reclamation:")
   );
 }
 
@@ -109,7 +127,7 @@ export function startDataFortReclamationChoice(
       ...(host.legalAction.payload ?? {}),
       ...primitivePayload,
       ...corpSequenceContextPayload({
-        step: "data_fort_reclamation_hq_choice_empty",
+        step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
         v1922CorpAgendaAbility: "data_fort_reclamation",
         sourceAgendaId: agendaId,
         dataFortReclamationChoiceOpened: false,
@@ -130,11 +148,10 @@ export function startDataFortReclamationChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
+  applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
     ...corpSequenceContextPayload({
-      step: "data_fort_reclamation_hq_choice_opened",
+      step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
       v1922CorpAgendaAbility: "data_fort_reclamation",
       sourceAgendaId: agendaId,
       cardImplementationSourceZone: sequence.sourceZone,
@@ -150,7 +167,7 @@ export function startDataFortReclamationChoice(
       ),
     }),
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
-  };
+  });
   return { handled: true, stateChanged: true };
 }
 
@@ -214,7 +231,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
         "v1922_data_fort_reclamation_install_sequence",
       ),
       ...corpSequenceContextPayload({
-        step: "data_fort_reclamation_install_sequence_empty",
+        step: DATA_FORT_RECLAMATION_STEPS.returnUnusedCredits,
         sourceAgendaId: agendaId,
         selectedCount: 0,
         installedCount: 0,
@@ -307,7 +324,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_install_sequence"),
     ...corpSequenceContextPayload({
-      step: "data_fort_reclamation_install_sequence",
+      step: DATA_FORT_RECLAMATION_STEPS.installSelectedCards,
       sourceAgendaId: agendaId,
       selectedCount: selectedIds.length,
       installedCount: installedIceCount + installedRootCount,
@@ -512,7 +529,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_rez_sequence"),
     ...corpSequenceContextPayload({
-      step: "data_fort_reclamation_rez_sequence",
+      step: DATA_FORT_RECLAMATION_STEPS.optionalRezBatch,
       sourceAgendaId: agendaId,
       cardImplementationSequenceCreatedServerId: serverId,
       cardImplementationTemporaryCreditBudget: temporaryCreditAmount,

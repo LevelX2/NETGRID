@@ -3426,6 +3426,7 @@ type BadPublicityActionEvidence = {
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
 const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
+const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -3807,9 +3808,7 @@ function semanticRuntimeDecisionDebug(
       : {}),
     ...(legacyActionType ? { legacyActionType } : {}),
     ...(legacyPlanKind ? { legacyPlanKind } : {}),
-    ...(legacyDebugSelectedActionType
-      ? { legacyDebugSelectedActionType }
-      : {}),
+    ...(legacyDebugSelectedActionType ? { legacyDebugSelectedActionType } : {}),
     selectedEvidence: scrubEvidence(selected.evidence),
     ...(selectedPlan
       ? {
@@ -3924,7 +3923,9 @@ function semanticRuntimeDecisionDebug(
   };
 }
 
-function semanticShadowTopDebugItems(selected: SemanticRuntimeChoice): string[] {
+function semanticShadowTopDebugItems(
+  selected: SemanticRuntimeChoice,
+): string[] {
   const topEvidence = selected.evidence.filter(
     (entry) =>
       entry.startsWith("ai_play_strength_pilot_score") ||
@@ -4011,9 +4012,9 @@ function doctrineGoalDebugItems(
   return scrubEvidence([
     "doctrine_goal_trace:decision_debug",
     `doctrine_side:${input.ownDeckDoctrine?.side ?? input.side}`,
-    ...((input.ownDeckDoctrine?.archetypeTags ?? [])
+    ...(input.ownDeckDoctrine?.archetypeTags ?? [])
       .slice(0, 3)
-      .map((tag) => `doctrine_archetype:${tag}`)),
+      .map((tag) => `doctrine_archetype:${tag}`),
     ...doctrineComponents.flatMap(doctrineGoalComponentDebugItems),
   ]).slice(0, 24);
 }
@@ -4870,6 +4871,15 @@ function semanticRuntimeActionExclusion(
     action,
   );
   if (planMemoryExclusion) return planMemoryExclusion;
+  const corpAdvancementPlacement =
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment(input, action);
+  if (corpAdvancementPlacement?.dominatedByBasicAdvance) {
+    return {
+      key: "corp_advancement_counter_placement_dominated_by_basic_advance",
+      label: "Basic-Advance-Dominanz",
+      reason: corpAdvancementPlacement.evidence.join("|"),
+    };
+  }
   const selfDamageSurvivalExclusion =
     semanticRuntimeRunnerSelfDamageSurvivalExclusion(input, action);
   if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
@@ -6775,8 +6785,7 @@ function semanticRuntimeRunnerScore(
 
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
-const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY =
-  "junkyard_bbs_return_top_heap";
+const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
 
@@ -6914,7 +6923,10 @@ function semanticRuntimeRunnerScoreComponents(
   if (lowValueRecoveryRepeatComponent) {
     components.push(lowValueRecoveryRepeatComponent);
   }
-  const viral15JackOutComponent = runnerViral15JackOutScoreComponent(input, action);
+  const viral15JackOutComponent = runnerViral15JackOutScoreComponent(
+    input,
+    action,
+  );
   if (viral15JackOutComponent) components.push(viral15JackOutComponent);
   const lateNoFundingCreditRepeatComponent =
     runnerLateNoFundingCreditRepeatScoreComponent(input, action);
@@ -8413,7 +8425,9 @@ function runnerLateNoFundingCreditSafeProgressTargets(
   // run; otherwise a credit can be real reserve preservation, not passivity.
   return assessRunnerPressureReadyForMetrics(input).readyTargets.filter(
     (target) => {
-      if (semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0)
+      if (
+        semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0
+      )
         return false;
       return target.serverId === closeout.target;
     },
@@ -8504,9 +8518,7 @@ function runnerJunkyardBbsRecoveryTarget(
       ? action.payload.targetCardId
       : undefined;
   if (targetCardId) return findVisibleCard(input, targetCardId);
-  return input.playerView.own.heapOrArchives.find(
-    (card) => card.known,
-  );
+  return input.playerView.own.heapOrArchives.find((card) => card.known);
 }
 
 function runnerJunkyardBbsRecoveryTargetAssessment(
@@ -10010,6 +10022,20 @@ function semanticRuntimeCorpScoreComponents(
       });
     }
   }
+  const advancementPlacement =
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment(input, action);
+  if (advancementPlacement) {
+    components.push({
+      key: advancementPlacement.dominatedByBasicAdvance
+        ? "corp_advancement_counter_placement_dominated_by_basic_advance"
+        : "corp_advancement_counter_placement_incremental_value",
+      label: advancementPlacement.dominatedByBasicAdvance
+        ? "Basic-Advance-Dominanz"
+        : "Advancement-Mehrwert",
+      value: advancementPlacement.scoreValue,
+      reason: advancementPlacement.evidence.join("|"),
+    });
+  }
   if (action.type === "gain_credit" && credits < 6) {
     components.push({
       key: "corp_low_credits",
@@ -10080,6 +10106,192 @@ function semanticRuntimeCorpScoreComponents(
     });
   }
   return components;
+}
+
+type CorpAdvancementCounterPlacementProfile = {
+  maxTargets: number;
+  counterPerTarget: number;
+  distinctTargets: boolean;
+  effectOnly: boolean;
+};
+
+type CorpAdvancementCounterPlacementAssessment = {
+  dominatedByBasicAdvance: boolean;
+  selectedTargets: number;
+  maxTargets: number;
+  basicAdvanceEquivalentAvailable: boolean;
+  secondCounterValue: number;
+  scoreValue: number;
+  evidence: string[];
+};
+
+function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpAdvancementCounterPlacementAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const profile = corpAdvancementCounterPlacementProfileForAction(
+    input,
+    action,
+  );
+  if (!profile) return undefined;
+  const targets = semanticRuntimeCorpBasicAdvanceEquivalentTargets(input).sort(
+    (left, right) =>
+      right.value - left.value ||
+      left.card.instanceId.localeCompare(right.card.instanceId),
+  );
+  const meaningfulTargets = targets.filter((target) => target.value > 0);
+  const selectedTargets = Math.min(
+    profile.maxTargets,
+    meaningfulTargets.length,
+  );
+  const basicAdvanceEquivalentAvailable = meaningfulTargets.length > 0;
+  const secondCounterValue =
+    selectedTargets >= 2 ? (meaningfulTargets[1]?.value ?? 0) : 0;
+  const dominatedByBasicAdvance =
+    profile.effectOnly &&
+    profile.counterPerTarget === 1 &&
+    profile.distinctTargets &&
+    selectedTargets <= 1 &&
+    basicAdvanceEquivalentAvailable;
+  const scoreValue = dominatedByBasicAdvance
+    ? -5200
+    : secondCounterValue > 0
+      ? 2200 + Math.min(900, secondCounterValue * 4)
+      : -600;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const evidence = [
+    "advancement_counter_placement:true",
+    `advancement_source:${sourceDefinitionId || "unknown"}`,
+    `advancement_selected_targets:${selectedTargets}`,
+    `advancement_max_targets:${profile.maxTargets}`,
+    `advancement_distinct_targets:${profile.distinctTargets}`,
+    `advancement_counter_per_target:${profile.counterPerTarget}`,
+    `basic_advance_equivalent_available:${basicAdvanceEquivalentAvailable}`,
+    `dominated_by_basic_advance:${dominatedByBasicAdvance}`,
+    `card_spend_without_incremental_counter_value:${dominatedByBasicAdvance}`,
+    `advancement_second_counter_value:${secondCounterValue}`,
+    ...(dominatedByBasicAdvance
+      ? [
+          "advancement_counter_placement_dominated_by_basic_advance",
+          "reason:single_counter_can_be_produced_by_basic_advance_without_spending_card",
+        ]
+      : secondCounterValue > 0
+        ? ["advancement_counter_placement_incremental_second_counter:true"]
+        : ["advancement_counter_placement_incremental_second_counter:false"]),
+  ];
+  return {
+    dominatedByBasicAdvance,
+    selectedTargets,
+    maxTargets: profile.maxTargets,
+    basicAdvanceEquivalentAvailable,
+    secondCounterValue,
+    scoreValue,
+    evidence,
+  };
+}
+
+function corpAdvancementCounterPlacementProfileForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpAdvancementCounterPlacementProfile | undefined {
+  if (action.type !== "play_operation") return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (!sourceDefinitionId) return undefined;
+  const text = normalizedRulesTextForDefinition(sourceDefinitionId);
+  if (
+    sourceDefinitionId === TEAM_RESTRUCTURING_CARD_ID ||
+    /\badd one advancement counter to each of up to two installed cards that can be advanced\b/.test(
+      text,
+    )
+  ) {
+    return {
+      maxTargets: 2,
+      counterPerTarget: 1,
+      distinctTargets: true,
+      effectOnly: true,
+    };
+  }
+  return undefined;
+}
+
+function normalizedRulesTextForDefinition(definitionId: string): string {
+  const runtime = RUNTIME_CARDS[definitionId];
+  const demo = DEMO_CARDS_BY_ID[definitionId];
+  const runtimeText = (runtime as { text?: string } | undefined)?.text ?? "";
+  const demoText = typeof demo?.rulesText === "string" ? demo.rulesText : "";
+  return `${runtimeText} ${demoText}`.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
+  input: AiDecisionInput,
+): Array<{
+  card: VisibleCard;
+  server: AiDecisionInput["playerView"]["servers"][number];
+  value: number;
+}> {
+  return input.legalActions
+    .filter(
+      (action) => action.side === "corp" && action.type === "advance_card",
+    )
+    .map((action) => semanticRuntimeCorpActionSourceCard(input, action))
+    .filter((card): card is VisibleCard => Boolean(card))
+    .map((card) => {
+      const located = findVisibleCorpServerCard(input, card.instanceId);
+      if (!located) return undefined;
+      return {
+        card: located.card,
+        server: located.server,
+        value: semanticRuntimeCorpAdvancementTargetValue(
+          located.card,
+          located.server,
+        ),
+      };
+    })
+    .filter(
+      (
+        target,
+      ): target is {
+        card: VisibleCard;
+        server: AiDecisionInput["playerView"]["servers"][number];
+        value: number;
+      } => Boolean(target),
+    );
+}
+
+function semanticRuntimeCorpAdvancementTargetValue(
+  card: VisibleCard,
+  server: AiDecisionInput["playerView"]["servers"][number],
+): number {
+  const definitionId = card.definitionId;
+  if (!definitionId) return 0;
+  const runtime = RUNTIME_CARDS[definitionId];
+  const demo = DEMO_CARDS_BY_ID[definitionId];
+  const type = card.type ?? runtime?.type ?? demo?.type;
+  const requirement =
+    card.advancementRequirement ??
+    runtime?.numeric.advancementRequirement ??
+    demo?.advancementRequirement;
+  const counters = card.advancementCounters ?? 0;
+  const remaining =
+    typeof requirement === "number"
+      ? Math.max(0, requirement - counters - 1)
+      : 99;
+  const protectedBonus = Math.min(server.ice.length, 2) * 12;
+  if (type === "agenda") {
+    return (
+      140 + (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) + protectedBonus
+    );
+  }
+  const text = normalizedRulesTextForDefinition(definitionId);
+  if (
+    /advancement counter|advance .* before|can be advanced|counter.*credit|gain \d/.test(
+      text,
+    )
+  ) {
+    return 45 + protectedBonus;
+  }
+  return 0;
 }
 
 function semanticRuntimeCorpPassiveScoreLinePenalty(
@@ -10289,8 +10501,12 @@ function semanticRuntimeCorpRemoteRezFloorAssessment(
   if (!serverId || !isRemoteServerTarget(serverId)) return undefined;
   const server = semanticRuntimeCorpServer(input, serverId);
   const rezFloor = semanticRuntimeCorpRemoteRezFloor(server);
-  const creditsAfterAction = input.playerView.own.credits - actionCreditCost(action);
-  const completesScore = semanticRuntimeCorpAdvanceCompletesScore(input, action);
+  const creditsAfterAction =
+    input.playerView.own.credits - actionCreditCost(action);
+  const completesScore = semanticRuntimeCorpAdvanceCompletesScore(
+    input,
+    action,
+  );
   const blockedByFloor =
     !completesScore && rezFloor > 0 && creditsAfterAction < rezFloor;
   return {
@@ -10306,7 +10522,9 @@ function semanticRuntimeCorpRemoteRezFloorAssessment(
       ...(blockedByFloor
         ? ["agenda_development_risk:below_remote_rez_floor"]
         : ["agenda_development_risk:remote_rez_floor_met"]),
-      ...(completesScore ? ["corp_remote_score_line:scoreable_after_action"] : []),
+      ...(completesScore
+        ? ["corp_remote_score_line:scoreable_after_action"]
+        : []),
     ],
   };
 }
@@ -10324,7 +10542,9 @@ function semanticRuntimeCorpRemoteRezFloor(
   return Math.min(...rezCosts);
 }
 
-function semanticRuntimeVisibleIceRezCost(card: VisibleCard): number | undefined {
+function semanticRuntimeVisibleIceRezCost(
+  card: VisibleCard,
+): number | undefined {
   return (
     card.rezCost ??
     (card.definitionId
@@ -10350,7 +10570,10 @@ function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
     return true;
   }
   return input.legalActions.some((action) => {
-    const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(input, action);
+    const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+      input,
+      action,
+    );
     return assessment?.blockedByFloor === true;
   });
 }
@@ -11078,6 +11301,11 @@ function semanticRuntimeCorpEvidence(
   if (action.type === "draw_card") {
     evidence.push("corp_safe_alternative:draw");
   }
+  const advancementPlacement =
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment(input, action);
+  if (advancementPlacement) {
+    evidence.push(...advancementPlacement.evidence);
+  }
   const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
@@ -11368,7 +11596,10 @@ function retainActionAlternativesForFindingWindows(
     // Action-limit findings usually point at the terminal action; keep a small
     // lookback so the preceding actionable decision alternatives survive.
     const from = Math.max(0, finding.actionIndex - 5);
-    const to = Math.min(summary.actionSequence.length - 1, finding.actionIndex + 1);
+    const to = Math.min(
+      summary.actionSequence.length - 1,
+      finding.actionIndex + 1,
+    );
     for (let index = from; index <= to; index += 1) {
       keep.add(`${finding.summaryIndex}:${index}`);
     }
@@ -14692,7 +14923,9 @@ function runnerViral15JackOutScoreComponent(
     (card) => card.known === true && card.type === "program",
   );
   if (installedPrograms.length === 0) return undefined;
-  const protectedBreakers = installedPrograms.filter(isVisibleIcebreakerProgram).length;
+  const protectedBreakers = installedPrograms.filter(
+    isVisibleIcebreakerProgram,
+  ).length;
   return {
     key: "runner_viral15_jack_out_prevents_program_trash",
     label: "Viral-15-Rigschutz",
@@ -16184,7 +16417,12 @@ function corpSourceAdvancementCounterCreditPayoutAssessment(
   input: AiDecisionInput,
   action: LegalAction,
   features: AiFeatures,
-): { score: number; payout: number; advancementCounters: number; evidence: string[] } {
+): {
+  score: number;
+  payout: number;
+  advancementCounters: number;
+  evidence: string[];
+} {
   const source = findVisibleCard(input, action.source);
   const amountPerCounter =
     typeof action.payload?.cardImplementationAmountPerAdvancementCounter ===
@@ -17539,7 +17777,11 @@ function sourceDefinitionIdForAction(
 ): string {
   if (action.source === "basic_action" || action.source === "game_rule")
     return "";
-  return findVisibleCard(input, action.source)?.definitionId ?? "";
+  return (
+    findVisibleCard(input, action.source)?.definitionId ??
+    semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
+    ""
+  );
 }
 
 function traceTagExpectedSuccessEstimate(input: AiDecisionInput): number {

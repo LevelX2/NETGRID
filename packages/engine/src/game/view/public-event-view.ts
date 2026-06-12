@@ -6,6 +6,7 @@ import {
   type PublicGameEvent,
   type Side,
 } from "@netgrid/shared";
+import { sanitizeEventPayloadForSurface } from "./surface-policy";
 
 export function toPublicEvent(event: GameEvent): PublicGameEvent {
   return {
@@ -17,7 +18,10 @@ export function toPublicEvent(event: GameEvent): PublicGameEvent {
     ...(event.visibilityClass
       ? { visibilityClass: event.visibilityClass }
       : {}),
-    publicPayload: event.publicPayload,
+    publicPayload: sanitizeEventPayloadForSurface(
+      event.publicPayload,
+      "public_event",
+    ),
   };
 }
 
@@ -31,10 +35,13 @@ export function toPublicEventForSide(
     privateProjection
       ? {
           ...publicEvent,
-          publicPayload: {
-            ...publicEvent.publicPayload,
-            ...privateProjection,
-          },
+          publicPayload: sanitizeEventPayloadForSurface(
+            {
+              ...publicEvent.publicPayload,
+              ...privateProjection,
+            },
+            "public_event",
+          ),
         }
       : publicEvent,
     viewerSide,

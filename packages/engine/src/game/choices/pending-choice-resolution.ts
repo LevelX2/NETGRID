@@ -520,7 +520,9 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1913.code_viral_cache_purge")) {
+  if (
+    state.pendingChoice.source.startsWith("runner_virus_counter_purge_replacement")
+  ) {
     resolveCodeViralCachePurgeChoice(state, legalAction, playerAction);
     return;
   }

@@ -104,7 +104,6 @@ export type RunnerMainActionGenerationHost = {
   };
   constants: {
     RUNNER_EVENT_RESOLVERS: Record<string, any>;
-    CODE_VIRAL_CACHE_ID: string;
     STACK_SEARCH_PROGRAM_CARD_IDS: ReadonlySet<string>;
     SELF_MODIFYING_CODE_ID: string;
     SHORT_CIRCUIT_RESOURCE_CARD_ID: string;
@@ -124,6 +123,30 @@ export type RunnerMainActionGenerationHost = {
     ALL_NIGHTER_ID: string;
   };
 };
+
+function runnerInstallCapabilitiesMet(
+  host: RunnerMainActionGenerationHost,
+  definition: any,
+): boolean {
+  const installCapabilities =
+    host.cardImplementation.cardImplementationForDefinitionId(definition.id)
+      ?.installCapabilities ?? [];
+  for (const capability of installCapabilities) {
+    if (capability.kind !== "runner_made_successful_run_on_server_this_turn")
+      continue;
+    const flags = host.runner.ensureRunnerTurnFlags(host.state);
+    if (capability.server === "hq" && flags.successfulHqRunThisTurn !== true)
+      return false;
+    if (capability.server === "rd" && flags.successfulRdRunThisTurn !== true)
+      return false;
+    if (
+      capability.server === "any_data_fort" &&
+      flags.successfulRunThisTurn !== true
+    )
+      return false;
+  }
+  return true;
+}
 
 export function buildRunnerMainActions(
   host: RunnerMainActionGenerationHost,
@@ -237,7 +260,6 @@ export function buildRunnerMainActions(
     host.runner.uniqueDirectLongtailImplementationForCard;
   const topRunnerHeapCardId = host.hiddenZone.topRunnerHeapCardId;
   const RUNNER_EVENT_RESOLVERS = host.constants.RUNNER_EVENT_RESOLVERS;
-  const CODE_VIRAL_CACHE_ID = host.constants.CODE_VIRAL_CACHE_ID;
   const STACK_SEARCH_PROGRAM_CARD_IDS =
     host.constants.STACK_SEARCH_PROGRAM_CARD_IDS;
   const SELF_MODIFYING_CODE_ID = host.constants.SELF_MODIFYING_CODE_ID;
@@ -589,12 +611,7 @@ export function buildRunnerMainActions(
       state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
         (definition.installCost ?? 0)
     ) {
-      if (
-        definition.id === CODE_VIRAL_CACHE_ID &&
-        ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true
-      ) {
-        continue;
-      }
+      if (!runnerInstallCapabilitiesMet(host, definition)) continue;
       const installAgendaPointCost =
         cardImplementationAgendaPointInstallCost(definition);
       if (installAgendaPointCost > 0) {

@@ -2945,7 +2945,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
     expect(
       state.randomDrawRecords.some((record) =>
-        record.purpose.includes("quest-for-cattekin.start_runner_turn"),
+        record.purpose.includes("start_turn_random_effect_table."),
       ),
     ).toBe(true);
     expect(
@@ -3006,7 +3006,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           .find(
             (candidate) =>
               (candidate as { effectId?: string }).effectId?.startsWith(
-                "runner.start.quest_for_cattekin.",
+                "runner.start.random_effect_table.",
               ) === true,
           ) as Record<string, unknown> | undefined;
         if (effect && targetRolls.includes(Number(effect.v1921DieRoll)))
@@ -3019,26 +3019,24 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     const noOp = resolveQuestStartForRoll([3, 4, 5]);
     expect(noOp.state.randomDrawRecords.length).toBe(noOp.randomBefore + 1);
-    expect(noOp.effect.questForCattekinOutcome).toBe("no_effect");
+    expect(noOp.effect.randomEffectOutcome).toBe("no_effect");
     expect(noOp.state.runner.rig.resources).toContain(noOp.questId);
     expect(noOp.state.runner.clicks).toBe(4);
 
     const coreDamage = resolveQuestStartForRoll(1);
-    expect(coreDamage.effect.questForCattekinOutcome).toBe("core_damage");
+    expect(coreDamage.effect.randomEffectOutcome).toBe("core_damage");
     expect(coreDamage.effect.damageCannotBePrevented).toBe(true);
     expect(coreDamage.effect.damageType).toBe("core");
     expect(coreDamage.effect.coreDamageAfter).toBeGreaterThanOrEqual(1);
 
     const netDamage = resolveQuestStartForRoll(2);
-    expect(netDamage.effect.questForCattekinOutcome).toBe("net_damage");
+    expect(netDamage.effect.randomEffectOutcome).toBe("net_damage");
     expect(netDamage.effect.damageCannotBePrevented).toBe(true);
     expect(netDamage.effect.damageType).toBe("net");
     expect(netDamage.effect.cardsTrashed).toBeGreaterThanOrEqual(1);
 
     const permanentAction = resolveQuestStartForRoll(6);
-    expect(permanentAction.effect.questForCattekinOutcome).toBe(
-      "permanent_action",
-    );
+    expect(permanentAction.effect.randomEffectOutcome).toBe("permanent_action");
     expect(permanentAction.effect.sourceTrashed).toBe(true);
     expect(permanentAction.state.runner.rig.resources).not.toContain(
       permanentAction.questId,
@@ -3048,9 +3046,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     expect(permanentAction.state.runner.clicks).toBe(5);
     expect(
-      permanentAction.state.runnerTurnFlags
-        ?.questForCattekinPermanentActionGain,
-    ).toBe(true);
+      permanentAction.state.runnerTurnFlags?.persistentModifiers,
+    ).toContainEqual({
+      sourceCardInstanceId: permanentAction.questId,
+      sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+      kind: "runner_extra_actions_per_turn",
+      amount: 1,
+    });
     const randomAfterFirstQuest =
       permanentAction.state.randomDrawRecords.length;
     let nextTurn = apply(

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -649,7 +649,6 @@ import {
   BUTCHER_BOY_ID,
   CHIMERA_ID,
   COCKROACH_ID,
-  CODE_VIRAL_CACHE_ID,
   DANSHIS_SECOND_ID,
   DEAL_WITH_MILITECH_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
@@ -765,7 +764,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     applyCorpStartOfTurnEffects,
     applyEffectCommands,
     applyPurgeableRunnerVirusCorpStartEffects,
-    applyQuestForCattekinStartOfTurn,
+    applyStartTurnRandomEffectTables,
     applyRunnerDrawSummaryPayload,
     applyRunnerForgoNextAction,
     applyRunnerStartOfTurnEffects,
@@ -1517,7 +1516,11 @@ function totalCounters(state: GameState, counterType: CounterType): number {
 
 function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.resources
-    .filter((cardId) => definitionFor(state, cardId).id === CODE_VIRAL_CACHE_ID)
+    .filter(
+      (cardId) =>
+        hiddenReplacementLongtailForDefinition(definitionFor(state, cardId))
+          ?.kind === "purge_replacement_with_runner_virus_counter_cleanup",
+    )
     .sort();
 }
 
@@ -1570,10 +1573,10 @@ function startCodeViralCachePurgeChoice(
   if (targets.length === 0) return false;
   const sourceCardId = sourceIds[0];
   state.pendingChoice = {
-    choiceId: `v1913_code_viral_cache_${state.stateVersion + 1}`,
+    choiceId: `runner_virus_purge_replacement_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v1913.code_viral_cache_purge:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Code Viral Cache: bis zu zwei Virus-Counter behalten.",
+    source: `runner_virus_counter_purge_replacement:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Bis zu zwei Virus-Counter behalten.",
     kind: "select_cards",
     options: targets.map((target) => ({
       id: target.optionId,
@@ -1589,10 +1592,10 @@ function startCodeViralCachePurgeChoice(
   state.activeSide = "runner";
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
-    codeViralCachePurgeReplacementOpened: true,
-    codeViralCacheEligibleCounterCount: targets.length,
-    codeViralCacheMaxPreserveCounters: Math.min(2, targets.length),
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    runnerVirusCounterPurgeReplacementOpened: true,
+    eligibleCounterCount: targets.length,
+    maxPreserveCounters: Math.min(2, targets.length),
     purgedCounterType: "virus",
   };
   return true;
@@ -1623,21 +1626,21 @@ function restoreCodeViralCachePreservedCounters(
     .map(parseCodeViralCachePreserveOption)
     .filter((target): target is CodeViralCachePreserveTarget => Boolean(target));
   if (selectedTargets.length !== selectedOptionIds.length)
-    throw new Error("Die Code-Viral-Cache-Auswahl ist ungueltig.");
+    throw new Error("Die Virus-Counter-Erhaltungsauswahl ist ungueltig.");
   if (selectedTargets.length > 2)
-    throw new Error("Code Viral Cache kann hoechstens 2 Counter behalten.");
+    throw new Error("Diese Replacement-Faehigkeit kann hoechstens 2 Counter behalten.");
   const beforeCardCounts = new Map<CardInstanceId, number>();
   const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
   const preservedCardDefinitionIds: CardDefinitionId[] = [];
   for (const target of selectedTargets) {
     if (target.kind === "card") {
       if (!visibleVirusCounterTargetIds(state).includes(target.cardId))
-        throw new Error("Ein Code-Viral-Cache-Counterziel ist nicht mehr legal.");
+        throw new Error("Ein Virus-Counter-Erhaltungsziel ist nicht mehr legal.");
       const count =
         beforeCardCounts.get(target.cardId) ??
         cardCounter(state, target.cardId, "virus");
       if (target.index > count)
-        throw new Error("Ein Code-Viral-Cache-Counter existiert nicht mehr.");
+        throw new Error("Ein zu erhaltender Virus-Counter existiert nicht mehr.");
       beforeCardCounts.set(target.cardId, count);
     } else {
       mustServer(state, target.serverId);
@@ -1648,7 +1651,7 @@ function restoreCodeViralCachePreservedCounters(
           Math.floor(Number(state.poxCountersByServer?.[target.serverId] ?? 0)),
         );
       if (target.index > count)
-        throw new Error("Ein Code-Viral-Cache-Pox-Counter existiert nicht mehr.");
+        throw new Error("Ein zu erhaltender Pox-Counter existiert nicht mehr.");
       beforePoxCounts.set(target.serverId, count);
     }
   }
@@ -1692,21 +1695,23 @@ function resolveCodeViralCachePurgeChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1913.code_viral_cache_purge"))
-    throw new Error("Es ist keine Code-Viral-Cache-Choice offen.");
+  if (
+    !choice ||
+    !choice.source.startsWith("runner_virus_counter_purge_replacement")
+  )
+    throw new Error("Es ist keine Virus-Counter-Erhaltungs-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
   if (!sourceCardId || !installedCodeViralCacheIds(state).includes(sourceCardId))
-    throw new Error("Code Viral Cache ist nicht mehr installiert.");
+    throw new Error("Die Replacement-Quelle ist nicht mehr installiert.");
   const selected = selectedChoiceIds(playerAction.selectedChoices);
   const legalOptionIds = new Set(choice.options.map((option) => option.id));
   if (selected.some((optionId) => !legalOptionIds.has(optionId)))
-    throw new Error("Die Code-Viral-Cache-Auswahl ist nicht legal.");
+    throw new Error("Die Virus-Counter-Erhaltungsauswahl ist nicht legal.");
   const result = restoreCodeViralCachePreservedCounters(state, selected);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
     purgedCounterType: "virus",
-    codeViralCachePreservedCounters: result.preserved,
     preservedCounterAmount: result.preserved,
     ...(result.preservedCardDefinitionIds.length > 0
       ? {

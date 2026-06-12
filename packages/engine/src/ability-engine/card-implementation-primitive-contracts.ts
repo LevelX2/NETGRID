@@ -54,7 +54,7 @@ export function primitiveContractRecords(
         requiresTarget: true,
         targetKind: scoredAgenda.target,
         hiddenInfoClass: scoredAgenda.visibility,
-        resolverModule: "scored-agenda-flow",
+        resolverModule: "scored-agenda/ice-transmutation-sequence",
       });
     }
     if (

@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -2157,8 +2157,13 @@ function startRunnerTurn(
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
   state.runner.clicks = runnerActionsPerTurn(state);
-  if (state.runnerTurnFlags?.questForCattekinPermanentActionGain)
-    state.runner.clicks += 1;
+  state.runner.clicks += (state.runnerTurnFlags?.persistentModifiers ?? []).reduce(
+    (total, modifier) =>
+      modifier.kind === "runner_extra_actions_per_turn"
+        ? total + modifier.amount
+        : total,
+    0,
+  );
   applyFutureExtraActionGrantsAtTurnStart(state, "runner", effects);
   state.corp.clicks = 0;
   clearEdgerunnerTempsInstallFlags(state);
@@ -2651,7 +2656,7 @@ function applyRunnerStartOfTurnEffects(
     state,
     effects,
   );
-  applyQuestForCattekinStartOfTurn(state, effects);
+  applyStartTurnRandomEffectTables(state, effects);
   if (!flags.startOfTurnFloatingCreditsApplied) {
     const virusCredits = virusCounterCreditsAtRunnerStart(state);
     if (virusCredits.amount > 0) {
@@ -2692,68 +2697,62 @@ function applyRunnerStartOfTurnEffects(
   }
 }
 
-function applyQuestForCattekinStartOfTurn(
+function applyStartTurnRandomEffectTables(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
-  const sourceIds = state.runner.rig.resources
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-        "quest_for_cattekin_start_turn_random_permanent_action",
-    );
-  for (const sourceId of sourceIds) {
+  for (const sourceId of state.runner.rig.resources.slice().sort()) {
     const sourceDefinitionId = definitionFor(state, sourceId).id;
-    const randomPurpose = `p3_59.die.${sourceDefinitionId}.start_runner_turn.${state.stateVersion}.${sourceId}`;
+    const implementation = runnerUtilityLongtailImplementationForCard(
+      state,
+      sourceId,
+    );
+    if (implementation?.kind !== "start_turn_random_effect_table") continue;
+    const randomPurpose = `start_turn_random_effect_table.${sourceDefinitionId}.runner_start.${state.stateVersion}.${sourceId}`;
     const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const outcome =
+      implementation.outcomes.find((candidate) => candidate.roll === dieRoll) ??
+      implementation.defaultOutcome;
+    const grantsAction =
+      outcome.kind === "trash_source_and_grant_persistent_extra_action";
+    const dealsDamage = outcome.kind === "unpreventable_damage";
     let damageSummary: DamageSummary | undefined;
-    if (dieRoll === 6) {
-      ensureRunnerTurnFlags(state).questForCattekinPermanentActionGain = true;
-      state.runner.clicks += 1;
+    if (grantsAction) {
+      const flags = ensureRunnerTurnFlags(state);
+      const modifiers = (flags.persistentModifiers ??= []);
+      if (!modifiers.some((modifier) => modifier.sourceCardInstanceId === sourceId)) {
+        modifiers.push({
+          sourceCardInstanceId: sourceId,
+          sourceDefinitionId,
+          kind: "runner_extra_actions_per_turn",
+          amount: outcome.extraActions,
+        });
+        state.runner.clicks += outcome.extraActions;
+      }
       trashRunnerInstalledCardToHeap(state, sourceId);
-    } else if (dieRoll === 1) {
+    } else if (dealsDamage) {
       damageSummary = doDamage(state, {
-        damageId: `runner.start.${sourceDefinitionId}.core.${state.stateVersion}`,
-        damageType: "core",
-        amount: 1,
-        source: `runner_start:${sourceDefinitionId}`,
-      });
-    } else if (dieRoll === 2) {
-      damageSummary = doDamage(state, {
-        damageId: `runner.start.${sourceDefinitionId}.net.${state.stateVersion}`,
-        damageType: "net",
-        amount: 1,
+        damageId: `runner.start.${sourceDefinitionId}.${outcome.damageType}.${state.stateVersion}`,
+        damageType: outcome.damageType,
+        amount: outcome.amount,
         source: `runner_start:${sourceDefinitionId}`,
       });
     }
     effects?.push({
-      effectId: `runner.start.quest_for_cattekin.${sourceId}`,
-      kind:
-        dieRoll === 6
-          ? "gain_actions"
-        : dieRoll === 1 || dieRoll === 2
-            ? "damage"
-            : "counter_change",
+      effectId: `runner.start.random_effect_table.${sourceId}`,
+      kind: grantsAction ? "gain_actions" : dealsDamage ? "damage" : "counter_change",
       visibility: "public",
       side: "runner",
-      amount: dieRoll === 6 ? 1 : damageSummary?.amount ?? 0,
+      amount: grantsAction ? outcome.extraActions : damageSummary?.amount ?? 0,
       reason: "start_of_turn",
       sourceDefinitionId,
       sourceTitle: publicCardTitle(sourceDefinitionId),
       v1921DieRoll: dieRoll,
-      questForCattekinOutcome:
-        dieRoll === 6
-          ? "permanent_action"
-          : dieRoll === 1
-            ? "core_damage"
-            : dieRoll === 2
-              ? "net_damage"
-              : "no_effect",
+      randomEffectOutcome:
+        grantsAction ? "permanent_action" : dealsDamage ? `${outcome.damageType}_damage` : "no_effect",
       randomPurpose,
       randomCounterAfter: state.randomCounter,
-      ...(dieRoll === 6
+      ...(grantsAction
         ? {
             permanentActionGain: true,
             sourceTrashed: true,
@@ -3185,7 +3184,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     virusCounterCascadeTrashAtCorpStart,
     trashFaceupRdCardsForCascade,
     applyRunnerStartOfTurnEffects,
-    applyQuestForCattekinStartOfTurn,
+    applyStartTurnRandomEffectTables,
     applyRunnerStartTurnActionEconomyEffects,
     runnerForcedActionGrantForRoll,
     randomRunnerGripCardId,

@@ -1,0 +1,33 @@
+import { describe, expect, it } from "vitest";
+import {
+  findScoredAgendaScoreTimeResolver,
+  SCORED_AGENDA_SCORE_TIME_RESOLVERS,
+} from "./scored-agenda-score-time-registry";
+
+describe("scored agenda score-time registry", () => {
+  it("uses unique resolver ids and kinds", () => {
+    const ids = SCORED_AGENDA_SCORE_TIME_RESOLVERS.map(
+      (resolver) => resolver.id,
+    );
+    const kinds = SCORED_AGENDA_SCORE_TIME_RESOLVERS.map(
+      (resolver) => resolver.kind,
+    );
+
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(new Set(kinds).size).toBe(kinds.length);
+  });
+
+  it("matches score-time resolvers by scored agenda kind", () => {
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "select_rezzed_ice_mark_modifier",
+      } as never)?.id,
+    ).toBe("ice_transmutation_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "score_install_hq_cards_into_new_remote_then_rez",
+      } as never)?.id,
+    ).toBe("data_fort_reclamation_score_start");
+    expect(findScoredAgendaScoreTimeResolver(undefined)).toBeUndefined();
+  });
+});

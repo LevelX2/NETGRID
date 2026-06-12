@@ -323,7 +323,7 @@ const abstractionPlan = [
       "Erster vertikaler Slice, weil kind, Payload, Resolver und Turn-State zusammen sichtbar sind.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Quest for Cattekin",
     currentNames: [
       "quest_for_cattekin_start_turn_random_permanent_action",
@@ -341,7 +341,7 @@ const abstractionPlan = [
       ],
     },
     notes:
-      "Fachlich nah an Action-Economy/Delayed-Damage, aber wegen Random-/Permanent-State erst nach dem Muster-Slice.",
+      "Zweiter vertikaler Slice: Start-of-turn-Random-Table und persistenter Runner-Action-Modifikator sind generisch umgesetzt.",
   },
   {
     priority: "deferred_refactor_required",
@@ -374,16 +374,17 @@ const abstractionPlan = [
       "Access-/Breach-State betrifft Hidden-Info-Grenzen und braucht eigenen Regression-Slice.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Code Viral Cache",
-    currentNames: ["code_viral_cache_purge_replacement", "CODE_VIRAL_CACHE_ID"],
+    currentNames: ["CODE_VIRAL_CACHE_ID", "trash_code_viral_cache"],
     targetKind: "purge_replacement_with_runner_virus_counter_cleanup",
     targetState: ["replacementEffects[]"],
     params: {
       interruptedEvent: "corp_purge_virus_counters",
       runnerVirusCounterCleanup: true,
     },
-    notes: "Purge-Replacement bleibt als eigene Event-/Replacement-Familie.",
+    notes:
+      "Install-Condition und Purge-Replacement sind generisch umgesetzt; die separate Corp-Trash-Aktion bleibt ein kleiner deferred Restpfad.",
   },
   {
     priority: "deferred_refactor_required",
@@ -671,7 +672,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice und der `Code Viral Cache`-Install-/Purge-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Krumz` und `Startup Immolator`; der separate Code-Viral-Cache-Corp-Trash-Restpfad, `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben eigene Folgeprozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");
@@ -709,7 +710,7 @@ const report = {
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
-    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt und Baseline-Guard sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt und Code-Viral-Cache-Install-/Purge-Slice sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",

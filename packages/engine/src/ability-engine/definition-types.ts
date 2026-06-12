@@ -219,7 +219,7 @@ export type CardHiddenReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "code_viral_cache_purge_replacement";
+      kind: "purge_replacement_with_runner_virus_counter_cleanup";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
@@ -268,7 +268,23 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "quest_for_cattekin_start_turn_random_permanent_action";
+      kind: "start_turn_random_effect_table";
+      dieFaces: number;
+      randomPurpose: "runner_start_turn_source";
+      outcomes: Array<
+        | {
+            roll: number;
+            kind: "trash_source_and_grant_persistent_extra_action";
+            extraActions: number;
+          }
+        | {
+            roll: number;
+            kind: "unpreventable_damage";
+            damageType: "core" | "net" | "meat";
+            amount: number;
+          }
+      >;
+      defaultOutcome: { kind: "no_effect" };
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -545,6 +561,11 @@ export type CardInstallCapabilityImplementation =
     }
   | {
       kind: "install_only_in_hq_or_rd";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "runner_made_successful_run_on_server_this_turn";
+      server: Extract<ServerId, "hq" | "rd"> | "any_data_fort";
       visibility: Extract<EventVisibilityClass, "public">;
     };
 

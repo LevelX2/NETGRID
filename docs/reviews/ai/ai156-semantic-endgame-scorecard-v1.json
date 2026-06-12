@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "ai156-semantic-endgame-scorecard-v1",
+  "generatedAt": "2026-06-12T22:25:33.839Z",
+  "gitHead": "1d825423",
+  "sources": [
+    "docs/reviews/ai/ai132-progress-delta-labeler-2026-06-12.json",
+    "docs/reviews/ai/ai148-final-a-d-5seed-2026-06-12.json",
+    "docs/reviews/ai/ai148-final-a-d-10seed-2026-06-12.json",
+    "docs/reviews/ai/ai149-same-state-challenger-probe-2026-06-12.json",
+    "docs/reviews/ai/ai152-runner-coverage-solver-shadow-2026-06-12.md",
+    "docs/reviews/ai/ai153-corp-tempo-converter-shadow-2026-06-12.md"
+  ],
+  "safety": {
+    "illegalActionsX10": 0,
+    "replayFailuresX10": 0,
+    "redactionSafeX10": true,
+    "criticalFindingsX10": 0
+  },
+  "traceMetrics": {
+    "x5": {
+      "games": 20,
+      "decisions": 2492,
+      "actionLimitReached": 11,
+      "actionLimitRate": 0.55,
+      "repeatedNoProgressRun": 33,
+      "unsafeScoreChosen": 4,
+      "passiveActionWithScoreLineAvailable": 7,
+      "averageGameLength": 124.6,
+      "runnerAgendaSteals": 28,
+      "corpAgendaScores": 13,
+      "corpFlatlines": 5
+    },
+    "x10": {
+      "games": 40,
+      "decisions": 5178,
+      "actionLimitReached": 23,
+      "actionLimitRate": 0.575,
+      "repeatedNoProgressRun": 56,
+      "unsafeScoreChosen": 7,
+      "passiveActionWithScoreLineAvailable": 14,
+      "averageGameLength": 129.45,
+      "runnerAgendaSteals": 49,
+      "corpAgendaScores": 23,
+      "corpFlatlines": 10
+    }
+  },
+  "semanticMetrics": {
+    "staleNoProgressShare": 0.3294,
+    "progressConversionRate": 0.5317,
+    "coverageCompletionRate": 0.6667,
+    "corpTempoConversionRate": 1,
+    "sameStateChallengerProofRate": 0,
+    "sameStateMatchRate": 0
+  }
+}

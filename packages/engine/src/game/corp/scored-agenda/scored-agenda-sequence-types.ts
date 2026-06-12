@@ -1,7 +1,20 @@
-import type { CardInstanceId } from "@netgrid/shared";
+import type { CardInstanceId, LegalAction } from "@netgrid/shared";
 import { sanitizeCardImplementationSurfacePayload } from "../../view/surface-sanitizer";
+import type { CorpInstallRezSequenceHandlerResult } from "./scored-agenda-sequence-host";
 
 export type CorpSequencePayloadValue = string | number | boolean;
+export type SequencePayloadPatch = Record<string, CorpSequencePayloadValue>;
+export type SequenceDeveloperTrace = {
+  step: string;
+  details?: Record<string, CorpSequencePayloadValue>;
+};
+
+export type SequenceResolution = {
+  result: CorpInstallRezSequenceHandlerResult;
+  payloadPatch: SequencePayloadPatch;
+  stateChanged?: boolean;
+  developerTrace?: SequenceDeveloperTrace;
+};
 
 /**
  * @contract Shared payload context for corp scored-agenda sequence steps.
@@ -36,7 +49,7 @@ export type CorpSequenceContext = {
 
 export function corpSequenceContextPayload(
   context: CorpSequenceContext,
-): Record<string, CorpSequencePayloadValue> {
+): SequencePayloadPatch {
   const { step: _step, ...payload } = context;
   const entries = Object.entries(payload).filter(
     (entry): entry is [string, CorpSequencePayloadValue] =>
@@ -45,4 +58,31 @@ export function corpSequenceContextPayload(
       typeof entry[1] === "boolean",
   );
   return sanitizeCardImplementationSurfacePayload(Object.fromEntries(entries));
+}
+
+export function applySequencePayloadPatch(
+  legalAction: LegalAction,
+  payloadPatch: SequencePayloadPatch,
+): NonNullable<LegalAction["payload"]> {
+  const sanitizedPatch = sanitizeCardImplementationSurfacePayload(payloadPatch);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...sanitizedPatch,
+  };
+  return legalAction.payload;
+}
+
+export function applySequenceResolution(
+  legalAction: LegalAction,
+  resolution: SequenceResolution,
+): CorpInstallRezSequenceHandlerResult {
+  const resolvedPayload = applySequencePayloadPatch(
+    legalAction,
+    resolution.payloadPatch,
+  );
+  return {
+    ...resolution.result,
+    ...(resolution.stateChanged === true ? { stateChanged: true } : {}),
+    resolvedPayload,
+  };
 }
