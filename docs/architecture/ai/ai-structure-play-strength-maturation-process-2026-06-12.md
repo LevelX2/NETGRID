@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_12_corpus_metadata_league
+ai_mat_13_doctrine_goal_delta
 
 ## Quelle/Vorgabe
 
@@ -173,7 +173,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-9 | complete | `771ae38f` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-shadow-calibration.ts packages/ai/src/decision/semantic-shadow-calibration.test.ts packages/ai/src/evaluation/play-strength-benchmark.ts packages/ai/src/evaluation/play-strength-benchmark.test.ts` |
 | AI-MAT-10 | complete | `876252b0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts` |
 | AI-MAT-11 | complete | `7afce6dd` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
-| AI-MAT-12 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus.ts packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
+| AI-MAT-12 | complete | `2020e1ef` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus.ts packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
+| AI-MAT-13 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/doctrine-goal-synthesis.ts packages/ai/src/decision/doctrine-goal-synthesis.test.ts` |
 
 ## Check-Nachweise
 
@@ -201,6 +202,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-12`: Shadow-League-Erwartungen werden ohne expliziten Override aus Corpus-Metadata abgeleitet.
 - `AI-MAT-12`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/real-engine-decision-corpus.test.ts src/evaluation/semantic-shadow-league.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1215 Tests ausgefuehrt.
 - `AI-MAT-12`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-13`: DoctrineGoalSynthesis ergaenzt Runner-RemoteContest-Diagnoseziele und Coverage-Fallback.
+- `AI-MAT-13`: `corepack pnpm --filter @netgrid/ai test -- src/decision/doctrine-goal-synthesis.test.ts src/decision/neutral-goal-synthesis.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1216 Tests ausgefuehrt.
+- `AI-MAT-13`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

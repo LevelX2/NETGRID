@@ -55,6 +55,36 @@ describe("doctrine goal synthesis", () => {
     ]);
   });
 
+  it("turns runner remote contest doctrine into diagnostic contest or coverage goals", () => {
+    const complete = synthesizeDoctrineTacticalGoals(
+      diagnostic("runner", "complete", false, [
+        strategy("runner.remote_contest", "complete"),
+      ]),
+    );
+    const partial = synthesizeDoctrineTacticalGoals(
+      diagnostic("runner", "partial", false, [
+        strategy("runner.remote_contest", "partial", ["weak_breaker_coverage"]),
+      ]),
+    );
+
+    expect(complete).toEqual([
+      expect.objectContaining({
+        goalId: "runner.doctrine.remote_contest",
+        family: "remote_contest",
+        evidence: expect.arrayContaining(["doctrine_goal:remote_contest"]),
+      }),
+    ]);
+    expect(partial).toEqual([
+      expect.objectContaining({
+        goalId: "runner.doctrine.remote_contest_coverage",
+        family: "coverage",
+        evidence: expect.arrayContaining([
+          "missing_breaker_coverage:doctrine_v2",
+        ]),
+      }),
+    ]);
+  });
+
   it("turns complete corp remote scoring into scoreline and defense goals", () => {
     const goals = synthesizeDoctrineTacticalGoals(
       diagnostic("corp", "complete", false, [

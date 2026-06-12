@@ -31,7 +31,19 @@ export function synthesizeDoctrineTacticalGoals(
 function runnerDoctrineGoals(
   strategy: DeckDoctrineV2StrategyDiagnostic,
 ): TacticalGoalLike[] {
-  if (strategy.strategyId !== "runner.rnd_pressure") return [];
+  switch (strategy.strategyId) {
+    case "runner.rnd_pressure":
+      return runnerRndPressureGoals(strategy);
+    case "runner.remote_contest":
+      return runnerRemoteContestGoals(strategy);
+    default:
+      return [];
+  }
+}
+
+function runnerRndPressureGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
   if (strategy.status === "complete") {
     return [
       goal("runner.doctrine.rnd_pressure_access", "pressure", 790, "high", [
@@ -56,6 +68,30 @@ function runnerDoctrineGoals(
         "doctrine_v2:runner.rnd_pressure",
         "doctrine_status:partial",
         "doctrine_gap:setup_before_pressure",
+      ]),
+    ];
+  }
+  return [];
+}
+
+function runnerRemoteContestGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("runner.doctrine.remote_contest", "remote_contest", 800, "high", [
+        "doctrine_v2:runner.remote_contest",
+        "doctrine_status:complete",
+        "doctrine_goal:remote_contest",
+      ]),
+    ];
+  }
+  if (strategy.status === "partial" && hasCoverageGap(strategy)) {
+    return [
+      goal("runner.doctrine.remote_contest_coverage", "coverage", 710, "medium", [
+        "doctrine_v2:runner.remote_contest",
+        "doctrine_status:partial",
+        "missing_breaker_coverage:doctrine_v2",
       ]),
     ];
   }
