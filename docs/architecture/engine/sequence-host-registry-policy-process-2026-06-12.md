@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`completed`
 
 ## Paketfortschritt
 
@@ -17,6 +17,7 @@
 - P8 abgeschlossen: Ice Transmutation liegt in `ice-transmutation-sequence.ts`; `scored-agenda-flow.ts` delegiert Start und Choice-Resolution nur noch an das Modul. Der Primitive-Contract verweist auf den neuen Resolverpfad. Ice-Transmutation-Flowtest, Modultest, Primitive-Contract-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P9 abgeschlossen: `ordered-fort-rebuild-sequence.ts` definiert einen Pavit-Bharat-kompatiblen Pilotvertrag mit geordneten Steps, Hidden-Info-Visibility und public Count-Payload ohne Kartenlisten. Es gibt keine produktive Kartenfreischaltung. Modultest, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P10 abgeschlossen: `sequence-contract.test.ts` bündelt Source-Routing-, Surface- und Payload-Atomicity-Verträge. Dabei wurde ein DFR-Overlap geschlossen: Rez-Sources matchen nicht mehr zusätzlich den Install-Resolver. Sequenz-/Surface-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P11 abgeschlossen: Finaler Engine-Typecheck, gebündelter Engine-Testblock, `check:ai`, Format- und Whitespace-Gates sind grün. `check:ai` meldet bestehende Warnungen, aber keine Errors. Der Branch ist bereit für die lokale Integration nach `main`.
 
 ## Quelle/Vorgabe
 
