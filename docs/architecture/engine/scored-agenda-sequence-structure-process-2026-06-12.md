@@ -9,6 +9,7 @@
 - P0 abgeschlossen mit Commit `0350f599`: Prozessartefakt und Worktree-Preflight.
 - P1 abgeschlossen: `hidden-zone-choice.ts` zentralisiert actor-private Hidden-Card-Choice-Optionen, Hidden-Card-Auswahlauflösung und Hidden-Zone-Payload-Marker. `install-rez-sequence-handlers.ts` nutzt diese Helper für Priority Requisition, Security Purge und Data Fort Reclamation ohne fachliche Verhaltensänderung.
 - P2 abgeschlossen: Data Fort Reclamation liegt in `packages/engine/src/game/corp/scored-agenda/data-fort-reclamation-sequence.ts`; der alte Install-/Rez-Handler dispatcht und re-exportiert nur noch die stabile Startfunktion. DFR-Testausschnitt, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P3 abgeschlossen: Security Purge liegt in `packages/engine/src/game/corp/scored-agenda/security-purge-sequence.ts`; der alte Handler dispatcht die offene Zielserver-Choice und re-exportiert den Agenda-Resolver. Security-Purge-Testausschnitt, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
