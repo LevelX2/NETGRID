@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`completed`
 
 ## Paketfortschritt
 
@@ -16,6 +16,7 @@
 - P7 abgeschlossen: `install-rez-sequence-handlers.ts` ist auf Host-/Result-Typen, stabile Re-Exports und Choice-Dispatcher reduziert. Ein Dispatcher-Kontrakt beschreibt, dass Legalität und Mutation in den Sequenzmodulen unter Rules-Engine-Vertrag bleiben. Handler-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P8 abgeschlossen: Neben den neuen Sequenzmodulen liegen schlanke Routing-Modultests für Data Fort Reclamation, Security Purge und Priority Requisition. Der bestehende `install-rez-sequence-handlers.test.ts` bleibt als Integrationstest erhalten. P8-Testblock, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P9 abgeschlossen: Die neuen Sequenzmodule tragen lokale Contract-/Authority-/Visibility-Kommentare. Der primitive Contract und das checked-in Manifest referenzieren Data Fort Reclamation nun auf `scored-agenda/data-fort-reclamation-sequence` statt auf den alten Dispatcher. Primitive-Contract-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P10 abgeschlossen: Finaler Verify-Block grün: `@netgrid/engine typecheck`, relevante Engine-Vitest-Dateien, `check:ai`, `format:changed -- main` und `git diff --check`. `check:ai` meldete bestehende Warnungen, aber keine Fehler. Keine durch dieses Paket verursachten roten Tests.
 
 ## Quelle/Vorgabe
 
