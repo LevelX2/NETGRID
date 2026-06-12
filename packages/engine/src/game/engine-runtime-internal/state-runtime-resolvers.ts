@@ -1010,7 +1010,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     resolvePostOnPlayGenericFollowups,
     resolvePowerGridOverloadChoice,
     resolvePowerGridOverloadOperation,
-    resolvePreyingMantisEndOfRunnerTurnDamage,
+    resolveDelayedEndTurnDamageEffects,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,

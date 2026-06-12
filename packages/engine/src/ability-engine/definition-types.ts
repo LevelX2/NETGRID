@@ -258,7 +258,13 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "preying_mantis_optional_action_unpreventable_core_damage";
+      kind: "optional_extra_action_with_delayed_damage";
+      extraActions: number;
+      damageType: "core" | "net" | "meat";
+      damageAmount: number;
+      damageTiming: "end_of_turn";
+      preventable: boolean;
+      limit: "once_per_turn_per_source";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

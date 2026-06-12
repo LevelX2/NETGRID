@@ -259,7 +259,8 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+          action.payload?.runnerUtilityAbility ===
+            "optional_extra_action_with_delayed_damage" &&
           action.payload?.cardId === mantisId,
       ),
     ).toBe(true);

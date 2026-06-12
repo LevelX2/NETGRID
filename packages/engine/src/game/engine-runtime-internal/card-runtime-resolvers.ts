@@ -1012,7 +1012,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     resolvePostOnPlayGenericFollowups,
     resolvePowerGridOverloadChoice,
     resolvePowerGridOverloadOperation,
-    resolvePreyingMantisEndOfRunnerTurnDamage,
+    resolveDelayedEndTurnDamageEffects,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,

@@ -1431,8 +1431,15 @@ export type GameState = {
     bodyweightDataCrecheExtraRunPending?: boolean;
     bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
     startupImmolatorUsedSourceIdsThisTurn?: CardInstanceId[];
-    preyingMantisUsedSourceIdsThisTurn?: CardInstanceId[];
-    preyingMantisDamageDueSourceIdsThisTurn?: CardInstanceId[];
+    delayedEndTurnEffects?: Array<{
+      sourceCardInstanceId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      abilityKey: string;
+      kind: "damage";
+      damageType: DamageType;
+      amount: number;
+      preventable: boolean;
+    }>;
     questForCattekinPermanentActionGain?: boolean;
     corpRezzedIceThisTurn?: number;
     lastRezzedBlackIceThisTurn?: {

@@ -1237,35 +1237,43 @@ function resolveFieldReporterEndOfRunnerTurn(
   };
 }
 
-function resolvePreyingMantisEndOfRunnerTurnDamage(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const dueSourceIds =
-    ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn ?? [];
-  if (dueSourceIds.length === 0) return;
+function resolveDelayedEndTurnDamageEffects(state: GameState, legalAction: LegalAction): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const dueEffects = (flags.delayedEndTurnEffects ?? []).filter(
+    (effect) => effect.kind === "damage",
+  );
+  if (dueEffects.length === 0) return;
+  const totalDamage = dueEffects.reduce((sum, effect) => sum + effect.amount, 0);
+  const damageType = dueEffects[0]!.damageType;
+  if (!dueEffects.every((effect) => effect.damageType === damageType))
+    throw new Error("Gemischte verzögerte Schadensarten sind nicht implementiert.");
+  if (!dueEffects.every((effect) => effect.preventable === false))
+    throw new Error("Verhinderbarer verzögerter Schaden ist nicht implementiert.");
   const damageSummary = doDamage(state, {
-    damageId: `runner.end.preying_mantis.${state.stateVersion}`,
-    damageType: "core",
-    amount: dueSourceIds.length,
-    source: "runner_end:preying_mantis",
+    damageId: `runner.end.delayed_damage.${state.stateVersion}`,
+    damageType,
+    amount: totalDamage,
+    source: "runner_end:delayed_damage",
   });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    runnerUtilityAbility: "preying_mantis_end_turn_damage",
+    runnerUtilityAbility: "delayed_end_turn_damage",
     damageCannotBePrevented: true,
     damageResolved: true,
     damageType: damageSummary.damageType,
     damageAmount: damageSummary.amount,
     cardsTrashed: damageSummary.cardsTrashed,
     flatline: damageSummary.flatline,
-    sourceDefinitionId: definitionFor(state, dueSourceIds[0]!).id,
-    sourceCount: dueSourceIds.length,
+    sourceDefinitionId: dueEffects[0]!.sourceDefinitionId,
+    sourceCount: dueEffects.length,
+    sourceCardInstanceIds: dueEffects.map((effect) => effect.sourceCardInstanceId).sort(),
     ...(damageSummary.coreDamageAfter !== undefined
       ? { coreDamageAfter: damageSummary.coreDamageAfter }
       : {}),
   };
-  ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn = [];
+  flags.delayedEndTurnEffects = (flags.delayedEndTurnEffects ?? []).filter(
+    (effect) => effect.kind !== "damage",
+  );
 }
 
 function endTurn(
@@ -1281,7 +1289,7 @@ function endTurn(
     );
     if (state.winner) return;
     resolveFieldReporterEndOfRunnerTurn(state, legalAction);
-    resolvePreyingMantisEndOfRunnerTurnDamage(state, legalAction);
+    resolveDelayedEndTurnDamageEffects(state, legalAction);
     resolveOmniscienceFoundationEndTurnTag(state, legalAction);
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
@@ -2186,8 +2194,7 @@ function startRunnerTurn(
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   flags.startupImmolatorUsedSourceIdsThisTurn = [];
-  flags.preyingMantisUsedSourceIdsThisTurn = [];
-  flags.preyingMantisDamageDueSourceIdsThisTurn = [];
+  flags.delayedEndTurnEffects = [];
   flags.corpRezzedIceThisTurn = 0;
   delete flags.lastRezzedBlackIceThisTurn;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn =
@@ -3134,7 +3141,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
   return {
     resolveOmniscienceFoundationEndTurnTag,
     resolveFieldReporterEndOfRunnerTurn,
-    resolvePreyingMantisEndOfRunnerTurnDamage,
+    resolveDelayedEndTurnDamageEffects,
     endTurn,
     resolveSneakPreviewTemporaryInstallReturns,
     resolveAcmeSavingsAndLoanEndOfCorpTurn,

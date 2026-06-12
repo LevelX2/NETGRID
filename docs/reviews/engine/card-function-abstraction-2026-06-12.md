@@ -10,13 +10,13 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 37 |
+| functional_kind_uses_card_name | 35 |
 | false_positive | 33 |
-| test_only_card_name | 106 |
+| test_only_card_name | 103 |
 | allowed_catalog_reference | 43 |
-| payload_key_uses_card_name | 5 |
-| runtime_state_field_uses_card_name | 280 |
+| runtime_state_field_uses_card_name | 263 |
 | mechanics_constant_controls_behavior_by_card_id | 49 |
+| payload_key_uses_card_name | 2 |
 
 ## Problemstellen
 
@@ -33,10 +33,9 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:218` Bizarre Encryption Scheme / `bizarre_encryption_scheme` -> `delayed_agenda_access_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:222` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:232` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:261` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:265` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:767` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:789` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
+- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:271` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
+- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:773` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:795` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-war.ts:8` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/project-babylon.ts:8` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:8` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
@@ -50,16 +49,9 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts:8` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/programs/startup-immolator.ts:8` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/code-viral-cache.ts:8` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/preying-mantis.ts:8` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/quest-for-cattekin.ts:8` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/proteus/corp/assets/siren.ts:15` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- payload_key_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:99` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:127` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:131` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:135` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:136` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/counter-utility-trigger-execution.ts:137` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/run-fort-trigger-execution.ts:68` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
@@ -206,7 +198,7 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1695` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1707` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:621` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:943` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
+- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:945` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:650` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:920` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:921` Krumz / `krumz` -> `recurring_trace_credit_pool`
@@ -215,27 +207,20 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1179` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1185` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1189` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1245` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1248` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1251` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- payload_key_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1255` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1268` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2128` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2152` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2188` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2189` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2190` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2193` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2262` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2264` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2302` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2303` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2352` Krumz / `krumz` -> `recurring_trace_credit_pool`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2358` Krumz / `krumz` -> `recurring_trace_credit_pool`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2698` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2706` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2725` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2739` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2136` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2160` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2196` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2200` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2269` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2271` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2309` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2310` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2359` Krumz / `krumz` -> `recurring_trace_credit_pool`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2365` Krumz / `krumz` -> `recurring_trace_credit_pool`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2705` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2713` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2732` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2746` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts:640` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:360` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:368` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
@@ -316,9 +301,7 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:106` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:120` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:154` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:155` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:156` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:189` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:188` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/trace/trace-orchestration.ts:100` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/trace/trace-orchestration.ts:164` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/corp-main-actions.ts:99` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -349,29 +332,26 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:300` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:308` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/turn/runner-main-actions.ts:579` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:898` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:901` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- payload_key_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:914` Preying Mantis / `preying_mantis` -> `optional_extra_action_with_delayed_damage`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1075` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1104` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1105` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1106` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1171` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1171` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1189` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1190` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1083` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1112` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1113` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1114` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1179` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1179` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1197` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1198` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1244` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1245` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1247` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1205` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1206` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1252` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1253` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1267` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1288` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1289` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1290` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1296` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1300` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1255` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1261` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1275` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1296` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1297` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1298` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1304` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1308` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:1` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:9` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:120` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
@@ -384,10 +364,8 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1356` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1402` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1433` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1434` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1435` Preying Mantis / `preyingMantis` -> `abilityUseLedger / delayedEndTurnEffects`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1436` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1450` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1443` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1457` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`

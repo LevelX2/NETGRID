@@ -2678,7 +2678,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+        action.payload?.runnerUtilityAbility ===
+          "optional_extra_action_with_delayed_damage" &&
         action.payload?.cardId === mantisId,
     );
     expect(state.runner.clicks).toBe(clicksBefore + 1);

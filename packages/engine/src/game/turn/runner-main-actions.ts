@@ -895,10 +895,13 @@ export function buildRunnerMainActions(
       }
       if (
         runnerUtilityLongtailKindForCard(state, cardId) ===
-        "preying_mantis_optional_action_unpreventable_core_damage"
+        "optional_extra_action_with_delayed_damage"
       ) {
+        const limitKey = "optional_extra_action_with_delayed_damage";
         const used = new Set(
-          ensureRunnerTurnFlags(state).preyingMantisUsedSourceIdsThisTurn ?? [],
+          ensureRunnerTurnFlags(state).abilityUsedSourceIdsByLimitKey?.[
+            limitKey
+          ] ?? [],
         );
         if (!used.has(cardId)) {
           actions.push(
@@ -911,8 +914,13 @@ export function buildRunnerMainActions(
               [],
               {
                 cardId,
-                runnerUtilityAbility: "preying_mantis_gain_action",
+                runnerUtilityAbility: "optional_extra_action_with_delayed_damage",
                 gainedActions: 1,
+                delayedDamageAmount: 1,
+                delayedDamageType: "core",
+                damageTiming: "end_of_turn",
+                damagePreventable: false,
+                abilityLimitKey: limitKey,
               },
             ),
           );

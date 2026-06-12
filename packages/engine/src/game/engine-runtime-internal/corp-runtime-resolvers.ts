@@ -994,7 +994,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolvePlayfulAiDiceLoopEvent,
     resolvePostMeatDamageHiddenResourceChoice,
     resolvePostOnPlayGenericFollowups,
-    resolvePreyingMantisEndOfRunnerTurnDamage,
+    resolveDelayedEndTurnDamageEffects,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,

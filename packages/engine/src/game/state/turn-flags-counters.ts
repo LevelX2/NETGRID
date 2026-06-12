@@ -152,8 +152,7 @@ export function ensureRunnerTurnFlags(
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
   flags.startupImmolatorUsedSourceIdsThisTurn ??= [];
-  flags.preyingMantisUsedSourceIdsThisTurn ??= [];
-  flags.preyingMantisDamageDueSourceIdsThisTurn ??= [];
+  flags.delayedEndTurnEffects ??= [];
   flags.corpRezzedIceThisTurn ??= 0;
   return flags;
 }

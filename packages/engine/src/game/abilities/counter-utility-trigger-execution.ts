@@ -10,6 +10,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { ActiveNewDataFortCreationLock } from "../turn/corp-data-fort-lock";
+import type { CardRunnerUtilityLongtailImplementation } from "../../ability-engine/definition-types";
 
 export type CounterUtilityTriggerExecutionHost = {
   state: GameState;
@@ -23,6 +24,10 @@ export type CounterUtilityTriggerExecutionHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => string | undefined;
+    runnerUtilityLongtailImplementationForCard: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => CardRunnerUtilityLongtailImplementation | undefined;
   };
   credits: {
     spend: (state: GameState, side: Side, amount: number) => void;
@@ -96,8 +101,11 @@ export function handleCounterUtilityTriggerExecution(
     resolveCorpTrashNewDataFortCreationLockSource(host, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
-    resolvePreyingMantisGainAction(host, legalAction);
+  if (
+    legalAction.payload?.runnerUtilityAbility ===
+    "optional_extra_action_with_delayed_damage"
+  ) {
+    resolveOptionalExtraActionWithDelayedDamage(host, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.corpAbility === "remove_spy_counter") {
@@ -112,37 +120,63 @@ export function handleCounterUtilityTriggerExecution(
   return { handled: false };
 }
 
-function resolvePreyingMantisGainAction(
+function resolveOptionalExtraActionWithDelayedDamage(
   host: CounterUtilityTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
   const { state } = host;
   if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Preying Mantis nutzen.");
+    throw new Error("Nur der Runner darf diese Zusatzaktion nutzen.");
   const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
   if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Preying Mantis ist nicht installiert.");
+    throw new Error("Die Quelle der Zusatzaktion ist nicht installiert.");
+  const implementation =
+    host.cards.runnerUtilityLongtailImplementationForCard(state, sourceCardId);
+  if (implementation?.kind !== "optional_extra_action_with_delayed_damage")
+    throw new Error("Die Zusatzaktion passt nicht zur Quelle.");
   if (
-    host.cards.runnerUtilityLongtailKindForCard(state, sourceCardId) !==
-    "preying_mantis_optional_action_unpreventable_core_damage"
+    implementation.extraActions <= 0 ||
+    implementation.damageAmount <= 0 ||
+    implementation.damageTiming !== "end_of_turn" ||
+    implementation.limit !== "once_per_turn_per_source"
   )
-    throw new Error("Die Preying-Mantis-Faehigkeit passt nicht zur Karte.");
+    throw new Error("Die Zusatzaktions-Parameter sind ungueltig.");
   const flags = host.runner.ensureTurnFlags(state);
-  const used = flags.preyingMantisUsedSourceIdsThisTurn ?? [];
+  const limitKey = implementation.kind;
+  const used = flags.abilityUsedSourceIdsByLimitKey?.[limitKey] ?? [];
   if (used.includes(sourceCardId))
-    throw new Error("Preying Mantis wurde in diesem Zug bereits genutzt.");
-  state.runner.clicks += 1;
-  flags.preyingMantisUsedSourceIdsThisTurn = [...used, sourceCardId].sort();
-  flags.preyingMantisDamageDueSourceIdsThisTurn = [
-    ...(flags.preyingMantisDamageDueSourceIdsThisTurn ?? []),
-    sourceCardId,
-  ].sort();
+    throw new Error("Diese Zusatzaktion wurde in diesem Zug bereits genutzt.");
+  state.runner.clicks += implementation.extraActions;
+  flags.abilityUsedSourceIdsByLimitKey = {
+    ...(flags.abilityUsedSourceIdsByLimitKey ?? {}),
+    [limitKey]: [...used, sourceCardId].sort(),
+  };
+  flags.delayedEndTurnEffects = [
+    ...(flags.delayedEndTurnEffects ?? []),
+    {
+      sourceCardInstanceId: sourceCardId,
+      sourceDefinitionId: host.cards.definitionFor(state, sourceCardId).id,
+      abilityKey: implementation.kind,
+      kind: "damage" as const,
+      damageType: implementation.damageType,
+      amount: implementation.damageAmount,
+      preventable: implementation.preventable,
+    },
+  ].sort((a, b) =>
+    `${a.abilityKey}:${a.sourceCardInstanceId}`.localeCompare(
+      `${b.abilityKey}:${b.sourceCardInstanceId}`,
+    ),
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: host.cards.definitionFor(state, sourceCardId).id,
-    gainedActions: 1,
+    gainedActions: implementation.extraActions,
     runnerClicksAfter: state.runner.clicks,
-    unpreventableDamageDueAtEndOfTurn: true,
+    delayedDamageDueAtEndOfTurn: true,
+    damageCannotBePrevented: implementation.preventable === false,
+    damageType: implementation.damageType,
+    damageAmount: implementation.damageAmount,
+    abilityLimitKey: limitKey,
   };
 }
 

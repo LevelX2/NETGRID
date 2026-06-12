@@ -38,10 +38,10 @@ export function resolveFieldReporterEndOfRunnerTurn(...args: any[]): any {
   )(...args);
 }
 
-export function resolvePreyingMantisEndOfRunnerTurnDamage(...args: any[]): any {
+export function resolveDelayedEndTurnDamageEffects(...args: any[]): any {
   return (
     runtimeDelegates.turnRuntimeResolvers
-      .resolvePreyingMantisEndOfRunnerTurnDamage as any
+      .resolveDelayedEndTurnDamageEffects as any
   )(...args);
 }
 
