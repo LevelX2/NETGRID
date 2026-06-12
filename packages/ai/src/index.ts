@@ -124,6 +124,10 @@ import {
   buildSemanticDecisionDebugDiagnostics,
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
+import {
+  formatDebugFieldValue,
+  uniqueDebugStrings,
+} from "./diagnostics/debug-format";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
   bestSemanticRuntimeChoice,
@@ -4036,7 +4040,7 @@ function tacticalPlanRankDebugItem(
   ];
   return `plan_rank|${fields
     .filter(([, value]) => value !== undefined && String(value).length > 0)
-    .map(([key, value]) => `${key}=${tacticalPlanDebugFieldValue(value!)}`)
+    .map(([key, value]) => `${key}=${formatDebugFieldValue(value!)}`)
     .join("|")}`;
 }
 
@@ -4074,23 +4078,6 @@ function tacticalPlanScoreDebugValue(plan: TacticalPlan): string {
     .slice(0, 5)
     .map((component) => `${component.label}:${round(component.value)}`)
     .join(",");
-}
-
-function tacticalPlanDebugFieldValue(value: string | number | boolean): string {
-  return String(value)
-    .replace(/[|\r\n]+/g, " ")
-    .trim();
-}
-
-function uniqueDebugStrings(values: string[]): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const value of values) {
-    if (seen.has(value)) continue;
-    seen.add(value);
-    result.push(value);
-  }
-  return result;
 }
 
 function semanticRuntimeMemoryDebug(input: AiDecisionInput): {

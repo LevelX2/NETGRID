@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_passed_pending_local_main_merge`
+`complete`
 
 Arbeitsbranch: `codex/ai-play-strength-followup-fixes`
 
@@ -55,6 +55,16 @@ Ergebnis:
 - Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Kartenfreigabeänderung.
 - Keine neue Hidden-Info-Fläche in Debug, Reports, Trace, PlayerViews oder AI-Inputs.
 
-## Nächster Schritt
+## Lokale Main-Integration
 
-Nach diesem FINAL-GREEN-Commit wird der Arbeitsbranch lokal nach `main` integriert. Danach werden die Hauptworkspace-Checks ausgeführt und der temporäre Worktree entfernt. Kein Push und kein Pull Request.
+Der Arbeitsbranch wurde nach FINAL-GREEN lokal nach `main` integriert und der temporäre Worktree wurde entfernt.
+
+Hauptworkspace-Verifikation nach lokaler Integration:
+
+- `@netgrid/ai test`: 65 Testdateien, 1117 Tests grün.
+- `@netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+- `src/index.test.ts`: 489 Tests grün.
+- `src/semantic-ai-runtime-cutover.test.ts`: 40 Tests grün.
+
+Stand beim Nachtrag am 2026-06-12: `main` und `origin/main` zeigen auf `c77ddb1e`; ein eventuell zuvor sichtbarer GitHub-vs-lokaler Versatz ist damit nicht mehr offen. Dieser Prozess selbst enthielt keinen Push und keinen Pull Request.

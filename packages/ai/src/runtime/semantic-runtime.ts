@@ -20,7 +20,7 @@ import type {
 } from "../tactical-plans";
 import {
   semanticBasicSetupPilotChoice,
-  semanticBasicSetupPilotEnabled,
+  semanticPlayStrengthPilotEnabled,
 } from "../decision/semantic-basic-setup-pilot";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
@@ -309,7 +309,7 @@ export function chooseSemanticRuntimeAction(
       initialChoice,
     );
   const choice = runOnlyActionAdjusted.choice;
-  const pilotChoice = semanticBasicSetupPilotEnabled()
+  const pilotChoice = semanticPlayStrengthPilotEnabled()
     ? (() => {
         const pilotFrame = buildSemanticDecisionFrame({
           input,

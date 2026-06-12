@@ -36,6 +36,8 @@ export type SemanticDecisionTrace = {
     actionCandidateCount: number;
     tacticalGoalCount: number;
     hiddenInfoPolicy: SemanticDecisionFrame["hiddenInfoPolicy"];
+    calibrationProfileId?: string;
+    calibrationMode?: string;
   };
   rankedActions: SemanticRankedAction[];
   rejectedActions: SemanticRejectedAction[];

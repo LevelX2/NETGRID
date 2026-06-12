@@ -1,6 +1,7 @@
 import type { AiDecision } from "@netgrid/shared";
 import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
+import { redactSemanticString } from "../diagnostics/semantic-redaction";
 import { compareSemanticShadowToRuntime } from "./semantic-shadow-report";
 import type { AiMistakeClass } from "./mistake-taxonomy";
 
@@ -60,7 +61,7 @@ export function buildPlayStrengthCalibrationBenchmark(
       `sample_count:${samples.length}`,
       `agreement_total:${comparisons.length}`,
       "productive_weight_change:false",
-    ],
+    ].map(redactSemanticString),
   };
 }
 

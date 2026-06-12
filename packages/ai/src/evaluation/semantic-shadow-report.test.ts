@@ -92,11 +92,24 @@ describe("SemanticShadowRuntimeComparison", () => {
     const comparison = compareSemanticShadowToRuntime({
       frame,
       trace,
-      runtimeDecision: decision("gain-1", "privatePayload_bad_reason"),
+      runtimeDecision: decision("gain-1", "PRIvatePAYload_bad_reason"),
     });
 
     expect(comparison.runtimeReasonCode).toBe("[redacted]");
-    expect(JSON.stringify(comparison)).not.toContain("privatePayload");
+    expect(JSON.stringify(comparison)).not.toMatch(/privatePayload/i);
+  });
+
+  it("redacts the extended semantic hidden marker set", () => {
+    const frame = economyFrame();
+    const trace = buildSemanticShadowDecision(frame);
+    const comparison = compareSemanticShadowToRuntime({
+      frame,
+      trace,
+      runtimeDecision: decision("gain-1", "deckOrder:bad"),
+    });
+
+    expect(comparison.runtimeReasonCode).toBe("[redacted]");
+    expect(JSON.stringify(comparison)).not.toMatch(/deckOrder/i);
   });
 });
 

@@ -1,0 +1,178 @@
+import { describe, expect, it } from "vitest";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildSemanticDecisionFrame } from "./semantic-decision-frame";
+import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
+import { synthesizeNeutralTacticalGoals } from "./neutral-goal-synthesis";
+
+describe("neutral goal synthesis", () => {
+  it("synthesizes economy and setup goals for runner basic actions", () => {
+    const frame = frameFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+      legalAction("draw-1", "draw_card", "runner"),
+    ]);
+
+    const goals = synthesizeNeutralTacticalGoals(frame);
+
+    expect(goals.map((goal) => goal.goalId)).toEqual(
+      expect.arrayContaining(["runner.neutral.economy", "runner.neutral.setup"]),
+    );
+    expect(JSON.stringify(goals)).not.toContain("actionId:");
+  });
+
+  it("synthesizes corp scoreline when score_agenda is available", () => {
+    const frame = frameFor("corp", [
+      legalAction("score-1", "score_agenda", "corp"),
+      legalAction("gain-1", "gain_credit", "corp"),
+    ]);
+
+    expect(synthesizeNeutralTacticalGoals(frame)[0]).toMatchObject({
+      goalId: "corp.neutral.score_agenda",
+      family: "corp_scoreline",
+    });
+  });
+
+  it("synthesizes remote contest for runner remote score threat", () => {
+    const frame = frameFor("runner", [
+      legalAction("run-remote", "start_run", "runner"),
+      legalAction("gain-1", "gain_credit", "runner"),
+    ], {
+      runner: {
+        runTargets: [
+          {
+            targetServerId: "remote_1",
+            targetKind: "remote",
+            scoreThreat: true,
+            recommendation: "run_now",
+            pathPassability: "reachable",
+            accessPayoff: "score_threat",
+            evidence: ["fixture:remote_score_threat"],
+          } as any,
+        ],
+      },
+    });
+
+    expect(synthesizeNeutralTacticalGoals(frame)[0]).toMatchObject({
+      goalId: "runner.neutral.remote_contest_if_score_threat",
+      family: "remote_contest",
+    });
+  });
+
+  it("lets no-goal frames rank legal actions instead of rejecting all candidates", () => {
+    const frame = frameFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+      legalAction("draw-1", "draw_card", "runner"),
+    ]);
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions.map((action) => action.actionId)).toEqual(
+      expect.arrayContaining(["gain-1", "draw-1"]),
+    );
+    expect(trace.rejectedActions).toEqual([]);
+    expect(trace.rankedActions.every((action) =>
+      frame.legalActionIds.includes(action.actionId),
+    )).toBe(true);
+  });
+});
+
+function frameFor(
+  side: "runner" | "corp",
+  legalActions: LegalAction[],
+  options: { runner?: Parameters<typeof buildSemanticDecisionFrame>[0]["runner"] } = {},
+) {
+  const input = inputFor(side, legalActions);
+  return buildSemanticDecisionFrame({
+    input,
+    actionCandidates: buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: side,
+      stateVersion: input.playerView.stateVersion,
+    }),
+    ...(options.runner ? { runner: options.runner } : {}),
+  });
+}
+
+function inputFor(
+  side: "runner" | "corp",
+  legalActions: LegalAction[],
+): AiDecisionInput {
+  return {
+    side,
+    playerView: {
+      side,
+      stateVersion: 7,
+      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      activeSide: side,
+      phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
+      own: {
+        identity: visibleCard(`${side}-identity`),
+        credits: 2,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: [],
+        stackOrRdCount: 20,
+        heapOrArchives: [],
+        scoreArea: [],
+        maxHandSize: 5,
+        tags: 0,
+      },
+      opponent: {
+        identity: visibleCard(`${side}-opponent-identity`),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        tags: 0,
+        handCount: 5,
+        maxHandSize: 5,
+        deckCount: 20,
+        discardCount: 0,
+        scoreArea: [],
+      },
+      servers: [],
+      publicEvents: [],
+      legalActions,
+      winner: null,
+      agendaPointsToWin: 7,
+    },
+    eventTail: [],
+    legalActions,
+    difficulty: "normal",
+    seed: "seed",
+    decisionId: `${side}:decision`,
+    actionNumber: 7,
+    profileId: `${side}:profile`,
+  } as unknown as AiDecisionInput;
+}
+
+function legalAction(
+  actionId: string,
+  type: LegalAction["type"],
+  side: "runner" | "corp",
+): LegalAction {
+  return {
+    actionId,
+    side,
+    type,
+    label: type,
+    source: "basic_action",
+    timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 7,
+  };
+}
+
+function visibleCard(cardId: string) {
+  return {
+    instanceId: `${cardId}-instance`,
+    definitionId: cardId,
+    title: cardId,
+    side: "runner",
+    type: "identity",
+    zone: "identity",
+    visibility: "public",
+    known: true,
+  };
+}

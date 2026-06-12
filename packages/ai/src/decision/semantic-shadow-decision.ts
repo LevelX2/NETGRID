@@ -1,8 +1,22 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
+import type { AiOpportunityProjection } from "./opportunity-projection";
+import {
+  alignRunTargetAction,
+  type RunTargetActionAlignmentTarget,
+} from "./run-target-action-alignment";
+import {
+  componentWeight,
+  opportunityPriorityBonus,
+  resolveSemanticShadowCalibrationProfile,
+  threatSeverityBonus,
+  type SemanticShadowCalibrationProfile,
+  type SemanticShadowCalibrationProfileId,
+} from "./semantic-shadow-calibration";
 import type { ScoreComponentDelta } from "./score-components";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
+import { synthesizeNeutralTacticalGoals } from "./neutral-goal-synthesis";
 import {
   buildTacticalGoalUtilities,
   type TacticalGoalUtility,
@@ -17,10 +31,25 @@ import type {
   SemanticRejectedAction,
 } from "./semantic-decision-trace";
 
+export type BuildSemanticShadowDecisionOptions = {
+  calibrationProfile?:
+    | SemanticShadowCalibrationProfile
+    | SemanticShadowCalibrationProfileId;
+};
+
 export function buildSemanticShadowDecision(
   frame: SemanticDecisionFrame,
+  options: BuildSemanticShadowDecisionOptions = {},
 ): SemanticDecisionTrace {
-  const utilities = buildTacticalGoalUtilities(frame.tacticalGoals);
+  const calibrationProfile = resolveSemanticShadowCalibrationProfile(
+    options.calibrationProfile,
+  );
+  const explicitCalibrationProfile = options.calibrationProfile !== undefined;
+  const tacticalGoals =
+    frame.tacticalGoals.length > 0
+      ? frame.tacticalGoals
+      : synthesizeNeutralTacticalGoals(frame);
+  const utilities = buildTacticalGoalUtilities(tacticalGoals);
   const threats = buildAiThreatProjections(frame);
   const opportunities = buildAiOpportunityProjections(frame);
   const rankedActions: SemanticRankedAction[] = [];
@@ -44,17 +73,9 @@ export function buildSemanticShadowDecision(
       fit,
       threats,
       opportunities,
+      calibrationProfile,
     );
-    const score = Math.max(
-      0,
-      Math.round(
-        fit.score +
-          contextualComponents.reduce(
-            (sum, component) => sum + component.delta,
-            0,
-          ),
-      ),
-    );
+    const score = calibratedScore(fit, contextualComponents, calibrationProfile);
     rankedActions.push({
       actionId: candidate.actionId,
       rank: 0,
@@ -85,8 +106,14 @@ export function buildSemanticShadowDecision(
       ...(frame.profileId ? { profileId: frame.profileId } : {}),
       legalActionCount: frame.legalActionIds.length,
       actionCandidateCount: frame.actionCandidates.length,
-      tacticalGoalCount: frame.tacticalGoals.length,
+      tacticalGoalCount: tacticalGoals.length,
       hiddenInfoPolicy: frame.hiddenInfoPolicy,
+      ...(explicitCalibrationProfile
+        ? {
+            calibrationProfileId: calibrationProfile.profileId,
+            calibrationMode: calibrationProfile.mode,
+          }
+        : {}),
     },
     rankedActions,
     rejectedActions,
@@ -128,21 +155,35 @@ function contextualProjectionComponents(
   fit: ActionGoalFit,
   threats: readonly AiThreatProjection[],
   opportunities: ReturnType<typeof buildAiOpportunityProjections>,
+  calibrationProfile: SemanticShadowCalibrationProfile,
 ): ScoreComponentDelta[] {
   const components: ScoreComponentDelta[] = [];
   const opportunityBonus = opportunities
-    .filter((opportunity) => opportunityMatchesCandidate(opportunity.opportunity, candidate))
-    .reduce((sum, opportunity) => sum + priorityBonus(opportunity.priority), 0);
+    .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
+    .reduce(
+      (sum, opportunity) =>
+        sum + opportunityPriorityBonus(calibrationProfile, opportunity.priority),
+      0,
+    );
   if (opportunityBonus !== 0) {
     components.push({
       component: "opportunity",
       delta: opportunityBonus,
-      evidence: [`opportunity_bonus:${opportunityBonus}`],
+      evidence: [
+        `opportunity_bonus:${opportunityBonus}`,
+        ...opportunities
+          .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
+          .flatMap((opportunity) => opportunityAlignmentEvidence(opportunity, candidate)),
+      ],
     });
   }
   const threatBonus = threats
     .filter((threat) => threatMatchesFit(threat, fit, candidate))
-    .reduce((sum, threat) => sum + threatBonusForSeverity(threat.severity), 0);
+    .reduce(
+      (sum, threat) =>
+        sum + threatSeverityBonus(calibrationProfile, threat.severity),
+      0,
+    );
   if (threatBonus !== 0) {
     components.push({
       component: "threat_response",
@@ -153,30 +194,64 @@ function contextualProjectionComponents(
   return components;
 }
 
+function calibratedScore(
+  fit: ActionGoalFit,
+  contextualComponents: readonly ScoreComponentDelta[],
+  calibrationProfile: SemanticShadowCalibrationProfile,
+): number {
+  if (calibrationProfile.profileId === "baseline_v1") {
+    return Math.max(
+      0,
+      Math.round(
+        fit.score +
+          contextualComponents.reduce(
+            (sum, component) => sum + component.delta,
+            0,
+          ),
+      ),
+    );
+  }
+  const weightedFitScore = fit.components.reduce(
+    (sum, component) =>
+      sum + component.delta * componentWeight(calibrationProfile, component.component),
+    0,
+  );
+  const weightedContextScore = contextualComponents.reduce(
+    (sum, component) =>
+      sum + component.delta * componentWeight(calibrationProfile, component.component),
+    0,
+  );
+  return Math.max(0, Math.round(weightedFitScore + weightedContextScore));
+}
+
 function opportunityMatchesCandidate(
-  opportunity: string,
+  opportunity: AiOpportunityProjection,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  const opportunityKind = opportunity.opportunity;
   if (
-    opportunity === "known_agenda_payoff" ||
-    opportunity === "safe_central_access" ||
-    opportunity === "remote_contest_window"
+    opportunityKind === "known_agenda_payoff" ||
+    opportunityKind === "safe_central_access" ||
+    opportunityKind === "remote_contest_window"
   ) {
-    return candidate.semanticActionType === "run.start";
+    return (
+      candidate.semanticActionType === "run.start" &&
+      targetSpecificRunAlignment(candidate, opportunity).aligned
+    );
   }
-  if (opportunity === "score_window") {
+  if (opportunityKind === "score_window") {
     return candidate.semanticActionType === "score.agenda";
   }
-  if (opportunity === "economy_window") {
+  if (opportunityKind === "economy_window") {
     return candidate.semanticActionType === "economy.gain_credit";
   }
-  if (opportunity === "setup_window") {
+  if (opportunityKind === "setup_window") {
     return (
       candidate.semanticActionType === "install.card" ||
       candidate.semanticActionType === "draw.card"
     );
   }
-  if (opportunity === "rez_value_window") {
+  if (opportunityKind === "rez_value_window") {
     return candidate.semanticActionType === "corp_window.rez";
   }
   return false;
@@ -204,7 +279,10 @@ function threatMatchesFit(
     );
   }
   if (threat.threat === "corp_score_window") {
-    return candidate.semanticActionType === "run.start";
+    return (
+      candidate.semanticActionType === "run.start" &&
+      targetSpecificRunAlignment(candidate, threat).aligned
+    );
   }
   if (threat.threat === "corp_low_rez_reserve") {
     return candidate.semanticActionType === "economy.gain_credit";
@@ -212,30 +290,28 @@ function threatMatchesFit(
   return false;
 }
 
-function priorityBonus(priority: "low" | "medium" | "high" | "critical"): number {
-  switch (priority) {
-    case "critical":
-      return 18;
-    case "high":
-      return 12;
-    case "medium":
-      return 6;
-    case "low":
-      return 2;
-  }
+function targetSpecificRunAlignment(
+  candidate: ActionSemanticCandidate,
+  target: RunTargetActionAlignmentTarget,
+) {
+  return alignRunTargetAction(candidate, target);
 }
 
-function threatBonusForSeverity(severity: AiThreatProjection["severity"]): number {
-  switch (severity) {
-    case "critical":
-      return 18;
-    case "high":
-      return 12;
-    case "medium":
-      return 6;
-    case "low":
-      return 2;
+function opportunityAlignmentEvidence(
+  opportunity: AiOpportunityProjection,
+  candidate: ActionSemanticCandidate,
+): string[] {
+  if (
+    opportunity.opportunity !== "known_agenda_payoff" &&
+    opportunity.opportunity !== "safe_central_access" &&
+    opportunity.opportunity !== "remote_contest_window"
+  ) {
+    return [`opportunity:${opportunity.opportunity}`];
   }
+  return [
+    `opportunity:${opportunity.opportunity}`,
+    ...targetSpecificRunAlignment(candidate, opportunity).evidence,
+  ];
 }
 
 function explainRankedAction(

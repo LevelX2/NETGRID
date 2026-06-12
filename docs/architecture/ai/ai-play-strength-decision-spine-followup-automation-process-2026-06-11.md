@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_passed_pending_local_main_merge`
+`complete`
 
 Arbeitsbranch: `codex/ai-play-strength-followup-fixes`
 
@@ -374,3 +374,7 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Arbeitsbranch ist lokal nach `main` integriert.
 - Hauptworkspace ist nach Merge geprüft.
 - Arbeits-Worktree ist entfernt.
+
+## Abschlussnachtrag 2026-06-12
+
+Der Status wurde nachträglich von `final_green_passed_pending_local_main_merge` auf `complete` korrigiert. Der lokale Merge nach `main`, die Hauptworkspace-Prüfungen und die Worktree-Entfernung waren abgeschlossen; der Follow-up-Final-Report dokumentiert die nachgezogenen Main-Checks mit 65 AI-Testdateien und 1117 Tests.

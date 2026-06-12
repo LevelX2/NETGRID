@@ -1,4 +1,5 @@
 import type { TacticalGoalLike } from "./semantic-decision-frame";
+import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
 
 export type TacticalGoalUtilityFamily =
   | "survival"
@@ -71,21 +72,11 @@ export function normalizeTacticalGoalUtility(
 export function assertTacticalGoalUtilitySideSafe(
   utility: TacticalGoalUtility,
 ): void {
-  const serialized = JSON.stringify(utility);
-  for (const forbidden of [
-    "cardInstances",
-    "privatePayload",
-    "sessionToken",
-    "reconnectToken",
-    "joinToken",
-    "tokenHash",
-    "fullGameState",
-  ]) {
-    if (serialized.includes(forbidden)) {
-      throw new Error(
-        `TacticalGoalUtility contains forbidden hidden-info marker: ${forbidden}`,
-      );
-    }
+  const forbiddenPath = findForbiddenSemanticPath(utility, "TacticalGoalUtility");
+  if (forbiddenPath) {
+    throw new Error(
+      `TacticalGoalUtility contains forbidden hidden-info marker: ${forbiddenPath}`,
+    );
   }
   for (const signal of utility.requiredActionSignals) {
     if (signal.startsWith("actionId:")) {
