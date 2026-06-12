@@ -53,6 +53,23 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_draw_pressure_window",
 ] as const;
 
+const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
+  runner_real_low_credits: ["gain_credit", "draw_card"],
+  runner_real_safe_hq_access: ["start_run"],
+  runner_real_safe_rd_access: ["start_run"],
+  runner_real_remote_score_threat: ["start_run"],
+  runner_real_damage_buffer_needed: ["draw_card"],
+  runner_real_tag_cleanup: ["remove_tag"],
+  corp_real_score_agenda_window: ["score_agenda"],
+  corp_real_advance_score_window: ["advance_card"],
+  corp_real_low_rez_reserve: ["gain_credit", "draw_card"],
+  corp_real_rez_value_window: ["rez_ice"],
+  corp_real_do_not_rez_when_broke: ["decline_rez"],
+  corp_real_basic_economy_draw: ["gain_credit", "draw_card"],
+} as const satisfies Partial<
+  Record<(typeof REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS)[number], readonly string[]>
+>;
+
 export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
   return [
     runnerScenario(
@@ -480,8 +497,26 @@ class RealEngineDecisionCorpusScenarioBuilder {
       ...(this.deckSnapshotId
         ? { deckDoctrine: deckDoctrineForSnapshot(this.deckSnapshotId) }
         : {}),
+      ...leagueExpectationForScenario(this.scenarioId),
     };
   }
+}
+
+function leagueExpectationForScenario(
+  scenarioId: string,
+): Pick<RealEngineDecisionCorpusScenario, "leagueExpectation"> {
+  const expectedTopActionTypes =
+    LEAGUE_EXPECTATION_BY_SCENARIO_ID[
+      scenarioId as keyof typeof LEAGUE_EXPECTATION_BY_SCENARIO_ID
+    ];
+  return expectedTopActionTypes
+    ? {
+        leagueExpectation: {
+          expectedTopActionTypes,
+          evidence: [`league_expectation_source:corpus_metadata:${scenarioId}`],
+        },
+      }
+    : {};
 }
 
 function deckDoctrineForSnapshot(snapshotId: string) {

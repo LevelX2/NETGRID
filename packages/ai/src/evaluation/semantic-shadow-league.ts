@@ -131,11 +131,15 @@ export type SemanticShadowLeaguePilotScopeBreakdown = {
 
 export function buildSemanticShadowLeagueReport(
   samples: readonly RealEngineDecisionCorpusSample[],
-  expectations: readonly SemanticShadowLeagueExpectation[] =
-    PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS,
+  expectations?: readonly SemanticShadowLeagueExpectation[],
 ): SemanticShadowLeagueReport {
+  const effectiveExpectations =
+    expectations ?? playStrengthShadowLeagueExpectationsFromSamples(samples);
   const expectationByScenarioId = new Map(
-    expectations.map((expectation) => [expectation.scenarioId, expectation]),
+    effectiveExpectations.map((expectation) => [
+      expectation.scenarioId,
+      expectation,
+    ]),
   );
   const scenarios = samples.map((sample) =>
     buildScenarioReport(sample, expectationByScenarioId.get(sample.scenarioId)),
@@ -164,6 +168,21 @@ export function buildSemanticShadowLeagueReport(
   };
   assertLeagueReportSideSafe(report);
   return report;
+}
+
+export function playStrengthShadowLeagueExpectationsFromSamples(
+  samples: readonly RealEngineDecisionCorpusSample[],
+): SemanticShadowLeagueExpectation[] {
+  return samples.flatMap((sample) =>
+    sample.leagueExpectation
+      ? [
+          {
+            scenarioId: sample.scenarioId,
+            ...sample.leagueExpectation,
+          },
+        ]
+      : [],
+  );
 }
 
 function buildScenarioReport(

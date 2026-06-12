@@ -7,8 +7,8 @@ import {
 import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";
 import {
   buildSemanticShadowLeagueReport,
-  PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS,
   SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION,
+  playStrengthShadowLeagueExpectationsFromSamples,
 } from "./semantic-shadow-league";
 
 describe("SemanticShadowLeague", () => {
@@ -29,7 +29,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.noRuntimeEffect).toBe(true);
 
     expect(report.metrics.agreementComparedCount).toBe(
-      PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS.length,
+      playStrengthShadowLeagueExpectationsFromSamples(samples).length,
     );
     expect(report.metrics.agreementRate).not.toBeNull();
     expect(report.metrics.agreementCount).toBeGreaterThan(0);

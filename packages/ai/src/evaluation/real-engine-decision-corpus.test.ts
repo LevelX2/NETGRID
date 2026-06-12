@@ -92,6 +92,10 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       actionTypesFor(scenarios, "corp_real_remote_defense_setup"),
     ).toContain("install_card");
+    expect(
+      sampleFor(samples, "runner_real_low_credits").leagueExpectation
+        ?.expectedTopActionTypes,
+    ).toEqual(["gain_credit", "draw_card"]);
   });
 
   it("keeps real run target payloads side-safe and target-alignable", () => {

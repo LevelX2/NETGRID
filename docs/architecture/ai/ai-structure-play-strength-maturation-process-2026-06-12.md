@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_11_corpus_expansion
+ai_mat_12_corpus_metadata_league
 
 ## Quelle/Vorgabe
 
@@ -172,7 +172,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-8 | complete | `de8705d0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/decision/semantic-shadow-decision.ts packages/ai/src/decision/semantic-shadow-decision.test.ts` |
 | AI-MAT-9 | complete | `771ae38f` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-shadow-calibration.ts packages/ai/src/decision/semantic-shadow-calibration.test.ts packages/ai/src/evaluation/play-strength-benchmark.ts packages/ai/src/evaluation/play-strength-benchmark.test.ts` |
 | AI-MAT-10 | complete | `876252b0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts` |
-| AI-MAT-11 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
+| AI-MAT-11 | complete | `7afce6dd` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
+| AI-MAT-12 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus.ts packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 
 ## Check-Nachweise
 
@@ -197,6 +198,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-11`: Real-Engine-Corpus von 18 auf 30 Szenarien erweitert.
 - `AI-MAT-11`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/real-engine-decision-corpus.test.ts src/evaluation/semantic-shadow-league.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1215 Tests ausgefuehrt.
 - `AI-MAT-11`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-12`: Shadow-League-Erwartungen werden ohne expliziten Override aus Corpus-Metadata abgeleitet.
+- `AI-MAT-12`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/real-engine-decision-corpus.test.ts src/evaluation/semantic-shadow-league.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1215 Tests ausgefuehrt.
+- `AI-MAT-12`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 
