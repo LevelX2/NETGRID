@@ -1,6 +1,11 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
+import type { AiOpportunityProjection } from "./opportunity-projection";
+import {
+  alignRunTargetAction,
+  type RunTargetActionAlignmentTarget,
+} from "./run-target-action-alignment";
 import type { ScoreComponentDelta } from "./score-components";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
 import { synthesizeNeutralTacticalGoals } from "./neutral-goal-synthesis";
@@ -136,13 +141,18 @@ function contextualProjectionComponents(
 ): ScoreComponentDelta[] {
   const components: ScoreComponentDelta[] = [];
   const opportunityBonus = opportunities
-    .filter((opportunity) => opportunityMatchesCandidate(opportunity.opportunity, candidate))
+    .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
     .reduce((sum, opportunity) => sum + priorityBonus(opportunity.priority), 0);
   if (opportunityBonus !== 0) {
     components.push({
       component: "opportunity",
       delta: opportunityBonus,
-      evidence: [`opportunity_bonus:${opportunityBonus}`],
+      evidence: [
+        `opportunity_bonus:${opportunityBonus}`,
+        ...opportunities
+          .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
+          .flatMap((opportunity) => opportunityAlignmentEvidence(opportunity, candidate)),
+      ],
     });
   }
   const threatBonus = threats
@@ -159,29 +169,33 @@ function contextualProjectionComponents(
 }
 
 function opportunityMatchesCandidate(
-  opportunity: string,
+  opportunity: AiOpportunityProjection,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  const opportunityKind = opportunity.opportunity;
   if (
-    opportunity === "known_agenda_payoff" ||
-    opportunity === "safe_central_access" ||
-    opportunity === "remote_contest_window"
+    opportunityKind === "known_agenda_payoff" ||
+    opportunityKind === "safe_central_access" ||
+    opportunityKind === "remote_contest_window"
   ) {
-    return candidate.semanticActionType === "run.start";
+    return (
+      candidate.semanticActionType === "run.start" &&
+      targetSpecificRunAlignment(candidate, opportunity).aligned
+    );
   }
-  if (opportunity === "score_window") {
+  if (opportunityKind === "score_window") {
     return candidate.semanticActionType === "score.agenda";
   }
-  if (opportunity === "economy_window") {
+  if (opportunityKind === "economy_window") {
     return candidate.semanticActionType === "economy.gain_credit";
   }
-  if (opportunity === "setup_window") {
+  if (opportunityKind === "setup_window") {
     return (
       candidate.semanticActionType === "install.card" ||
       candidate.semanticActionType === "draw.card"
     );
   }
-  if (opportunity === "rez_value_window") {
+  if (opportunityKind === "rez_value_window") {
     return candidate.semanticActionType === "corp_window.rez";
   }
   return false;
@@ -209,12 +223,39 @@ function threatMatchesFit(
     );
   }
   if (threat.threat === "corp_score_window") {
-    return candidate.semanticActionType === "run.start";
+    return (
+      candidate.semanticActionType === "run.start" &&
+      targetSpecificRunAlignment(candidate, threat).aligned
+    );
   }
   if (threat.threat === "corp_low_rez_reserve") {
     return candidate.semanticActionType === "economy.gain_credit";
   }
   return false;
+}
+
+function targetSpecificRunAlignment(
+  candidate: ActionSemanticCandidate,
+  target: RunTargetActionAlignmentTarget,
+) {
+  return alignRunTargetAction(candidate, target);
+}
+
+function opportunityAlignmentEvidence(
+  opportunity: AiOpportunityProjection,
+  candidate: ActionSemanticCandidate,
+): string[] {
+  if (
+    opportunity.opportunity !== "known_agenda_payoff" &&
+    opportunity.opportunity !== "safe_central_access" &&
+    opportunity.opportunity !== "remote_contest_window"
+  ) {
+    return [`opportunity:${opportunity.opportunity}`];
+  }
+  return [
+    `opportunity:${opportunity.opportunity}`,
+    ...targetSpecificRunAlignment(candidate, opportunity).evidence,
+  ];
 }
 
 function priorityBonus(priority: "low" | "medium" | "high" | "critical"): number {
