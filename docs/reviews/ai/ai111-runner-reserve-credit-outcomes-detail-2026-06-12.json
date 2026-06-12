@@ -1,0 +1,1839 @@
+{
+  "schemaVersion": "ai111-runner-reserve-outcomes-detail-v1",
+  "generatedAt": "2026-06-12T16:11:31.179Z",
+  "cases": [
+    {
+      "pairId": "B",
+      "pair": {
+        "id": "B",
+        "label": "Stealth Interface Starter vs Manhunt Pressure Bureau",
+        "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+        "corp": "real_scene_corp_manhunt_pressure_bureau_snapshot_v1"
+      },
+      "seed": "ai-v143-tuning-003",
+      "actions": 160,
+      "turns": 25,
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "firstReserveIndex": 121,
+      "reserveEntries": [
+        {
+          "index": 121,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 122,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 131,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 144,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 145,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        }
+      ],
+      "followup": [
+        {
+          "index": 122,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 123,
+          "side": "runner",
+          "actionType": "start_run",
+          "turnNumber": 20,
+          "planKind": "simple_run_choice",
+          "reasonCode": "runner.semantic.simple_run_choice",
+          "targetServerId": "archives",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 124,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 20,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 125,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 21,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 126,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 21,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 127,
+          "side": "corp",
+          "actionType": "rez_ice",
+          "turnNumber": 21,
+          "planKind": "corp.rez_defense",
+          "reasonCode": "corp.semantic.simple_rez",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 128,
+          "side": "corp",
+          "actionType": "activated_card_ability",
+          "turnNumber": 21,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 129,
+          "side": "corp",
+          "actionType": "activated_card_ability",
+          "turnNumber": 21,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 130,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 21,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 131,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 132,
+          "side": "runner",
+          "actionType": "draw_card",
+          "turnNumber": 22,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 133,
+          "side": "runner",
+          "actionType": "install_card",
+          "turnNumber": 22,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.setup_card_search",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 134,
+          "side": "runner",
+          "actionType": "activated_card_ability",
+          "turnNumber": 22,
+          "planKind": "runner.obtain_breaker_coverage",
+          "reasonCode": "runner.semantic.coverage_search",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 135,
+          "side": "runner",
+          "actionType": "resolve_choice",
+          "turnNumber": 22,
+          "planKind": "choice_resolution",
+          "reasonCode": "runner.semantic.choice_resolution",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 136,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 22,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 137,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 23,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 138,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 23,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "rd"
+        },
+        {
+          "index": 139,
+          "side": "corp",
+          "actionType": "activated_card_ability",
+          "turnNumber": 23,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 140,
+          "side": "corp",
+          "actionType": "activated_card_ability",
+          "turnNumber": 23,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 141,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 23,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        }
+      ],
+      "progressEntries": [
+        {
+          "index": 126,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 21,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 133,
+          "side": "runner",
+          "actionType": "install_card",
+          "turnNumber": 22,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.setup_card_search",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 138,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 23,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "rd"
+        }
+      ],
+      "category": "reserve_preserved_run_reachability"
+    },
+    {
+      "pairId": "B",
+      "pair": {
+        "id": "B",
+        "label": "Stealth Interface Starter vs Manhunt Pressure Bureau",
+        "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+        "corp": "real_scene_corp_manhunt_pressure_bureau_snapshot_v1"
+      },
+      "seed": "ai-v143-tuning-005",
+      "actions": 160,
+      "turns": 26,
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "firstReserveIndex": 100,
+      "reserveEntries": [
+        {
+          "index": 100,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 101,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 103,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 110,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 111,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 112,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 113,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        },
+        {
+          "index": 120,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        },
+        {
+          "index": 123,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 131,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 135,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 136,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 145,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 146,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 148,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 155,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 26,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 156,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 26,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 157,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 26,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 158,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 26,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        }
+      ],
+      "followup": [
+        {
+          "index": 101,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 102,
+          "side": "runner",
+          "actionType": "remove_tag",
+          "turnNumber": 16,
+          "planKind": "tag_removal",
+          "reasonCode": "runner.semantic.tag_removal",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 103,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 104,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 16,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 105,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 17,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 106,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 17,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 107,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 17,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 108,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 17,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 109,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 17,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 110,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 111,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 112,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 113,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        },
+        {
+          "index": 114,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 18,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        },
+        {
+          "index": 115,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 19,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 116,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 19,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 117,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 19,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 118,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 19,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 119,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 19,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 120,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        }
+      ],
+      "progressEntries": [],
+      "category": "reserve_no_conversion"
+    },
+    {
+      "pairId": "C",
+      "pair": {
+        "id": "C",
+        "label": "Blink Pressure Rig vs Ivory Bastion",
+        "runner": "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+        "corp": "local_realistic_corp_ivory_bastion_snapshot_v1"
+      },
+      "seed": "ai-v143-tuning-001",
+      "actions": 160,
+      "turns": 24,
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "firstReserveIndex": 105,
+      "reserveEntries": [
+        {
+          "index": 105,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 106,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 107,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 114,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 115,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 125,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRemote": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 126,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRemote": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 129,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 137,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 138,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 139,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 140,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 22,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 152,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 24,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        }
+      ],
+      "followup": [
+        {
+          "index": 106,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 107,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 108,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 16,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ]
+        },
+        {
+          "index": 109,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 17,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 110,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 17,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "hq"
+        },
+        {
+          "index": 111,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 17,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 112,
+          "side": "corp",
+          "actionType": "play_operation",
+          "turnNumber": 17,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install"
+        },
+        {
+          "index": 113,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 17,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 114,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 115,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 116,
+          "side": "runner",
+          "actionType": "draw_card",
+          "turnNumber": 18,
+          "planKind": "runner.opportunistic_central_run",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 117,
+          "side": "runner",
+          "actionType": "play_event",
+          "turnNumber": 18,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.coverage_search",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 118,
+          "side": "runner",
+          "actionType": "resolve_choice",
+          "turnNumber": 18,
+          "planKind": "choice_resolution",
+          "reasonCode": "runner.semantic.choice_resolution",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 119,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 18,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 120,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 19,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 121,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 19,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 122,
+          "side": "corp",
+          "actionType": "advance_card",
+          "turnNumber": 19,
+          "planKind": "corp.create_score_window",
+          "reasonCode": "corp.semantic.simple_score_advance",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 123,
+          "side": "corp",
+          "actionType": "advance_card",
+          "turnNumber": 19,
+          "planKind": "corp.create_score_window",
+          "reasonCode": "corp.semantic.simple_score_advance",
+          "targetServerId": "remote_1"
+        },
+        {
+          "index": 124,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 19,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 125,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRemote": true,
+          "runnerPressureReadyByTargetRnd": true
+        }
+      ],
+      "progressEntries": [
+        {
+          "index": 110,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 17,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "hq"
+        },
+        {
+          "index": 117,
+          "side": "runner",
+          "actionType": "play_event",
+          "turnNumber": 18,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.coverage_search",
+          "runnerCreditsBefore": 6,
+          "runnerSetupMissingCoverageTypes": [
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 121,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 19,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "remote_1"
+        }
+      ],
+      "category": "reserve_preserved_run_reachability"
+    },
+    {
+      "pairId": "C",
+      "pair": {
+        "id": "C",
+        "label": "Blink Pressure Rig vs Ivory Bastion",
+        "runner": "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+        "corp": "local_realistic_corp_ivory_bastion_snapshot_v1"
+      },
+      "seed": "ai-v143-tuning-005",
+      "actions": 160,
+      "turns": 21,
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "firstReserveIndex": 100,
+      "reserveEntries": [
+        {
+          "index": 100,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 12,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 101,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 12,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 104,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 12,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 111,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 112,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 114,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 121,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 122,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 123,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 124,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 16,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 132,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 133,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true,
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 134,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 18,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        },
+        {
+          "index": 142,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 20,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerPressureReadyByTargetRnd": true
+        }
+      ],
+      "followup": [
+        {
+          "index": 101,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 12,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 102,
+          "side": "runner",
+          "actionType": "play_event",
+          "turnNumber": 12,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.coverage_search",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 103,
+          "side": "runner",
+          "actionType": "resolve_choice",
+          "turnNumber": 12,
+          "planKind": "choice_resolution",
+          "reasonCode": "runner.semantic.choice_resolution",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 104,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 12,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 2,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 105,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 12,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 106,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 13,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 107,
+          "side": "corp",
+          "actionType": "play_operation",
+          "turnNumber": 13,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install"
+        },
+        {
+          "index": 108,
+          "side": "corp",
+          "actionType": "draw_card",
+          "turnNumber": 13,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 109,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 13,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "rd"
+        },
+        {
+          "index": 110,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 13,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        },
+        {
+          "index": 111,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 3,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerEconomyTakenToReachRunReserve": true,
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 112,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 4,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 113,
+          "side": "runner",
+          "actionType": "install_card",
+          "turnNumber": 14,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.basic_install",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 114,
+          "side": "runner",
+          "actionType": "gain_credit",
+          "turnNumber": 14,
+          "planKind": "runner.build_credit_base",
+          "reasonCode": "runner.semantic.basic_economy_draw",
+          "runnerCreditsBefore": 0,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerReservePreservingEconomy": true,
+          "runnerBelowReserveBefore": true,
+          "runnerCreditStarvedWithLegalEconomy": true
+        },
+        {
+          "index": 115,
+          "side": "runner",
+          "actionType": "end_turn",
+          "turnNumber": 14,
+          "planKind": "end_turn",
+          "reasonCode": "runner.semantic.end_turn",
+          "runnerCreditsBefore": 1,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ],
+          "runnerBelowReserveBefore": true
+        },
+        {
+          "index": 116,
+          "side": "corp",
+          "actionType": "mandatory_draw",
+          "turnNumber": 15,
+          "planKind": "mandatory_draw",
+          "reasonCode": "corp.semantic.mandatory_draw"
+        },
+        {
+          "index": 117,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 15,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 118,
+          "side": "corp",
+          "actionType": "gain_credit",
+          "turnNumber": 15,
+          "planKind": "basic_economy_draw",
+          "reasonCode": "corp.semantic.basic_economy_draw"
+        },
+        {
+          "index": 119,
+          "side": "corp",
+          "actionType": "play_operation",
+          "turnNumber": 15,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install"
+        },
+        {
+          "index": 120,
+          "side": "corp",
+          "actionType": "end_turn",
+          "turnNumber": 15,
+          "planKind": "end_turn",
+          "reasonCode": "corp.semantic.end_turn"
+        }
+      ],
+      "progressEntries": [
+        {
+          "index": 102,
+          "side": "runner",
+          "actionType": "play_event",
+          "turnNumber": 12,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.coverage_search",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        },
+        {
+          "index": 109,
+          "side": "corp",
+          "actionType": "install_card",
+          "turnNumber": 13,
+          "planKind": "basic_install",
+          "reasonCode": "corp.semantic.basic_install",
+          "targetServerId": "rd"
+        },
+        {
+          "index": 113,
+          "side": "runner",
+          "actionType": "install_card",
+          "turnNumber": 14,
+          "planKind": "runner.develop_hand_card",
+          "reasonCode": "runner.semantic.basic_install",
+          "runnerCreditsBefore": 5,
+          "runnerSetupMissingCoverageTypes": [
+            "code_gate",
+            "wall"
+          ]
+        }
+      ],
+      "category": "reserve_preserved_run_reachability"
+    }
+  ]
+}

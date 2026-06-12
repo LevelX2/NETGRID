@@ -48,6 +48,7 @@ export type AiSelfplayActionLimitSubclusterId =
   | "corp_late_gain_credit_without_rez_score_protection_need"
   | "corp_late_gain_credit_real_rez_or_protection_reserve"
   | "corp_late_gain_credit_no_safe_alternative"
+  | "late_draw_for_coverage_or_hand_goal"
   | "late_draw_without_coverage_or_hand_goal"
   | "late_ability_reuse_low_delta"
   | "late_install_low_delta"
@@ -154,6 +155,7 @@ export const SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS: AiSelfplayActionLimitSubclust
     "corp_late_gain_credit_without_rez_score_protection_need",
     "corp_late_gain_credit_real_rez_or_protection_reserve",
     "corp_late_gain_credit_no_safe_alternative",
+    "late_draw_for_coverage_or_hand_goal",
     "late_draw_without_coverage_or_hand_goal",
     "late_ability_reuse_low_delta",
     "late_install_low_delta",
@@ -413,8 +415,12 @@ function classifySelfplayActionLimitSubclusterEntry(
   if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(text)) {
     return classifyLateGainCreditSubclusterEntry(entry, text);
   }
-  if (entry.actionType === "draw_card" && !entryHasDrawOrCoverageNeed(text)) {
-    return "late_draw_without_coverage_or_hand_goal";
+  if (entry.actionType === "draw_card") {
+    // AI109 showed coverage gaps may only appear as structured trace flags, so
+    // those draws are separated from true no-goal late draws.
+    return entryHasDrawOrCoverageNeed(entry, text)
+      ? "late_draw_for_coverage_or_hand_goal"
+      : "late_draw_without_coverage_or_hand_goal";
   }
   if (
     entry.actionType === "activated_card_ability" &&
@@ -572,6 +578,8 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
 function corpLateGainCreditHasSafeProgressAlternative(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
+  // AI110 keeps economy-only and opaque ability references out of "safe
+  // progress"; this bucket needs a scoreline action that was actually legal.
   return (
     entry.corpScoreTerminalWindowScoreLegal === true ||
     entry.corpScoreTerminalWindowAdvanceToScoreLegal === true ||
@@ -585,9 +593,15 @@ function entryHasFundingNeedSignal(text: string): boolean {
   );
 }
 
-function entryHasDrawOrCoverageNeed(text: string): boolean {
-  return /coverage|hand_goal|draw_for_answer|search_or_draw|supportsdraworsearchneed:true|answer/.test(
-    text,
+function entryHasDrawOrCoverageNeed(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): boolean {
+  return (
+    (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
+    /coverage|hand_goal|draw_for_answer|search_or_draw|supportsdraworsearchneed:true|answer/.test(
+      text,
+    )
   );
 }
 

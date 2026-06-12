@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "ai-selfplay-trace-pair-set-v1",
+  "date": "2026-06-12",
+  "purpose": "alternate_deck_benchmark_comparison_against_ai107_a_d_x5",
+  "pairs": [
+    {
+      "pair": {
+        "id": "E",
+        "label": "Event Pressure vs Tag Ops Control",
+        "runner": "onr_origin_runner_ai_event_pressure_snapshot_v1",
+        "corp": "onr_origin_corp_ai_tag_ops_snapshot_v1"
+      },
+      "comparisonRole": "aggressive_runner_vs_corp_tag_pressure"
+    },
+    {
+      "pair": {
+        "id": "F",
+        "label": "Starter Pressure vs Starter Score Grid",
+        "runner": "demo_runner_008_snapshot_v0_8",
+        "corp": "demo_corp_008_snapshot_v0_8"
+      },
+      "comparisonRole": "economy_setup_starter_pair"
+    },
+    {
+      "pair": {
+        "id": "G",
+        "label": "Stealth Interface Starter vs Ivory Bastion",
+        "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+        "corp": "local_realistic_corp_ivory_bastion_snapshot_v1"
+      },
+      "comparisonRole": "ice_breaker_coverage_pair"
+    },
+    {
+      "pair": {
+        "id": "H",
+        "label": "Blink Pressure Rig vs Siren Fortress",
+        "runner": "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+        "corp": "real_scene_corp_siren_fortress_snapshot_v1"
+      },
+      "comparisonRole": "corp_scoring_remote_pressure_pair"
+    }
+  ]
+}
