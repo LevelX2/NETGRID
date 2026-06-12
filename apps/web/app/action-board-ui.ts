@@ -298,6 +298,11 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return display.ariaLabel;
     case "bad_publicity":
       return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;
+    case "install_cost_modifier":
+      if (display.id.startsWith("restrictive_net_zoning_install_cost_")) {
+        return `Restrictive Net Zoning: Die Korp muss ${amount} zusätzliche ${amount === 1 ? "Credit" : "Credits"} zahlen, um ICE vor diesem Fort zu installieren.`;
+      }
+      return display.ariaLabel;
     default:
       if (display.id === "pox")
         return `Pox: Je 2 Pox-Counter in diesem Fort erhöhen die Korp-Installationskosten in oder auf diesem Fort um 1 Credit. ${PURGEABLE_RUNNER_VIRUS_HELP}`;

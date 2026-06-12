@@ -924,6 +924,18 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       iceInstallAdditionalCost: 4,
       iceInstallTotalCost: 4,
     });
+    expect(
+      getPlayerView(zoningState, "runner").servers.find(
+        (server) => server.id === "rd",
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "restrictive_net_zoning_install_cost_rd",
+        amount: 4,
+        label: "Install +",
+        counterType: "install_cost_modifier",
+      }),
+    ]);
 
     let polymerState = toRunnerTurn(v192CardReleaseGame("spotcheck-polymer"));
     polymerState.corp.credits = 5;

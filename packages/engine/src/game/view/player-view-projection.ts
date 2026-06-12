@@ -2,9 +2,11 @@
 // This module creates no LegalActions, executes no actions, and mutates no
 // GameState. The host passes LegalActions in from the game legal-actions facade.
 import {
+  type CounterDisplay,
   type GameState,
   type LegalAction,
   type PlayerView,
+  type ServerId,
   type Side,
 } from "@netgrid/shared";
 import { maxHandSize, runnerMemoryLimit } from "../../ability-engine/effective-values";
@@ -25,6 +27,9 @@ import {
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+
+const RESTRICTIVE_NET_ZONING_ID = "onr_v1_173_restrictive-net-zoning";
+
 export function buildPlayerViewProjection(
   state: GameState,
   side: Side,
@@ -55,6 +60,11 @@ export function buildPlayerViewProjection(
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ?? []),
         ...(spyCounterDisplaysForServer(state, server.id) ?? []),
+        ...(restrictiveNetZoningCounterDisplaysForServer(
+          state,
+          server.id,
+          server.label,
+        ) ?? []),
       ]),
     };
   });
@@ -227,4 +237,34 @@ export function buildPlayerViewProjection(
     agendaPointsToWin: state.agendaPointsToWin,
     ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {}),
   };
+}
+
+function restrictiveNetZoningCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  serverLabel: string,
+): CounterDisplay[] | undefined {
+  const amount = state.runner.rig.resources.reduce((sum, cardId) => {
+    const instance = state.cardInstances[cardId];
+    if (
+      instance?.definitionId !== RESTRICTIVE_NET_ZONING_ID ||
+      instance.faceup === false ||
+      instance.selectedServerId !== serverId
+    ) {
+      return sum;
+    }
+    return sum + 2;
+  }, 0);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: `restrictive_net_zoning_install_cost_${serverId}`,
+      amount,
+      displayKind: "generic_counter",
+      label: "Install +",
+      ariaLabel: `${serverLabel}: ICE-Installationskosten +${amount} durch Restrictive Net Zoning.`,
+      counterType: "install_cost_modifier",
+      usageHint: "status_marker",
+    },
+  ];
 }
