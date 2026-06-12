@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-selfplay-trace-matrix-v1",
-  "generatedAt": "2026-06-12T18:54:35.965Z",
-  "gitHead": "d60429ce",
+  "generatedAt": "2026-06-12T19:00:51.269Z",
+  "gitHead": "bcc63315",
   "config": {
     "pairIds": [
       "a",
