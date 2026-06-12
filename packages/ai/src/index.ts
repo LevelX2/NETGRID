@@ -124,6 +124,8 @@ import {
   buildSemanticDecisionDebugDiagnostics,
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
+import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
+import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
   formatDebugFieldValue,
   uniqueDebugStrings,
@@ -3809,6 +3811,11 @@ function semanticRuntimeDecisionDebug(
     ...(memoryDebug.items.length > 0
       ? { memoryItems: memoryDebug.items, memorySectionTitle: "KI-Speicher" }
       : {}),
+    semanticShadowTopItems: semanticShadowTopDebugItems(selected),
+    pilotScopeItems: pilotScopeDebugItems(selected.evidence),
+    calibrationProfileItems: calibrationProfileDebugItems(selected.evidence),
+    targetChoiceShadowItems: targetChoiceShadowDebugItems(selected.action),
+    mistakeSummaryItems: mistakeSummaryDebugItems(selected.evidence),
   });
   const selectedPlanSelection = semanticRuntimePlanSelectionDisplayContext(
     input,
@@ -3900,6 +3907,92 @@ function semanticRuntimeDecisionDebug(
     profileId: input.profileId,
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
   };
+}
+
+function semanticShadowTopDebugItems(selected: SemanticRuntimeChoice): string[] {
+  const topEvidence = selected.evidence.filter(
+    (entry) =>
+      entry.startsWith("ai_play_strength_pilot_score") ||
+      entry.startsWith("ai_play_strength_pilot_goal"),
+  );
+  if (topEvidence.length === 0) return [];
+  return scrubEvidence([
+    `semantic_shadow_top_action:${selected.action.actionId}`,
+    `semantic_shadow_top_action_type:${selected.action.type}`,
+    ...topEvidence,
+  ]);
+}
+
+function pilotScopeDebugItems(evidence: readonly string[]): string[] {
+  return scrubEvidence(
+    evidence.filter(
+      (entry) =>
+        entry.startsWith("ai_play_strength_pilot:") ||
+        entry.startsWith("pilot_scope"),
+    ),
+  );
+}
+
+function calibrationProfileDebugItems(evidence: readonly string[]): string[] {
+  if (!evidence.some((entry) => entry.startsWith("ai_play_strength_pilot:"))) {
+    return [];
+  }
+  const profile = semanticShadowCalibrationProfileFromEnv();
+  return scrubEvidence([
+    `calibration_profile:${profile.profileId}`,
+    `calibration_mode:${profile.mode}`,
+    `calibration_version:${profile.version}`,
+    `calibration_baseline:${profile.baselineReference}`,
+    `calibration_minimum_score_gap:${profile.pilotMinimumScoreGap}`,
+    `calibration_productive_use_allowed:${profile.productiveUseAllowed}`,
+  ]);
+}
+
+function targetChoiceShadowDebugItems(action: LegalAction): string[] {
+  if (
+    (action.targetRequirements?.length ?? 0) === 0 &&
+    (action.choiceRequirements?.length ?? 0) === 0
+  ) {
+    return [];
+  }
+  try {
+    const report = buildTargetChoiceShadowReport({
+      action: {
+        ...action,
+        targetRequirements: action.targetRequirements ?? [],
+      },
+    });
+    return [
+      ...report.evidence,
+      `target_choice_action_type:${report.actionType}`,
+      `target_choice_ranked_option_count:${report.rankedOptions.length}`,
+      `target_choice_blocked_requirement_count:${report.blockedRequirements.length}`,
+      ...report.rankedOptions
+        .slice(0, 6)
+        .map(
+          (option) =>
+            `target_choice_option:${option.rank}:${option.kind}:${option.requirementId}:${option.optionId}:${option.score}`,
+        ),
+      ...report.blockedRequirements
+        .slice(0, 6)
+        .map(
+          (requirement) =>
+            `target_choice_blocked:${requirement.kind}:${requirement.reason}`,
+        ),
+    ];
+  } catch {
+    return ["target_choice_shadow:unavailable_redacted"];
+  }
+}
+
+function mistakeSummaryDebugItems(evidence: readonly string[]): string[] {
+  return scrubEvidence(
+    evidence.filter(
+      (entry) =>
+        entry.startsWith("mistake_summary:") ||
+        entry.startsWith("observed_mistake_count:"),
+    ),
+  );
 }
 
 function tacticalPlanDebugItems(

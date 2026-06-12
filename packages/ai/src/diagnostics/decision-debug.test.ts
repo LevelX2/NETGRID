@@ -91,6 +91,66 @@ describe("DecisionDebug diagnostics", () => {
     ]);
   });
 
+  it("adds side-safe decision trace diagnostic sections", () => {
+    const diagnostics = buildSemanticDecisionDebugDiagnostics({
+      scopeId: "setup",
+      selectedActionType: "gain_credit",
+      semanticShadowTopItems: [
+        "semantic_shadow_top_action:gain-1",
+        "privatePayload:bad",
+      ],
+      pilotScopeItems: [
+        "ai_play_strength_pilot:basic_setup",
+        "sessionToken:bad",
+      ],
+      calibrationProfileItems: [
+        "calibration_profile:shadow_calibrated_v1",
+        "fullGameState:bad",
+      ],
+      targetChoiceShadowItems: [
+        "target_choice_shadow:report_only",
+        "secretGripIds:bad",
+      ],
+      mistakeSummaryItems: [
+        "mistake_summary:illegal_action=1",
+        "cardInstances:bad",
+      ],
+    });
+
+    expect(diagnostics.detailSections).toEqual(
+      expect.arrayContaining([
+        {
+          id: "semantic_shadow_top",
+          title: "Semantic Shadow Top",
+          items: ["semantic_shadow_top_action:gain-1"],
+        },
+        {
+          id: "pilot_scope",
+          title: "Pilot Scope",
+          items: ["ai_play_strength_pilot:basic_setup"],
+        },
+        {
+          id: "calibration_profile",
+          title: "Calibration Profile",
+          items: ["calibration_profile:shadow_calibrated_v1"],
+        },
+        {
+          id: "target_choice_shadow",
+          title: "Target Choice Shadow",
+          items: ["target_choice_shadow:report_only"],
+        },
+        {
+          id: "mistake_summary",
+          title: "Mistake Summary",
+          items: ["mistake_summary:illegal_action=1"],
+        },
+      ]),
+    );
+    expect(JSON.stringify(diagnostics)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|secretGripIds|fullGameState/i,
+    );
+  });
+
   it("builds side-safe score components for debug reports", () => {
     expect(
       buildSemanticDecisionDebugScoreComponent({

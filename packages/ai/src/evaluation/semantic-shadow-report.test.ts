@@ -9,7 +9,9 @@ import { compareSemanticShadowToRuntime } from "./semantic-shadow-report";
 describe("SemanticShadowRuntimeComparison", () => {
   it("detects agreement between runtime and semantic shadow top action", () => {
     const frame = economyFrame();
-    const trace = buildSemanticShadowDecision(frame);
+    const trace = buildSemanticShadowDecision(frame, {
+      calibrationProfile: "baseline_v1",
+    });
     const comparison = compareSemanticShadowToRuntime({
       frame,
       trace,
@@ -21,9 +23,18 @@ describe("SemanticShadowRuntimeComparison", () => {
       shadowTopActionId: "gain-1",
       agreement: true,
       runtimeReasonCode: "runner.semantic.basic_economy_draw",
+      calibrationProfileId: "baseline_v1",
+      calibrationMode: "baseline",
+      mistakeSummary: {},
     });
     expect(comparison.shadowTopScore).toBeGreaterThan(0);
     expect(comparison.observedMistakes).toEqual([]);
+    expect(comparison.evidence).toEqual(
+      expect.arrayContaining([
+        "calibration_profile:baseline_v1",
+        "calibration_mode:baseline",
+      ]),
+    );
   });
 
   it("reports legal disagreement without treating it as a runtime error", () => {
@@ -81,6 +92,8 @@ describe("SemanticShadowRuntimeComparison", () => {
 
     expect(comparison.shadowTopActionId).toBeUndefined();
     expect(comparison.observedMistakes).toContain("illegal_action");
+    expect(comparison.mistakeSummary.illegal_action).toBe(1);
+    expect(comparison.evidence).toContain("mistake_summary:illegal_action=1");
     expect(JSON.stringify(comparison)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
     );

@@ -1,4 +1,8 @@
 import type { AiDecisionDebug, AiDecisionScoreComponent } from "@netgrid/shared";
+import type {
+  SemanticDecisionTraceDiagnosticSection,
+  SemanticDecisionTraceDiagnosticSectionId,
+} from "../decision/semantic-decision-trace";
 import {
   containsForbiddenSemanticMarker,
   redactSemanticString,
@@ -31,6 +35,11 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   tacticalPlanItems?: readonly string[];
   memoryItems?: readonly string[];
   memorySectionTitle?: string;
+  semanticShadowTopItems?: readonly string[];
+  pilotScopeItems?: readonly string[];
+  calibrationProfileItems?: readonly string[];
+  targetChoiceShadowItems?: readonly string[];
+  mistakeSummaryItems?: readonly string[];
 };
 
 export type SemanticDecisionDebugDiagnostics = {
@@ -47,6 +56,14 @@ export type SemanticDecisionDebugScoreComponentInput = {
   weight?: number;
   reason?: string;
 };
+
+const TRACE_DIAGNOSTIC_SECTION_TITLES = {
+  semantic_shadow_top: "Semantic Shadow Top",
+  pilot_scope: "Pilot Scope",
+  calibration_profile: "Calibration Profile",
+  target_choice_shadow: "Target Choice Shadow",
+  mistake_summary: "Mistake Summary",
+} as const satisfies Record<SemanticDecisionTraceDiagnosticSectionId, string>;
 
 export function buildSemanticDecisionDebugScoreComponent(
   input: SemanticDecisionDebugScoreComponentInput,
@@ -110,6 +127,28 @@ export function buildSemanticDecisionDebugDiagnostics(
       title: "Semantic Runtime",
       items: detailItems,
     },
+    ...semanticDecisionTraceDiagnosticSections([
+      {
+        id: "semantic_shadow_top",
+        items: input.semanticShadowTopItems,
+      },
+      {
+        id: "pilot_scope",
+        items: input.pilotScopeItems,
+      },
+      {
+        id: "calibration_profile",
+        items: input.calibrationProfileItems,
+      },
+      {
+        id: "target_choice_shadow",
+        items: input.targetChoiceShadowItems,
+      },
+      {
+        id: "mistake_summary",
+        items: input.mistakeSummaryItems,
+      },
+    ]),
     ...(input.tacticalPlanItems && input.tacticalPlanItems.length > 0
       ? [
           {
@@ -143,6 +182,25 @@ export function buildSemanticDecisionDebugDiagnostics(
     detailSections,
     longTermPlan,
   };
+}
+
+function semanticDecisionTraceDiagnosticSections(
+  sections: readonly {
+    id: SemanticDecisionTraceDiagnosticSectionId;
+    items?: readonly string[] | undefined;
+  }[],
+): SemanticDecisionTraceDiagnosticSection[] {
+  return sections.flatMap((section) => {
+    const items = sideSafeDebugItems(section.items ?? []);
+    if (items.length === 0) return [];
+    return [
+      {
+        id: section.id,
+        title: TRACE_DIAGNOSTIC_SECTION_TITLES[section.id],
+        items,
+      },
+    ];
+  });
 }
 
 function sideSafeDebugItems(items: readonly string[]): string[] {
