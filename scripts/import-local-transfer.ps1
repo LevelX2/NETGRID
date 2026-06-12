@@ -225,7 +225,7 @@ try {
         } else {
           Push-Location $ProjectRoot
           try {
-            & corepack pnpm storage:restore -- $backupDirs[0].FullName
+            & corepack pnpm --filter "@netgrid/server" exec tsx src/storage-cli.ts restore $backupDirs[0].FullName
             if ($LASTEXITCODE -ne 0) {
               throw "storage:restore failed."
             }

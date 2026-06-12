@@ -152,7 +152,7 @@ try {
 
   if (-not $SkipStorageBackup) {
     Write-Host "Creating validated SQLite storage backup..."
-    $backupOutput = & corepack pnpm storage:backup 2>&1
+    $backupOutput = & corepack pnpm --filter "@netgrid/server" exec tsx src/storage-cli.ts backup 2>&1
     $backupExitCode = $LASTEXITCODE
     $backupText = ($backupOutput | Out-String)
     if ($backupExitCode -ne 0) {
