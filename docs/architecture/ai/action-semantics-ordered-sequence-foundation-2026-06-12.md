@@ -461,6 +461,24 @@ Checks:
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
 
+## P4 Ergebnis
+
+Umgesetzt:
+
+- DFR-Prevalidation erkennt jetzt Root-Karten, die den normalen install-on-install/rez-on-install-Pfad benötigen:
+  - Region-Upgrades;
+  - Root-Karten mit `rootInstallRezzesOnInstall`.
+- Solche Karten werden vor `createRemote()` und vor Zone-/CardInstance-Mutation abgelehnt.
+- Runtime-Host reicht `isRegionUpgrade` und `rootInstallRezzesOnInstall` an den DFR-Sequenzhandler durch.
+- Atomarer Test für Region und Nicht-Region-root-rez-on-install ergänzt.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.

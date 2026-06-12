@@ -56,6 +56,8 @@ export type CorpInstallRezSequenceHandlerHost = {
       definition: CardDefinition,
       server: CorpServer,
     ) => boolean;
+    isRegionUpgrade: (definition: CardDefinition) => boolean;
+    rootInstallRezzesOnInstall: (definition: CardDefinition) => boolean;
     rezCostForCard: (cardId: CardInstanceId) => number;
     isPriorityRequisitionCandidate: (cardId: CardInstanceId) => boolean;
   };
@@ -837,10 +839,24 @@ function prevalidateHqToNewRemoteInstallSelection(
     }
     if (!host.cards.canInstallCorpRootCardInServer(definition, simulatedServer))
       throw new Error("Diese Root-Karte kann nicht in das neue Remote.");
+    if (requiresOrderedRootInstallRezSequence(host, definition))
+      throw new Error(
+        "Data Fort Reclamation braucht fuer Region- oder Rez-on-install-Root-Karten eine ordered install/rez sequence.",
+      );
     simulatedServer.root.push(cardId);
     selectedCards.push({ cardId, definition, destination: "root" });
   }
   return selectedCards;
+}
+
+function requiresOrderedRootInstallRezSequence(
+  host: CorpInstallRezSequenceHandlerHost,
+  definition: CardDefinition,
+): boolean {
+  return (
+    host.cards.isRegionUpgrade(definition) ||
+    host.cards.rootInstallRezzesOnInstall(definition)
+  );
 }
 
 function resolveHqToNewRemoteInstallRezRezChoice(

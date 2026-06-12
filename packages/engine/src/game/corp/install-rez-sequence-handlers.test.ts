@@ -38,12 +38,14 @@ function definition(
   type: CardDefinition["type"],
   title = id,
   rezCost = 0,
+  subtypes: string[] = [],
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
     type,
     title,
     rezCost,
+    subtypes,
   } as CardDefinition;
 }
 
@@ -220,6 +222,11 @@ function makeHost(
           !server.root.some((cardId) => definitions[cardId]?.type === "agenda")
         );
       },
+      isRegionUpgrade: (cardDefinition) =>
+        cardDefinition.subtypes?.includes("region") ?? false,
+      rootInstallRezzesOnInstall: (cardDefinition) =>
+        (cardDefinition.subtypes?.includes("region") ?? false) ||
+        cardDefinition.id === "forced_rez_root_def",
       rezCostForCard: (cardId) => definitions[cardId]?.rezCost ?? 0,
       isPriorityRequisitionCandidate: (cardId) => {
         const cardInstance = cardInstances[cardId];
@@ -505,6 +512,59 @@ describe("corp install rez sequence handlers", () => {
     expect(() => handleCorpInstallRezSequenceChoice(nonHqHost)).toThrow(
       "Eine gewaehlte Karte liegt nicht mehr in HQ.",
     );
+  });
+
+  it("rejects Data Fort Reclamation region and rez-on-install roots without partial mutation", () => {
+    const guardedRootCases = [
+      {
+        cardId: "region_1" as CardInstanceId,
+        definition: definition("region_def", "upgrade", "Region 1", 2, [
+          "region",
+        ]),
+      },
+      {
+        cardId: "forced_rez_root" as CardInstanceId,
+        definition: definition(
+          "forced_rez_root_def",
+          "asset",
+          "Forced Rez Root",
+          3,
+        ),
+      },
+    ];
+
+    for (const { cardId, definition: rootDefinition } of guardedRootCases) {
+      const host = makeHost({
+        hq: [cardId, "ice_1"] as CardInstanceId[],
+        scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+        scoredKinds: {
+          data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+        },
+        definitions: {
+          [cardId]: rootDefinition,
+        },
+        pendingChoice: selectCardsChoice(
+          "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+          [cardId, "ice_1"] as CardInstanceId[],
+          4,
+        ),
+        playerAction: playerAction([`card_${cardId}`]),
+      });
+      const hqBefore = [...host.state.corp.hq];
+      const serversBefore = structuredClone(host.state.corp.servers);
+      const cardInstancesBefore = structuredClone(host.state.cardInstances);
+      const pendingChoiceBefore = structuredClone(host.state.pendingChoice);
+
+      expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+        "Data Fort Reclamation braucht fuer Region- oder Rez-on-install-Root-Karten eine ordered install/rez sequence.",
+      );
+
+      expect(host.state.corp.hq).toEqual(hqBefore);
+      expect(host.state.corp.servers).toEqual(serversBefore);
+      expect(host.state.cardInstances).toEqual(cardInstancesBefore);
+      expect(host.state.pendingChoice).toEqual(pendingChoiceBefore);
+      expect(host.legalAction.payload).toEqual({});
+    }
   });
 
   it("resolves Data Fort Reclamation rez with temporary credits before corp credits", () => {
