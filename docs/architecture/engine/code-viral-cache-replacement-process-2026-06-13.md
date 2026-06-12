@@ -103,6 +103,27 @@ Stop ohne Rückfrage, wenn:
 - Done-Gate: Konkreter Implementierungsvertrag ist dokumentiert.
 - Commit: `docs: specify code viral cache generic contract`
 
+Inspektionsergebnis:
+
+- `CardConditionImplementation` kennt bereits `runner_made_successful_run_on_server_this_turn` mit `server: "hq" | "rd" | "any_data_fort"`.
+- `createCardImplementationRuntimeDeps` wertet diese Bedingung bereits gegen `runnerTurnFlags.successfulHqRunThisTurn`, `successfulRdRunThisTurn` und `successfulRunThisTurn` aus.
+- `CardImplementationDefinition` besitzt bereits `installCapabilities`; diese Vokabularstelle ist der richtige Ort für eine deklarative Runner-Install-Voraussetzung.
+- Code Viral Cache hängt derzeit zusätzlich an:
+  - `packages/engine/src/game/turn/runner-main-actions.ts` für LegalAction-Generierung;
+  - `packages/engine/src/game/install/install-card.ts` für Revalidation;
+  - `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts` für Purge-Replacement-Choice;
+  - `packages/engine/src/game/choices/pending-choice-resolution.ts` für Pending-Choice-Routing;
+  - `packages/engine/src/game/turn/corp-main-actions.ts` und `trigger-ability-execution.ts` für Corp-Trash-Aktion.
+
+P3-Vertrag:
+
+- `CardInstallCapabilityImplementation` wird um `runner_made_successful_run_on_server_this_turn` mit `server: "hq"` erweitert.
+- Code Viral Cache deklariert diese Install-Capability selbst.
+- LegalAction-Generierung und Install-Revalidation prüfen generisch alle Install-Capability-Bedingungen.
+- Das Purge-Replacement wird über `hiddenReplacementLongtail.kind === "purge_replacement_with_runner_virus_counter_cleanup"` gefunden.
+- Pending-Choice-Source und Payload-Felder werden neutral benannt, sodass kein neuer Code-Viral-Cache-Payload-Key nötig ist.
+- Die Corp-Trash-Aktion bleibt in diesem Slice semantisch unverändert; falls sie noch card-id-spezifisch bleibt, wird sie in P4 als separates Restthema klassifiziert, weil der Auftrag auf Install-Condition und Purge-Replacement zielt.
+
 ### P3 - Code Viral Cache Refaktor
 
 - Ziel: Card-ID-Zweige aus Runtime-Code entfernen.
