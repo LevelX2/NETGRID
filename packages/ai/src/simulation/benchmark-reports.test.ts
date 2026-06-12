@@ -898,6 +898,61 @@ describe("benchmark report formatting", () => {
     expect(subclusters.late_draw_for_coverage_or_hand_goal).toBe(1);
     expect(subclusters.late_draw_without_coverage_or_hand_goal).toBe(0);
   });
+
+  it("keeps the pair A late no-goal draw regression separate from coverage draws", () => {
+    const pairANoGoalDraw: AiSimulationSummary = {
+      seed: "pair-a-ai-v143-tuning-006-late-no-goal-draw",
+      winner: "action_limit_reached",
+      actions: 4,
+      turns: 2,
+      finalAgendaPoints: { runner: 2, corp: 0 },
+      finalStateHash: "fnv1a:pair-a-ai-v143-tuning-006-late-no-goal-draw",
+      eventLogLength: 4,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "draw_card", {
+          selectedActionId: "pair-a-no-goal-draw-1",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          planKind: "basic_economy_draw",
+        }),
+        selfplayAction("runner", 2, "draw_card", {
+          selectedActionId: "pair-a-no-goal-draw-2",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          planKind: "basic_economy_draw",
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+    const pairACoverageDraw: AiSimulationSummary = {
+      ...pairANoGoalDraw,
+      seed: "pair-a-ai-v143-tuning-008-coverage-draw",
+      finalAgendaPoints: { runner: 5, corp: 2 },
+      finalStateHash: "fnv1a:pair-a-ai-v143-tuning-008-coverage-draw",
+      actionSequence: [
+        selfplayAction("runner", 1, "draw_card", {
+          selectedActionId: "pair-a-coverage-draw",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          planKind: "runner.obtain_breaker_coverage",
+          runnerSetupMissingCoverageTypes: ["special"],
+        }),
+      ],
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([
+      pairANoGoalDraw,
+      pairACoverageDraw,
+    ]);
+
+    expect(subclusters.late_draw_without_coverage_or_hand_goal).toBe(1);
+    expect(subclusters.late_draw_for_coverage_or_hand_goal).toBe(1);
+    expect(subclusters.mixed_unknown).toBe(0);
+    expect(JSON.stringify(subclusters)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
 });
 
 function selfplayAction(
