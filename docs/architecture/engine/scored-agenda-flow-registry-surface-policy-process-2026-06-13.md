@@ -10,6 +10,7 @@
 - P1 abgeschlossen: `scored-agenda-score-time-types.ts` und `scored-agenda-score-time-registry.ts` definieren den Score-Time-Start-Vertrag und registrieren DFR, Ice Transmutation, Priority Requisition und Security Purge. Registry-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P2 abgeschlossen: `startScoreTimeChoices` delegiert DFR, Ice Transmutation, Priority Requisition und Security Purge über `resolveScoredAgendaScoreTime`; die restlichen direkten Score-Starts bleiben unverändert. Scored-Agenda-/Install-Rez-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P3 abgeschlossen: `subtype-reveal-economy-sequence.ts` kapselt Start und Resolve für `reveal_installed_ice_subtype_for_credits`; `scored-agenda-flow.ts` delegiert nur noch. Modul- und Flow-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P4 abgeschlossen: Corporate War, Corporate Retreat und Employee Empowerment liegen in eigenen Scored-Agenda-Modulen. `scored-agenda-flow.ts` re-exportiert Employee Empowerment weiter stabil für bestehende Runtime-Bootstrap-Imports und liegt nach dem Paket bei 432 Zeilen. Scored-Agenda-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
