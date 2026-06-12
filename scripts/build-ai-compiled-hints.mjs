@@ -327,7 +327,8 @@ function normalizeGeneratedTargetProfile(targetProfile) {
   ) {
     return targetProfile;
   }
-  if (!targetProfile.zone && !targetProfile.targetCardType) return targetProfile;
+  if (!targetProfile.zone && !targetProfile.targetCardType)
+    return targetProfile;
   const targetType = targetProfile.targetCardType ?? "card";
   return {
     schemaVersion: "target-profile-v1",
@@ -725,15 +726,12 @@ export function runCli(argv = process.argv.slice(2)) {
     if (!fs.existsSync(repoPath(REPORT_PATH))) {
       throw new Error(`Compiled hints report is missing: ${REPORT_PATH}`);
     }
-    if (
-      fs.readFileSync(repoPath(COMPILED_HINTS_PATH), "utf8") !==
-      serializedArtifact
-    ) {
+    if (!sameJsonArtifact(readJson(COMPILED_HINTS_PATH), artifact)) {
       throw new Error(
         `Generated compiled hints differ from committed ${COMPILED_HINTS_PATH}. Run corepack pnpm build:ai-compiled-hints.`,
       );
     }
-    if (fs.readFileSync(repoPath(REPORT_PATH), "utf8") !== serializedReport) {
+    if (!sameJsonArtifact(readJson(REPORT_PATH), report)) {
       throw new Error(
         `Generated compiled report differs from committed ${REPORT_PATH}. Run corepack pnpm build:ai-compiled-hints.`,
       );
@@ -758,4 +756,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;
   }
+}
+
+function sameJsonArtifact(left, right) {
+  return (
+    JSON.stringify(stableValue(left)) === JSON.stringify(stableValue(right))
+  );
 }

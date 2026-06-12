@@ -2,7 +2,7 @@
 
 Datum: 2026-06-12
 
-Status: `AI-CONS-0` bis `AI-CONS-11` complete. `FINAL-GREEN` folgt als separater Abschluss- und Integrationsschritt.
+Status: `AI-CONS-0` bis `AI-CONS-11` complete. `FINAL-GREEN` wurde ausgeführt; der lokale `main`-Merge erforderte anschließend eine Baseline-Anpassung für den erweiterten Real-Engine-Korpus.
 
 ## Ausgangslage
 
@@ -52,14 +52,10 @@ Die vorherige AI-Play-Strength-Activation-Serie war lokal auf `main` vorhanden, 
 - Fokustests für DecisionDebug, Shadow-Report, Module Boundaries, Pilot Registry, Real-Engine Corpus, Shadow League, Benchmark, Calibration, DoctrineGoalSynthesis und TargetChoiceShadow liefen paketbezogen grün.
 - `git diff --check` war vor jedem Paketcommit grün.
 
-## FINAL-GREEN Vorbereitung
+## FINAL-GREEN und Main-Merge
 
-Der finale Schritt muss noch auf dem fertigen Arbeitsbranch ausführen:
+- Vor dem `main`-Merge: `@netgrid/ai test`, `@netgrid/ai typecheck`, `src/index.test.ts`, `src/semantic-ai-runtime-cutover.test.ts` und `git diff --check` grün.
+- Beim Merge von lokalem `main` gab es einen Importkonflikt in `semantic-ai-runtime-cutover.test.ts`; gelöst auf die neue `pilot-scope-registry`.
+- Der lokale `main` erweiterte den Real-Engine-Decision-Corpus auf 18 Szenarien. Die Shadow-League-Pilot-Eligibility wurde deshalb von 9 auf 15 aktualisiert.
 
-1. `corepack pnpm --filter @netgrid/ai test`
-2. `corepack pnpm --filter @netgrid/ai typecheck`
-3. `git diff --check`
-4. `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`
-5. `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`
-
-Nur nach grünem FINAL-GREEN wird der Branch lokal nach `main` integriert und der Arbeits-Worktree entfernt.
+Nach der Baseline-Anpassung liefen `@netgrid/ai test` mit 1202 Tests, `@netgrid/ai typecheck`, `src/index.test.ts`, `src/semantic-ai-runtime-cutover.test.ts` mit 45 Tests und `git diff --check` erneut grün. Der Branch kann nach `main` fast-forwarded werden.

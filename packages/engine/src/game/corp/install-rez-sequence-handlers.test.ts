@@ -607,6 +607,64 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
+  it("keeps Data Fort Reclamation optional rez as one follow-up after the install batch", () => {
+    const host = makeHost({
+      hq: ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction([
+        "card_asset_1",
+        "card_ice_1",
+        "card_upgrade_1",
+      ]),
+    });
+
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.handled).toBe(true);
+    expect(result.rezzedCardIds).toEqual([]);
+    expect(host.state.corp.hq).toEqual([]);
+    expect(host.state.corp.servers[0]?.root).toEqual(["asset_1", "upgrade_1"]);
+    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1"]);
+    expect(host.state.cardInstances.asset_1).toMatchObject({
+      rezzed: false,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+    expect(host.state.cardInstances.ice_1).toMatchObject({
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+    });
+    expect(host.state.cardInstances.upgrade_1).toMatchObject({
+      rezzed: false,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+    expect(host.state.pendingChoice).toMatchObject({
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 3,
+    });
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(["asset_1", "ice_1", "upgrade_1"]);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      immediateRezzedCount: 0,
+      dataFortReclamationRezChoiceOpened: true,
+      dataFortReclamationRezCandidateCount: 3,
+      temporaryCreditsSpent: 0,
+      temporaryCreditsRemaining: 10,
+    });
+  });
+
   it("resolves Data Fort Reclamation rez with temporary credits before corp credits", () => {
     const rezRootCalls: CardInstanceId[] = [];
     const server = {

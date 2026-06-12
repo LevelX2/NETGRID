@@ -19,8 +19,10 @@ describe("SemanticShadowLeague", () => {
     const report = buildSemanticShadowLeagueReport(samples);
     expect(report.schemaVersion).toBe(SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION);
     expect(report.scope).toBe("semantic_shadow_league_report_only");
-    expect(report.scenarioCount).toBe(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length);
-    expect(report.sideCounts).toEqual({ runner: 6, corp: 6 });
+    expect(report.scenarioCount).toBe(
+      REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length,
+    );
+    expect(report.sideCounts).toEqual(expectedSideCounts(samples));
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");
@@ -38,10 +40,10 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
-    expect(report.metrics.pilotEligibleCount).toBe(9);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(9);
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(4);
-    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(4);
+    expect(report.metrics.pilotEligibleCount).toBe(15);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(15);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(8);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(6);
     expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(1);
     expect(report.topDisagreementReasons).toEqual([
       "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
@@ -64,10 +66,9 @@ describe("SemanticShadowLeague", () => {
       topActionType: "score_agenda",
       agreement: true,
     });
-    expect(scenario(report, "runner_real_low_credits").expectedTopActionTypes).toEqual([
-      "draw_card",
-      "gain_credit",
-    ]);
+    expect(
+      scenario(report, "runner_real_low_credits").expectedTopActionTypes,
+    ).toEqual(["draw_card", "gain_credit"]);
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
     ).toEqual(["start_run"]);
@@ -83,4 +84,16 @@ function scenario(
   );
   if (!result) throw new Error(`Missing scenario ${scenarioId}`);
   return result;
+}
+
+function expectedSideCounts(
+  samples: ReturnType<typeof buildRealEngineDecisionCorpus>,
+) {
+  return samples.reduce(
+    (counts, sample) => ({
+      ...counts,
+      [sample.side]: counts[sample.side] + 1,
+    }),
+    { runner: 0, corp: 0 },
+  );
 }

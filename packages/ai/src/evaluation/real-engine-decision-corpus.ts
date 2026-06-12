@@ -11,6 +11,7 @@ import type {
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
 
 export type RealEngineDecisionCorpusScenario = {
@@ -18,6 +19,7 @@ export type RealEngineDecisionCorpusScenario = {
   input: AiDecisionInput;
   tacticalGoals?: readonly TacticalGoalLike[];
   runner?: BuildSemanticDecisionFrameParams["runner"];
+  deckDoctrine?: DeckDoctrineV2Diagnostic;
   evidence?: readonly string[];
 };
 
@@ -28,6 +30,7 @@ export type RealEngineDecisionCorpusSample = {
   candidateCount: number;
   frame: SemanticDecisionFrame;
   trace: SemanticDecisionTrace;
+  deckDoctrine?: DeckDoctrineV2Diagnostic;
   evidence: string[];
 };
 
@@ -57,7 +60,9 @@ export function buildRealEngineDecisionCorpusSample(
   const frame = buildSemanticDecisionFrame({
     input: scenario.input,
     actionCandidates,
-    ...(scenario.tacticalGoals ? { tacticalGoals: scenario.tacticalGoals } : {}),
+    ...(scenario.tacticalGoals
+      ? { tacticalGoals: scenario.tacticalGoals }
+      : {}),
     ...(scenario.runner ? { runner: scenario.runner } : {}),
     evidence: [
       `real_engine_decision_corpus:${scenario.scenarioId}`,
@@ -65,7 +70,11 @@ export function buildRealEngineDecisionCorpusSample(
     ],
   });
   const trace = buildSemanticShadowDecision(frame);
-  assertRealEngineDecisionCorpusSampleSideSafe(scenario.scenarioId, frame, trace);
+  assertRealEngineDecisionCorpusSampleSideSafe(
+    scenario.scenarioId,
+    frame,
+    trace,
+  );
   assertTraceUsesOnlyFrameLegalActions(scenario.scenarioId, frame, trace);
   return {
     scenarioId: scenario.scenarioId,
@@ -74,6 +83,7 @@ export function buildRealEngineDecisionCorpusSample(
     candidateCount: frame.actionCandidates.length,
     frame,
     trace,
+    ...(scenario.deckDoctrine ? { deckDoctrine: scenario.deckDoctrine } : {}),
     evidence: [
       `scenario:${scenario.scenarioId}`,
       `side:${scenario.input.side}`,
@@ -81,6 +91,12 @@ export function buildRealEngineDecisionCorpusSample(
       `candidate_count:${frame.actionCandidates.length}`,
       `ranked_action_count:${trace.rankedActions.length}`,
       `rejected_action_count:${trace.rejectedActions.length}`,
+      ...(scenario.deckDoctrine
+        ? [
+            `deck_doctrine:${scenario.deckDoctrine.deckSnapshotId}`,
+            `deck_doctrine_status:${scenario.deckDoctrine.status}`,
+          ]
+        : []),
     ],
   };
 }

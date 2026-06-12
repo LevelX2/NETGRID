@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -657,7 +657,12 @@ Main-Abgleich nach lokalem `main`-Merge:
 - Grün: `corepack pnpm test`
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check main..HEAD`
-- Rot: `corepack pnpm format:changed -- origin/main` wegen 34 Dateien aus bereits vorhandenen lokalen `main`-Commits außerhalb dieses Branch-Diffs.
+- Historische Baseline-Abweichung während der lokalen Integration: `corepack pnpm format:changed -- origin/main` war rot, weil `origin/main` zu diesem Zeitpunkt noch nicht die bereits vorhandenen lokalen `main`-Commits enthielt. Diese Rotmeldung gehörte nicht zum Branch-Diff gegen lokalen `main` und durfte deshalb nicht als Paketfehler dieses Prozesses gewertet werden.
+- Nach dem späteren Push war `origin/main` wieder auf dem lokalen `main`-Stand; die frühere Rotmeldung bleibt nur als Integrationshistorie relevant.
+
+Folgeprozess-Hygiene:
+
+- Ein separater lokaler AI022-/Hints-Strang wurde vor dem Folgeprozess als Stash `ai022-hints-local-baseline-before-followup-process` gesichert. Er war nicht Bestandteil dieses Abschlussprozesses.
 
 ## Verifikationsregeln
 
@@ -687,5 +692,5 @@ Main-Abgleich nach lokalem `main`-Merge:
 - Data Fort Reclamation ist für Region-/rez-on-install-Grenzen technisch gesichert oder vollständig sequenziert.
 - Primitive-Manifest, ActionSemantic-Coverage, TargetContext, Kosten/Timing und BasicAction-Semantik sind read-only diagnostisch verfügbar.
 - Kommentar-, Signal-, Doctrine- und Shadow-Trace-Diagnostik sind no-effect und default-off.
-- AI-Checks, Typechecks, Tests, `format:changed` und `git diff --check` sind grün.
+- AI-Checks, Typechecks, Tests, `format:changed` und `git diff --check` sind gegen die jeweils dokumentierte Paket- oder Integrationsbasis grün; abweichende Baselines werden ausdrücklich als solche dokumentiert.
 - Lokaler `main` enthält alle Paketcommits.
