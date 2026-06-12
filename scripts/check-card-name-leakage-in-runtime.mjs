@@ -323,7 +323,7 @@ const abstractionPlan = [
       "Erster vertikaler Slice, weil kind, Payload, Resolver und Turn-State zusammen sichtbar sind.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Quest for Cattekin",
     currentNames: [
       "quest_for_cattekin_start_turn_random_permanent_action",
@@ -341,7 +341,7 @@ const abstractionPlan = [
       ],
     },
     notes:
-      "Fachlich nah an Action-Economy/Delayed-Damage, aber wegen Random-/Permanent-State erst nach dem Muster-Slice.",
+      "Zweiter vertikaler Slice: Start-of-turn-Random-Table und persistenter Runner-Action-Modifikator sind generisch umgesetzt.",
   },
   {
     priority: "deferred_refactor_required",
@@ -671,7 +671,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+    "Die Guard-Nachpflege und der `Quest for Cattekin`-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Code Viral Cache`, `Krumz` und `Startup Immolator`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");

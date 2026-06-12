@@ -268,7 +268,23 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "quest_for_cattekin_start_turn_random_permanent_action";
+      kind: "start_turn_random_effect_table";
+      dieFaces: number;
+      randomPurpose: "runner_start_turn_source";
+      outcomes: Array<
+        | {
+            roll: number;
+            kind: "trash_source_and_grant_persistent_extra_action";
+            extraActions: number;
+          }
+        | {
+            roll: number;
+            kind: "unpreventable_damage";
+            damageType: "core" | "net" | "meat";
+            amount: number;
+          }
+      >;
+      defaultOutcome: { kind: "no_effect" };
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

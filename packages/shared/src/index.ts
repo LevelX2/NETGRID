@@ -1448,7 +1448,12 @@ export type GameState = {
       amount: number;
       preventable: boolean;
     }>;
-    questForCattekinPermanentActionGain?: boolean;
+    persistentModifiers?: Array<{
+      sourceCardInstanceId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      kind: "runner_extra_actions_per_turn";
+      amount: number;
+    }>;
     corpRezzedIceThisTurn?: number;
     lastRezzedBlackIceThisTurn?: {
       cardId: CardInstanceId;

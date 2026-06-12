@@ -1,4 +1,4 @@
-﻿import { runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegates } from "./runtime-delegate-store";
 
 export function corpRunnerActionPaidWindowActions(...args: any[]): any {
   return (
@@ -262,10 +262,10 @@ export function applyRunnerStartOfTurnEffects(...args: any[]): any {
   )(...args);
 }
 
-export function applyQuestForCattekinStartOfTurn(...args: any[]): any {
+export function applyStartTurnRandomEffectTables(...args: any[]): any {
   return (
     runtimeDelegates.turnRuntimeResolvers
-      .applyQuestForCattekinStartOfTurn as any
+      .applyStartTurnRandomEffectTables as any
   )(...args);
 }
 
