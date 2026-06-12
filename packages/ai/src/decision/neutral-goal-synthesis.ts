@@ -1,12 +1,17 @@
 import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
+import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 
 export function synthesizeNeutralTacticalGoals(
   frame: SemanticDecisionFrame,
 ): TacticalGoalLike[] {
-  const goals =
+  const sideGoals =
     frame.side === "runner"
       ? synthesizeRunnerNeutralGoals(frame)
       : synthesizeCorpNeutralGoals(frame);
+  const goals = [
+    ...sideGoals,
+    ...synthesizeDoctrineTacticalGoals(frame.doctrineDiagnostic),
+  ];
   return dedupeGoals(goals);
 }
 

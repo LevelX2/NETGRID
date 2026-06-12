@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "./semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
@@ -74,12 +75,30 @@ describe("neutral goal synthesis", () => {
       frame.legalActionIds.includes(action.actionId),
     )).toBe(true);
   });
+
+  it("adds diagnostic doctrine goals when a frame carries DeckDoctrine v2", () => {
+    const frame = frameFor(
+      "runner",
+      [
+        legalAction("gain-1", "gain_credit", "runner"),
+        legalAction("draw-1", "draw_card", "runner"),
+      ],
+      { doctrineDiagnostic: runnerRndDoctrine() },
+    );
+
+    expect(synthesizeNeutralTacticalGoals(frame).map((goal) => goal.goalId)).toEqual(
+      expect.arrayContaining(["runner.doctrine.rnd_pressure_access"]),
+    );
+  });
 });
 
 function frameFor(
   side: "runner" | "corp",
   legalActions: LegalAction[],
-  options: { runner?: Parameters<typeof buildSemanticDecisionFrame>[0]["runner"] } = {},
+  options: {
+    runner?: Parameters<typeof buildSemanticDecisionFrame>[0]["runner"];
+    doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
+  } = {},
 ) {
   const input = inputFor(side, legalActions);
   return buildSemanticDecisionFrame({
@@ -90,7 +109,62 @@ function frameFor(
       stateVersion: input.playerView.stateVersion,
     }),
     ...(options.runner ? { runner: options.runner } : {}),
+    ...(options.doctrineDiagnostic
+      ? { doctrineDiagnostic: options.doctrineDiagnostic }
+      : {}),
   });
+}
+
+function runnerRndDoctrine(): DeckDoctrineV2Diagnostic {
+  return {
+    schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+    scope: "diagnostic_only",
+    productiveUseAllowed: false,
+    deckSnapshotId: "runner-rnd-test",
+    side: "runner",
+    status: "complete",
+    neutralDoctrine: false,
+    strategyDiagnostics: [
+      {
+        strategyId: "runner.rnd_pressure",
+        status: "complete",
+        anchorScore: 80,
+        supportScore: 80,
+        finalScore: 80,
+        confidence: "high",
+        anchorEvidenceCount: 1,
+        supportEvidenceCount: 1,
+        supportGaps: [],
+      },
+    ],
+    rolesStatus: {
+      status: "complete",
+      cardCount: 1,
+      cardRows: 1,
+      completeCards: 1,
+      partialCards: 0,
+      anchorlessCards: 0,
+      cardsWithoutRoles: [],
+      roleSignalCount: 1,
+      functionSignalCount: 1,
+      strategyAnchorCount: 1,
+    },
+    cardRoles: [],
+    warnings: [],
+    source: {
+      strategyProfile: "buildDeckStrategyProfile",
+      mode: "report_only",
+      plannerEffect: "none",
+    },
+    noEffectFlags: {
+      actionSelection: false,
+      plannerWeights: false,
+      scoring: false,
+      legalActionGeneration: false,
+      engineMutation: false,
+      hiddenInfoProjection: false,
+    },
+  };
 }
 
 function inputFor(

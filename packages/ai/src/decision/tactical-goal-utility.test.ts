@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TacticalGoalLike } from "./semantic-decision-frame";
+import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import {
   buildTacticalGoalUtilities,
   normalizeTacticalGoalUtility,
@@ -109,6 +110,65 @@ describe("TacticalGoalUtility", () => {
         }),
       ),
     ).toThrow(/forbidden hidden-info marker/);
+  });
+
+  it("maps doctrine-generated goals to existing utility families", () => {
+    const utilities = buildTacticalGoalUtilities(
+      synthesizeDoctrineTacticalGoals({
+        schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+        scope: "diagnostic_only",
+        productiveUseAllowed: false,
+        deckSnapshotId: "corp-remote-scoring-test",
+        side: "corp",
+        status: "complete",
+        neutralDoctrine: false,
+        strategyDiagnostics: [
+          {
+            strategyId: "corp.remote_scoring",
+            status: "complete",
+            anchorScore: 80,
+            supportScore: 80,
+            finalScore: 80,
+            confidence: "high",
+            anchorEvidenceCount: 1,
+            supportEvidenceCount: 1,
+            supportGaps: [],
+          },
+        ],
+        rolesStatus: {
+          status: "complete",
+          cardCount: 1,
+          cardRows: 1,
+          completeCards: 1,
+          partialCards: 0,
+          anchorlessCards: 0,
+          cardsWithoutRoles: [],
+          roleSignalCount: 1,
+          functionSignalCount: 1,
+          strategyAnchorCount: 1,
+        },
+        cardRoles: [],
+        warnings: [],
+        source: {
+          strategyProfile: "buildDeckStrategyProfile",
+          mode: "report_only",
+          plannerEffect: "none",
+        },
+        noEffectFlags: {
+          actionSelection: false,
+          plannerWeights: false,
+          scoring: false,
+          legalActionGeneration: false,
+          engineMutation: false,
+          hiddenInfoProjection: false,
+        },
+      }),
+    );
+
+    expect(utilities.map((utility) => utility.family)).toEqual([
+      "corp_scoreline",
+      "corp_ice_defense",
+    ]);
   });
 });
 
