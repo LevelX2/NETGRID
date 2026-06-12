@@ -21,6 +21,14 @@ import type {
 } from "../install-rez-sequence-handlers";
 import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
 
+/**
+ * @contract Data Fort Reclamation owns the hidden HQ install/rez sequence.
+ * @authority Legality still comes from scored-agenda LegalActions and every
+ * choice resolve revalidates source, score area, selected HQ cards and costs.
+ * @visibility HQ choices stay corp-private; public payloads expose only
+ * counts, public definition IDs, server IDs and credit totals.
+ */
+
 const HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE =
   "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez";
 const HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE =

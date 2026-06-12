@@ -14,6 +14,15 @@ import type {
   CorpInstallRezSequenceHandlerResult,
 } from "../install-rez-sequence-handlers";
 
+/**
+ * @contract Priority Requisition owns the scored-agenda free-rez choice for a
+ * single installed ICE candidate.
+ * @authority The resolver revalidates score area, selected option membership
+ * and current no-cost rez eligibility before mutating ICE faceup/rezzed state.
+ * @visibility Candidate labels are actor-private; public payloads expose the
+ * resolved target and free-rez outcome only after resolution.
+ */
+
 export function isPriorityRequisitionChoiceSource(source: string): boolean {
   return source.startsWith("v162.priority_requisition");
 }

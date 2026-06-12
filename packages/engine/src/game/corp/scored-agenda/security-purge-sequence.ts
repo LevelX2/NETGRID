@@ -13,6 +13,15 @@ import type {
 } from "../install-rez-sequence-handlers";
 import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
 
+/**
+ * @contract Security Purge owns the scored-agenda reveal, target-choice and
+ * install/trash sequence for the top three R&D cards.
+ * @authority Resolver callbacks revalidate score area, revealed order and
+ * selected target servers before any R&D, server or Archives mutation.
+ * @visibility Revealed definitions, target labels and counts may be public;
+ * unrevealed R&D identity and private choice metadata must not leak.
+ */
+
 type SequencePayload = Record<string, string | number | boolean>;
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
   "v1922.security_purge_install_targets";
