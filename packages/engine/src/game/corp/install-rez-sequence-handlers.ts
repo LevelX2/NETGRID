@@ -97,6 +97,11 @@ export type CorpInstallRezSequenceHandlerResult = {
   resolvedPayload?: SequencePayload;
 };
 
+/**
+ * @dispatcher Routes pending corp scored-agenda install/rez choices to the
+ * owning sequence module. Card-specific legality and mutation stay inside the
+ * delegated resolver and still run under the Rules Engine action contract.
+ */
 export function handleCorpInstallRezSequenceChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
