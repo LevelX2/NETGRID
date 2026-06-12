@@ -290,6 +290,7 @@ describe("buildActionSemanticCandidates", () => {
           },
         }),
       ],
+      observerSide: "runner",
     });
     if (!candidate) throw new Error("Expected primitive payload candidate");
 
@@ -306,6 +307,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.primitiveKind).toBe("successful_run_before_access_effect");
     expect(candidate.effectKind).toBe("corp_lose_credits");
     expect(candidate.abilityBindingMethod).toBe("engine_payload");
+    expect(candidate.observerSide).toBe("runner");
     expect(candidate.visibilityScope).toBe("actor_private");
     expect(candidate.actionTacticSignals).toEqual([]);
     expect(candidate.strategySupport).toEqual([]);

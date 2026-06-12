@@ -186,6 +186,14 @@ describe("ChoiceView projection", () => {
       corpView.pendingChoice?.options.map((option) => option.label),
     ).toEqual(options.map((option) => option.label));
     expect(runnerView.pendingChoice).toBeUndefined();
+    for (const fieldName of [
+      "cardImplementationAbilityId",
+      "cardImplementationAbilityKey",
+      "cardImplementationPrimitiveKind",
+      "cardImplementationEffectKind",
+    ]) {
+      expect(runnerViewJson).not.toContain(fieldName);
+    }
     for (const option of options) {
       expect(runnerViewJson).not.toContain(String(option.value));
       expect(runnerViewJson).not.toContain(option.label);
@@ -248,5 +256,6 @@ describe("ChoiceView projection", () => {
       definitionId: "simple_barrier_ice",
       rezzed: true,
     });
+    expect(JSON.stringify(runnerView)).toContain("Simple Barrier ICE");
   });
 });

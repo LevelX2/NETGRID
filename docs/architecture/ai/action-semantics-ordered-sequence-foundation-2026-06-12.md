@@ -444,6 +444,23 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/ai typecheck`
 - Grün: `git diff --check`
 
+## P3 Ergebnis
+
+Umgesetzt:
+
+- Hidden-Resource-Härtung prüft vor Reveal zusätzlich, dass Opponent-Views keine Primitive-Metadaten oder verdeckte Source-Instanz-ID enthalten.
+- Hidden-Resource-PublicPayload nach Reveal bleibt auf öffentliche Reveal-Fakten begrenzt und enthält keine `cardImplementation*`-Felder.
+- Data-Fort-Reclamation-HQ-Choice bleibt im Runner-View ohne Choice, HQ-Optionen, DefinitionIds oder Primitive-Metadaten.
+- Public scored ICE mark choice bleibt weiterhin public sichtbar, weil das Ziel bereits public/rezzed ist.
+- AI-Smoke bindet die actor-private Primitive-Projektion explizit an den Runner-Observer.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
