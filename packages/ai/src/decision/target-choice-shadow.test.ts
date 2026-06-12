@@ -86,6 +86,102 @@ describe("TargetChoiceShadow", () => {
     ]);
   });
 
+  it("ranks activated card ability legal targets without materializing selected targets", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "ability-target",
+        type: "activated_card_ability",
+        targetRequirements: [
+          {
+            id: "target",
+            kind: "card",
+            side: "runner",
+            zoneScope: ["rig"],
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        target: ["runner-resource", "runner-program"],
+      },
+      preferredOptionIds: ["runner-program"],
+    });
+
+    expect(report.actionType).toBe("activated_card_ability");
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "runner-program",
+      "runner-resource",
+    ]);
+    expect(report.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    });
+  });
+
+  it("covers accessed-card trash and decline contexts as report-only diagnostics", () => {
+    const trashReport = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "trash-accessed",
+        type: "trash_accessed_card",
+        targetRequirements: [
+          {
+            id: "accessed",
+            kind: "card",
+            side: "corp",
+            zoneScope: ["remote"],
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        accessed: ["accessed-card-public-id"],
+      },
+    });
+    const declineReport = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "decline-trash",
+        type: "decline_trash",
+      }),
+    });
+
+    expect(trashReport.rankedOptions).toEqual([
+      expect.objectContaining({
+        requirementId: "accessed",
+        optionId: "accessed-card-public-id",
+      }),
+    ]);
+    expect(declineReport.rankedOptions).toEqual([]);
+    expect(declineReport.blockedRequirements).toEqual([]);
+    expect(declineReport.noRuntimeEffect).toBe(true);
+  });
+
+  it("ranks score and advance legal target options deterministically", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "advance-installed",
+        side: "corp",
+        type: "advance_card",
+        targetRequirements: [
+          {
+            id: "installed-card",
+            kind: "card",
+            side: "corp",
+            zoneScope: ["remote"],
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        "installed-card": ["remote_2_agenda", "remote_1_agenda"],
+      },
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "remote_1_agenda",
+      "remote_2_agenda",
+    ]);
+  });
+
   it("redacts forbidden markers from report-only option diagnostics", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
@@ -108,13 +204,16 @@ describe("TargetChoiceShadow", () => {
 });
 
 function action(options: {
+  actionId?: string;
+  side?: LegalAction["side"];
+  type?: LegalAction["type"];
   choiceRequirements?: LegalAction["choiceRequirements"];
   targetRequirements?: LegalAction["targetRequirements"];
 }): LegalAction {
   return {
-    actionId: "resolve-choice",
-    side: "runner",
-    type: "resolve_choice",
+    actionId: options.actionId ?? "resolve-choice",
+    side: options.side ?? "runner",
+    type: options.type ?? "resolve_choice",
     label: "Resolve choice",
     source: "game_rule",
     timingPoint: "runner_action.main",
