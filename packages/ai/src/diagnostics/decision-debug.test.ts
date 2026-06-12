@@ -111,6 +111,10 @@ describe("DecisionDebug diagnostics", () => {
         "target_choice_shadow:report_only",
         "secretGripIds:bad",
       ],
+      doctrineGoalItems: [
+        "doctrine_goal_trace:decision_debug",
+        "privatePayload:bad",
+      ],
       mistakeSummaryItems: [
         "mistake_summary:illegal_action=1",
         "cardInstances:bad",
@@ -138,6 +142,11 @@ describe("DecisionDebug diagnostics", () => {
           id: "target_choice_shadow",
           title: "Target Choice Shadow",
           items: ["target_choice_shadow:report_only"],
+        },
+        {
+          id: "doctrine_goal",
+          title: "Doctrine Goal",
+          items: ["doctrine_goal_trace:decision_debug"],
         },
         {
           id: "mistake_summary",

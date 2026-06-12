@@ -50,6 +50,7 @@ function candidateRunServerIds(candidate: ActionSemanticCandidate): string[] {
     .filter((target) => target.targetKind === "server")
     .map((target) => normalizeServerId(target.targetId))
     .filter((targetId): targetId is string => targetId !== undefined);
+  if (fromTargets.length > 0) return uniqueStrings(fromTargets);
   const fromEvidence = candidate.evidence
     .flatMap((entry) => [
       parseEvidenceServer(entry, "run_action_projection_target:"),
@@ -57,7 +58,7 @@ function candidateRunServerIds(candidate: ActionSemanticCandidate): string[] {
       parseEvidenceServer(entry, "server:"),
     ])
     .filter((targetId): targetId is string => targetId !== undefined);
-  return uniqueStrings([...fromTargets, ...fromEvidence]);
+  return uniqueStrings(fromEvidence);
 }
 
 function parseEvidenceServer(

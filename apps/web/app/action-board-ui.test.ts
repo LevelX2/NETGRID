@@ -1389,6 +1389,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
       })
     ).toBe("Cascade: Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen. Aktuell sind das 1 Karte. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
     expect(
+      serverCounterChipsForDisplays([
+        {
+          id: "restrictive_net_zoning_install_cost_rd",
+          amount: 2,
+          displayKind: "generic_counter",
+          label: "Install +",
+          ariaLabel:
+            "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+          counterType: "install_cost_modifier",
+          usageHint: "status_marker"
+        }
+      ])
+    ).toEqual([
+      {
+        key: "restrictive_net_zoning_install_cost_rd",
+        amount: 2,
+        label: "Install +",
+        ariaLabel:
+          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        tooltip:
+          "Restrictive Net Zoning: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Fort zu installieren."
+      }
+    ]);
+    expect(
       counterDisplayTooltipText({
         id: "runner_virus_corp_vienna",
         amount: 2,

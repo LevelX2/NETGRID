@@ -166,6 +166,7 @@ export type CounterType =
   | "agenda"
   | "recurring_credit"
   | "bad_publicity"
+  | "install_cost_modifier"
   | "charge"
   | "mark"
   | "dividend"

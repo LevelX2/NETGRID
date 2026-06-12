@@ -20,6 +20,13 @@ export type RealEngineDecisionCorpusScenario = {
   tacticalGoals?: readonly TacticalGoalLike[];
   runner?: BuildSemanticDecisionFrameParams["runner"];
   deckDoctrine?: DeckDoctrineV2Diagnostic;
+  leagueExpectation?: RealEngineDecisionCorpusLeagueExpectation;
+  evidence?: readonly string[];
+};
+
+export type RealEngineDecisionCorpusLeagueExpectation = {
+  expectedTopActionTypes?: readonly string[];
+  expectedTopActionIds?: readonly string[];
   evidence?: readonly string[];
 };
 
@@ -31,6 +38,7 @@ export type RealEngineDecisionCorpusSample = {
   frame: SemanticDecisionFrame;
   trace: SemanticDecisionTrace;
   deckDoctrine?: DeckDoctrineV2Diagnostic;
+  leagueExpectation?: RealEngineDecisionCorpusLeagueExpectation;
   evidence: string[];
 };
 
@@ -84,6 +92,9 @@ export function buildRealEngineDecisionCorpusSample(
     frame,
     trace,
     ...(scenario.deckDoctrine ? { deckDoctrine: scenario.deckDoctrine } : {}),
+    ...(scenario.leagueExpectation
+      ? { leagueExpectation: scenario.leagueExpectation }
+      : {}),
     evidence: [
       `scenario:${scenario.scenarioId}`,
       `side:${scenario.input.side}`,

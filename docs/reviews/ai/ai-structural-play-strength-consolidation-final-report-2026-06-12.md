@@ -59,3 +59,7 @@ Die vorherige AI-Play-Strength-Activation-Serie war lokal auf `main` vorhanden, 
 - Der lokale `main` erweiterte den Real-Engine-Decision-Corpus auf 18 Szenarien. Die Shadow-League-Pilot-Eligibility wurde deshalb von 9 auf 15 aktualisiert.
 
 Nach der Baseline-Anpassung liefen `@netgrid/ai test` mit 1202 Tests, `@netgrid/ai typecheck`, `src/index.test.ts`, `src/semantic-ai-runtime-cutover.test.ts` mit 45 Tests und `git diff --check` erneut grün. Der Branch kann nach `main` fast-forwarded werden.
+
+## Follow-up-Audit 2026-06-12
+
+Die anschliessende Maturation-Serie startet lokal von `main` bei `924940fa Fix Corp AI valuation for Information Laundering`. Der gemeldete Konsolidierungsabschluss `9f6f0987` ist in der lokalen Historie und in den lokalen Remote-Refs fuer `origin/main` enthalten. Die neue Serie behandelt den Abschluss deshalb als vorhandene Basis und konzentriert sich auf Delta-Arbeit: Pilot-Scope-Zerlegung, Corpus- und League-Haertung, side-sichere Diagnose, Target-/Doctrine-Diagnostik, Modulgrenzen und den vorbereiteten `index.ts`-Strukturschnitt.

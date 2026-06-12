@@ -1,5 +1,7 @@
+import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
+import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
 import type { AiOpportunityProjection } from "./opportunity-projection";
 import {
@@ -28,14 +30,21 @@ import {
 } from "./threat-projection";
 import type {
   SemanticDecisionTrace,
+  SemanticDecisionTraceDoctrineGoalSummary,
+  SemanticDecisionTraceTargetChoiceShadowSummary,
   SemanticRankedAction,
   SemanticRejectedAction,
 } from "./semantic-decision-trace";
+import {
+  buildTargetChoiceShadowReport,
+  TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
+} from "./target-choice-shadow";
 
 export type BuildSemanticShadowDecisionOptions = {
   calibrationProfile?:
     | SemanticShadowCalibrationProfile
     | SemanticShadowCalibrationProfileId;
+  includeDoctrineGoalsInTrace?: boolean;
 };
 
 export function buildSemanticShadowDecision(
@@ -99,6 +108,10 @@ export function buildSemanticShadowDecision(
   rejectedActions.sort((left, right) =>
     left.actionId.localeCompare(right.actionId),
   );
+  const targetChoiceShadow = targetChoiceShadowTraceSummary(frame);
+  const doctrineGoals = options.includeDoctrineGoalsInTrace
+    ? doctrineGoalTraceSummary(frame)
+    : undefined;
 
   return {
     schemaVersion: "semantic-decision-trace-v1",
@@ -119,6 +132,8 @@ export function buildSemanticShadowDecision(
     },
     rankedActions,
     rejectedActions,
+    ...(targetChoiceShadow ? { targetChoiceShadow } : {}),
+    ...(doctrineGoals ? { doctrineGoals } : {}),
     noRuntimeEffect: true,
   };
 }
@@ -346,4 +361,115 @@ function fitStatusRank(status: ActionGoalFit["fitStatus"]): number {
     case "blocked":
       return 1;
   }
+}
+
+function targetChoiceShadowTraceSummary(
+  frame: SemanticDecisionFrame,
+): SemanticDecisionTraceTargetChoiceShadowSummary | undefined {
+  const reports = frame.actionCandidates.flatMap((candidate) => {
+    const action = syntheticTargetChoiceActionForCandidate(candidate, frame);
+    if (!action) return [];
+    return [buildTargetChoiceShadowReport({ action, candidate })];
+  });
+  if (reports.length === 0) return undefined;
+  const topReport = reports[0];
+  const topOption = topReport?.rankedOptions[0];
+  const rankedOptionCount = reports.reduce(
+    (sum, report) => sum + report.rankedOptions.length,
+    0,
+  );
+  const blockedRequirementCount = reports.reduce(
+    (sum, report) => sum + report.blockedRequirements.length,
+    0,
+  );
+  return {
+    schemaVersion: TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
+    scope: "target_choice_shadow_trace_summary",
+    reportOnly: true,
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    actionCount: reports.length,
+    rankedOptionCount,
+    blockedRequirementCount,
+    ...(topReport ? { topActionId: topReport.actionId } : {}),
+    ...(topOption ? { topOptionId: topOption.optionId } : {}),
+    selectionOutput: {
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    },
+    evidence: [
+      "target_choice_shadow:trace_summary",
+      `target_choice_shadow_action_count:${reports.length}`,
+      `target_choice_shadow_ranked_option_count:${rankedOptionCount}`,
+      `target_choice_shadow_blocked_requirement_count:${blockedRequirementCount}`,
+      "selected_choices_created:false",
+      "selected_targets_created:false",
+    ],
+  };
+}
+
+function syntheticTargetChoiceActionForCandidate(
+  candidate: ActionSemanticCandidate,
+  frame: SemanticDecisionFrame,
+): LegalAction | undefined {
+  const context = candidate.targetContext;
+  if (!context || context.hiddenInfoPolicy === "hidden_info_blocked") {
+    return undefined;
+  }
+  const requirementKind = legalTargetRequirementKind(context.targetKind);
+  if (!requirementKind) return undefined;
+  const side = candidate.actorSide === "corp" ? "corp" : frame.side;
+  return {
+    actionId: candidate.actionId,
+    side,
+    type: candidate.actionType as LegalAction["type"],
+    label: candidate.actionType,
+    source: "basic_action",
+    timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+    costs: [],
+    targetRequirements: [
+      {
+        id: "candidate_target",
+        kind: requirementKind,
+        visibility: "known_to_actor",
+      },
+    ],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: frame.stateVersion,
+  };
+}
+
+function legalTargetRequirementKind(
+  targetKind: NonNullable<ActionSemanticCandidate["targetContext"]>["targetKind"],
+): LegalAction["targetRequirements"][number]["kind"] | undefined {
+  if (targetKind === "card") return "card";
+  if (targetKind === "server") return "server";
+  if (targetKind === "subroutine") return "subroutine";
+  return undefined;
+}
+
+function doctrineGoalTraceSummary(
+  frame: SemanticDecisionFrame,
+): SemanticDecisionTraceDoctrineGoalSummary | undefined {
+  const goals = synthesizeDoctrineTacticalGoals(frame.doctrineDiagnostic);
+  if (goals.length === 0) return undefined;
+  return {
+    scope: "doctrine_goal_trace_summary",
+    reportOnly: true,
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    goalCount: goals.length,
+    goals: goals.map((goal) => ({
+      goalId: goal.goalId,
+      family: goal.family,
+      priority: goal.priority,
+      ...(goal.source ? { source: goal.source } : {}),
+      evidence: [...(goal.evidence ?? [])],
+    })),
+    evidence: [
+      "doctrine_goals:trace_summary",
+      `doctrine_goal_count:${goals.length}`,
+      "productive_use_allowed:false",
+    ],
+  };
 }

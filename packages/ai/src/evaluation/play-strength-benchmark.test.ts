@@ -79,10 +79,16 @@ describe("PlayStrengthCalibrationBenchmark", () => {
     const diff = comparePlayStrengthCalibrationProfiles(samples);
 
     expect(diff.baselineProfileId).toBe("baseline_v1");
+    expect(diff.baselineProfileVersion).toBe("2026-06-12");
     expect(diff.candidateProfileId).toBe("shadow_calibrated_v1");
+    expect(diff.candidateProfileVersion).toBe("2026-06-12");
     expect(diff.baselineReference).toBe(
       "ai-shadow-league-baseline-2026-06-12",
     );
+    expect(diff.baselineReportPath).toBe(
+      "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
+    );
+    expect(diff.baselineScenarioCount).toBe(18);
     expect(diff.sampleCount).toBe(samples.length);
     expect(diff.changedScoreSampleCount).toBeGreaterThan(0);
     expect(diff.productiveUseAllowed).toBe(false);
@@ -91,6 +97,7 @@ describe("PlayStrengthCalibrationBenchmark", () => {
     expect(diff.evidence).toEqual(
       expect.arrayContaining([
         "play_strength_calibration_profile_diff:diagnostic_only",
+        "baseline_scenario_count:18",
         "runtime_weight_change:false",
       ]),
     );

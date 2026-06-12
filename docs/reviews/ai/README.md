@@ -14,6 +14,11 @@
 
 - `semantic-ai-runtime-cutover-2026-06-04.md`: Die Semantic Runtime ist im AI-Livepfad default aktiv. `chooseRunnerAction` und `chooseCorpAction` nutzen Legacy nur noch als Referenz, per `NETGRID_SEMANTIC_AI_RUNTIME=legacy` als expliziten Notaus oder als No-Candidate-Fallback. Bestehende Legacy-Regressionstests setzen den Notaus bewusst; der neue Cutover-Test prüft den default-aktiven Semantic-Pfad.
 
+## Aktuelle Struktur- und Backlog-Reviews
+
+- `ai-structure-play-strength-maturation-final-report-2026-06-12.md`: Abschlussbericht fuer die AI-MAT-0-bis-AI-MAT-20-Play-Strength-Maturation-Serie vor FINAL-GREEN. Dokumentiert Pilot-Scope-Schnitt, Corpus-/Shadow-League-Ausbau, Doctrine-/Target-Debug, Modulgrenzen, `index.ts`-Debt-Map, Originalset-Backlog und verbleibende Integrationsschritte.
+- `originalset-semantic-play-strength-backlog-2026-06-12.md`: Diagnostischer Folgebacklog fuer Originalset-nahe Play-Strength-Semantik nach AI028-R. Schneidet die verbleibenden Warningklassen in kleine Folgeauftraege und macht den bestehenden Action-Semantic-Invariant-Guard zum Pflichtgate; keine Runtime-, Planner-, Score-, Engine- oder Hidden-Info-Wirkung.
+
 ## Neue AI-Aufgaben ab AI001
 
 - `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.

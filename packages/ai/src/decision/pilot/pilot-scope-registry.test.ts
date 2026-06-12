@@ -2,17 +2,19 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
+  ALL_PLAY_STRENGTH_PILOT_SCOPES,
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
+  PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   parsePilotScopes,
   pilotScopeAllowsAction,
   semanticPilotChoice,
 } from "./pilot-scope-registry";
-import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "./semantic-shadow-calibration";
-import type { SemanticDecisionFrame } from "./semantic-decision-frame";
-import type { SemanticDecisionTrace } from "./semantic-decision-trace";
-import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
+import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "../semantic-shadow-calibration";
+import type { SemanticDecisionFrame } from "../semantic-decision-frame";
+import type { SemanticDecisionTrace } from "../semantic-decision-trace";
+import type { SemanticRuntimeChoice } from "../../runtime/semantic-runtime-types";
 
 describe("pilot-scope-registry", () => {
   const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
@@ -38,6 +40,21 @@ describe("pilot-scope-registry", () => {
         ` ${BASIC_SETUP_PILOT_MODE},unknown;${RUNNER_SAFE_ACCESS_PILOT_MODE} ${BASIC_SETUP_PILOT_MODE} `,
       ),
     ).toEqual([BASIC_SETUP_PILOT_MODE, RUNNER_SAFE_ACCESS_PILOT_MODE]);
+  });
+
+  it("expands the all token without duplicating explicit scopes", () => {
+    expect(parsePilotScopes(PLAY_STRENGTH_PILOT_ALL_TOKEN)).toEqual(
+      ALL_PLAY_STRENGTH_PILOT_SCOPES,
+    );
+    expect(
+      parsePilotScopes(
+        `${RUNNER_SAFE_ACCESS_PILOT_MODE},${PLAY_STRENGTH_PILOT_ALL_TOKEN};${BASIC_SETUP_PILOT_MODE}`,
+      ),
+    ).toEqual([
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      BASIC_SETUP_PILOT_MODE,
+      CORP_SCORE_WINDOW_PILOT_MODE,
+    ]);
   });
 
   it("allows only basic setup resource actions for the basic scope", () => {
@@ -107,7 +124,56 @@ describe("pilot-scope-registry", () => {
       expect.arrayContaining(["target_kind:hq", "recommendation:run_now"]),
     );
     expect(remoteBlocked.allowed).toBe(false);
-    expect(remoteBlocked.reason).toBe("runner_safe_access_gate_blocked");
+    expect(remoteBlocked.reason).toBe("runner_safe_access_non_central_target");
+  });
+
+  it("blocks runner safe access on risk signals from the run target", () => {
+    const riskyCases = [
+      {
+        label: "universal pressure",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          riskyUniversalCoverage: true,
+        },
+        reason: "runner_safe_access_universal_risk_blocked",
+        evidence: "risky_universal_coverage:true",
+      },
+      {
+        label: "negative credits after run",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          creditsAfterRun: -1,
+        },
+        reason: "runner_safe_access_credit_risk_blocked",
+        evidence: "credits_after_run:-1",
+      },
+      {
+        label: "unaffordable steal or trash",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          stealOrTrashAffordable: false,
+        },
+        reason: "runner_safe_access_unaffordable_access_blocked",
+        evidence: "steal_or_trash_affordable:false",
+      },
+    ] as const;
+
+    for (const riskyCase of riskyCases) {
+      const result = pilotScopeAllowsAction({
+        scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
+        frame: frame(["run-hq"], {
+          runner: { runTargets: [riskyCase.target] },
+        }),
+        action: legalAction("run-hq", "start_run", { serverId: "hq" }),
+        top: rankedAction("run-hq", 160, "run_access"),
+      });
+
+      expect(result.allowed, riskyCase.label).toBe(false);
+      expect(result.reason, riskyCase.label).toBe(riskyCase.reason);
+      expect(result.evidence, riskyCase.label).toEqual(
+        expect.arrayContaining([riskyCase.evidence]),
+      );
+    }
   });
 
   it("allows only corp score_agenda actions with scoreline evidence", () => {
@@ -158,6 +224,33 @@ describe("pilot-scope-registry", () => {
         "pilot_scope_allowed:true",
         "target_kind:hq",
       ]),
+    );
+    expect(result?.evidence).toEqual(
+      expect.arrayContaining([
+        "ai_play_strength_pilot:runner_safe_access",
+        "pilot_scope_reason:runner_safe_access_central_reachable_allowed",
+      ]),
+    );
+  });
+
+  it("falls through blocked earlier scopes in a multi-scope env", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] =
+      `${BASIC_SETUP_PILOT_MODE},${RUNNER_SAFE_ACCESS_PILOT_MODE}`;
+    const result = semanticPilotChoice({
+      frame: frame(["gain-1", "run-hq"], {
+        runner: { runTargets: [safeCentralRunTarget("run-hq", "hq")] },
+      }),
+      trace: trace("run-hq", 160, "run_access"),
+      currentChoice: choice("gain-1", "gain_credit", 70),
+      choices: [
+        choice("gain-1", "gain_credit", 70),
+        choice("run-hq", "start_run", 160, { serverId: "hq" }),
+      ],
+    });
+
+    expect(result?.choice.action.actionId).toBe("run-hq");
+    expect(result?.choice.reasonCode).toBe(
+      "ai_play_strength.runner_safe_access_pilot",
     );
     expect(result?.evidence).toEqual(
       expect.arrayContaining([

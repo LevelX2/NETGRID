@@ -4652,6 +4652,38 @@ describe("V1.8.1 Mechanikpaket H", () => {
         (card) => card.instanceId === restrictiveCardId,
       ),
     ).toMatchObject({ selectedServerId: "rd", selectedServerLabel: "R&D" });
+    expect(
+      getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "rd",
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "restrictive_net_zoning_install_cost_rd",
+        amount: 2,
+        label: "Install +",
+        ariaLabel:
+          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        counterType: "install_cost_modifier",
+      }),
+    ]);
+    expect(
+      getPlayerView(state, "corp").servers.find((server) => server.id === "rd")
+        ?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "restrictive_net_zoning_install_cost_rd",
+        amount: 2,
+        label: "Install +",
+        ariaLabel:
+          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        counterType: "install_cost_modifier",
+      }),
+    ]);
+    expect(
+      getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "hq",
+      )?.counterDisplays,
+    ).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       selectedServerId: "rd",

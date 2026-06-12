@@ -30,6 +30,12 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_click_limited_economy",
   "runner_real_remote_probe",
   "runner_real_rnd_pressure_with_buffer",
+  "runner_real_high_credits_setup",
+  "runner_real_empty_hand_draw",
+  "runner_real_tagged_low_credits",
+  "runner_real_safe_archives_access",
+  "runner_real_remote_with_ice_probe",
+  "runner_real_low_click_tag_cleanup",
   "corp_real_score_agenda_window",
   "corp_real_advance_score_window",
   "corp_real_low_rez_reserve",
@@ -39,7 +45,30 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_remote_defense_setup",
   "corp_real_install_credit_pressure",
   "corp_real_high_credit_main_window",
+  "corp_real_score_low_credits",
+  "corp_real_remote_ice_defense",
+  "corp_real_low_credit_main_window",
+  "corp_real_rez_mid_credits",
+  "corp_real_remote_double_asset_setup",
+  "corp_real_draw_pressure_window",
 ] as const;
+
+const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
+  runner_real_low_credits: ["gain_credit", "draw_card"],
+  runner_real_safe_hq_access: ["start_run"],
+  runner_real_safe_rd_access: ["start_run"],
+  runner_real_remote_score_threat: ["start_run"],
+  runner_real_damage_buffer_needed: ["draw_card"],
+  runner_real_tag_cleanup: ["remove_tag"],
+  corp_real_score_agenda_window: ["score_agenda"],
+  corp_real_advance_score_window: ["advance_card"],
+  corp_real_low_rez_reserve: ["gain_credit", "draw_card"],
+  corp_real_rez_value_window: ["rez_ice"],
+  corp_real_do_not_rez_when_broke: ["decline_rez"],
+  corp_real_basic_economy_draw: ["gain_credit", "draw_card"],
+} as const satisfies Partial<
+  Record<(typeof REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS)[number], readonly string[]>
+>;
 
 export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
   return [
@@ -133,6 +162,66 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       ["fixture:rnd_pressure_with_buffer"],
       "onr_origin_runner_ai_snapshot_v1",
     ),
+    runnerScenario(
+      "runner_real_high_credits_setup",
+      "real-runner-high-credits-setup",
+      (state) => {
+        state.runner.credits = 12;
+      },
+      ["fixture:runner_high_credits_setup"],
+      "demo_runner_008_snapshot_v0_8",
+    ),
+    runnerScenario(
+      "runner_real_empty_hand_draw",
+      "real-runner-empty-hand-draw",
+      (state) => {
+        state.runner.credits = 5;
+        state.runner.grip = [];
+      },
+      ["fixture:runner_empty_hand"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_tagged_low_credits",
+      "real-runner-tagged-low-credits",
+      (state) => {
+        state.runner.tags = 2;
+        state.runner.credits = 1;
+      },
+      ["fixture:runner_tagged_low_credits"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_safe_archives_access",
+      "real-runner-safe-archives",
+      (state) => {
+        state.runner.credits = 7;
+      },
+      ["fixture:runner_archives_access"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_remote_with_ice_probe",
+      "real-runner-remote-ice-probe",
+      (state) => {
+        state.runner.credits = 9;
+        ensureServer(state, "remote_2");
+        putCorpIceOnServer(state, "remote_2", "simple_barrier_ice");
+      },
+      ["fixture:runner_remote_with_ice_probe"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_low_click_tag_cleanup",
+      "real-runner-low-click-tag-cleanup",
+      (state) => {
+        state.runner.clicks = 1;
+        state.runner.tags = 1;
+        state.runner.credits = 4;
+      },
+      ["fixture:runner_low_click_tag_cleanup"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
     corpScenario(
       "corp_real_score_agenda_window",
       "real-corp-score-window",
@@ -211,6 +300,63 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       ["fixture:corp_high_credit_main_window"],
       "onr_origin_corp_ai_snapshot_v1",
     ),
+    corpScenario(
+      "corp_real_score_low_credits",
+      "real-corp-score-low-credits",
+      (state) => {
+        state.corp.credits = 1;
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 3);
+      },
+      ["fixture:corp_score_low_credits"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_remote_ice_defense",
+      "real-corp-remote-ice-defense",
+      (state) => {
+        state.corp.credits = 5;
+        ensureServer(state, "remote_2");
+        putCorpIceOnServer(state, "remote_2", "simple_barrier_ice");
+      },
+      ["fixture:corp_remote_ice_defense"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_low_credit_main_window",
+      "real-corp-low-credit-main-window",
+      (state) => {
+        state.corp.credits = 1;
+      },
+      ["fixture:corp_low_credit_main_window"],
+      "demo_corp_008_snapshot_v0_8",
+    ),
+    corpRezScenario(
+      "corp_real_rez_mid_credits",
+      "real-corp-rez-mid-credits",
+      4,
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_remote_double_asset_setup",
+      "real-corp-remote-double-asset-setup",
+      (state) => {
+        state.corp.credits = 7;
+        putCorpRootInServer(state, "remote_1", "simple_economy_asset", 0);
+        ensureServer(state, "remote_2");
+      },
+      ["fixture:corp_remote_double_asset_setup"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_draw_pressure_window",
+      "real-corp-draw-pressure-window",
+      (state) => {
+        state.corp.credits = 3;
+        state.corp.hq = state.corp.hq.slice(0, 1);
+      },
+      ["fixture:corp_draw_pressure_window"],
+      "demo_corp_008_snapshot_v0_8",
+    ),
   ];
 }
 
@@ -221,26 +367,11 @@ function runnerScenario(
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  const state = toRunnerTurn(
-    createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
-  );
-  mutate(state);
-  const input = buildAiDecisionInput(state, "runner", {
-    decisionId: scenarioId,
-    profileId: "runner-ai-real-engine-corpus",
-  });
-  return {
-    scenarioId,
-    input,
-    runner: {
-      runTargets: evaluateRunnerRunTargets({ input }),
-      economyPosture: buildRunnerEconomyPosture({ input }),
-    },
-    evidence,
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-  };
+  return RealEngineDecisionCorpusScenarioBuilder.runnerTurn(scenarioId, seed)
+    .mutate(mutate)
+    .addEvidence(evidence)
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
 }
 
 function corpScenario(
@@ -250,20 +381,11 @@ function corpScenario(
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  let state = createGameAfterSetup({ seed, agendaPointsToWin: 7 });
-  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-  mutate(state);
-  return {
-    scenarioId,
-    input: buildAiDecisionInput(state, "corp", {
-      decisionId: scenarioId,
-      profileId: "corp-ai-real-engine-corpus",
-    }),
-    evidence,
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-  };
+  return RealEngineDecisionCorpusScenarioBuilder.corpMain(scenarioId, seed)
+    .mutate(mutate)
+    .addEvidence(evidence)
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
 }
 
 function corpRezScenario(
@@ -284,17 +406,117 @@ function corpRezScenario(
     (action) =>
       action.type === "start_run" && action.payload?.serverId === "hq",
   );
-  return {
+  return RealEngineDecisionCorpusScenarioBuilder.fromState(
     scenarioId,
-    input: buildAiDecisionInput(state, "corp", {
-      decisionId: scenarioId,
-      profileId: "corp-ai-real-engine-corpus",
-    }),
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-    evidence: [`fixture:corp_rez_window_credits:${corpCredits}`],
-  };
+    "corp",
+    state,
+  )
+    .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`])
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
+}
+
+class RealEngineDecisionCorpusScenarioBuilder {
+  private readonly evidence: string[] = [];
+  private deckSnapshotId?: string;
+
+  private constructor(
+    private readonly scenarioId: string,
+    private readonly side: Side,
+    private readonly state: GameState,
+  ) {}
+
+  static runnerTurn(
+    scenarioId: string,
+    seed: string,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(
+      scenarioId,
+      "runner",
+      toRunnerTurn(createGameAfterSetup({ seed, agendaPointsToWin: 7 })),
+    );
+  }
+
+  static corpMain(
+    scenarioId: string,
+    seed: string,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(
+      scenarioId,
+      "corp",
+      apply(
+        createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      ),
+    );
+  }
+
+  static fromState(
+    scenarioId: string,
+    side: Side,
+    state: GameState,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(scenarioId, side, state);
+  }
+
+  mutate(mutator: (state: GameState) => void): this {
+    mutator(this.state);
+    return this;
+  }
+
+  addEvidence(evidence: readonly string[]): this {
+    this.evidence.push(...evidence);
+    return this;
+  }
+
+  withDeckDoctrine(deckSnapshotId: string | undefined): this {
+    if (deckSnapshotId !== undefined) {
+      this.deckSnapshotId = deckSnapshotId;
+    }
+    return this;
+  }
+
+  build(): RealEngineDecisionCorpusScenario {
+    const input = buildAiDecisionInput(this.state, this.side, {
+      decisionId: this.scenarioId,
+      profileId: `${this.side}-ai-real-engine-corpus`,
+    });
+    return {
+      scenarioId: this.scenarioId,
+      input,
+      ...(this.side === "runner"
+        ? {
+            runner: {
+              runTargets: evaluateRunnerRunTargets({ input }),
+              economyPosture: buildRunnerEconomyPosture({ input }),
+            },
+          }
+        : {}),
+      evidence: [...this.evidence],
+      ...(this.deckSnapshotId
+        ? { deckDoctrine: deckDoctrineForSnapshot(this.deckSnapshotId) }
+        : {}),
+      ...leagueExpectationForScenario(this.scenarioId),
+    };
+  }
+}
+
+function leagueExpectationForScenario(
+  scenarioId: string,
+): Pick<RealEngineDecisionCorpusScenario, "leagueExpectation"> {
+  const expectedTopActionTypes =
+    LEAGUE_EXPECTATION_BY_SCENARIO_ID[
+      scenarioId as keyof typeof LEAGUE_EXPECTATION_BY_SCENARIO_ID
+    ];
+  return expectedTopActionTypes
+    ? {
+        leagueExpectation: {
+          expectedTopActionTypes,
+          evidence: [`league_expectation_source:corpus_metadata:${scenarioId}`],
+        },
+      }
+    : {};
 }
 
 function deckDoctrineForSnapshot(snapshotId: string) {

@@ -26,11 +26,46 @@ export type SemanticRejectedAction = {
   evidence: string[];
 };
 
+export type SemanticDecisionTraceTargetChoiceShadowSummary = {
+  schemaVersion: "target-choice-shadow-v1";
+  scope: "target_choice_shadow_trace_summary";
+  reportOnly: true;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  actionCount: number;
+  rankedOptionCount: number;
+  blockedRequirementCount: number;
+  topActionId?: string;
+  topOptionId?: string;
+  selectionOutput: {
+    selectedChoicesCreated: false;
+    selectedTargetsCreated: false;
+  };
+  evidence: string[];
+};
+
+export type SemanticDecisionTraceDoctrineGoalSummary = {
+  scope: "doctrine_goal_trace_summary";
+  reportOnly: true;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  goalCount: number;
+  goals: {
+    goalId: string;
+    family: string;
+    priority: number;
+    source?: string;
+    evidence: string[];
+  }[];
+  evidence: string[];
+};
+
 export const SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS = [
   "semantic_shadow_top",
   "pilot_scope",
   "calibration_profile",
   "target_choice_shadow",
+  "doctrine_goal",
   "mistake_summary",
 ] as const;
 
@@ -58,6 +93,8 @@ export type SemanticDecisionTrace = {
   };
   rankedActions: SemanticRankedAction[];
   rejectedActions: SemanticRejectedAction[];
+  targetChoiceShadow?: SemanticDecisionTraceTargetChoiceShadowSummary;
+  doctrineGoals?: SemanticDecisionTraceDoctrineGoalSummary;
   selectedActionId?: string;
   noRuntimeEffect?: boolean;
 };

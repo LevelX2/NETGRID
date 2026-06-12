@@ -7,8 +7,8 @@ import {
 import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";
 import {
   buildSemanticShadowLeagueReport,
-  PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS,
   SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION,
+  playStrengthShadowLeagueExpectationsFromSamples,
 } from "./semantic-shadow-league";
 
 describe("SemanticShadowLeague", () => {
@@ -29,7 +29,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.noRuntimeEffect).toBe(true);
 
     expect(report.metrics.agreementComparedCount).toBe(
-      PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS.length,
+      playStrengthShadowLeagueExpectationsFromSamples(samples).length,
     );
     expect(report.metrics.agreementRate).not.toBeNull();
     expect(report.metrics.agreementCount).toBeGreaterThan(0);
@@ -40,11 +40,28 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
-    expect(report.metrics.pilotEligibleCount).toBe(15);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(15);
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(8);
-    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(6);
-    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(1);
+    expect(report.metrics.pilotEligibleCount).toBe(26);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(26);
+    expect(report.metrics.pilotEligibilityRate).toBe(0.867);
+    expect(report.metrics.pilotEligibilityBySide.runner).toEqual({
+      scenarioCount: 15,
+      eligibleCount: 14,
+      wouldOverrideCount: 14,
+      eligibleRate: 0.933,
+    });
+    expect(report.metrics.pilotEligibilityBySide.corp).toEqual({
+      scenarioCount: 15,
+      eligibleCount: 12,
+      wouldOverrideCount: 12,
+      eligibleRate: 0.8,
+    });
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(13);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(11);
+    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(2);
+    expect(report.metrics.remoteContestPilotCandidateCount).toBe(1);
+    expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
+      "runner_real_remote_score_threat",
+    ]);
     expect(report.topDisagreementReasons).toEqual([
       "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
       "runner_real_damage_buffer_needed:expected=draw_card:observed=start_run",
@@ -72,6 +89,55 @@ describe("SemanticShadowLeague", () => {
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
     ).toEqual(["start_run"]);
+    expect(
+      scenario(report, "runner_real_remote_score_threat")
+        .remoteContestPilotCandidate,
+    ).toMatchObject({
+      targetKind: "remote",
+      scoreThreat: true,
+      reportOnly: true,
+      productiveUseAllowed: false,
+      reason: "remote_contest_target_calibration_required",
+      evidence: expect.arrayContaining([
+        "remote_contest_pilot_candidate:report_only",
+        "productive_use_allowed:false",
+      ]),
+    });
+    expect(scenario(report, "runner_real_low_credits").pilotEligibility).toEqual({
+      eligible: true,
+      wouldOverride: true,
+      scopes: ["basic_setup"],
+      reportOnly: true,
+      productiveUseAllowed: false,
+      evidence: [
+        "pilot_scope_eligible:true",
+        "pilot_would_override:true",
+        "pilot_eligibility:report_only",
+        "productive_use_allowed:false",
+        "pilot_scope:basic_setup:eligible",
+      ],
+    });
+    expect(scenario(report, "runner_real_safe_hq_access").pilotEligibility).toEqual({
+      eligible: true,
+      wouldOverride: true,
+      scopes: ["runner_safe_access"],
+      reportOnly: true,
+      productiveUseAllowed: false,
+      evidence: [
+        "pilot_scope_eligible:true",
+        "pilot_would_override:true",
+        "pilot_eligibility:report_only",
+        "productive_use_allowed:false",
+        "pilot_scope:runner_safe_access:eligible",
+      ],
+    });
+    expect(
+      report.scenarios.every(
+        (candidate) =>
+          candidate.pilotEligibility.reportOnly &&
+          candidate.pilotEligibility.productiveUseAllowed === false,
+      ),
+    ).toBe(true);
   });
 });
 

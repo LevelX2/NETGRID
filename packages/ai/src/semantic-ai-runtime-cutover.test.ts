@@ -76,6 +76,42 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
+    const rdRun = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [rdRun]);
+    input.playerView.own.credits = 8;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.ownDeckDoctrine = runnerDoctrine({ pressure_rnd: 24 });
+
+    const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "doctrine_goal",
+          title: "Doctrine Goal",
+          items: expect.arrayContaining([
+            "doctrine_goal_trace:decision_debug",
+            "doctrine_goal_plan:pressure_rnd",
+            "doctrine_goal_consumer:runner_pressure_rnd",
+            "doctrine_goal_weight:120",
+          ]),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
+  });
+
   it("keeps the runtime choice unchanged when the basic setup pilot flag is unset", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const run = legalAction(
@@ -251,6 +287,54 @@ describe("Semantic AI runtime cutover", () => {
       expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
     );
     expect(rememberedActions).toEqual(["run-hq"]);
+  });
+
+  it("falls through blocked local pilot scopes in the runtime env", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] =
+      `${BASIC_SETUP_PILOT_MODE},${RUNNER_SAFE_ACCESS_PILOT_MODE}`;
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0 },
+      { payload: { serverId: "hq" } },
+    );
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [run, gain]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const runtimeChoices = [
+      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
+      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+        runTargets: [safeRuntimeRunTarget(run.actionId, "hq")],
+        goal: {
+          goalId: "runner.pressure_good_central_target",
+          family: "pressure",
+          priority: 980,
+          urgency: "high",
+          source: "run_target_evaluation",
+          evidence: ["test_goal:run_access"],
+        },
+      }),
+    );
+
+    expect(decision.actionId).toBe("run-hq");
+    expect(decision.reasonCode).toBe(
+      "ai_play_strength.runner_safe_access_pilot",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
+    );
   });
 
   it("uses semantic runtime as the live corp decision by default", () => {
@@ -465,6 +549,108 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.actionId).toBe("advance-protected-agenda");
     expect(decision.evidence).toEqual(
       expect.arrayContaining(["corp_remote_protection:protected"]),
+    );
+  });
+
+  it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
+    const remoteAgenda = visibleCard("remote-agenda-below-rez-floor", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-below-rez-floor",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [visibleCard("corp-ice-in-hq", "corp", "ice")];
+    input.playerView.opponent.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            rezzed: false,
+            rezCost: 3,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_floor_funding_need:true",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "corp_remote_rez_floor_penalty",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "agenda_development_risk:below_remote_rez_floor",
+    );
+  });
+
+  it("allows remote agenda advance when credits still cover the unrezzed ice rez floor", () => {
+    const remoteAgenda = visibleCard("remote-agenda-with-rez-floor", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-with-rez-floor",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            rezzed: false,
+            rezCost: 3,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("advance-with-rez-floor");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_floor:3",
+        "credits_after_action:4",
+        "low_rez_reserve:false",
+      ]),
     );
   });
 
@@ -2137,6 +2323,25 @@ function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
     decisionId: `semantic-runtime-cutover:${side}`,
     actionNumber: 1,
     profileId: `${side}-semantic-runtime-cutover-test`,
+  };
+}
+
+function runnerDoctrine(
+  planWeights: Record<string, number>,
+): NonNullable<AiDecisionInput["ownDeckDoctrine"]> {
+  return {
+    schemaVersion: "ai-deck-doctrine-v1",
+    deckSnapshotId: "semantic-runtime-doctrine-debug",
+    deckHash: "test:semantic-runtime-doctrine-debug",
+    side: "runner",
+    confidence: 0.9,
+    archetypeTags: ["rnd_pressure"],
+    roleCounts: {},
+    roleDensity: {},
+    planWeights,
+    mulliganWeights: {},
+    riskFlags: [],
+    evidence: [],
   };
 }
 

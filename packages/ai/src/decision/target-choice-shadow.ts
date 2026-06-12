@@ -1,4 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   findForbiddenSemanticPath,
   redactSemanticString,
@@ -45,6 +46,7 @@ export type TargetChoiceShadowReport = {
 
 export type BuildTargetChoiceShadowReportParams = {
   action: LegalAction;
+  candidate?: ActionSemanticCandidate;
   preferredOptionIds?: readonly string[];
   avoidOptionIds?: readonly string[];
   sideSafeTargetIdsByRequirementId?: Readonly<Record<string, readonly string[]>>;
@@ -116,11 +118,8 @@ function targetOptions(
 ): TargetChoiceShadowOption[] {
   return params.action.targetRequirements.flatMap((requirement) => {
     if (requirement.visibility === "engine_only") return [];
-    const optionIds =
-      requirement.allowedServers ??
-      params.sideSafeTargetIdsByRequirementId?.[requirement.id] ??
-      [];
-    return optionIds.map((optionId, index) =>
+    const targetOptions = targetOptionIdsForRequirement(params, requirement);
+    return targetOptions.optionIds.map((optionId, index) =>
       option(
         requirement.id,
         optionId,
@@ -131,6 +130,7 @@ function targetOptions(
         [
           `target_requirement_kind:${requirement.kind}`,
           `target_requirement_side:${requirement.side ?? "unknown"}`,
+          ...targetOptions.evidence,
         ],
       ),
     );
@@ -196,16 +196,13 @@ function blockedRequirements(
       });
       continue;
     }
-    const optionIds =
-      requirement.allowedServers ??
-      params.sideSafeTargetIdsByRequirementId?.[requirement.id] ??
-      [];
-    if (optionIds.length === 0) {
+    const targetOptions = targetOptionIdsForRequirement(params, requirement);
+    if (targetOptions.optionIds.length === 0) {
       blocked.push({
         requirementId: safe(requirement.id),
         kind: requirement.kind,
         reason: "no_side_safe_options",
-        evidence: ["target_requirement_options:none"],
+        evidence: ["target_requirement_options:none", ...targetOptions.evidence],
       });
     }
   }
@@ -229,6 +226,75 @@ function targetShapeBonus(optionId: string): number {
   if (optionId === "hq" || optionId === "rd") return 10;
   if (optionId.startsWith("remote_")) return 5;
   return 0;
+}
+
+function targetOptionIdsForRequirement(
+  params: BuildTargetChoiceShadowReportParams,
+  requirement: LegalAction["targetRequirements"][number],
+): { optionIds: string[]; evidence: string[] } {
+  if (requirement.allowedServers !== undefined) {
+    return {
+      optionIds: uniqueStrings(requirement.allowedServers),
+      evidence: ["target_option_source:legal_action_allowed_servers"],
+    };
+  }
+  const explicitOptions = params.sideSafeTargetIdsByRequirementId?.[requirement.id];
+  if (explicitOptions !== undefined) {
+    return {
+      optionIds: uniqueStrings(explicitOptions),
+      evidence: ["target_option_source:explicit_side_safe_map"],
+    };
+  }
+  const candidateOptions = candidateTargetIdsForRequirement(
+    params.candidate,
+    requirement.kind,
+  );
+  if (candidateOptions.length > 0) {
+    return {
+      optionIds: candidateOptions,
+      evidence: [
+        "target_option_source:semantic_candidate_target_context",
+        ...(params.candidate
+          ? [`candidate_action_id:${safe(params.candidate.actionId)}`]
+          : []),
+      ],
+    };
+  }
+  return {
+    optionIds: [],
+    evidence: ["target_option_source:none"],
+  };
+}
+
+function candidateTargetIdsForRequirement(
+  candidate: ActionSemanticCandidate | undefined,
+  requirementKind: LegalAction["targetRequirements"][number]["kind"],
+): string[] {
+  const context = candidate?.targetContext;
+  if (!context || context.hiddenInfoPolicy === "hidden_info_blocked") return [];
+  const targetKind = targetKindFromRequirement(requirementKind);
+  if (targetKind === "unknown") return [];
+  return uniqueStrings(
+    [
+      ...context.selectedTargets,
+      ...(context.availableTargets ?? []),
+    ]
+      .filter((target) => target.targetKind === targetKind)
+      .map((target) => target.targetId),
+  );
+}
+
+function targetKindFromRequirement(
+  kind: LegalAction["targetRequirements"][number]["kind"],
+): "card" | "server" | "subroutine" | "unknown" {
+  if (kind === "card") return "card";
+  if (kind === "server") return "server";
+  if (kind === "subroutine") return "subroutine";
+  return "unknown";
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.map(safe))];
 }
 
 function safe(value: string): string {
