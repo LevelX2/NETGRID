@@ -19,9 +19,9 @@ import type {
   TacticalPlanRuntimeResult,
 } from "../tactical-plans";
 import {
-  semanticBasicSetupPilotChoice,
+  semanticPilotChoice,
   semanticPlayStrengthPilotEnabled,
-} from "../decision/semantic-basic-setup-pilot";
+} from "../decision/pilot-scope-registry";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
@@ -325,9 +325,9 @@ export function chooseSemanticRuntimeAction(
               ? { economyPosture: runnerEconomyPosture }
               : {}),
           },
-          evidence: ["semantic_runtime:basic_setup_pilot_candidate"],
+          evidence: ["semantic_runtime:play_strength_pilot_candidate"],
         });
-        return semanticBasicSetupPilotChoice({
+        return semanticPilotChoice({
           frame: pilotFrame,
           trace: buildSemanticShadowDecision(pilotFrame),
           currentChoice: choice,
