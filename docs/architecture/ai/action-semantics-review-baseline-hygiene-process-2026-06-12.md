@@ -155,6 +155,27 @@ Done-Gate: Inventar liegt vor und trifft keine ungesicherte Löschentscheidung.
 
 Commit: `docs(ai): classify review report artifacts`
 
+#### P2 Ergebnis
+
+Umgesetzt:
+
+- Geänderte und neue `docs/reviews/ai`-Artefakte des Action-Semantics-Follow-up-Branches gegen `b3c004d7^1` inventarisiert.
+- JSON-Artefakte klassifiziert:
+  - `action-semantic-candidate-coverage-2026-06-12.json`: `benchmark-baseline`.
+  - `action-semantic-signal-catalog-2026-06-12.json`: `gate-required`.
+- Markdown-Reviewartefakte klassifiziert:
+  - Signal-Katalog-MD: `gate-required`.
+  - Local-Report-Hygiene: `artifact-only`.
+  - DeckDoctrine-Fixtures: `benchmark-baseline`.
+- Keine Report-Löschung vorgenommen, weil kein geprüftes Artefakt ein verbraucherloser One-off-Diagnostic ist.
+- Bericht erstellt: `docs/reviews/ai/action-semantics-report-artifact-classification-2026-06-12.md`.
+
+Checks:
+
+- Grün: `git diff --name-status b3c004d7^1..codex/action-semantics-followup-quality -- docs/reviews/ai`
+- Grün: `git diff --numstat b3c004d7^1..codex/action-semantics-followup-quality -- docs/reviews/ai`
+- Grün: `rg -n "action-semantic-candidate-coverage|action-semantic-signal-catalog|deck-doctrine-v2-diagnostic" package.json scripts packages docs`
+
 ### P3 Prozessdokumente schließen und entwirren
 
 Ziel: Abschlussdokumente enthalten keine widersprüchlichen Status- oder Gate-Aussagen.
