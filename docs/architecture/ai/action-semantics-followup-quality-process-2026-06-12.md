@@ -288,9 +288,17 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-strategy.test.ts`
-- `corepack pnpm check:ai`
-- `git diff --check`
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-strategy.test.ts`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+Ergebnis:
+
+- DeckDoctrine-v2 wird zusätzlich gegen sechs echte Snapshots aus `data/decks/deck-snapshots-0.8.json` geprüft: V0.8 Demo Runner/Corp, Originalset Runner/Corp und Proteus Runner/Corp.
+- Die Matrix erzwingt `diagnostic_only`, `productiveUseAllowed=false`, Side-Sicherheit und non-`unknown_snapshot` für reale Snapshots.
+- `anchorless` bleibt an `NeutralDoctrine` und null StrategyAnchors gebunden; nicht-anchorless Diagnostics müssen echte StrategyAnchors haben.
+- Der Fixture-Report `docs/reviews/ai/deck-doctrine-v2-diagnostic-fixtures-2026-06-12.md` dokumentiert Snapshots und Assertions.
 
 Done-Gate: DeckDoctrine erfindet keine Strategie aus bloßen FunctionSignals.
 
