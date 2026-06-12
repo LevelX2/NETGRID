@@ -11,6 +11,7 @@ const reportMdPath =
   "docs/reviews/engine/card-function-abstraction-2026-06-12.md";
 
 const writeReport = process.argv.includes("--write-report");
+const selfTestNewLeak = process.argv.includes("--self-test-new-leak");
 
 const scopedRoots = [
   "packages/engine/src/ability-engine",
@@ -158,6 +159,141 @@ const watchTokens = [
     target: "delayed_install_sequence",
   },
 ];
+
+function wordsFor(value) {
+  return value
+    .replace(/['’]/g, "")
+    .replace(/&/g, " and ")
+    .split(/[^A-Za-z0-9]+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+}
+
+function lowerFirst(value) {
+  return value ? `${value[0].toLowerCase()}${value.slice(1)}` : value;
+}
+
+function upperFirst(value) {
+  return value ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
+}
+
+function camelCase(words) {
+  return words
+    .map((word, index) =>
+      index === 0
+        ? word.toLowerCase()
+        : `${word[0].toUpperCase()}${word.slice(1).toLowerCase()}`,
+    )
+    .join("");
+}
+
+function meaningfulToken(token) {
+  if (token.length < 5) return false;
+  if (/^\d+$/.test(token)) return false;
+  return !new Set([
+    "action",
+    "agenda",
+    "asset",
+    "card",
+    "cards",
+    "corp",
+    "event",
+    "fort",
+    "grant",
+    "install",
+    "node",
+    "program",
+    "runner",
+    "score",
+    "server",
+    "trace",
+    "upgrade",
+  ]).has(token.toLowerCase());
+}
+
+function variantsForWords(words) {
+  const lowerWords = words.map((word) => word.toLowerCase());
+  const variants = new Set();
+  if (lowerWords.length < 2) return variants;
+  variants.add(lowerWords.join("_"));
+  variants.add(lowerWords.join("-"));
+  variants.add(camelCase(words));
+  variants.add(upperFirst(camelCase(words)));
+  if (lowerWords[0] === "the" && lowerWords.length > 1) {
+    const withoutArticle = words.slice(1);
+    variants.add(withoutArticle.map((word) => word.toLowerCase()).join("_"));
+    variants.add(withoutArticle.map((word) => word.toLowerCase()).join("-"));
+    variants.add(camelCase(withoutArticle));
+    variants.add(upperFirst(camelCase(withoutArticle)));
+  }
+  return variants;
+}
+
+function definitionSlugForId(id) {
+  return id.replace(/^onr_(?:v1|proteus)_\d+_/, "");
+}
+
+function deriveCatalogWatchTokens() {
+  const sharedIndexPath = `${repoRoot}/packages/shared/src/index.ts`;
+  const text = readFileSync(sharedIndexPath, "utf8");
+  const cards = [];
+  const cardPattern =
+    /id:\s*"(?<id>onr_(?:v1|proteus)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
+  let match = cardPattern.exec(text);
+  while (match) {
+    cards.push({ id: match.groups.id, title: match.groups.title });
+    match = cardPattern.exec(text);
+  }
+
+  const byToken = new Map();
+  for (const card of cards) {
+    const tokenVariants = new Set([
+      ...variantsForWords(wordsFor(card.title)),
+      ...variantsForWords(wordsFor(definitionSlugForId(card.id))),
+    ]);
+    for (const token of tokenVariants) {
+      if (!meaningfulToken(token)) continue;
+      if (byToken.has(token)) continue;
+      byToken.set(token, {
+        token,
+        title: card.title,
+        target: "derived_catalog_token",
+        tokenSource: "derived_catalog_token",
+      });
+    }
+  }
+  return [...byToken.values()];
+}
+
+function allWatchTokens() {
+  const merged = new Map();
+  for (const watch of deriveCatalogWatchTokens()) {
+    merged.set(watch.token, watch);
+  }
+  for (const watch of watchTokens) {
+    merged.set(watch.token, {
+      ...watch,
+      tokenSource: "known_watch_token",
+    });
+  }
+  return [...merged.values()].sort((a, b) => a.token.localeCompare(b.token));
+}
+
+function knownWatchTokens() {
+  return watchTokens.map((watch) => ({
+    ...watch,
+    tokenSource: "known_watch_token",
+  }));
+}
+
+function derivedWatchTokens() {
+  const knownTokens = new Set(watchTokens.map((watch) => watch.token));
+  return allWatchTokens().filter(
+    (watch) =>
+      watch.tokenSource === "derived_catalog_token" &&
+      !knownTokens.has(watch.token),
+  );
+}
 
 const abstractionPlan = [
   {
@@ -355,7 +491,7 @@ function isCommentOnly(line) {
   return line.startsWith("//") || line.startsWith("*") || line.startsWith("/*");
 }
 
-function classify({ path, token, snippet }) {
+function classify({ path, token, snippet, tokenSource }) {
   if (isTestFile(path)) return "test_only_card_name";
   if (isRegistryPath(path)) return "allowed_catalog_reference";
   if (isCatalogPath(path)) {
@@ -386,25 +522,75 @@ function classify({ path, token, snippet }) {
     return "mechanics_constant_controls_behavior_by_card_id";
   if (path.includes("/game/") || path.includes("/mechanics/"))
     return "runtime_state_field_uses_card_name";
+  if (tokenSource === "derived_catalog_token")
+    return "new_unclassified_card_name_leak";
   return "false_positive";
 }
 
-function findOccurrences() {
+function isDerivedAllowedContext(path, snippet) {
+  if (isTestFile(path)) return true;
+  if (isRegistryPath(path)) return true;
+  if (isCommentOnly(snippet)) return true;
+  if (snippet.includes("cardDefinitionId")) return true;
+  if (snippet.includes("card-implementations/")) return true;
+  if (snippet.includes("Implementation.")) return true;
+  if (path === "packages/shared/src/index.ts") {
+    if (
+      snippet.includes("id:") ||
+      snippet.includes("title:") ||
+      snippet.includes("text:") ||
+      snippet.includes("flavorText:") ||
+      snippet.includes("mechanics:")
+    )
+      return true;
+  }
+  return false;
+}
+
+function shouldIncludeFinding({ path, tokenSource, category, snippet }) {
+  if (tokenSource !== "derived_catalog_token") return true;
+  if (isDerivedAllowedContext(path, snippet)) return false;
+  return ![
+    "allowed_catalog_reference",
+    "test_only_card_name",
+    "false_positive",
+  ].includes(category);
+}
+
+function findOccurrences(tokens) {
   const findings = [];
   for (const path of listFiles()) {
     const text = readFileSync(`${repoRoot}/${path}`, "utf8");
-    for (const watch of watchTokens) {
+    for (const watch of tokens) {
       let index = text.indexOf(watch.token);
       while (index !== -1) {
         const position = lineColumnFor(text, index);
         const snippet = lineText(text, position.line);
+        const category = classify({
+          path,
+          token: watch.token,
+          snippet,
+          tokenSource: watch.tokenSource,
+        });
+        if (
+          !shouldIncludeFinding({
+            path,
+            tokenSource: watch.tokenSource,
+            category,
+            snippet,
+          })
+        ) {
+          index = text.indexOf(watch.token, index + watch.token.length);
+          continue;
+        }
         findings.push({
           path,
           line: position.line,
           column: position.column,
           token: watch.token,
           cardTitle: watch.title,
-          category: classify({ path, token: watch.token, snippet }),
+          tokenSource: watch.tokenSource,
+          category,
           targetAbstraction: watch.target,
           snippet,
         });
@@ -417,6 +603,17 @@ function findOccurrences() {
       `${b.path}:${String(b.line).padStart(6, "0")}:${b.token}`,
     ),
   );
+}
+
+function fingerprint(finding) {
+  return [
+    finding.path,
+    finding.line,
+    finding.column,
+    finding.token,
+    finding.cardTitle,
+    finding.category,
+  ].join("|");
 }
 
 function summary(findings) {
@@ -435,6 +632,10 @@ function renderMarkdown(report) {
     "## Kurzbefund",
     "",
     "Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisch sind kartenspezifische Namen in funktionalen `kind`-Werten, Payload-Keys, Runtime-State-Feldern, Resolvernamen und verhaltenssteuernden Konstanten.",
+    "",
+    "Dieser Review ist ein Inventar mit erstem vertikalem Refactor-Slice, kein Abschlussbericht über vollständige Bereinigung. Der Preying-Mantis-Pfad ist generisch umgestellt; die übrigen Kandidaten bleiben sichtbar offen.",
+    "",
+    "Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und ergänzt eine automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.",
     "",
     "## Zählung",
     "",
@@ -467,8 +668,27 @@ function renderMarkdown(report) {
   }
   lines.push("", "## Nächste Umsetzung", "");
   lines.push(
-    "Der erste Code-Slice refaktoriert `Preying Mantis`, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
+    "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
+  lines.push(
+    "Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+  );
+  if (report.derivedCatalogGuard) {
+    lines.push("", "## Automatisch abgeleiteter Guard", "");
+    lines.push(
+      `Der Derived-Guard erzeugt ${report.derivedCatalogGuard.tokenCount} Tokens aus Kartentiteln und \`cardDefinitionId\`-Varianten und hält ${report.derivedCatalogGuard.baselineCount} problemzonenrelevante Fingerprints als Baseline.`,
+    );
+    lines.push(
+      "Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.",
+    );
+    lines.push("", "| Kategorie | Anzahl |");
+    lines.push("| --- | ---: |");
+    for (const [category, count] of Object.entries(
+      report.derivedCatalogGuard.summary,
+    )) {
+      lines.push(`| ${category} | ${count} |`);
+    }
+  }
   lines.push("", "## Erlaubte Referenzen", "");
   for (const finding of report.findings.filter(
     (entry) => entry.category === "allowed_catalog_reference",
@@ -480,11 +700,16 @@ function renderMarkdown(report) {
   return `${lines.join("\n")}\n`;
 }
 
-const findings = findOccurrences();
+const findings = findOccurrences(knownWatchTokens());
+const derivedFindings = findOccurrences(derivedWatchTokens());
 const report = {
   schemaVersion: 1,
   generatedAt: "2026-06-12",
-  status: "inventory",
+  status: "inventory_with_vertical_slice",
+  guardCharacter:
+    "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
+  completionNote:
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt und Baseline-Guard sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",
@@ -493,10 +718,20 @@ const report = {
     "payload_key_uses_card_name",
     "resolver_function_uses_card_name",
     "mechanics_constant_controls_behavior_by_card_id",
+    "new_unclassified_card_name_leak",
     "test_only_card_name",
     "false_positive",
   ],
   summary: summary(findings),
+  derivedCatalogGuard: {
+    status: "baseline_enforced",
+    tokenSource:
+      "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/index.ts",
+    tokenCount: derivedWatchTokens().length,
+    baselineCount: derivedFindings.length,
+    summary: summary(derivedFindings),
+    fingerprints: derivedFindings.map(fingerprint),
+  },
   abstractionPlan,
   findings,
 };
@@ -526,6 +761,44 @@ const expected = JSON.parse(
 );
 const normalize = (value) =>
   JSON.stringify({ ...value, generatedAt: "baseline" }, null, 2);
+
+if (selfTestNewLeak) {
+  const syntheticFinding = {
+    path: "packages/engine/src/game/synthetic-card-name-leak.self-test.ts",
+    line: 1,
+    column: 9,
+    token: "synthetic_card_name",
+    cardTitle: "Synthetic Card Name",
+    tokenSource: "derived_catalog_token",
+    category: "functional_kind_uses_card_name",
+    targetAbstraction: "derived_catalog_token",
+    snippet: 'kind: "synthetic_card_name_runtime_effect";',
+  };
+  const syntheticFingerprints = [
+    ...report.derivedCatalogGuard.fingerprints,
+    fingerprint(syntheticFinding),
+  ];
+  const syntheticReport = {
+    ...report,
+    derivedCatalogGuard: {
+      ...report.derivedCatalogGuard,
+      baselineCount: syntheticFingerprints.length,
+      summary: summary([...derivedFindings, syntheticFinding]),
+      fingerprints: syntheticFingerprints,
+    },
+  };
+  if (normalize(syntheticReport) === normalize(expected)) {
+    console.error(
+      "Self-test failed: synthetic derived card-name leak was not detectable.",
+    );
+    process.exit(1);
+  }
+  console.log(
+    "Self-test passed: synthetic derived card-name leak would change the baseline.",
+  );
+  process.exit(0);
+}
+
 if (normalize(report) !== normalize(expected)) {
   console.error(
     "Card function abstraction inventory changed. Run scripts/check-card-name-leakage-in-runtime.mjs --write-report and review the diff.",

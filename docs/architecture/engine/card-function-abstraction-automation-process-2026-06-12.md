@@ -1,6 +1,6 @@
 # Engine Card Function Abstraction Automation Process 2026-06-12
 
-Status: in_progress
+Status: completed_locally_merged_to_main
 
 ## Quelle/Vorgabe
 
@@ -223,3 +223,9 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Guard gegen neue kartenspezifische funktionale Namen ist vorhanden.
 - Paket- und Finalchecks sind dokumentiert.
 - Branch ist lokal nach `main` integriert.
+
+## Abschlussnotiz 2026-06-12
+
+Der Prozess wurde als erster Vertikalschnitt abgeschlossen und lokal nach `main` integriert. Der Stand bedeutet nicht, dass alle kartennamenspezifischen funktionalen Reststellen bereinigt sind. Abgeschlossen sind Inventar, Abstraktionsplan, Preying-Mantis-Musterslice und ein konservativer Guard für das bekannte Inventar.
+
+Die offenen Refactor-Kandidaten aus dem Review bleiben bewusst `deferred_refactor_required`. Der Guard schützt diesen Stand als Baseline und wird im Folgeprozess `card-function-abstraction-followup-guard-process-2026-06-12.md` um automatische New-Leak-Erkennung aus Kartentiteln und `cardDefinitionId`-Varianten erweitert.
