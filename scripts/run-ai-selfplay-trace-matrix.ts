@@ -6,6 +6,7 @@ import {
   benchmarkDeckFromFrozenLocalSnapshot,
   runAiSelfplayTraceMining,
 } from "../packages/ai/src/index";
+import { progressAwareAlternativeSnapshot } from "../packages/ai/src/simulation/progress-aware-alternative-snapshot";
 
 type PairId = "a" | "b" | "c" | "d";
 type TraceMiningResult = ReturnType<typeof runAiSelfplayTraceMining>;
@@ -252,29 +253,11 @@ function actionAlternativeSnapshotsForSummary(summary: TraceMiningSummary) {
       side: entry.side,
       stateVersionBefore: entry.stateVersionBefore,
       selectedActionType: entry.actionType,
-      alternatives: (entry.actionAlternatives ?? []).map((alternative) => ({
-        rank: alternative.rank,
-        actionType: alternative.actionType,
-        selected: alternative.selected,
-        sourceKind: alternativeSourceKind(alternative.source),
-        ...(alternative.sourceTitle
-          ? { sourceDefinitionId: alternative.sourceTitle }
-          : {}),
-        scoreKeys: (alternative.scoreBreakdown ?? []).map(
-          (component) => component.key,
-        ),
-        whyChosen: alternative.whyChosen ?? [],
-        whyNot: alternative.whyNot ?? [],
-        economy: alternative.economy,
-      })),
+      alternatives: (entry.actionAlternatives ?? []).map((alternative) =>
+        progressAwareAlternativeSnapshot(alternative),
+      ),
     }))
     .filter((entry) => entry.alternatives.length > 0);
-}
-
-function alternativeSourceKind(source: string | undefined): string | undefined {
-  if (!source) return undefined;
-  if (source === "basic_action" || source === "game_rule") return source;
-  return "visible_card_or_ability";
 }
 
 function readPair(id: PairId): TracePairFile {
