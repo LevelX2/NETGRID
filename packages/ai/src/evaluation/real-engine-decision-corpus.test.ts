@@ -102,6 +102,21 @@ describe("RealEngineDecisionCorpus", () => {
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.expectedTopActionTypes,
     ).toEqual(["gain_credit", "draw_card"]);
+    expect(
+      sampleFor(samples, "runner_real_low_credits").leagueExpectation
+        ?.pilotEligibleScopes,
+    ).toEqual(["basic_setup"]);
+    expect(
+      sampleFor(samples, "runner_real_low_credits").leagueExpectation
+        ?.forbiddenMistakes,
+    ).toEqual(["economy_starvation"]);
+    expect(
+      sampleFor(samples, "runner_real_low_credits").leagueExpectation?.evidence,
+    ).toEqual(
+      expect.arrayContaining([
+        "league_expectation_source:corpus_metadata:runner_real_low_credits",
+      ]),
+    );
   });
 
   it("keeps real run target payloads side-safe and target-alignable", () => {

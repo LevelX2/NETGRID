@@ -11,8 +11,10 @@ import type {
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
+import type { AiPlayStrengthPilotScope } from "../decision/pilot-scope-registry";
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
+import type { AiMistakeClass } from "./mistake-taxonomy";
 
 export type RealEngineDecisionCorpusScenario = {
   scenarioId: string;
@@ -27,6 +29,9 @@ export type RealEngineDecisionCorpusScenario = {
 export type RealEngineDecisionCorpusLeagueExpectation = {
   expectedTopActionTypes?: readonly string[];
   expectedTopActionIds?: readonly string[];
+  pilotEligibleScopes?: readonly AiPlayStrengthPilotScope[];
+  forbiddenMistakes?: readonly AiMistakeClass[];
+  notes?: readonly string[];
   evidence?: readonly string[];
 };
 

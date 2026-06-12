@@ -38,25 +38,13 @@ const AI_MISTAKE_CLASSES = [
   "target_choice_unavailable",
 ] as const satisfies readonly AiMistakeClass[];
 
-export const PLAY_STRENGTH_SHADOW_LEAGUE_EXPECTATIONS = [
-  expectation("runner_real_low_credits", ["gain_credit", "draw_card"]),
-  expectation("runner_real_safe_hq_access", ["start_run"]),
-  expectation("runner_real_safe_rd_access", ["start_run"]),
-  expectation("runner_real_remote_score_threat", ["start_run"]),
-  expectation("runner_real_damage_buffer_needed", ["draw_card"]),
-  expectation("runner_real_tag_cleanup", ["remove_tag"]),
-  expectation("corp_real_score_agenda_window", ["score_agenda"]),
-  expectation("corp_real_advance_score_window", ["advance_card"]),
-  expectation("corp_real_low_rez_reserve", ["gain_credit", "draw_card"]),
-  expectation("corp_real_rez_value_window", ["rez_ice"]),
-  expectation("corp_real_do_not_rez_when_broke", ["decline_rez"]),
-  expectation("corp_real_basic_economy_draw", ["gain_credit", "draw_card"]),
-] as const satisfies readonly SemanticShadowLeagueExpectation[];
-
 export type SemanticShadowLeagueExpectation = {
   scenarioId: string;
   expectedTopActionTypes?: readonly string[];
   expectedTopActionIds?: readonly string[];
+  pilotEligibleScopes?: readonly AiPlayStrengthPilotScope[];
+  forbiddenMistakes?: readonly AiMistakeClass[];
+  notes?: readonly string[];
   evidence?: readonly string[];
 };
 
@@ -74,6 +62,10 @@ export type SemanticShadowLeagueScenarioReport = {
   topGoalId?: string;
   expectedTopActionTypes?: string[];
   expectedTopActionIds?: string[];
+  expectedPilotEligibleScopes?: AiPlayStrengthPilotScope[];
+  forbiddenMistakes?: AiMistakeClass[];
+  forbiddenMistakeViolations?: AiMistakeClass[];
+  expectationNotes?: string[];
   agreementCompared: boolean;
   agreement?: boolean;
   observedMistakes: AiMistakeClass[];
@@ -219,6 +211,12 @@ function buildScenarioReport(
     : undefined;
   const expectedTopActionTypes = sanitizeList(expectation?.expectedTopActionTypes);
   const expectedTopActionIds = sanitizeList(expectation?.expectedTopActionIds);
+  const expectedPilotEligibleScopes = sanitizePilotScopes(
+    expectation?.pilotEligibleScopes,
+  );
+  const forbiddenMistakes = uniqueMistakeClasses(
+    expectation?.forbiddenMistakes ?? [],
+  );
   const agreementCompared =
     expectedTopActionTypes.length > 0 || expectedTopActionIds.length > 0;
   const agreement = agreementCompared
@@ -228,10 +226,16 @@ function buildScenarioReport(
       })
     : undefined;
   const mistakes = classifyDecisionTraceMistakes(sample.frame, sample.trace);
+  const forbiddenMistakeViolations = uniqueMistakeClasses(
+    mistakes
+      .map((mistake) => mistake.mistakeClass)
+      .filter((mistake) => forbiddenMistakes.includes(mistake)),
+  );
   const pilotEligibility = buildPilotEligibility(
     pilotScopeDecisions(sample, top, topCandidate?.actionType),
     scoreGapForTop(sample.trace.rankedActions),
   );
+  const expectationNotes = sanitizeList(expectation?.notes);
   const remoteContestPilotCandidate = remoteContestPilotCandidateFor(
     sample,
     top,
@@ -253,6 +257,14 @@ function buildScenarioReport(
     ...(top?.primaryGoalId ? { topGoalId: safe(top.primaryGoalId) } : {}),
     ...(expectedTopActionTypes.length > 0 ? { expectedTopActionTypes } : {}),
     ...(expectedTopActionIds.length > 0 ? { expectedTopActionIds } : {}),
+    ...(expectedPilotEligibleScopes.length > 0
+      ? { expectedPilotEligibleScopes }
+      : {}),
+    ...(forbiddenMistakes.length > 0 ? { forbiddenMistakes } : {}),
+    ...(forbiddenMistakeViolations.length > 0
+      ? { forbiddenMistakeViolations }
+      : {}),
+    ...(expectationNotes.length > 0 ? { expectationNotes } : {}),
     agreementCompared,
     ...(agreementCompared ? { agreement: agreement === true } : {}),
     observedMistakes: uniqueMistakeClasses(
@@ -270,6 +282,12 @@ function buildScenarioReport(
       `rejected_action_count:${sample.trace.rejectedActions.length}`,
       `agreement_compared:${agreementCompared}`,
       ...(agreementCompared ? [`agreement:${Boolean(agreement)}`] : []),
+      ...(expectation
+        ? [
+            "expectation_source:real_engine_corpus_metadata",
+            `forbidden_mistake_violation_count:${forbiddenMistakeViolations.length}`,
+          ]
+        : []),
       ...pilotEligibility.evidence,
       ...(remoteContestPilotCandidate
         ? ["remote_contest_pilot_candidate:report_only"]
@@ -629,15 +647,12 @@ function sanitizeList(values: readonly string[] | undefined): string[] {
   return [...(values ?? [])].map(safe).sort();
 }
 
-function expectation(
-  scenarioId: string,
-  expectedTopActionTypes: readonly string[],
-): SemanticShadowLeagueExpectation {
-  return {
-    scenarioId,
-    expectedTopActionTypes,
-    evidence: [`expectation:${scenarioId}`],
-  };
+function sanitizePilotScopes(
+  values: readonly AiPlayStrengthPilotScope[] | undefined,
+): AiPlayStrengthPilotScope[] {
+  return [...(values ?? [])]
+    .map((value) => safe(value) as AiPlayStrengthPilotScope)
+    .sort();
 }
 
 function roundMetric(value: number): number {

@@ -12,7 +12,10 @@ import {
   evaluateRunnerRunTargets,
 } from "../runner-run-target-evaluation";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
-import type { RealEngineDecisionCorpusScenario } from "./real-engine-decision-corpus";
+import type {
+  RealEngineDecisionCorpusLeagueExpectation,
+  RealEngineDecisionCorpusScenario,
+} from "./real-engine-decision-corpus";
 import {
   RealEngineFixtureBuilder,
   type RealEngineFixtureMutator,
@@ -52,20 +55,55 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
 ] as const;
 
 const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
-  runner_real_low_credits: ["gain_credit", "draw_card"],
-  runner_real_safe_hq_access: ["start_run"],
-  runner_real_safe_rd_access: ["start_run"],
-  runner_real_remote_score_threat: ["start_run"],
-  runner_real_damage_buffer_needed: ["draw_card"],
-  runner_real_tag_cleanup: ["remove_tag"],
-  corp_real_score_agenda_window: ["score_agenda"],
-  corp_real_advance_score_window: ["advance_card"],
-  corp_real_low_rez_reserve: ["gain_credit", "draw_card"],
-  corp_real_rez_value_window: ["rez_ice"],
-  corp_real_do_not_rez_when_broke: ["decline_rez"],
-  corp_real_basic_economy_draw: ["gain_credit", "draw_card"],
+  runner_real_low_credits: expectation(["gain_credit", "draw_card"], {
+    pilotEligibleScopes: ["basic_setup"],
+    forbiddenMistakes: ["economy_starvation"],
+    notes: ["low credits should prefer economy or draw stabilization"],
+  }),
+  runner_real_safe_hq_access: expectation(["start_run"], {
+    pilotEligibleScopes: ["runner_safe_access"],
+    forbiddenMistakes: ["missed_safe_access"],
+    notes: ["safe central run should stay visible to shadow league"],
+  }),
+  runner_real_safe_rd_access: expectation(["start_run"], {
+    pilotEligibleScopes: ["runner_safe_access"],
+    forbiddenMistakes: ["missed_safe_access"],
+  }),
+  runner_real_remote_score_threat: expectation(["start_run"], {
+    forbiddenMistakes: ["ignored_remote_threat"],
+    notes: ["remote contest remains report-only until a productive scope exists"],
+  }),
+  runner_real_damage_buffer_needed: expectation(["draw_card"], {
+    forbiddenMistakes: ["ignored_damage_risk", "unsafe_run"],
+  }),
+  runner_real_tag_cleanup: expectation(["remove_tag"], {
+    forbiddenMistakes: ["unsafe_run"],
+  }),
+  corp_real_score_agenda_window: expectation(["score_agenda"], {
+    pilotEligibleScopes: ["corp_score_window"],
+    forbiddenMistakes: ["missed_score_window"],
+  }),
+  corp_real_advance_score_window: expectation(["advance_card"], {
+    forbiddenMistakes: ["missed_score_window"],
+  }),
+  corp_real_low_rez_reserve: expectation(["gain_credit", "draw_card"], {
+    forbiddenMistakes: ["bad_rez_spend"],
+  }),
+  corp_real_rez_value_window: expectation(["rez_ice"], {
+    forbiddenMistakes: ["bad_rez_spend"],
+  }),
+  corp_real_do_not_rez_when_broke: expectation(["decline_rez"], {
+    forbiddenMistakes: ["bad_rez_spend"],
+  }),
+  corp_real_basic_economy_draw: expectation(["gain_credit", "draw_card"], {
+    pilotEligibleScopes: ["basic_setup"],
+    forbiddenMistakes: ["economy_starvation"],
+  }),
 } as const satisfies Partial<
-  Record<(typeof REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS)[number], readonly string[]>
+  Record<
+    (typeof REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS)[number],
+    RealEngineDecisionCorpusLeagueExpectation
+  >
 >;
 
 export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
@@ -489,18 +527,34 @@ class RealEngineDecisionCorpusScenarioBuilder {
 function leagueExpectationForScenario(
   scenarioId: string,
 ): Pick<RealEngineDecisionCorpusScenario, "leagueExpectation"> {
-  const expectedTopActionTypes =
+  const leagueExpectation =
     LEAGUE_EXPECTATION_BY_SCENARIO_ID[
       scenarioId as keyof typeof LEAGUE_EXPECTATION_BY_SCENARIO_ID
     ];
-  return expectedTopActionTypes
+  return leagueExpectation
     ? {
         leagueExpectation: {
-          expectedTopActionTypes,
-          evidence: [`league_expectation_source:corpus_metadata:${scenarioId}`],
+          ...leagueExpectation,
+          evidence: [
+            `league_expectation_source:corpus_metadata:${scenarioId}`,
+            ...(leagueExpectation.evidence ?? []),
+          ],
         },
       }
     : {};
+}
+
+function expectation(
+  expectedTopActionTypes: readonly string[],
+  options: Omit<
+    RealEngineDecisionCorpusLeagueExpectation,
+    "expectedTopActionTypes" | "expectedTopActionIds" | "evidence"
+  > = {},
+): RealEngineDecisionCorpusLeagueExpectation {
+  return {
+    expectedTopActionTypes,
+    ...options,
+  };
 }
 
 function deckDoctrineForSnapshot(snapshotId: string) {

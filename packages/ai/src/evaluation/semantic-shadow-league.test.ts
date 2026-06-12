@@ -104,6 +104,21 @@ describe("SemanticShadowLeague", () => {
       scenario(report, "runner_real_low_credits").expectedTopActionTypes,
     ).toEqual(["draw_card", "gain_credit"]);
     expect(
+      scenario(report, "runner_real_low_credits").expectedPilotEligibleScopes,
+    ).toEqual(["basic_setup"]);
+    expect(scenario(report, "runner_real_low_credits").forbiddenMistakes).toEqual([
+      "economy_starvation",
+    ]);
+    expect(scenario(report, "runner_real_low_credits").expectationNotes).toEqual([
+      "low credits should prefer economy or draw stabilization",
+    ]);
+    expect(scenario(report, "runner_real_low_credits").evidence).toEqual(
+      expect.arrayContaining([
+        "expectation_source:real_engine_corpus_metadata",
+        "league_expectation_source:corpus_metadata:runner_real_low_credits",
+      ]),
+    );
+    expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
     ).toEqual(["start_run"]);
     expect(
@@ -181,6 +196,34 @@ describe("SemanticShadowLeague", () => {
         (candidate) =>
           candidate.pilotEligibility.reportOnly &&
           candidate.pilotEligibility.productiveUseAllowed === false,
+      ),
+    ).toBe(true);
+  });
+
+  it("derives league expectations directly from corpus sample metadata", () => {
+    const samples = buildRealEngineDecisionCorpus(
+      buildRealEngineDecisionCorpusScenarios(),
+    );
+    const expectations = playStrengthShadowLeagueExpectationsFromSamples(samples);
+
+    expect(expectations).toEqual(
+      samples.flatMap((sample) =>
+        sample.leagueExpectation
+          ? [
+              {
+                scenarioId: sample.scenarioId,
+                ...sample.leagueExpectation,
+              },
+            ]
+          : [],
+      ),
+    );
+    expect(expectations.length).toBeGreaterThan(0);
+    expect(
+      expectations.every((expectation) =>
+        expectation.evidence?.some((entry) =>
+          entry.startsWith("league_expectation_source:corpus_metadata:"),
+        ),
       ),
     ).toBe(true);
   });
