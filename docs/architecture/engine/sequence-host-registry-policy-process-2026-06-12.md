@@ -15,6 +15,7 @@
 - P6 abgeschlossen: Data Fort Reclamation definiert `DataFortReclamationStep` und nutzt interne Step-Konstanten für HQ-Auswahl, Install-Batch, optionalen Rez-Batch und Credit-Rückgabe. Die aktuelle Batch-UX bleibt unverändert. DFR-Integrationstest, DFR-Modultest, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P7 abgeschlossen: Security Purge definiert `SecurityPurgeStep` und nutzt interne Step-Konstanten für Top-R&D-Reveal, TargetChoice, Install/Rez, Trash und Complete. Verhalten und Payload-Felder bleiben unverändert. Security-Purge-Integrationstest, Modultest, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P8 abgeschlossen: Ice Transmutation liegt in `ice-transmutation-sequence.ts`; `scored-agenda-flow.ts` delegiert Start und Choice-Resolution nur noch an das Modul. Der Primitive-Contract verweist auf den neuen Resolverpfad. Ice-Transmutation-Flowtest, Modultest, Primitive-Contract-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P9 abgeschlossen: `ordered-fort-rebuild-sequence.ts` definiert einen Pavit-Bharat-kompatiblen Pilotvertrag mit geordneten Steps, Hidden-Info-Visibility und public Count-Payload ohne Kartenlisten. Es gibt keine produktive Kartenfreischaltung. Modultest, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
