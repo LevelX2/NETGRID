@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { LegalAction } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import {
@@ -125,6 +126,15 @@ describe("RealEngineDecisionCorpus", () => {
         "remote_1",
       ),
     ).toBe(true);
+  });
+
+  it("keeps scenario fixture mutations behind the real engine fixture builder", () => {
+    const source = readFileSync(
+      new URL("./real-engine-decision-corpus-fixtures.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).not.toMatch(/\bstate\.(?:runner|corp|cardInstances)\b[^\n;]*=/);
   });
 
   it("validates play-strength pilot scopes against real Engine corpus samples", () => {
