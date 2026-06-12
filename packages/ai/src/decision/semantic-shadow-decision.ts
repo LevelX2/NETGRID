@@ -6,6 +6,14 @@ import {
   alignRunTargetAction,
   type RunTargetActionAlignmentTarget,
 } from "./run-target-action-alignment";
+import {
+  componentWeight,
+  opportunityPriorityBonus,
+  resolveSemanticShadowCalibrationProfile,
+  threatSeverityBonus,
+  type SemanticShadowCalibrationProfile,
+  type SemanticShadowCalibrationProfileId,
+} from "./semantic-shadow-calibration";
 import type { ScoreComponentDelta } from "./score-components";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
 import { synthesizeNeutralTacticalGoals } from "./neutral-goal-synthesis";
@@ -23,9 +31,20 @@ import type {
   SemanticRejectedAction,
 } from "./semantic-decision-trace";
 
+export type BuildSemanticShadowDecisionOptions = {
+  calibrationProfile?:
+    | SemanticShadowCalibrationProfile
+    | SemanticShadowCalibrationProfileId;
+};
+
 export function buildSemanticShadowDecision(
   frame: SemanticDecisionFrame,
+  options: BuildSemanticShadowDecisionOptions = {},
 ): SemanticDecisionTrace {
+  const calibrationProfile = resolveSemanticShadowCalibrationProfile(
+    options.calibrationProfile,
+  );
+  const explicitCalibrationProfile = options.calibrationProfile !== undefined;
   const tacticalGoals =
     frame.tacticalGoals.length > 0
       ? frame.tacticalGoals
@@ -54,17 +73,9 @@ export function buildSemanticShadowDecision(
       fit,
       threats,
       opportunities,
+      calibrationProfile,
     );
-    const score = Math.max(
-      0,
-      Math.round(
-        fit.score +
-          contextualComponents.reduce(
-            (sum, component) => sum + component.delta,
-            0,
-          ),
-      ),
-    );
+    const score = calibratedScore(fit, contextualComponents, calibrationProfile);
     rankedActions.push({
       actionId: candidate.actionId,
       rank: 0,
@@ -97,6 +108,12 @@ export function buildSemanticShadowDecision(
       actionCandidateCount: frame.actionCandidates.length,
       tacticalGoalCount: tacticalGoals.length,
       hiddenInfoPolicy: frame.hiddenInfoPolicy,
+      ...(explicitCalibrationProfile
+        ? {
+            calibrationProfileId: calibrationProfile.profileId,
+            calibrationMode: calibrationProfile.mode,
+          }
+        : {}),
     },
     rankedActions,
     rejectedActions,
@@ -138,11 +155,16 @@ function contextualProjectionComponents(
   fit: ActionGoalFit,
   threats: readonly AiThreatProjection[],
   opportunities: ReturnType<typeof buildAiOpportunityProjections>,
+  calibrationProfile: SemanticShadowCalibrationProfile,
 ): ScoreComponentDelta[] {
   const components: ScoreComponentDelta[] = [];
   const opportunityBonus = opportunities
     .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
-    .reduce((sum, opportunity) => sum + priorityBonus(opportunity.priority), 0);
+    .reduce(
+      (sum, opportunity) =>
+        sum + opportunityPriorityBonus(calibrationProfile, opportunity.priority),
+      0,
+    );
   if (opportunityBonus !== 0) {
     components.push({
       component: "opportunity",
@@ -157,7 +179,11 @@ function contextualProjectionComponents(
   }
   const threatBonus = threats
     .filter((threat) => threatMatchesFit(threat, fit, candidate))
-    .reduce((sum, threat) => sum + threatBonusForSeverity(threat.severity), 0);
+    .reduce(
+      (sum, threat) =>
+        sum + threatSeverityBonus(calibrationProfile, threat.severity),
+      0,
+    );
   if (threatBonus !== 0) {
     components.push({
       component: "threat_response",
@@ -166,6 +192,36 @@ function contextualProjectionComponents(
     });
   }
   return components;
+}
+
+function calibratedScore(
+  fit: ActionGoalFit,
+  contextualComponents: readonly ScoreComponentDelta[],
+  calibrationProfile: SemanticShadowCalibrationProfile,
+): number {
+  if (calibrationProfile.profileId === "baseline_v1") {
+    return Math.max(
+      0,
+      Math.round(
+        fit.score +
+          contextualComponents.reduce(
+            (sum, component) => sum + component.delta,
+            0,
+          ),
+      ),
+    );
+  }
+  const weightedFitScore = fit.components.reduce(
+    (sum, component) =>
+      sum + component.delta * componentWeight(calibrationProfile, component.component),
+    0,
+  );
+  const weightedContextScore = contextualComponents.reduce(
+    (sum, component) =>
+      sum + component.delta * componentWeight(calibrationProfile, component.component),
+    0,
+  );
+  return Math.max(0, Math.round(weightedFitScore + weightedContextScore));
 }
 
 function opportunityMatchesCandidate(
@@ -256,32 +312,6 @@ function opportunityAlignmentEvidence(
     `opportunity:${opportunity.opportunity}`,
     ...targetSpecificRunAlignment(candidate, opportunity).evidence,
   ];
-}
-
-function priorityBonus(priority: "low" | "medium" | "high" | "critical"): number {
-  switch (priority) {
-    case "critical":
-      return 18;
-    case "high":
-      return 12;
-    case "medium":
-      return 6;
-    case "low":
-      return 2;
-  }
-}
-
-function threatBonusForSeverity(severity: AiThreatProjection["severity"]): number {
-  switch (severity) {
-    case "critical":
-      return 18;
-    case "high":
-      return 12;
-    case "medium":
-      return 6;
-    case "low":
-      return 2;
-  }
 }
 
 function explainRankedAction(
