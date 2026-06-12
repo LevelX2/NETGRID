@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "action-semantic-candidate-coverage-report-v2",
+  "date": "2026-06-12",
+  "status": "done",
+  "runtimeConsumerStatus": "none",
+  "source": {
+    "builder": "packages/ai/src/actions/action-semantic-coverage.ts:summarizeActionSemanticCandidateCoverage",
+    "fixture": "packages/ai/src/actions/action-semantic-coverage.test.ts:coverageReportFixtureCandidates"
+  },
+  "metrics": {
+    "totalCandidates": 11,
+    "sources": {
+      "basic_action": 4,
+      "card": 3,
+      "game_rule": 3,
+      "choice": 1
+    },
+    "abilities": {
+      "hasAbilityId": 2
+    },
+    "primitives": {
+      "hasPrimitiveKind": 1,
+      "hasEffectKind": 1
+    },
+    "costs": {
+      "hasCostProfile": 11
+    },
+    "timing": {
+      "hasTimingProfile": 11
+    },
+    "targetContext": {
+      "hasTargetContext": 2,
+      "statuses": {
+        "missing": 9,
+        "engine_provided": 1,
+        "target_context_unavailable": 1
+      },
+      "byGroup": {
+        "basic_action": {
+          "engine_provided": 1,
+          "not_available": 0,
+          "target_context_unavailable": 1,
+          "missing": 2
+        },
+        "game_rule": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 3
+        },
+        "runner_card_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 2
+        },
+        "corp_card_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        },
+        "choice_resolution": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 2
+        },
+        "run_action": {
+          "engine_provided": 1,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 0
+        },
+        "access_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        },
+        "corp_window_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        },
+        "score_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 2
+        },
+        "install_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        },
+        "advance_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        },
+        "rez_action": {
+          "engine_provided": 0,
+          "not_available": 0,
+          "target_context_unavailable": 0,
+          "missing": 1
+        }
+      }
+    },
+    "hiddenInfoBlockers": 1,
+    "schemaGaps": {
+      "target_context_unavailable": 6
+    },
+    "projectionIssues": {
+      "target_context_unavailable": 6,
+      "hidden_info_blocked": 1
+    },
+    "projectionStatuses": {
+      "partial_projected": 7,
+      "projected": 3,
+      "hidden_info_blocked": 1
+    },
+    "coverageGroups": {
+      "basic_action": 4,
+      "game_rule": 3,
+      "runner_card_action": 2,
+      "corp_card_action": 1,
+      "choice_resolution": 2,
+      "run_action": 1,
+      "access_action": 1,
+      "corp_window_action": 1,
+      "score_action": 2,
+      "install_action": 1,
+      "advance_action": 1,
+      "rez_action": 1
+    },
+    "neutralFallbacks": 0,
+    "redaction": {
+      "safe": true,
+      "unsafeRows": 0,
+      "forbiddenMarkers": []
+    }
+  },
+  "gates": {
+    "deterministic": true,
+    "hiddenInfoLeaks": 0,
+    "runtimeBehaviorChanges": 0,
+    "actionSelectionChanges": 0,
+    "legalActionGenerationChanges": 0
+  },
+  "noEffectFlags": [
+    "no_runtime_scoring",
+    "no_action_selection",
+    "no_legal_action_generation",
+    "no_hidden_info_projection",
+    "report_only"
+  ]
+}

@@ -259,6 +259,20 @@ Done-Gate: Coverage-Report ist deterministisch und no-effect.
 
 Commit: `test(ai): report action semantic candidate coverage`
 
+Ergebnis 2026-06-12:
+
+- `summarizeActionSemanticCandidateCoverage` misst nun zusätzlich Primitive-/Effect-Felder, Projection-Issue-Zähler, Hidden-Info-Blocker und Schema-Gaps.
+- Der versionierte Report `docs/reviews/ai/action-semantic-candidate-coverage-2026-06-12.json` ist an eine deterministische Test-Fixture gebunden und enthält nur aggregierte, redaction-sichere Werte.
+- Report-Gates: `runtimeBehaviorChanges=0`, `actionSelectionChanges=0`, `legalActionGenerationChanges=0`, `hiddenInfoLeaks=0`.
+
+Checks 2026-06-12:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts src/action-semantic-candidate.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm check:ai` (PASS mit bestehenden AI-Warnungen)
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P8 TargetContext
 
 Ziel: Legale Zieloptionen read-only in ActionSemanticCandidate projizieren.
