@@ -492,6 +492,40 @@ describe("benchmark report formatting", () => {
     );
   }, 30_000);
 
+  it("keeps action alternatives scoped to action-limit finding windows", () => {
+    const pair = JSON.parse(
+      readFileSync(
+        join(
+          __dirname,
+          "../../../../docs/reviews/ai/ai-selfplay-trace-mining-a.json",
+        ),
+        "utf8",
+      ),
+    ).pair as { runner: string; corp: string };
+    const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
+    const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
+
+    const noActionLimit = runAiSelfplayTraceMining({
+      seeds: ["ai-v143-tuning-001"],
+      runnerDeck: runner.deck,
+      corpDeck: corp.deck,
+      runnerDeckMetadata: runner.metadata,
+      corpDeckMetadata: corp.metadata,
+      maxActions: 160,
+      maxFindings: 5,
+      includeActionAlternativesForFindings: true,
+      maxAlternativesPerFinding: 3,
+    });
+
+    expect(noActionLimit.aggregate.actionLimitReached).toBe(0);
+    expect(JSON.stringify(noActionLimit.summaries)).not.toContain(
+      "actionAlternatives",
+    );
+    expect(JSON.stringify(noActionLimit)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  }, 30_000);
+
   it("clusters action-limit roots without hidden trace data", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-action-limit-cluster",

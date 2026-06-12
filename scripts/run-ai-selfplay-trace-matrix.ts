@@ -42,6 +42,8 @@ const pairFiles = args.pairFiles ?? [];
 const seeds = args.seeds ?? DEFAULT_SEEDS;
 const maxActions = args.maxActions ?? 160;
 const maxFindings = args.maxFindings ?? 50;
+const includeActionAlternatives = args.includeActionAlternatives ?? false;
+const maxAlternativesPerFinding = args.maxAlternativesPerFinding ?? 5;
 
 const pairs = [
   ...pairIds.map((id) => readPair(id)),
@@ -58,6 +60,8 @@ const matrix = pairs.map(({ pair }) => {
     corpDeckMetadata: corp.metadata,
     maxActions,
     maxFindings,
+    includeActionAlternativesForFindings: includeActionAlternatives,
+    maxAlternativesPerFinding,
   });
   return {
     pair,
@@ -96,6 +100,12 @@ const matrix = pairs.map(({ pair }) => {
       last40ActionTypes: summary.actionSequence
         .slice(-40)
         .map((entry) => entry.actionType),
+      ...(includeActionAlternatives
+        ? {
+            actionAlternativeSnapshots:
+              actionAlternativeSnapshotsForSummary(summary),
+          }
+        : {}),
     })),
     topFindings: result.topFindings.map((finding) => ({
       matchId: finding.matchId,
@@ -123,6 +133,8 @@ const output = {
     seeds,
     maxActions,
     maxFindings,
+    includeActionAlternatives,
+    maxAlternativesPerFinding,
   },
   aggregate: combineAggregates(matrix.map((entry) => entry.aggregate)),
   diagnostics: {
@@ -148,6 +160,8 @@ function parseArgs(argv: string[]): {
   seeds?: string[];
   maxActions?: number;
   maxFindings?: number;
+  includeActionAlternatives?: boolean;
+  maxAlternativesPerFinding?: number;
 } {
   let out: string | undefined;
   let pairs: PairId[] | undefined;
@@ -156,6 +170,8 @@ function parseArgs(argv: string[]): {
   let seeds: string[] | undefined;
   let maxActionsArg: number | undefined;
   let maxFindingsArg: number | undefined;
+  let includeActionAlternatives = false;
+  let maxAlternativesPerFinding: number | undefined;
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     const next = argv[index + 1];
@@ -201,6 +217,15 @@ function parseArgs(argv: string[]): {
       index += 1;
       continue;
     }
+    if (arg === "--include-action-alternatives") {
+      includeActionAlternatives = true;
+      continue;
+    }
+    if (arg === "--max-alternatives-per-finding" && next) {
+      maxAlternativesPerFinding = Number.parseInt(next, 10);
+      index += 1;
+      continue;
+    }
   }
   if (!out) {
     throw new Error("Missing required --out <path> argument.");
@@ -213,7 +238,43 @@ function parseArgs(argv: string[]): {
     ...(seeds && seeds.length > 0 ? { seeds } : {}),
     ...(Number.isFinite(maxActionsArg) ? { maxActions: maxActionsArg } : {}),
     ...(Number.isFinite(maxFindingsArg) ? { maxFindings: maxFindingsArg } : {}),
+    ...(includeActionAlternatives ? { includeActionAlternatives } : {}),
+    ...(Number.isFinite(maxAlternativesPerFinding)
+      ? { maxAlternativesPerFinding }
+      : {}),
   };
+}
+
+function actionAlternativeSnapshotsForSummary(summary: TraceMiningSummary) {
+  return summary.actionSequence
+    .map((entry, actionIndex) => ({
+      actionIndex,
+      side: entry.side,
+      stateVersionBefore: entry.stateVersionBefore,
+      selectedActionType: entry.actionType,
+      alternatives: (entry.actionAlternatives ?? []).map((alternative) => ({
+        rank: alternative.rank,
+        actionType: alternative.actionType,
+        selected: alternative.selected,
+        sourceKind: alternativeSourceKind(alternative.source),
+        ...(alternative.sourceTitle
+          ? { sourceDefinitionId: alternative.sourceTitle }
+          : {}),
+        scoreKeys: (alternative.scoreBreakdown ?? []).map(
+          (component) => component.key,
+        ),
+        whyChosen: alternative.whyChosen ?? [],
+        whyNot: alternative.whyNot ?? [],
+        economy: alternative.economy,
+      })),
+    }))
+    .filter((entry) => entry.alternatives.length > 0);
+}
+
+function alternativeSourceKind(source: string | undefined): string | undefined {
+  if (!source) return undefined;
+  if (source === "basic_action" || source === "game_rule") return source;
+  return "visible_card_or_ability";
 }
 
 function readPair(id: PairId): TracePairFile {

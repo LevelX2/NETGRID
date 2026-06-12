@@ -11181,6 +11181,10 @@ function stripSelfplayActionAlternatives(
   }
 }
 
+const SELFPLAY_ACTION_ALTERNATIVE_FINDING_DETECTORS = new Set([
+  "action_limit_reached",
+]);
+
 function retainActionAlternativesForFindingWindows(
   summaries: AiSimulationSummary[],
   findings: { summaryIndex: number; actionIndex: number }[],
@@ -11194,6 +11198,7 @@ function retainActionAlternativesForFindingWindows(
       }
     | undefined;
   let firstAvailableAlternatives: AiDecisionActionAlternative[] | undefined;
+  let sawEligibleFinding = false;
   for (const [summaryIndex, summary] of summaries.entries()) {
     const actionIndex = summary.actionSequence.findIndex(
       (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
@@ -11206,6 +11211,16 @@ function retainActionAlternativesForFindingWindows(
     }
   }
   for (const finding of findings) {
+    if (
+      "detectorIds" in finding &&
+      Array.isArray(finding.detectorIds) &&
+      !finding.detectorIds.some((detectorId) =>
+        SELFPLAY_ACTION_ALTERNATIVE_FINDING_DETECTORS.has(String(detectorId)),
+      )
+    ) {
+      continue;
+    }
+    sawEligibleFinding = true;
     const summary = summaries[finding.summaryIndex];
     if (!summary) continue;
     // Action-limit findings usually point at the terminal action; keep a small
@@ -11235,7 +11250,7 @@ function retainActionAlternativesForFindingWindows(
       (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
     ),
   );
-  if (!retained && firstAvailable) {
+  if (!retained && sawEligibleFinding && firstAvailable) {
     const entry =
       summaries[firstAvailable.summaryIndex]?.actionSequence[
         firstAvailable.actionIndex
