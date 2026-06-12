@@ -324,6 +324,20 @@ Done-Gate: Kosten/Timing sind read-only und testseitig für Basisfälle abgedeck
 
 Commit: `feat(ai): project action cost and timing semantics`
 
+Ergebnis 2026-06-12:
+
+- `ActionCostProfile` beschreibt jetzt temporäre Credits (`budget`, `provided`, `spent`, `remaining`, `returned`) sowie `tapCost` und `revealCost` read-only.
+- Der Cost/Timing-Projektor erkennt `corpCreditsSpent`/`runnerCreditsSpent`, Data-Fort-Temporary-Credit-Payloads, `cardImplementationTapSourceCost`, `sourceTapped`, `cardImplementationCostKind`, `publicRevealKind` und `revealKind`.
+- Score-Window wird zusätzlich für Score-CardImplementation-Primitive erkannt, insbesondere Data Fort Reclamation und Ice Transmutation.
+
+Checks 2026-06-12:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts -t "Data Fort Reclamation|reveal|tap|Credit Subversion|Death from Above"`
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P10 Basic-Action-Semantik
 
 Ziel: Nichtkartenaktionen erhalten kontrollierte Semantik.

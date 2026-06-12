@@ -108,6 +108,15 @@ export type ActionCostProfile = {
   creditCost?: number;
   trashCost?: number;
   agendaPointCost?: number;
+  temporaryCredits?: {
+    budget?: number;
+    provided?: number;
+    spent?: number;
+    remaining?: number;
+    returned?: number;
+  };
+  tapCost?: boolean;
+  revealCost?: boolean;
   forfeitAgenda?: boolean;
   selfDamage?: DamageAmount[];
   selfTag?: number;

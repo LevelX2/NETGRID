@@ -515,14 +515,45 @@ describe("buildActionSemanticCandidates", () => {
           timingPoint: "corp_action.main",
           costs: [],
         }),
+        legalAction("resolve_choice", 3, {
+          side: "corp",
+          source: "game_rule",
+          timingPoint: "corp_action.main",
+          payload: {
+            cardImplementationPrimitiveKind:
+              "score_install_hq_cards_into_new_remote_then_rez",
+            cardImplementationAbilityKey: "hq_to_new_remote_install_rez:0",
+            cardImplementationTemporaryCreditBudget: 10,
+            temporaryCreditsProvided: 10,
+            temporaryCreditsSpent: 9,
+            temporaryCreditsRemaining: 1,
+            temporaryCreditsReturned: 1,
+            corpCreditsSpent: 0,
+            hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+          },
+        }),
+        legalAction("trigger_ability", 4, {
+          side: "runner",
+          source: "hidden-resource-source",
+          timingPoint: "access.resolve_card",
+          payload: {
+            cardImplementationPrimitiveKind:
+              "successful_run_before_access_effect",
+            cardImplementationCostKind: "reveal_and_tap_source",
+            publicRevealKind: "reveal",
+            sourceTapped: true,
+          },
+        }),
       ],
     });
 
     const gainCredit = candidates[0];
     const rezIce = candidates[1];
     const endTurn = candidates[2];
-    if (!gainCredit || !rezIce || !endTurn) {
-      throw new Error("Expected three AI040 candidates");
+    const dataFortSequence = candidates[3];
+    const revealTap = candidates[4];
+    if (!gainCredit || !rezIce || !endTurn || !dataFortSequence || !revealTap) {
+      throw new Error("Expected five AI040 candidates");
     }
 
     expect(gainCredit.costProfile).toMatchObject({
@@ -564,6 +595,50 @@ describe("buildActionSemanticCandidates", () => {
       phase: "corp_action_phase",
       turnSide: "corp",
       window: "corp_action.main",
+    });
+
+    expect(dataFortSequence.costProfile).toMatchObject({
+      creditCost: 0,
+      costKnownStatus: "known",
+      temporaryCredits: {
+        budget: 10,
+        provided: 10,
+        spent: 9,
+        remaining: 1,
+        returned: 1,
+      },
+    });
+    expect(dataFortSequence.costProfile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "cardImplementationTemporaryCreditBudget",
+        "temporaryCreditsProvided",
+        "temporaryCreditsSpent",
+        "temporaryCreditsRemaining",
+        "temporaryCreditsReturned",
+        "corpCreditsSpent",
+      ]),
+    );
+    expect(dataFortSequence.timingProfile).toMatchObject({
+      phase: "corp_action_phase",
+      scoreWindow: true,
+    });
+
+    expect(revealTap.costProfile).toMatchObject({
+      tapCost: true,
+      revealCost: true,
+      costKnownStatus: "known",
+    });
+    expect(revealTap.costProfile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "cardImplementationCostKind",
+        "publicRevealKind",
+        "sourceTapped",
+      ]),
+    );
+    expect(revealTap.timingProfile).toMatchObject({
+      phase: "run",
+      accessPhase: true,
+      responseWindow: true,
     });
   });
 
