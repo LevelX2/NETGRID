@@ -19,6 +19,7 @@ import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "../install-rez-sequence-handlers";
+import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
 
 const HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE =
   "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez";
@@ -99,10 +100,13 @@ export function startDataFortReclamationChoice(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       ...primitivePayload,
-      v1922CorpAgendaAbility: "data_fort_reclamation",
-      sourceAgendaId: agendaId,
-      dataFortReclamationChoiceOpened: false,
-      dataFortReclamationCandidateCount: 0,
+      ...corpSequenceContextPayload({
+        step: "data_fort_reclamation_hq_choice_empty",
+        v1922CorpAgendaAbility: "data_fort_reclamation",
+        sourceAgendaId: agendaId,
+        dataFortReclamationChoiceOpened: false,
+        dataFortReclamationCandidateCount: 0,
+      }),
     };
     return { handled: true, resolvedPayload: host.legalAction.payload ?? {} };
   }
@@ -121,19 +125,22 @@ export function startDataFortReclamationChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...primitivePayload,
-    v1922CorpAgendaAbility: "data_fort_reclamation",
-    sourceAgendaId: agendaId,
-    cardImplementationSourceZone: sequence.sourceZone,
-    cardImplementationTargetServer: sequence.targetServer,
-    cardImplementationAllowedCards: sequence.allowedCards,
-    cardImplementationMaxCards: sequence.maxCards,
-    cardImplementationTemporaryCreditBudget: sequence.temporaryCredits.amount,
-    dataFortReclamationChoiceOpened: true,
-    dataFortReclamationCandidateCount: options.length,
-    dataFortReclamationMaxSelections: Math.min(
-      sequence.maxCards,
-      options.length,
-    ),
+    ...corpSequenceContextPayload({
+      step: "data_fort_reclamation_hq_choice_opened",
+      v1922CorpAgendaAbility: "data_fort_reclamation",
+      sourceAgendaId: agendaId,
+      cardImplementationSourceZone: sequence.sourceZone,
+      cardImplementationTargetServer: sequence.targetServer,
+      cardImplementationAllowedCards: sequence.allowedCards,
+      cardImplementationMaxCards: sequence.maxCards,
+      cardImplementationTemporaryCreditBudget: sequence.temporaryCredits.amount,
+      dataFortReclamationChoiceOpened: true,
+      dataFortReclamationCandidateCount: options.length,
+      dataFortReclamationMaxSelections: Math.min(
+        sequence.maxCards,
+        options.length,
+      ),
+    }),
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
   };
   return { handled: true, stateChanged: true };
@@ -198,19 +205,22 @@ export function resolveHqToNewRemoteInstallRezChoice(
       ...hiddenZoneChoicePayload(
         "v1922_data_fort_reclamation_install_sequence",
       ),
-      sourceAgendaId: agendaId,
-      selectedCount: 0,
-      installedCount: 0,
-      installedIceCount: 0,
-      installedRootCount: 0,
-      cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
-      temporaryCreditsProvided: temporaryCreditAmount,
-      temporaryCreditsSpent: 0,
-      corpCreditsSpent: 0,
-      temporaryCreditsRemaining: temporaryCreditAmount,
-      temporaryCreditsReturned: temporaryCreditAmount,
-      dataFortReclamationRezChoiceOpened: false,
-      dataFortReclamationRezCandidateCount: 0,
+      ...corpSequenceContextPayload({
+        step: "data_fort_reclamation_install_sequence_empty",
+        sourceAgendaId: agendaId,
+        selectedCount: 0,
+        installedCount: 0,
+        installedIceCount: 0,
+        installedRootCount: 0,
+        cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
+        temporaryCreditsProvided: temporaryCreditAmount,
+        temporaryCreditsSpent: 0,
+        corpCreditsSpent: 0,
+        temporaryCreditsRemaining: temporaryCreditAmount,
+        temporaryCreditsReturned: temporaryCreditAmount,
+        dataFortReclamationRezChoiceOpened: false,
+        dataFortReclamationRezCandidateCount: 0,
+      }),
     };
     return {
       handled: true,
@@ -288,24 +298,27 @@ export function resolveHqToNewRemoteInstallRezChoice(
     ...(host.legalAction.payload ?? {}),
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_install_sequence"),
-    sourceAgendaId: agendaId,
-    selectedCount: selectedIds.length,
-    installedCount: installedIceCount + installedRootCount,
-    installedIceCount,
-    installedRootCount,
-    createdServerId: server.id,
-    cardImplementationSequenceCreatedServerId: server.id,
-    cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
-    temporaryCreditsProvided: temporaryCreditAmount,
-    temporaryCreditsSpent,
-    corpCreditsSpent,
-    temporaryCreditsRemaining,
-    immediateRezzedCount: immediateRezzedIds.length,
-    dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
-    dataFortReclamationRezCandidateCount: rezCandidates.length,
-    ...(rezCandidates.length === 0
-      ? { temporaryCreditsReturned: temporaryCreditsRemaining }
-      : {}),
+    ...corpSequenceContextPayload({
+      step: "data_fort_reclamation_install_sequence",
+      sourceAgendaId: agendaId,
+      selectedCount: selectedIds.length,
+      installedCount: installedIceCount + installedRootCount,
+      installedIceCount,
+      installedRootCount,
+      createdServerId: server.id,
+      cardImplementationSequenceCreatedServerId: server.id,
+      cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
+      temporaryCreditsProvided: temporaryCreditAmount,
+      temporaryCreditsSpent,
+      corpCreditsSpent,
+      temporaryCreditsRemaining,
+      immediateRezzedCount: immediateRezzedIds.length,
+      dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
+      dataFortReclamationRezCandidateCount: rezCandidates.length,
+      ...(rezCandidates.length === 0
+        ? { temporaryCreditsReturned: temporaryCreditsRemaining }
+        : {}),
+    }),
   };
   if (rezCandidates.length > 0) {
     host.state.pendingChoice = {
@@ -490,18 +503,21 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     ...(host.legalAction.payload ?? {}),
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_rez_sequence"),
-    sourceAgendaId: agendaId,
-    cardImplementationSequenceCreatedServerId: serverId,
-    cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
-    selectedCount: selectedIds.length,
-    rezzedCount: rezzedIceCount + rezzedRootCount,
-    rezzedIceCount,
-    rezzedRootCount,
-    temporaryCreditsProvided: temporaryCreditAmount,
-    temporaryCreditsSpent,
-    temporaryCreditsRemaining,
-    corpCreditsSpent,
-    corpCreditsAfter: host.state.corp.credits,
+    ...corpSequenceContextPayload({
+      step: "data_fort_reclamation_rez_sequence",
+      sourceAgendaId: agendaId,
+      cardImplementationSequenceCreatedServerId: serverId,
+      cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
+      selectedCount: selectedIds.length,
+      rezzedCount: rezzedIceCount + rezzedRootCount,
+      rezzedIceCount,
+      rezzedRootCount,
+      temporaryCreditsProvided: temporaryCreditAmount,
+      temporaryCreditsSpent,
+      temporaryCreditsRemaining,
+      corpCreditsSpent,
+      corpCreditsAfter: host.state.corp.credits,
+    }),
   };
   return {
     handled: true,

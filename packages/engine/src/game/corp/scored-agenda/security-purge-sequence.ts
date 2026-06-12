@@ -11,6 +11,7 @@ import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "../install-rez-sequence-handlers";
+import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
 
 type SequencePayload = Record<string, string | number | boolean>;
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
@@ -57,12 +58,15 @@ export function resolveSecurityPurgeAgendaPurge(
       ...(host.legalAction.payload ?? {}),
       ...basePayload,
       ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3_target_choice"),
-      revealedIceCount: revealedIceIds.length,
-      pendingTrashCount: pendingTrashIds.length,
-      installedIceCount: 0,
-      trashedCount: 0,
-      securityPurgeTargetChoiceOpened: true,
-      securityPurgeTargetChoiceCount: revealedIceIds.length,
+      ...corpSequenceContextPayload({
+        step: "security_purge_rd_top3_target_choice",
+        revealedIceCount: revealedIceIds.length,
+        pendingTrashCount: pendingTrashIds.length,
+        installedIceCount: 0,
+        trashedCount: 0,
+        securityPurgeTargetChoiceOpened: true,
+        securityPurgeTargetChoiceCount: revealedIceIds.length,
+      }),
     };
     return {
       handled: true,
@@ -84,14 +88,17 @@ export function resolveSecurityPurgeAgendaPurge(
     ...(host.legalAction.payload ?? {}),
     ...basePayload,
     ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
-    revealedIceCount: 0,
-    pendingTrashCount: 0,
-    installedIceCount: 0,
-    trashedCount: trashedIds.length,
-    securityPurgeTargetChoiceOpened: false,
-    trashedDefinitionIds: trashedIds
-      .map((id) => host.cards.definitionFor(id).id)
-      .join(","),
+    ...corpSequenceContextPayload({
+      step: "security_purge_rd_top3",
+      revealedIceCount: 0,
+      pendingTrashCount: 0,
+      installedIceCount: 0,
+      trashedCount: trashedIds.length,
+      securityPurgeTargetChoiceOpened: false,
+      trashedDefinitionIds: trashedIds
+        .map((id) => host.cards.definitionFor(id).id)
+        .join(","),
+    }),
   };
   return {
     handled: true,
@@ -173,21 +180,24 @@ export function resolveSecurityPurgeInstallTargetChoice(
     ...(host.legalAction.payload ?? {}),
     ...securityPurgeBasePayload(host, agendaId, revealedIds),
     ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
-    revealedIceCount: installedIce.length,
-    pendingTrashCount: 0,
-    installedIceCount: installedIce.length,
-    trashedCount: trashedIds.length,
-    securityPurgeTargetChoiceOpened: false,
-    securityPurgeTargetChoiceResolved: true,
-    installedIceDefinitionIds: installedIce
-      .map((entry) => host.cards.definitionFor(entry.cardId).id)
-      .join(","),
-    installedIceServerLabels: installedIce
-      .map((entry) => entry.server.label)
-      .join(","),
-    trashedDefinitionIds: trashedIds
-      .map((id) => host.cards.definitionFor(id).id)
-      .join(","),
+    ...corpSequenceContextPayload({
+      step: "security_purge_install_targets",
+      revealedIceCount: installedIce.length,
+      pendingTrashCount: 0,
+      installedIceCount: installedIce.length,
+      trashedCount: trashedIds.length,
+      securityPurgeTargetChoiceOpened: false,
+      securityPurgeTargetChoiceResolved: true,
+      installedIceDefinitionIds: installedIce
+        .map((entry) => host.cards.definitionFor(entry.cardId).id)
+        .join(","),
+      installedIceServerLabels: installedIce
+        .map((entry) => entry.server.label)
+        .join(","),
+      trashedDefinitionIds: trashedIds
+        .map((id) => host.cards.definitionFor(id).id)
+        .join(","),
+    }),
   };
   return {
     handled: true,
@@ -210,16 +220,19 @@ function securityPurgeBasePayload(
   revealedIds: readonly CardInstanceId[],
 ): SequencePayload {
   return {
-    agendaAbility: "v1922_security_purge",
-    sourceDefinitionId: host.cards.definitionFor(agendaId).id,
     ...hiddenZoneChoicePayload("v1922_security_purge"),
-    publicRevealKind: "reveal",
-    revealedCount: revealedIds.length,
-    securityPurgeInstallContract: "corp_server_choice_per_ice",
-    securityPurgeWaivesPrintedRezCosts: true,
-    publicRevealDefinitionIds: revealedIds
-      .map((id) => host.cards.definitionFor(id).id)
-      .join(","),
+    ...corpSequenceContextPayload({
+      step: "security_purge_base_reveal",
+      agendaAbility: "v1922_security_purge",
+      sourceDefinitionId: host.cards.definitionFor(agendaId).id,
+      publicRevealKind: "reveal",
+      revealedCount: revealedIds.length,
+      securityPurgeInstallContract: "corp_server_choice_per_ice",
+      securityPurgeWaivesPrintedRezCosts: true,
+      publicRevealDefinitionIds: revealedIds
+        .map((id) => host.cards.definitionFor(id).id)
+        .join(","),
+    }),
   };
 }
 
