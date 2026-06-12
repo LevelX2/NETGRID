@@ -72,7 +72,7 @@ export function primitiveContractRecords(
         requiresTarget: true,
         targetKind: scoredAgenda.targetServer,
         hiddenInfoClass: scoredAgenda.visibility,
-        resolverModule: "corp-install-rez-sequence-handlers",
+        resolverModule: "scored-agenda/data-fort-reclamation-sequence",
       });
     }
   }
