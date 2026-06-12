@@ -269,21 +269,29 @@ export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
   "on_install",
   "on_play",
   "paid_action",
+  "paid_or_triggered_reposition",
+  "corp_rez_window",
   "during_ice_encounter",
+  "encounter_resolution",
   "on_use",
   "after_successful_run",
+  "hq_access",
+  "rnd_access",
   "prevention_window",
   "replacement_window",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
   "installed_ice",
+  "ice_position",
   "ice_type",
   "program",
   "icebreaker",
   "hosted_program",
   "server",
   "card",
+  "accessed_card",
+  "mode_choice",
   "subroutine",
 ] as const;
 
@@ -318,6 +326,18 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "prevent_hardware_trash_subroutine",
   "prevent_dangerous_tag_subroutine",
   "prevent_run_lock_subroutine",
+  "use_choice_option_with_visible_board_payoff",
+  "prefer_option_relevant_to_current_run_path",
+  "prefer_option_that_protects_agenda_or_remote_pressure",
+  "protects_agenda_remote",
+  "protects_central_access_pressure",
+  "current_run_path_relevance",
+  "high_run_denial_payoff",
+  "high_rez_cost_relief",
+  "high_value_accessed_card",
+  "denies_corp_economy_or_combo_piece",
+  "normally_untrashable_payoff",
+  "denies_corp_agenda_or_combo_piece",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -332,11 +352,15 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "pure_end_the_run_subroutine",
   "normal_breaker_available_without_run_end",
   "access_goal_blocked_after_use",
+  "option_with_no_visible_current_payoff",
+  "low_value_accessed_card",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [
   "visible_or_known_only",
   "legal_targets_only",
+  "legal_options_only",
+  "current_access_only",
   "public_or_controller_known_only",
 ] as const;
 
@@ -745,7 +769,13 @@ function validateCostProfile(
     addIssue(issues, "error", "invalid_shape", path, "Expected object.");
     return;
   }
-  for (const key of ["clicks", "credits", "memory", "counters", "agendaPoints"]) {
+  for (const key of [
+    "clicks",
+    "credits",
+    "memory",
+    "counters",
+    "agendaPoints",
+  ]) {
     validateOptionalNumber(costProfile[key], `${path}.${key}`, issues);
   }
   validateOptionalKnown(

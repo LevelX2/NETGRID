@@ -60,3 +60,9 @@ Dieser Vertrag beschreibt den naechsten engen, nicht-promotenden Runtime-Schnitt
 - Zielserver-Auswahl durch Spieler.
 - AI-Hints oder AI-Smokes.
 - Finale Completion-Gate-Promotion.
+
+## Boundary-Abgleich 2026-06-12
+
+Der aktuelle Runtime-Schnitt hat keine bekannte aktuelle Kartenabweichung fuer Nicht-Region-/Nicht-Rez-on-install-Root-Karten: normale ICE, Assets und Upgrades werden zuerst als kompletter Batch aus HQ in genau ein neues Remote installiert und bleiben unrezzed. Danach oeffnet die Engine eine einzige Korp-private optionale Rez-Choice fuer alle neu installierten rezbaren Karten.
+
+Das ist eine bewusste MVP-Boundary. Region-Upgrades und Root-Karten mit verpflichtendem `rootInstallRezzesOnInstall` werden bereits waehrend der geordneten Install-Sequenz gerezzed, damit Region-Replacement und On-Rez-Vertraege korrekt laufen. Ein echtes per-card Interleaving nach jeder einzelnen installierten nicht-verpflichtenden Karte ist dagegen weiterhin nicht Teil des Runtime-Vertrags. Fuer eine spaetere Promotion waere dafuer ein neuer Choice-/Sequenzvertrag mit Hidden-Info-, Replay- und StateHash-Garantien noetig.

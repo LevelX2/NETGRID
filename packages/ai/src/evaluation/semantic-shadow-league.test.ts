@@ -20,8 +20,10 @@ describe("SemanticShadowLeague", () => {
 
     expect(report.schemaVersion).toBe(SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION);
     expect(report.scope).toBe("semantic_shadow_league_report_only");
-    expect(report.scenarioCount).toBe(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length);
-    expect(report.sideCounts).toEqual({ runner: 6, corp: 6 });
+    expect(report.scenarioCount).toBe(
+      REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length,
+    );
+    expect(report.sideCounts).toEqual(expectedSideCounts(samples));
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");
@@ -54,10 +56,9 @@ describe("SemanticShadowLeague", () => {
       topActionType: "score_agenda",
       agreement: true,
     });
-    expect(scenario(report, "runner_real_low_credits").expectedTopActionTypes).toEqual([
-      "draw_card",
-      "gain_credit",
-    ]);
+    expect(
+      scenario(report, "runner_real_low_credits").expectedTopActionTypes,
+    ).toEqual(["draw_card", "gain_credit"]);
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
     ).toEqual(["start_run"]);
@@ -73,4 +74,16 @@ function scenario(
   );
   if (!result) throw new Error(`Missing scenario ${scenarioId}`);
   return result;
+}
+
+function expectedSideCounts(
+  samples: ReturnType<typeof buildRealEngineDecisionCorpus>,
+) {
+  return samples.reduce(
+    (counts, sample) => ({
+      ...counts,
+      [sample.side]: counts[sample.side] + 1,
+    }),
+    { runner: 0, corp: 0 },
+  );
 }
