@@ -16,6 +16,27 @@ const jsonReportPath =
   "docs/reviews/ai/action-semantic-signal-catalog-2026-06-12.json";
 const markdownReportPath =
   "docs/reviews/ai/action-semantic-signal-catalog-2026-06-12.md";
+const allowedNoSignalReasons = [
+  "none",
+  "inspector_missing",
+  "legacy_fallback_only",
+  "deferred_requires_human_review",
+  "identity_no_function_signal",
+  "not_ai_supported",
+  "no_function_signal",
+];
+const allowedDeferredScopes = [
+  "inspector_warning",
+  "active_hint_quality",
+  "inspector_warning_and_active_hint_quality",
+];
+const knownSprintBaseline = {
+  label: "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
+  coveredCards: 539,
+  deferredCards: 45,
+  noSignalCards: 25,
+  targetProfileGapCards: 84,
+};
 
 const options = parseArgs(process.argv.slice(2));
 const report = buildReport();
@@ -104,8 +125,11 @@ function buildReport() {
       tacticSignals: "functional_card_utility_only",
       subtypeOnlySignalsAllowed: false,
       targetProfilesAreSignals: false,
+      allowedNoSignalReasons,
+      allowedDeferredScopes,
     },
     summary: summarizeRows(rows),
+    qualityGate: qualityGateSummary(rows),
     rows,
   };
 }
@@ -137,6 +161,9 @@ function buildRow({ activeCard, compiledCard, inspectorCard, signalById }) {
   const deferred =
     warningCategories.includes("deferred_requires_human_review") ||
     activeCard.quality?.needsHumanReview === true;
+  const deferredScope = deferred
+    ? deferredReviewScope({ activeCard, warningCategories })
+    : "none";
   const covered =
     derivedFunctionSignals.length > 0 &&
     unknownSignals.length === 0 &&
@@ -151,6 +178,8 @@ function buildRow({ activeCard, compiledCard, inspectorCard, signalById }) {
     aiSupportStatus: activeCard.aiSupportStatus ?? "unknown",
     covered,
     deferred,
+    deferred_review_scope: deferredScope,
+    deferred_owner: deferred ? "ai_semantic_catalog_review" : "none",
     no_signal_reason: noSignalReason({
       activeCard,
       inspectorCard,
@@ -167,6 +196,17 @@ function buildRow({ activeCard, compiledCard, inspectorCard, signalById }) {
     targetProfileExpectedBySignals,
     warningCategories,
   };
+}
+
+function deferredReviewScope({ activeCard, warningCategories }) {
+  const inspector =
+    warningCategories.includes("deferred_requires_human_review") ||
+    warningCategories.includes("legacy_fallback_only");
+  const activeHint = activeCard.quality?.needsHumanReview === true;
+  if (inspector && activeHint)
+    return "inspector_warning_and_active_hint_quality";
+  if (inspector) return "inspector_warning";
+  return "active_hint_quality";
 }
 
 function noSignalReason({
@@ -218,6 +258,48 @@ function summarizeRows(rows) {
       cardId: row.cardId,
       signals: row.unknownSignals,
     })),
+    baselineDeltas: {
+      baseline: knownSprintBaseline.label,
+      coveredCards:
+        rows.filter((row) => row.covered).length -
+        knownSprintBaseline.coveredCards,
+      deferredCards:
+        rows.filter((row) => row.deferred).length -
+        knownSprintBaseline.deferredCards,
+      noSignalCards:
+        rows.filter((row) => row.no_signal_reason !== "none").length -
+        knownSprintBaseline.noSignalCards,
+      targetProfileGapCards:
+        rows.filter((row) => row.target_profile_gap).length -
+        knownSprintBaseline.targetProfileGapCards,
+    },
+  };
+}
+
+function qualityGateSummary(rows) {
+  const noSignalReviewStart = rows
+    .filter((row) => row.no_signal_reason !== "none")
+    .map((row) => ({
+      cardId: row.cardId,
+      reason: row.no_signal_reason,
+      side: row.side,
+      cardType: row.cardType,
+    }));
+  const deferredReviewRows = rows
+    .filter((row) => row.deferred)
+    .map((row) => ({
+      cardId: row.cardId,
+      scope: row.deferred_review_scope,
+      owner: row.deferred_owner,
+      warnings: row.warningCategories,
+    }));
+  return {
+    gateVersion: "semantic-signal-quality-gate-v2",
+    forbiddenSubtypeOnlySignals: 0,
+    unknownSignals: 0,
+    allowedNoSignalReasons,
+    noSignalReviewStart,
+    deferredReviewRows,
   };
 }
 
@@ -269,6 +351,46 @@ function validateReport(reportToValidate) {
   if (reportToValidate.summary.unknownSignalCards !== 0) {
     fail("all derived function signals must be present in tactic-signals-v1");
   }
+  const allowedNoSignalReasonSet = new Set(allowedNoSignalReasons);
+  const allowedDeferredScopeSet = new Set(allowedDeferredScopes);
+  for (const row of reportToValidate.rows ?? []) {
+    if (!allowedNoSignalReasonSet.has(row.no_signal_reason)) {
+      fail(
+        `unknown no_signal_reason for ${row.cardId}: ${row.no_signal_reason}`,
+      );
+    }
+    if (row.deferred) {
+      if (!allowedDeferredScopeSet.has(row.deferred_review_scope)) {
+        fail(
+          `missing deferred review scope for ${row.cardId}: ${row.deferred_review_scope}`,
+        );
+      }
+      if (row.deferred_owner !== "ai_semantic_catalog_review") {
+        fail(`missing deferred review owner for ${row.cardId}`);
+      }
+    }
+    if (row.covered && row.no_signal_reason !== "none") {
+      fail(`covered row must not carry no_signal_reason: ${row.cardId}`);
+    }
+    if (
+      row.target_profile_gap &&
+      row.targetProfileExpectedBySignals.length === 0
+    ) {
+      fail(`target profile gap without target-relevant signal: ${row.cardId}`);
+    }
+  }
+  if (
+    (reportToValidate.qualityGate?.noSignalReviewStart ?? []).length !==
+    reportToValidate.summary.noSignalCards
+  ) {
+    fail("noSignalReviewStart must include every no-signal row");
+  }
+  if (
+    (reportToValidate.qualityGate?.deferredReviewRows ?? []).length !==
+    reportToValidate.summary.deferredCards
+  ) {
+    fail("deferredReviewRows must include every deferred row");
+  }
 }
 
 function renderMarkdownReport(reportToRender) {
@@ -283,6 +405,16 @@ function renderMarkdownReport(reportToRender) {
       (row) =>
         `| \`${row.cardId}\` | ${row.side} | ${row.cardType} | ${row.targetProfileExpectedBySignals.map((signal) => `\`${signal}\``).join(", ")} |`,
     );
+  const noSignalReviewRows = reportToRender.qualityGate.noSignalReviewStart
+    .slice(0, 30)
+    .map(
+      (row) =>
+        `| \`${row.cardId}\` | ${row.side} | ${row.cardType} | \`${row.reason}\` |`,
+    );
+  const deferredScopeRows = Object.entries(
+    countBy(reportToRender.qualityGate.deferredReviewRows, (row) => row.scope),
+  ).map(([scope, count]) => `| \`${scope}\` | ${count} |`);
+  const deltas = summary.baselineDeltas;
 
   return [
     "# Action Semantic Signal Catalog Gate 2026-06-12",
@@ -302,6 +434,10 @@ function renderMarkdownReport(reportToRender) {
     `| target_profile_gap | ${summary.targetProfileGapCards} |`,
     `| structural signal violations | ${summary.structuralSignalViolationCards} |`,
     `| unknown signals | ${summary.unknownSignalCards} |`,
+    `| covered delta vs ${deltas.baseline} | ${signed(deltas.coveredCards)} |`,
+    `| deferred delta vs ${deltas.baseline} | ${signed(deltas.deferredCards)} |`,
+    `| no_signal delta vs ${deltas.baseline} | ${signed(deltas.noSignalCards)} |`,
+    `| target_profile_gap delta vs ${deltas.baseline} | ${signed(deltas.targetProfileGapCards)} |`,
     "",
     "## No Signal Reasons",
     "",
@@ -315,11 +451,29 @@ function renderMarkdownReport(reportToRender) {
     "| --- | --- | --- | --- |",
     ...(targetGapRows.length > 0 ? targetGapRows : ["| none | - | - | - |"]),
     "",
+    "## No Signal Review Start",
+    "",
+    "| Card | Side | Type | Reason |",
+    "| --- | --- | --- | --- |",
+    ...(noSignalReviewRows.length > 0
+      ? noSignalReviewRows
+      : ["| none | - | - | - |"]),
+    "",
+    "## Deferred Review Scope",
+    "",
+    "| Scope | Cards |",
+    "| --- | ---: |",
+    ...(deferredScopeRows.length > 0 ? deferredScopeRows : ["| none | 0 |"]),
+    "",
     "## Row Contract",
     "",
-    "Every JSON row contains `covered`, `deferred`, `no_signal_reason` and `target_profile_gap`.",
+    "Every JSON row contains `covered`, `deferred`, `deferred_review_scope`, `deferred_owner`, `no_signal_reason` and `target_profile_gap`.",
     "",
   ].join("\n");
+}
+
+function signed(value) {
+  return value > 0 ? `+${value}` : String(value);
 }
 
 function pureStructuralSignal(signal, rowSignals) {

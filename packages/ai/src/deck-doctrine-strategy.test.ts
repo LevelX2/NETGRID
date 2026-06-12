@@ -13,6 +13,14 @@ const snapshots = snapshotsData08.snapshots as Array<{
   publicMetadata?: AiDeckDoctrineDeckSnapshot["publicMetadata"];
   cards: Array<{ cardId: string; quantity: number }>;
 }>;
+const realDoctrineSnapshotIds = [
+  "demo_runner_008_snapshot_v0_8",
+  "demo_corp_008_snapshot_v0_8",
+  "onr_origin_runner_ai_snapshot_v1",
+  "onr_origin_corp_ai_snapshot_v1",
+  "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+  "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
   it("detects Runner R&D and interface pressure from normalized multiaccess evidence", () => {
@@ -265,6 +273,43 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(serialized).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|legalActions/i,
     );
+  });
+
+  it("keeps DeckDoctrine v2 diagnostics grounded in real deck snapshots", () => {
+    const diagnostics = realDoctrineSnapshotIds.map((snapshotId) =>
+      buildDeckDoctrineV2Diagnostic(snapshotById(snapshotId)),
+    );
+
+    expect(diagnostics).toHaveLength(6);
+    expect(new Set(diagnostics.map((entry) => entry.side))).toEqual(
+      new Set(["corp", "runner"]),
+    );
+    expect(
+      diagnostics.every((entry) => entry.status !== "unknown_snapshot"),
+    ).toBe(true);
+    expect(diagnostics.some((entry) => entry.status === "partial")).toBe(true);
+    expect(
+      diagnostics.every(
+        (entry) =>
+          entry.scope === "diagnostic_only" &&
+          entry.productiveUseAllowed === false,
+      ),
+    ).toBe(true);
+
+    for (const diagnostic of diagnostics) {
+      expect(diagnostic.rolesStatus.cardRows).toBeGreaterThan(0);
+      expect(diagnostic.strategyDiagnostics.length).toBeGreaterThan(0);
+      if (diagnostic.status === "anchorless") {
+        expect(diagnostic.neutralDoctrine).toBe(true);
+        expect(diagnostic.rolesStatus.strategyAnchorCount).toBe(0);
+      } else {
+        expect(diagnostic.neutralDoctrine).toBe(false);
+        expect(diagnostic.rolesStatus.strategyAnchorCount).toBeGreaterThan(0);
+      }
+      expect(JSON.stringify(diagnostic)).not.toMatch(
+        /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|deckHash|legalActions/i,
+      );
+    }
   });
 
   it("keeps NeutralDoctrine anchorless when a deck has no strategy anchors", () => {

@@ -18,6 +18,7 @@ import {
   type ActionSemanticCandidateCoverageSummary,
   formatActionSemanticCandidateCoverageReport,
   summarizeActionSemanticCandidateCoverage,
+  summarizeActionSemanticCandidateCoverageSources,
 } from "./action-semantic-coverage";
 
 const repoRoot = path.resolve(
@@ -383,8 +384,17 @@ describe("Action semantic coverage", () => {
 
   it("matches the checked-in ActionSemanticCandidate coverage report", () => {
     const candidates = coverageReportFixtureCandidates();
+    const engineBackedCandidates = buildActionSemanticCandidates({
+      legalActions: collectRealEngineLegalActions(),
+      observerSide: "system",
+      stateVersion: 613,
+    });
     const summary = summarizeActionSemanticCandidateCoverage(candidates);
-    const artifact = coverageReportArtifact(summary);
+    const sourceSummary = summarizeActionSemanticCandidateCoverageSources({
+      syntheticCandidates: candidates,
+      engineBackedCandidates,
+    });
+    const artifact = coverageReportArtifact(summary, sourceSummary);
     const checkedInReport = JSON.parse(
       readFileSync(
         path.join(
@@ -399,6 +409,9 @@ describe("Action semantic coverage", () => {
     expect(summary.fieldCoverage.hasPrimitiveKind).toBe(1);
     expect(summary.fieldCoverage.hasEffectKind).toBe(1);
     expect(summary.hiddenInfoBlockers).toBe(1);
+    expect(sourceSummary.engineBackedCandidates).toBeGreaterThan(0);
+    expect(sourceSummary.hiddenInfoLeaks).toBe(0);
+    expect(sourceSummary.legalActionGenerationChanges).toBe(0);
     expect(summary.schemaGaps).toMatchObject({
       target_context_unavailable: 6,
     });
@@ -562,6 +575,9 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
 
 function coverageReportArtifact(
   summary: ActionSemanticCandidateCoverageSummary,
+  sourceSummary: ReturnType<
+    typeof summarizeActionSemanticCandidateCoverageSources
+  >,
 ): unknown {
   return {
     schemaVersion: "action-semantic-candidate-coverage-report-v2",
@@ -576,6 +592,7 @@ function coverageReportArtifact(
     },
     metrics: {
       totalCandidates: summary.totalCandidates,
+      sourceBreakdown: sourceSummary,
       sources: summary.sourceKinds,
       abilities: {
         hasAbilityId: summary.fieldCoverage.hasAbilityId,

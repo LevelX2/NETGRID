@@ -1,14 +1,23 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { chooseCorpAction, chooseRunnerAction } from "./index";
+import * as aiPublicApi from "./index";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import { buildSemanticDecisionFrame } from "./decision/semantic-decision-frame";
+import { buildSemanticShadowDecision } from "./decision/semantic-shadow-decision";
+import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
+import { buildRealEngineDecisionCorpusScenarios } from "./evaluation/real-engine-decision-corpus-fixtures";
+import { buildRealEngineDecisionCorpus } from "./evaluation/real-engine-decision-corpus";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
 } from "./decision/semantic-basic-setup-pilot";
-import { getTacticalPlanMemorySnapshot, resetTacticalPlanMemory } from "./tactical-plans";
+import {
+  getTacticalPlanMemorySnapshot,
+  resetTacticalPlanMemory,
+} from "./tactical-plans";
 import {
   chooseSemanticRuntimeAction,
   type SemanticRuntimeDependencies,
@@ -418,10 +427,15 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("keeps a protected remote score line selectable", () => {
-    const remoteAgenda = visibleCard("protected-remote-agenda", "corp", "agenda", {
-      advancementCounters: 1,
-      advancementRequirement: 3,
-    });
+    const remoteAgenda = visibleCard(
+      "protected-remote-agenda",
+      "corp",
+      "agenda",
+      {
+        advancementCounters: 1,
+        advancementRequirement: 3,
+      },
+    );
     const input = aiInput("corp", [
       legalAction(
         "advance-protected-agenda",
@@ -474,9 +488,15 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -533,11 +553,15 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-          rezzed: true,
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -789,9 +813,15 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const previewDecision = chooseRunnerAction(input, {
@@ -836,9 +866,15 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -1253,14 +1289,20 @@ describe("Semantic AI runtime cutover", () => {
     expect(decisionDebug).toContain(
       "why_mantis_selected:searches_for_required_breaker_coverage",
     );
-    expect(tacticalDebugItems(decision).some((item) =>
-      item.includes("id=runner.develop_hand_card:mantis-card") &&
-      item.includes("card_type=event"),
-    )).toBe(true);
-    expect(tacticalDebugItems(decision).some((item) =>
-      item.includes("id=runner.develop_hand_card:mantis-card") &&
-      item.includes("step=install_development_card"),
-    )).toBe(true);
+    expect(
+      tacticalDebugItems(decision).some(
+        (item) =>
+          item.includes("id=runner.develop_hand_card:mantis-card") &&
+          item.includes("card_type=event"),
+      ),
+    ).toBe(true);
+    expect(
+      tacticalDebugItems(decision).some(
+        (item) =>
+          item.includes("id=runner.develop_hand_card:mantis-card") &&
+          item.includes("step=install_development_card"),
+      ),
+    ).toBe(true);
   });
 
   it("keeps Bodyweight event plan display data as play-not-install fallback", () => {
@@ -1300,10 +1342,13 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining(["semantic_scope:basic_economy_draw"]),
     );
-    expect(tacticalDebugItems(decision).some((item) =>
-      item.includes("id=runner.develop_hand_card:bodyweight-card") &&
-      item.includes("card_type=event"),
-    )).toBe(true);
+    expect(
+      tacticalDebugItems(decision).some(
+        (item) =>
+          item.includes("id=runner.develop_hand_card:bodyweight-card") &&
+          item.includes("card_type=event"),
+      ),
+    ).toBe(true);
   });
 
   it("keeps The Short Circuit plan display data as a resource installation", () => {
@@ -1344,10 +1389,13 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining(["semantic_scope:setup_card_search"]),
     );
-    expect(tacticalDebugItems(decision).some((item) =>
-      item.includes("id=runner.develop_hand_card:short-circuit-card") &&
-      item.includes("card_type=resource"),
-    )).toBe(true);
+    expect(
+      tacticalDebugItems(decision).some(
+        (item) =>
+          item.includes("id=runner.develop_hand_card:short-circuit-card") &&
+          item.includes("card_type=resource"),
+      ),
+    ).toBe(true);
   });
 
   it("sets up The Short Circuit as a search engine before basic draw when no direct search is legal", () => {
@@ -1497,12 +1545,14 @@ describe("Semantic AI runtime cutover", () => {
     const decision = chooseRunnerAction(input, {
       persistTacticalPlanMemory: false,
     });
-    const archivesAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) => entry.actionId === "run-archives",
-    );
-    const selectedAlternative = decision.decisionDebug?.actionAlternatives?.find(
-      (entry) => entry.actionId === "draw",
-    );
+    const archivesAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === "run-archives",
+      );
+    const selectedAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === "draw",
+      );
 
     expect(decision.actionId).toBe("draw");
     expect(archivesAlternative?.whyNot).toEqual(
@@ -1789,9 +1839,15 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const centralDecision = chooseRunnerAction(centralInput);
@@ -1894,20 +1950,17 @@ describe("Semantic AI runtime cutover", () => {
     followupInput.playerView.stateVersion = 3;
     followupInput.playerView.servers = initialInput.playerView.servers;
     followupInput.eventTail = [
-      rdAccessEvent(
-        "semantic-rd-rock-access",
-        1,
-        "onr_v1_265_rock-is-strong",
-      ),
+      rdAccessEvent("semantic-rd-rock-access", 1, "onr_v1_265_rock-is-strong"),
     ];
 
     const followupDecision = chooseRunnerAction(followupInput);
     const selected = followupInput.legalActions.find(
       (action) => action.actionId === followupDecision.actionId,
     );
-    const tacticalDebug = followupDecision.decisionDebug?.detailSections
-      ?.find((section) => section.id === "tactical_plan")
-      ?.items.join("\n") ?? "";
+    const tacticalDebug =
+      followupDecision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
 
     expect(
       selected?.type === "start_run" && selected.payload?.serverId === "rd",
@@ -1938,11 +1991,7 @@ describe("Semantic AI runtime cutover", () => {
       }),
     ]);
     input.playerView.stateVersion = 3;
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.eventTail = [
       rdAccessEvent(
         "semantic-rd-rock-fallback-access",
@@ -1959,7 +2008,9 @@ describe("Semantic AI runtime cutover", () => {
       "semantic_excluded:known_central_no_current_payoff",
     );
     expect(debugText).toContain("payoff:known_low_value");
-    expect(debugText).toContain("rd_run_suppressed_by_known_low_value_top:true");
+    expect(debugText).toContain(
+      "rd_run_suppressed_by_known_low_value_top:true",
+    );
   });
 
   it("represents a corp rez window as a rez defense plan", () => {
@@ -2006,6 +2057,72 @@ describe("Semantic AI runtime cutover", () => {
 
     expect(decision.reasonCode).not.toContain(".semantic.");
     expect(decision.evidence).toContain("semantic_runtime_force_legacy");
+  });
+
+  it("does not expose shadow-only diagnostics through the public AI runtime API", () => {
+    const exportedKeys = Object.keys(aiPublicApi);
+
+    expect(exportedKeys).not.toContain("buildSemanticShadowDecision");
+    expect(exportedKeys).not.toContain("buildDeckDoctrineV2Diagnostic");
+    expect(exportedKeys).not.toContain("buildRealEngineDecisionCorpus");
+    expect(exportedKeys).not.toContain("buildSemanticDecisionFrame");
+  });
+
+  it("keeps ActionSemanticCandidate as a projection instead of LegalAction generation", () => {
+    const action = legalAction(
+      "gain-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1",
+      {
+        credits: 0,
+      },
+    );
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: 1,
+    });
+
+    expect(candidate?.actionId).toBe(action.actionId);
+    expect(candidate).not.toHaveProperty("legalAction");
+    expect(candidate).not.toHaveProperty("legalActions");
+    expect(JSON.stringify(candidate)).not.toContain("applyAction");
+  });
+
+  it("keeps SemanticShadowDecision and DeckDoctrine v2 as no-effect diagnostics", () => {
+    const input = aiInput("runner", [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+    const trace = buildSemanticShadowDecision(frame);
+    const doctrine = buildDeckDoctrineV2Diagnostic({
+      deckSnapshotId: "cutover-shadow-only-runner",
+      side: "runner",
+      cards: [{ cardId: "simple_run_event", quantity: 3 }],
+    });
+    const corpus = buildRealEngineDecisionCorpus(
+      buildRealEngineDecisionCorpusScenarios(),
+    );
+
+    expect(trace.noRuntimeEffect).toBe(true);
+    expect(trace.selectedActionId).toBeUndefined();
+    expect(doctrine.scope).toBe("diagnostic_only");
+    expect(doctrine.productiveUseAllowed).toBe(false);
+    expect(corpus.every((sample) => sample.trace.noRuntimeEffect)).toBe(true);
+    expect(
+      corpus.every((sample) => sample.trace.selectedActionId === undefined),
+    ).toBe(true);
   });
 });
 
@@ -2071,12 +2188,16 @@ function runnerWallCoverageInput(actions: LegalAction[]): AiDecisionInput {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [
-      visibleCard("simple_barrier_ice", "corp", "ice", {
-        rezzed: true,
-        subtypes: ["Wall"],
-      }),
-    ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    server(
+      "remote_1",
+      [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ],
+      [visibleCard("simple_agenda", "corp", "agenda")],
+    ),
   ];
   return input;
 }
@@ -2099,11 +2220,7 @@ function visibleCard(
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
     Partial<VisibleCard>,
-    | "instanceId"
-    | "owner"
-    | "controller"
-    | "type"
-    | "known"
+    "instanceId" | "owner" | "controller" | "type" | "known"
   > = {},
 ): VisibleCard {
   return {
@@ -2284,7 +2401,8 @@ function semanticRuntimeDependencies(
     }),
     bestSemanticRuntimeChoice: () =>
       choices.find(
-        (choice) => choice.action.actionId === options.initiallySelectedActionId,
+        (choice) =>
+          choice.action.actionId === options.initiallySelectedActionId,
       ),
     bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
     tacticalPlanMappedChoice: () => ({}),
@@ -2303,7 +2421,11 @@ function semanticRuntimeDependencies(
       planAlternatives: [],
       blockedPlans: [],
     }),
-    runnerRunOnlyActionAdjustedSemanticChoice: (_input, rankedChoices, selectedChoice) => ({
+    runnerRunOnlyActionAdjustedSemanticChoice: (
+      _input,
+      rankedChoices,
+      selectedChoice,
+    ) => ({
       choice: selectedChoice,
       rankedChoices: [...rankedChoices],
     }),
@@ -2322,10 +2444,14 @@ function semanticRuntimeDependencies(
   };
 }
 
-function tacticalDebugItems(decision: ReturnType<typeof chooseRunnerAction>): string[] {
-  return decision.decisionDebug?.detailSections?.flatMap((section) =>
-    section.items,
-  ) ?? [];
+function tacticalDebugItems(
+  decision: ReturnType<typeof chooseRunnerAction>,
+): string[] {
+  return (
+    decision.decisionDebug?.detailSections?.flatMap(
+      (section) => section.items,
+    ) ?? []
+  );
 }
 
 function rdAccessEvent(
