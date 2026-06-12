@@ -15,8 +15,9 @@ type BasicActionSemanticClassification = {
   projectionIssues?: ActionProjectionIssue[];
 };
 
-const BASIC_ACTION_SEMANTICS: Partial<
-  Record<LegalAction["type"], BasicActionSemanticClassification>
+const BASIC_ACTION_SEMANTICS: Record<
+  LegalAction["type"],
+  BasicActionSemanticClassification
 > = {
   mandatory_draw: {
     semanticActionType: "draw.mandatory",
@@ -216,7 +217,9 @@ export function applyBasicActionSemantics(
   };
 }
 
-function basicSourceKindForAction(action: LegalAction): ActionSemanticSourceKind {
+function basicSourceKindForAction(
+  action: LegalAction,
+): ActionSemanticSourceKind {
   if (action.type === "resolve_choice") return "choice";
   if (action.source === "basic_action") return "basic_action";
   if (action.source === "game_rule") return "game_rule";
@@ -250,7 +253,8 @@ function updateBasicActionGates(
         ...gate,
         status: "not_applicable",
         severity: "info",
-        reason: "Basic, game-rule and choice actions do not need card ability binding.",
+        reason:
+          "Basic, game-rule and choice actions do not need card ability binding.",
       };
     }
     return gate;

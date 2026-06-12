@@ -356,6 +356,20 @@ Done-Gate: Basisaktionen sind als read-only Kandidatenfelder erkennbar.
 
 Commit: `feat(ai): classify basic action semantics`
 
+Ergebnis 2026-06-12:
+
+- `BASIC_ACTION_SEMANTICS` ist jetzt ein vollständiger Compile-Time-Vertrag über alle aktuellen `LegalAction["type"]`-Werte statt eines `Partial`-Mappings.
+- Der Candidate-Test prüft jede aktuelle ActionType auf kontrollierte `semanticActionType`, Confidence, Runtime-No-Effect-Gate und fehlende Strategie-/Scoring-Anker.
+- Es wurden keine Planner-, Strategie- oder DeckDoctrine-Verbraucher angebunden.
+
+Checks 2026-06-12:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm check:ai` (PASS mit bestehenden AI-Warnungen)
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P11 Source-Contract-Kommentar-Extraktion
 
 Ziel: Contract-Kommentare als Reviewhilfe nutzbar machen.

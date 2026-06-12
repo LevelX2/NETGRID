@@ -209,6 +209,37 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
+  it("classifies every current LegalAction type without strategy or scoring anchors", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: ALL_ACTION_TYPES.map((type, index) =>
+        legalAction(type, index),
+      ),
+      observerSide: "system",
+    });
+
+    expect(candidates).toHaveLength(ALL_ACTION_TYPES.length);
+    for (const candidate of candidates) {
+      expect(candidate.semanticActionType).not.toBe("unknown");
+      expect(candidate.confidence).not.toBe("none");
+      expect(candidate.strategySupport).toEqual([]);
+      expect(candidate.actionTacticSignals).toEqual([]);
+      expect(candidate.cardContextSignals).toEqual([]);
+      expect(candidate.hardGates).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            gateId: "runtime_no_effect",
+            status: "pass",
+          }),
+        ]),
+      );
+    }
+
+    const serialized = JSON.stringify(candidates);
+    expect(serialized).not.toContain("planWeight");
+    expect(serialized).not.toContain("scoringWeight");
+    expect(serialized).not.toContain("selectedActionId");
+  });
+
   it("binds card source and ability only from side-safe LegalAction evidence", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
