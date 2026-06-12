@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -441,8 +441,25 @@ Checks vor Integration:
 - Zunächst rot, danach grün: `corepack pnpm -r --if-present typecheck`
 - Grün: `corepack pnpm -r --if-present --no-bail test`
 - Grün: `corepack pnpm test`
-- Grün: `corepack pnpm format:changed -- main`
+- Grün im Arbeitsbranch vor Integration: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
+
+#### Abschluss- und Remote-Nachtrag
+
+Finaler lokaler Integrationsstand:
+
+- Arbeitsbranch: `codex/action-semantics-followup-quality`.
+- Review-Branch-Head: `3822c63f test(ai): verify action semantics followup quality process`.
+- Lokaler Merge nach `main`: `b3c004d7 merge: action semantics followup quality`.
+- `b3c004d7` ist inzwischen Ancestor von `origin/main`.
+- Der Review-Branch ist als `origin/codex/action-semantics-followup-quality` remote sichtbar.
+- Der getrennte AI022-/Hints-Strang bleibt als `stash@{0}: ai022-hints-local-baseline-before-followup-process` außerhalb dieses Prozesses.
+
+Formatbaseline-Einordnung:
+
+- `format:changed -- main` war im Arbeitsbranch vor dem Merge ein sinnvoller Branch-Diff-Check.
+- Nach einem lokalen Merge auf `main` ist `format:changed -- main` leer beziehungsweise trivial und darf nicht als aussagekräftiger Post-Merge-Main-Check verstanden werden.
+- Für Remote-Review-Hygiene ist `origin/main` die relevante Vergleichsbasis; da `origin/main` den Merge inzwischen enthält, dokumentiert der Folgeprozess `action-semantics-review-baseline-hygiene` die ursprüngliche Commitfolge über den Vergleich `b3c004d7^1..codex/action-semantics-followup-quality`.
 
 ## Verifikationsregeln
 
@@ -472,3 +489,4 @@ Checks vor Integration:
 - Runtime-Cutover-Sperre ist testbar.
 - Alle Pflichtchecks sind grün oder bestehende Baseline-Abweichungen sind ehrlich dokumentiert.
 - Lokaler `main` enthält alle Paketcommits.
+- Remote-Prüfbarkeit ist nachträglich hergestellt: `origin/main` enthält den Merge und `origin/codex/action-semantics-followup-quality` enthält die Review-Branch-Commitfolge.

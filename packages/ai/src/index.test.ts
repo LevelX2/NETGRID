@@ -5948,70 +5948,79 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpAction(input).actionId).toBe(fullBbsActions[0]?.actionId);
   });
 
-  it("keeps Information Laundering legal at zero counters but values it below basic credit", () => {
-    const input = installedCorpInformationLaunderingInput(
-      "ai-corp-information-laundering-zero",
+  it("keeps source advancement-counter payout abilities legal at zero counters but values them below basic credit", () => {
+    const input = installedCorpAdvancementCounterPayoutInput(
+      "ai-corp-advancement-counter-payout-zero",
       0,
       { credits: 1 },
     );
-    const laundering = input.legalActions.find(
+    const payoutAction = input.legalActions.find(
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_328_information-laundering",
+        action.payload?.cardImplementationEconomyKind ===
+          "gain_credits_per_advancement_counter_on_source",
     );
     const basicCredit = input.legalActions.find(
       (action) =>
         action.type === "gain_credit" && action.source === "basic_action",
     );
 
-    expect(laundering).toBeDefined();
+    expect(payoutAction).toBeDefined();
     expect(basicCredit).toBeDefined();
-    if (!laundering || !basicCredit)
-      throw new Error("Missing Information Laundering zero-counter fixture");
+    if (!payoutAction || !basicCredit)
+      throw new Error("Missing advancement-counter payout zero-counter fixture");
 
     const decision = chooseCorpAction({
       ...input,
-      legalActions: [laundering, basicCredit],
+      legalActions: [payoutAction, basicCredit],
     });
 
     expect(decision.actionId).toBe(basicCredit.actionId);
   });
 
-  it("uses prepared Information Laundering payouts before the basic credit action", () => {
-    const input = installedCorpInformationLaunderingInput(
-      "ai-corp-information-laundering-payout",
+  it("uses prepared source advancement-counter credit payouts before the basic credit action", () => {
+    const input = installedCorpAdvancementCounterPayoutInput(
+      "ai-corp-advancement-counter-payout",
       4,
       { credits: 1 },
     );
-    const laundering = input.legalActions.find(
+    const payoutAction = input.legalActions.find(
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_328_information-laundering",
+        action.payload?.cardImplementationEconomyKind ===
+          "gain_credits_per_advancement_counter_on_source",
     );
     const basicCredit = input.legalActions.find(
       (action) =>
         action.type === "gain_credit" && action.source === "basic_action",
     );
 
-    expect(laundering).toBeDefined();
+    expect(payoutAction).toBeDefined();
     expect(basicCredit).toBeDefined();
-    if (!laundering || !basicCredit)
-      throw new Error("Missing Information Laundering payout fixture");
+    if (!payoutAction || !basicCredit)
+      throw new Error("Missing advancement-counter payout fixture");
+    expect(payoutAction.payload).toMatchObject({
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      cardImplementationTrashesSource: true,
+    });
 
     const decision = chooseCorpAction({
       ...input,
-      legalActions: [basicCredit, laundering],
+      legalActions: [basicCredit, payoutAction],
     });
 
-    expect(decision.actionId).toBe(laundering.actionId);
+    expect(decision.actionId).toBe(payoutAction.actionId);
     expect(decision.reasonCode).toBe("corp.plan.recover_economy");
     expect(decision.evidence).toContain(
       "installed_corp_economy_kind:advancement_counter_payout",
     );
     expect(decision.evidence).toContain(
       "installed_corp_economy_advancement_counters:4",
+    );
+    expect(decision.evidence).toContain(
+      "installed_corp_economy_amount_per_counter:4",
     );
     expect(decision.evidence).toContain(
       "installed_corp_economy_immediate_gain:16",
@@ -26776,7 +26785,7 @@ function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
   });
 }
 
-function installedCorpInformationLaunderingInput(
+function installedCorpAdvancementCounterPayoutInput(
   seed: string,
   advancementCounters: number,
   options: { credits?: number } = {},
@@ -26785,8 +26794,8 @@ function installedCorpInformationLaunderingInput(
     seed,
     baseline: CURRENT_RULES_BASELINE,
     runnerDeck: {
-      id: `installed_corp_information_laundering_runner_${seed}`,
-      name: "Installed Corp Information Laundering Runner",
+      id: `installed_corp_advancement_counter_payout_runner_${seed}`,
+      name: "Installed Corp Advancement Counter Payout Runner",
       side: "runner",
       identity: "runner_identity_001",
       cards: [
@@ -26795,8 +26804,8 @@ function installedCorpInformationLaunderingInput(
       ],
     },
     corpDeck: {
-      id: `installed_corp_information_laundering_corp_${seed}`,
-      name: "Installed Corp Information Laundering Corp",
+      id: `installed_corp_advancement_counter_payout_corp_${seed}`,
+      name: "Installed Corp Advancement Counter Payout Corp",
       side: "corp",
       identity: "corp_identity_001",
       cards: [
