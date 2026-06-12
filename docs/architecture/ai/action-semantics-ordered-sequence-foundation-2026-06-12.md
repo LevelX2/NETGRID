@@ -389,6 +389,18 @@ Done-Gate: Zentrale Grenzkommentare sind auffindbar und ohne Strategie-/Scoring-
 
 Commit: `tooling: extract source contract comments`
 
+Ergebnis 2026-06-12:
+
+- `scripts/extract-source-contract-comments.mjs` scannt `packages/` und `scripts/` nach JSDoc-Tags `@contract`, `@authority`, `@visibility`, `@mvpBoundary` und `@aiProjection`.
+- Der Report `docs/reviews/architecture/source-contract-comments-2026-06-12.md` listet sechs zentrale Source-Kommentarblöcke mit Tag-Zählung und Kurzinhalt.
+- Das Script ist reine Reviewhilfe: keine Runtime-Anbindung, keine Planner-Empfehlung und keine Scoring-Empfehlung.
+
+Checks 2026-06-12:
+
+- `node scripts/extract-source-contract-comments.mjs --write-report`
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P12 Semantik- und Signal-Katalog-Gate
 
 Ziel: Signal-Katalog-Diagnose vorbereiten, ohne KI-Wirkung.
