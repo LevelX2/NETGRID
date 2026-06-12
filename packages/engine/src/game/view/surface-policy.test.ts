@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeForSurface } from "./surface-policy";
+import {
+  sanitizeEventPayloadForSurface,
+  sanitizeForSurface,
+} from "./surface-policy";
 
 describe("surface policy", () => {
   it("allows actor-private choice metadata on actor-private surfaces", () => {
@@ -50,5 +53,26 @@ describe("surface policy", () => {
       actorPrivateLabel: "Archer",
       step: "select_hq_cards",
     });
+  });
+
+  it("allows event payload arrays while enforcing hidden key policy", () => {
+    expect(
+      sanitizeEventPayloadForSurface(
+        {
+          knownHqDefinitionIds: ["agenda_def"],
+          knownHqCardCount: 1,
+        },
+        "public_event",
+      ),
+    ).toEqual({
+      knownHqDefinitionIds: ["agenda_def"],
+      knownHqCardCount: 1,
+    });
+    expect(() =>
+      sanitizeEventPayloadForSurface(
+        { hqCardIds: ["secret_card"] },
+        "public_event",
+      ),
+    ).toThrow(/hidden card data/i);
   });
 });

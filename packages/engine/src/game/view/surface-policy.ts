@@ -18,6 +18,10 @@ const ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
   /private.*label/i,
   /^label$/i,
 ];
+const EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
+  /actorPrivate.*label/i,
+  /private.*label/i,
+];
 
 /**
  * @contract Surface policy distinguishes actor-private engine surfaces from
@@ -43,8 +47,21 @@ export function sanitizeCardImplementationSurfacePayload(
   return sanitizeForSurface(payload, "public_event");
 }
 
+export function sanitizeEventPayloadForSurface(
+  payload: Record<string, unknown>,
+  surfaceKind: SurfaceKind,
+): Record<string, unknown> {
+  if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace") {
+    assertNoHiddenCardLists(payload, surfaceKind);
+    assertNoActorPrivateLabels(payload, surfaceKind, {
+      rejectGenericLabel: false,
+    });
+  }
+  return { ...payload };
+}
+
 export function assertNoHiddenCardLists(
-  payload: PublicSurfacePayload,
+  payload: Record<string, unknown>,
   surfaceKind: SurfaceKind,
 ): void {
   for (const key of Object.keys(payload)) {
@@ -56,11 +73,16 @@ export function assertNoHiddenCardLists(
 }
 
 export function assertNoActorPrivateLabels(
-  payload: PublicSurfacePayload,
+  payload: Record<string, unknown>,
   surfaceKind: SurfaceKind,
+  options: { rejectGenericLabel?: boolean } = {},
 ): void {
+  const patterns =
+    options.rejectGenericLabel === false
+      ? EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS
+      : ACTOR_PRIVATE_LABEL_FIELD_PATTERNS;
   for (const key of Object.keys(payload)) {
-    if (ACTOR_PRIVATE_LABEL_FIELD_PATTERNS.some((pattern) => pattern.test(key)))
+    if (patterns.some((pattern) => pattern.test(key)))
       throw new Error(
         `Surface ${surfaceKind} payload field ${key} may leak actor-private labels.`,
       );
