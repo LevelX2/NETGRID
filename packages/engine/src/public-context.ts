@@ -460,7 +460,6 @@ export function publicContextForAction(
       "finalAmount",
       "fullBodyConversionCorpBypassPaid",
       "fullBodyConversionBypassCostPerDamage",
-      "codeViralCachePreservedCounters",
       "preservedCounterAmount",
       "remainingVirusCounters",
       "preservedCardDefinitionIds",

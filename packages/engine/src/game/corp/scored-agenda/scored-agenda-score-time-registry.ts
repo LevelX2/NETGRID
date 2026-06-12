@@ -1,0 +1,67 @@
+import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
+import { startScoredRezzedIceMarkModifierChoice } from "./ice-transmutation-sequence";
+import type {
+  ScoredAgendaScoreTimeContext,
+  ScoredAgendaScoreTimeResolver,
+} from "./scored-agenda-score-time-types";
+
+export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeResolver[] =
+  [
+    {
+      id: "data_fort_reclamation_score_start",
+      kind: "score_install_hq_cards_into_new_remote_then_rez",
+      startsChoice: true,
+      resolveOnScore: ({ host, cardId }) => {
+        host.choices.startDataFortReclamation(cardId);
+      },
+    },
+    {
+      id: "ice_transmutation_score_start",
+      kind: "select_rezzed_ice_mark_modifier",
+      startsChoice: true,
+      resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
+        if (scoredAgenda.kind !== "select_rezzed_ice_mark_modifier")
+          throw new Error("Ice-Transmutation-Score-Time-Vertrag ungueltig.");
+        startScoredRezzedIceMarkModifierChoice(
+          host,
+          cardId,
+          legalAction,
+          scoredAgenda,
+        );
+      },
+    },
+    {
+      id: "priority_requisition_score_start",
+      kind: "score_rez_installed_ice_at_no_cost",
+      startsChoice: true,
+      resolveOnScore: ({ host, cardId }) => {
+        host.choices.startPriorityRequisition(cardId);
+      },
+    },
+    {
+      id: "security_purge_score_start",
+      kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
+      startsChoice: false,
+      resolveOnScore: ({ host, cardId }) => {
+        host.choices.resolveSecurityPurge(cardId);
+      },
+    },
+  ];
+
+export function findScoredAgendaScoreTimeResolver(
+  scoredAgenda: CardScoredAgendaImplementation | undefined,
+): ScoredAgendaScoreTimeResolver | undefined {
+  if (!scoredAgenda) return undefined;
+  return SCORED_AGENDA_SCORE_TIME_RESOLVERS.find(
+    (resolver) => resolver.kind === scoredAgenda.kind,
+  );
+}
+
+export function resolveScoredAgendaScoreTime(
+  context: ScoredAgendaScoreTimeContext,
+): boolean {
+  const resolver = findScoredAgendaScoreTimeResolver(context.scoredAgenda);
+  if (!resolver) return false;
+  resolver.resolveOnScore(context);
+  return true;
+}

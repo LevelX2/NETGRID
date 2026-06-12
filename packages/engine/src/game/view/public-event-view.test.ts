@@ -10,6 +10,7 @@ import {
   putCorpCardOnTopOfRd,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
+import { toPublicEvent } from "./public-event-view";
 
 describe("PublicEvent projection", () => {
   it("classifies access as a hidden-info barrier event", () => {
@@ -47,4 +48,20 @@ describe("PublicEvent projection", () => {
     expect(isHiddenInfoBarrierEvent(event)).toBe(true);
   });
 
+  it("rejects hidden card lists at the public event projection boundary", () => {
+    expect(() =>
+      toPublicEvent({
+        eventId: "event_1",
+        type: "test",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "hash" as never,
+        publicPayload: {
+          actor: "corp",
+          actionType: "test",
+          hqCardIds: ["secret_card"],
+        },
+      }),
+    ).toThrow(/hidden card data/i);
+  });
 });

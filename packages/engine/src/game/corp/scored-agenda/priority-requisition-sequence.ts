@@ -13,6 +13,7 @@ import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "./scored-agenda-sequence-host";
+import { applySequenceResolution } from "./scored-agenda-sequence-types";
 
 /**
  * @contract Priority Requisition owns the scored-agenda free-rez choice for a
@@ -33,12 +34,13 @@ export function startPriorityRequisitionChoice(
 ): CorpInstallRezSequenceHandlerResult {
   const candidates = priorityRequisitionCandidates(host);
   if (candidates.length === 0) {
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      priorityRequisitionChoiceOpened: false,
-      priorityRequisitionCandidateCount: 0,
-    };
-    return { handled: true, resolvedPayload: host.legalAction.payload ?? {} };
+    return applySequenceResolution(host.legalAction, {
+      result: { handled: true },
+      payloadPatch: {
+        priorityRequisitionChoiceOpened: false,
+        priorityRequisitionCandidateCount: 0,
+      },
+    });
   }
   host.state.pendingChoice = {
     choiceId: `v162_priority_requisition_${host.state.stateVersion + 1}`,
