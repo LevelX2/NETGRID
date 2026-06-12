@@ -122,26 +122,29 @@ function targetOptions(
   preferred: ReadonlySet<string>,
   avoid: ReadonlySet<string>,
 ): TargetChoiceShadowOption[] {
-  return params.action.targetRequirements.flatMap((requirement) => {
-    if (requirement.visibility === "engine_only") return [];
-    const targetOptions = targetOptionIdsForRequirement(params, requirement);
-    return targetOptions.optionIds.map((optionId, index) =>
-      option(
-        requirement.id,
-        optionId,
-        "target_option",
-        index,
-        preferred,
-        avoid,
-        [
-          `target_requirement_kind:${requirement.kind}`,
-          `target_requirement_side:${requirement.side ?? "unknown"}`,
-          ...targetOptions.evidence,
-        ],
-        targetContextScore(params, optionId),
-      ),
-    );
-  });
+  return [
+    ...params.action.targetRequirements.flatMap((requirement) => {
+      if (requirement.visibility === "engine_only") return [];
+      const targetOptions = targetOptionIdsForRequirement(params, requirement);
+      return targetOptions.optionIds.map((optionId, index) =>
+        option(
+          requirement.id,
+          optionId,
+          "target_option",
+          index,
+          preferred,
+          avoid,
+          [
+            `target_requirement_kind:${requirement.kind}`,
+            `target_requirement_side:${requirement.side ?? "unknown"}`,
+            ...targetOptions.evidence,
+          ],
+          targetContextScore(params, optionId),
+        ),
+      );
+    }),
+    ...payloadTargetOptions(params, preferred, avoid),
+  ];
 }
 
 function option(
@@ -407,6 +410,75 @@ function targetOptionIdsForRequirement(
     optionIds: [],
     evidence: ["target_option_source:none"],
   };
+}
+
+function payloadTargetOptions(
+  params: BuildTargetChoiceShadowReportParams,
+  preferred: ReadonlySet<string>,
+  avoid: ReadonlySet<string>,
+): TargetChoiceShadowOption[] {
+  if (params.action.targetRequirements.length > 0) return [];
+  const payloadTargets = sideSafePayloadTargets(params.action);
+  return payloadTargets.map((target, index) =>
+    option(
+      target.requirementId,
+      target.optionId,
+      "target_option",
+      index,
+      preferred,
+      avoid,
+      [
+        `target_requirement_kind:${target.kind}`,
+        "target_option_source:legal_action_payload",
+        `target_payload_key:${target.payloadKey}`,
+      ],
+      targetContextScore(params, target.optionId),
+    ),
+  );
+}
+
+function sideSafePayloadTargets(
+  action: LegalAction,
+): {
+  requirementId: string;
+  optionId: string;
+  kind: LegalAction["targetRequirements"][number]["kind"];
+  payloadKey: string;
+}[] {
+  const targets: {
+    requirementId: string;
+    optionId: string;
+    kind: LegalAction["targetRequirements"][number]["kind"];
+    payloadKey: string;
+  }[] = [];
+  const serverId = action.payload?.serverId;
+  if (typeof serverId === "string") {
+    targets.push({
+      requirementId: "payload.serverId",
+      optionId: serverId,
+      kind: "server",
+      payloadKey: "serverId",
+    });
+  }
+  const cardId = action.payload?.cardId;
+  if (typeof cardId === "string" && isPayloadCardTargetAction(action)) {
+    targets.push({
+      requirementId: "payload.cardId",
+      optionId: cardId,
+      kind: "card",
+      payloadKey: "cardId",
+    });
+  }
+  return targets;
+}
+
+function isPayloadCardTargetAction(action: LegalAction): boolean {
+  return (
+    action.type === "advance_card" ||
+    action.type === "score_agenda" ||
+    action.type === "trash_accessed_card" ||
+    action.type === "trash_resource"
+  );
 }
 
 function candidateTargetIdsForRequirement(

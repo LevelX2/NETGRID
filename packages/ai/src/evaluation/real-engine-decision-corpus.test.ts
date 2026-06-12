@@ -10,6 +10,7 @@ import {
   semanticPilotChoice,
   type AiPlayStrengthPilotScope,
 } from "../decision/pilot-scope-registry";
+import { buildTargetChoiceShadowReport } from "../decision/target-choice-shadow";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import {
@@ -126,6 +127,55 @@ describe("RealEngineDecisionCorpus", () => {
         "remote_1",
       ),
     ).toBe(true);
+  });
+
+  it("builds target choice reports from real Engine payload targets", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+
+    for (const [scenarioId, serverId] of [
+      ["runner_real_safe_hq_access", "hq"],
+      ["runner_real_safe_rd_access", "rd"],
+      ["runner_real_remote_score_threat", "remote_1"],
+    ] as const) {
+      const scenario = scenarioFor(scenarios, scenarioId);
+      const sample = sampleFor(samples, scenarioId);
+      const action = scenario.input.legalActions.find(
+        (candidate) => candidate.payload?.serverId === serverId,
+      );
+      if (!action) {
+        throw new Error(`Missing real Engine action for ${scenarioId}:${serverId}`);
+      }
+      const semanticCandidate = sample.frame.actionCandidates.find(
+        (candidate) => candidate.actionId === action.actionId,
+      );
+      const report = buildTargetChoiceShadowReport({
+        action,
+        ...(semanticCandidate ? { candidate: semanticCandidate } : {}),
+      });
+
+      expect(report.rankedOptions).toEqual([
+        expect.objectContaining({
+          requirementId: "payload.serverId",
+          optionId: serverId,
+          kind: "target_option",
+        }),
+      ]);
+      expect(report.rankedOptions[0]?.evidence).toEqual(
+        expect.arrayContaining([
+          "target_option_source:legal_action_payload",
+          "target_payload_key:serverId",
+        ]),
+      );
+      expect(report.blockedRequirements).toEqual([]);
+      expect(report.selectionOutput).toEqual({
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+      });
+      expect(report.productiveUseAllowed).toBe(false);
+      expect(report.runtimeConsumerStatus).toBe("none");
+      expect(containsForbiddenSemanticMarker(report)).toBe(false);
+    }
   });
 
   it("keeps scenario fixture mutations behind the real engine fixture builder", () => {

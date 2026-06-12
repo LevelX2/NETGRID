@@ -62,6 +62,85 @@ describe("TargetChoiceShadow", () => {
     expect(report.blockedRequirements).toEqual([]);
   });
 
+  it("ranks real Engine payload server targets as report-only options", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "runner.start_run.remote_1",
+        type: "start_run",
+        payload: { serverId: "remote_1" },
+      }),
+    });
+
+    expect(report.rankedOptions).toEqual([
+      expect.objectContaining({
+        requirementId: "payload.serverId",
+        optionId: "remote_1",
+        kind: "target_option",
+      }),
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining([
+        "target_option_source:legal_action_payload",
+        "target_payload_key:serverId",
+      ]),
+    );
+    expect(report.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    });
+  });
+
+  it("ranks real Engine payload card targets when the card id is side-safe", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "corp.score_agenda.remote_1_agenda",
+        side: "corp",
+        type: "score_agenda",
+        payload: { cardId: "remote_1_agenda" },
+      }),
+      utilityFamilies: ["corp_scoreline"],
+    });
+
+    expect(report.rankedOptions).toEqual([
+      expect.objectContaining({
+        requirementId: "payload.cardId",
+        optionId: "remote_1_agenda",
+        kind: "target_option",
+      }),
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining([
+        "target_requirement_kind:card",
+        "target_payload_key:cardId",
+        "utility_family:corp_scoreline",
+      ]),
+    );
+  });
+
+  it("blocks empty choice requirements without fabricating options", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "empty-choice",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: [],
+          },
+        ],
+      }),
+    });
+
+    expect(report.rankedOptions).toEqual([]);
+    expect(report.blockedRequirements).toEqual([
+      expect.objectContaining({
+        requirementId: "empty-choice",
+        kind: "choice",
+        reason: "no_side_safe_options",
+      }),
+    ]);
+  });
+
   it("raises remote targets when remote-contest utility and opportunity align", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
@@ -425,6 +504,7 @@ function action(options: {
   type?: LegalAction["type"];
   choiceRequirements?: LegalAction["choiceRequirements"];
   targetRequirements?: LegalAction["targetRequirements"];
+  payload?: LegalAction["payload"];
 }): LegalAction {
   return {
     actionId: options.actionId ?? "resolve-choice",
@@ -440,6 +520,7 @@ function action(options: {
       : {}),
     visibility: "private_to_actor",
     expiresAtStateVersion: 1,
+    ...(options.payload ? { payload: options.payload } : {}),
   };
 }
 
