@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`completed`
 
 ## Paketfortschritt
 
@@ -14,6 +14,7 @@
 - P5 abgeschlossen: `applySequenceResolution` verbindet `SequenceResolution`, Sanitizer und `CorpInstallRezSequenceHandlerResult`; ein risikoarmer Priority-Requisition-Pfad nutzt den Helper. Die Contract-Matrix prüft sanitized Resolution-Patches. Scored-Agenda-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P6 abgeschlossen: `toPublicEvent` und side-spezifische PublicEvent-Projektionen nutzen `sanitizeEventPayloadForSurface`. Event-Payloads dürfen weiterhin legitime öffentliche Arrays und generische Labels tragen, blockieren aber Hidden-Card-Listen und actor-private/private Labels. PublicEvent-/Surface-Policy-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P7 abgeschlossen: Die Contract-Matrix prüft Score-Time-Resolver-Kinds, erwartete Start-Resolver und getrennte IDs gegenüber pending-choice Resolvern. Scored-Agenda-/View-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P8 abgeschlossen: Finaler Engine-Typecheck, gebündelter Scored-Agenda-/Install-Rez-/View-Testblock, `check:ai`, Format- und Whitespace-Gates sind grün. `check:ai` meldet bestehende Warnungen, aber keine Errors. Der Branch ist bereit für lokale Integration nach `main`.
 
 ## Quelle/Vorgabe
 
