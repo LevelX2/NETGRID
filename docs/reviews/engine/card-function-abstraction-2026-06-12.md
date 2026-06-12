@@ -1,10 +1,14 @@
 # Card Function Abstraction Review 2026-06-12
 
-Status: inventory
+Status: inventory_with_vertical_slice
 
 ## Kurzbefund
 
 Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisch sind kartenspezifische Namen in funktionalen `kind`-Werten, Payload-Keys, Runtime-State-Feldern, Resolvernamen und verhaltenssteuernden Konstanten.
+
+Dieser Review ist ein Inventar mit erstem vertikalem Refactor-Slice, kein Abschlussbericht über vollständige Bereinigung. Der Preying-Mantis-Pfad ist generisch umgestellt; die übrigen Kandidaten bleiben sichtbar offen.
+
+Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und wird im Folgeprozess um automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung erweitert; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.
 
 ## Zählung
 
@@ -386,7 +390,9 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 
 ## Nächste Umsetzung
 
-Der erste Code-Slice refaktoriert `Preying Mantis`, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
+Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
+
+Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
 
 ## Erlaubte Referenzen
 

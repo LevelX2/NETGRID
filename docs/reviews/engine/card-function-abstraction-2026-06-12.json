@@ -1,7 +1,9 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-06-12",
-  "status": "inventory",
+  "status": "inventory_with_vertical_slice",
+  "guardCharacter": "conservative_baseline_inventory_guard",
+  "completionNote": "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt und Baseline-Guard sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   "scope": [
     "packages/engine/src/ability-engine",
     "packages/engine/src/game",
