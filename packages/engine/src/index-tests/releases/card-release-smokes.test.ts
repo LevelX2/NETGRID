@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -329,7 +325,9 @@ describe("V1.0.5K Card Release", () => {
   });
 
   it("lets Runner trash installed programs before normal grip program installs", () => {
-    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-install"));
+    let state = toRunnerTurn(
+      v105kCardReleaseGame("runner-program-trash-install"),
+    );
     state.runner.credits = 40;
     state.runner.clicks = 10;
     installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
@@ -350,7 +348,11 @@ describe("V1.0.5K Card Release", () => {
         action.payload?.runnerProgramTrashBeforeInstall === true,
     );
 
-    state = apply(state, "runner", (action) => action.actionId === installAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === installAction.actionId,
+    );
     expect(state.runner.clicks).toBe(10);
     expect(state.runner.credits).toBe(40);
     expect(state.runner.grip).toContain(sourceId);
@@ -386,7 +388,9 @@ describe("V1.0.5K Card Release", () => {
   });
 
   it("cancels or rejects invalid program-trash install choices without changing install costs", () => {
-    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-cancel"));
+    let state = toRunnerTurn(
+      v105kCardReleaseGame("runner-program-trash-cancel"),
+    );
     state.runner.credits = 40;
     state.runner.clicks = 10;
     installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
@@ -755,7 +759,9 @@ describe("V1.0.5K Card Release", () => {
       "corp",
       (action) => action.actionId === installAgenda.actionId,
     );
-    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     expect(remote?.root).toContain(agendaId);
     expect(remote?.root).not.toContain(assetId);
     expect(state.corp.archives).toContain(assetId);
@@ -1193,7 +1199,8 @@ describe("V1.0.6K Card Release", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
     expect(
@@ -1851,7 +1858,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2009,7 +2017,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       )
     )
       return putCorpIceOnServer(state, serverId, definitionId);
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error("Missing server");
     const instanceId =
       `p344_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
@@ -2062,7 +2072,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2093,7 +2104,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           String(action.payload?.breakerId) === breakerId,
       );
       if (!pumpAction) return current;
-      current = apply(current, "runner", (action) => action.actionId === pumpAction.actionId);
+      current = apply(
+        current,
+        "runner",
+        (action) => action.actionId === pumpAction.actionId,
+      );
     }
     return current;
   }
@@ -2101,11 +2116,29 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("runs P3.44 simple icebreaker break and pump matchers without duplicate actions", () => {
     const specs = [
       ["Krash", "onr_v1_039_krash", "simple_code_gate_ice", 2, true],
-      ["Codecracker", "onr_v1_014_codecracker", "simple_code_gate_ice", 0, true],
-      ["Cyfermaster", "onr_v1_016_cyfermaster", "simple_code_gate_ice", 2, true],
+      [
+        "Codecracker",
+        "onr_v1_014_codecracker",
+        "simple_code_gate_ice",
+        0,
+        true,
+      ],
+      [
+        "Cyfermaster",
+        "onr_v1_016_cyfermaster",
+        "simple_code_gate_ice",
+        2,
+        true,
+      ],
       ["Raffles", "onr_v1_052_raffles", "simple_code_gate_ice", 1, true],
       ["Tinweasel", "onr_v1_070_tinweasel", "simple_code_gate_ice", 0, false],
-      ["Wizard's Book", "onr_v1_073_wizards-book", "simple_code_gate_ice", 0, true],
+      [
+        "Wizard's Book",
+        "onr_v1_073_wizards-book",
+        "simple_code_gate_ice",
+        0,
+        true,
+      ],
       ["Dwarf", "onr_v1_021_dwarf", "onr_v1_237_data-wall", 1, true],
       ["Worm", "onr_v1_074_worm", "onr_v1_237_data-wall", 0, true],
       ["Black Dahlia", "onr_v1_006_black-dahlia", "simple_sentry_ice", 2, true],
@@ -2115,12 +2148,24 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ["Shaka", "onr_v1_060_shaka", "simple_sentry_ice", 1, true],
       ["Wild Card", "onr_v1_072_wild-card", "simple_sentry_ice", 0, true],
       ["Flak", "onr_v1_027_flak", "onr_v1_280_zombie", 1, true],
-      ["Dogcatcher", "onr_v1_018_dogcatcher", "onr_v1_243_fetch-4-0-1", 1, true],
+      [
+        "Dogcatcher",
+        "onr_v1_018_dogcatcher",
+        "onr_v1_243_fetch-4-0-1",
+        1,
+        true,
+      ],
       ["Reflector", "onr_v1_055_reflector", "onr_v1_271_tko-2-0", 0, false],
       ["Replicator", "onr_v1_056_replicator", "onr_v1_221_asp", 0, true],
     ] as const;
 
-    for (const [label, breakerDefinitionId, iceDefinitionId, expectedCost, hasPump] of specs) {
+    for (const [
+      label,
+      breakerDefinitionId,
+      iceDefinitionId,
+      expectedCost,
+      hasPump,
+    ] of specs) {
       const { state: initialEncounter, breakerId } = p344EncounterState(
         `p344-${label}`,
         breakerDefinitionId,
@@ -2145,16 +2190,24 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       expect(breakActions[0]?.costs[0]?.credits, label).toBe(expectedCost);
       const beforeBreak = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.actionId === breakActions[0]?.actionId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === breakActions[0]?.actionId,
+      );
       expect(state.run?.brokenSubroutineIndexes, label).toContain(0);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "break_subroutine",
         cardDefinitionId: breakerDefinitionId,
       });
-      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), label).not.toMatch(
-        /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+      expect(
+        JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+        label,
+      ).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+      const replay = replayEvents(
+        beforeBreak,
+        state.eventLog.slice(replayStart),
       );
-      const replay = replayEvents(beforeBreak, state.eventLog.slice(replayStart));
       expect(replay.ok, label).toBe(true);
       expect(hashState(replay.state), label).toBe(hashState(state));
     }
@@ -2169,7 +2222,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     dogcatcher = p344PumpUntilBreak(
       dogcatcher,
       dogcatcher.runner.rig.programs.find(
-        (id) => dogcatcher.cardInstances[id]?.definitionId === "onr_v1_018_dogcatcher",
+        (id) =>
+          dogcatcher.cardInstances[id]?.definitionId ===
+          "onr_v1_018_dogcatcher",
       )!,
     );
     expect(
@@ -2202,7 +2257,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         sourceDefinition(state, action) === "onr_v1_147_zz22-speed-chip",
     );
     const zz22Id = state.runner.rig.hardware.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_147_zz22-speed-chip",
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_147_zz22-speed-chip",
     );
     expect(zz22Id).toBeDefined();
     p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
@@ -2218,7 +2274,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2235,7 +2292,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
     );
     expect(breakAction.costs[0]?.credits).toBe(2);
-    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === breakAction.actionId,
+    );
     expect(zz22Id && cardCounterAmount(state, zz22Id, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
   });
@@ -2253,7 +2314,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "pump_breaker" &&
         sourceDefinition(droppPump, action) === "onr_v1_019_dropp",
     );
-    droppPump = apply(droppPump, "runner", (action) => action.actionId === droppPumpAction.actionId);
+    droppPump = apply(
+      droppPump,
+      "runner",
+      (action) => action.actionId === droppPumpAction.actionId,
+    );
     expect(droppPump.run?.phase).toBe("encounter_ice");
     expect(droppPump.timingPoint).toBe("run.encounter_ice");
 
@@ -2273,7 +2338,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.costs[0]?.credits === 3,
     );
     const japaneseId = String(japanesePump.payload?.breakerId);
-    japanese = apply(japanese, "runner", (action) => action.actionId === japanesePump.actionId);
+    japanese = apply(
+      japanese,
+      "runner",
+      (action) => action.actionId === japanesePump.actionId,
+    );
     expect(japanese.cardInstances[japaneseId]?.strengthModifier).toBe(3);
     expect(japanese.runnerTurnFlags?.forgoNextActionsPending).toBe(3);
 
@@ -2283,7 +2352,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "simple_sentry_ice",
     ).state;
     const snowballId = snowball.runner.rig.programs.find(
-      (id) => snowball.cardInstances[id]?.definitionId === "onr_v1_066_snowball",
+      (id) =>
+        snowball.cardInstances[id]?.definitionId === "onr_v1_066_snowball",
     );
     expect(snowballId).toBeDefined();
     snowball = p344PumpUntilBreak(snowball, snowballId!);
@@ -2294,8 +2364,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "break_subroutine" &&
         String(action.payload?.breakerId) === snowballId,
     );
-    snowball = apply(snowball, "runner", (action) => action.actionId === snowballBreak.actionId);
-    expect(snowball.run?.remainderStrengthBonusByBreaker?.[snowballId!]).toBe(1);
+    snowball = apply(
+      snowball,
+      "runner",
+      (action) => action.actionId === snowballBreak.actionId,
+    );
+    expect(snowball.run?.remainderStrengthBonusByBreaker?.[snowballId!]).toBe(
+      1,
+    );
   });
 
   it("applies Crash Everett draw replacement with private trash or stack-top choice", () => {
@@ -2327,7 +2403,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "install_card" && action.payload?.cardId === crashId,
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === crashId,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -2363,7 +2440,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
 
     let trashState = structuredClone(initial);
-    trashState = apply(trashState, "runner", (action) => action.type === "draw_card");
+    trashState = apply(
+      trashState,
+      "runner",
+      (action) => action.type === "draw_card",
+    );
     const trashOption = trashState.pendingChoice?.options.find((option) =>
       option.id.startsWith("trash_"),
     );
@@ -2402,7 +2483,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "install_card" && action.payload?.cardId === wilsonId,
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === wilsonId,
     );
     expect(state.runner.clicks).toBe(0);
     const actionsAfterInstall = getLegalActions(state, "runner");
@@ -2413,9 +2495,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           action.payload?.runnerAbility === "gain_run_only_action",
       ),
     ).toBe(false);
-    expect(actionsAfterInstall.some((action) => action.type === "end_turn")).toBe(
-      true,
-    );
+    expect(
+      actionsAfterInstall.some((action) => action.type === "end_turn"),
+    ).toBe(true);
     const rdRunOnlyAction = actionsAfterInstall.find(
       (action) =>
         action.type === "start_run" &&
@@ -2485,14 +2567,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).toBe(false);
     expect(
       actionsAfterNormalClicks.some((action) => action.type === "gain_credit"),
-    ).toBe(
-      false,
-    );
+    ).toBe(false);
     expect(
       actionsAfterNormalClicks.some((action) => action.type === "end_turn"),
-    ).toBe(
-      true,
-    );
+    ).toBe(true);
     expect(
       actionsAfterNormalClicks.some(
         (action) =>
@@ -2574,8 +2652,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           cards: [
             { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-              (card) =>
-                card.id !== "onr_v1_166_karl-de-veres-corporate-stooge",
+              (card) => card.id !== "onr_v1_166_karl-de-veres-corporate-stooge",
             ),
           ],
         },
@@ -2592,7 +2669,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     karlState = apply(
       karlState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(karlState.runner.credits).toBe(creditsBeforeRun + 1);
     expect(karlState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2629,11 +2707,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   });
 
   it("resolves P3.59 Field Reporter and Preying Mantis runner-turn windows", () => {
-    const p359FieldPreyingRunnerCards = MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-      (card) =>
-        card.id !== "onr_v1_162_field-reporter-for-ice-and-data" &&
-        card.id !== "onr_v1_171_preying-mantis",
-    );
+    const p359FieldPreyingRunnerCards =
+      MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+        (card) =>
+          card.id !== "onr_v1_162_field-reporter-for-ice-and-data" &&
+          card.id !== "onr_v1_171_preying-mantis",
+      );
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "p359-field-preying",
@@ -2678,7 +2757,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+        action.payload?.runnerUtilityAbility ===
+          "optional_extra_action_with_delayed_damage" &&
         action.payload?.cardId === mantisId,
     );
     expect(state.runner.clicks).toBe(clicksBefore + 1);
@@ -2686,7 +2766,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2781,12 +2862,16 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       counterType: "spy",
       usageHint: "status_marker",
     });
-    expect(runnerSpyServerView?.ice.find((card) => card.instanceId === iceId)).toMatchObject({
+    expect(
+      runnerSpyServerView?.ice.find((card) => card.instanceId === iceId),
+    ).toMatchObject({
       known: true,
       rezzed: false,
       title: "Simple Barrier ICE",
     });
-    expect(runnerSpyServerView?.root.find((card) => card.instanceId === rootId)).toMatchObject({
+    expect(
+      runnerSpyServerView?.root.find((card) => card.instanceId === rootId),
+    ).toMatchObject({
       known: true,
       rezzed: false,
       title: "Simple Economy Asset",
@@ -2806,18 +2891,23 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.serverId === "remote_1",
     );
     expect(state.spyCountersByServer?.remote_1).toBe(0);
-    const runnerAfterRemovalServerView = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
-    );
+    const runnerAfterRemovalServerView = getPlayerView(
+      state,
+      "runner",
+    ).servers.find((server) => server.id === "remote_1");
     expect(runnerAfterRemovalServerView?.counterDisplays).toBeUndefined();
     expect(
-      runnerAfterRemovalServerView?.ice.find((card) => card.instanceId !== undefined),
+      runnerAfterRemovalServerView?.ice.find(
+        (card) => card.instanceId !== undefined,
+      ),
     ).toMatchObject({
       known: false,
       rezzed: false,
     });
     expect(
-      runnerAfterRemovalServerView?.root.find((card) => card.instanceId !== undefined),
+      runnerAfterRemovalServerView?.root.find(
+        (card) => card.instanceId !== undefined,
+      ),
     ).toMatchObject({
       known: false,
       rezzed: false,
@@ -2922,7 +3012,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         if (effect && targetRolls.includes(Number(effect.v1921DieRoll)))
           return { state, effect, questId, randomBefore };
       }
-      throw new Error(`No Quest for Cattekin seed produced roll ${targetRolls.join(", ")}`);
+      throw new Error(
+        `No Quest for Cattekin seed produced roll ${targetRolls.join(", ")}`,
+      );
     }
 
     const noOp = resolveQuestStartForRoll([3, 4, 5]);
@@ -2944,18 +3036,28 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(netDamage.effect.cardsTrashed).toBeGreaterThanOrEqual(1);
 
     const permanentAction = resolveQuestStartForRoll(6);
-    expect(permanentAction.effect.questForCattekinOutcome).toBe("permanent_action");
+    expect(permanentAction.effect.questForCattekinOutcome).toBe(
+      "permanent_action",
+    );
     expect(permanentAction.effect.sourceTrashed).toBe(true);
     expect(permanentAction.state.runner.rig.resources).not.toContain(
       permanentAction.questId,
     );
-    expect(permanentAction.state.runner.heap).toContain(permanentAction.questId);
+    expect(permanentAction.state.runner.heap).toContain(
+      permanentAction.questId,
+    );
     expect(permanentAction.state.runner.clicks).toBe(5);
     expect(
-      permanentAction.state.runnerTurnFlags?.questForCattekinPermanentActionGain,
+      permanentAction.state.runnerTurnFlags
+        ?.questForCattekinPermanentActionGain,
     ).toBe(true);
-    const randomAfterFirstQuest = permanentAction.state.randomDrawRecords.length;
-    let nextTurn = apply(permanentAction.state, "runner", (action) => action.type === "end_turn");
+    const randomAfterFirstQuest =
+      permanentAction.state.randomDrawRecords.length;
+    let nextTurn = apply(
+      permanentAction.state,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
     nextTurn = toRunnerTurn(nextTurn);
     expect(nextTurn.runner.clicks).toBe(5);
     expect(nextTurn.randomDrawRecords.length).toBe(randomAfterFirstQuest);
@@ -2983,7 +3085,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       }),
     );
     correct.runner.credits = 5;
-    const correctEventId = moveRunnerCardToGrip(correct, "onr_v1_111_social-engineering");
+    const correctEventId = moveRunnerCardToGrip(
+      correct,
+      "onr_v1_111_social-engineering",
+    );
     correct = apply(
       correct,
       "runner",
@@ -2991,20 +3096,26 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "play_event" &&
         action.payload?.cardId === correctEventId,
     );
-    expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_hide");
+    expect(correct.pendingChoice?.source).toContain(
+      "p3_58.social_engineering_hide",
+    );
     expect(getPlayerView(correct, "corp").pendingChoice).toBeUndefined();
     correct = applyChoice(correct, "runner", "hide_3");
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_111_social-engineering",
       hiddenZoneBarrier: true,
     });
-    expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_guess");
+    expect(correct.pendingChoice?.source).toContain(
+      "p3_58.social_engineering_guess",
+    );
     correct = applyChoice(correct, "corp", "guess_3");
     expect(correct.runner.credits).toBe(1);
     expect(correct.pendingChoice).toBeUndefined();
     expect(correct.activeSide).toBe("runner");
     expect(
-      getLegalActions(correct, "runner").some((action) => action.type === "end_turn"),
+      getLegalActions(correct, "runner").some(
+        (action) => action.type === "end_turn",
+      ),
     ).toBe(true);
     expect(getLegalActions(correct, "corp")).toHaveLength(0);
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3028,7 +3139,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       }),
     );
     wrong.runner.credits = 5;
-    const wrongEventId = moveRunnerCardToGrip(wrong, "onr_v1_111_social-engineering");
+    const wrongEventId = moveRunnerCardToGrip(
+      wrong,
+      "onr_v1_111_social-engineering",
+    );
     const iceId = putCorpIceOnServer(wrong, "rd", "simple_barrier_ice");
     wrong.cardInstances[iceId] = {
       ...wrong.cardInstances[iceId]!,
@@ -3039,15 +3153,19 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       wrong,
       "runner",
       (action) =>
-        action.type === "play_event" &&
-        action.payload?.cardId === wrongEventId,
+        action.type === "play_event" && action.payload?.cardId === wrongEventId,
     );
     wrong = applyChoice(wrong, "runner", "hide_3");
     wrong = applyChoice(wrong, "corp", "guess_2");
-    expect(wrong.pendingChoice?.source).toContain("p3_58.social_engineering_target");
+    expect(wrong.pendingChoice?.source).toContain(
+      "p3_58.social_engineering_target",
+    );
     expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
     wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
-    expect(wrong.run?.position).toMatchObject({ kind: "server", serverId: "rd" });
+    expect(wrong.run?.position).toMatchObject({
+      kind: "server",
+      serverId: "rd",
+    });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_111_social-engineering",
       socialEngineeringRun: true,
@@ -3185,8 +3303,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       omni,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
-        action.payload?.cardId === omniId,
+        action.type === "rez_ice" && action.payload?.cardId === omniId,
     );
     moveCorpCardToHq(omni, "onr_v1_306_trojan-horse");
     omni.runnerTurnFlags = {
@@ -3276,7 +3393,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     disinfectant = apply(
       disinfectant,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     disinfectant = apply(
       disinfectant,
@@ -3410,7 +3528,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           action.payload?.hostOnCardId === afreetId,
       );
       hostedIds.push(String(install.payload?.cardId ?? "") as CardInstanceId);
-      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === install.actionId,
+      );
     }
     expect(state.runner.memoryUsed).toBe(1);
     for (const hostedId of hostedIds)
@@ -3451,7 +3573,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   });
 
   it("resolves P3.46 Chimera through CardImplementation and trashes hosted Daemon programs", () => {
-    let state = toRunnerTurn(v199CardReleaseGame("p346-chimera-card-implementation"));
+    let state = toRunnerTurn(
+      v199CardReleaseGame("p346-chimera-card-implementation"),
+    );
     state.runner.credits = 60;
     state.runner.clicks = 20;
     state.runner.memoryLimit = 2;
@@ -3476,8 +3600,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         sourceDefinition(state, action) === "onr_v1_006_black-dahlia" &&
         action.payload?.hostOnCardId === afreetId,
     );
-    const hostedId = String(hostedInstall.payload?.cardId ?? "") as CardInstanceId;
-    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+    const hostedId = String(
+      hostedInstall.payload?.cardId ?? "",
+    ) as CardInstanceId;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === hostedInstall.actionId,
+    );
     const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
     state.cardInstances[chimeraId] = {
       ...state.cardInstances[chimeraId]!,
@@ -3740,7 +3870,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     fallGuyState.runnerTurnFlags = {
       ...(fallGuyState.runnerTurnFlags ?? {}),
-      stoleAgendaThisTurn: fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaThisTurn:
+        fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
     fallGuyState = apply(
@@ -3755,13 +3886,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     fallGuyState.runnerTurnFlags = {
       ...(fallGuyState.runnerTurnFlags ?? {}),
-      stoleAgendaThisTurn: fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaThisTurn:
+        fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
-    const trojanId = moveCorpCardToHq(
-      fallGuyState,
-      "onr_v1_306_trojan-horse",
-    );
+    const trojanId = moveCorpCardToHq(fallGuyState, "onr_v1_306_trojan-horse");
     keepOnlyCorpHqCard(fallGuyState, trojanId);
     fallGuyState.corp.credits = 8;
     fallGuyState = apply(
@@ -3771,9 +3900,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "play_operation" &&
         sourceDefinition(fallGuyState, action) === "onr_v1_306_trojan-horse",
     );
-    expect(fallGuyState.pendingChoice?.source).toContain(
-      "event_modification",
-    );
+    expect(fallGuyState.pendingChoice?.source).toContain("event_modification");
     expect(fallGuyState.runner.tags).toBe(0);
     const fallGuyOption = fallGuyState.pendingChoice?.options.find((option) =>
       option.id.includes("avoid_tag"),
@@ -3827,7 +3954,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(retrofitState.runnerTagAvoidanceCredits).toBe(1);
     retrofitState.runnerTurnFlags = {
       ...(retrofitState.runnerTurnFlags ?? {}),
-      stoleAgendaThisTurn: retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaThisTurn:
+        retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
     retrofitState = apply(
@@ -3842,7 +3970,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     retrofitState.runnerTurnFlags = {
       ...(retrofitState.runnerTurnFlags ?? {}),
-      stoleAgendaThisTurn: retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaThisTurn:
+        retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
     const retrofitTrojanId = moveCorpCardToHq(

@@ -5,7 +5,13 @@ import type { CardImplementationDefinition } from "../../../types";
 export const preyingMantisImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_171_preying-mantis",
   runnerUtilityLongtail: {
-    kind: "preying_mantis_optional_action_unpreventable_core_damage",
+    kind: "optional_extra_action_with_delayed_damage",
+    extraActions: 1,
+    damageType: "core",
+    damageAmount: 1,
+    damageTiming: "end_of_turn",
+    preventable: false,
+    limit: "once_per_turn_per_source",
     visibility: "public",
   },
 };

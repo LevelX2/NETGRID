@@ -39,7 +39,7 @@
     "requiresTarget": true,
     "targetKind": "new_remote",
     "hiddenInfoClass": "hidden_info_barrier",
-    "resolverModule": "corp-install-rez-sequence-handlers"
+    "resolverModule": "scored-agenda/data-fort-reclamation-sequence"
   },
   {
     "cardDefinitionId": "onr_v1_204_ice-transmutation",

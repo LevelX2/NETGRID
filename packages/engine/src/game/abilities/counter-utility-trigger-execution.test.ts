@@ -31,7 +31,9 @@ describe("counter utility trigger execution", () => {
       [{ clicks: 1 }],
     );
 
-    expect(handleCounterUtilityTriggerExecution(testHost(state), action)).toEqual({
+    expect(
+      handleCounterUtilityTriggerExecution(testHost(state), action),
+    ).toEqual({
       handled: false,
     });
     expect(JSON.stringify(state)).toBe(before);
@@ -42,10 +44,14 @@ describe("counter utility trigger execution", () => {
     const state = baseState();
     state.runner.clicks = 1;
     state.runner.rig.resources = [sourceId];
-    state.cardInstances[sourceId] = instance(sourceId, "preying_mantis", "runner");
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      "preying_mantis",
+      "runner",
+    );
     const action = triggerAction(state, "runner", {
       cardId: sourceId,
-      runnerUtilityAbility: "preying_mantis_gain_action",
+      runnerUtilityAbility: "optional_extra_action_with_delayed_damage",
     });
 
     expect(
@@ -54,25 +60,45 @@ describe("counter utility trigger execution", () => {
           definitions: {
             preying_mantis: definition("preying_mantis", "resource"),
           },
-          runnerUtilityKind:
-            "preying_mantis_optional_action_unpreventable_core_damage",
+          runnerUtilityImplementation: {
+            kind: "optional_extra_action_with_delayed_damage",
+            extraActions: 1,
+            damageType: "core",
+            damageAmount: 1,
+            damageTiming: "end_of_turn",
+            preventable: false,
+            limit: "once_per_turn_per_source",
+            visibility: "public",
+          },
         }),
         action,
       ),
     ).toMatchObject({ handled: true, actionType: "trigger_ability" });
 
     expect(state.runner.clicks).toBe(2);
-    expect(state.runnerTurnFlags?.preyingMantisUsedSourceIdsThisTurn).toEqual([
-      sourceId,
-    ]);
-    expect(state.runnerTurnFlags?.preyingMantisDamageDueSourceIdsThisTurn).toEqual([
-      sourceId,
+    expect(
+      state.runnerTurnFlags?.abilityUsedSourceIdsByLimitKey?.[
+        "optional_extra_action_with_delayed_damage"
+      ],
+    ).toEqual([sourceId]);
+    expect(state.runnerTurnFlags?.delayedEndTurnEffects).toEqual([
+      {
+        sourceCardInstanceId: sourceId,
+        sourceDefinitionId: "preying_mantis",
+        abilityKey: "optional_extra_action_with_delayed_damage",
+        kind: "damage",
+        damageType: "core",
+        amount: 1,
+        preventable: false,
+      },
     ]);
     expect(action.payload).toMatchObject({
       sourceDefinitionId: "preying_mantis",
       gainedActions: 1,
       runnerClicksAfter: 2,
-      unpreventableDamageDueAtEndOfTurn: true,
+      delayedDamageDueAtEndOfTurn: true,
+      damageCannotBePrevented: true,
+      abilityLimitKey: "optional_extra_action_with_delayed_damage",
     });
   });
 
@@ -118,7 +144,11 @@ describe("counter utility trigger execution", () => {
     state.runner.identity = identityId;
     state.runner.clicks = 2;
     state.runner.credits = 5;
-    state.cardInstances[identityId] = instance(identityId, "runner_identity_def", "runner");
+    state.cardInstances[identityId] = instance(
+      identityId,
+      "runner_identity_def",
+      "runner",
+    );
     setCounter(state, identityId, "data_raven", 1);
     const action = triggerAction(
       state,
@@ -162,7 +192,11 @@ describe("counter utility trigger execution", () => {
     state.corp.clicks = 3;
     state.corp.credits = 5;
     state.runner.rig.resources = [sourceId];
-    state.cardInstances[sourceId] = instance(sourceId, "lock_source_def", "runner");
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      "lock_source_def",
+      "runner",
+    );
     const action = triggerAction(
       state,
       "corp",
@@ -212,6 +246,13 @@ describe("counter utility trigger execution", () => {
 type HostOptions = {
   definitions?: Record<string, CardDefinition>;
   runnerUtilityKind?: string;
+  runnerUtilityImplementation?: CounterUtilityTriggerExecutionHost["cards"] extends {
+    runnerUtilityLongtailImplementationForCard: (
+      ...args: any[]
+    ) => infer Implementation;
+  }
+    ? Implementation
+    : never;
   serverLabel?: string;
   traceCounterEffect?: {
     counterType: CounterType;
@@ -281,10 +322,15 @@ function testHost(
         if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
         return (
           options.definitions?.[card.definitionId] ??
-          definition(card.definitionId, card.owner === "corp" ? "asset" : "resource")
+          definition(
+            card.definitionId,
+            card.owner === "corp" ? "asset" : "resource",
+          )
         );
       },
       runnerUtilityLongtailKindForCard: () => options.runnerUtilityKind,
+      runnerUtilityLongtailImplementationForCard: () =>
+        options.runnerUtilityImplementation,
     },
     credits: {
       spend: (stateToMutate, side, amount) => {
@@ -302,7 +348,10 @@ function testHost(
           counter(stateToMutate, cardId, counterType) - amount,
         ),
       spyCountersForServer: (stateToRead, serverId) =>
-        Math.max(0, Math.floor(stateToRead.spyCountersByServer?.[serverId] ?? 0)),
+        Math.max(
+          0,
+          Math.floor(stateToRead.spyCountersByServer?.[serverId] ?? 0),
+        ),
       traceCounterEffectDefinitionFor: () => options.traceCounterEffect,
     },
     runner: {
@@ -402,14 +451,14 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(
-  id: string,
-  type: CardDefinition["type"],
-): CardDefinition {
+function definition(id: string, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
     title: id,
-    side: type === "asset" || type === "ice" || type === "upgrade" ? "corp" : "runner",
+    side:
+      type === "asset" || type === "ice" || type === "upgrade"
+        ? "corp"
+        : "runner",
     type,
     mechanics: [],
   } as unknown as CardDefinition;

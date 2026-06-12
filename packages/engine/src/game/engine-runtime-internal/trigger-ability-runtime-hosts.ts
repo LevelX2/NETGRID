@@ -723,6 +723,7 @@ export function createTriggerAbilityRuntimeHosts(
     declineExtraActionOffer,
     resolvePdcaCounterAction,
     resolveForcedActionNotPossible,
+    runnerUtilityLongtailImplementationForCard,
     runnerUtilityLongtailKindForCard,
     spyCountersForServer,
     successfulRunInterventionHost,
@@ -856,6 +857,7 @@ export function createTriggerAbilityRuntimeHosts(
       cards: {
         definitionFor,
         runnerUtilityLongtailKindForCard,
+        runnerUtilityLongtailImplementationForCard,
       },
       credits: {
         spend: spendCredits,

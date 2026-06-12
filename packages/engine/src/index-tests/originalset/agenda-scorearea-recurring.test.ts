@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -259,13 +255,14 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+          action.payload?.runnerUtilityAbility ===
+            "optional_extra_action_with_delayed_damage" &&
           action.payload?.cardId === mantisId,
       ),
     ).toBe(true);
-    expect(JSON.stringify(state.eventLog.map((event) => event.publicPayload))).not.toMatch(
-      privatePayloadMarkers,
-    );
+    expect(
+      JSON.stringify(state.eventLog.map((event) => event.publicPayload)),
+    ).not.toMatch(privatePayloadMarkers);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -290,7 +287,8 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.payload?.cardId === boonId || action.payload?.cardId === branchId,
+          action.payload?.cardId === boonId ||
+          action.payload?.cardId === branchId,
       ),
     ).toBe(false);
     expect(
@@ -408,7 +406,8 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       state,
       "runner",
       (action) =>
-        action.type === "install_card" && String(action.payload?.cardId) === mramId,
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === mramId,
     );
     const stale = applyAction(state, {
       matchId: state.matchId,
@@ -423,7 +422,11 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const maxHandSizeBefore = getPlayerView(state, "runner").own.maxHandSize;
-    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
     expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
       maxHandSizeBefore + 2,
     );
@@ -461,7 +464,9 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       faceup: true,
       rezzed: false,
     };
-    expect(getPlayerView(state, "runner").own.maxHandSize).toBe(maxHandSizeBefore);
+    expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
+      maxHandSizeBefore,
+    );
     expect(
       collectActiveModifiers(state).some(
         (modifier) =>
@@ -539,7 +544,11 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     });
     expect(stolenResult.ok).toBe(false);
     const creditsBefore = state.corp.credits;
-    state = apply(state, "corp", (action) => action.actionId === coupAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === coupAction.actionId,
+    );
     expect(state.corp.credits).toBe(creditsBefore + 3);
     expect(cardCounterAmount(state, coupId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -583,7 +592,11 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     const damageInitial = structuredClone(state);
     const damageReplayStart = state.eventLog.length;
     const gripBefore = state.runner.grip.length;
-    state = apply(state, "corp", (action) => action.actionId === onCallAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === onCallAction.actionId,
+    );
     expect(state.runner.grip.length).toBeLessThan(gripBefore);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
@@ -733,7 +746,8 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     canisState = apply(
       canisState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     canisState = apply(
       canisState,
@@ -757,11 +771,15 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     expect(
       getPlayerView(canisState, "runner")
         .servers.find((server) => server.id === "rd")
-        ?.ice.find((ice) => ice.definitionId === "simple_code_gate_ice")?.strength,
+        ?.ice.find((ice) => ice.definitionId === "simple_code_gate_ice")
+        ?.strength,
     ).toBe((DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
     canisState = continueRunThroughMovement(canisState);
     expect(canisState.run).toBeUndefined();
-    const replay = replayEvents(initial, canisState.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      initial,
+      canisState.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(canisState));
   });
@@ -769,7 +787,9 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
 
 describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () => {
   it("keeps V1.9.19 agenda and operation targets deterministic and leak-safe", () => {
-    let state = MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-agenda-run-recurring-v1919");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring(
+      "spotcheck-agenda-run-recurring-v1919",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 80;
     state.corp.clicks = 30;
@@ -832,7 +852,11 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
-    state = apply(state, "corp", (action) => action.actionId === projectAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === projectAction.actionId,
+    );
     const projectOption = state.pendingChoice?.options.find(
       (option) => String(option.value) === `${secondAgendaId}:4`,
     );
@@ -872,7 +896,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(state, action) === "onr_v1_305_team-restructuring",
     );
     const teamOption = state.pendingChoice?.options.find(
-      (option) => String(option.value) === `${firstAgendaId}:1|${secondAgendaId}:1`,
+      (option) =>
+        String(option.value) === `${firstAgendaId}:1|${secondAgendaId}:1`,
     );
     expect(teamOption).toBeDefined();
     state = applyChoices(state, "corp", [teamOption?.id ?? ""]);
@@ -911,7 +936,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     accessState = apply(
       accessState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(accessState.run?.breach?.queue).toHaveLength(1);
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -933,10 +959,13 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       actionType: "access_card",
       cardDefinitionId: "simple_economy_operation",
     });
-    expect(JSON.stringify(accessState.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "simple_agenda",
-    );
-    expect(replayEvents(accessInitial, accessState.eventLog.slice(accessReplayStart)).ok).toBe(true);
+    expect(
+      JSON.stringify(accessState.eventLog.at(-1)?.publicPayload),
+    ).not.toContain("simple_agenda");
+    expect(
+      replayEvents(accessInitial, accessState.eventLog.slice(accessReplayStart))
+        .ok,
+    ).toBe(true);
 
     let shredderState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.runAccess("spotcheck-shredder-uplink-activated-run"),
@@ -952,7 +981,10 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(shredderState, action) ===
           "onr_v1_062_shredder-uplink-protocol",
     );
-    const hqCardId = moveCorpCardToHq(shredderState, "simple_economy_operation");
+    const hqCardId = moveCorpCardToHq(
+      shredderState,
+      "simple_economy_operation",
+    );
     keepOnlyCorpHqCard(shredderState, hqCardId);
     const shredderInitial = structuredClone(shredderState);
     const shredderReplayStart = shredderState.eventLog.length;
@@ -1002,7 +1034,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     traceState = apply(
       traceState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     traceState = apply(
       traceState,
@@ -1012,7 +1045,11 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(traceState, action) ===
           "onr_v1_246_fragmentation-storm",
     );
-    traceState = apply(traceState, "runner", (action) => action.type === "continue_run");
+    traceState = apply(
+      traceState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     traceState = applyChoice(traceState, "corp", "bid_1");
     expect(traceState.trace).toMatchObject({
       status: "base_link",
@@ -1047,20 +1084,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(maxLinkState, action) === "onr_v1_182_submarine-uplink",
+        sourceDefinition(maxLinkState, action) ===
+          "onr_v1_182_submarine-uplink",
     );
     maxLinkState = apply(
       maxLinkState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(maxLinkState, action) === "onr_v1_148_access-through-alpha",
+        sourceDefinition(maxLinkState, action) ===
+          "onr_v1_148_access-through-alpha",
     );
     putCorpIceOnServer(maxLinkState, "rd", "onr_v1_246_fragmentation-storm");
     maxLinkState = apply(
       maxLinkState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     maxLinkState = apply(
       maxLinkState,
@@ -1070,7 +1110,11 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(maxLinkState, action) ===
           "onr_v1_246_fragmentation-storm",
     );
-    maxLinkState = apply(maxLinkState, "runner", (action) => action.type === "continue_run");
+    maxLinkState = apply(
+      maxLinkState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     maxLinkState = applyChoice(maxLinkState, "corp", "bid_1");
     expect(maxLinkState.trace).toMatchObject({
       status: "base_link",
@@ -1118,17 +1162,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     priorityState.runner.credits = 8;
     priorityState.corp.credits = 6;
     moveRunnerCardToGrip(priorityState, "onr_v1_105_priority-wreck");
-    const hqCardId = moveCorpCardToHq(priorityState, "simple_economy_operation");
+    const hqCardId = moveCorpCardToHq(
+      priorityState,
+      "simple_economy_operation",
+    );
     keepOnlyCorpHqCard(priorityState, hqCardId);
     priorityState = apply(
       priorityState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(priorityState, action) === "onr_v1_105_priority-wreck" &&
+        sourceDefinition(priorityState, action) ===
+          "onr_v1_105_priority-wreck" &&
         action.payload?.serverId === "hq",
     );
-    expect(priorityState.pendingChoice?.source).toContain("p3_33.priority_wreck");
+    expect(priorityState.pendingChoice?.source).toContain(
+      "p3_33.priority_wreck",
+    );
     expect(priorityState.run?.breach).toBeUndefined();
     priorityState = applyChoice(priorityState, "runner", "pay_3");
     expect(priorityState.runner.credits).toBe(5);
@@ -1172,7 +1222,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       ),
     ).toBe(true);
     expect(getPlayerView(protocolState, "corp").pendingChoice).toBeUndefined();
-    expect(JSON.stringify(protocolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+    expect(
+      JSON.stringify(protocolState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(
       /simple_agenda|Simple Agenda|"cardInstances"|"privatePayload"/,
     );
     protocolState = applyChoice(protocolState, "runner", "done");
@@ -1198,14 +1250,17 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     const hqRun = apply(
       structuredClone(interfaceState),
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    expect(hqRun.run?.breach?.queue.filter((entry) => entry.zone === "hq")).toHaveLength(2);
+    expect(
+      hqRun.run?.breach?.queue.filter((entry) => entry.zone === "hq"),
+    ).toHaveLength(2);
     expect(hqRun.eventLog.at(-1)?.publicPayload).toMatchObject({
       installedAccessBonus: 1,
       effectiveAccessCount: 2,
-        installedAccessBonusSourceDefinitionIds: "onr_v1_129_hq-interface",
-      });
+      installedAccessBonusSourceDefinitionIds: "onr_v1_129_hq-interface",
+    });
 
     let rdInterfaceState = p333State("p3-33-rd-interface", [
       "onr_v1_139_r-and-d-interface",
@@ -1226,7 +1281,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     const rdRun = apply(
       structuredClone(rdInterfaceState),
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(rdRun.run?.breach?.queue).toHaveLength(2);
     expect(rdRun.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1278,10 +1334,17 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expertState = apply(
       expertState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    expertState = apply(expertState, "runner", (action) => action.type === "access_card");
-    expect(expertState.pendingChoice?.source).toContain("p3_33.private_look:post_access");
+    expertState = apply(
+      expertState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(expertState.pendingChoice?.source).toContain(
+      "p3_33.private_look:post_access",
+    );
     expect(
       getPlayerView(expertState, "runner").pendingChoice?.options.some(
         (option) => option.card?.definitionId === "simple_economy_asset",
@@ -1301,7 +1364,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(technicianState, action) === "onr_v1_183_technician-lover",
+        sourceDefinition(technicianState, action) ===
+          "onr_v1_183_technician-lover",
     );
     putCorpCardOnTopOfRd(technicianState, "simple_agenda");
     technicianState = apply(
@@ -1309,9 +1373,12 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(technicianState, action) === "onr_v1_183_technician-lover",
+        sourceDefinition(technicianState, action) ===
+          "onr_v1_183_technician-lover",
     );
-    expect(technicianState.pendingChoice?.source).toContain("p3_33.private_look:ability");
+    expect(technicianState.pendingChoice?.source).toContain(
+      "p3_33.private_look:ability",
+    );
     expect(
       getPlayerView(technicianState, "runner").pendingChoice?.options.some(
         (option) => option.card?.definitionId === "simple_agenda",
@@ -1319,7 +1386,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     ).toBe(true);
     const technicianRemoved = structuredClone(technicianState);
     const technicianId = technicianRemoved.runner.rig.resources.find(
-      (id) => technicianRemoved.cardInstances[id]?.definitionId === "onr_v1_183_technician-lover",
+      (id) =>
+        technicianRemoved.cardInstances[id]?.definitionId ===
+        "onr_v1_183_technician-lover",
     );
     if (!technicianId) throw new Error("Missing Technician Lover");
     removeEverywhere(technicianRemoved, technicianId);
@@ -1362,12 +1431,21 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     microtechState = apply(
       microtechState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    expect(microtechState.pendingChoice?.source).toContain("p3_33.microtech_ai_interface");
+    expect(microtechState.pendingChoice?.source).toContain(
+      "p3_33.microtech_ai_interface",
+    );
     microtechState = applyChoice(microtechState, "runner", "cut_1");
-    expect(microtechState.run?.breach?.queue[0]?.cardInstanceId).toBe(microtechState.corp.rd[0]);
-    microtechState = apply(microtechState, "runner", (action) => action.type === "access_card");
+    expect(microtechState.run?.breach?.queue[0]?.cardInstanceId).toBe(
+      microtechState.corp.rd[0],
+    );
+    microtechState = apply(
+      microtechState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(microtechState.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "simple_economy_operation",
     });
@@ -1382,9 +1460,13 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(recordState, action) === "onr_v1_142_record-reconstructor",
+        sourceDefinition(recordState, action) ===
+          "onr_v1_142_record-reconstructor",
     );
-    const firstArchive = moveCorpCardToHq(recordState, "simple_economy_operation");
+    const firstArchive = moveCorpCardToHq(
+      recordState,
+      "simple_economy_operation",
+    );
     removeEverywhere(recordState, firstArchive);
     recordState.corp.archives.push(firstArchive);
     recordState.cardInstances[firstArchive] = {
@@ -1407,7 +1489,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(recordState, action) === "onr_v1_142_record-reconstructor",
+        sourceDefinition(recordState, action) ===
+          "onr_v1_142_record-reconstructor",
     );
     expect(recordState.run).toBeUndefined();
     expect(recordState.corp.rd.slice(0, 2).sort()).toEqual(
@@ -1419,7 +1502,10 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       movedCount: 2,
       sourceDefinitionId: "onr_v1_142_record-reconstructor",
     });
-    const replay = replayEvents(initial, recordState.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      initial,
+      recordState.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(recordState));
   });
@@ -1522,11 +1608,19 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
   });
 
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-install"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-install"),
+    );
     state.runner.credits = 20;
     state.runner.memoryLimit = 8;
-    const mysteryId = installRunnerProgramForTest(state, "onr_v1_043_mystery-box");
-    const bottomReveal = putRunnerCardOnTopOfStack(state, "simple_economy_event");
+    const mysteryId = installRunnerProgramForTest(
+      state,
+      "onr_v1_043_mystery-box",
+    );
+    const bottomReveal = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
     const secondProgram = putRunnerCardOnTopOfStack(
       state,
       "onr_v1_024_expert-schedule-analyzer",
@@ -1539,7 +1633,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const mysteryAction = mustAction(
       state,
@@ -1552,17 +1647,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       cardImplementationAbility: "activated",
       cardImplementationAbilityTiming: "during_run",
     });
-    state = apply(state, "runner", (action) => action.actionId === mysteryAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === mysteryAction.actionId,
+    );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       visibility: "public",
       minSelections: 1,
       maxSelections: 1,
     });
-    expect(state.pendingChoice?.source).toContain("p3_38.mystery_box_corp_review");
-    expect(
-      state.pendingChoice?.options.map((option) => option.value),
-    ).toEqual(expect.arrayContaining([selectedProgram, secondProgram, "done"]));
+    expect(state.pendingChoice?.source).toContain(
+      "p3_38.mystery_box_corp_review",
+    );
+    expect(state.pendingChoice?.options.map((option) => option.value)).toEqual(
+      expect.arrayContaining([selectedProgram, secondProgram, "done"]),
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).toContain(
       "simple_decoder",
     );
@@ -1576,9 +1677,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(state.pendingChoice?.source).toContain(
       "p3_38.look_top_stack_show_to_corp_then_install_matching",
     );
-    expect(
-      state.pendingChoice?.options.map((option) => option.value),
-    ).toEqual(expect.arrayContaining([selectedProgram, secondProgram]));
+    expect(state.pendingChoice?.options.map((option) => option.value)).toEqual(
+      expect.arrayContaining([selectedProgram, secondProgram]),
+    );
     state = applyChoice(state, "runner", `card_${selectedProgram}`);
     expect(state.runner.rig.programs).toContain(selectedProgram);
     expect(state.runner.heap).toContain(mysteryId);
@@ -1603,7 +1704,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let noProgram = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-no-program"));
+    let noProgram = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-no-program"),
+    );
     noProgram.runner.credits = 20;
     noProgram.runner.memoryLimit = 8;
     installRunnerProgramForTest(noProgram, "onr_v1_043_mystery-box");
@@ -1624,7 +1727,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     noProgram = apply(
       noProgram,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     noProgram = apply(
       noProgram,
@@ -1702,15 +1806,28 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     let refreshState = structuredClone(state);
     setCardCounterForTest(refreshState, corollaId, "bit", 0);
     refreshState.runner.maxHandSize = 100;
-    refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
-    refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
+    refreshState = apply(
+      refreshState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     refreshState.corp.maxHandSize = 100;
-    refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
     expect(cardCounterAmount(refreshState, corollaId, "bit")).toBe(1);
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -1734,7 +1851,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(state, action) === "simple_killer",
     );
     expect(state.runner.credits).toBe(0);
-    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(true);
+    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(
+      true,
+    );
 
     let decoderState = toRunnerTurn(
       createGameAfterSetup({
@@ -1787,7 +1906,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     decoderState = apply(
       decoderState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     decoderState = apply(
       decoderState,
@@ -1867,7 +1987,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(
       getLegalActions(state, "runner").some(
@@ -1916,7 +2037,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       }),
     );
     state.runner.credits = 20;
-    const firstInterface = moveRunnerCardToGrip(state, "onr_v1_139_r-and-d-interface");
+    const firstInterface = moveRunnerCardToGrip(
+      state,
+      "onr_v1_139_r-and-d-interface",
+    );
     state = apply(
       state,
       "runner",
@@ -1935,9 +2059,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         action.type === "install_card" &&
         String(action.payload?.cardId) === secondInterface,
     );
-    expect(
-      DEMO_CARDS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
-    ).toEqual(expect.arrayContaining(["access", "breach", "multiaccess"]));
+    expect(DEMO_CARDS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics).toEqual(
+      expect.arrayContaining(["access", "breach", "multiaccess"]),
+    );
     expect(
       DEMO_CARDS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
     ).not.toContain("damage_prevention");
@@ -1953,10 +2077,15 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     if (state.run && !state.run.breach) {
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
     }
 
     expect(state.run?.breach?.queue).toHaveLength(3);
@@ -1965,7 +2094,8 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       baseAccessCount: 1,
       installedAccessBonus: 2,
       effectiveAccessCount: 3,
-      installedAccessBonusSourceDefinitionIds: "onr_v1_139_r-and-d-interface,onr_v1_139_r-and-d-interface",
+      installedAccessBonusSourceDefinitionIds:
+        "onr_v1_139_r-and-d-interface,onr_v1_139_r-and-d-interface",
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Economy Asset",
@@ -2010,7 +2140,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     state.runner.credits = 10;
     state.corp.credits = 10;
     state.corp.clicks = 3;
-    const nasukoId = installRunnerHardwareForTest(state, "onr_v1_135_nasuko-cycle");
+    const nasukoId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_135_nasuko-cycle",
+    );
     moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
     moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
     moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
@@ -2024,9 +2157,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
     );
-    expect(state.eventModificationWindow?.candidates[0]?.sourceRef.definitionId).toBe(
-      "onr_v1_135_nasuko-cycle",
-    );
+    expect(
+      state.eventModificationWindow?.candidates[0]?.sourceRef.definitionId,
+    ).toBe("onr_v1_135_nasuko-cycle");
     state = applyChoice(
       state,
       "runner",
@@ -2129,9 +2262,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     state = encounterIce(state, "rd", "onr_v1_246_fragmentation-storm");
     state = continueRunThroughMovementWindow(state);
     state = applyChoice(state, "corp", "bid_0");
-    expect(state.pendingChoice?.options.some((option) => option.id === "bid_1")).toBe(
-      true,
-    );
+    expect(
+      state.pendingChoice?.options.some((option) => option.id === "bid_1"),
+    ).toBe(true);
     state = applyChoice(state, "runner", "bid_1");
     expect(cardCounterAmount(state, hellsRunId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2146,9 +2279,21 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     let refreshState = structuredClone(initial);
     setCardCounterForTest(refreshState, hellsRunId, "bit", 0);
     refreshState.corp.maxHandSize = 100;
-    refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
-    refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
-    refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
+    refreshState = apply(
+      refreshState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    refreshState = apply(
+      refreshState,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
     expect(cardCounterAmount(refreshState, hellsRunId, "bit")).toBe(1);
 
     let runCostState = toRunnerTurn(
@@ -2221,9 +2366,15 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       }),
     );
     state.runner.credits = 10;
-    const roninId = installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
+    const roninId = installRunnerResourceForTest(
+      state,
+      "onr_v1_175_ronin-around",
+    );
     const lowerCardId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-    const hardwareId = putRunnerCardOnTopOfStack(state, "simple_setup_hardware");
+    const hardwareId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_setup_hardware",
+    );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -2235,7 +2386,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         String(action.payload?.cardId) === roninId &&
         action.payload?.cardImplementationAbilityIndex === 0,
     );
-    expect(state.pendingChoice?.source).toContain("p3_37.look_top_stack_take_matching");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_37.look_top_stack_take_matching",
+    );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(runnerChoice?.options).toEqual(
@@ -2264,7 +2417,11 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       exposeState,
       "onr_v1_175_ronin-around",
     );
-    const targetIceId = putCorpIceOnServer(exposeState, "rd", "simple_barrier_ice");
+    const targetIceId = putCorpIceOnServer(
+      exposeState,
+      "rd",
+      "simple_barrier_ice",
+    );
     exposeState = apply(
       exposeState,
       "runner",
@@ -2329,7 +2486,8 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       hostile,
       "corp",
       (action) =>
-        action.type === "install_card" && String(action.payload?.cardId) === hostileId,
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === hostileId,
     );
     expect(
       getLegalActions(hostile, "corp").some(
@@ -2408,9 +2566,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         sourceDefinition(political, action) ===
           "onr_v1_210_political-overthrow",
     );
-    expect(politicalActions.map((action) => action.payload?.cardId).sort()).toEqual(
-      [firstPolitical, secondPolitical].sort(),
-    );
+    expect(
+      politicalActions.map((action) => action.payload?.cardId).sort(),
+    ).toEqual([firstPolitical, secondPolitical].sort());
     const removedPolitical = structuredClone(political);
     removeEverywhere(removedPolitical, firstPolitical);
     const firstPoliticalAction = politicalActions.find(
@@ -2444,7 +2602,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       }),
     );
     nevinyrral.runner.credits = 10;
-    const nevinyrralId = putCorpRootInRemote(nevinyrral, "onr_v1_331_nevinyrral");
+    const nevinyrralId = putCorpRootInRemote(
+      nevinyrral,
+      "onr_v1_331_nevinyrral",
+    );
     nevinyrral.cardInstances[nevinyrralId] = {
       ...nevinyrral.cardInstances[nevinyrralId]!,
       faceup: true,
@@ -2456,7 +2617,11 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    nevinyrral = apply(nevinyrral, "runner", (action) => action.type === "access_card");
+    nevinyrral = apply(
+      nevinyrral,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     nevinyrral = apply(
       nevinyrral,
       "runner",
@@ -2490,7 +2655,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) => action.type === "mandatory_draw",
     );
     rustbelt.corp.maxHandSize = 5;
-    const rustbeltId = putCorpRootInRemote(rustbelt, "onr_v1_338_rustbelt-hq-branch");
+    const rustbeltId = putCorpRootInRemote(
+      rustbelt,
+      "onr_v1_338_rustbelt-hq-branch",
+    );
     expect(getPlayerView(rustbelt, "corp").own.maxHandSize).toBe(5);
     rustbelt.cardInstances[rustbeltId] = {
       ...rustbelt.cardInstances[rustbeltId]!,
@@ -2677,7 +2845,11 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     const siliconReplayStart = silicon.eventLog.length;
     const siliconCreditsBefore = silicon.runner.credits;
     const siliconGripBefore = silicon.runner.grip.length;
-    silicon = apply(silicon, "runner", (action) => action.actionId === siliconAction.actionId);
+    silicon = apply(
+      silicon,
+      "runner",
+      (action) => action.actionId === siliconAction.actionId,
+    );
     expect(silicon.runner.credits).toBe(siliconCreditsBefore + 1);
     expect(silicon.runner.grip.length).toBe(siliconGripBefore + 1);
     expect(silicon.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2739,8 +2911,16 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     const topRunnersInitial = structuredClone(topRunners);
     const topRunnersReplayStart = topRunners.eventLog.length;
     const creditsBeforeTopRunners = topRunners.runner.credits;
-    topRunners = apply(topRunners, "runner", (action) => action.type === "end_turn");
-    topRunners = apply(topRunners, "corp", (action) => action.type === "mandatory_draw");
+    topRunners = apply(
+      topRunners,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    topRunners = apply(
+      topRunners,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     topRunners = toRunnerTurnFromCorpMain(topRunners);
     expect(topRunners.runner.credits).toBe(creditsBeforeTopRunners + 2);
     topRunners = apply(
@@ -2795,7 +2975,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       (option) => option.id !== "pass",
     )?.id;
     expect(optionId).toBeDefined();
-    if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+    if (!optionId)
+      throw new Error(`Missing prevention option for ${definitionId}`);
     state = applyChoice(state, "runner", optionId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
@@ -2830,22 +3011,25 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "corp", (action) => action.type === "rez_ice");
 
     state = apply(
       state,
       "runner",
-      (action) => action.type === "continue_run" && action.payload?.encounterContinue === true,
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
     );
 
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.heap).toHaveLength(3);
     expect(state.run?.phase).toBe("movement");
-    expect(getLegalActions(state, "runner").map((action) => action.type)).toContain(
-      "continue_run",
-    );
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toContain("continue_run");
   });
 
   it("shows Trauma Team trauma counters after install and its add-counter action", () => {
@@ -2864,8 +3048,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     const traumaTeamId = state.runner.rig.resources.find(
       (cardId) =>
-        state.cardInstances[cardId]?.definitionId ===
-        "onr_v1_185_trauma-team",
+        state.cardInstances[cardId]?.definitionId === "onr_v1_185_trauma-team",
     );
     expect(traumaTeamId).toBeDefined();
     if (!traumaTeamId) throw new Error("Missing Trauma Team install");
@@ -2919,10 +3102,17 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     employee.corp.credits = 10;
     employee.corp.maxHandSize = 100;
-    const employeeId = scoreCorpAgendaForTest(employee, "onr_v1_199_employee-empowerment");
+    const employeeId = scoreCorpAgendaForTest(
+      employee,
+      "onr_v1_199_employee-empowerment",
+    );
     const hqBeforeEmployeeStart = employee.corp.hq.length;
     employee = apply(employee, "corp", (action) => action.type === "end_turn");
-    employee = apply(employee, "runner", (action) => action.type === "end_turn");
+    employee = apply(
+      employee,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
     expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart);
     expect(employee.pendingChoice).toMatchObject({
       side: "corp",
@@ -2931,12 +3121,22 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       minSelections: 1,
       maxSelections: 1,
     });
-    expect(getPlayerView(employee, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(["draw", "skip"]);
+    expect(
+      getPlayerView(employee, "corp").pendingChoice?.options.map(
+        (option) => option.id,
+      ),
+    ).toEqual(["draw", "skip"]);
     expect(getPlayerView(employee, "runner").pendingChoice).toBeUndefined();
-    expect(getLegalActions(employee, "corp").map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(
+      getLegalActions(employee, "corp").map((action) => action.type),
+    ).toEqual(["resolve_choice"]);
     expect(getLegalActions(employee, "runner")).toEqual([]);
 
-    const choiceAction = mustAction(employee, "corp", (action) => action.type === "resolve_choice");
+    const choiceAction = mustAction(
+      employee,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
     const wrongSide = applyAction(employee, {
       matchId: employee.matchId,
       side: "runner",
@@ -2975,7 +3175,11 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     expect(employeeSkipReplay.ok).toBe(true);
     expect(hashState(employeeSkipReplay.state)).toBe(hashState(employee));
-    employee = apply(employee, "corp", (action) => action.type === "mandatory_draw");
+    employee = apply(
+      employee,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart + 1);
 
     const employeeAction = mustAction(
@@ -2983,10 +3187,15 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(employee, action) === "onr_v1_199_employee-empowerment",
+        sourceDefinition(employee, action) ===
+          "onr_v1_199_employee-empowerment",
     );
     const beforeAgendaAction = employee.corp.hq.length;
-    employee = apply(employee, "corp", (action) => action.actionId === employeeAction.actionId);
+    employee = apply(
+      employee,
+      "corp",
+      (action) => action.actionId === employeeAction.actionId,
+    );
     expect(employee.corp.hq.length).toBe(beforeAgendaAction + 2);
     expect(employee.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
@@ -2999,7 +3208,9 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       "runner",
       (action) => action.type === "end_turn",
     );
-    expect(nextTurnStart.pendingChoice?.source).toContain("v1912.employee_empowerment_start_draw");
+    expect(nextTurnStart.pendingChoice?.source).toContain(
+      "v1912.employee_empowerment_start_draw",
+    );
     const hqBeforeOptionalDraw = nextTurnStart.corp.hq.length;
     const employeeDraw = applyChoice(nextTurnStart, "corp", "draw");
     expect(employeeDraw.corp.hq.length).toBe(hqBeforeOptionalDraw + 1);
@@ -3029,7 +3240,11 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     const removedResult = applyAction(removedEmployee, {
       matchId: removedEmployee.matchId,
       side: "corp",
-      actionId: mustAction(removedEmployee, "corp", (action) => action.type === "resolve_choice").actionId,
+      actionId: mustAction(
+        removedEmployee,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: removedEmployee.stateVersion,
       selectedChoices: {
         choiceId: removedEmployee.pendingChoice?.choiceId,
@@ -3057,7 +3272,10 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     marine.corp.credits = 30;
     marine.corp.clicks = 10;
-    const marineId = scoreCorpAgendaForTest(marine, "onr_v1_206_marine-arcology");
+    const marineId = scoreCorpAgendaForTest(
+      marine,
+      "onr_v1_206_marine-arcology",
+    );
     const marineAction = mustAction(
       marine,
       "corp",
@@ -3078,7 +3296,11 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     const marineInitial = structuredClone(marine);
     const marineReplayStart = marine.eventLog.length;
     const marineCreditsBefore = marine.corp.credits;
-    marine = apply(marine, "corp", (action) => action.actionId === marineAction.actionId);
+    marine = apply(
+      marine,
+      "corp",
+      (action) => action.actionId === marineAction.actionId,
+    );
     expect(marine.corp.credits).toBe(marineCreditsBefore + 3);
     expect(marine.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
@@ -3159,10 +3381,15 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "corp", (action) => action.actionId === scoreAction.actionId);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === scoreAction.actionId,
+      );
       if (definitionId === "onr_v1_214_project-babylon") {
         const projectBabylonId = state.corp.scoreArea.find(
-          (cardId) => state.cardInstances[cardId]?.definitionId === definitionId,
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId === definitionId,
         );
         expect(projectBabylonId).toBeDefined();
         if (projectBabylonId)

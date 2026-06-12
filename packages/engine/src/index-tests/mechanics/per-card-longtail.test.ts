@@ -1391,15 +1391,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ).toEqual(["trash_ice"]);
     trashState = applyChoice(trashState, "corp", "trash_ice");
     expect(trashState.corp.archives).toContain(trashTargetId);
+    expect(trashState.cardInstances[trashTargetId]?.faceup).toBe(false);
+    expect(trashState.cardInstances[trashTargetId]?.rezzed).toBe(false);
     expect(trashState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_option",
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       corpDecision: "trash_ice",
       trashedCount: 1,
-      targetCardDefinitionId: "simple_barrier_ice",
       targetIcePositionLabel: "ICE 1 in HQ",
+      targetVisibility: "hidden_installed_ice_position",
     });
+    expect(trashState.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "targetCardDefinitionId",
+    );
+    expect(JSON.stringify(trashState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_barrier_ice/,
+    );
+    expect(JSON.stringify(getPlayerView(trashState, "runner"))).not.toMatch(
+      /simple_barrier_ice|Simple Barrier ICE/,
+    );
   });
 
   it("plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE", () => {

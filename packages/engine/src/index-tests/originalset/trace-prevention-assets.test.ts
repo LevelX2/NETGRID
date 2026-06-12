@@ -747,12 +747,21 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
 
     state = applyChoice(state, "corp", "trash_ice");
     expect(state.corp.archives).toContain(rdIce);
+    expect(state.cardInstances[rdIce]?.faceup).toBe(false);
+    expect(state.cardInstances[rdIce]?.rezzed).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       corpDecision: "trash_ice",
       targetServerLabel: "Research and Development",
       targetIcePositionLabel: "ICE 1 in Research and Development",
       trashedCount: 1,
+      targetVisibility: "hidden_installed_ice_position",
     });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "targetCardDefinitionId",
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_barrier_ice/,
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );

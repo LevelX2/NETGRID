@@ -201,6 +201,7 @@ type CorpInstalledEconomyActionAssessment = {
   immediateGain: number;
   netCredits: number;
   storedCredits: number;
+  amountPerCounter?: number;
   futurePoolAfter: number;
   ability: string;
   scoredAgenda?: CorpScoredAgendaAbilityAssessment;
@@ -556,7 +557,6 @@ export type CorpEvaluationContext = {
 
 const AI_HINTS = createAiHintsByCard();
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
-const INFORMATION_LAUNDERING_CARD_ID = "onr_v1_328_information-laundering";
 const CORP_FUTURE_RUN_ICE_CLASSES: Record<string, CorpFutureRunIceClass> = {
   "onr_v1_222_ball-and-chain": "ball_and_chain",
   "onr_v1_224_bolter-cluster": "bolter_or_data_darts",
@@ -4318,7 +4318,14 @@ function evaluateCorpInstalledEconomyActions(
       `installed_corp_economy_net_credits:${best.netCredits}`,
       `installed_corp_economy_stored_credits:${best.storedCredits}`,
       ...(best.kind === "advancement_counter_payout"
-        ? [`installed_corp_economy_advancement_counters:${best.storedCredits}`]
+        ? [
+            `installed_corp_economy_advancement_counters:${best.storedCredits}`,
+            ...(best.amountPerCounter !== undefined
+              ? [
+                  `installed_corp_economy_amount_per_counter:${best.amountPerCounter}`,
+                ]
+              : []),
+          ]
         : []),
       `installed_corp_economy_future_pool_after:${best.futurePoolAfter}`,
       `corp_credit_need:${acuteNeed ? "acute" : "stable"}`,
@@ -4773,20 +4780,26 @@ function classifyCorpInstalledEconomyAction(
     ),
   );
   if (!installedInServer) return undefined;
-  if (sourceCard.definitionId === INFORMATION_LAUNDERING_CARD_ID) {
+  const advancementCounterCreditPayout =
+    sourceAdvancementCounterCreditPayoutForAction(action);
+  if (advancementCounterCreditPayout) {
     const advancementCounters = Math.max(
       0,
       Math.floor(sourceCard.advancementCounters ?? 0),
     );
-    const immediateGain = advancementCounters * 4;
+    const immediateGain =
+      advancementCounters * advancementCounterCreditPayout.amountPerCounter;
     if (immediateGain <= 0) return undefined;
     return {
       kind: "advancement_counter_payout",
       immediateGain,
       netCredits: immediateGain - actionCreditCost(action),
       storedCredits: advancementCounters,
+      amountPerCounter: advancementCounterCreditPayout.amountPerCounter,
       futurePoolAfter: 0,
-      ability: "information_laundering_advancement_counter_payout",
+      ability: advancementCounterCreditPayout.trashesSource
+        ? "source_advancement_counter_credit_payout_trash_source"
+        : "source_advancement_counter_credit_payout",
     };
   }
   const ability =
@@ -4843,6 +4856,26 @@ function classifyCorpInstalledEconomyAction(
     storedCredits,
     futurePoolAfter,
     ability: ability || "corp_installed_credit_payout",
+  };
+}
+
+function sourceAdvancementCounterCreditPayoutForAction(
+  action: LegalAction,
+): { amountPerCounter: number; trashesSource: boolean } | undefined {
+  if (
+    action.payload?.cardImplementationEconomyKind !==
+    "gain_credits_per_advancement_counter_on_source"
+  )
+    return undefined;
+  if (
+    typeof action.payload.cardImplementationAmountPerAdvancementCounter !==
+    "number"
+  )
+    return undefined;
+  return {
+    amountPerCounter:
+      action.payload.cardImplementationAmountPerAdvancementCounter,
+    trashesSource: action.payload.cardImplementationTrashesSource === true,
   };
 }
 
