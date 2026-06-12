@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_1_git_discipline
+ai_mat_2_pilot_modules
 
 ## Quelle/Vorgabe
 
@@ -162,7 +162,13 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | --- | --- | --- | --- |
 | Prozess-Setup | complete | `d41f18aa` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md` |
 | AI-MAT-0 | complete | `e4604a27` | `git add -- docs/architecture/ai/README.md docs/reviews/ai/ai-structural-play-strength-consolidation-final-report-2026-06-12.md docs/reviews/ai/ai-structure-play-strength-maturation-preflight-2026-06-12.md` |
-| AI-MAT-1 | in progress | pending | Nur dieses Prozessartefakt wird gestaged. |
+| AI-MAT-1 | complete | `0576f2e5` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md` |
+| AI-MAT-2 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot-scope-registry.ts packages/ai/src/decision/pilot/basic-setup-pilot.ts packages/ai/src/decision/pilot/corp-score-window-pilot.ts packages/ai/src/decision/pilot/pilot-scope-common.ts packages/ai/src/decision/pilot/pilot-scope-registry.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/decision/pilot/runner-safe-access-pilot.ts` |
+
+## Check-Nachweise
+
+- `AI-MAT-2`: `corepack pnpm --filter @netgrid/ai test -- src/decision/pilot/pilot-scope-registry.test.ts src/decision/semantic-basic-setup-pilot.test.ts src/semantic-ai-runtime-cutover.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1206 Tests ausgefuehrt.
+- `AI-MAT-2`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

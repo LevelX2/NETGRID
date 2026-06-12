@@ -9,10 +9,10 @@ import {
   pilotScopeAllowsAction,
   semanticPilotChoice,
 } from "./pilot-scope-registry";
-import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "./semantic-shadow-calibration";
-import type { SemanticDecisionFrame } from "./semantic-decision-frame";
-import type { SemanticDecisionTrace } from "./semantic-decision-trace";
-import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
+import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "../semantic-shadow-calibration";
+import type { SemanticDecisionFrame } from "../semantic-decision-frame";
+import type { SemanticDecisionTrace } from "../semantic-decision-trace";
+import type { SemanticRuntimeChoice } from "../../runtime/semantic-runtime-types";
 
 describe("pilot-scope-registry", () => {
   const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
