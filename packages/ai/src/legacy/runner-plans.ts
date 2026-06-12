@@ -2661,6 +2661,8 @@ function evaluateRunnerEconomyReserveDiscipline(
         runTarget,
         features,
       );
+      // Remote contests must preserve enough post-run credit for the real
+      // payoff step, especially steal or trash costs after successful access.
       if (!runPath.blocked && runPath.creditsAfterPath < postRunTarget) {
         score -= 520;
         reasons.push("preserve_credits_for_steal_or_trash");
@@ -7299,6 +7301,8 @@ function runnerRemoteContestProfile(
   const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
   const blockedByBreakerCoverage =
     estimate?.blocked === true && !blockedByKnownIceCost;
+  // A run can be affordable through ice and still strategically blocked if it
+  // would leave no reserve for the post-access objective.
   const blockedByPostRunReserve =
     !blockedByBreakerCoverage &&
     !blockedByKnownIceCost &&

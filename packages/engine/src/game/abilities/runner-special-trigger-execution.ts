@@ -164,6 +164,8 @@ export function shellTradersPreparedTargetIds(
       const definition = host.cards.definitionFor(host.state, cardId);
       if (definition.type !== "program" && definition.type !== "hardware")
         return false;
+      // Only the final Shell counter is gated by installability: earlier
+      // counters may still be removed while the delayed install target drifts.
       return (
         shellCounters > 1 ||
         shellTradersCanInstallPreparedCardForFree(host, cardId, definition)
@@ -408,6 +410,8 @@ function removeShellCounterAndMaybeInstall(
   host: RunnerSpecialTriggerExecutionHost,
   targetCardId: CardInstanceId,
 ): { remainingCounters: number; installed: boolean } {
+  // Re-check the prepared target at resolution time because both paid and
+  // start-of-turn removal can turn the last counter into an immediate install.
   if (!shellTradersPreparedTargetIds(host).includes(targetCardId))
     throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
   host.counters.spendCardCounter(host.state, targetCardId, "shell", 1);

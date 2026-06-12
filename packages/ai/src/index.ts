@@ -8376,6 +8376,8 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
   if (recentCredits <= 0) return undefined;
   const fundingNeed = runnerRecoveryFundingNeedContext(input);
   if (fundingNeed.active) return undefined;
+  // Late credit repeats are only penalized when a public, safe central
+  // closeout exists; reserve-building for unsafe or stale paths stays legal.
   const pressureReadyTargets =
     runnerLateNoFundingCreditSafeProgressTargets(input);
   if (pressureReadyTargets.length === 0) return undefined;
@@ -8409,6 +8411,8 @@ function runnerLateNoFundingCreditSafeProgressTargets(
 ): RunnerPressureReadyTargetForMetrics[] {
   const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
   if (!closeout.opportunity || !closeout.target) return [];
+  // The target must match the current best closeout and must not have just been
+  // run; otherwise a credit can be real reserve preservation, not passivity.
   return assessRunnerPressureReadyForMetrics(input).readyTargets.filter(
     (target) => {
       if (semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0)

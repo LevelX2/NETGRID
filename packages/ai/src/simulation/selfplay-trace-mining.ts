@@ -384,6 +384,8 @@ function classifySelfplayActionLimitSubcluster(
     );
   const [best, second] = ranked;
   if (!best || best.count <= 0) return "mixed_unknown";
+  // Equal end-window evidence stays mixed; forcing a winner here hides the
+  // exact tie that follow-up packages need to inspect.
   if (second && second.count > 0 && best.count === second.count) {
     return "mixed_unknown";
   }
@@ -469,6 +471,8 @@ function runWindowHasAccessOrBreachAfter(
   window: readonly AiSimulationSummary["actionSequence"][number][],
   windowIndex: number,
 ): boolean {
+  // A continue action followed by access is required run microflow, not a
+  // no-progress loop, so the lookahead is intentionally narrow and positive.
   return window.slice(windowIndex + 1, windowIndex + 5).some(
     (entry) =>
       entry.side === "runner" &&
@@ -509,6 +513,8 @@ function runnerLateGainCreditHasReserveOrSafetyNeed(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
+  // These trace-only flags preserve legitimate reserve and safety credits from
+  // being collapsed into the "no funding need" residual bucket.
   return (
     entry.runnerEconomyTakenToReachRunReserve === true ||
     entry.runnerReservePreservingEconomy === true ||
@@ -538,6 +544,8 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
+  // Corp credit gains remain plausible when public diagnostics show rez,
+  // score-conversion, or protection reserve pressure.
   return (
     entry.corpCreditsBelowCheapestRelevantRez === true ||
     entry.corpCreditsBelowEstimatedCentralRezNeed === true ||
