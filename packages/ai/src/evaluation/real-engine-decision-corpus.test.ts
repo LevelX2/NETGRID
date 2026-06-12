@@ -39,6 +39,8 @@ describe("RealEngineDecisionCorpus", () => {
     expect(samples.map((sample) => sample.scenarioId)).toEqual(
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
+    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBeGreaterThanOrEqual(30);
+    expect(samples.length).toBeGreaterThanOrEqual(30);
     expect(samples.filter((sample) => sample.legalActionCount === 0)).toEqual(
       [],
     );

@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_10_fixture_builder
+ai_mat_11_corpus_expansion
 
 ## Quelle/Vorgabe
 
@@ -171,7 +171,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-7 | complete | `386262ba` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/target-choice-shadow.ts packages/ai/src/decision/target-choice-shadow.test.ts` |
 | AI-MAT-8 | complete | `de8705d0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/decision/semantic-shadow-decision.ts packages/ai/src/decision/semantic-shadow-decision.test.ts` |
 | AI-MAT-9 | complete | `771ae38f` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-shadow-calibration.ts packages/ai/src/decision/semantic-shadow-calibration.test.ts packages/ai/src/evaluation/play-strength-benchmark.ts packages/ai/src/evaluation/play-strength-benchmark.test.ts` |
-| AI-MAT-10 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts` |
+| AI-MAT-10 | complete | `876252b0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts` |
+| AI-MAT-11 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 
 ## Check-Nachweise
 
@@ -193,6 +194,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-9`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 - `AI-MAT-10`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/real-engine-decision-corpus.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1215 Tests ausgefuehrt.
 - `AI-MAT-10`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-11`: Real-Engine-Corpus von 18 auf 30 Szenarien erweitert.
+- `AI-MAT-11`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/real-engine-decision-corpus.test.ts src/evaluation/semantic-shadow-league.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1215 Tests ausgefuehrt.
+- `AI-MAT-11`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

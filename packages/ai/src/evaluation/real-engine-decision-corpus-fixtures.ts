@@ -30,6 +30,12 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_click_limited_economy",
   "runner_real_remote_probe",
   "runner_real_rnd_pressure_with_buffer",
+  "runner_real_high_credits_setup",
+  "runner_real_empty_hand_draw",
+  "runner_real_tagged_low_credits",
+  "runner_real_safe_archives_access",
+  "runner_real_remote_with_ice_probe",
+  "runner_real_low_click_tag_cleanup",
   "corp_real_score_agenda_window",
   "corp_real_advance_score_window",
   "corp_real_low_rez_reserve",
@@ -39,6 +45,12 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_remote_defense_setup",
   "corp_real_install_credit_pressure",
   "corp_real_high_credit_main_window",
+  "corp_real_score_low_credits",
+  "corp_real_remote_ice_defense",
+  "corp_real_low_credit_main_window",
+  "corp_real_rez_mid_credits",
+  "corp_real_remote_double_asset_setup",
+  "corp_real_draw_pressure_window",
 ] as const;
 
 export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
@@ -133,6 +145,66 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       ["fixture:rnd_pressure_with_buffer"],
       "onr_origin_runner_ai_snapshot_v1",
     ),
+    runnerScenario(
+      "runner_real_high_credits_setup",
+      "real-runner-high-credits-setup",
+      (state) => {
+        state.runner.credits = 12;
+      },
+      ["fixture:runner_high_credits_setup"],
+      "demo_runner_008_snapshot_v0_8",
+    ),
+    runnerScenario(
+      "runner_real_empty_hand_draw",
+      "real-runner-empty-hand-draw",
+      (state) => {
+        state.runner.credits = 5;
+        state.runner.grip = [];
+      },
+      ["fixture:runner_empty_hand"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_tagged_low_credits",
+      "real-runner-tagged-low-credits",
+      (state) => {
+        state.runner.tags = 2;
+        state.runner.credits = 1;
+      },
+      ["fixture:runner_tagged_low_credits"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_safe_archives_access",
+      "real-runner-safe-archives",
+      (state) => {
+        state.runner.credits = 7;
+      },
+      ["fixture:runner_archives_access"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_remote_with_ice_probe",
+      "real-runner-remote-ice-probe",
+      (state) => {
+        state.runner.credits = 9;
+        ensureServer(state, "remote_2");
+        putCorpIceOnServer(state, "remote_2", "simple_barrier_ice");
+      },
+      ["fixture:runner_remote_with_ice_probe"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_low_click_tag_cleanup",
+      "real-runner-low-click-tag-cleanup",
+      (state) => {
+        state.runner.clicks = 1;
+        state.runner.tags = 1;
+        state.runner.credits = 4;
+      },
+      ["fixture:runner_low_click_tag_cleanup"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
     corpScenario(
       "corp_real_score_agenda_window",
       "real-corp-score-window",
@@ -210,6 +282,63 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       },
       ["fixture:corp_high_credit_main_window"],
       "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_score_low_credits",
+      "real-corp-score-low-credits",
+      (state) => {
+        state.corp.credits = 1;
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 3);
+      },
+      ["fixture:corp_score_low_credits"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_remote_ice_defense",
+      "real-corp-remote-ice-defense",
+      (state) => {
+        state.corp.credits = 5;
+        ensureServer(state, "remote_2");
+        putCorpIceOnServer(state, "remote_2", "simple_barrier_ice");
+      },
+      ["fixture:corp_remote_ice_defense"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_low_credit_main_window",
+      "real-corp-low-credit-main-window",
+      (state) => {
+        state.corp.credits = 1;
+      },
+      ["fixture:corp_low_credit_main_window"],
+      "demo_corp_008_snapshot_v0_8",
+    ),
+    corpRezScenario(
+      "corp_real_rez_mid_credits",
+      "real-corp-rez-mid-credits",
+      4,
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_remote_double_asset_setup",
+      "real-corp-remote-double-asset-setup",
+      (state) => {
+        state.corp.credits = 7;
+        putCorpRootInServer(state, "remote_1", "simple_economy_asset", 0);
+        ensureServer(state, "remote_2");
+      },
+      ["fixture:corp_remote_double_asset_setup"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_draw_pressure_window",
+      "real-corp-draw-pressure-window",
+      (state) => {
+        state.corp.credits = 3;
+        state.corp.hq = state.corp.hq.slice(0, 1);
+      },
+      ["fixture:corp_draw_pressure_window"],
+      "demo_corp_008_snapshot_v0_8",
     ),
   ];
 }

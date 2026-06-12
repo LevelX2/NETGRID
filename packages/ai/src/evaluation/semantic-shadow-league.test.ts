@@ -40,11 +40,11 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
-    expect(report.metrics.pilotEligibleCount).toBe(15);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(15);
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(8);
-    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(6);
-    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(1);
+    expect(report.metrics.pilotEligibleCount).toBe(26);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(26);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(13);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(11);
+    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(2);
     expect(report.metrics.remoteContestPilotCandidateCount).toBe(1);
     expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
       "runner_real_remote_score_threat",
