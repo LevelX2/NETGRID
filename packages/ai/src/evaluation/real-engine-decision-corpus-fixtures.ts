@@ -221,26 +221,11 @@ function runnerScenario(
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  const state = toRunnerTurn(
-    createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
-  );
-  mutate(state);
-  const input = buildAiDecisionInput(state, "runner", {
-    decisionId: scenarioId,
-    profileId: "runner-ai-real-engine-corpus",
-  });
-  return {
-    scenarioId,
-    input,
-    runner: {
-      runTargets: evaluateRunnerRunTargets({ input }),
-      economyPosture: buildRunnerEconomyPosture({ input }),
-    },
-    evidence,
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-  };
+  return RealEngineDecisionCorpusScenarioBuilder.runnerTurn(scenarioId, seed)
+    .mutate(mutate)
+    .addEvidence(evidence)
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
 }
 
 function corpScenario(
@@ -250,20 +235,11 @@ function corpScenario(
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  let state = createGameAfterSetup({ seed, agendaPointsToWin: 7 });
-  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-  mutate(state);
-  return {
-    scenarioId,
-    input: buildAiDecisionInput(state, "corp", {
-      decisionId: scenarioId,
-      profileId: "corp-ai-real-engine-corpus",
-    }),
-    evidence,
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-  };
+  return RealEngineDecisionCorpusScenarioBuilder.corpMain(scenarioId, seed)
+    .mutate(mutate)
+    .addEvidence(evidence)
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
 }
 
 function corpRezScenario(
@@ -284,17 +260,99 @@ function corpRezScenario(
     (action) =>
       action.type === "start_run" && action.payload?.serverId === "hq",
   );
-  return {
+  return RealEngineDecisionCorpusScenarioBuilder.fromState(
     scenarioId,
-    input: buildAiDecisionInput(state, "corp", {
-      decisionId: scenarioId,
-      profileId: "corp-ai-real-engine-corpus",
-    }),
-    ...(deckSnapshotId
-      ? { deckDoctrine: deckDoctrineForSnapshot(deckSnapshotId) }
-      : {}),
-    evidence: [`fixture:corp_rez_window_credits:${corpCredits}`],
-  };
+    "corp",
+    state,
+  )
+    .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`])
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
+}
+
+class RealEngineDecisionCorpusScenarioBuilder {
+  private readonly evidence: string[] = [];
+  private deckSnapshotId?: string;
+
+  private constructor(
+    private readonly scenarioId: string,
+    private readonly side: Side,
+    private readonly state: GameState,
+  ) {}
+
+  static runnerTurn(
+    scenarioId: string,
+    seed: string,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(
+      scenarioId,
+      "runner",
+      toRunnerTurn(createGameAfterSetup({ seed, agendaPointsToWin: 7 })),
+    );
+  }
+
+  static corpMain(
+    scenarioId: string,
+    seed: string,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(
+      scenarioId,
+      "corp",
+      apply(
+        createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      ),
+    );
+  }
+
+  static fromState(
+    scenarioId: string,
+    side: Side,
+    state: GameState,
+  ): RealEngineDecisionCorpusScenarioBuilder {
+    return new RealEngineDecisionCorpusScenarioBuilder(scenarioId, side, state);
+  }
+
+  mutate(mutator: (state: GameState) => void): this {
+    mutator(this.state);
+    return this;
+  }
+
+  addEvidence(evidence: readonly string[]): this {
+    this.evidence.push(...evidence);
+    return this;
+  }
+
+  withDeckDoctrine(deckSnapshotId: string | undefined): this {
+    if (deckSnapshotId !== undefined) {
+      this.deckSnapshotId = deckSnapshotId;
+    }
+    return this;
+  }
+
+  build(): RealEngineDecisionCorpusScenario {
+    const input = buildAiDecisionInput(this.state, this.side, {
+      decisionId: this.scenarioId,
+      profileId: `${this.side}-ai-real-engine-corpus`,
+    });
+    return {
+      scenarioId: this.scenarioId,
+      input,
+      ...(this.side === "runner"
+        ? {
+            runner: {
+              runTargets: evaluateRunnerRunTargets({ input }),
+              economyPosture: buildRunnerEconomyPosture({ input }),
+            },
+          }
+        : {}),
+      evidence: [...this.evidence],
+      ...(this.deckSnapshotId
+        ? { deckDoctrine: deckDoctrineForSnapshot(this.deckSnapshotId) }
+        : {}),
+    };
+  }
 }
 
 function deckDoctrineForSnapshot(snapshotId: string) {
