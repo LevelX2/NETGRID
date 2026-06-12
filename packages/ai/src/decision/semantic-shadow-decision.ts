@@ -3,6 +3,7 @@ import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
 import type { ScoreComponentDelta } from "./score-components";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
+import { synthesizeNeutralTacticalGoals } from "./neutral-goal-synthesis";
 import {
   buildTacticalGoalUtilities,
   type TacticalGoalUtility,
@@ -20,7 +21,11 @@ import type {
 export function buildSemanticShadowDecision(
   frame: SemanticDecisionFrame,
 ): SemanticDecisionTrace {
-  const utilities = buildTacticalGoalUtilities(frame.tacticalGoals);
+  const tacticalGoals =
+    frame.tacticalGoals.length > 0
+      ? frame.tacticalGoals
+      : synthesizeNeutralTacticalGoals(frame);
+  const utilities = buildTacticalGoalUtilities(tacticalGoals);
   const threats = buildAiThreatProjections(frame);
   const opportunities = buildAiOpportunityProjections(frame);
   const rankedActions: SemanticRankedAction[] = [];
@@ -85,7 +90,7 @@ export function buildSemanticShadowDecision(
       ...(frame.profileId ? { profileId: frame.profileId } : {}),
       legalActionCount: frame.legalActionIds.length,
       actionCandidateCount: frame.actionCandidates.length,
-      tacticalGoalCount: frame.tacticalGoals.length,
+      tacticalGoalCount: tacticalGoals.length,
       hiddenInfoPolicy: frame.hiddenInfoPolicy,
     },
     rankedActions,
