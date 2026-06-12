@@ -149,12 +149,18 @@ function option(
   const safeOptionId = safe(optionId);
   const preferenceBonus = preferred.has(safeOptionId) ? 25 : 0;
   const avoidPenalty = avoid.has(safeOptionId) ? 25 : 0;
+  const orderPenalty = kind === "choice_option" ? index : 0;
   return {
     requirementId: safe(requirementId),
     optionId: safeOptionId,
     kind,
     rank: 0,
-    score: 100 - index + targetShapeBonus(safeOptionId) + preferenceBonus - avoidPenalty,
+    score:
+      100 -
+      orderPenalty +
+      targetShapeBonus(safeOptionId) +
+      preferenceBonus -
+      avoidPenalty,
     evidence: [
       ...evidence.map(safe),
       `preferred:${preferenceBonus > 0}`,

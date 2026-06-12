@@ -17,7 +17,6 @@ describe("SemanticShadowLeague", () => {
       buildRealEngineDecisionCorpusScenarios(),
     );
     const report = buildSemanticShadowLeagueReport(samples);
-
     expect(report.schemaVersion).toBe(SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION);
     expect(report.scope).toBe("semantic_shadow_league_report_only");
     expect(report.scenarioCount).toBe(
@@ -41,6 +40,17 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
+    expect(report.metrics.pilotEligibleCount).toBe(15);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(15);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(8);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(6);
+    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(1);
+    expect(report.topDisagreementReasons).toEqual([
+      "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
+      "runner_real_damage_buffer_needed:expected=draw_card:observed=start_run",
+      "runner_real_tag_cleanup:expected=remove_tag:observed=start_run",
+    ]);
+    expect(report.redactionStatus).toBe("passed");
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 

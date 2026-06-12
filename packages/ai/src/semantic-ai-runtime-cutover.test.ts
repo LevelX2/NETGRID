@@ -13,7 +13,7 @@ import {
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
-} from "./decision/semantic-basic-setup-pilot";
+} from "./decision/pilot-scope-registry";
 import {
   getTacticalPlanMemorySnapshot,
   resetTacticalPlanMemory,

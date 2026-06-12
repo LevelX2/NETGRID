@@ -10,6 +10,7 @@ import {
   componentWeight,
   opportunityPriorityBonus,
   resolveSemanticShadowCalibrationProfile,
+  semanticShadowCalibrationProfileEnvEnabled,
   threatSeverityBonus,
   type SemanticShadowCalibrationProfile,
   type SemanticShadowCalibrationProfileId,
@@ -45,6 +46,7 @@ export function buildSemanticShadowDecision(
     options.calibrationProfile,
   );
   const explicitCalibrationProfile = options.calibrationProfile !== undefined;
+  const envCalibrationProfile = semanticShadowCalibrationProfileEnvEnabled();
   const tacticalGoals =
     frame.tacticalGoals.length > 0
       ? frame.tacticalGoals
@@ -108,7 +110,7 @@ export function buildSemanticShadowDecision(
       actionCandidateCount: frame.actionCandidates.length,
       tacticalGoalCount: tacticalGoals.length,
       hiddenInfoPolicy: frame.hiddenInfoPolicy,
-      ...(explicitCalibrationProfile
+      ...(explicitCalibrationProfile || envCalibrationProfile
         ? {
             calibrationProfileId: calibrationProfile.profileId,
             calibrationMode: calibrationProfile.mode,

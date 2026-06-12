@@ -4,7 +4,14 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
-import { buildPlayStrengthCalibrationBenchmark } from "./play-strength-benchmark";
+import {
+  buildRealEngineDecisionCorpusScenarios,
+} from "./real-engine-decision-corpus-fixtures";
+import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";
+import {
+  buildPlayStrengthCalibrationBenchmark,
+  comparePlayStrengthCalibrationProfiles,
+} from "./play-strength-benchmark";
 
 describe("PlayStrengthCalibrationBenchmark", () => {
   it("summarizes snapshot scores, mistakes, agreement and score components", () => {
@@ -57,6 +64,37 @@ describe("PlayStrengthCalibrationBenchmark", () => {
     expect(benchmark.scoreComponentContribution.goal_fit).toBeGreaterThan(0);
     expect(benchmark.evidence).toContain("productive_weight_change:false");
     expect(JSON.stringify(benchmark)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
+  });
+
+  it("compares calibration profiles against the local baseline without runtime effect", () => {
+    const samples = buildRealEngineDecisionCorpus(
+      buildRealEngineDecisionCorpusScenarios(),
+    ).map((sample) => ({
+      snapshotId: sample.scenarioId,
+      frame: sample.frame,
+    }));
+
+    const diff = comparePlayStrengthCalibrationProfiles(samples);
+
+    expect(diff.baselineProfileId).toBe("baseline_v1");
+    expect(diff.candidateProfileId).toBe("shadow_calibrated_v1");
+    expect(diff.baselineReference).toBe(
+      "ai-shadow-league-baseline-2026-06-12",
+    );
+    expect(diff.sampleCount).toBe(samples.length);
+    expect(diff.changedScoreSampleCount).toBeGreaterThan(0);
+    expect(diff.productiveUseAllowed).toBe(false);
+    expect(diff.runtimeConsumerStatus).toBe("none");
+    expect(diff.noRuntimeEffect).toBe(true);
+    expect(diff.evidence).toEqual(
+      expect.arrayContaining([
+        "play_strength_calibration_profile_diff:diagnostic_only",
+        "runtime_weight_change:false",
+      ]),
+    );
+    expect(JSON.stringify(diff)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
     );
   });

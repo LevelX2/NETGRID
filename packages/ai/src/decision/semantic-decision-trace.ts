@@ -26,6 +26,23 @@ export type SemanticRejectedAction = {
   evidence: string[];
 };
 
+export const SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS = [
+  "semantic_shadow_top",
+  "pilot_scope",
+  "calibration_profile",
+  "target_choice_shadow",
+  "mistake_summary",
+] as const;
+
+export type SemanticDecisionTraceDiagnosticSectionId =
+  (typeof SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS)[number];
+
+export type SemanticDecisionTraceDiagnosticSection = {
+  id: SemanticDecisionTraceDiagnosticSectionId;
+  title: string;
+  items: string[];
+};
+
 export type SemanticDecisionTrace = {
   schemaVersion: typeof SEMANTIC_DECISION_TRACE_SCHEMA_VERSION;
   frameSummary: {

@@ -1,5 +1,15 @@
 import type { LegalAction } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  AI_PLAY_STRENGTH_PILOT_ENV,
+  BASIC_SETUP_PILOT_MODE,
+  CORP_SCORE_WINDOW_PILOT_MODE,
+  RUNNER_SAFE_ACCESS_PILOT_MODE,
+  pilotScopeAllowsAction,
+  semanticPilotChoice,
+  type AiPlayStrengthPilotScope,
+} from "../decision/pilot-scope-registry";
+import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import {
   REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
@@ -12,6 +22,16 @@ import {
 } from "./real-engine-decision-corpus";
 
 describe("RealEngineDecisionCorpus", () => {
+  const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+
+  afterEach(() => {
+    if (originalPilot === undefined) {
+      delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    } else {
+      process.env[AI_PLAY_STRENGTH_PILOT_ENV] = originalPilot;
+    }
+  });
+
   it("builds the activation-track corpus from real Engine LegalActions", () => {
     const scenarios = buildRealEngineDecisionCorpusScenarios();
     const samples = buildRealEngineDecisionCorpus(scenarios);
@@ -96,6 +116,71 @@ describe("RealEngineDecisionCorpus", () => {
       ),
     ).toBe(true);
   });
+
+  it("validates play-strength pilot scopes against real Engine corpus samples", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+
+    const basicPositive = sampleFor(samples, "runner_real_low_credits");
+    expect(
+      pilotDecisionFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE).allowed,
+    ).toBe(true);
+    expect(
+      pilotChoiceFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE)?.choice
+        .action.actionId,
+    ).toBe(topAction(basicPositive).actionId);
+    expect(
+      pilotDecisionFor(scenarios, sampleFor(samples, "runner_real_safe_hq_access"), BASIC_SETUP_PILOT_MODE)
+        .allowed,
+    ).toBe(false);
+    expect(
+      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_score_agenda_window"), BASIC_SETUP_PILOT_MODE)
+        .allowed,
+    ).toBe(false);
+
+    const runnerPositive = sampleFor(samples, "runner_real_safe_hq_access");
+    expect(
+      pilotDecisionFor(scenarios, runnerPositive, RUNNER_SAFE_ACCESS_PILOT_MODE)
+        .allowed,
+    ).toBe(true);
+    expect(
+      pilotChoiceFor(scenarios, runnerPositive, RUNNER_SAFE_ACCESS_PILOT_MODE)
+        ?.choice.action.actionId,
+    ).toBe(topAction(runnerPositive).actionId);
+    expect(
+      pilotDecisionFor(scenarios, sampleFor(samples, "runner_real_remote_score_threat"), RUNNER_SAFE_ACCESS_PILOT_MODE)
+        .allowed,
+    ).toBe(false);
+    expect(
+      pilotScopeAllowsAction({
+        scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
+        frame: runnerPositive.frame,
+        action: {
+          ...legalActionFor(scenarios, runnerPositive),
+          payload: { serverId: "remote_missing" },
+        },
+        top: topAction(runnerPositive),
+      }).allowed,
+    ).toBe(false);
+
+    const corpPositive = sampleFor(samples, "corp_real_score_agenda_window");
+    expect(
+      pilotDecisionFor(scenarios, corpPositive, CORP_SCORE_WINDOW_PILOT_MODE)
+        .allowed,
+    ).toBe(true);
+    expect(
+      pilotChoiceFor(scenarios, corpPositive, CORP_SCORE_WINDOW_PILOT_MODE)?.choice
+        .action.actionId,
+    ).toBe(topAction(corpPositive).actionId);
+    expect(
+      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_advance_score_window"), CORP_SCORE_WINDOW_PILOT_MODE)
+        .allowed,
+    ).toBe(false);
+    expect(
+      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_rez_value_window"), CORP_SCORE_WINDOW_PILOT_MODE)
+        .allowed,
+    ).toBe(false);
+  });
 });
 
 function scenarioFor(
@@ -149,4 +234,85 @@ function hasServerTargetContext(
           target.targetKind === "server" && target.targetId === serverId,
       ) === true,
   );
+}
+
+function pilotDecisionFor(
+  scenarios: readonly RealEngineDecisionCorpusScenario[],
+  sample: RealEngineDecisionCorpusSample,
+  scope: AiPlayStrengthPilotScope,
+) {
+  return pilotScopeAllowsAction({
+    scope,
+    frame: sample.frame,
+    action: legalActionFor(scenarios, sample),
+    top: topAction(sample),
+  });
+}
+
+function pilotChoiceFor(
+  scenarios: readonly RealEngineDecisionCorpusScenario[],
+  sample: RealEngineDecisionCorpusSample,
+  scope: AiPlayStrengthPilotScope,
+) {
+  process.env[AI_PLAY_STRENGTH_PILOT_ENV] = scope;
+  return semanticPilotChoice({
+    frame: sample.frame,
+    trace: sample.trace,
+    currentChoice: fallbackRuntimeChoice(scenarios, sample),
+    choices: runtimeChoicesFor(scenarios, sample),
+  });
+}
+
+function topAction(
+  sample: RealEngineDecisionCorpusSample,
+): RealEngineDecisionCorpusSample["trace"]["rankedActions"][number] {
+  const top = sample.trace.rankedActions[0];
+  if (!top) throw new Error(`Missing top action for ${sample.scenarioId}`);
+  return top;
+}
+
+function legalActionFor(
+  scenarios: readonly RealEngineDecisionCorpusScenario[],
+  sample: RealEngineDecisionCorpusSample,
+): LegalAction {
+  const top = topAction(sample);
+  const action = scenarioFor(scenarios, sample.scenarioId).input.legalActions.find(
+    (candidate) => candidate.actionId === top.actionId,
+  );
+  if (!action) throw new Error(`Missing LegalAction ${top.actionId}`);
+  return action;
+}
+
+function runtimeChoicesFor(
+  scenarios: readonly RealEngineDecisionCorpusScenario[],
+  sample: RealEngineDecisionCorpusSample,
+): SemanticRuntimeChoice[] {
+  const top = topAction(sample);
+  return scenarioFor(scenarios, sample.scenarioId).input.legalActions.map((action) => ({
+    action,
+    scopeId: "real_engine_corpus",
+    score: action.actionId === top.actionId ? top.score : Math.max(top.score - 40, 0),
+    reasonCode: `real_engine_corpus.${sample.scenarioId}`,
+    explanation: "real engine corpus candidate",
+    evidence: [`scenario:${sample.scenarioId}`, `action:${action.actionId}`],
+  }));
+}
+
+function fallbackRuntimeChoice(
+  scenarios: readonly RealEngineDecisionCorpusScenario[],
+  sample: RealEngineDecisionCorpusSample,
+): SemanticRuntimeChoice {
+  const top = topAction(sample);
+  const fallbackAction =
+    scenarioFor(scenarios, sample.scenarioId).input.legalActions.find(
+      (action) => action.actionId !== top.actionId,
+    ) ?? legalActionFor(scenarios, sample);
+  return {
+    action: fallbackAction,
+    scopeId: "real_engine_corpus_fallback",
+    score: Math.max(top.score - 40, 0),
+    reasonCode: `real_engine_corpus.fallback.${sample.scenarioId}`,
+    explanation: "real engine corpus fallback",
+    evidence: [`fallback:${fallbackAction.actionId}`],
+  };
 }

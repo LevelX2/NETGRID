@@ -1,5 +1,6 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type {
   RunnerEconomyPosture,
@@ -36,6 +37,7 @@ export type SemanticDecisionFrame = {
   legalActionIds: string[];
   actionCandidates: ActionSemanticCandidate[];
   tacticalGoals: TacticalGoalLike[];
+  doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
   beliefSummary?: unknown;
@@ -52,6 +54,7 @@ export type BuildSemanticDecisionFrameParams = {
   input: AiDecisionInput;
   actionCandidates?: readonly ActionSemanticCandidate[];
   tacticalGoals?: readonly TacticalGoalLike[];
+  doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
   beliefSummary?: unknown;
@@ -95,6 +98,9 @@ export function buildSemanticDecisionFrame(
     legalActionIds,
     actionCandidates,
     tacticalGoals: [...(params.tacticalGoals ?? [])],
+    ...(params.doctrineDiagnostic
+      ? { doctrineDiagnostic: params.doctrineDiagnostic }
+      : {}),
     ...(params.tacticalPlan ? { tacticalPlan: params.tacticalPlan } : {}),
     ...(params.deckCapabilities
       ? { deckCapabilities: params.deckCapabilities }
