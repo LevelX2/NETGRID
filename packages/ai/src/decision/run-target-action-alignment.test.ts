@@ -40,6 +40,30 @@ describe("run target action alignment", () => {
     });
   });
 
+  it("does not let evidence override structured target context", () => {
+    const candidate = {
+      ...runCandidate("run-remote-1", "remote_1"),
+      evidence: ["run_action_projection_target:hq"],
+    };
+
+    expect(
+      alignRunTargetAction(candidate, {
+        targetServerId: "hq",
+        targetKind: "hq",
+      }),
+    ).toMatchObject({
+      actionId: "run-remote-1",
+      serverId: "remote_1",
+      runTargetId: "hq",
+      aligned: false,
+      evidence: expect.arrayContaining([
+        "candidate_server:remote_1",
+        "run_target:hq",
+        "aligned:false",
+      ]),
+    });
+  });
+
   it("boosts HQ opportunity only for the HQ run action", () => {
     const trace = buildSemanticShadowDecision(
       frame({
