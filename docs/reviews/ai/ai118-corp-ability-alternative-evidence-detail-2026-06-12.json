@@ -1,0 +1,1808 @@
+{
+  "schemaVersion": "ai118-corp-ability-alternative-evidence-detail-v1",
+  "generatedAt": "2026-06-12T16:57:14.085Z",
+  "pair": {
+    "id": "D",
+    "label": "R&D Interface Dig vs Shadoe Tag & Bag",
+    "runner": "local_realistic_runner_rnd_interface_dig_snapshot_v1",
+    "corp": "local_realistic_corp_shadoe_tag_bag_snapshot_v1"
+  },
+  "seed": "ai-v143-tuning-004",
+  "summary": {
+    "winner": "action_limit_reached",
+    "actions": 160,
+    "turns": 21,
+    "finalStateHash": "fnv1a:067d3ea2",
+    "replayOk": true
+  },
+  "windows": [
+    {
+      "actionIndex": 118,
+      "stateVersionBefore": 118,
+      "turnNumber": 15,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:1",
+        "own_credits:0",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:13e5b9e7",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:4",
+        "semantic_memory:own_hand_current_legal_actions:0",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:0"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:1"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 131,
+      "stateVersionBefore": 131,
+      "turnNumber": 17,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:3",
+        "own_credits:1",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:bdb153c5",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:0",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:1"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:3"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 132,
+      "stateVersionBefore": 132,
+      "turnNumber": 17,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:2",
+        "own_credits:2",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:9d3350df",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:1",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:2"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.play_operation.corp_onr_v1_284_chance-observation_2.corp_onr_v1_284_chance-observation_2",
+          "actionType": "play_operation",
+          "selected": false,
+          "label": "Chance Observation spielen",
+          "source": "corp_onr_v1_284_chance-observation_2",
+          "sourceTitle": "Chance Observation",
+          "priority": 6155,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "play_operation"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": -70,
+              "reason": "2"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 5,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:2"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 133,
+      "stateVersionBefore": 133,
+      "turnNumber": 17,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:1",
+        "own_credits:3",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:37809034",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:1",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:3"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.play_operation.corp_onr_v1_284_chance-observation_2.corp_onr_v1_284_chance-observation_2",
+          "actionType": "play_operation",
+          "selected": false,
+          "label": "Chance Observation spielen",
+          "source": "corp_onr_v1_284_chance-observation_2",
+          "sourceTitle": "Chance Observation",
+          "priority": 6155,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "play_operation"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": -70,
+              "reason": "2"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 5,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:1"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 142,
+      "stateVersionBefore": 142,
+      "turnNumber": 19,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:2",
+        "own_credits:3",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:5a5c8028",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:0",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:3"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:2"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 143,
+      "stateVersionBefore": 143,
+      "turnNumber": 19,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:1",
+        "own_credits:4",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:01ccd9fc",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:0",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:4"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:1"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 157,
+      "stateVersionBefore": 157,
+      "turnNumber": 21,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:2",
+        "own_credits:4",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:9dc50b8a",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:1",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:4"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.play_operation.corp_onr_v1_284_chance-observation_2.corp_onr_v1_284_chance-observation_2",
+          "actionType": "play_operation",
+          "selected": false,
+          "label": "Chance Observation spielen",
+          "source": "corp_onr_v1_284_chance-observation_2",
+          "sourceTitle": "Chance Observation",
+          "priority": 6155,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "play_operation"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": -70,
+              "reason": "2"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 5,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:2"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    },
+    {
+      "actionIndex": 158,
+      "stateVersionBefore": 158,
+      "turnNumber": 21,
+      "selectedActionId": "corp.gain_credit",
+      "facts": [
+        "action_semantic_candidate:economy.gain_credit",
+        "action_semantic_projection:projected",
+        "action_type:gain_credit",
+        "corp_empty_remote_count:1",
+        "credit_cost:0",
+        "own_clicks:1",
+        "own_credits:5",
+        "own_tags:0",
+        "planKind:basic_economy_draw",
+        "scope_family:basic_economy_draw",
+        "selectedActionType:gain_credit",
+        "semantic_memory:memory_version:belief-v1.4.2:f74ff7cc",
+        "semantic_memory:own_hand_content_visibility:preview_private_section",
+        "semantic_memory:own_hand_count:5",
+        "semantic_memory:own_hand_current_legal_actions:1",
+        "semantic_runtime:legacy_reference_action_type:activated_card_ability",
+        "semantic_runtime:legacy_reference_plan:recover_economy",
+        "semantic_runtime:semantic_actual_action_type:gain_credit",
+        "semantic_runtime:semantic_runtime_scope:basic_economy_draw",
+        "semantic_runtime_actual_differs_from_legacy_debug",
+        "semantic_scope:basic_economy_draw",
+        "semantic_score:6375",
+        "side:corp",
+        "tactical_plan:previous_plan:corp.create_score_window:corp.score_agenda.corp_onr_v1_214_project-babylon_1.corp_onr_v1_214_project-babylon_1",
+        "tactical_plan:previous_plan_status:satisfied",
+        "tactical_plan:previous_plan_ttl:2",
+        "tactical_plan:previous_plan_type:corp.create_score_window"
+      ],
+      "abilityAlternatives": [
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ],
+      "allAlternatives": [
+        {
+          "rank": 1,
+          "actionId": "corp.gain_credit",
+          "actionType": "gain_credit",
+          "selected": true,
+          "label": "1 Credit nehmen",
+          "source": "basic_action",
+          "priority": 6375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5400,
+              "reason": "gain_credit"
+            },
+            {
+              "key": "corp_low_credits",
+              "label": "Credit-Bedarf",
+              "value": 700,
+              "reason": "credits:5"
+            },
+            {
+              "key": "corp_remote_instability_credit_reserve",
+              "label": "Remote-Reserve",
+              "value": 250,
+              "reason": "remote_instability"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyChosen": [
+            "semantic_runtime_actual"
+          ]
+        },
+        {
+          "rank": 2,
+          "actionId": "corp.activated_card_ability.corp_onr_v1_192_corporate-boon_1.corp_onr_v1_192_corporate-boon_1.activated.0",
+          "actionType": "activated_card_ability",
+          "selected": false,
+          "label": "Corporate Boon: Boon-Counter fuer Aktion ausgeben",
+          "source": "corp_onr_v1_192_corporate-boon_1",
+          "sourceTitle": "Corporate Boon",
+          "priority": 6200,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "activated_card_ability"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 3,
+          "actionId": "corp.play_operation.corp_onr_v1_284_chance-observation_2.corp_onr_v1_284_chance-observation_2",
+          "actionType": "play_operation",
+          "selected": false,
+          "label": "Chance Observation spielen",
+          "source": "corp_onr_v1_284_chance-observation_2",
+          "sourceTitle": "Chance Observation",
+          "priority": 6155,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 6200,
+              "reason": "play_operation"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": -70,
+              "reason": "2"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 4,
+          "actionId": "corp.draw_card",
+          "actionType": "draw_card",
+          "selected": false,
+          "label": "Karte ziehen",
+          "source": "basic_action",
+          "priority": 5325,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 5300,
+              "reason": "draw_card"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        },
+        {
+          "rank": 5,
+          "actionId": "corp.end_turn",
+          "actionType": "end_turn",
+          "selected": false,
+          "label": "Zug beenden",
+          "source": "game_rule",
+          "priority": -375,
+          "scoreBreakdown": [
+            {
+              "key": "semantic_type_priority",
+              "label": "Action-Typ-Priorität",
+              "value": 1000,
+              "reason": "end_turn"
+            },
+            {
+              "key": "corp_unused_actions",
+              "label": "Ungenutzte Aktionen",
+              "value": -1400,
+              "reason": "actions:1"
+            },
+            {
+              "key": "semantic_private_actor_bonus",
+              "label": "Akteur-private Action",
+              "value": 25,
+              "reason": "private_to_actor"
+            },
+            {
+              "key": "semantic_credit_cost_penalty",
+              "label": "Credit-Kosten",
+              "value": 0,
+              "reason": "0"
+            }
+          ],
+          "whyNot": [
+            "semantic_score_below_selected"
+          ]
+        }
+      ]
+    }
+  ]
+}
