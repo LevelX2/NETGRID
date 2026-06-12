@@ -27,6 +27,10 @@ export type EncounterSpecialWindowHost = {
     rollDie?: (purpose: string) => number;
     spendCredits?: (side: Side, amount: number) => void;
     trashCorpInstalledCard?: (cardId: CardInstanceId) => void;
+    trashRunnerInstalledCardToHeap?: (
+      cardId: CardInstanceId,
+      legalAction?: LegalAction,
+    ) => void;
   };
 };
 
@@ -560,6 +564,12 @@ export function resolveStartupImmolatorTrashIce(
   if (!host.callbacks?.trashCorpInstalledCard)
     throw new Error("Corp-Trash-Callback fehlt.");
   host.callbacks.trashCorpInstalledCard(targetIceId as CardInstanceId);
+  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
+    throw new Error("Runner-Trash-Callback fehlt.");
+  host.callbacks.trashRunnerInstalledCardToHeap(
+    sourceCardId as CardInstanceId,
+    legalAction,
+  );
   flags.startupImmolatorUsedSourceIdsThisTurn = [
     ...used,
     sourceCardId as CardInstanceId,
