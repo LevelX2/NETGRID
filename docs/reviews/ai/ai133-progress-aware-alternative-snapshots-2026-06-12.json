@@ -1,0 +1,1285 @@
+{
+  "schemaVersion": "ai-selfplay-trace-matrix-v1",
+  "generatedAt": "2026-06-12T20:54:45.789Z",
+  "gitHead": "4f51a6b5",
+  "config": {
+    "pairIds": [
+      "b"
+    ],
+    "pairFiles": [],
+    "seeds": [
+      "ai-v143-tuning-005"
+    ],
+    "maxActions": 160,
+    "maxFindings": 10,
+    "includeActionAlternatives": true,
+    "maxAlternativesPerFinding": 5
+  },
+  "aggregate": {
+    "games": 1,
+    "decisions": 160,
+    "findings": 66,
+    "findingsBySeverity": {
+      "critical": 0,
+      "high": 1,
+      "medium": 48,
+      "low": 17
+    },
+    "findingsByDetector": {
+      "illegal_action": 0,
+      "replay_failure": 0,
+      "hidden_info_marker": 0,
+      "no_legal_action_failure": 0,
+      "action_limit_reached": 1,
+      "repeated_no_progress_run": 1,
+      "repeated_known_no_payoff_remote": 0,
+      "repeated_low_value_archives": 0,
+      "recovery_low_value_loop": 0,
+      "bank_over_target_without_funding_need": 0,
+      "risky_self_damage_action": 0,
+      "blink_low_hand_buffer_run": 0,
+      "duplicate_low_delta_install": 0,
+      "overdraw_without_urgency": 0,
+      "plan_step_action_mismatch": 46,
+      "semantic_override_suspicious": 28,
+      "corp_never_scores_long_game": 1,
+      "runner_never_accesses_long_game": 0
+    },
+    "illegalActions": 0,
+    "replayFailures": 0,
+    "actionLimitReached": 1,
+    "allRedactionSafe": true,
+    "redactionSafe": true,
+    "averageGameLength": 160,
+    "corpAgendaScores": 0,
+    "runnerAgendaSteals": 0,
+    "corpFlatlines": 0,
+    "scoreWindowMissed": 0,
+    "unsafeScoreChosen": 0,
+    "passiveActionWithScoreLineAvailable": 0,
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 0,
+      "action_limit_low_value_repeat": 1,
+      "action_limit_mixed_or_unknown": 0
+    },
+    "actionLimitSubclusters": {
+      "late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_real_reserve": 1,
+      "runner_late_gain_credit_no_safe_alternative": 0,
+      "corp_late_gain_credit_without_rez_score_protection_need": 0,
+      "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+      "corp_late_gain_credit_no_safe_alternative": 0,
+      "late_draw_for_coverage_or_hand_goal": 0,
+      "late_draw_without_coverage_or_hand_goal": 0,
+      "late_ability_reuse_low_delta": 0,
+      "late_install_low_delta": 0,
+      "late_run_step_stall": 0,
+      "run_microstep_required": 0,
+      "continue_chain_to_access": 0,
+      "break_pump_required": 0,
+      "jackout_loop": 0,
+      "continue_without_progress": 0,
+      "access_pending": 0,
+      "breach_pending": 0,
+      "mixed_unknown": 0
+    }
+  },
+  "diagnostics": {
+    "unsafeScoreChosenByReason": {},
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 0,
+      "action_limit_low_value_repeat": 1,
+      "action_limit_mixed_or_unknown": 0
+    }
+  },
+  "matrix": [
+    {
+      "pair": {
+        "id": "B",
+        "label": "Stealth Interface Starter vs Manhunt Pressure Bureau",
+        "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+        "corp": "real_scene_corp_manhunt_pressure_bureau_snapshot_v1"
+      },
+      "runner": {
+        "deckHash": "fnv1a:c0db223e"
+      },
+      "corp": {
+        "deckHash": "fnv1a:6e07aa9b"
+      },
+      "aggregate": {
+        "games": 1,
+        "decisions": 160,
+        "findings": 66,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 1,
+          "medium": 48,
+          "low": 17
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 1,
+          "repeated_no_progress_run": 1,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 0,
+          "recovery_low_value_loop": 0,
+          "bank_over_target_without_funding_need": 0,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 46,
+          "semantic_override_suspicious": 28,
+          "corp_never_scores_long_game": 1,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 1,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 160,
+        "corpAgendaScores": 0,
+        "runnerAgendaSteals": 0,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 0,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 0,
+          "action_limit_low_value_repeat": 1,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 1,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "diagnostics": {
+        "unsafeScoreChosenByReason": {},
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 0,
+          "action_limit_low_value_repeat": 1,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 1,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "summaries": [
+        {
+          "seed": "ai-v143-tuning-005",
+          "winner": "action_limit_reached",
+          "actions": 160,
+          "turns": 26,
+          "finalAgendaPoints": {
+            "runner": 0,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:18def66b",
+          "replayOk": true,
+          "replayErrors": [],
+          "lastActionTypes": [
+            "mandatory_draw",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn"
+          ],
+          "last40ActionTypes": [
+            "gain_credit",
+            "draw_card",
+            "install_card",
+            "gain_credit",
+            "end_turn",
+            "mandatory_draw",
+            "install_card",
+            "rez_ice",
+            "activated_card_ability",
+            "activated_card_ability",
+            "end_turn",
+            "gain_credit",
+            "start_run",
+            "access_card",
+            "trash_accessed_card",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "mandatory_draw",
+            "install_card",
+            "play_operation",
+            "resolve_choice",
+            "resolve_choice",
+            "play_operation",
+            "end_turn",
+            "gain_credit",
+            "gain_credit",
+            "remove_tag",
+            "gain_credit",
+            "end_turn",
+            "mandatory_draw",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn"
+          ],
+          "actionAlternativeSnapshots": [
+            {
+              "actionIndex": 154,
+              "side": "corp",
+              "stateVersionBefore": 154,
+              "selectedActionType": "end_turn",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "reachability_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            },
+            {
+              "actionIndex": 155,
+              "side": "runner",
+              "stateVersionBefore": 155,
+              "selectedActionType": "gain_credit",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_credits",
+                    "runner_hand_funding_target",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "selected_by_plan_mapping"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "selected_by_plan_mapping",
+                    "rawSemanticScore:6575",
+                    "finalSelectionScore:6825",
+                    "selectedPlan:runner.build_credit_base"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_hand",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:5875",
+                    "finalSelectionScore:5875"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_unused_actions",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:-475",
+                    "finalSelectionScore:-475"
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "runner_archives_pressure",
+                    "runner_free_server_path",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "semantic_excluded:archives_known_no_agenda"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:archives_known_no_agenda",
+                    "known_non_agenda:7"
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "runner_rnd_pressure",
+                    "runner_rnd_unknown_top",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "semantic_excluded:known_ice_path_no_access"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:known_ice_path_no_access",
+                    "server:rd;known_ice:1;can_reach_access:false;reason:missing_breaker_coverage;unpayable:ice_unbreakable;break_cost:0;credits_after:1;missing:wall;ice:Wall of Static"
+                  ]
+                }
+              ]
+            },
+            {
+              "actionIndex": 156,
+              "side": "runner",
+              "stateVersionBefore": 156,
+              "selectedActionType": "gain_credit",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_credits",
+                    "runner_hand_funding_target",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "selected_by_plan_mapping"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "selected_by_plan_mapping",
+                    "rawSemanticScore:6600",
+                    "finalSelectionScore:6850",
+                    "selectedPlan:runner.build_credit_base"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_hand",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:5875",
+                    "finalSelectionScore:5875"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_unused_actions",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:-475",
+                    "finalSelectionScore:-475"
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "runner_archives_pressure",
+                    "runner_free_server_path",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "semantic_excluded:archives_known_no_agenda"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:archives_known_no_agenda",
+                    "known_non_agenda:7"
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "runner_rnd_pressure",
+                    "runner_rnd_unknown_top",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "semantic_excluded:known_ice_path_no_access"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:known_ice_path_no_access",
+                    "server:rd;known_ice:1;can_reach_access:false;reason:missing_breaker_coverage;unpayable:ice_unbreakable;break_cost:0;credits_after:2;missing:wall;ice:Wall of Static"
+                  ]
+                }
+              ]
+            },
+            {
+              "actionIndex": 157,
+              "side": "runner",
+              "stateVersionBefore": 157,
+              "selectedActionType": "gain_credit",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_credits",
+                    "runner_hand_funding_target",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "selected_by_plan_mapping"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "selected_by_plan_mapping",
+                    "rawSemanticScore:6625",
+                    "finalSelectionScore:6875",
+                    "selectedPlan:runner.build_credit_base"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_hand",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:5875",
+                    "finalSelectionScore:5875"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_unused_actions",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:-475",
+                    "finalSelectionScore:-475"
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "runner_archives_pressure",
+                    "runner_free_server_path",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "semantic_excluded:archives_known_no_agenda"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:archives_known_no_agenda",
+                    "known_non_agenda:7"
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "runner_rnd_pressure",
+                    "runner_rnd_unknown_top",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "deck_doctrine_runtime_weight_suppressed",
+                    "semantic_excluded:known_ice_path_no_access"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:known_ice_path_no_access",
+                    "server:rd;known_ice:1;can_reach_access:false;reason:missing_breaker_coverage;unpayable:ice_unbreakable;break_cost:0;credits_after:3;missing:wall;ice:Wall of Static"
+                  ]
+                }
+              ]
+            },
+            {
+              "actionIndex": 158,
+              "side": "runner",
+              "stateVersionBefore": 158,
+              "selectedActionType": "gain_credit",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_credits",
+                    "runner_hand_funding_target",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "selected_by_plan_mapping"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "selected_by_plan_mapping",
+                    "rawSemanticScore:6650",
+                    "finalSelectionScore:6900",
+                    "selectedPlan:runner.build_credit_base"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_low_hand",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:5875",
+                    "finalSelectionScore:5875"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": false,
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "R&D Interface",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_persistent_install_fit",
+                    "runner_install_pressure",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:2910",
+                    "finalSelectionScore:2910"
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "runner_unused_actions",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:-475",
+                    "finalSelectionScore:-475"
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_action_excluded",
+                    "runner_archives_pressure",
+                    "runner_free_server_path",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [
+                    "semantic_action_excluded",
+                    "semantic_excluded:archives_known_no_agenda"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_excluded:archives_known_no_agenda",
+                    "known_non_agenda:7"
+                  ]
+                }
+              ]
+            },
+            {
+              "actionIndex": 159,
+              "side": "runner",
+              "stateVersionBefore": 159,
+              "selectedActionType": "end_turn",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_priority",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "reachability_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "topFindings": [
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 154,
+          "side": "corp",
+          "selectedActionType": "end_turn",
+          "planKind": "end_turn",
+          "detectorIds": [
+            "corp_never_scores_long_game"
+          ],
+          "severity": "high",
+          "shortReason": "Long selfplay game ended without a Corp score.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:turn_flow.end_turn",
+            "action_semantic_projection:projected",
+            "action_type:end_turn",
+            "corp_empty_remote_count:0",
+            "credit_cost:0",
+            "legacy_reference_action_type:end_turn",
+            "legacy_reference_reason:corp.end_turn",
+            "own_clicks:0",
+            "own_credits:9",
+            "own_tags:0",
+            "planKind:end_turn",
+            "scope_family:end_turn"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 154,
+            "fromActionIndex": 152,
+            "toActionIndex": 155
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 9,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:projected",
+            "action_type:continue_run",
+            "credit_cost:0",
+            "legacy_reference:plan:safe_probe_run",
+            "legacy_reference_action_type:continue_run",
+            "legacy_reference_reason:runner.plan.safe_probe_run",
+            "own_clicks:3",
+            "own_credits:5",
+            "own_tags:0",
+            "planKind:simple_run_choice",
+            "scope_family:simple_run_choice"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 9,
+            "fromActionIndex": 7,
+            "toActionIndex": 10
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 11,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:recover_economy",
+            "legacy_reference_action_type:gain_credit",
+            "legacy_reference_reason:runner.plan.recover_economy",
+            "own_clicks:2",
+            "own_credits:1",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 11,
+            "fromActionIndex": 9,
+            "toActionIndex": 12
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 12,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:recover_economy",
+            "legacy_reference_action_type:gain_credit",
+            "legacy_reference_reason:runner.plan.recover_economy",
+            "own_clicks:1",
+            "own_credits:2",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 12,
+            "fromActionIndex": 10,
+            "toActionIndex": 13
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 20,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch",
+            "semantic_override_suspicious"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category. | Semantic runtime selected a different actual action than the legacy debug winner.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:pressure_rnd",
+            "legacy_reference_action_type:start_run",
+            "legacy_reference_reason:runner.plan.pressure_rnd",
+            "own_clicks:4",
+            "own_credits:3",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 20,
+            "fromActionIndex": 18,
+            "toActionIndex": 21
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 24,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:recover_economy",
+            "legacy_reference_action_type:gain_credit",
+            "legacy_reference_reason:runner.plan.recover_economy",
+            "own_clicks:2",
+            "own_credits:0",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 24,
+            "fromActionIndex": 22,
+            "toActionIndex": 25
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 25,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:recover_economy",
+            "legacy_reference_action_type:gain_credit",
+            "legacy_reference_reason:runner.plan.recover_economy",
+            "own_clicks:1",
+            "own_credits:1",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 25,
+            "fromActionIndex": 23,
+            "toActionIndex": 26
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 32,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch",
+            "semantic_override_suspicious"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category. | Semantic runtime selected a different actual action than the legacy debug winner.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:pressure_rnd",
+            "legacy_reference_action_type:start_run",
+            "legacy_reference_reason:runner.plan.pressure_rnd",
+            "own_clicks:4",
+            "own_credits:2",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 32,
+            "fromActionIndex": 30,
+            "toActionIndex": 33
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 33,
+          "side": "runner",
+          "selectedActionType": "gain_credit",
+          "planKind": "runner.build_credit_base",
+          "detectorIds": [
+            "plan_step_action_mismatch",
+            "semantic_override_suspicious"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category. | Semantic runtime selected a different actual action than the legacy debug winner.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:economy.gain_credit",
+            "action_semantic_projection:projected",
+            "action_type:gain_credit",
+            "credit_cost:0",
+            "legacy_reference:plan:pressure_rnd",
+            "legacy_reference_action_type:start_run",
+            "legacy_reference_reason:runner.plan.pressure_rnd",
+            "own_clicks:3",
+            "own_credits:3",
+            "own_tags:0",
+            "planKind:runner.build_credit_base",
+            "scope_family:basic_economy_draw"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 33,
+            "fromActionIndex": 31,
+            "toActionIndex": 34
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-005",
+          "seed": "ai-v143-tuning-005",
+          "actionIndex": 37,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:projected",
+            "action_type:continue_run",
+            "credit_cost:0",
+            "legacy_reference:plan:safe_probe_run",
+            "legacy_reference_action_type:continue_run",
+            "legacy_reference_reason:runner.plan.safe_probe_run",
+            "own_clicks:1",
+            "own_credits:2",
+            "own_tags:0",
+            "planKind:simple_run_choice",
+            "scope_family:simple_run_choice"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-005",
+            "stateVersion": 37,
+            "fromActionIndex": 35,
+            "toActionIndex": 38
+          }
+        }
+      ]
+    }
+  ]
+}
