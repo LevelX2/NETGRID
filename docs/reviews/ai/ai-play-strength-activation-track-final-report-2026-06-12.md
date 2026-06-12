@@ -2,7 +2,7 @@
 
 ## Status
 
-`implemented_pending_final_green`
+`final_green_passed_pending_local_main_merge`
 
 Arbeitsbranch: `codex/ai-play-strength-activation-track`
 
@@ -54,15 +54,32 @@ Während der Paketarbeit wurden jeweils fokussierte Vitest-Läufe, Typecheck und
 - TargetChoice-Shadow und ActionSemanticCandidate/Coverage grün.
 - Diagnostics-Cut plus Runtime-Debug-Nachbarschaft grün.
 
-## FINAL-GREEN
+## FINAL-GREEN Worktree-Verifikation
 
-Noch ausstehend in diesem Bericht:
+Ausgeführt im Arbeits-Worktree:
 
-- vollständiger `corepack pnpm --filter @netgrid/ai test`
-- `corepack pnpm --filter @netgrid/ai typecheck`
-- `git diff --check`
+```bash
+corepack pnpm --filter @netgrid/ai test
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
+corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+```
+
+Ergebnis:
+
+- `@netgrid/ai test`: 73 Testdateien, 1163 Tests grün.
+- `@netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+- `src/index.test.ts`: 494 Tests grün.
+- `src/semantic-ai-runtime-cutover.test.ts`: 42 Tests grün.
+
+## Lokale Main-Integration
+
+Noch ausstehend:
+
 - lokale Integration nach `main`
-- Hauptworkspace-Verifikation
+- Hauptworkspace-Verifikation nach lokaler Integration
 - Entfernung des Arbeits-Worktrees
 
 Der Status darf erst danach auf `complete` wechseln.

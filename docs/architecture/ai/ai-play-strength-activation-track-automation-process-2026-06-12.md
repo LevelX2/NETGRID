@@ -2,7 +2,7 @@
 
 ## Status
 
-`process_prepared`
+`final_green_passed_pending_local_main_merge`
 
 Arbeitsbranch: `codex/ai-play-strength-activation-track`
 
