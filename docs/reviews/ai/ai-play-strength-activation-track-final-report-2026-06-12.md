@@ -86,4 +86,4 @@ Hauptworkspace-Verifikation nach lokaler Integration:
 - `src/index.test.ts`: 494 Tests grün.
 - `src/semantic-ai-runtime-cutover.test.ts`: 42 Tests grün.
 
-Der temporäre Arbeits-Worktree wird nach diesem Statusnachtrag entfernt.
+Der temporäre Arbeits-Worktree wurde nach diesem Statusnachtrag entfernt.
