@@ -178,7 +178,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-14 | complete | `f4bfa1d4` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/decision/semantic-shadow-decision.ts packages/ai/src/decision/semantic-shadow-decision.test.ts` |
 | AI-MAT-15 | complete | `4b4cf668` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/module-boundaries.test.ts` |
 | AI-MAT-16 | complete | `95476991` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
-| AI-MAT-17 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/diagnostics/decision-debug.ts packages/ai/src/diagnostics/decision-debug.test.ts packages/ai/src/index.ts packages/ai/src/semantic-ai-runtime-cutover.test.ts` |
+| AI-MAT-17 | complete | `7aad48f6` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/diagnostics/decision-debug.ts packages/ai/src/diagnostics/decision-debug.test.ts packages/ai/src/index.ts packages/ai/src/semantic-ai-runtime-cutover.test.ts` |
+| AI-MAT-18 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md docs/reviews/ai/ai-index-rest-debt-map-2026-06-12.md` |
 
 ## Check-Nachweise
 
@@ -221,6 +222,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-17`: DecisionDebug kennt jetzt eine side-safe `doctrine_goal`-Section; die Semantic Runtime befuellt sie nur, wenn DeckDoctrine-Runtime-Scorekomponenten im ausgewaehlten Action-ScoreBreakdown vorkommen.
 - `AI-MAT-17`: `corepack pnpm --filter @netgrid/ai test -- src/diagnostics/decision-debug.test.ts src/semantic-ai-runtime-cutover.test.ts src/index.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1219 Tests ausgefuehrt.
 - `AI-MAT-17`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-18`: `docs/reviews/ai/ai-index-rest-debt-map-2026-06-12.md` auf den Stand nach AI-MAT-17 aktualisiert; `index.ts` umfasst 35.984 Zeilen, `semanticRuntimeDecisionDebug` bleibt bei `packages/ai/src/index.ts:3768`.
+- `AI-MAT-18`: `git diff --check` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 
