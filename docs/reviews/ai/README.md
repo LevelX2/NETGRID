@@ -16,6 +16,7 @@
 
 ## Aktuelle Struktur- und Backlog-Reviews
 
+- `ai-structure-play-strength-maturation-final-report-2026-06-12.md`: Abschlussbericht fuer die AI-MAT-0-bis-AI-MAT-20-Play-Strength-Maturation-Serie vor FINAL-GREEN. Dokumentiert Pilot-Scope-Schnitt, Corpus-/Shadow-League-Ausbau, Doctrine-/Target-Debug, Modulgrenzen, `index.ts`-Debt-Map, Originalset-Backlog und verbleibende Integrationsschritte.
 - `originalset-semantic-play-strength-backlog-2026-06-12.md`: Diagnostischer Folgebacklog fuer Originalset-nahe Play-Strength-Semantik nach AI028-R. Schneidet die verbleibenden Warningklassen in kleine Folgeauftraege und macht den bestehenden Action-Semantic-Invariant-Guard zum Pflichtgate; keine Runtime-, Planner-, Score-, Engine- oder Hidden-Info-Wirkung.
 
 ## Neue AI-Aufgaben ab AI001
