@@ -29,6 +29,21 @@ type SequencePayload = Record<string, string | number | boolean>;
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
   "v1922.security_purge_install_targets";
 
+export type SecurityPurgeStep =
+  | "reveal_top_rd"
+  | "choose_install_targets"
+  | "install_and_rez_ice"
+  | "trash_non_ice"
+  | "complete";
+
+const SECURITY_PURGE_STEPS = {
+  revealTopRd: "reveal_top_rd",
+  chooseInstallTargets: "choose_install_targets",
+  installAndRezIce: "install_and_rez_ice",
+  trashNonIce: "trash_non_ice",
+  complete: "complete",
+} satisfies Record<string, SecurityPurgeStep>;
+
 export function isSecurityPurgeInstallTargetChoiceSource(
   source: string,
 ): boolean {
@@ -70,7 +85,7 @@ export function resolveSecurityPurgeAgendaPurge(
       ...basePayload,
       ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3_target_choice"),
       ...corpSequenceContextPayload({
-        step: "security_purge_rd_top3_target_choice",
+        step: SECURITY_PURGE_STEPS.chooseInstallTargets,
         revealedIceCount: revealedIceIds.length,
         pendingTrashCount: pendingTrashIds.length,
         installedIceCount: 0,
@@ -100,7 +115,7 @@ export function resolveSecurityPurgeAgendaPurge(
     ...basePayload,
     ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
     ...corpSequenceContextPayload({
-      step: "security_purge_rd_top3",
+      step: SECURITY_PURGE_STEPS.trashNonIce,
       revealedIceCount: 0,
       pendingTrashCount: 0,
       installedIceCount: 0,
@@ -192,7 +207,7 @@ export function resolveSecurityPurgeInstallTargetChoice(
     ...securityPurgeBasePayload(host, agendaId, revealedIds),
     ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
     ...corpSequenceContextPayload({
-      step: "security_purge_install_targets",
+      step: SECURITY_PURGE_STEPS.installAndRezIce,
       revealedIceCount: installedIce.length,
       pendingTrashCount: 0,
       installedIceCount: installedIce.length,
@@ -233,7 +248,7 @@ function securityPurgeBasePayload(
   return {
     ...hiddenZoneChoicePayload("v1922_security_purge"),
     ...corpSequenceContextPayload({
-      step: "security_purge_base_reveal",
+      step: SECURITY_PURGE_STEPS.revealTopRd,
       agendaAbility: "v1922_security_purge",
       sourceDefinitionId: host.cards.definitionFor(agendaId).id,
       publicRevealKind: "reveal",
