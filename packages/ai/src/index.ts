@@ -11187,10 +11187,30 @@ function retainActionAlternativesForFindingWindows(
   maxAlternativesPerFinding: number,
 ): void {
   const keep = new Set<string>();
+  let firstAvailable:
+    | {
+        summaryIndex: number;
+        actionIndex: number;
+      }
+    | undefined;
+  let firstAvailableAlternatives: AiDecisionActionAlternative[] | undefined;
+  for (const [summaryIndex, summary] of summaries.entries()) {
+    const actionIndex = summary.actionSequence.findIndex(
+      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
+    );
+    if (actionIndex >= 0) {
+      firstAvailable = { summaryIndex, actionIndex };
+      firstAvailableAlternatives =
+        summary.actionSequence[actionIndex]?.actionAlternatives?.slice();
+      break;
+    }
+  }
   for (const finding of findings) {
     const summary = summaries[finding.summaryIndex];
     if (!summary) continue;
-    const from = Math.max(0, finding.actionIndex - 1);
+    // Action-limit findings usually point at the terminal action; keep a small
+    // lookback so the preceding actionable decision alternatives survive.
+    const from = Math.max(0, finding.actionIndex - 5);
     const to = Math.min(summary.actionSequence.length - 1, finding.actionIndex + 1);
     for (let index = from; index <= to; index += 1) {
       keep.add(`${finding.summaryIndex}:${index}`);
@@ -11208,6 +11228,23 @@ function retainActionAlternativesForFindingWindows(
           Math.max(1, maxAlternativesPerFinding),
         );
       }
+    }
+  }
+  const retained = summaries.some((summary) =>
+    summary.actionSequence.some(
+      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
+    ),
+  );
+  if (!retained && firstAvailable) {
+    const entry =
+      summaries[firstAvailable.summaryIndex]?.actionSequence[
+        firstAvailable.actionIndex
+      ];
+    if (entry && firstAvailableAlternatives) {
+      entry.actionAlternatives = firstAvailableAlternatives.slice(
+        0,
+        Math.max(1, maxAlternativesPerFinding),
+      );
     }
   }
 }
@@ -12193,6 +12230,12 @@ export function runAiSelfplayTraceMining(
         ? { simulationRngSeed: `${config.simulationRngSeed}:${seed}` }
         : {}),
       ...(config.beliefWorld ? { beliefWorld: config.beliefWorld } : {}),
+      ...(config.includeActionAlternativesForFindings === true
+        ? { includeActionAlternativesForFindings: true }
+        : {}),
+      ...(config.maxAlternativesPerFinding !== undefined
+        ? { maxAlternativesPerFinding: config.maxAlternativesPerFinding }
+        : {}),
     }),
   );
   const findings = detectAiSelfplaySuspiciousDecisions(summaries, {

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   evaluateDoctrineQualityGate,
@@ -11,6 +13,7 @@ import {
   summarizeSelfplayActionLimitSubclusters,
 } from "./selfplay-trace-mining";
 import {
+  benchmarkDeckFromFrozenLocalSnapshot,
   detectAiSelfplaySuspiciousDecisions,
   listMatchProgressionBenchmarkDeckSlots,
   runAiSelfplayTraceMining,
@@ -383,8 +386,8 @@ describe("benchmark report formatting", () => {
       seeds: ["ai-v143-tuning-001"],
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
-      maxActions: 8,
-      maxFindings: 5,
+      maxActions: 40,
+      maxFindings: 50,
     });
     const report = formatAiSelfplayTraceMiningReport(result);
 
@@ -427,6 +430,64 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("## Action Limit Clusters");
     expect(report).toContain("## Action Limit Subclusters");
     expect(JSON.stringify({ result, report })).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  }, 30_000);
+
+  it("keeps action alternative snapshots opt-in and redaction-safe", () => {
+    const pair = JSON.parse(
+      readFileSync(
+        join(
+          __dirname,
+          "../../../../docs/reviews/ai/ai-selfplay-trace-mining-b.json",
+        ),
+        "utf8",
+      ),
+    ).pair as { runner: string; corp: string };
+    const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
+    const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
+    const base = runAiSelfplayTraceMining({
+      seeds: ["ai-v143-tuning-005"],
+      runnerDeck: runner.deck,
+      corpDeck: corp.deck,
+      runnerDeckMetadata: runner.metadata,
+      corpDeckMetadata: corp.metadata,
+      maxActions: 160,
+      maxFindings: 50,
+    });
+    expect(JSON.stringify(base.summaries)).not.toContain(
+      "actionAlternatives",
+    );
+
+    const withAlternatives = runAiSelfplayTraceMining({
+      seeds: ["ai-v143-tuning-005"],
+      runnerDeck: runner.deck,
+      corpDeck: corp.deck,
+      runnerDeckMetadata: runner.metadata,
+      corpDeckMetadata: corp.metadata,
+      maxActions: 160,
+      maxFindings: 5,
+      includeActionAlternativesForFindings: true,
+      maxAlternativesPerFinding: 3,
+    });
+    const entriesWithAlternatives = withAlternatives.summaries.flatMap(
+      (summary) =>
+        summary.actionSequence.filter(
+          (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
+        ),
+    );
+
+    expect(
+      withAlternatives.config.includeActionAlternativesForFindings,
+    ).toBe(true);
+    expect(withAlternatives.config.maxAlternativesPerFinding).toBe(3);
+    expect(entriesWithAlternatives.length).toBeGreaterThan(0);
+    expect(
+      entriesWithAlternatives.every(
+        (entry) => (entry.actionAlternatives?.length ?? 0) <= 3,
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(withAlternatives)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
   }, 30_000);
