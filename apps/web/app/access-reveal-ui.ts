@@ -13,14 +13,23 @@ export function accessRevealActionGroups(actions: LegalAction[]): AccessRevealAc
   };
 }
 
-export function accessDecisionLabel(action: LegalAction): string {
-  if (action.type === "access_card") return "Nächste Karte";
-  if (action.type === "steal_agenda") return "Agenda stehlen";
+export function accessDecisionLabel(action: LegalAction, serverLabel?: string): string {
+  const accessContext = accessDecisionContextLabel(serverLabel);
+  if (action.type === "access_card") return accessContext ? `Nächste ${accessContext}-Karte` : "Nächste Karte";
+  if (action.type === "steal_agenda") return accessContext ? `Agenda aus ${accessContext} stehlen` : "Agenda stehlen";
   if (action.type === "trash_accessed_card") {
-    if (action.payload?.freeAccessTrash === true) return "Kostenlos trashen";
-    return "Trashen";
+    if (action.payload?.freeAccessTrash === true) return accessContext ? `Kostenlos aus ${accessContext} trashen` : "Kostenlos trashen";
+    return accessContext ? `Aus ${accessContext} trashen` : "Trashen";
   }
   if (action.type === "trash_resource") return "Resource trashen";
-  if (action.type === "decline_trash") return "OK";
+  if (action.type === "decline_trash") return accessContext ? `${accessContext}-Zugriff abschließen` : "OK";
   return normalizeVisibleTerms(action.label);
+}
+
+function accessDecisionContextLabel(serverLabel: string | undefined): string | null {
+  if (!serverLabel) return null;
+  const label = normalizeVisibleTerms(serverLabel.trim());
+  if (!label) return null;
+  if (label === "Archive") return "Archiv";
+  return label;
 }

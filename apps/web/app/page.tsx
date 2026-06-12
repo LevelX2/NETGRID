@@ -7185,14 +7185,14 @@ function AccessRevealModal({
               {primaryActions.map((action) => (
                 <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
                   {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <AgendaIcon size={15} />}
-                  {accessDecisionLabel(action)}
+                  {accessDecisionLabel(action, reveal.serverLabel)}
                   <CostChips action={action} />
                 </button>
               ))}
               {declineAction ? (
                 <button className="button" onClick={() => runAction(declineAction)} disabled={disabled}>
                   <Check size={15} />
-                  {accessDecisionLabel(declineAction)}
+                  {accessDecisionLabel(declineAction, reveal.serverLabel)}
                 </button>
               ) : null}
               {reveal.actions.length === 0 ? (

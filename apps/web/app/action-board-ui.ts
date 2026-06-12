@@ -902,25 +902,31 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
 
 export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actions: LegalAction[], actorSide: Side, viewerSide: Side, serverLabel: string): string {
   const fromArchives = serverDisplayLabel(serverLabel) === "Archive";
-  if (actorSide !== viewerSide) return observedAccessStatusLabel(card, actorSide, fromArchives);
+  const withServer = (status: string) => `${accessServerStatusPrefix(serverLabel)}: ${status}`;
+  if (actorSide !== viewerSide) return withServer(observedAccessStatusLabel(card, actorSide, fromArchives));
   const stealCostStatus = accessRevealStealCostStatus(actions);
-  if (stealCostStatus) return stealCostStatus;
-  if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
+  if (stealCostStatus) return withServer(stealCostStatus);
+  if (actions.some((action) => action.type === "steal_agenda")) return withServer("Diese Agenda kann jetzt gestohlen werden.");
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
-    return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
+    return withServer("Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.");
   }
   const freeTrashSource = accessFreeTrashSourceLabel(actions);
   if (freeTrashSource)
-    return `${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`;
-  if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
-  if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
+    return withServer(`${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`);
+  if (actions.some((action) => action.type === "trash_accessed_card")) return withServer("Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.");
+  if (actions.some((action) => action.type === "access_card")) return withServer("Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.");
   if (actions.length === 0) {
-    if (serverDisplayLabel(serverLabel) === "R&D") return "Angezeigte Karte aus Research and Development.";
-    return "Angezeigte Karte. Du kannst das Fenster schließen.";
+    if (serverDisplayLabel(serverLabel) === "R&D") return withServer("Angezeigte Karte aus Research and Development.");
+    return withServer("Angezeigte Karte. Du kannst das Fenster schließen.");
   }
-  if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
-  if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
-  return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+  if (card.type === "asset" || card.type === "upgrade") return withServer("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
+  if (actions.some((action) => action.type === "decline_trash")) return withServer("Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.");
+  return withServer("Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.");
+}
+
+function accessServerStatusPrefix(serverLabel: string): string {
+  const label = serverDisplayLabel(serverLabel);
+  return `${label === "Archive" ? "Archiv" : label}-Zugriff`;
 }
 
 function accessFreeTrashSourceLabel(actions: LegalAction[]): string | null {

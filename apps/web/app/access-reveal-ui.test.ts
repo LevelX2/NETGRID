@@ -11,7 +11,7 @@ describe("access reveal UI helpers", () => {
 
     expect(groups.primaryActions).toEqual([trash]);
     expect(groups.declineAction).toBe(ok);
-    expect(groups.primaryActions.map(accessDecisionLabel)).toEqual(["Trashen"]);
+    expect(groups.primaryActions.map((action) => accessDecisionLabel(action))).toEqual(["Trashen"]);
     expect(accessDecisionLabel(groups.declineAction!)).toBe("OK");
   });
 
@@ -29,6 +29,18 @@ describe("access reveal UI helpers", () => {
     const next = legalAction("access_card", "Weiter accessen");
 
     expect(accessDecisionLabel(next)).toBe("Nächste Karte");
+  });
+
+  it("can include the accessed server in decision labels", () => {
+    const next = legalAction("access_card", "Weiter accessen");
+    const trash = legalAction("trash_accessed_card", "PAD Campaign trashen");
+    const steal = legalAction("steal_agenda", "Agenda stehlen");
+    const ok = legalAction("decline_trash", "Access abschließen");
+
+    expect(accessDecisionLabel(next, "R&D")).toBe("Nächste R&D-Karte");
+    expect(accessDecisionLabel(trash, "HQ")).toBe("Aus HQ trashen");
+    expect(accessDecisionLabel(steal, "Remote 1")).toBe("Agenda aus Remote 1 stehlen");
+    expect(accessDecisionLabel(ok, "Archive")).toBe("Archiv-Zugriff abschließen");
   });
 
   it("labels free access trash actions as free", () => {

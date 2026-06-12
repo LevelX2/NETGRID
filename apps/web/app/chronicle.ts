@@ -2529,9 +2529,10 @@ export function formatChronicleEvent(
       importance = "important";
       {
         const highlighterAccess = highlighterAccessExplanation(payload);
+        const location = accessServerLocationSuffix(serverLabel);
         title = phrase(
           subject,
-          `auf ${cardTitle ?? "eine Karte"} zugegriffen${highlighterAccess ? `, weil die Korp ${highlighterAccess.counterCount} Highlighter-Counter hat` : ""}`,
+          `auf ${cardTitle ?? "eine Karte"}${location} zugegriffen${highlighterAccess ? `, weil die Korp ${highlighterAccess.counterCount} Highlighter-Counter hat` : ""}`,
         );
         description = highlighterAccess
           ? `Das ist Zugriff ${highlighterAccess.accessNumber} von ${highlighterAccess.totalAccesses}; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.`
@@ -2554,9 +2555,9 @@ export function formatChronicleEvent(
       const points = agendaPointSuffix(agendaPoints);
       title = phrase(
         subject,
-        `${cardTitle ?? "eine Agenda"} gestohlen${points}`,
+        `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel)} gestohlen${points}`,
       );
-      chips.push("Steal", ...agendaPointChips(agendaPoints));
+      chips.push("Steal", ...(serverLabel ? [serverLabel] : []), ...agendaPointChips(agendaPoints));
       break;
     }
     case "trash_accessed_card":
@@ -2564,15 +2565,15 @@ export function formatChronicleEvent(
       importance = "important";
       title = phrase(
         subject,
-        `${cardTitle ?? "die zugegriffene Karte"} getrasht`,
+        `${cardTitle ?? "die zugegriffene Karte"}${accessServerSourceSuffix(serverLabel)} getrasht`,
       );
       {
         const freeTrashSource = freeAccessTrashSourceLabel(payload);
         if (freeTrashSource) {
           description = `${freeTrashSource} erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.`;
-          chips.push("Trash", freeTrashSource, "Kostenlos");
+          chips.push("Trash", ...(serverLabel ? [serverLabel] : []), freeTrashSource, "Kostenlos");
         } else {
-          chips.push("Trash");
+          chips.push("Trash", ...(serverLabel ? [serverLabel] : []));
         }
       }
       break;
@@ -2584,8 +2585,8 @@ export function formatChronicleEvent(
       break;
     case "decline_trash":
       category = "run";
-      title = phrase(subject, "den Zugriff abgeschlossen");
-      chips.push("Zugriff");
+      title = phrase(subject, `${serverLabel ? `den ${accessServerStatusLabel(serverLabel)}` : "den Zugriff"} abgeschlossen`);
+      chips.push("Zugriff", ...(serverLabel ? [serverLabel] : []));
       break;
     case "remove_tag":
       category = "danger";
@@ -4838,6 +4839,22 @@ function displayServerLabel(label: string | undefined): string | undefined {
   const remote = /^remote_(\d+)$/.exec(label);
   if (remote?.[1]) return `Remote ${remote[1]}`;
   return label;
+}
+
+function accessServerLocationSuffix(serverLabel: string | undefined): string {
+  if (!serverLabel) return "";
+  if (serverLabel === "Archive") return " im Archiv";
+  return ` in ${serverLabel}`;
+}
+
+function accessServerSourceSuffix(serverLabel: string | undefined): string {
+  if (!serverLabel) return "";
+  if (serverLabel === "Archive") return " aus dem Archiv";
+  return ` aus ${serverLabel}`;
+}
+
+function accessServerStatusLabel(serverLabel: string): string {
+  return `${serverLabel === "Archive" ? "Archiv" : serverLabel}-Zugriff`;
 }
 
 function runTargetFromLabel(label: string | undefined): string {

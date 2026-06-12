@@ -2272,14 +2272,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     accessedUpgrade.trashCost = 2;
     const decline = legalAction("runner", "decline_trash", "game_rule", "Nicht trashen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
-    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
+    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Remote 1-Zugriff: Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 
   it("does not describe missing local access actions as insufficient credits", () => {
     const accessedAsset = card("asset_1", "Doppelganger Antibody", "asset");
     accessedAsset.trashCost = 0;
 
-    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Angezeigte Karte aus Research and Development.");
+    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("R&D-Zugriff: Angezeigte Karte aus Research and Development.");
   });
 
   it("explains Proteus free access trash for normally untrashable cards", () => {
@@ -2299,7 +2299,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const decline = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: "ice_1" }, "access.resolve_card");
 
     expect(accessRevealStatusLabel(accessedIce, [trash, decline], "runner", "runner", "R&D")).toBe(
-      "Garbage In: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat."
+      "R&D-Zugriff: Garbage In: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat."
     );
   });
 
@@ -2528,7 +2528,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     };
 
     expect(accessRevealStatusLabel({ type: "agenda" }, [steal], "runner", "runner", "Remote 1")).toBe(
-      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Diese Agenda kann jetzt gestohlen werden."
+      "Remote 1-Zugriff: Red Herrings: 5 Credits zusätzliche Stehlkosten. Diese Agenda kann jetzt gestohlen werden."
     );
   });
 
@@ -2542,7 +2542,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     });
 
     expect(accessRevealStatusLabel({ type: "agenda" }, [decline], "runner", "runner", "Remote 1")).toBe(
-      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Du hast nicht genug Credits, um diese Agenda zu stehlen."
+      "Remote 1-Zugriff: Red Herrings: 5 Credits zusätzliche Stehlkosten. Du hast nicht genug Credits, um diese Agenda zu stehlen."
     );
   });
 });

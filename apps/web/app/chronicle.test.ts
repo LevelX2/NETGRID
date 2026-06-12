@@ -3817,10 +3817,48 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Du hast auf Simple Economy Operation zugegriffen.",
+      "Du hast auf Simple Economy Operation in HQ zugegriffen.",
     );
     expect(item.cardTitle).toBe("Simple Economy Operation");
     expect(item.chips).toContain("HQ");
+  });
+
+  it("keeps the accessed server visible for access follow-up actions", () => {
+    const steal = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Project Agenda",
+        agendaPoints: 2,
+        serverLabel: "HQ",
+      }),
+      "runner",
+      { cardTitle: "Project Agenda" },
+    );
+    const trash = formatChronicleEvent(
+      makeEvent("trash_accessed_card", {
+        actor: "runner",
+        title: "PAD Campaign",
+        serverLabel: "R&D",
+      }),
+      "runner",
+      { cardTitle: "PAD Campaign" },
+    );
+    const done = formatChronicleEvent(
+      makeEvent("decline_trash", {
+        actor: "runner",
+        serverLabel: "Archives",
+      }),
+      "runner",
+    );
+
+    expect(steal.title).toBe(
+      "Du hast Project Agenda aus HQ gestohlen und 2 Agenda-Punkte erhalten.",
+    );
+    expect(trash.title).toBe("Du hast PAD Campaign aus R&D getrasht.");
+    expect(done.title).toBe("Du hast den Archiv-Zugriff abgeschlossen.");
+    expect(steal.chips).toContain("HQ");
+    expect(trash.chips).toContain("R&D");
+    expect(done.chips).toContain("Archive");
   });
 
   it("describes public stack-search reveals with the selected card and destination", () => {
@@ -5471,9 +5509,9 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(firstAccess.title).toBe("Du hast auf Pattel Antibody zugegriffen.");
+    expect(firstAccess.title).toBe("Du hast auf Pattel Antibody in R&D zugegriffen.");
     expect(secondAccess.title).toBe(
-      "Du hast auf Bel-Digmo Antibody zugegriffen, weil die Korp 3 Highlighter-Counter hat.",
+      "Du hast auf Bel-Digmo Antibody in R&D zugegriffen, weil die Korp 3 Highlighter-Counter hat.",
     );
     expect(secondAccess.description).toBe(
       "Das ist Zugriff 2 von 3; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.",
