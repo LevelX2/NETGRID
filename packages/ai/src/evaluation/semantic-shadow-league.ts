@@ -1,4 +1,11 @@
-import type { Side } from "@netgrid/shared";
+import type { LegalAction, Side } from "@netgrid/shared";
+import {
+  BASIC_SETUP_PILOT_MODE,
+  CORP_SCORE_WINDOW_PILOT_MODE,
+  RUNNER_SAFE_ACCESS_PILOT_MODE,
+  pilotScopeAllowsAction,
+  type AiPlayStrengthPilotScope,
+} from "../decision/pilot-scope-registry";
 import type { SemanticRankedAction } from "../decision/semantic-decision-trace";
 import {
   findForbiddenSemanticPath,
@@ -80,6 +87,9 @@ export type SemanticShadowLeagueReport = {
     agreementRate: number | null;
     mistakeCount: number;
     mistakesByClass: Record<AiMistakeClass, number>;
+    pilotEligibleCount: number;
+    pilotWouldOverrideCount: number;
+    scopeBreakdown: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>;
     rankedActionCount: number;
     rejectedActionCount: number;
     topScoreAverage: number | null;
@@ -87,12 +97,20 @@ export type SemanticShadowLeagueReport = {
     topScoreMax: number | null;
     blockersByKind: Record<string, number>;
   };
+  topDisagreementReasons: string[];
+  redactionStatus: "passed";
   scenarios: SemanticShadowLeagueScenarioReport[];
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
   noRuntimeEffect: true;
   evidence: string[];
+};
+
+export type SemanticShadowLeaguePilotScopeBreakdown = {
+  eligibleCount: number;
+  wouldOverrideCount: number;
+  scenarioIds: string[];
 };
 
 export function buildSemanticShadowLeagueReport(
@@ -115,6 +133,8 @@ export function buildSemanticShadowLeagueReport(
       corp: scenarios.filter((scenario) => scenario.side === "corp").length,
     },
     metrics: buildLeagueMetrics(scenarios),
+    topDisagreementReasons: topDisagreementReasons(scenarios),
+    redactionStatus: "passed",
     scenarios,
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
@@ -149,6 +169,7 @@ function buildScenarioReport(
       })
     : undefined;
   const mistakes = classifyDecisionTraceMistakes(sample.frame, sample.trace);
+  const pilotScopes = eligiblePilotScopes(sample, top, topCandidate?.actionType);
   const report: SemanticShadowLeagueScenarioReport = {
     scenarioId: safe(sample.scenarioId),
     side: sample.side,
@@ -179,6 +200,9 @@ function buildScenarioReport(
       `rejected_action_count:${sample.trace.rejectedActions.length}`,
       `agreement_compared:${agreementCompared}`,
       ...(agreementCompared ? [`agreement:${Boolean(agreement)}`] : []),
+      `pilot_scope_eligible:${pilotScopes.length > 0}`,
+      `pilot_would_override:${pilotScopes.length > 0}`,
+      ...pilotScopes.map((scope) => `pilot_scope:${scope}:eligible`),
       ...(expectation?.evidence ?? []).map(safe),
     ],
   };
@@ -205,6 +229,13 @@ function buildLeagueMetrics(
     mistakesByClass: countMistakes(
       scenarios.flatMap((scenario) => scenario.observedMistakes),
     ),
+    pilotEligibleCount: scenarios.filter((scenario) =>
+      scenario.evidence.includes("pilot_scope_eligible:true"),
+    ).length,
+    pilotWouldOverrideCount: scenarios.filter((scenario) =>
+      scenario.evidence.includes("pilot_would_override:true"),
+    ).length,
+    scopeBreakdown: pilotScopeBreakdown(scenarios),
     rankedActionCount: scenarios.reduce(
       (sum, scenario) => sum + scenario.rankedActionCount,
       0,
@@ -229,6 +260,42 @@ function buildLeagueMetrics(
   };
 }
 
+function pilotScopeBreakdown(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+): Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown> {
+  const result: Record<
+    AiPlayStrengthPilotScope,
+    SemanticShadowLeaguePilotScopeBreakdown
+  > = {
+    [BASIC_SETUP_PILOT_MODE]: emptyPilotScopeBreakdown(),
+    [RUNNER_SAFE_ACCESS_PILOT_MODE]: emptyPilotScopeBreakdown(),
+    [CORP_SCORE_WINDOW_PILOT_MODE]: emptyPilotScopeBreakdown(),
+  };
+
+  for (const scenario of scenarios) {
+    for (const scope of [
+      BASIC_SETUP_PILOT_MODE,
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      CORP_SCORE_WINDOW_PILOT_MODE,
+    ] as const) {
+      if (!scenario.evidence.includes(`pilot_scope:${scope}:eligible`)) continue;
+      result[scope].eligibleCount += 1;
+      result[scope].wouldOverrideCount += 1;
+      result[scope].scenarioIds.push(scenario.scenarioId);
+    }
+  }
+
+  return result;
+}
+
+function emptyPilotScopeBreakdown(): SemanticShadowLeaguePilotScopeBreakdown {
+  return {
+    eligibleCount: 0,
+    wouldOverrideCount: 0,
+    scenarioIds: [],
+  };
+}
+
 function topAgreesWithExpectation(
   top: SemanticRankedAction | undefined,
   topActionType: string | undefined,
@@ -243,6 +310,72 @@ function topAgreesWithExpectation(
     (topActionType !== undefined &&
       expectation.expectedTopActionTypes.includes(topActionType))
   );
+}
+
+function eligiblePilotScopes(
+  sample: RealEngineDecisionCorpusSample,
+  top: SemanticRankedAction | undefined,
+  topActionType: string | undefined,
+): AiPlayStrengthPilotScope[] {
+  if (!top || !topActionType) return [];
+  const action = syntheticLegalActionForTop(sample, top, topActionType);
+  const scopes: readonly AiPlayStrengthPilotScope[] = [
+    BASIC_SETUP_PILOT_MODE,
+    RUNNER_SAFE_ACCESS_PILOT_MODE,
+    CORP_SCORE_WINDOW_PILOT_MODE,
+  ];
+  return scopes.filter(
+    (scope) =>
+      pilotScopeAllowsAction({
+        scope,
+        frame: sample.frame,
+        action,
+        top,
+      }).allowed,
+  );
+}
+
+function syntheticLegalActionForTop(
+  sample: RealEngineDecisionCorpusSample,
+  top: SemanticRankedAction,
+  actionType: string,
+): LegalAction {
+  const candidate = sample.frame.actionCandidates.find(
+    (candidate) => candidate.actionId === top.actionId,
+  );
+  const serverId =
+    candidate?.targetContext?.selectedTargets[0]?.targetId ??
+    candidate?.targetContext?.availableTargets?.[0]?.targetId;
+  return {
+    actionId: top.actionId,
+    side: sample.side,
+    type: actionType as LegalAction["type"],
+    label: actionType,
+    source: "basic_action",
+    timingPoint:
+      sample.side === "runner" ? "runner_action.main" : "corp_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: sample.frame.stateVersion,
+    ...(serverId ? { payload: { serverId } } : {}),
+  };
+}
+
+function topDisagreementReasons(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+): string[] {
+  return scenarios
+    .filter((scenario) => scenario.agreementCompared && !scenario.agreement)
+    .map((scenario) =>
+      safe(
+        `${scenario.scenarioId}:expected=${[
+          ...(scenario.expectedTopActionTypes ?? []),
+          ...(scenario.expectedTopActionIds ?? []),
+        ].join("|")}:observed=${scenario.topActionType ?? scenario.topActionId ?? "none"}`,
+      ),
+    )
+    .sort();
 }
 
 function countMistakes(
