@@ -176,7 +176,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-12 | complete | `2020e1ef` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus.ts packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 | AI-MAT-13 | complete | `d7334946` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/doctrine-goal-synthesis.ts packages/ai/src/decision/doctrine-goal-synthesis.test.ts` |
 | AI-MAT-14 | complete | `f4bfa1d4` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/decision/semantic-shadow-decision.ts packages/ai/src/decision/semantic-shadow-decision.test.ts` |
-| AI-MAT-15 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/module-boundaries.test.ts` |
+| AI-MAT-15 | complete | `4b4cf668` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/module-boundaries.test.ts` |
+| AI-MAT-16 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 
 ## Check-Nachweise
 
@@ -213,6 +214,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-15`: Module-Boundary-Guard nutzt pfadresolvierende Imports und schuetzt `decision/pilot/*` gegen Evaluation-, Runtime-Selection-, Legacy- und Public-Chooser-Imports.
 - `AI-MAT-15`: `corepack pnpm --filter @netgrid/ai test -- src/decision/module-boundaries.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1218 Tests ausgefuehrt.
 - `AI-MAT-15`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-16`: ShadowLeague berichtet Pilot-Eligibility jetzt strukturiert je Szenario, als Gesamtrate und als Runner/Corp-Breakdown; Scope-Breakdown wird nicht mehr aus Evidence-Strings abgeleitet.
+- `AI-MAT-16`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/semantic-shadow-league.test.ts src/decision/pilot/pilot-scope-registry.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1218 Tests ausgefuehrt.
+- `AI-MAT-16`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

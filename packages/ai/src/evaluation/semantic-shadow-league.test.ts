@@ -42,6 +42,19 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
     expect(report.metrics.pilotEligibleCount).toBe(26);
     expect(report.metrics.pilotWouldOverrideCount).toBe(26);
+    expect(report.metrics.pilotEligibilityRate).toBe(0.867);
+    expect(report.metrics.pilotEligibilityBySide.runner).toEqual({
+      scenarioCount: 15,
+      eligibleCount: 14,
+      wouldOverrideCount: 14,
+      eligibleRate: 0.933,
+    });
+    expect(report.metrics.pilotEligibilityBySide.corp).toEqual({
+      scenarioCount: 15,
+      eligibleCount: 12,
+      wouldOverrideCount: 12,
+      eligibleRate: 0.8,
+    });
     expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(13);
     expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(11);
     expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(2);
@@ -90,6 +103,41 @@ describe("SemanticShadowLeague", () => {
         "productive_use_allowed:false",
       ]),
     });
+    expect(scenario(report, "runner_real_low_credits").pilotEligibility).toEqual({
+      eligible: true,
+      wouldOverride: true,
+      scopes: ["basic_setup"],
+      reportOnly: true,
+      productiveUseAllowed: false,
+      evidence: [
+        "pilot_scope_eligible:true",
+        "pilot_would_override:true",
+        "pilot_eligibility:report_only",
+        "productive_use_allowed:false",
+        "pilot_scope:basic_setup:eligible",
+      ],
+    });
+    expect(scenario(report, "runner_real_safe_hq_access").pilotEligibility).toEqual({
+      eligible: true,
+      wouldOverride: true,
+      scopes: ["runner_safe_access"],
+      reportOnly: true,
+      productiveUseAllowed: false,
+      evidence: [
+        "pilot_scope_eligible:true",
+        "pilot_would_override:true",
+        "pilot_eligibility:report_only",
+        "productive_use_allowed:false",
+        "pilot_scope:runner_safe_access:eligible",
+      ],
+    });
+    expect(
+      report.scenarios.every(
+        (candidate) =>
+          candidate.pilotEligibility.reportOnly &&
+          candidate.pilotEligibility.productiveUseAllowed === false,
+      ),
+    ).toBe(true);
   });
 });
 

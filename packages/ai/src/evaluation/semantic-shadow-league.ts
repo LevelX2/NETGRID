@@ -73,7 +73,17 @@ export type SemanticShadowLeagueScenarioReport = {
   agreement?: boolean;
   observedMistakes: AiMistakeClass[];
   blockers: Record<string, number>;
+  pilotEligibility: SemanticShadowLeaguePilotEligibility;
   remoteContestPilotCandidate?: SemanticShadowLeagueRemoteContestPilotCandidate;
+  evidence: string[];
+};
+
+export type SemanticShadowLeaguePilotEligibility = {
+  eligible: boolean;
+  wouldOverride: boolean;
+  scopes: AiPlayStrengthPilotScope[];
+  reportOnly: true;
+  productiveUseAllowed: false;
   evidence: string[];
 };
 
@@ -103,6 +113,8 @@ export type SemanticShadowLeagueReport = {
     mistakesByClass: Record<AiMistakeClass, number>;
     pilotEligibleCount: number;
     pilotWouldOverrideCount: number;
+    pilotEligibilityRate: number | null;
+    pilotEligibilityBySide: Record<Side, SemanticShadowLeaguePilotEligibilityBySide>;
     scopeBreakdown: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>;
     remoteContestPilotCandidateCount: number;
     remoteContestPilotCandidateScenarioIds: string[];
@@ -121,6 +133,13 @@ export type SemanticShadowLeagueReport = {
   runtimeConsumerStatus: "none";
   noRuntimeEffect: true;
   evidence: string[];
+};
+
+export type SemanticShadowLeaguePilotEligibilityBySide = {
+  scenarioCount: number;
+  eligibleCount: number;
+  wouldOverrideCount: number;
+  eligibleRate: number | null;
 };
 
 export type SemanticShadowLeaguePilotScopeBreakdown = {
@@ -205,6 +224,7 @@ function buildScenarioReport(
     : undefined;
   const mistakes = classifyDecisionTraceMistakes(sample.frame, sample.trace);
   const pilotScopes = eligiblePilotScopes(sample, top, topCandidate?.actionType);
+  const pilotEligibility = buildPilotEligibility(pilotScopes);
   const remoteContestPilotCandidate = remoteContestPilotCandidateFor(
     sample,
     top,
@@ -233,6 +253,7 @@ function buildScenarioReport(
     blockers: countStrings(
       sample.trace.rejectedActions.flatMap((action) => action.blockers),
     ),
+    pilotEligibility,
     ...(remoteContestPilotCandidate ? { remoteContestPilotCandidate } : {}),
     evidence: [
       `scenario:${safe(sample.scenarioId)}`,
@@ -241,9 +262,7 @@ function buildScenarioReport(
       `rejected_action_count:${sample.trace.rejectedActions.length}`,
       `agreement_compared:${agreementCompared}`,
       ...(agreementCompared ? [`agreement:${Boolean(agreement)}`] : []),
-      `pilot_scope_eligible:${pilotScopes.length > 0}`,
-      `pilot_would_override:${pilotScopes.length > 0}`,
-      ...pilotScopes.map((scope) => `pilot_scope:${scope}:eligible`),
+      ...pilotEligibility.evidence,
       ...(remoteContestPilotCandidate
         ? ["remote_contest_pilot_candidate:report_only"]
         : []),
@@ -258,6 +277,12 @@ function buildLeagueMetrics(
 ): SemanticShadowLeagueReport["metrics"] {
   const compared = scenarios.filter((scenario) => scenario.agreementCompared);
   const agreementCount = compared.filter((scenario) => scenario.agreement).length;
+  const pilotEligibleCount = scenarios.filter(
+    (scenario) => scenario.pilotEligibility.eligible,
+  ).length;
+  const pilotWouldOverrideCount = scenarios.filter(
+    (scenario) => scenario.pilotEligibility.wouldOverride,
+  ).length;
   const topScores = scenarios
     .map((scenario) => scenario.topScore)
     .filter((score): score is number => score !== undefined);
@@ -273,12 +298,11 @@ function buildLeagueMetrics(
     mistakesByClass: countMistakes(
       scenarios.flatMap((scenario) => scenario.observedMistakes),
     ),
-    pilotEligibleCount: scenarios.filter((scenario) =>
-      scenario.evidence.includes("pilot_scope_eligible:true"),
-    ).length,
-    pilotWouldOverrideCount: scenarios.filter((scenario) =>
-      scenario.evidence.includes("pilot_would_override:true"),
-    ).length,
+    pilotEligibleCount,
+    pilotWouldOverrideCount,
+    pilotEligibilityRate:
+      scenarios.length > 0 ? roundMetric(pilotEligibleCount / scenarios.length) : null,
+    pilotEligibilityBySide: pilotEligibilityBySide(scenarios),
     scopeBreakdown: pilotScopeBreakdown(scenarios),
     remoteContestPilotCandidateCount: scenarios.filter(
       (scenario) => scenario.remoteContestPilotCandidate !== undefined,
@@ -359,6 +383,26 @@ function rankedActionHasUtilityFamily(
   );
 }
 
+function buildPilotEligibility(
+  scopes: readonly AiPlayStrengthPilotScope[],
+): SemanticShadowLeaguePilotEligibility {
+  const eligible = scopes.length > 0;
+  return {
+    eligible,
+    wouldOverride: eligible,
+    scopes: [...scopes].sort(),
+    reportOnly: true,
+    productiveUseAllowed: false,
+    evidence: [
+      `pilot_scope_eligible:${eligible}`,
+      `pilot_would_override:${eligible}`,
+      "pilot_eligibility:report_only",
+      "productive_use_allowed:false",
+      ...scopes.map((scope) => `pilot_scope:${scope}:eligible`),
+    ],
+  };
+}
+
 function pilotScopeBreakdown(
   scenarios: readonly SemanticShadowLeagueScenarioReport[],
 ): Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown> {
@@ -372,12 +416,7 @@ function pilotScopeBreakdown(
   };
 
   for (const scenario of scenarios) {
-    for (const scope of [
-      BASIC_SETUP_PILOT_MODE,
-      RUNNER_SAFE_ACCESS_PILOT_MODE,
-      CORP_SCORE_WINDOW_PILOT_MODE,
-    ] as const) {
-      if (!scenario.evidence.includes(`pilot_scope:${scope}:eligible`)) continue;
+    for (const scope of scenario.pilotEligibility.scopes) {
       result[scope].eligibleCount += 1;
       result[scope].wouldOverrideCount += 1;
       result[scope].scenarioIds.push(scenario.scenarioId);
@@ -392,6 +431,37 @@ function emptyPilotScopeBreakdown(): SemanticShadowLeaguePilotScopeBreakdown {
     eligibleCount: 0,
     wouldOverrideCount: 0,
     scenarioIds: [],
+  };
+}
+
+function pilotEligibilityBySide(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+): Record<Side, SemanticShadowLeaguePilotEligibilityBySide> {
+  return {
+    runner: pilotEligibilityForSide(scenarios, "runner"),
+    corp: pilotEligibilityForSide(scenarios, "corp"),
+  };
+}
+
+function pilotEligibilityForSide(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+  side: Side,
+): SemanticShadowLeaguePilotEligibilityBySide {
+  const sideScenarios = scenarios.filter((scenario) => scenario.side === side);
+  const eligibleCount = sideScenarios.filter(
+    (scenario) => scenario.pilotEligibility.eligible,
+  ).length;
+  const wouldOverrideCount = sideScenarios.filter(
+    (scenario) => scenario.pilotEligibility.wouldOverride,
+  ).length;
+  return {
+    scenarioCount: sideScenarios.length,
+    eligibleCount,
+    wouldOverrideCount,
+    eligibleRate:
+      sideScenarios.length > 0
+        ? roundMetric(eligibleCount / sideScenarios.length)
+        : null,
   };
 }
 
