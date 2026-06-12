@@ -94,6 +94,7 @@ Der Prozess stoppt ohne Nachfrage, wenn eine Änderung Engine-Validierung, `appl
 | AI-MAT2-5 | complete | AI-MAT2-5 commit | PilotScopeDecisionMatrix in Registry und side-safe Debug-Formatter ergänzt. Checks: Registry 11/11, DecisionDebug 5/5, Typecheck grün. |
 | AI-MAT2-6 | complete | AI-MAT2-6 commit | `runProjectionSummary` am Candidate ergänzt; Alignment nutzt Summary vor TargetContext vor Evidence-Fallback. Checks: Alignment 9/9, ActionSemanticCoverage 5/5, Typecheck grün. |
 | AI-MAT2-7 | complete | AI-MAT2-7 commit | RunnerSafeAccess blockt Evidence-only Alignment und verlangt strukturierte Candidate-Alignment-Quelle. Checks: SafeAccess 2/2, Alignment 9/9, Registry 11/11, Typecheck grün. |
+| AI-MAT2-8 | complete | AI-MAT2-8 commit | RemoteContest Candidate V2 streng bewertet und in ShadowLeague report-only integriert; Runtime-Consumer bleibt `none`. Checks: RemoteContest 3/3, ShadowLeague 2/2, Typecheck grün. |
 
 ## Paketdetails
 

@@ -67,6 +67,9 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 | --- | --- |
 | candidateCount | 1 |
 | scenarioIds | `runner_real_remote_score_threat` |
+| candidateStatus | `eligible` |
+| productiveUseAllowed | `false` |
+| runtimeConsumerStatus | `none` |
 
 ## Top Disagreement Reasons
 
@@ -79,6 +82,7 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 - `pilotEligibleCount` zählt Szenarien mit mindestens einem erlaubten Scope. `scopeCandidateCount` zählt geprüfte Szenario/Scope-Paare. `scopeAllowedCount` zählt erlaubte Szenario/Scope-Paare.
 - `pilotWouldOverrideCount` ist report-only und bedeutet: Die Shadow-Top-Action hätte bei erlaubtem Scope und positivem Score-Gap ein hypothetisches Override-Potenzial. Es ist keine produktive Entscheidung.
 - `pilotActualOverrideCount` bleibt 0, weil die Shadow-League keinen Runtime-Consumer hat.
+- Der RemoteContest-Kandidat ist in V2 streng bewertet, bleibt aber weiterhin report-only und hat keinen Runtime-Consumer.
 - Die `runner_safe_access`-Eligibility in `runner_real_damage_buffer_needed` und `runner_real_tag_cleanup` ist ein bewusst sichtbarer Baseline-Befund, kein Freigabesignal.
 - `redactionStatus: passed` bestätigt nur den lokalen Report-Scrub. Es erweitert keine Hidden-Info-Allowlist.
 - Nach AI-MAT2-2 umfasst der Korpus lokal 30 Szenarien. Die drei Top-Disagreements bleiben unverändert; die zusätzlichen Szenarien erhöhen die Pilot-Scope-Eligibility.

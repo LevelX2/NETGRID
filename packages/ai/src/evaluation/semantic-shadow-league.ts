@@ -7,6 +7,10 @@ import {
   type AiPlayStrengthPilotScope,
   type PilotScopeDecision,
 } from "../decision/pilot-scope-registry";
+import {
+  evaluateRemoteContestCandidate,
+  type RemoteContestCandidateEvaluation,
+} from "../decision/pilot/remote-contest-candidate";
 import type { SemanticRankedAction } from "../decision/semantic-decision-trace";
 import {
   findForbiddenSemanticPath,
@@ -93,18 +97,8 @@ export type SemanticShadowLeaguePilotEligibility = {
   evidence: string[];
 };
 
-export type SemanticShadowLeagueRemoteContestPilotCandidate = {
-  actionId: string;
-  targetServerId?: string;
-  targetKind?: string;
-  recommendation?: string;
-  pathPassability?: string;
-  scoreThreat?: boolean;
-  reportOnly: true;
-  productiveUseAllowed: false;
-  reason: string;
-  evidence: string[];
-};
+export type SemanticShadowLeagueRemoteContestPilotCandidate =
+  RemoteContestCandidateEvaluation;
 
 export type SemanticShadowLeagueReport = {
   schemaVersion: typeof SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION;
@@ -242,6 +236,7 @@ function buildScenarioReport(
     sample,
     top,
     topCandidate?.actionType,
+    pilotEligibility.scoreGap,
   );
   const report: SemanticShadowLeagueScenarioReport = {
     scenarioId: safe(sample.scenarioId),
@@ -380,48 +375,31 @@ function remoteContestPilotCandidateFor(
   sample: RealEngineDecisionCorpusSample,
   top: SemanticRankedAction | undefined,
   topActionType: string | undefined,
+  scoreGap: number | null,
 ): SemanticShadowLeagueRemoteContestPilotCandidate | undefined {
-  if (!top || sample.side !== "runner" || topActionType !== "start_run") {
-    return undefined;
-  }
-  if (!rankedActionHasUtilityFamily(top, "remote_contest")) return undefined;
-  const runTarget = sample.frame.runner?.runTargets?.find(
-    (target) =>
-      target.actionId === top.actionId &&
-      (target.targetKind === "remote" || target.accessTargetKind === "remote"),
-  );
-  if (!runTarget) return undefined;
+  const result = evaluateRemoteContestCandidate({
+    frame: sample.frame,
+    top,
+    topActionType,
+    scoreGap,
+  });
+  if (!result) return undefined;
   return {
-    actionId: safe(top.actionId),
-    targetServerId: safe(runTarget.targetServerId),
-    targetKind: safe(runTarget.targetKind),
-    recommendation: safe(runTarget.recommendation),
-    pathPassability: safe(runTarget.pathPassability),
-    scoreThreat: runTarget.scoreThreat,
-    reportOnly: true,
-    productiveUseAllowed: false,
-    reason: "remote_contest_target_calibration_required",
-    evidence: [
-      "remote_contest_pilot_candidate:report_only",
-      "productive_use_allowed:false",
-      `target_kind:${safe(runTarget.targetKind)}`,
-      `recommendation:${safe(runTarget.recommendation)}`,
-      `path_passability:${safe(runTarget.pathPassability)}`,
-      `score_threat:${runTarget.scoreThreat}`,
-    ],
+    ...result,
+    actionId: safe(result.actionId),
+    ...(result.targetServerId
+      ? { targetServerId: safe(result.targetServerId) }
+      : {}),
+    ...(result.targetKind ? { targetKind: safe(result.targetKind) } : {}),
+    ...(result.recommendation
+      ? { recommendation: safe(result.recommendation) }
+      : {}),
+    ...(result.pathPassability
+      ? { pathPassability: safe(result.pathPassability) }
+      : {}),
+    ...(result.blockedReason ? { blockedReason: safe(result.blockedReason) } : {}),
+    evidence: result.evidence.map(safe),
   };
-}
-
-function rankedActionHasUtilityFamily(
-  action: SemanticRankedAction,
-  family: string,
-): boolean {
-  if (action.primaryGoalId?.includes(family)) return true;
-  return action.components.some(
-    (component) =>
-      component.component === "goal_fit" &&
-      component.evidence.some((entry) => entry === `utility_family:${family}`),
-  );
 }
 
 function buildPilotEligibility(

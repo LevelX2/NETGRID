@@ -112,12 +112,16 @@ describe("SemanticShadowLeague", () => {
     ).toMatchObject({
       targetKind: "remote",
       scoreThreat: true,
-      reportOnly: true,
+      candidateStatus: "eligible",
+      structuredAlignment: true,
       productiveUseAllowed: false,
-      reason: "remote_contest_target_calibration_required",
+      runtimeConsumerStatus: "none",
       evidence: expect.arrayContaining([
-        "remote_contest_pilot_candidate:report_only",
+        "remote_contest_candidate:report_only",
         "productive_use_allowed:false",
+        "runtime_consumer:none",
+        "alignment_source:legal_action_payload",
+        "remote_contest_candidate_status:eligible",
       ]),
     });
     expect(scenario(report, "runner_real_low_credits").pilotEligibility).toMatchObject({
