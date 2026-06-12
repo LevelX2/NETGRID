@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "./semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
@@ -189,6 +190,49 @@ describe("SemanticShadowDecision", () => {
     });
     expect(JSON.stringify(trace)).not.toMatch(/privatePayload|cardInstances|fullGameState/i);
   });
+
+  it("optionally includes diagnostic doctrine goals in the shadow trace", () => {
+    const input = inputFor("runner", [
+      legalAction("run-hq", "start_run", "runner"),
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      doctrineDiagnostic: runnerRemoteContestDoctrine(),
+    });
+
+    expect(buildSemanticShadowDecision(frame).doctrineGoals).toBeUndefined();
+
+    const trace = buildSemanticShadowDecision(frame, {
+      includeDoctrineGoalsInTrace: true,
+    });
+
+    expect(trace.doctrineGoals).toMatchObject({
+      scope: "doctrine_goal_trace_summary",
+      reportOnly: true,
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      goalCount: 1,
+      goals: [
+        expect.objectContaining({
+          goalId: "runner.doctrine.remote_contest",
+          family: "remote_contest",
+          source: "deck",
+        }),
+      ],
+      evidence: expect.arrayContaining([
+        "doctrine_goals:trace_summary",
+        "productive_use_allowed:false",
+      ]),
+    });
+    expect(trace.selectedActionId).toBeUndefined();
+    expect(trace.noRuntimeEffect).toBe(true);
+  });
 });
 
 function frameForEconomyChoice() {
@@ -301,5 +345,57 @@ function visibleCard(cardId: string) {
     zone: "identity",
     visibility: "public",
     known: true,
+  };
+}
+
+function runnerRemoteContestDoctrine(): DeckDoctrineV2Diagnostic {
+  return {
+    schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+    scope: "diagnostic_only",
+    productiveUseAllowed: false,
+    deckSnapshotId: "runner-remote-test",
+    side: "runner",
+    status: "complete",
+    neutralDoctrine: false,
+    strategyDiagnostics: [
+      {
+        strategyId: "runner.remote_contest",
+        status: "complete",
+        anchorScore: 80,
+        supportScore: 80,
+        finalScore: 80,
+        confidence: "high",
+        anchorEvidenceCount: 1,
+        supportEvidenceCount: 1,
+        supportGaps: [],
+      },
+    ],
+    rolesStatus: {
+      status: "complete",
+      cardCount: 1,
+      cardRows: 1,
+      completeCards: 1,
+      partialCards: 0,
+      anchorlessCards: 0,
+      cardsWithoutRoles: [],
+      roleSignalCount: 1,
+      functionSignalCount: 1,
+      strategyAnchorCount: 1,
+    },
+    cardRoles: [],
+    warnings: [],
+    source: {
+      strategyProfile: "buildDeckStrategyProfile",
+      mode: "report_only",
+      plannerEffect: "none",
+    },
+    noEffectFlags: {
+      actionSelection: false,
+      plannerWeights: false,
+      scoring: false,
+      legalActionGeneration: false,
+      engineMutation: false,
+      hiddenInfoProjection: false,
+    },
   };
 }

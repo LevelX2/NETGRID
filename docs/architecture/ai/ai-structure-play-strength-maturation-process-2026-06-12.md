@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_13_doctrine_goal_delta
+ai_mat_14_doctrine_trace_option
 
 ## Quelle/Vorgabe
 
@@ -174,7 +174,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-10 | complete | `876252b0` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts` |
 | AI-MAT-11 | complete | `7afce6dd` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 | AI-MAT-12 | complete | `2020e1ef` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/real-engine-decision-corpus.ts packages/ai/src/evaluation/real-engine-decision-corpus-fixtures.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
-| AI-MAT-13 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/doctrine-goal-synthesis.ts packages/ai/src/decision/doctrine-goal-synthesis.test.ts` |
+| AI-MAT-13 | complete | `d7334946` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/doctrine-goal-synthesis.ts packages/ai/src/decision/doctrine-goal-synthesis.test.ts` |
+| AI-MAT-14 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/decision/semantic-shadow-decision.ts packages/ai/src/decision/semantic-shadow-decision.test.ts` |
 
 ## Check-Nachweise
 
@@ -205,6 +206,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-13`: DoctrineGoalSynthesis ergaenzt Runner-RemoteContest-Diagnoseziele und Coverage-Fallback.
 - `AI-MAT-13`: `corepack pnpm --filter @netgrid/ai test -- src/decision/doctrine-goal-synthesis.test.ts src/decision/neutral-goal-synthesis.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1216 Tests ausgefuehrt.
 - `AI-MAT-13`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-14`: DoctrineGoals sind per expliziter ShadowDecision-Option als report-only Trace-Summary sichtbar; Default bleibt ohne DoctrineGoal-Trace-Feld.
+- `AI-MAT-14`: `corepack pnpm --filter @netgrid/ai test -- src/decision/semantic-shadow-decision.test.ts src/decision/doctrine-goal-synthesis.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1217 Tests ausgefuehrt.
+- `AI-MAT-14`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

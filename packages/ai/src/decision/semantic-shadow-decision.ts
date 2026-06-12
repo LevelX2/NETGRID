@@ -1,6 +1,7 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
+import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
 import type { AiOpportunityProjection } from "./opportunity-projection";
 import {
@@ -29,6 +30,7 @@ import {
 } from "./threat-projection";
 import type {
   SemanticDecisionTrace,
+  SemanticDecisionTraceDoctrineGoalSummary,
   SemanticDecisionTraceTargetChoiceShadowSummary,
   SemanticRankedAction,
   SemanticRejectedAction,
@@ -42,6 +44,7 @@ export type BuildSemanticShadowDecisionOptions = {
   calibrationProfile?:
     | SemanticShadowCalibrationProfile
     | SemanticShadowCalibrationProfileId;
+  includeDoctrineGoalsInTrace?: boolean;
 };
 
 export function buildSemanticShadowDecision(
@@ -106,6 +109,9 @@ export function buildSemanticShadowDecision(
     left.actionId.localeCompare(right.actionId),
   );
   const targetChoiceShadow = targetChoiceShadowTraceSummary(frame);
+  const doctrineGoals = options.includeDoctrineGoalsInTrace
+    ? doctrineGoalTraceSummary(frame)
+    : undefined;
 
   return {
     schemaVersion: "semantic-decision-trace-v1",
@@ -127,6 +133,7 @@ export function buildSemanticShadowDecision(
     rankedActions,
     rejectedActions,
     ...(targetChoiceShadow ? { targetChoiceShadow } : {}),
+    ...(doctrineGoals ? { doctrineGoals } : {}),
     noRuntimeEffect: true,
   };
 }
@@ -439,4 +446,30 @@ function legalTargetRequirementKind(
   if (targetKind === "server") return "server";
   if (targetKind === "subroutine") return "subroutine";
   return undefined;
+}
+
+function doctrineGoalTraceSummary(
+  frame: SemanticDecisionFrame,
+): SemanticDecisionTraceDoctrineGoalSummary | undefined {
+  const goals = synthesizeDoctrineTacticalGoals(frame.doctrineDiagnostic);
+  if (goals.length === 0) return undefined;
+  return {
+    scope: "doctrine_goal_trace_summary",
+    reportOnly: true,
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    goalCount: goals.length,
+    goals: goals.map((goal) => ({
+      goalId: goal.goalId,
+      family: goal.family,
+      priority: goal.priority,
+      ...(goal.source ? { source: goal.source } : {}),
+      evidence: [...(goal.evidence ?? [])],
+    })),
+    evidence: [
+      "doctrine_goals:trace_summary",
+      `doctrine_goal_count:${goals.length}`,
+      "productive_use_allowed:false",
+    ],
+  };
 }

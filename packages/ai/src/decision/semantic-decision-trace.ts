@@ -44,6 +44,22 @@ export type SemanticDecisionTraceTargetChoiceShadowSummary = {
   evidence: string[];
 };
 
+export type SemanticDecisionTraceDoctrineGoalSummary = {
+  scope: "doctrine_goal_trace_summary";
+  reportOnly: true;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  goalCount: number;
+  goals: {
+    goalId: string;
+    family: string;
+    priority: number;
+    source?: string;
+    evidence: string[];
+  }[];
+  evidence: string[];
+};
+
 export const SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS = [
   "semantic_shadow_top",
   "pilot_scope",
@@ -77,6 +93,7 @@ export type SemanticDecisionTrace = {
   rankedActions: SemanticRankedAction[];
   rejectedActions: SemanticRejectedAction[];
   targetChoiceShadow?: SemanticDecisionTraceTargetChoiceShadowSummary;
+  doctrineGoals?: SemanticDecisionTraceDoctrineGoalSummary;
   selectedActionId?: string;
   noRuntimeEffect?: boolean;
 };
