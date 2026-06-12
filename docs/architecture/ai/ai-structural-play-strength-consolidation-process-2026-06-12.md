@@ -210,11 +210,24 @@ created
 - Worktree: `C:\Projekte\NETGRID_AI_STRUCTURAL_PLAY_STRENGTH_CONSOLIDATION`.
 - Hauptworkspace: `C:\Projekte\NETGRID`, nur finaler lokaler Merge.
 - Kein `git add .`.
+- Kein pauschales `git add -A`.
 - Kein pauschales Staging im Hauptworkspace.
 - Vor jedem Commit: `git status --short`.
+- Stage-Kommandos nennen immer konkrete paketzugehörige Pfade.
 - Commit nur mit paketzugehörigen Dateien.
+- Abschlussberichte nennen die gestagten Paketpfade, wenn fremde Änderungen im Hauptworkspace möglich sind.
 - Fremde offene Änderungen werden dokumentiert, nicht gestasht, nicht committed, nicht reverted.
 - Push/PR nur auf ausdrücklichen Nutzerwunsch.
+
+## AI-CONS-1 Paketdisziplin
+
+Dieser Prozess startet mit fremden offenen Hauptworkspace-Änderungen in AI022-Daten-, Review- und Scriptdateien. Daraus folgt für alle Pakete:
+
+- `git status --short` wird vor jedem Commit geprüft.
+- `git add` wird nur mit expliziten Pfaden verwendet.
+- Neue oder geänderte Dateien außerhalb des aktiven Pakets bleiben unstaged.
+- Hauptworkspace-Änderungen aus anderen Threads werden nicht normalisiert, formatiert oder als Nebenfund korrigiert.
+- Ein finaler Merge nach `main` wird nur durchgeführt, wenn Git die fremden Änderungen nicht überschreibt.
 
 ## Controller-Prompt-Kern
 
