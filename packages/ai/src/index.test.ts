@@ -5948,6 +5948,76 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpAction(input).actionId).toBe(fullBbsActions[0]?.actionId);
   });
 
+  it("keeps Information Laundering legal at zero counters but values it below basic credit", () => {
+    const input = installedCorpInformationLaunderingInput(
+      "ai-corp-information-laundering-zero",
+      0,
+      { credits: 1 },
+    );
+    const laundering = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_328_information-laundering",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(laundering).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!laundering || !basicCredit)
+      throw new Error("Missing Information Laundering zero-counter fixture");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [laundering, basicCredit],
+    });
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+  });
+
+  it("uses prepared Information Laundering payouts before the basic credit action", () => {
+    const input = installedCorpInformationLaunderingInput(
+      "ai-corp-information-laundering-payout",
+      4,
+      { credits: 1 },
+    );
+    const laundering = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_328_information-laundering",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(laundering).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!laundering || !basicCredit)
+      throw new Error("Missing Information Laundering payout fixture");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, laundering],
+    });
+
+    expect(decision.actionId).toBe(laundering.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(decision.evidence).toContain(
+      "installed_corp_economy_kind:advancement_counter_payout",
+    );
+    expect(decision.evidence).toContain(
+      "installed_corp_economy_advancement_counters:4",
+    );
+    expect(decision.evidence).toContain(
+      "installed_corp_economy_immediate_gain:16",
+    );
+  });
+
   it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
     const input = corpActionPhaseInput(
       "ai-v140-low-reserve-central-protect",
@@ -26699,6 +26769,58 @@ function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
     putInstalledCorpBbsInRemote(state, `remote_${index + 1}`, bitCount);
   });
   state.corp.credits = 2;
+  state.corp.clicks = 3;
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function installedCorpInformationLaunderingInput(
+  seed: string,
+  advancementCounters: number,
+  options: { credits?: number } = {},
+) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: {
+      id: `installed_corp_information_laundering_runner_${seed}`,
+      name: "Installed Corp Information Laundering Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "simple_fracter", quantity: 2 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `installed_corp_information_laundering_corp_${seed}`,
+      name: "Installed Corp Information Laundering Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_328_information-laundering", quantity: 1 },
+        { id: "simple_agenda", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 2 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  const launderingId = putCorpRootInRemote(
+    state,
+    "onr_v1_328_information-laundering",
+    advancementCounters,
+  );
+  state.cardInstances[launderingId] = {
+    ...state.cardInstances[launderingId]!,
+    faceup: true,
+    rezzed: true,
+    advancementCounters,
+  };
+  state.corp.credits = options.credits ?? 2;
   state.corp.clicks = 3;
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",

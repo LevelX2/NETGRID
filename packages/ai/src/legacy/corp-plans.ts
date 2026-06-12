@@ -191,6 +191,7 @@ type CorpPlanFeatures = {
 type CorpInstalledEconomyActionKind =
   | "direct_payout"
   | "pool_payout"
+  | "advancement_counter_payout"
   | "side_economy"
   | "scored_agenda_economy"
   | "scored_agenda_counter_economy";
@@ -555,6 +556,7 @@ export type CorpEvaluationContext = {
 
 const AI_HINTS = createAiHintsByCard();
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
+const INFORMATION_LAUNDERING_CARD_ID = "onr_v1_328_information-laundering";
 const CORP_FUTURE_RUN_ICE_CLASSES: Record<string, CorpFutureRunIceClass> = {
   "onr_v1_222_ball-and-chain": "ball_and_chain",
   "onr_v1_224_bolter-cluster": "bolter_or_data_darts",
@@ -4303,6 +4305,8 @@ function evaluateCorpInstalledEconomyActions(
         ? "scored_agenda_economy"
         : best.kind === "scored_agenda_counter_economy"
           ? "scored_agenda_counter_economy"
+          : best.kind === "advancement_counter_payout"
+            ? "installed_corp_economy_advancement_counter_payout"
           : best.kind === "pool_payout"
             ? "installed_corp_economy_pool_payout"
             : "installed_corp_economy_direct_payout",
@@ -4313,6 +4317,9 @@ function evaluateCorpInstalledEconomyActions(
       `installed_corp_economy_immediate_gain:${best.immediateGain}`,
       `installed_corp_economy_net_credits:${best.netCredits}`,
       `installed_corp_economy_stored_credits:${best.storedCredits}`,
+      ...(best.kind === "advancement_counter_payout"
+        ? [`installed_corp_economy_advancement_counters:${best.storedCredits}`]
+        : []),
       `installed_corp_economy_future_pool_after:${best.futurePoolAfter}`,
       `corp_credit_need:${acuteNeed ? "acute" : "stable"}`,
       ...scoredAgendaEvidence,
@@ -4766,6 +4773,22 @@ function classifyCorpInstalledEconomyAction(
     ),
   );
   if (!installedInServer) return undefined;
+  if (sourceCard.definitionId === INFORMATION_LAUNDERING_CARD_ID) {
+    const advancementCounters = Math.max(
+      0,
+      Math.floor(sourceCard.advancementCounters ?? 0),
+    );
+    const immediateGain = advancementCounters * 4;
+    if (immediateGain <= 0) return undefined;
+    return {
+      kind: "advancement_counter_payout",
+      immediateGain,
+      netCredits: immediateGain - actionCreditCost(action),
+      storedCredits: advancementCounters,
+      futurePoolAfter: 0,
+      ability: "information_laundering_advancement_counter_payout",
+    };
+  }
   const ability =
     [
       action.payload?.v1917AssetAbility,

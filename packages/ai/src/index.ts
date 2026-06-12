@@ -3416,6 +3416,7 @@ type BadPublicityActionEvidence = {
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
 const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
+const INFORMATION_LAUNDERING_CARD_ID = "onr_v1_328_information-laundering";
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -16003,6 +16004,23 @@ function scoreCorpAction(
             ? ["political_overthrow_taken:true"]
             : []),
         );
+      } else if (
+        action.type === "activated_card_ability" &&
+        sourceDefinitionIdForAction(input, action) ===
+          INFORMATION_LAUNDERING_CARD_ID
+      ) {
+        const assessment = corpInformationLaunderingEconomyAssessment(
+          input,
+          action,
+          features,
+        );
+        score = assessment.score;
+        reasonCode = "corp.installed_economy.information_laundering";
+        explanation =
+          assessment.payout > 0
+            ? "Die Corp nutzt Information Laundering als vorbereitete Credit-Quelle."
+            : "Information Laundering ist legal, hat ohne Advancement-Counter aber keinen Credit-Wert.";
+        evidence.push(...assessment.evidence);
       } else {
         score = 260;
         reasonCode = "corp.card_ability.visible";
@@ -16100,6 +16118,57 @@ function scoreCorpAction(
     explanation,
     confidence: confidence(score),
     evidence,
+  };
+}
+
+function corpInformationLaunderingEconomyAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  features: AiFeatures,
+): { score: number; payout: number; advancementCounters: number; evidence: string[] } {
+  const source = findVisibleCard(input, action.source);
+  const advancementCounters = Math.max(
+    0,
+    Math.floor(source?.advancementCounters ?? 0),
+  );
+  const payout = advancementCounters * 4;
+  const clickCost = actionClickCost(action);
+  const lowCredits = features.credits < 5;
+  if (payout <= 0) {
+    return {
+      score: 35,
+      payout,
+      advancementCounters,
+      evidence: [
+        "installed_corp_economy:true",
+        "installed_corp_economy_kind:advancement_counter_payout",
+        `installed_corp_economy_source:${INFORMATION_LAUNDERING_CARD_ID}`,
+        `installed_corp_economy_advancement_counters:${advancementCounters}`,
+        "installed_corp_economy_immediate_gain:0",
+        "installed_corp_economy_net_credits:0",
+        "information_laundering_zero_counter_payout:true",
+        "information_laundering_self_trash_without_credit_value:true",
+      ],
+    };
+  }
+  const score =
+    520 +
+    payout * 45 +
+    (lowCredits ? 100 : 35) -
+    Math.max(0, clickCost - 1) * 80;
+  return {
+    score,
+    payout,
+    advancementCounters,
+    evidence: [
+      "installed_corp_economy:true",
+      "installed_corp_economy_kind:advancement_counter_payout",
+      `installed_corp_economy_source:${INFORMATION_LAUNDERING_CARD_ID}`,
+      `installed_corp_economy_advancement_counters:${advancementCounters}`,
+      `installed_corp_economy_immediate_gain:${payout}`,
+      `installed_corp_economy_net_credits:${payout}`,
+      "information_laundering_prepared_payout:true",
+    ],
   };
 }
 
