@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildPilotScopeDecisionMatrixDebugItems,
   buildSemanticDecisionDebugDiagnostics,
   buildSemanticDecisionDebugScoreComponent,
 } from "./decision-debug";
@@ -158,6 +159,41 @@ describe("DecisionDebug diagnostics", () => {
     expect(JSON.stringify(diagnostics)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|secretGripIds|fullGameState/i,
     );
+  });
+
+  it("formats pilot scope decision matrix items side-safely", () => {
+    expect(
+      buildPilotScopeDecisionMatrixDebugItems({
+        topActionId: "run-hq",
+        scoreGap: 42,
+        scopes: [
+          {
+            scope: "runner_safe_access",
+            allowed: true,
+            reason: "runner_safe_access_central_reachable_allowed",
+            evidence: ["target_kind:hq", "privatePayload:bad"],
+          },
+          {
+            scope: "corp_score_window",
+            allowed: false,
+            reason: "corp_score_window_wrong_side",
+            evidence: ["pilot_scope_allowed:false"],
+          },
+        ],
+      }),
+    ).toEqual([
+      "pilot_scope_matrix_top_action:run-hq",
+      "pilot_scope_matrix_score_gap:42",
+      "pilot_scope_matrix_scope_count:2",
+      "pilot_scope_matrix_scope:runner_safe_access",
+      "pilot_scope_matrix_allowed:runner_safe_access:true",
+      "pilot_scope_matrix_reason:runner_safe_access:runner_safe_access_central_reachable_allowed",
+      "pilot_scope_matrix_evidence:runner_safe_access:target_kind:hq",
+      "pilot_scope_matrix_scope:corp_score_window",
+      "pilot_scope_matrix_allowed:corp_score_window:false",
+      "pilot_scope_matrix_reason:corp_score_window:corp_score_window_wrong_side",
+      "pilot_scope_matrix_evidence:corp_score_window:pilot_scope_allowed:false",
+    ]);
   });
 
   it("builds side-safe score components for debug reports", () => {

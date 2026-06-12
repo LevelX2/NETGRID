@@ -58,6 +58,17 @@ export type SemanticDecisionDebugScoreComponentInput = {
   reason?: string;
 };
 
+export type SemanticDecisionDebugPilotScopeDecisionMatrix = {
+  topActionId: string;
+  scoreGap: number;
+  scopes: readonly {
+    scope: string;
+    allowed: boolean;
+    reason: string;
+    evidence: readonly string[];
+  }[];
+};
+
 const TRACE_DIAGNOSTIC_SECTION_TITLES = {
   semantic_shadow_top: "Semantic Shadow Top",
   pilot_scope: "Pilot Scope",
@@ -79,6 +90,24 @@ export function buildSemanticDecisionDebugScoreComponent(
       ? { reason: sideSafeDebugValue(input.reason) }
       : {}),
   };
+}
+
+export function buildPilotScopeDecisionMatrixDebugItems(
+  matrix: SemanticDecisionDebugPilotScopeDecisionMatrix,
+): string[] {
+  return sideSafeDebugItems([
+    `pilot_scope_matrix_top_action:${matrix.topActionId}`,
+    `pilot_scope_matrix_score_gap:${matrix.scoreGap}`,
+    `pilot_scope_matrix_scope_count:${matrix.scopes.length}`,
+    ...matrix.scopes.flatMap((scope) => [
+      `pilot_scope_matrix_scope:${scope.scope}`,
+      `pilot_scope_matrix_allowed:${scope.scope}:${scope.allowed}`,
+      `pilot_scope_matrix_reason:${scope.scope}:${scope.reason}`,
+      ...scope.evidence.map(
+        (entry) => `pilot_scope_matrix_evidence:${scope.scope}:${entry}`,
+      ),
+    ]),
+  ]);
 }
 
 export function buildSemanticDecisionDebugDiagnostics(

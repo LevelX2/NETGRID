@@ -34,6 +34,17 @@ export type SemanticBasicSetupPilotResult = {
   evidence: string[];
 };
 
+export type PilotScopeDecisionMatrix = {
+  topActionId: string;
+  scoreGap: number;
+  scopes: Array<{
+    scope: AiPlayStrengthPilotScope;
+    allowed: boolean;
+    reason: string;
+    evidence: string[];
+  }>;
+};
+
 export function parsePilotScopes(env: string | undefined): AiPlayStrengthPilotScope[] {
   if (!env) return [];
   const seen = new Set<AiPlayStrengthPilotScope>();
@@ -81,21 +92,22 @@ export function semanticPilotChoice(params: {
   );
   if (!matchingChoice) return undefined;
   if (!traceIsHiddenInfoSafe(params.trace)) return undefined;
+  const scoreGap = top.score - params.currentChoice.score;
+  const decisionMatrix = buildPilotScopeDecisionMatrix({
+    scopes,
+    frame: params.frame,
+    action: matchingChoice.action,
+    top,
+    scoreGap,
+  });
 
-  for (const scope of scopes) {
-    const decision = pilotScopeAllowsAction({
-      scope,
-      frame: params.frame,
-      action: matchingChoice.action,
-      top,
-    });
+  for (const decision of decisionMatrix.scopes) {
     if (!decision.allowed) continue;
     return buildPilotResult({
-      scope,
       decision,
+      decisionMatrix,
       matchingChoice,
       top,
-      scoreGap: top.score - params.currentChoice.score,
     });
   }
 
@@ -118,35 +130,83 @@ export function pilotScopeAllowsAction(params: {
   }
 }
 
-function buildPilotResult(input: {
-  scope: AiPlayStrengthPilotScope;
-  decision: PilotScopeDecision;
-  matchingChoice: SemanticRuntimeChoice;
+export function buildPilotScopeDecisionMatrix(params: {
+  scopes?: readonly AiPlayStrengthPilotScope[];
+  frame: SemanticDecisionFrame;
+  action: LegalAction;
   top: RankedAction;
   scoreGap: number;
+}): PilotScopeDecisionMatrix {
+  const scopes = params.scopes ?? ALL_PLAY_STRENGTH_PILOT_SCOPES;
+  return {
+    topActionId: params.top.actionId,
+    scoreGap: params.scoreGap,
+    scopes: scopes.map((scope) => {
+      const decision = pilotScopeAllowsAction({
+        scope,
+        frame: params.frame,
+        action: params.action,
+        top: params.top,
+      });
+      return {
+        scope,
+        allowed: decision.allowed,
+        reason: decision.reason,
+        evidence: decision.evidence,
+      };
+    }),
+  };
+}
+
+function buildPilotResult(input: {
+  decision: PilotScopeDecisionMatrix["scopes"][number];
+  decisionMatrix: PilotScopeDecisionMatrix;
+  matchingChoice: SemanticRuntimeChoice;
+  top: RankedAction;
 }): SemanticBasicSetupPilotResult {
-  const scopeLabel = `ai_play_strength_pilot:${input.scope}`;
+  const scopeLabel = `ai_play_strength_pilot:${input.decision.scope}`;
   return {
     choice: {
       ...input.matchingChoice,
-      reasonCode: reasonCodeForScope(input.scope),
-      explanation: explanationForScope(input.scope, input.matchingChoice.action.type),
+      reasonCode: reasonCodeForScope(input.decision.scope),
+      explanation: explanationForScope(
+        input.decision.scope,
+        input.matchingChoice.action.type,
+      ),
       evidence: [
         ...input.matchingChoice.evidence,
         scopeLabel,
         `ai_play_strength_pilot_score:${input.top.score}`,
-        `ai_play_strength_pilot_score_gap:${input.scoreGap}`,
+        `ai_play_strength_pilot_score_gap:${input.decisionMatrix.scoreGap}`,
         `ai_play_strength_pilot_goal:${input.top.primaryGoalId ?? "unknown"}`,
+        ...pilotScopeDecisionMatrixEvidence(input.decisionMatrix),
         ...input.decision.evidence,
       ],
     },
     evidence: [
       scopeLabel,
       `top_action:${input.top.actionId}`,
-      `score_gap:${input.scoreGap}`,
+      `score_gap:${input.decisionMatrix.scoreGap}`,
       `pilot_scope_reason:${input.decision.reason}`,
+      ...pilotScopeDecisionMatrixEvidence(input.decisionMatrix),
     ],
   };
+}
+
+function pilotScopeDecisionMatrixEvidence(
+  matrix: PilotScopeDecisionMatrix,
+): string[] {
+  return [
+    `pilot_scope_matrix_top_action:${matrix.topActionId}`,
+    `pilot_scope_matrix_score_gap:${matrix.scoreGap}`,
+    `pilot_scope_matrix_scope_count:${matrix.scopes.length}`,
+    ...matrix.scopes.map(
+      (scopeDecision) =>
+        `pilot_scope_matrix:${scopeDecision.scope}:${
+          scopeDecision.allowed ? "allowed" : "blocked"
+        }:${scopeDecision.reason}`,
+    ),
+  ];
 }
 
 function traceIsHiddenInfoSafe(trace: SemanticDecisionTrace): boolean {

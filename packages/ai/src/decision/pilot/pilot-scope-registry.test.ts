@@ -7,6 +7,7 @@ import {
   CORP_SCORE_WINDOW_PILOT_MODE,
   PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
+  buildPilotScopeDecisionMatrix,
   parsePilotScopes,
   pilotScopeAllowsAction,
   semanticPilotChoice,
@@ -154,6 +155,42 @@ describe("pilot-scope-registry", () => {
     expect(remoteBlocked.reason).toBe("runner_safe_access_non_central_target");
   });
 
+  it("builds a decision matrix for every requested pilot scope", () => {
+    const frameInput = frame(["run-hq"], {
+      runner: { runTargets: [safeCentralRunTarget("run-hq", "hq")] },
+    });
+    const top = rankedAction("run-hq", 160, "run_access");
+    const matrix = buildPilotScopeDecisionMatrix({
+      frame: frameInput,
+      action: legalAction("run-hq", "start_run", { serverId: "hq" }),
+      top,
+      scoreGap: 42,
+    });
+
+    expect(matrix).toEqual({
+      topActionId: "run-hq",
+      scoreGap: 42,
+      scopes: [
+        expect.objectContaining({
+          scope: BASIC_SETUP_PILOT_MODE,
+          allowed: false,
+          reason: "basic_setup_action_type_blocked",
+        }),
+        expect.objectContaining({
+          scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
+          allowed: true,
+          reason: "runner_safe_access_central_reachable_allowed",
+          evidence: expect.arrayContaining(["target_kind:hq"]),
+        }),
+        expect.objectContaining({
+          scope: CORP_SCORE_WINDOW_PILOT_MODE,
+          allowed: false,
+          reason: "corp_score_window_wrong_side",
+        }),
+      ],
+    });
+  });
+
   it("blocks runner safe access on risk signals from the run target", () => {
     const riskyCases = [
       {
@@ -256,6 +293,8 @@ describe("pilot-scope-registry", () => {
       expect.arrayContaining([
         "ai_play_strength_pilot:runner_safe_access",
         "pilot_scope_reason:runner_safe_access_central_reachable_allowed",
+        "pilot_scope_matrix:basic_setup:blocked:basic_setup_action_type_blocked",
+        "pilot_scope_matrix:runner_safe_access:allowed:runner_safe_access_central_reachable_allowed",
       ]),
     );
   });
