@@ -1,4 +1,5 @@
 import type { CardInstanceId } from "@netgrid/shared";
+import { sanitizeCardImplementationSurfacePayload } from "../../view/surface-sanitizer";
 
 export type CorpSequencePayloadValue = string | number | boolean;
 
@@ -43,5 +44,5 @@ export function corpSequenceContextPayload(
       typeof entry[1] === "number" ||
       typeof entry[1] === "boolean",
   );
-  return Object.fromEntries(entries);
+  return sanitizeCardImplementationSurfacePayload(Object.fromEntries(entries));
 }
