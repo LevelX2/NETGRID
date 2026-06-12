@@ -124,6 +124,16 @@ import {
   buildSemanticDecisionDebugDiagnostics,
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
+import {
+  buildSemanticRuntimeDebugPlanContext,
+  semanticRuntimeDebugActionDisplayScore,
+  semanticRuntimeDebugActionWhyChosen,
+  semanticRuntimeDebugActionWhyNot,
+  semanticRuntimeDebugCoverageScoreBreakdown,
+  semanticRuntimeDebugPlanSelectionScoreBreakdown,
+  semanticRuntimeDebugRankedAlternatives,
+  type SemanticRuntimeDebugPlanContext,
+} from "./diagnostics/semantic-runtime-debug";
 import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
 import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
@@ -3832,7 +3842,7 @@ function semanticRuntimeDecisionDebug(
     selected.action.actionId,
     selected,
   );
-  const selectedDisplayScore = semanticRuntimeActionDisplayScore(
+  const selectedDisplayScore = semanticRuntimeDebugActionDisplayScore(
     selected,
     true,
     selectedPlanSelection,
@@ -3865,12 +3875,12 @@ function semanticRuntimeDecisionDebug(
     ),
     scoreBreakdown: [
       ...selectedSemanticScoreBreakdown,
-      ...semanticRuntimeCoveragePlanScoreBreakdown(
+      ...semanticRuntimeDebugCoverageScoreBreakdown(
         selected,
         true,
         selectedPlanSelection,
       ),
-      ...semanticRuntimePlanSelectionScoreBreakdown(
+      ...semanticRuntimeDebugPlanSelectionScoreBreakdown(
         selected,
         true,
         selectedDisplayScore,
@@ -4554,31 +4564,18 @@ function semanticRuntimeRankedAlternatives(
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
-  return rankedChoices
-    .filter((choice) => !choice.exclusion)
-    .slice(0, 24)
-    .map((choice, index) => ({
-      rank: index + 1,
-      planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
-      planKind: choice.scopeId,
-      selectedActionType: choice.action.type,
-      summary: choice.explanation,
-      score: choice.score,
-      ...(choice.confidence !== undefined
-        ? { confidence: choice.confidence }
-        : {}),
-      visibleReasons: scrubEvidence(choice.evidence).slice(0, 4),
-      scoreBreakdown: semanticRuntimeScoreBreakdown(
+  return semanticRuntimeDebugRankedAlternatives({
+    rankedChoices,
+    selectedActionId,
+    scoreBreakdownForChoice: (choice) =>
+      semanticRuntimeScoreBreakdown(
         input,
         choice.action,
         choice.scopeId,
         choice.exclusion,
       ),
-      whyNot:
-        choice.action.actionId === selectedActionId
-          ? ["selected_action"]
-          : ["semantic_score_below_selected"],
-    }));
+    scrubEvidence,
+  });
 }
 
 function semanticRuntimeActionAlternatives(
@@ -4604,18 +4601,18 @@ function semanticRuntimeActionAlternatives(
   });
   return orderedChoices.slice(0, 32).map((choice, index) => {
     const selected = choice.action.actionId === selectedActionId;
-    const displayScore = semanticRuntimeActionDisplayScore(
+    const displayScore = semanticRuntimeDebugActionDisplayScore(
       choice,
       selected,
       planSelection,
     );
-    const planScoreBreakdown = semanticRuntimePlanSelectionScoreBreakdown(
+    const planScoreBreakdown = semanticRuntimeDebugPlanSelectionScoreBreakdown(
       choice,
       selected,
       displayScore,
       planSelection,
     );
-    const coverageScoreBreakdown = semanticRuntimeCoveragePlanScoreBreakdown(
+    const coverageScoreBreakdown = semanticRuntimeDebugCoverageScoreBreakdown(
       choice,
       selected,
       planSelection,
@@ -4641,14 +4638,14 @@ function semanticRuntimeActionAlternatives(
         ...planScoreBreakdown,
       ],
       ...(selected
-        ? { whyChosen: semanticRuntimeActionWhyChosen(choice, planSelection) }
+        ? { whyChosen: semanticRuntimeDebugActionWhyChosen(choice, planSelection) }
         : {
             whyNot: choice.exclusion
               ? [
                   `semantic_excluded:${choice.exclusion.key}`,
                   choice.exclusion.reason,
                 ]
-              : semanticRuntimeActionWhyNot(
+              : semanticRuntimeDebugActionWhyNot(
                   choice,
                   displayScore,
                   planSelection,
@@ -4657,18 +4654,6 @@ function semanticRuntimeActionAlternatives(
     };
   });
 }
-
-type SemanticRuntimePlanSelectionDisplayContext = {
-  selectedChoice?: SemanticRuntimeChoice;
-  selectedActionId: string;
-  selectedRawScore: number;
-  selectedByPlanMapping: boolean;
-  planMatchDisplayBoost: number;
-  coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
-  selectedPlanId?: string;
-  selectedPlanType?: string;
-  mappedActionOrder: Map<string, number>;
-};
 
 function semanticRuntimeCoverageSelectionDebug(
   input: AiDecisionInput,
@@ -4798,39 +4783,13 @@ function semanticRuntimeCoverageCapabilityLabel(kind: string): string {
   }
 }
 
-function semanticRuntimeCoveragePlanScoreBreakdown(
-  choice: SemanticRuntimeChoice,
-  selected: boolean,
-  context: SemanticRuntimePlanSelectionDisplayContext,
-): AiDecisionScoreComponent[] {
-  const coverageSelection = context.coverageSelection;
-  if (
-    !selected ||
-    !coverageSelection ||
-    choice.action.actionId !== context.selectedActionId
-  ) {
-    return [];
-  }
-  return [
-    buildSemanticDecisionDebugScoreComponent({
-      key: "runner_coverage_answer_fit",
-      label: `Coverage-Suchtreffer: ${coverageSelection.capabilityLabel}`,
-      value: 0,
-      reason: coverageSelection.evidence.join("|"),
-    }),
-  ];
-}
-
 function semanticRuntimePlanSelectionDisplayContext(
   input: AiDecisionInput,
   planRuntime: TacticalPlanRuntimeResult,
   selectedActionId: string,
   selectedChoice: SemanticRuntimeChoice | undefined,
-): SemanticRuntimePlanSelectionDisplayContext {
+): SemanticRuntimeDebugPlanContext {
   const mappedActions = planRuntime.selectedMapping?.legalActions ?? [];
-  const mappedActionOrder = new Map(
-    mappedActions.map((action, index) => [action.actionId, index]),
-  );
   const coverageSelection = selectedChoice
     ? semanticRuntimeCoverageSelectionDebug(
         input,
@@ -4838,17 +4797,10 @@ function semanticRuntimePlanSelectionDisplayContext(
         planRuntime,
       )
     : undefined;
-  const selectedByPlanMapping =
-    mappedActionOrder.has(selectedActionId) &&
-    selectedChoice?.evidence.some((entry) =>
-      entry.startsWith("tactical_plan_mapping_overridden:true"),
-    ) !== true;
-  return {
-    ...(selectedChoice ? { selectedChoice } : {}),
+  return buildSemanticRuntimeDebugPlanContext({
     selectedActionId,
-    selectedRawScore: selectedChoice?.score ?? 0,
-    selectedByPlanMapping,
-    planMatchDisplayBoost: selectedByPlanMapping ? 250 : 0,
+    ...(selectedChoice ? { selectedChoice } : {}),
+    mappedActionIds: mappedActions.map((action) => action.actionId),
     ...(coverageSelection ? { coverageSelection } : {}),
     ...(planRuntime.selectedPlan?.planId
       ? { selectedPlanId: planRuntime.selectedPlan.planId }
@@ -4856,102 +4808,7 @@ function semanticRuntimePlanSelectionDisplayContext(
     ...(planRuntime.selectedPlan?.type
       ? { selectedPlanType: planRuntime.selectedPlan.type }
       : {}),
-    mappedActionOrder,
-  };
-}
-
-function semanticRuntimeActionDisplayScore(
-  choice: SemanticRuntimeChoice,
-  selected: boolean,
-  context: SemanticRuntimePlanSelectionDisplayContext,
-): number {
-  if (choice.exclusion) return choice.score;
-  if (!context.selectedByPlanMapping) return choice.score;
-  const selectedFinalScore =
-    context.selectedRawScore + context.planMatchDisplayBoost;
-  if (selected) return selectedFinalScore;
-  const selectedOrder = context.mappedActionOrder.get(context.selectedActionId);
-  const choiceOrder = context.mappedActionOrder.get(choice.action.actionId);
-  if (choiceOrder !== undefined && selectedOrder !== undefined) {
-    if (choiceOrder > selectedOrder) {
-      return Math.min(
-        choice.score,
-        selectedFinalScore - (choiceOrder - selectedOrder) * 25,
-      );
-    }
-    return choice.score;
-  }
-  if (choice.score > selectedFinalScore) {
-    return selectedFinalScore - 50;
-  }
-  return choice.score;
-}
-
-function semanticRuntimePlanSelectionScoreBreakdown(
-  choice: SemanticRuntimeChoice,
-  selected: boolean,
-  displayScore: number,
-  context: SemanticRuntimePlanSelectionDisplayContext,
-): AiDecisionScoreComponent[] {
-  if (!context.selectedByPlanMapping || choice.exclusion) return [];
-  const reason = [
-    `rawSemanticScore:${choice.score}`,
-    `finalSelectionScore:${displayScore}`,
-    context.selectedPlanType ? `selectedPlan:${context.selectedPlanType}` : "",
-    context.planMatchDisplayBoost
-      ? `planMatchDisplayBoost:${context.planMatchDisplayBoost}`
-      : "",
-    context.mappedActionOrder.has(choice.action.actionId)
-      ? "selected_by_plan_mapping_candidate:true"
-      : "plan_mismatch:true",
-  ]
-    .filter(Boolean)
-    .join("|");
-  return [
-    buildSemanticDecisionDebugScoreComponent({
-      key: selected ? "selected_by_plan_mapping" : "plan_selection_adjustment",
-      label: selected ? "Plan-Auswahl" : "Plan-Abgleich",
-      value: roundScore(displayScore - choice.score),
-      reason,
-    }),
-  ];
-}
-
-function semanticRuntimeActionWhyChosen(
-  choice: SemanticRuntimeChoice,
-  context: SemanticRuntimePlanSelectionDisplayContext,
-): string[] {
-  if (context.selectedByPlanMapping) {
-    return [
-      "selected_by_plan_mapping",
-      `rawSemanticScore:${choice.score}`,
-      `finalSelectionScore:${choice.score + context.planMatchDisplayBoost}`,
-      ...(context.selectedPlanType
-        ? [`selectedPlan:${context.selectedPlanType}`]
-        : []),
-    ];
-  }
-  return ["semantic_runtime_actual"];
-}
-
-function semanticRuntimeActionWhyNot(
-  choice: SemanticRuntimeChoice,
-  displayScore: number,
-  context: SemanticRuntimePlanSelectionDisplayContext,
-): string[] {
-  if (context.selectedByPlanMapping) {
-    const mapped = context.mappedActionOrder.has(choice.action.actionId);
-    return [
-      mapped ? "lower_plan_fit" : "plan_mismatch",
-      mapped ? "selected_by_plan_mapping" : "excluded_by_current_plan",
-      `rawSemanticScore:${choice.score}`,
-      `finalSelectionScore:${displayScore}`,
-      ...(displayScore < choice.score
-        ? ["lower_final_score_after_adjustment"]
-        : []),
-    ];
-  }
-  return ["semantic_score_below_selected"];
+  });
 }
 
 function semanticRuntimeScoreBreakdown(
