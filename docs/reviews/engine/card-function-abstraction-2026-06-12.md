@@ -14,7 +14,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 31 |
+| functional_kind_uses_card_name | 32 |
 | false_positive | 33 |
 | test_only_card_name | 101 |
 | allowed_catalog_reference | 43 |
@@ -78,10 +78,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:487` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:488` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:489` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:156` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:305` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:327` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:334` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:169` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:312` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- functional_kind_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:11` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:41` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:48` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/create-game.ts:213` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:640` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:662` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -371,15 +372,15 @@ Die Guard-Nachpflege, der `Quest for Cattekin`-Slice und der `Code Viral Cache`-
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5756 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5778 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie | Anzahl |
 | --- | ---: |
 | new_unclassified_card_name_leak | 1303 |
 | functional_kind_uses_card_name | 41 |
-| runtime_state_field_uses_card_name | 4305 |
-| resolver_function_uses_card_name | 105 |
+| runtime_state_field_uses_card_name | 4326 |
+| resolver_function_uses_card_name | 106 |
 | payload_key_uses_card_name | 2 |
 
 ## Erlaubte Referenzen
