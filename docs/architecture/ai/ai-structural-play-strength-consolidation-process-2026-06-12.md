@@ -2,7 +2,7 @@
 
 ## Status
 
-in_progress
+final_report_ready
 
 ## Quelle/Vorgabe
 
