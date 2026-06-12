@@ -418,6 +418,21 @@ Done-Gate: Signal-Gaps sind diagnosefähig und nicht runtimewirksam.
 
 Commit: `test(ai): report semantic signal catalog gaps`
 
+Ergebnis 2026-06-12:
+
+- Neues Gate `check:ai-action-semantic-signal-catalog` erzeugt und prüft `docs/reviews/ai/action-semantic-signal-catalog-2026-06-12.{json,md}`.
+- Der Report umfasst 564 aktive Karten mit Pflichtfeldern `covered`, `deferred`, `no_signal_reason` und `target_profile_gap`.
+- Stand: 539 Karten covered, 45 deferred, 25 ohne Function-Signal, 116 diagnostische Target-Profile-Gaps, 0 unbekannte Signale, 0 isolierte Struktur-/Subtyp-only-Signalverstöße.
+- Das Gate hängt in `corepack pnpm check:ai` und bleibt diagnose-only: keine Runtime-Anbindung, keine Action-Auswahl, keine LegalAction-Erzeugung, kein Planner- oder Scoring-Consumer.
+
+Checks 2026-06-12:
+
+- `node scripts/check-ai-action-semantic-signal-catalog.mjs --write-report`
+- `node scripts/check-ai-action-semantic-signal-catalog.mjs --check`
+- `corepack pnpm check:ai` (PASS mit bestehenden AI-Warnungen)
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P13 DeckDoctrine v2 diagnostisch
 
 Ziel: Deckanalyse mit Strategieankern und NeutralDoctrine nur diagnostisch starten.
