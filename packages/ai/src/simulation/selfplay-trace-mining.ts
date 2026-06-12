@@ -1,4 +1,4 @@
-import type { LegalAction, Side } from "@netgrid/shared";
+import type { AiDecisionActionAlternative, LegalAction, Side } from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import type {
   AiSimulationConfig,
@@ -83,6 +83,42 @@ export type AiSelfplaySuspiciousDecision = {
     fromActionIndex: number;
     toActionIndex: number;
   };
+};
+
+export type AiSelfplayDecisionPointActionAlternative = {
+  rank: number;
+  actionId: string;
+  actionType: string;
+  selected: boolean;
+  excluded?: boolean;
+  priority?: number;
+  label?: string;
+  source?: string;
+  whyChosen: string[];
+  whyNot: string[];
+};
+
+export type AiSelfplayDecisionPoint = {
+  matchId: string;
+  seed: string;
+  summaryIndex: number;
+  actionIndex: number;
+  side: Side;
+  stateVersion: number;
+  selectedActionId: string;
+  selectedActionType: LegalAction["type"];
+  planKind?: string;
+  targetServerId?: string;
+  reasonCode: string;
+  redactionSafe: boolean;
+  replaySafeReference: {
+    seed: string;
+    stateVersion: number;
+    fromActionIndex: number;
+    toActionIndex: number;
+  };
+  facts: string[];
+  actionAlternatives: AiSelfplayDecisionPointActionAlternative[];
 };
 
 export type AiSelfplayTraceMiningDetectorOptions = {
@@ -220,6 +256,58 @@ export function detectAiSelfplaySuspiciousDecisions(
     ),
   );
   return sortSelfplayFindings(groupSelfplayFindings(findings));
+}
+
+export function extractAiSelfplayDecisionPoints(
+  summaries: readonly AiSimulationSummary[],
+): AiSelfplayDecisionPoint[] {
+  return summaries.flatMap((summary, summaryIndex) =>
+    summary.actionSequence.map((entry, actionIndex) => {
+      const selectedActionId =
+        entry.selectedActionId ??
+        `${entry.actionType}:${entry.stateVersionBefore}`;
+      const point: AiSelfplayDecisionPoint = {
+        matchId: `selfplay:${summary.seed}`,
+        seed: sanitizeSelfplayText(summary.seed) ?? "[redacted]",
+        summaryIndex,
+        actionIndex,
+        side: entry.side,
+        stateVersion: entry.stateVersionBefore,
+        selectedActionId: sanitizeSelfplayText(selectedActionId) ?? "[redacted]",
+        selectedActionType: entry.actionType,
+        ...(entry.planKind
+          ? { planKind: sanitizeSelfplayText(entry.planKind) ?? "[redacted]" }
+          : {}),
+        ...(entry.targetServerId
+          ? {
+              targetServerId:
+                sanitizeSelfplayText(entry.targetServerId) ?? "[redacted]",
+            }
+          : {}),
+        reasonCode: sanitizeSelfplayText(entry.reasonCode) ?? "[redacted]",
+        redactionSafe: isSelfplayTraceRedactionSafe(entry),
+        replaySafeReference: {
+          seed: sanitizeSelfplayText(summary.seed) ?? "[redacted]",
+          stateVersion: entry.stateVersionBefore,
+          fromActionIndex: Math.max(0, actionIndex - 2),
+          toActionIndex: Math.max(0, actionIndex + 1),
+        },
+        facts: safeSelfplayFacts([
+          entry.explanation,
+          ...(entry.evidence ?? []),
+          ...(entry.debugFacts ?? []),
+          ...(entry.qualityTags ?? []),
+        ]).slice(0, 16),
+        actionAlternatives: safeSelfplayActionAlternatives(
+          entry.actionAlternatives ?? [],
+        ),
+      };
+      return {
+        ...point,
+        redactionSafe: point.redactionSafe && isSelfplayTraceRedactionSafe(point),
+      };
+    }),
+  );
 }
 
 export function sortedUniqueSelfplayDetectors(
@@ -1407,6 +1495,42 @@ function selfplayEntryText(
     .toLocaleLowerCase("en-US");
 }
 
+function safeSelfplayActionAlternatives(
+  alternatives: readonly AiDecisionActionAlternative[],
+): AiSelfplayDecisionPointActionAlternative[] {
+  return alternatives
+    .map(safeSelfplayActionAlternative)
+    .filter(
+      (
+        alternative,
+      ): alternative is AiSelfplayDecisionPointActionAlternative =>
+        alternative !== undefined,
+    );
+}
+
+function safeSelfplayActionAlternative(
+  alternative: AiDecisionActionAlternative,
+): AiSelfplayDecisionPointActionAlternative | undefined {
+  const actionId = sanitizeSelfplayText(alternative.actionId);
+  const actionType = sanitizeSelfplayText(alternative.actionType);
+  if (!actionId || !actionType) return undefined;
+  const result: AiSelfplayDecisionPointActionAlternative = {
+    rank: alternative.rank,
+    actionId,
+    actionType,
+    selected: alternative.selected,
+    whyChosen: safeSelfplayFacts(alternative.whyChosen ?? []),
+    whyNot: safeSelfplayFacts(alternative.whyNot ?? []),
+  };
+  if (alternative.excluded !== undefined) result.excluded = alternative.excluded;
+  if (alternative.priority !== undefined) result.priority = alternative.priority;
+  const label = sanitizeSelfplayText(alternative.label);
+  if (label) result.label = label;
+  const source = sanitizeSelfplayText(alternative.source);
+  if (source) result.source = source;
+  return result;
+}
+
 export function safeSelfplayFacts(values: unknown[]): string[] {
   return sortedUnique(
     values
@@ -1434,7 +1558,7 @@ export function isSelfplayTraceRedactionSafe(value: unknown): boolean {
     )
   )
     return false;
-  return !/\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|decklist)\b/i.test(
+  return !/\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|decklist|deckOrder)\b/i.test(
     serialized,
   );
 }

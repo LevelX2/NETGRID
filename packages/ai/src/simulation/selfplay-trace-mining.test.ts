@@ -1,0 +1,178 @@
+import type { AiSimulationSummary } from "../index";
+import { describe, expect, it } from "vitest";
+import {
+  detectAiSelfplaySuspiciousDecisions,
+  extractAiSelfplayDecisionPoints,
+  isSelfplayTraceRedactionSafe,
+  safeSelfplayFacts,
+} from "./selfplay-trace-mining";
+
+describe("SelfplayTraceMining", () => {
+  it("extracts redaction-safe decision points from selfplay summaries", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-hq",
+        targetServerId: "hq",
+        planKind: "runner.hq_pressure",
+        evidence: ["safe_central_access:true"],
+        actionAlternatives: [
+          {
+            rank: 1,
+            actionId: "run-hq",
+            actionType: "start_run",
+            selected: true,
+            whyChosen: ["pressure_window"],
+            whyNot: [],
+          },
+          {
+            rank: 2,
+            actionId: "gain-credit",
+            actionType: "gain_credit",
+            selected: false,
+            whyChosen: [],
+            whyNot: ["lower_priority"],
+          },
+        ],
+      }),
+    ]);
+
+    const [point] = extractAiSelfplayDecisionPoints([summary]);
+
+    expect(point).toMatchObject({
+      matchId: "selfplay:selfplay-trace-mining",
+      seed: "selfplay-trace-mining",
+      summaryIndex: 0,
+      actionIndex: 0,
+      side: "runner",
+      stateVersion: 1,
+      selectedActionId: "run-hq",
+      selectedActionType: "start_run",
+      planKind: "runner.hq_pressure",
+      targetServerId: "hq",
+      reasonCode: "runner.synthetic",
+      redactionSafe: true,
+    });
+    expect(point?.actionAlternatives).toEqual([
+      expect.objectContaining({
+        actionId: "run-hq",
+        actionType: "start_run",
+        selected: true,
+        whyChosen: ["pressure_window"],
+      }),
+      expect.objectContaining({
+        actionId: "gain-credit",
+        actionType: "gain_credit",
+        selected: false,
+        whyNot: ["lower_priority"],
+      }),
+    ]);
+    expect(JSON.stringify(point)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
+  it("detects repeated no-payoff remote decisions without hidden trace data", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-1",
+        targetServerId: "remote_1",
+        evidence: ["known_no_current_payoff"],
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "run-remote-2",
+        targetServerId: "remote_1",
+        evidence: ["known_no_current_payoff"],
+        runnerRepeatRunOnKnownUnpayableRemotePath: true,
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: [
+        "repeated_no_progress_run",
+        "repeated_known_no_payoff_remote",
+      ],
+    });
+
+    const repeatFinding = findings.find(
+      (finding) => finding.selectedActionId === "run-remote-2",
+    );
+
+    expect(findings).toHaveLength(2);
+    expect(repeatFinding?.detectorIds).toEqual([
+      "repeated_no_progress_run",
+      "repeated_known_no_payoff_remote",
+    ]);
+    expect(
+      findings.some((finding) => finding.selectedActionId === "run-remote-1"),
+    ).toBe(true);
+    expect(isSelfplayTraceRedactionSafe(findings)).toBe(true);
+  });
+
+  it("drops forbidden debug facts during redaction", () => {
+    expect(
+      safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
+    ).toEqual(["safe_fact"]);
+    expect(isSelfplayTraceRedactionSafe({ cardInstances: [] })).toBe(false);
+  });
+});
+
+function selfplaySummary(
+  actionSequence: AiSimulationSummary["actionSequence"],
+): AiSimulationSummary {
+  return {
+    seed: "selfplay-trace-mining",
+    winner: "action_limit_reached",
+    actions: actionSequence.length,
+    turns: 2,
+    finalAgendaPoints: { runner: 0, corp: 0 },
+    finalStateHash: "fnv1a:selfplay-trace-mining",
+    eventLogLength: actionSequence.length,
+    replayOk: true,
+    replayErrors: [],
+    actionSequence,
+    errors: [],
+    cardPoolVersion: "0.99.0",
+    metrics: {
+      illegalActions: 0,
+      fallbackRate: 0,
+      timeoutRate: 0,
+      reasonCodeCoverage: [],
+      actionTypeCoverage: [],
+      roleCoverage: [],
+      progressScore: 0,
+      holdout: false,
+      doctrine: {
+        nakedAgendaInstalls: 0,
+        agendaFloodExposure: 0,
+        scoreWindowMissed: 0,
+        remoteOverbuild: 0,
+        economyStall: 0,
+        repeatedLowValueCentralRun: 0,
+        rigStall: 0,
+        assetTrashNeglect: 0,
+      },
+    },
+  };
+}
+
+function selfplayAction(
+  side: AiSimulationSummary["actionSequence"][number]["side"],
+  stateVersionBefore: number,
+  actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
+  overrides: Partial<AiSimulationSummary["actionSequence"][number]> = {},
+): AiSimulationSummary["actionSequence"][number] {
+  return {
+    ...overrides,
+    side,
+    stateVersionBefore,
+    actionType,
+    reasonCode: overrides.reasonCode ?? `${side}.synthetic`,
+    explanation: overrides.explanation ?? "Synthetic selfplay action.",
+    confidence: overrides.confidence ?? 0.5,
+    evidence: overrides.evidence ?? [],
+    fallbackUsed: overrides.fallbackUsed ?? false,
+    timeoutUsed: overrides.timeoutUsed ?? false,
+    qualityTags: overrides.qualityTags ?? [],
+    stateHashAfter: overrides.stateHashAfter ?? `fnv1a:${stateVersionBefore}`,
+  };
+}
