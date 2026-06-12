@@ -391,7 +391,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+Die Guard-Nachpflege ist umgesetzt und bleibt ein Baseline-/New-Leak-Detektor. Die nächsten kleineren Refactor-Slices sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
