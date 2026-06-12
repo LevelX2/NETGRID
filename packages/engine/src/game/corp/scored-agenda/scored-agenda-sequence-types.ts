@@ -12,6 +12,7 @@ export type SequenceDeveloperTrace = {
 export type SequenceResolution = {
   result: CorpInstallRezSequenceHandlerResult;
   payloadPatch: SequencePayloadPatch;
+  stateChanged?: boolean;
   developerTrace?: SequenceDeveloperTrace;
 };
 
@@ -69,4 +70,19 @@ export function applySequencePayloadPatch(
     ...sanitizedPatch,
   };
   return legalAction.payload;
+}
+
+export function applySequenceResolution(
+  legalAction: LegalAction,
+  resolution: SequenceResolution,
+): CorpInstallRezSequenceHandlerResult {
+  const resolvedPayload = applySequencePayloadPatch(
+    legalAction,
+    resolution.payloadPatch,
+  );
+  return {
+    ...resolution.result,
+    ...(resolution.stateChanged === true ? { stateChanged: true } : {}),
+    resolvedPayload,
+  };
 }

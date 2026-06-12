@@ -13,6 +13,7 @@ import {
 } from "./scored-agenda-sequence-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
+  applySequenceResolution,
   applySequencePayloadPatch,
   corpSequenceContextPayload,
 } from "./scored-agenda-sequence-types";
@@ -114,6 +115,30 @@ describe("scored agenda sequence contract matrix", () => {
       }),
     ).toThrow(/hidden card data/i);
     expect(legalAction.payload).toEqual({ existing: true });
+  });
+
+  it("applies sequence resolutions through sanitized payload patches", () => {
+    const legalAction = {
+      side: "corp",
+      costs: [],
+      payload: { existing: true },
+    } as unknown as LegalAction;
+
+    const result = applySequenceResolution(legalAction, {
+      result: { handled: true },
+      stateChanged: true,
+      payloadPatch: { priorityRequisitionChoiceOpened: false },
+    });
+
+    expect(result).toEqual({
+      handled: true,
+      stateChanged: true,
+      resolvedPayload: {
+        existing: true,
+        priorityRequisitionChoiceOpened: false,
+      },
+    });
+    expect(legalAction.payload).toEqual(result.resolvedPayload);
   });
 
   it("keeps public sequence contexts and ordered-fort payloads count-only", () => {
