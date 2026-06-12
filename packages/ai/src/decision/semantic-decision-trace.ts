@@ -65,6 +65,7 @@ export const SEMANTIC_DECISION_TRACE_DIAGNOSTIC_SECTION_IDS = [
   "pilot_scope",
   "calibration_profile",
   "target_choice_shadow",
+  "doctrine_goal",
   "mistake_summary",
 ] as const;
 

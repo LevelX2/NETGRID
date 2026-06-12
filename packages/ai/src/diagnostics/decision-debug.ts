@@ -39,6 +39,7 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   pilotScopeItems?: readonly string[];
   calibrationProfileItems?: readonly string[];
   targetChoiceShadowItems?: readonly string[];
+  doctrineGoalItems?: readonly string[];
   mistakeSummaryItems?: readonly string[];
 };
 
@@ -62,6 +63,7 @@ const TRACE_DIAGNOSTIC_SECTION_TITLES = {
   pilot_scope: "Pilot Scope",
   calibration_profile: "Calibration Profile",
   target_choice_shadow: "Target Choice Shadow",
+  doctrine_goal: "Doctrine Goal",
   mistake_summary: "Mistake Summary",
 } as const satisfies Record<SemanticDecisionTraceDiagnosticSectionId, string>;
 
@@ -143,6 +145,10 @@ export function buildSemanticDecisionDebugDiagnostics(
       {
         id: "target_choice_shadow",
         items: input.targetChoiceShadowItems,
+      },
+      {
+        id: "doctrine_goal",
+        items: input.doctrineGoalItems,
       },
       {
         id: "mistake_summary",

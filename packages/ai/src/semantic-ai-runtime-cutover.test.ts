@@ -76,6 +76,42 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
+    const rdRun = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [rdRun]);
+    input.playerView.own.credits = 8;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.ownDeckDoctrine = runnerDoctrine({ pressure_rnd: 24 });
+
+    const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "doctrine_goal",
+          title: "Doctrine Goal",
+          items: expect.arrayContaining([
+            "doctrine_goal_trace:decision_debug",
+            "doctrine_goal_plan:pressure_rnd",
+            "doctrine_goal_consumer:runner_pressure_rnd",
+            "doctrine_goal_weight:120",
+          ]),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
+  });
+
   it("keeps the runtime choice unchanged when the basic setup pilot flag is unset", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const run = legalAction(
@@ -2185,6 +2221,25 @@ function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
     decisionId: `semantic-runtime-cutover:${side}`,
     actionNumber: 1,
     profileId: `${side}-semantic-runtime-cutover-test`,
+  };
+}
+
+function runnerDoctrine(
+  planWeights: Record<string, number>,
+): NonNullable<AiDecisionInput["ownDeckDoctrine"]> {
+  return {
+    schemaVersion: "ai-deck-doctrine-v1",
+    deckSnapshotId: "semantic-runtime-doctrine-debug",
+    deckHash: "test:semantic-runtime-doctrine-debug",
+    side: "runner",
+    confidence: 0.9,
+    archetypeTags: ["rnd_pressure"],
+    roleCounts: {},
+    roleDensity: {},
+    planWeights,
+    mulliganWeights: {},
+    riskFlags: [],
+    evidence: [],
   };
 }
 
