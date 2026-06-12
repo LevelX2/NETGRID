@@ -4,6 +4,11 @@
 
 `in_progress`
 
+## Paketfortschritt
+
+- P0 abgeschlossen mit Commit `0350f599`: Prozessartefakt und Worktree-Preflight.
+- P1 abgeschlossen: `hidden-zone-choice.ts` zentralisiert actor-private Hidden-Card-Choice-Optionen, Hidden-Card-Auswahlauflösung und Hidden-Zone-Payload-Marker. `install-rez-sequence-handlers.ts` nutzt diese Helper für Priority Requisition, Security Purge und Data Fort Reclamation ohne fachliche Verhaltensänderung.
+
 ## Quelle/Vorgabe
 
 Eingefügter Statusbericht vom 2026-06-12 mit dem nächsten konkreten Umsetzungsauftrag `engine/scored-agenda-sequence-structure`.

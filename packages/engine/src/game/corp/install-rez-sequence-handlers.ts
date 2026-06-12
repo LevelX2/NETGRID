@@ -14,6 +14,12 @@ import {
   type HqToNewRemoteInstallRezSequence,
 } from "../../ability-engine/card-implementation-primitives";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
+import { selectedChoiceIds } from "../choices/choice-validation";
+import {
+  hiddenCardChoiceOption,
+  hiddenZoneChoicePayload,
+  selectedHiddenCardChoiceIds,
+} from "../choices/hidden-zone-choice";
 
 type SequencePayload = Record<string, string | number | boolean>;
 const HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE =
@@ -175,12 +181,13 @@ export function startPriorityRequisitionChoice(
     prompt: "Priority Requisition: ICE kostenlos rezzen",
     kind: "select_cards",
     options: [
-      ...candidates.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: host.cards.definitionFor(cardId).title,
-        publicLabel: "Installiertes ICE",
-        value: cardId,
-      })),
+      ...candidates.map((cardId) =>
+        hiddenCardChoiceOption({
+          cardId,
+          label: host.cards.definitionFor(cardId).title,
+          publicLabel: "Installiertes ICE",
+        }),
+      ),
       {
         id: "skip",
         label: "Überspringen",
@@ -234,7 +241,7 @@ export function resolveSecurityPurgeAgendaPurge(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       ...basePayload,
-      hiddenZoneAction: "v1922_security_purge_rd_top3_target_choice",
+      ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3_target_choice"),
       revealedIceCount: revealedIceIds.length,
       pendingTrashCount: pendingTrashIds.length,
       installedIceCount: 0,
@@ -261,7 +268,7 @@ export function resolveSecurityPurgeAgendaPurge(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...basePayload,
-    hiddenZoneAction: "v1922_security_purge_rd_top3",
+    ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
     revealedIceCount: 0,
     pendingTrashCount: 0,
     installedIceCount: 0,
@@ -350,7 +357,7 @@ function resolveSecurityPurgeInstallTargetChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...securityPurgeBasePayload(host, agendaId, revealedIds),
-    hiddenZoneAction: "v1922_security_purge_install_targets",
+    ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
     revealedIceCount: installedIce.length,
     pendingTrashCount: 0,
     installedIceCount: installedIce.length,
@@ -390,7 +397,7 @@ function securityPurgeBasePayload(
   return {
     agendaAbility: "v1922_security_purge",
     sourceDefinitionId: host.cards.definitionFor(agendaId).id,
-    hiddenZoneBarrier: true,
+    ...hiddenZoneChoicePayload("v1922_security_purge"),
     publicRevealKind: "reveal",
     revealedCount: revealedIds.length,
     securityPurgeInstallContract: "corp_server_choice_per_ice",
@@ -515,7 +522,7 @@ export function startDataFortReclamationChoice(
     .sort()
     .map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+      return hiddenCardChoiceOption({ cardId, label: definition.title });
     });
   if (options.length === 0) {
     host.legalAction.payload = {
@@ -556,8 +563,7 @@ export function startDataFortReclamationChoice(
       sequence.maxCards,
       options.length,
     ),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
+    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
   };
   return { handled: true, stateChanged: true };
 }
@@ -636,8 +642,7 @@ function resolvePriorityRequisitionChoice(
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v162_priority_requisition_free_rez",
+    ...hiddenZoneChoicePayload("v162_priority_requisition_free_rez"),
     priorityRequisitionFreeRez: true,
     priorityRequisitionTarget: targetId,
     priorityRequisitionTargetDefinitionId:
@@ -709,8 +714,9 @@ function resolveHqToNewRemoteInstallRezChoice(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       ...primitivePayload,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      ...hiddenZoneChoicePayload(
+        "v1922_data_fort_reclamation_install_sequence",
+      ),
       sourceAgendaId: agendaId,
       selectedCount: 0,
       installedCount: 0,
@@ -800,8 +806,7 @@ function resolveHqToNewRemoteInstallRezChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...primitivePayload,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_install_sequence"),
     sourceAgendaId: agendaId,
     selectedCount: selectedIds.length,
     installedCount: installedIceCount + installedRootCount,
@@ -830,7 +835,7 @@ function resolveHqToNewRemoteInstallRezChoice(
       kind: "select_cards",
       options: rezCandidates.sort().map((cardId) => {
         const definition = host.cards.definitionFor(cardId);
-        return { id: `card_${cardId}`, label: definition.title, value: cardId };
+        return hiddenCardChoiceOption({ cardId, label: definition.title });
       }),
       minSelections: 0,
       maxSelections: rezCandidates.length,
@@ -1003,8 +1008,7 @@ function resolveHqToNewRemoteInstallRezRezChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...primitivePayload,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_rez_sequence"),
     sourceAgendaId: agendaId,
     cardImplementationSequenceCreatedServerId: serverId,
     cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
@@ -1107,26 +1111,8 @@ function selectedChoiceCardIds(
   host: CorpInstallRezSequenceHandlerHost,
   choice: ChoiceRequest,
 ): CardInstanceId[] {
-  return selectedChoiceIds(requirePlayerAction(host).selectedChoices).map(
-    (optionId) => {
-      const option = choice.options.find(
-        (candidate) => candidate.id === optionId,
-      );
-      if (typeof option?.value !== "string")
-        throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
-      return option.value;
-    },
+  return selectedHiddenCardChoiceIds(
+    requirePlayerAction(host).selectedChoices,
+    choice,
   );
-}
-
-function selectedChoiceIds(
-  selectedChoices: PlayerAction["selectedChoices"],
-): string[] {
-  const raw =
-    selectedChoices?.selectedOptionIds ??
-    selectedChoices?.optionIds ??
-    selectedChoices?.options ??
-    selectedChoices?.selectedOptions;
-  if (!Array.isArray(raw)) return [];
-  return raw.filter((value): value is string => typeof value === "string");
 }
