@@ -37,6 +37,16 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_safe_archives_access",
   "runner_real_remote_with_ice_probe",
   "runner_real_low_click_tag_cleanup",
+  "runner_real_remote_unknown_no_contest",
+  "runner_real_remote_known_agenda_contest",
+  "runner_real_run_blocked_missing_coverage",
+  "runner_real_run_blocked_unpayable",
+  "runner_real_tagged_remove_before_run",
+  "runner_real_draw_before_damage_risk",
+  "runner_real_setup_install_breaker",
+  "runner_real_basic_end_turn_when_no_good_action",
+  "runner_real_hq_multiaccess_payoff",
+  "runner_real_rd_multiaccess_payoff",
   "corp_real_score_agenda_window",
   "corp_real_advance_score_window",
   "corp_real_low_rez_reserve",
@@ -49,9 +59,19 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_score_low_credits",
   "corp_real_remote_ice_defense",
   "corp_real_low_credit_main_window",
-  "corp_real_rez_mid_credits",
+  "corp_real_rez_affordable_outer_ice",
   "corp_real_remote_double_asset_setup",
   "corp_real_draw_pressure_window",
+  "corp_real_score_now_vs_gain_credit",
+  "corp_real_advance_not_score_yet",
+  "corp_real_rez_too_expensive_decline",
+  "corp_real_hq_pressure_defend",
+  "corp_real_rnd_pressure_defend",
+  "corp_real_no_punish_without_tag",
+  "corp_real_punish_candidate_tagged_runner_shadow_only",
+  "corp_real_install_remote_when_safe",
+  "corp_real_asset_economy_install",
+  "corp_real_fast_advance_support_shadow_only",
 ] as const;
 
 const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
@@ -79,6 +99,15 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   runner_real_tag_cleanup: expectation(["remove_tag"], {
     forbiddenMistakes: ["unsafe_run"],
   }),
+  runner_real_tagged_remove_before_run: expectation(["remove_tag"], {
+    forbiddenMistakes: ["unsafe_run"],
+  }),
+  runner_real_remote_known_agenda_contest: expectation(["start_run"], {
+    forbiddenMistakes: ["ignored_remote_threat"],
+  }),
+  runner_real_draw_before_damage_risk: expectation(["draw_card"], {
+    forbiddenMistakes: ["ignored_damage_risk", "unsafe_run"],
+  }),
   corp_real_score_agenda_window: expectation(["score_agenda"], {
     pilotEligibleScopes: ["corp_score_window"],
     forbiddenMistakes: ["missed_score_window"],
@@ -98,6 +127,16 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   corp_real_basic_economy_draw: expectation(["gain_credit", "draw_card"], {
     pilotEligibleScopes: ["basic_setup"],
     forbiddenMistakes: ["economy_starvation"],
+  }),
+  corp_real_score_now_vs_gain_credit: expectation(["score_agenda"], {
+    pilotEligibleScopes: ["corp_score_window"],
+    forbiddenMistakes: ["missed_score_window"],
+  }),
+  corp_real_advance_not_score_yet: expectation(["advance_card"], {
+    forbiddenMistakes: ["missed_score_window"],
+  }),
+  corp_real_rez_too_expensive_decline: expectation(["decline_rez"], {
+    forbiddenMistakes: ["bad_rez_spend"],
   }),
 } as const satisfies Partial<
   Record<
@@ -249,6 +288,105 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       ["fixture:runner_low_click_tag_cleanup"],
       "onr_origin_runner_ai_snapshot_v1",
     ),
+    runnerScenario(
+      "runner_real_remote_unknown_no_contest",
+      "real-runner-remote-unknown-no-contest",
+      (fixture) => {
+        fixture.withRunnerCredits(6).ensureServer("remote_3");
+      },
+      ["fixture:runner_remote_unknown_no_contest"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_remote_known_agenda_contest",
+      "real-runner-remote-known-agenda-contest",
+      (fixture) => {
+        fixture.withRunnerCredits(9).withCorpRemoteAgenda("remote_2", 2, {
+          faceup: true,
+          rezzed: false,
+        });
+      },
+      ["fixture:runner_remote_known_agenda_contest"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_run_blocked_missing_coverage",
+      "real-runner-blocked-missing-coverage",
+      (fixture) => {
+        fixture
+          .withRunnerCredits(5)
+          .ensureServer("remote_2")
+          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+      },
+      ["fixture:runner_run_blocked_missing_coverage"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_run_blocked_unpayable",
+      "real-runner-blocked-unpayable",
+      (fixture) => {
+        fixture
+          .withRunnerCredits(0)
+          .ensureServer("remote_2")
+          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+      },
+      ["fixture:runner_run_blocked_unpayable"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_tagged_remove_before_run",
+      "real-runner-tagged-remove-before-run",
+      (fixture) => {
+        fixture.withRunnerTags(2).withRunnerCredits(6);
+      },
+      ["fixture:runner_tagged_remove_before_run"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_draw_before_damage_risk",
+      "real-runner-draw-before-damage-risk",
+      (fixture) => {
+        fixture.withRunnerCredits(4).withRunnerGripSize(1);
+      },
+      ["fixture:runner_draw_before_damage_risk"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_setup_install_breaker",
+      "real-runner-setup-install-breaker",
+      (fixture) => {
+        fixture.withRunnerCredits(5);
+      },
+      ["fixture:runner_setup_install_breaker"],
+      "demo_runner_008_snapshot_v0_8",
+    ),
+    runnerScenario(
+      "runner_real_basic_end_turn_when_no_good_action",
+      "real-runner-basic-end-turn",
+      (fixture) => {
+        fixture.withRunnerClicks(0).withRunnerCredits(0);
+      },
+      ["fixture:runner_basic_end_turn_when_no_good_action"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_hq_multiaccess_payoff",
+      "real-runner-hq-multiaccess-payoff",
+      (fixture) => {
+        fixture.withRunnerCredits(9);
+      },
+      ["fixture:runner_hq_multiaccess_payoff"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "runner_real_rd_multiaccess_payoff",
+      "real-runner-rd-multiaccess-payoff",
+      (fixture) => {
+        fixture.withRunnerCredits(9);
+      },
+      ["fixture:runner_rd_multiaccess_payoff"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
     corpScenario(
       "corp_real_score_agenda_window",
       "real-corp-score-window",
@@ -355,8 +493,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "demo_corp_008_snapshot_v0_8",
     ),
     corpRezScenario(
-      "corp_real_rez_mid_credits",
-      "real-corp-rez-mid-credits",
+      "corp_real_rez_affordable_outer_ice",
+      "real-corp-rez-affordable-outer-ice",
       4,
       "onr_origin_corp_ai_snapshot_v1",
     ),
@@ -380,6 +518,96 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       },
       ["fixture:corp_draw_pressure_window"],
       "demo_corp_008_snapshot_v0_8",
+    ),
+    corpScenario(
+      "corp_real_score_now_vs_gain_credit",
+      "real-corp-score-now-vs-gain-credit",
+      (fixture) => {
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 3);
+      },
+      ["fixture:corp_score_now_vs_gain_credit"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_advance_not_score_yet",
+      "real-corp-advance-not-score-yet",
+      (fixture) => {
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 1);
+      },
+      ["fixture:corp_advance_not_score_yet"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpRezScenario(
+      "corp_real_rez_too_expensive_decline",
+      "real-corp-rez-too-expensive-decline",
+      0,
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_hq_pressure_defend",
+      "real-corp-hq-pressure-defend",
+      (fixture) => {
+        fixture.withCorpCredits(5).withCorpIceOnServer("hq", "simple_barrier_ice");
+      },
+      ["fixture:corp_hq_pressure_defend"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_rnd_pressure_defend",
+      "real-corp-rnd-pressure-defend",
+      (fixture) => {
+        fixture.withCorpCredits(5).withCorpIceOnServer("rd", "simple_barrier_ice");
+      },
+      ["fixture:corp_rnd_pressure_defend"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_no_punish_without_tag",
+      "real-corp-no-punish-without-tag",
+      (fixture) => {
+        fixture.withCorpCredits(6);
+      },
+      ["fixture:corp_no_punish_without_tag"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_punish_candidate_tagged_runner_shadow_only",
+      "real-corp-punish-tagged-runner-shadow",
+      (fixture) => {
+        fixture.withRunnerTags(2).withCorpCredits(6);
+      },
+      ["fixture:corp_punish_candidate_tagged_runner_shadow_only"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_install_remote_when_safe",
+      "real-corp-install-remote-when-safe",
+      (fixture) => {
+        fixture.withCorpCredits(7).ensureServer("remote_2");
+      },
+      ["fixture:corp_install_remote_when_safe"],
+      "demo_corp_008_snapshot_v0_8",
+    ),
+    corpScenario(
+      "corp_real_asset_economy_install",
+      "real-corp-asset-economy-install",
+      (fixture) => {
+        fixture.withCorpCredits(7).withCorpRemoteRoot(
+          "remote_1",
+          "simple_economy_asset",
+        );
+      },
+      ["fixture:corp_asset_economy_install"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+    ),
+    corpScenario(
+      "corp_real_fast_advance_support_shadow_only",
+      "real-corp-fast-advance-support-shadow",
+      (fixture) => {
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_2", 2);
+      },
+      ["fixture:corp_fast_advance_support_shadow_only"],
+      "proteus_corp_region_fast_score_snapshot_v2026_05_25",
     ),
   ];
 }

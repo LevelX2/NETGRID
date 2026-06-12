@@ -46,7 +46,7 @@ describe("RealEngineDecisionCorpus", () => {
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
     expect(samples.length).toBe(scenarios.length);
-    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBeGreaterThanOrEqual(30);
+    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBe(50);
     expect(samples.filter((sample) => sample.legalActionCount === 0)).toEqual(
       [],
     );
@@ -98,6 +98,15 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       actionTypesFor(scenarios, "corp_real_remote_defense_setup"),
     ).toContain("install_card");
+    expect(
+      actionTypesFor(scenarios, "runner_real_remote_known_agenda_contest"),
+    ).toContain("start_run");
+    expect(
+      actionTypesFor(scenarios, "corp_real_score_now_vs_gain_credit"),
+    ).toContain("score_agenda");
+    expect(
+      actionTypesFor(scenarios, "corp_real_rez_affordable_outer_ice"),
+    ).toContain("rez_ice");
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.expectedTopActionTypes,

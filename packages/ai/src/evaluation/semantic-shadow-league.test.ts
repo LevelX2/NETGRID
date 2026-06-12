@@ -48,41 +48,45 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
-    expect(report.metrics.pilotEligibleCount).toBe(26);
-    expect(report.metrics.scopeCandidateCount).toBe(90);
-    expect(report.metrics.scopeAllowedCount).toBe(26);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(26);
+    expect(report.metrics.pilotEligibleCount).toBe(43);
+    expect(report.metrics.scopeCandidateCount).toBe(150);
+    expect(report.metrics.scopeAllowedCount).toBe(43);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(43);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(21.276);
+    expect(report.metrics.averageScoreGap).toBe(18.872);
     expect(report.metrics.blockedByReason).toMatchObject({
-      basic_setup_action_type_blocked: 17,
-      corp_score_window_wrong_side: 15,
-      runner_safe_access_wrong_side: 15,
+      basic_setup_action_type_blocked: 27,
+      corp_score_window_wrong_side: 25,
+      runner_safe_access_wrong_side: 25,
     });
-    expect(report.metrics.pilotEligibilityRate).toBe(0.867);
+    expect(report.metrics.pilotEligibilityRate).toBe(0.86);
     expect(report.metrics.pilotEligibilityBySide.runner).toEqual({
-      scenarioCount: 15,
-      eligibleCount: 14,
-      wouldOverrideCount: 14,
-      eligibleRate: 0.933,
+      scenarioCount: 25,
+      eligibleCount: 22,
+      wouldOverrideCount: 22,
+      eligibleRate: 0.88,
     });
     expect(report.metrics.pilotEligibilityBySide.corp).toEqual({
-      scenarioCount: 15,
-      eligibleCount: 12,
-      wouldOverrideCount: 12,
-      eligibleRate: 0.8,
+      scenarioCount: 25,
+      eligibleCount: 21,
+      wouldOverrideCount: 21,
+      eligibleRate: 0.84,
     });
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(13);
-    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(11);
-    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(2);
-    expect(report.metrics.remoteContestPilotCandidateCount).toBe(1);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(22);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(18);
+    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(3);
+    expect(report.metrics.remoteContestPilotCandidateCount).toBe(2);
     expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
+      "runner_real_remote_known_agenda_contest",
       "runner_real_remote_score_threat",
     ]);
     expect(report.topDisagreementReasons).toEqual([
+      "corp_real_advance_not_score_yet:expected=advance_card:observed=gain_credit",
       "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
       "runner_real_damage_buffer_needed:expected=draw_card:observed=start_run",
+      "runner_real_draw_before_damage_risk:expected=draw_card:observed=start_run",
       "runner_real_tag_cleanup:expected=remove_tag:observed=start_run",
+      "runner_real_tagged_remove_before_run:expected=remove_tag:observed=start_run",
     ]);
     expect(report.redactionStatus).toBe("passed");
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
