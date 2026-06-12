@@ -16,7 +16,7 @@ describe("AI module boundaries", () => {
   it("keeps decision modules independent from evaluation and runtime implementation", () => {
     const violations = productionFiles("decision").flatMap((file) =>
       importsFrom(file).flatMap((reference) => {
-        if (reference.importSource.startsWith("../evaluation")) {
+        if (resolvesToSrcArea(file, reference.importSource, "evaluation")) {
           return [
             violation(
               file,
@@ -26,10 +26,11 @@ describe("AI module boundaries", () => {
           ];
         }
 
-        if (reference.importSource.startsWith("../runtime")) {
+        if (resolvesToSrcArea(file, reference.importSource, "runtime")) {
           const isAllowedRuntimeTypeImport =
             reference.isTypeOnly &&
-            reference.importSource === "../runtime/semantic-runtime-types";
+            resolvedImportBasename(file, reference.importSource) ===
+              "semantic-runtime-types";
           if (!isAllowedRuntimeTypeImport) {
             return [
               violation(
@@ -44,6 +45,56 @@ describe("AI module boundaries", () => {
         return [];
       }),
     );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps play-strength pilot scope modules out of evaluation and runtime selection", () => {
+    const pilotRoot = path.join(srcDir, "decision", "pilot");
+    const violations = collectSourceFiles(pilotRoot)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) =>
+        importsFrom(file).flatMap((reference) => {
+          if (resolvesToSrcArea(file, reference.importSource, "evaluation")) {
+            return [
+              violation(
+                file,
+                reference,
+                "pilot scopes must not import evaluation modules",
+              ),
+            ];
+          }
+          if (resolvesToSrcArea(file, reference.importSource, "runtime")) {
+            const isAllowedRegistryTypeImport =
+              path.basename(file) === "pilot-scope-registry.ts" &&
+              reference.isTypeOnly &&
+              resolvedImportBasename(file, reference.importSource) ===
+                "semantic-runtime-types";
+            if (!isAllowedRegistryTypeImport) {
+              return [
+                violation(
+                  file,
+                  reference,
+                  "pilot scopes must not import runtime selection",
+                ),
+              ];
+            }
+          }
+          if (
+            resolvesToSrcArea(file, reference.importSource, "legacy") ||
+            resolvesToSrcArea(file, reference.importSource, "index")
+          ) {
+            return [
+              violation(
+                file,
+                reference,
+                "pilot scopes must not import legacy or public action choosers",
+              ),
+            ];
+          }
+          return [];
+        }),
+      );
 
     expect(violations).toEqual([]);
   });
@@ -148,4 +199,19 @@ function violation(file: string, reference: ImportReference, message: string): s
 
 function relativeFile(file: string): string {
   return path.relative(srcDir, file).replaceAll(path.sep, "/");
+}
+
+function resolvesToSrcArea(
+  file: string,
+  importSource: string,
+  area: string,
+): boolean {
+  if (!importSource.startsWith(".")) return false;
+  const resolved = path.resolve(path.dirname(file), importSource);
+  const areaRoot = path.join(srcDir, area);
+  return resolved === areaRoot || resolved.startsWith(`${areaRoot}${path.sep}`);
+}
+
+function resolvedImportBasename(file: string, importSource: string): string {
+  return path.basename(path.resolve(path.dirname(file), importSource));
 }
