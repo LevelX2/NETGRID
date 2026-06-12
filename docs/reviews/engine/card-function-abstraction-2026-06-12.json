@@ -3,7 +3,7 @@
   "generatedAt": "2026-06-12",
   "status": "inventory_with_vertical_slice",
   "guardCharacter": "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
-  "completionNote": "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt und Baseline-Guard sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+  "completionNote": "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard und Quest-for-Cattekin-Vertikalschnitt sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   "scope": [
     "packages/engine/src/ability-engine",
     "packages/engine/src/game",
@@ -27,8 +27,8 @@
     "functional_kind_uses_card_name": 33,
     "false_positive": 33,
     "test_only_card_name": 103,
-    "allowed_catalog_reference": 43,
-    "runtime_state_field_uses_card_name": 257,
+    "allowed_catalog_reference": 45,
+    "runtime_state_field_uses_card_name": 255,
     "mechanics_constant_controls_behavior_by_card_id": 49,
     "payload_key_uses_card_name": 2
   },
@@ -11258,8 +11258,9 @@
       "token": "questForCattekin",
       "cardTitle": "Quest for Cattekin",
       "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
+      "category": "allowed_catalog_reference",
       "targetAbstraction": "persistentModifiers / start_turn_random_effect_table",
+      "reviewNote": "Erlaubter diagnostischer Helper nach Quest-Slice: die Datei leitet die Random-Effect-Hilfsliste aus der Kartenimplementierung ab und steuert keinen eigenen Runtime-Zweig.",
       "snippet": "import { questForCattekinImplementation } from \"../card-implementations/onr-v1/runner/resources/quest-for-cattekin\";"
     },
     {
@@ -11269,8 +11270,9 @@
       "token": "questForCattekin",
       "cardTitle": "Quest for Cattekin",
       "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
+      "category": "allowed_catalog_reference",
       "targetAbstraction": "persistentModifiers / start_turn_random_effect_table",
+      "reviewNote": "Erlaubter diagnostischer Helper nach Quest-Slice: die Datei leitet die Random-Effect-Hilfsliste aus der Kartenimplementierung ab und steuert keinen eigenen Runtime-Zweig.",
       "snippet": "questForCattekinImplementation.cardDefinitionId;"
     },
     {

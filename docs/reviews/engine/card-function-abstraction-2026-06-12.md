@@ -17,8 +17,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | functional_kind_uses_card_name                  |     33 |
 | false_positive                                  |     33 |
 | test_only_card_name                             |    103 |
-| allowed_catalog_reference                       |     43 |
-| runtime_state_field_uses_card_name              |    257 |
+| allowed_catalog_reference                       |     45 |
+| runtime_state_field_uses_card_name              |    255 |
 | mechanics_constant_controls_behavior_by_card_id |     49 |
 | payload_key_uses_card_name                      |      2 |
 
@@ -352,8 +352,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:1` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:9` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:120` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- allowed_catalog_reference: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table` (diagnostischer Helper nach Quest-Slice)
+- allowed_catalog_reference: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table` (diagnostischer Helper nach Quest-Slice)
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1144` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1155` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1199` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
@@ -383,7 +383,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die Guard-Nachpflege und der `Quest for Cattekin`-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Code Viral Cache`, `Krumz` und `Startup Immolator`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+Die Guard-Nachpflege und der `Quest for Cattekin`-Slice sind umgesetzt; die zwei Quest-Restfunde in `packages/engine/src/mechanics/random-effects.ts` sind als erlaubte diagnostische Helper klassifiziert. Die nächsten kleineren Refactor-Slices sind `Code Viral Cache`, `Krumz` und `Startup Immolator`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
