@@ -1,6 +1,6 @@
 # Engine Quest Random Effect Table Process 2026-06-13
 
-Status: in_progress
+Status: completed_locally_merged_to_main
 
 ## Quelle/Vorgabe
 
@@ -201,3 +201,15 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Quest-Tests decken No-op, Core Damage, Net Damage und permanente Zusatzaktion ab.
 - Card-Function-Abstraction-Guard und Self-Test bestehen.
 - Branch ist lokal nach `main` integriert.
+
+## Abschlussnotiz 2026-06-13
+
+Paket 0 bis Paket 3 sind abgeschlossen und committet. Ausgeführt wurden:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine test -- card-release-smokes`
+- `corepack pnpm check:card-function-abstraction`
+- `node scripts/check-card-name-leakage-in-runtime.mjs --self-test-new-leak`
+- `git diff --check`
+
+Der frische Worktree erhielt eine lokale `pnpm install --offline`-Dependency-Installation, weil eine reine `node_modules`-Junction Workspace-Pakete wie `@netgrid/shared` nicht korrekt auflösen konnte.
