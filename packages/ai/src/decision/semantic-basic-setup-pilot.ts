@@ -7,6 +7,7 @@ import type { SemanticDecisionTrace } from "./semantic-decision-trace";
 export const AI_PLAY_STRENGTH_PILOT_ENV = "NETGRID_AI_PLAY_STRENGTH_PILOT";
 export const BASIC_SETUP_PILOT_MODE = "basic_setup";
 export const RUNNER_SAFE_ACCESS_PILOT_MODE = "runner_safe_access";
+export const CORP_SCORE_WINDOW_PILOT_MODE = "corp_score_window";
 const MINIMUM_PILOT_SCORE_GAP = 20;
 
 export type SemanticBasicSetupPilotResult = {
@@ -21,7 +22,8 @@ export function semanticBasicSetupPilotEnabled(): boolean {
 export function semanticPlayStrengthPilotEnabled(): boolean {
   return (
     process.env[AI_PLAY_STRENGTH_PILOT_ENV] === BASIC_SETUP_PILOT_MODE ||
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] === RUNNER_SAFE_ACCESS_PILOT_MODE
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] === RUNNER_SAFE_ACCESS_PILOT_MODE ||
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] === CORP_SCORE_WINDOW_PILOT_MODE
   );
 }
 
@@ -56,7 +58,17 @@ export function semanticBasicSetupPilotChoice(params: {
   ) {
     return undefined;
   }
-  if (mode !== BASIC_SETUP_PILOT_MODE && mode !== RUNNER_SAFE_ACCESS_PILOT_MODE) {
+  if (
+    mode === CORP_SCORE_WINDOW_PILOT_MODE &&
+    !actionAllowedInCorpScoreWindowPilot(params.frame, matchingChoice.action, top)
+  ) {
+    return undefined;
+  }
+  if (
+    mode !== BASIC_SETUP_PILOT_MODE &&
+    mode !== RUNNER_SAFE_ACCESS_PILOT_MODE &&
+    mode !== CORP_SCORE_WINDOW_PILOT_MODE
+  ) {
     return undefined;
   }
   if (!traceIsHiddenInfoSafe(params.trace)) return undefined;
@@ -76,6 +88,27 @@ export function semanticBasicSetupPilotChoice(params: {
       },
       evidence: [
         "ai_play_strength_pilot:runner_safe_access",
+        `top_action:${top.actionId}`,
+        `score_gap:${top.score - params.currentChoice.score}`,
+      ],
+    };
+  }
+  if (mode === CORP_SCORE_WINDOW_PILOT_MODE) {
+    return {
+      choice: {
+        ...matchingChoice,
+        reasonCode: "ai_play_strength.corp_score_window_pilot",
+        explanation: `Corp score-window pilot selected ${matchingChoice.action.type} from semantic shadow ranking.`,
+        evidence: [
+          ...matchingChoice.evidence,
+          "ai_play_strength_pilot:corp_score_window",
+          `ai_play_strength_pilot_score:${top.score}`,
+          `ai_play_strength_pilot_score_gap:${top.score - params.currentChoice.score}`,
+          `ai_play_strength_pilot_goal:${top.primaryGoalId ?? "unknown"}`,
+        ],
+      },
+      evidence: [
+        "ai_play_strength_pilot:corp_score_window",
         `top_action:${top.actionId}`,
         `score_gap:${top.score - params.currentChoice.score}`,
       ],
@@ -135,6 +168,20 @@ function actionAllowedInBasicSetupPilot(
     default:
       return false;
   }
+}
+
+function actionAllowedInCorpScoreWindowPilot(
+  frame: SemanticDecisionFrame,
+  action: LegalAction,
+  top: SemanticDecisionTrace["rankedActions"][number],
+): boolean {
+  if (frame.side !== "corp") return false;
+  if (action.type !== "score_agenda") return false;
+  return top.components.some(
+    (component) =>
+      component.component === "goal_fit" &&
+      component.evidence.some((entry) => entry === "utility_family:corp_scoreline"),
+  );
 }
 
 function actionAllowedInRunnerSafeAccessPilot(

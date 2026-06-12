@@ -5,6 +5,7 @@ import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   BASIC_SETUP_PILOT_MODE,
+  CORP_SCORE_WINDOW_PILOT_MODE,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
 } from "./decision/semantic-basic-setup-pilot";
 import { getTacticalPlanMemorySnapshot, resetTacticalPlanMemory } from "./tactical-plans";
@@ -259,6 +260,38 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.reasonCode).toBe("corp.semantic.simple_score_advance");
     expect(decision.evidence).toContain("semantic_runtime_default:true");
     expect(decision.fallbackUsed).toBe(false);
+  });
+
+  it("allows a legal score_agenda through the local corp score-window pilot", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = CORP_SCORE_WINDOW_PILOT_MODE;
+    const score = legalAction("score", "corp", "score_agenda", "Score agenda", {
+      credits: 0,
+    });
+    const gain = legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("corp", [score, gain]);
+    const runtimeChoices = [
+      semanticRuntimeChoice(score, 160, "corp.semantic.simple_score_advance"),
+      semanticRuntimeChoice(gain, 70, "corp.semantic.basic_economy_draw"),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.corp.economy"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+      }),
+    );
+
+    expect(decision.actionId).toBe("score");
+    expect(decision.reasonCode).toBe(
+      "ai_play_strength.corp_score_window_pilot",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["ai_play_strength_pilot:corp_score_window"]),
+    );
   });
 
   it("prefers central ICE protection over another empty remote shell", () => {

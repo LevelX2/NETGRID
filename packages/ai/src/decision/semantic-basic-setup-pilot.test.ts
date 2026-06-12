@@ -3,6 +3,7 @@ import type { LegalAction } from "@netgrid/shared";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   BASIC_SETUP_PILOT_MODE,
+  CORP_SCORE_WINDOW_PILOT_MODE,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   semanticBasicSetupPilotChoice,
 } from "./semantic-basic-setup-pilot";
@@ -75,7 +76,7 @@ describe("semanticBasicSetupPilotChoice", () => {
 
     const result = semanticBasicSetupPilotChoice({
       frame: frame(["gain-1", "run-hq"], {
-        runTargets: [safeCentralRunTarget("run-hq", "hq")],
+        runner: { runTargets: [safeCentralRunTarget("run-hq", "hq")] },
       }),
       trace: trace("run-hq", 160, "runner.pressure_good_central_target", "run_access"),
       currentChoice: choice("gain-1", "gain_credit", 70),
@@ -100,20 +101,63 @@ describe("semanticBasicSetupPilotChoice", () => {
     expect(
       semanticBasicSetupPilotChoice({
         frame: frame(["gain-1", "run-remote"], {
-          runTargets: [
-            {
-              ...safeCentralRunTarget("run-remote", "remote_1"),
-              targetKind: "remote",
-              accessTargetKind: "remote",
-              scoreThreat: true,
-            },
-          ],
+          runner: {
+            runTargets: [
+              {
+                ...safeCentralRunTarget("run-remote", "remote_1"),
+                targetKind: "remote",
+                accessTargetKind: "remote",
+                scoreThreat: true,
+              },
+            ],
+          },
         }),
         trace: trace("run-remote", 160, "runner.remote_contest", "remote_contest"),
         currentChoice: choice("gain-1", "gain_credit", 70),
         choices: [
           choice("gain-1", "gain_credit", 70),
           choice("run-remote", "start_run", 160, { serverId: "remote_1" }),
+        ],
+      }),
+    ).toBeUndefined();
+  });
+
+  it("overrides only score_agenda in the corp score-window pilot", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = CORP_SCORE_WINDOW_PILOT_MODE;
+
+    const result = semanticBasicSetupPilotChoice({
+      frame: frame(["gain-1", "score-1"], { side: "corp" }),
+      trace: trace("score-1", 160, "corp.neutral.score_agenda", "corp_scoreline", "corp"),
+      currentChoice: choice("gain-1", "gain_credit", 70, undefined, "corp"),
+      choices: [
+        choice("gain-1", "gain_credit", 70, undefined, "corp"),
+        choice("score-1", "score_agenda", 160, undefined, "corp"),
+      ],
+    });
+
+    expect(result?.choice.action.actionId).toBe("score-1");
+    expect(result?.choice.reasonCode).toBe(
+      "ai_play_strength.corp_score_window_pilot",
+    );
+  });
+
+  it("does not let advance_card through the corp score-window pilot", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = CORP_SCORE_WINDOW_PILOT_MODE;
+
+    expect(
+      semanticBasicSetupPilotChoice({
+        frame: frame(["gain-1", "advance-1"], { side: "corp" }),
+        trace: trace(
+          "advance-1",
+          160,
+          "corp.neutral.score_agenda",
+          "corp_scoreline",
+          "corp",
+        ),
+        currentChoice: choice("gain-1", "gain_credit", 70, undefined, "corp"),
+        choices: [
+          choice("gain-1", "gain_credit", 70, undefined, "corp"),
+          choice("advance-1", "advance_card", 160, undefined, "corp"),
         ],
       }),
     ).toBeUndefined();
@@ -177,17 +221,21 @@ describe("semanticBasicSetupPilotChoice", () => {
 
 function frame(
   legalActionIds: string[],
-  runner?: SemanticDecisionFrame["runner"],
+  options: {
+    side?: SemanticDecisionFrame["side"];
+    runner?: SemanticDecisionFrame["runner"];
+  } = {},
 ): SemanticDecisionFrame {
+  const side = options.side ?? "runner";
   return {
     schemaVersion: "semantic-decision-frame-v1",
-    side: "runner",
+    side,
     stateVersion: 1,
-    profileId: "runner:test",
+    profileId: `${side}:test`,
     legalActionIds,
     actionCandidates: [],
     tacticalGoals: [],
-    ...(runner ? { runner } : {}),
+    ...(options.runner ? { runner: options.runner } : {}),
     evidence: ["test_frame"],
     hiddenInfoPolicy: "player_view_only",
   };
@@ -198,13 +246,14 @@ function trace(
   score: number,
   primaryGoalId: string,
   utilityFamily: string,
+  side: "runner" | "corp" = "runner",
 ): SemanticDecisionTrace {
   return {
     schemaVersion: "semantic-decision-trace-v1",
     frameSummary: {
-      side: "runner",
+      side,
       stateVersion: 1,
-      profileId: "runner:test",
+      profileId: `${side}:test`,
       legalActionCount: 2,
       actionCandidateCount: 2,
       tacticalGoalCount: 1,
@@ -237,15 +286,16 @@ function choice(
   type: LegalAction["type"],
   score: number,
   payload?: LegalAction["payload"],
+  side: "runner" | "corp" = "runner",
 ): SemanticRuntimeChoice {
   return {
     action: {
       actionId,
-      side: "runner",
+      side,
       type,
       label: type,
       source: "basic_action",
-      timingPoint: "runner_action.main",
+      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
       costs: [],
       targetRequirements: [],
       visibility: "private_to_actor",
