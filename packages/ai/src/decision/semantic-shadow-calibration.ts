@@ -8,16 +8,26 @@ export type SemanticShadowCalibrationProfileId =
 
 export type SemanticShadowCalibrationMode = "baseline" | "shadow_only";
 
+export const SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION =
+  "semantic-shadow-calibration-profile-v1" as const;
 export const SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV =
   "NETGRID_AI_PLAY_STRENGTH_CALIBRATION_PROFILE";
+export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE =
+  "ai-shadow-league-baseline-2026-06-12" as const;
+export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH =
+  "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md" as const;
+export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT = 18;
 
 export type SemanticShadowCalibrationProfile = {
+  schemaVersion: typeof SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION;
   profileId: SemanticShadowCalibrationProfileId;
   version: string;
   mode: SemanticShadowCalibrationMode;
   scope: "semantic_shadow_decision_scoring";
   intendedScopes: readonly string[];
   baselineReference: string;
+  baselineReportPath: string;
+  baselineScenarioCount: number;
   weightSummary: Record<string, string | number>;
   pilotMinimumScoreGap: number;
   componentWeights: Record<ScoreComponent, number>;
@@ -30,6 +40,7 @@ export type SemanticShadowCalibrationProfile = {
 };
 
 export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
+  schemaVersion: SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
   profileId: "baseline_v1",
   version: "2026-06-12",
   mode: "baseline",
@@ -39,7 +50,9 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
     "pilot_scope_registry",
     "play_strength_benchmark",
   ],
-  baselineReference: "ai-shadow-league-baseline-2026-06-12",
+  baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
+  baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
+  baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
   weightSummary: {
     componentWeights: "all_components_1x",
     opportunityPriorityBonus: "low:2,medium:6,high:12,critical:18",
@@ -76,10 +89,13 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
   evidence: [
     "baseline_v1:current_semantic_shadow_score",
     "baseline_reference:ai-shadow-league-baseline-2026-06-12",
+    "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
+    "baseline_scenario_count:18",
   ],
 };
 
 export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
+  schemaVersion: SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
   profileId: "shadow_calibrated_v1",
   version: "2026-06-12",
   mode: "shadow_only",
@@ -89,7 +105,9 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
     "pilot_scope_registry",
     "play_strength_benchmark",
   ],
-  baselineReference: "ai-shadow-league-baseline-2026-06-12",
+  baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
+  baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
+  baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
   weightSummary: {
     componentWeights:
       "cost:1.15,timing:1.1,risk:1.25,plan:1.05,target:1.2,opportunity:1.15,threat:1.2",
@@ -127,6 +145,8 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
   evidence: [
     "shadow_calibrated_v1:diagnostic_weight_experiment_only",
     "baseline_reference:ai-shadow-league-baseline-2026-06-12",
+    "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
+    "baseline_scenario_count:18",
   ],
 };
 

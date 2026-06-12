@@ -34,8 +34,12 @@ export type PlayStrengthCalibrationBenchmark = {
 
 export type PlayStrengthCalibrationProfileDiff = {
   baselineProfileId: string;
+  baselineProfileVersion: string;
   candidateProfileId: string;
+  candidateProfileVersion: string;
   baselineReference: string;
+  baselineReportPath: string;
+  baselineScenarioCount: number;
   sampleCount: number;
   changedScoreSampleCount: number;
   topActionChangedCount: number;
@@ -109,8 +113,12 @@ export function comparePlayStrengthCalibrationProfiles(
   });
   return {
     baselineProfileId: baselineProfile.profileId,
+    baselineProfileVersion: baselineProfile.version,
     candidateProfileId: candidateProfile.profileId,
+    candidateProfileVersion: candidateProfile.version,
     baselineReference: candidateProfile.baselineReference,
+    baselineReportPath: candidateProfile.baselineReportPath,
+    baselineScenarioCount: candidateProfile.baselineScenarioCount,
     sampleCount: samples.length,
     changedScoreSampleCount: scoreDiffs.filter((diff) => diff.scoreChanged).length,
     topActionChangedCount: scoreDiffs.filter((diff) => diff.topActionChanged)
@@ -124,6 +132,8 @@ export function comparePlayStrengthCalibrationProfiles(
       `baseline_profile:${baselineProfile.profileId}`,
       `candidate_profile:${candidateProfile.profileId}`,
       `baseline_reference:${candidateProfile.baselineReference}`,
+      `baseline_report_path:${candidateProfile.baselineReportPath}`,
+      `baseline_scenario_count:${candidateProfile.baselineScenarioCount}`,
       "runtime_weight_change:false",
     ].map(redactSemanticString),
   };

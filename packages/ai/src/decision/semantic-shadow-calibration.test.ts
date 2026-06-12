@@ -4,6 +4,7 @@ import { buildRealEngineDecisionCorpusScenarios } from "../evaluation/real-engin
 import { buildRealEngineDecisionCorpus } from "../evaluation/real-engine-decision-corpus";
 import {
   SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV,
+  SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
   SEMANTIC_SHADOW_BASELINE_V1,
   SEMANTIC_SHADOW_CALIBRATED_V1,
   semanticShadowCalibrationProfileFromEnv,
@@ -28,10 +29,17 @@ describe("SemanticShadowCalibration", () => {
       SEMANTIC_SHADOW_BASELINE_V1,
       SEMANTIC_SHADOW_CALIBRATED_V1,
     ]) {
+      expect(profile.schemaVersion).toBe(
+        SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION,
+      );
       expect(profile.version).toBe("2026-06-12");
       expect(profile.baselineReference).toBe(
         "ai-shadow-league-baseline-2026-06-12",
       );
+      expect(profile.baselineReportPath).toBe(
+        "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
+      );
+      expect(profile.baselineScenarioCount).toBe(18);
       expect(profile.intendedScopes).toEqual(
         expect.arrayContaining([
           "semantic_shadow_league",
@@ -45,6 +53,8 @@ describe("SemanticShadowCalibration", () => {
       expect(profile.evidence).toEqual(
         expect.arrayContaining([
           "baseline_reference:ai-shadow-league-baseline-2026-06-12",
+          "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
+          "baseline_scenario_count:18",
         ]),
       );
       expect(profile.productiveUseAllowed).toBe(false);
