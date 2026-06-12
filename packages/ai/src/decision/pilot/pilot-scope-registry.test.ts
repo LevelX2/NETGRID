@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
+  ALL_PLAY_STRENGTH_PILOT_SCOPES,
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
+  PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   parsePilotScopes,
   pilotScopeAllowsAction,
@@ -38,6 +40,21 @@ describe("pilot-scope-registry", () => {
         ` ${BASIC_SETUP_PILOT_MODE},unknown;${RUNNER_SAFE_ACCESS_PILOT_MODE} ${BASIC_SETUP_PILOT_MODE} `,
       ),
     ).toEqual([BASIC_SETUP_PILOT_MODE, RUNNER_SAFE_ACCESS_PILOT_MODE]);
+  });
+
+  it("expands the all token without duplicating explicit scopes", () => {
+    expect(parsePilotScopes(PLAY_STRENGTH_PILOT_ALL_TOKEN)).toEqual(
+      ALL_PLAY_STRENGTH_PILOT_SCOPES,
+    );
+    expect(
+      parsePilotScopes(
+        `${RUNNER_SAFE_ACCESS_PILOT_MODE},${PLAY_STRENGTH_PILOT_ALL_TOKEN};${BASIC_SETUP_PILOT_MODE}`,
+      ),
+    ).toEqual([
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      BASIC_SETUP_PILOT_MODE,
+      CORP_SCORE_WINDOW_PILOT_MODE,
+    ]);
   });
 
   it("allows only basic setup resource actions for the basic scope", () => {
@@ -158,6 +175,33 @@ describe("pilot-scope-registry", () => {
         "pilot_scope_allowed:true",
         "target_kind:hq",
       ]),
+    );
+    expect(result?.evidence).toEqual(
+      expect.arrayContaining([
+        "ai_play_strength_pilot:runner_safe_access",
+        "pilot_scope_reason:runner_safe_access_central_reachable_allowed",
+      ]),
+    );
+  });
+
+  it("falls through blocked earlier scopes in a multi-scope env", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] =
+      `${BASIC_SETUP_PILOT_MODE},${RUNNER_SAFE_ACCESS_PILOT_MODE}`;
+    const result = semanticPilotChoice({
+      frame: frame(["gain-1", "run-hq"], {
+        runner: { runTargets: [safeCentralRunTarget("run-hq", "hq")] },
+      }),
+      trace: trace("run-hq", 160, "run_access"),
+      currentChoice: choice("gain-1", "gain_credit", 70),
+      choices: [
+        choice("gain-1", "gain_credit", 70),
+        choice("run-hq", "start_run", 160, { serverId: "hq" }),
+      ],
+    });
+
+    expect(result?.choice.action.actionId).toBe("run-hq");
+    expect(result?.choice.reasonCode).toBe(
+      "ai_play_strength.runner_safe_access_pilot",
     );
     expect(result?.evidence).toEqual(
       expect.arrayContaining([

@@ -8,8 +8,10 @@ import { basicSetupDecision } from "./basic-setup-pilot";
 import { corpScoreWindowDecision } from "./corp-score-window-pilot";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
+  ALL_PLAY_STRENGTH_PILOT_SCOPES,
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
+  PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   type AiPlayStrengthPilotScope,
   type PilotScopeDecision,
@@ -19,8 +21,10 @@ import { runnerSafeAccessDecision } from "./runner-safe-access-pilot";
 
 export {
   AI_PLAY_STRENGTH_PILOT_ENV,
+  ALL_PLAY_STRENGTH_PILOT_SCOPES,
   BASIC_SETUP_PILOT_MODE,
   CORP_SCORE_WINDOW_PILOT_MODE,
+  PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
 };
 export type { AiPlayStrengthPilotScope, PilotScopeDecision };
@@ -30,20 +34,17 @@ export type SemanticBasicSetupPilotResult = {
   evidence: string[];
 };
 
-const PILOT_SCOPES = [
-  BASIC_SETUP_PILOT_MODE,
-  RUNNER_SAFE_ACCESS_PILOT_MODE,
-  CORP_SCORE_WINDOW_PILOT_MODE,
-] as const satisfies readonly AiPlayStrengthPilotScope[];
-
 export function parsePilotScopes(env: string | undefined): AiPlayStrengthPilotScope[] {
   if (!env) return [];
   const seen = new Set<AiPlayStrengthPilotScope>();
   const scopes: AiPlayStrengthPilotScope[] = [];
   for (const token of env.split(/[,\s;]+/)) {
-    if (!isPilotScope(token) || seen.has(token)) continue;
-    seen.add(token);
-    scopes.push(token);
+    if (token === PLAY_STRENGTH_PILOT_ALL_TOKEN) {
+      appendPilotScopes(scopes, seen, ALL_PLAY_STRENGTH_PILOT_SCOPES);
+      continue;
+    }
+    if (!isPilotScope(token)) continue;
+    appendPilotScopes(scopes, seen, [token]);
   }
   return scopes;
 }
@@ -178,5 +179,17 @@ function explanationForScope(
 }
 
 function isPilotScope(value: string): value is AiPlayStrengthPilotScope {
-  return PILOT_SCOPES.some((scope) => scope === value);
+  return ALL_PLAY_STRENGTH_PILOT_SCOPES.some((scope) => scope === value);
+}
+
+function appendPilotScopes(
+  scopes: AiPlayStrengthPilotScope[],
+  seen: Set<AiPlayStrengthPilotScope>,
+  nextScopes: readonly AiPlayStrengthPilotScope[],
+): void {
+  for (const scope of nextScopes) {
+    if (seen.has(scope)) continue;
+    seen.add(scope);
+    scopes.push(scope);
+  }
 }

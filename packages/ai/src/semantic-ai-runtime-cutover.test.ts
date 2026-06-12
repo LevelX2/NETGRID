@@ -253,6 +253,54 @@ describe("Semantic AI runtime cutover", () => {
     expect(rememberedActions).toEqual(["run-hq"]);
   });
 
+  it("falls through blocked local pilot scopes in the runtime env", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] =
+      `${BASIC_SETUP_PILOT_MODE},${RUNNER_SAFE_ACCESS_PILOT_MODE}`;
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0 },
+      { payload: { serverId: "hq" } },
+    );
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [run, gain]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const runtimeChoices = [
+      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
+      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+        runTargets: [safeRuntimeRunTarget(run.actionId, "hq")],
+        goal: {
+          goalId: "runner.pressure_good_central_target",
+          family: "pressure",
+          priority: 980,
+          urgency: "high",
+          source: "run_target_evaluation",
+          evidence: ["test_goal:run_access"],
+        },
+      }),
+    );
+
+    expect(decision.actionId).toBe("run-hq");
+    expect(decision.reasonCode).toBe(
+      "ai_play_strength.runner_safe_access_pilot",
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
+    );
+  });
+
   it("uses semantic runtime as the live corp decision by default", () => {
     const input = aiInput("corp", [
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {

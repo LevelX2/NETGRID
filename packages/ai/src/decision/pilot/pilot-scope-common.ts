@@ -4,11 +4,18 @@ export const AI_PLAY_STRENGTH_PILOT_ENV = "NETGRID_AI_PLAY_STRENGTH_PILOT";
 export const BASIC_SETUP_PILOT_MODE = "basic_setup";
 export const RUNNER_SAFE_ACCESS_PILOT_MODE = "runner_safe_access";
 export const CORP_SCORE_WINDOW_PILOT_MODE = "corp_score_window";
+export const PLAY_STRENGTH_PILOT_ALL_TOKEN = "all";
 
 export type AiPlayStrengthPilotScope =
   | typeof BASIC_SETUP_PILOT_MODE
   | typeof RUNNER_SAFE_ACCESS_PILOT_MODE
   | typeof CORP_SCORE_WINDOW_PILOT_MODE;
+
+export const ALL_PLAY_STRENGTH_PILOT_SCOPES = [
+  BASIC_SETUP_PILOT_MODE,
+  RUNNER_SAFE_ACCESS_PILOT_MODE,
+  CORP_SCORE_WINDOW_PILOT_MODE,
+] as const satisfies readonly AiPlayStrengthPilotScope[];
 
 export type PilotScopeDecision = {
   scope: AiPlayStrengthPilotScope;
