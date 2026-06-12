@@ -353,6 +353,27 @@ Done-Gate: Kein diagnostischer Baustein ist produktiver Cutover-Pfad.
 
 Commit: `test(ai): keep semantic diagnostics out of runtime cutover`
 
+#### P8 Ergebnis
+
+Umgesetzt:
+
+- Runtime-Cutover-Tests erzwingen, dass Shadow-Trace, DeckDoctrine-v2, Real-Engine-Corpus und Semantic-Decision-Frame nicht über die öffentliche AI-Runtime-API exportiert werden.
+- ActionSemanticCandidate bleibt eine Projektion über vorhandene LegalActions: keine LegalAction-Erzeugung, kein `applyAction`-Pfad, kein Runtime-Cutover.
+- SemanticShadowDecision und DeckDoctrine-v2 bleiben `diagnostic_only`, `productiveUseAllowed=false` und ohne `selectedActionId`.
+- Der 18-Sample-Real-Engine-Corpus wird zusätzlich auf no-effect Trace-Verhalten geprüft.
+- Durch P2/P7 sichtbar gewordene rote Tests wurden im selben Block korrigiert:
+  - TargetProfile-Ontologie um die tatsächlich genutzten aktiven Profilwerte erweitert.
+  - Semantic-Shadow-League-Test an die zentrale Korpusquelle gebunden statt an die alte 12-Sample-Verteilung.
+  - Inspector-Index-Check auf strukturellen JSON-Vergleich gehärtet, damit Prettier und Determinismus-Test nicht gegeneinander laufen.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts src/hint-ontology.test.ts src/ai-hint-inspector-index.test.ts src/evaluation/semantic-shadow-league.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai test`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ### P9 Lokale Transfer- und Report-Hygiene
 
 Ziel: Lokale Commit- und Reportlage wird inventarisiert.
