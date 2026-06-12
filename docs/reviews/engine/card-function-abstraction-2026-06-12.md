@@ -392,6 +392,24 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
+## Abstraktionsplan
+
+| Priorität | Fundklasse | Zielbaustein | State-Ziel |
+| --- | --- | --- | --- |
+| slice_now | Preying Mantis | `optional_extra_action_with_delayed_damage` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
+| deferred_refactor_required | Quest for Cattekin | `start_turn_random_effect_table` | `runnerTurnFlags.persistentModifiers[]` |
+| deferred_refactor_required | Pirate Broadcast | `multi_server_success_sequence` | `runnerTurnFlags.pendingSequences[]` |
+| deferred_refactor_required | Bizarre Encryption Scheme | `delayed_agenda_access_replacement` | `runDurationEffects[]`, `delayedAccessEffects[]` |
+| deferred_refactor_required | Code Viral Cache | `purge_replacement_with_runner_virus_counter_cleanup` | `replacementEffects[]` |
+| deferred_refactor_required | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
+| deferred_refactor_required | Krumz | `recurring_trace_credit_pool` | `recurringCreditPools[]` |
+| deferred_refactor_required | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
+| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
+
+## Nächste Umsetzung
+
+Der erste Code-Slice refaktoriert `Preying Mantis`, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
+
 ## Erlaubte Referenzen
 
 - `packages/engine/src/card-implementations/coverage.ts:182` Disinfectant / `disinfectant`

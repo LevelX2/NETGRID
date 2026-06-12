@@ -29,6 +29,178 @@
     "runtime_state_field_uses_card_name": 280,
     "mechanics_constant_controls_behavior_by_card_id": 49
   },
+  "abstractionPlan": [
+    {
+      "priority": "slice_now",
+      "cardTitle": "Preying Mantis",
+      "currentNames": [
+        "preying_mantis_optional_action_unpreventable_core_damage",
+        "preying_mantis_gain_action",
+        "resolvePreyingMantisGainAction",
+        "preyingMantisUsedSourceIdsThisTurn",
+        "preyingMantisDamageDueSourceIdsThisTurn"
+      ],
+      "targetKind": "optional_extra_action_with_delayed_damage",
+      "targetState": [
+        "runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]",
+        "runnerTurnFlags.delayedEndTurnEffects[]"
+      ],
+      "params": {
+        "extraActions": 1,
+        "damageType": "core",
+        "damageAmount": 1,
+        "damageTiming": "end_of_turn",
+        "preventable": false,
+        "limit": "once_per_turn_per_source"
+      },
+      "notes": "Erster vertikaler Slice, weil kind, Payload, Resolver und Turn-State zusammen sichtbar sind."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Quest for Cattekin",
+      "currentNames": [
+        "quest_for_cattekin_start_turn_random_permanent_action",
+        "questForCattekinPermanentActionGain"
+      ],
+      "targetKind": "start_turn_random_effect_table",
+      "targetState": [
+        "runnerTurnFlags.persistentModifiers[]"
+      ],
+      "params": {
+        "dieFaces": 6,
+        "outcomes": [
+          "trash_source_and_grant_permanent_extra_action",
+          "unpreventable_core_damage",
+          "unpreventable_net_damage",
+          "no_effect"
+        ]
+      },
+      "notes": "Fachlich nah an Action-Economy/Delayed-Damage, aber wegen Random-/Permanent-State erst nach dem Muster-Slice."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Pirate Broadcast",
+      "currentNames": [
+        "pirateBroadcastPending",
+        "pirateBroadcastRun"
+      ],
+      "targetKind": "multi_server_success_sequence",
+      "targetState": [
+        "runnerTurnFlags.pendingSequences[]"
+      ],
+      "params": {
+        "sequence": "run_each_data_fort",
+        "advanceOnSuccessfulRun": true,
+        "failOnUnsuccessfulRun": true
+      },
+      "notes": "Größerer Sequenz-State; nicht in denselben Slice ziehen."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Bizarre Encryption Scheme",
+      "currentNames": [
+        "bizarre_encryption_scheme_access_replacement",
+        "bizarreEncryptionSchemeActive",
+        "bizarreEncryptionDelayedAgendas"
+      ],
+      "targetKind": "delayed_agenda_access_replacement",
+      "targetState": [
+        "runDurationEffects[]",
+        "delayedAccessEffects[]"
+      ],
+      "params": {
+        "replacementWindow": "agenda_access",
+        "delay": "after_current_access_sequence"
+      },
+      "notes": "Access-/Breach-State betrifft Hidden-Info-Grenzen und braucht eigenen Regression-Slice."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Code Viral Cache",
+      "currentNames": [
+        "code_viral_cache_purge_replacement",
+        "CODE_VIRAL_CACHE_ID"
+      ],
+      "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
+      "targetState": [
+        "replacementEffects[]"
+      ],
+      "params": {
+        "interruptedEvent": "corp_purge_virus_counters",
+        "runnerVirusCounterCleanup": true
+      },
+      "notes": "Purge-Replacement bleibt als eigene Event-/Replacement-Familie."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Startup Immolator",
+      "currentNames": [
+        "startup_immolator_trash_fully_broken_ice",
+        "startupImmolatorUsedSourceIdsThisTurn"
+      ],
+      "targetKind": "trash_fully_broken_passed_ice",
+      "targetState": [
+        "runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]"
+      ],
+      "params": {
+        "triggerWindow": "after_passing_fully_broken_ice",
+        "target": "that_ice",
+        "limit": "once_per_turn_per_source"
+      },
+      "notes": "Kann nach Ability-Use-Ledger auf dieselbe Limit-Infrastruktur wie Preying Mantis wechseln."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Krumz",
+      "currentNames": [
+        "krumz_trace_bit",
+        "spendKrumzTraceBits"
+      ],
+      "targetKind": "recurring_trace_credit_pool",
+      "targetState": [
+        "recurringCreditPools[]"
+      ],
+      "params": {
+        "amount": 1,
+        "spendWindow": "trace",
+        "refresh": "start_of_corp_turn_after_use"
+      },
+      "notes": "Soll mit vorhandenen Trace-Credit- und Recurring-Credit-Pfaden zusammengeführt werden."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Siren",
+      "currentNames": [
+        "siren_start_run_redirect"
+      ],
+      "targetKind": "start_run_redirect_to_source_fort",
+      "targetState": [
+        "runStartInterventions[]"
+      ],
+      "params": {
+        "redirectTarget": "source_fort",
+        "triggerWindow": "run_start"
+      },
+      "notes": "Run-Redirect braucht side-sichere Serverbindung und darf keine Hidden-Info über Zielauswahl leaken."
+    },
+    {
+      "priority": "deferred_refactor_required",
+      "cardTitle": "Corporate War / Project Babylon",
+      "currentNames": [
+        "corporate_war_credit_swing",
+        "project_babylon_bonus_points"
+      ],
+      "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
+      "targetState": [
+        "scoredAgendaAbilities[]"
+      ],
+      "params": {
+        "triggerWindow": "agenda_scored",
+        "conditionSource": "agenda_params"
+      },
+      "notes": "Agenda-Scoring-Familien sollten über parametrisierte Scored-Agenda-Abilities laufen."
+    }
+  ],
   "findings": [
     {
       "path": "packages/engine/src/ability-engine/definition-types.ts",
