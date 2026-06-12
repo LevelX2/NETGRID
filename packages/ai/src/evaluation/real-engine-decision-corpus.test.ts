@@ -139,18 +139,31 @@ describe("RealEngineDecisionCorpus", () => {
     ).toBe(false);
 
     const runnerPositive = sampleFor(samples, "runner_real_safe_hq_access");
-    expect(
-      pilotDecisionFor(scenarios, runnerPositive, RUNNER_SAFE_ACCESS_PILOT_MODE)
-        .allowed,
-    ).toBe(true);
+    const runnerPositiveDecision = pilotDecisionFor(
+      scenarios,
+      runnerPositive,
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+    );
+    expect(runnerPositiveDecision.allowed).toBe(true);
+    expect(runnerPositiveDecision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^credits_after_run:/),
+        "steal_or_trash_affordable:unknown",
+        "risky_universal_coverage:false",
+        "score_threat:false",
+      ]),
+    );
     expect(
       pilotChoiceFor(scenarios, runnerPositive, RUNNER_SAFE_ACCESS_PILOT_MODE)
         ?.choice.action.actionId,
     ).toBe(topAction(runnerPositive).actionId);
-    expect(
-      pilotDecisionFor(scenarios, sampleFor(samples, "runner_real_remote_score_threat"), RUNNER_SAFE_ACCESS_PILOT_MODE)
-        .allowed,
-    ).toBe(false);
+    const remoteThreatDecision = pilotDecisionFor(
+      scenarios,
+      sampleFor(samples, "runner_real_remote_score_threat"),
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+    );
+    expect(remoteThreatDecision.allowed).toBe(false);
+    expect(remoteThreatDecision.reason).toBe("runner_safe_access_non_central_target");
     expect(
       pilotScopeAllowsAction({
         scope: RUNNER_SAFE_ACCESS_PILOT_MODE,

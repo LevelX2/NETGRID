@@ -124,7 +124,56 @@ describe("pilot-scope-registry", () => {
       expect.arrayContaining(["target_kind:hq", "recommendation:run_now"]),
     );
     expect(remoteBlocked.allowed).toBe(false);
-    expect(remoteBlocked.reason).toBe("runner_safe_access_gate_blocked");
+    expect(remoteBlocked.reason).toBe("runner_safe_access_non_central_target");
+  });
+
+  it("blocks runner safe access on risk signals from the run target", () => {
+    const riskyCases = [
+      {
+        label: "universal pressure",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          riskyUniversalCoverage: true,
+        },
+        reason: "runner_safe_access_universal_risk_blocked",
+        evidence: "risky_universal_coverage:true",
+      },
+      {
+        label: "negative credits after run",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          creditsAfterRun: -1,
+        },
+        reason: "runner_safe_access_credit_risk_blocked",
+        evidence: "credits_after_run:-1",
+      },
+      {
+        label: "unaffordable steal or trash",
+        target: {
+          ...safeCentralRunTarget("run-hq", "hq"),
+          stealOrTrashAffordable: false,
+        },
+        reason: "runner_safe_access_unaffordable_access_blocked",
+        evidence: "steal_or_trash_affordable:false",
+      },
+    ] as const;
+
+    for (const riskyCase of riskyCases) {
+      const result = pilotScopeAllowsAction({
+        scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
+        frame: frame(["run-hq"], {
+          runner: { runTargets: [riskyCase.target] },
+        }),
+        action: legalAction("run-hq", "start_run", { serverId: "hq" }),
+        top: rankedAction("run-hq", 160, "run_access"),
+      });
+
+      expect(result.allowed, riskyCase.label).toBe(false);
+      expect(result.reason, riskyCase.label).toBe(riskyCase.reason);
+      expect(result.evidence, riskyCase.label).toEqual(
+        expect.arrayContaining([riskyCase.evidence]),
+      );
+    }
   });
 
   it("allows only corp score_agenda actions with scoreline evidence", () => {
