@@ -179,7 +179,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-15 | complete | `4b4cf668` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/module-boundaries.test.ts` |
 | AI-MAT-16 | complete | `95476991` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts` |
 | AI-MAT-17 | complete | `7aad48f6` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/semantic-decision-trace.ts packages/ai/src/diagnostics/decision-debug.ts packages/ai/src/diagnostics/decision-debug.test.ts packages/ai/src/index.ts packages/ai/src/semantic-ai-runtime-cutover.test.ts` |
-| AI-MAT-18 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md docs/reviews/ai/ai-index-rest-debt-map-2026-06-12.md` |
+| AI-MAT-18 | complete | `c1201d7e` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md docs/reviews/ai/ai-index-rest-debt-map-2026-06-12.md` |
+| AI-MAT-19 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md docs/reviews/ai/README.md docs/reviews/ai/originalset-semantic-play-strength-backlog-2026-06-12.md` |
 
 ## Check-Nachweise
 
@@ -224,6 +225,9 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-17`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 - `AI-MAT-18`: `docs/reviews/ai/ai-index-rest-debt-map-2026-06-12.md` auf den Stand nach AI-MAT-17 aktualisiert; `index.ts` umfasst 35.984 Zeilen, `semanticRuntimeDecisionDebug` bleibt bei `packages/ai/src/index.ts:3768`.
 - `AI-MAT-18`: `git diff --check` gruen.
+- `AI-MAT-19`: Originalset-naher Play-Strength-Semantik-Backlog aus AI028-R erstellt; Folgeauftraege AI-ORIG-SEM-1 bis AI-ORIG-SEM-5 halten Invariant- und No-Effect-Gates fest.
+- `AI-MAT-19`: `corepack pnpm --filter @netgrid/ai test -- src/actions/action-semantic-invariants.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1219 Tests ausgefuehrt.
+- `AI-MAT-19`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 
