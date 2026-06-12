@@ -31,32 +31,65 @@ export function synthesizeDoctrineTacticalGoals(
 function runnerDoctrineGoals(
   strategy: DeckDoctrineV2StrategyDiagnostic,
 ): TacticalGoalLike[] {
+  if (!hasStrategyAnchor(strategy)) return [];
   switch (strategy.strategyId) {
     case "runner.rnd_pressure":
-      return runnerRndPressureGoals(strategy);
+      return runnerPressureGoals(strategy, {
+        strategyId: "runner.rnd_pressure",
+        accessGoalId: "runner.doctrine.rnd_pressure_access",
+        coverageGoalId: "runner.doctrine.rnd_pressure_coverage",
+        setupGoalId: "runner.doctrine.rnd_pressure_setup",
+        completeEvidence: "doctrine_goal:run_access",
+        priority: 790,
+      });
+    case "runner.hq_pressure":
+      return runnerPressureGoals(strategy, {
+        strategyId: "runner.hq_pressure",
+        accessGoalId: "runner.doctrine.hq_pressure_access",
+        coverageGoalId: "runner.doctrine.hq_pressure_coverage",
+        setupGoalId: "runner.doctrine.hq_pressure_setup",
+        completeEvidence: "doctrine_goal:hq_access",
+        priority: 780,
+      });
     case "runner.remote_contest":
       return runnerRemoteContestGoals(strategy);
+    case "runner.search.breaker":
+      return runnerBreakerSearchGoals(strategy);
+    case "runner.survival_defense":
+      return runnerSurvivalGoals(strategy);
+    case "runner.economy_first":
+      return runnerEconomyEngineGoals(strategy);
     default:
       return [];
   }
 }
 
-function runnerRndPressureGoals(
+type RunnerPressureGoalSpec = {
+  strategyId: string;
+  accessGoalId: string;
+  coverageGoalId: string;
+  setupGoalId: string;
+  completeEvidence: string;
+  priority: number;
+};
+
+function runnerPressureGoals(
   strategy: DeckDoctrineV2StrategyDiagnostic,
+  spec: RunnerPressureGoalSpec,
 ): TacticalGoalLike[] {
   if (strategy.status === "complete") {
     return [
-      goal("runner.doctrine.rnd_pressure_access", "pressure", 790, "high", [
-        "doctrine_v2:runner.rnd_pressure",
+      goal(spec.accessGoalId, "pressure", spec.priority, "high", [
+        `doctrine_v2:${spec.strategyId}`,
         "doctrine_status:complete",
-        "doctrine_goal:run_access",
+        spec.completeEvidence,
       ]),
     ];
   }
   if (strategy.status === "partial" && hasCoverageGap(strategy)) {
     return [
-      goal("runner.doctrine.rnd_pressure_coverage", "coverage", 720, "medium", [
-        "doctrine_v2:runner.rnd_pressure",
+      goal(spec.coverageGoalId, "coverage", 720, "medium", [
+        `doctrine_v2:${spec.strategyId}`,
         "doctrine_status:partial",
         "missing_breaker_coverage:doctrine_v2",
       ]),
@@ -64,8 +97,8 @@ function runnerRndPressureGoals(
   }
   if (strategy.status === "partial") {
     return [
-      goal("runner.doctrine.rnd_pressure_setup", "setup", 650, "medium", [
-        "doctrine_v2:runner.rnd_pressure",
+      goal(spec.setupGoalId, "setup", 650, "medium", [
+        `doctrine_v2:${spec.strategyId}`,
         "doctrine_status:partial",
         "doctrine_gap:setup_before_pressure",
       ]),
@@ -98,28 +131,99 @@ function runnerRemoteContestGoals(
   return [];
 }
 
+function runnerBreakerSearchGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("runner.doctrine.breaker_search", "coverage", 735, "medium", [
+        "doctrine_v2:runner.search.breaker",
+        "doctrine_status:complete",
+        "doctrine_goal:breaker_search",
+      ]),
+    ];
+  }
+  if (strategy.status === "partial") {
+    return [
+      goal("runner.doctrine.breaker_search_setup", "setup", 650, "medium", [
+        "doctrine_v2:runner.search.breaker",
+        "doctrine_status:partial",
+        "doctrine_gap:search_setup_before_payoff",
+      ]),
+    ];
+  }
+  return [];
+}
+
+function runnerSurvivalGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("runner.doctrine.survival", "risk_control", 760, "high", [
+        "doctrine_v2:runner.survival_defense",
+        "doctrine_status:complete",
+        "doctrine_goal:survival",
+      ]),
+    ];
+  }
+  if (strategy.status === "partial") {
+    return [
+      goal("runner.doctrine.survival_setup", "setup", 650, "medium", [
+        "doctrine_v2:runner.survival_defense",
+        "doctrine_status:partial",
+        "doctrine_gap:survival_tool_setup",
+      ]),
+    ];
+  }
+  return [];
+}
+
+function runnerEconomyEngineGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("runner.doctrine.economy_engine", "economy", 735, "medium", [
+        "doctrine_v2:runner.economy_first",
+        "doctrine_status:complete",
+        "doctrine_goal:economy_engine",
+      ]),
+    ];
+  }
+  if (strategy.status === "partial") {
+    return [
+      goal("runner.doctrine.economy_engine_setup", "setup", 650, "medium", [
+        "doctrine_v2:runner.economy_first",
+        "doctrine_status:partial",
+        "doctrine_gap:economy_setup_before_payoff",
+      ]),
+    ];
+  }
+  return [];
+}
+
 function corpDoctrineGoals(
   strategy: DeckDoctrineV2StrategyDiagnostic,
 ): TacticalGoalLike[] {
-  if (strategy.strategyId === "corp.remote_scoring" && strategy.status === "complete") {
-    return [
-      goal("corp.doctrine.remote_scoring_scoreline", "corp_scoreline", 810, "high", [
-        "doctrine_v2:corp.remote_scoring",
-        "doctrine_status:complete",
-        "doctrine_goal:corp_scoreline",
-      ]),
-      goal(
-        "corp.doctrine.remote_scoring_ice_defense",
-        "corp_ice_defense",
-        760,
-        "medium",
-        [
-          "doctrine_v2:corp.remote_scoring",
-          "doctrine_status:complete",
-          "doctrine_goal:corp_ice_defense",
-        ],
-      ),
-    ];
+  if (!hasStrategyAnchor(strategy)) return [];
+  if (strategy.strategyId === "corp.remote_scoring") {
+    return corpRemoteScoringGoals(strategy);
+  }
+  if (strategy.strategyId === "corp.fast_advance") {
+    return corpFastAdvanceGoals(strategy);
+  }
+  if (strategy.strategyId === "corp.ice_tax_glacier") {
+    return corpIceTaxGoals(strategy);
+  }
+  if (strategy.strategyId === "corp.asset_economy") {
+    return corpAssetEconomyGoals(strategy);
+  }
+  if (strategy.strategyId === "corp.central_stabilize") {
+    return corpCentralDefenseGoals(strategy);
+  }
+  if (strategy.strategyId === "corp.ambush_bluff") {
+    return corpRemoteAmbushGoals(strategy);
   }
   if (strategy.strategyId === "corp.tag_trace_punish" && tagPunishReady(strategy)) {
     return [
@@ -140,6 +244,135 @@ function corpDoctrineGoals(
   return [];
 }
 
+function corpRemoteScoringGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.remote_scoring_scoreline", "corp_scoreline", 810, "high", [
+        "doctrine_v2:corp.remote_scoring",
+        "doctrine_status:complete",
+        "doctrine_goal:corp_scoreline",
+      ]),
+      goal(
+        "corp.doctrine.remote_scoring_ice_defense",
+        "corp_ice_defense",
+        760,
+        "medium",
+        [
+          "doctrine_v2:corp.remote_scoring",
+          "doctrine_status:complete",
+          "doctrine_goal:corp_ice_defense",
+        ],
+      ),
+    ];
+  }
+  if (strategy.status === "partial") {
+    return [
+      goal("corp.doctrine.remote_scoring_setup", "setup", 670, "medium", [
+        "doctrine_v2:corp.remote_scoring",
+        "doctrine_status:partial",
+        "doctrine_gap:setup_before_remote_scoreline",
+      ]),
+    ];
+  }
+  return [];
+}
+
+function corpFastAdvanceGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.fast_advance", "corp_scoreline", 805, "high", [
+        "doctrine_v2:corp.fast_advance",
+        "doctrine_status:complete",
+        "doctrine_goal:fast_advance",
+      ]),
+    ];
+  }
+  return corpPartialSetupGoal(strategy, "corp.doctrine.fast_advance_setup");
+}
+
+function corpIceTaxGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.ice_tax", "corp_ice_defense", 780, "medium", [
+        "doctrine_v2:corp.ice_tax_glacier",
+        "doctrine_status:complete",
+        "doctrine_goal:ice_tax",
+      ]),
+    ];
+  }
+  return corpPartialSetupGoal(strategy, "corp.doctrine.ice_tax_setup");
+}
+
+function corpAssetEconomyGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.asset_economy", "economy", 740, "medium", [
+        "doctrine_v2:corp.asset_economy",
+        "doctrine_status:complete",
+        "doctrine_goal:asset_economy",
+      ]),
+    ];
+  }
+  return corpPartialSetupGoal(strategy, "corp.doctrine.asset_economy_setup");
+}
+
+function corpCentralDefenseGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.hq_defense", "corp_ice_defense", 770, "medium", [
+        "doctrine_v2:corp.central_stabilize",
+        "doctrine_status:complete",
+        "doctrine_goal:hq_defense",
+      ]),
+      goal("corp.doctrine.rnd_defense", "corp_ice_defense", 768, "medium", [
+        "doctrine_v2:corp.central_stabilize",
+        "doctrine_status:complete",
+        "doctrine_goal:rnd_defense",
+      ]),
+    ];
+  }
+  return corpPartialSetupGoal(strategy, "corp.doctrine.central_defense_setup");
+}
+
+function corpRemoteAmbushGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  if (strategy.status === "complete") {
+    return [
+      goal("corp.doctrine.remote_ambush", "damage_pressure", 730, "medium", [
+        "doctrine_v2:corp.ambush_bluff",
+        "doctrine_status:complete",
+        "doctrine_goal:remote_ambush",
+      ]),
+    ];
+  }
+  return corpPartialSetupGoal(strategy, "corp.doctrine.remote_ambush_setup");
+}
+
+function corpPartialSetupGoal(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+  goalId: string,
+): TacticalGoalLike[] {
+  if (strategy.status !== "partial") return [];
+  return [
+    goal(goalId, "setup", 660, "medium", [
+      `doctrine_v2:${strategy.strategyId}`,
+      "doctrine_status:partial",
+      "doctrine_gap:setup_before_payoff",
+    ]),
+  ];
+}
+
 function tagPunishReady(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
   return (
     strategy.status === "complete" &&
@@ -152,6 +385,10 @@ function damagePressureReady(strategy: DeckDoctrineV2StrategyDiagnostic): boolea
     strategy.status === "complete" &&
     !hasAnyGap(strategy, ["payoff_without_enablers", "low_punish_payoff_density"])
   );
+}
+
+function hasStrategyAnchor(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
+  return strategy.anchorEvidenceCount > 0 || strategy.anchorScore > 0;
 }
 
 function hasCoverageGap(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
