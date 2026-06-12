@@ -1,0 +1,512 @@
+{
+  "schemaVersion": "ai136-semantic-shadow-endwindow-challenger-v1",
+  "generatedAt": "2026-06-12T21:02:54.827Z",
+  "gitHead": "e653ac72",
+  "source": {
+    "corpus": "docs/reviews/ai/ai131-x10-action-limit-failure-corpus-2026-06-12.json",
+    "progressLabels": "docs/reviews/ai/ai132-progress-delta-labeler-2026-06-12.json"
+  },
+  "redaction": {
+    "safe": true,
+    "forbiddenMarkers": []
+  },
+  "aggregate": {
+    "cases": 21,
+    "comparisons": 21,
+    "hiddenInfoFindings": 0,
+    "nonLegalChallengerActions": 0,
+    "differentChallengers": 17,
+    "improvementCandidates": 17,
+    "noGoCases": 4,
+    "topImprovementCases": [
+      "A-ai-v143-tuning-006",
+      "A-ai-v143-tuning-008",
+      "A-ai-v143-tuning-009"
+    ]
+  },
+  "comparisons": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "pair": "A",
+      "seed": "ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "advance_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 152,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_reachability_improved outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "pair": "A",
+      "seed": "ai-v143-tuning-008",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "challengerSelected": {
+        "actionIndex": 154,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_server_protected outranks legacy terminal label progress_reachability_improved",
+      "historicalSimilarOutcome": "progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "pair": "A",
+      "seed": "ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "decline_rez",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_trash outranks legacy terminal label no_progress_plausible",
+      "historicalSimilarOutcome": "progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "pair": "B",
+      "seed": "ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "resolve_choice",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 141,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_trash outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "pair": "B",
+      "seed": "ai-v143-tuning-003",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "pump_breaker",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "challengerSelected": {
+        "actionIndex": 158,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_server_protected outranks legacy terminal label progress_reachability_improved",
+      "historicalSimilarOutcome": "progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-005",
+      "pair": "B",
+      "seed": "ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_plausible"
+      },
+      "different": false,
+      "whyDifferent": "no stronger side-safe progress candidate in final 20 actions",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": true,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "pair": "B",
+      "seed": "ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "challengerSelected": {
+        "actionIndex": 144,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_access outranks legacy terminal label progress_reachability_improved",
+      "historicalSimilarOutcome": "progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "pair": "B",
+      "seed": "ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 148,
+        "side": "runner",
+        "actionType": "install_card",
+        "progressLabel": "progress_coverage_install"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_coverage_install outranks legacy terminal label no_progress_plausible",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "pair": "B",
+      "seed": "ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 143,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_trash outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "pair": "C",
+      "seed": "ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "advance_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 151,
+        "side": "runner",
+        "actionType": "steal_agenda",
+        "progressLabel": "progress_steal"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_steal outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "progress_coverage_install,progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-002",
+      "pair": "C",
+      "seed": "ai-v143-tuning-002",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "challengerSelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "different": false,
+      "whyDifferent": "no stronger side-safe progress candidate in final 20 actions",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": true,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-004",
+      "pair": "C",
+      "seed": "ai-v143-tuning-004",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "challengerSelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "different": false,
+      "whyDifferent": "no stronger side-safe progress candidate in final 20 actions",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": true,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "pair": "C",
+      "seed": "ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "resolve_choice",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 155,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_trash outranks legacy terminal label no_progress_plausible",
+      "historicalSimilarOutcome": "progress_coverage_install",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "pair": "C",
+      "seed": "ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "activated_card_ability",
+        "progressLabel": "progress_coverage_install"
+      },
+      "challengerSelected": {
+        "actionIndex": 156,
+        "side": "runner",
+        "actionType": "steal_agenda",
+        "progressLabel": "progress_steal"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_steal outranks legacy terminal label progress_coverage_install",
+      "historicalSimilarOutcome": "progress_coverage_install",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "pair": "C",
+      "seed": "ai-v143-tuning-007",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "mandatory_draw",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "activated_card_ability",
+        "progressLabel": "progress_coverage_install"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_coverage_install outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "pair": "C",
+      "seed": "ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_access outranks legacy terminal label no_progress_plausible",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "pair": "D",
+      "seed": "ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "break_subroutine",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "challengerSelected": {
+        "actionIndex": 150,
+        "side": "corp",
+        "actionType": "score_agenda",
+        "progressLabel": "progress_score"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_score outranks legacy terminal label progress_reachability_improved",
+      "historicalSimilarOutcome": "progress_reachability_improved",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "pair": "D",
+      "seed": "ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 150,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_access outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-006",
+      "pair": "D",
+      "seed": "ai-v143-tuning-006",
+      "dominantSubcluster": "corp_late_gain_credit_no_safe_alternative",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "different": false,
+      "whyDifferent": "no stronger side-safe progress candidate in final 20 actions",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": true,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "pair": "D",
+      "seed": "ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_stale"
+      },
+      "challengerSelected": {
+        "actionIndex": 142,
+        "side": "corp",
+        "actionType": "score_agenda",
+        "progressLabel": "progress_score"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_score outranks legacy terminal label no_progress_stale",
+      "historicalSimilarOutcome": "progress_reachability_improved,progress_access",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "pair": "D",
+      "seed": "ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "legacySelected": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "challengerSelected": {
+        "actionIndex": 142,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "different": true,
+      "whyDifferent": "challenger label progress_access outranks legacy terminal label no_progress_plausible",
+      "historicalSimilarOutcome": "no_followup_progress_in_window",
+      "noGo": false,
+      "legalBasis": "historical_selected_legal_action"
+    }
+  ]
+}
