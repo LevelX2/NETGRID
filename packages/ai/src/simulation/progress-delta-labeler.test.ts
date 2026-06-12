@@ -42,8 +42,8 @@ describe("progress delta labeler", () => {
       { index: 12, side: "runner", actionType: "access_card" },
     ]);
 
-    expect(labels[0].label).toBe("progress_economy_converted");
-    expect(labels[0].followUp.within5).toContain("progress_access");
+    expect(labels[0]?.label).toBe("progress_economy_converted");
+    expect(labels[0]?.followUp.within5).toContain("progress_access");
   });
 
   it("keeps reserve economy plausible without treating it as progress", () => {

@@ -204,7 +204,9 @@ function hasFutureProgress(
     index < Math.min(window.length, offset + lookahead + 1);
     index += 1
   ) {
-    const label = directProgressLabel(window[index]);
+    const action = window[index];
+    if (!action) continue;
+    const label = directProgressLabel(action);
     if (label && isDirectProgressLabel(label)) return true;
   }
   return false;
@@ -250,7 +252,9 @@ function directLabelsInWindow(
     index < Math.min(labels.length, offset + lookahead + 1);
     index += 1
   ) {
-    const label = labels[index].label;
+    const entry = labels[index];
+    if (!entry) continue;
+    const label = entry.label;
     if (isDirectProgressLabel(label)) unique.add(label);
   }
   return [...unique];

@@ -48,14 +48,24 @@ export function progressAwareAlternativeSnapshot(
     alternative.excluded || hardGates.length > 0
       ? alternative.whyNot?.[0] ?? hardGates[0] ?? "blocked_by_gate"
       : undefined;
+  const side = sideForAlternative(alternative);
+  const sourceKind = alternativeSourceKind(alternative.source);
+  const progressAction = {
+    actionType: alternative.actionType,
+    ...(side ? { side } : {}),
+    reasonCode: scoreKeys.join("|"),
+    evidence: [...(alternative.whyChosen ?? []), ...(alternative.whyNot ?? [])],
+  };
   return {
-    rank: alternative.rank,
+    ...(alternative.rank !== undefined ? { rank: alternative.rank } : {}),
     actionType: alternative.actionType,
     semanticActionType:
       alternative.semanticActionType ??
       semanticActionTypeForAlternative(alternative.actionType, scoreKeys),
-    selected: alternative.selected,
-    sourceKind: alternativeSourceKind(alternative.source),
+    ...(alternative.selected !== undefined
+      ? { selected: alternative.selected }
+      : {}),
+    ...(sourceKind ? { sourceKind } : {}),
     ...(alternative.sourceTitle
       ? { sourceDefinitionId: alternative.sourceTitle }
       : {}),
@@ -67,17 +77,12 @@ export function progressAwareAlternativeSnapshot(
       alternative.whyChosen ?? [],
       alternative.whyNot ?? [],
     ),
-    expectedProgressLabel: labelProgressDeltaAction({
-      actionType: alternative.actionType,
-      side: sideForAlternative(alternative),
-      reasonCode: scoreKeys.join("|"),
-      evidence: [...(alternative.whyChosen ?? []), ...(alternative.whyNot ?? [])],
-    }).label,
-    blockedReason,
+    expectedProgressLabel: labelProgressDeltaAction(progressAction).label,
+    ...(blockedReason ? { blockedReason } : {}),
     similarLaterProgress: "unknown_shadow_only",
     whyChosen: [...(alternative.whyChosen ?? [])],
     whyNot: [...(alternative.whyNot ?? [])],
-    economy: alternative.economy,
+    ...(alternative.economy !== undefined ? { economy: alternative.economy } : {}),
   };
 }
 
