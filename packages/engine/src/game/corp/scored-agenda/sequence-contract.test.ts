@@ -11,6 +11,10 @@ import {
   resolveScoredAgendaSequenceChoice,
   SCORED_AGENDA_CHOICE_RESOLVERS,
 } from "./scored-agenda-sequence-registry";
+import {
+  findScoredAgendaScoreTimeResolver,
+  SCORED_AGENDA_SCORE_TIME_RESOLVERS,
+} from "./scored-agenda-score-time-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
   applySequenceResolution,
@@ -20,6 +24,61 @@ import {
 import { isSecurityPurgeInstallTargetChoiceSource } from "./security-purge-sequence";
 
 describe("scored agenda sequence contract matrix", () => {
+  it("keeps score-time resolver kinds unique and explicit", () => {
+    const kinds = SCORED_AGENDA_SCORE_TIME_RESOLVERS.map(
+      (resolver) => resolver.kind,
+    );
+    expect(new Set(kinds).size).toBe(kinds.length);
+    expect(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id).sort(),
+    ).toEqual([
+      "data_fort_reclamation_score_start",
+      "ice_transmutation_score_start",
+      "priority_requisition_score_start",
+      "security_purge_score_start",
+    ]);
+  });
+
+  it("maps registered score-time kinds to the expected start resolvers", () => {
+    const cases = [
+      {
+        kind: "score_install_hq_cards_into_new_remote_then_rez",
+        id: "data_fort_reclamation_score_start",
+      },
+      {
+        kind: "select_rezzed_ice_mark_modifier",
+        id: "ice_transmutation_score_start",
+      },
+      {
+        kind: "score_rez_installed_ice_at_no_cost",
+        id: "priority_requisition_score_start",
+      },
+      {
+        kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
+        id: "security_purge_score_start",
+      },
+    ] as const;
+
+    for (const candidate of cases) {
+      expect(
+        findScoredAgendaScoreTimeResolver({
+          kind: candidate.kind,
+        } as never)?.id,
+      ).toBe(candidate.id);
+    }
+  });
+
+  it("keeps score-time resolver ids separate from pending-choice resolver ids", () => {
+    const choiceResolverIds = new Set(
+      SCORED_AGENDA_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+    );
+    expect(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.some((resolver) =>
+        choiceResolverIds.has(resolver.id),
+      ),
+    ).toBe(false);
+  });
+
   it("routes each registered choice source to exactly one resolver", () => {
     const cases: readonly { source: string; resolverId: string }[] = [
       {
