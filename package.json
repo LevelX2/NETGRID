@@ -23,6 +23,7 @@
     "check:ai-hint-compiled-index": "node scripts/check-ai-hint-compiled-index.mjs --check",
     "check:ai-manual-overlays": "node scripts/check-ai-manual-overlays.mjs --check",
     "check:ai-action-semantic-signal-catalog": "node scripts/check-ai-action-semantic-signal-catalog.mjs --check",
+    "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
