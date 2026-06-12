@@ -306,20 +306,29 @@ function snapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );
   if (!snapshot) throw new Error(`Missing deck snapshot ${snapshotId}`);
+  const publicMetadata = snapshot.publicMetadata
+    ? {
+        ...snapshot.publicMetadata,
+        side: parseSnapshotSide(snapshot.publicMetadata.side, snapshotId),
+      }
+    : undefined;
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
-    side: snapshot.side,
+    side: parseSnapshotSide(snapshot.side, snapshotId),
     ...(snapshot.formatProfileId
       ? { formatProfileId: snapshot.formatProfileId }
       : {}),
-    ...(snapshot.publicMetadata
-      ? { publicMetadata: snapshot.publicMetadata }
-      : {}),
+    ...(publicMetadata ? { publicMetadata } : {}),
     cards: snapshot.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
     })),
   };
+}
+
+function parseSnapshotSide(side: unknown, snapshotId: string): Side {
+  if (side === "runner" || side === "corp") return side;
+  throw new Error(`Unsupported deck snapshot side ${side} for ${snapshotId}`);
 }
 
 function toRunnerTurn(state: GameState): GameState {

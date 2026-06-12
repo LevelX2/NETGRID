@@ -427,6 +427,23 @@ Done-Gate: Keine durch diesen Prozess verursachten roten Tests. Branch ist lokal
 
 Commit: `test(ai): verify action semantics followup quality process`
 
+#### P10 Ergebnis
+
+Umgesetzt:
+
+- Finaler Volltest ausgeführt.
+- Durch den Prozess verursachter Typecheck-Fehler in `real-engine-decision-corpus-fixtures.ts` behoben: rohe JSON-Snapshot-Seiten werden jetzt explizit auf `runner`/`corp` validiert, bevor sie in DeckDoctrine-Diagnostik gelangen.
+- Keine zusätzlichen roten Tests nach Korrektur.
+
+Checks vor Integration:
+
+- Grün: `corepack pnpm check:ai`
+- Zunächst rot, danach grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `corepack pnpm -r --if-present --no-bail test`
+- Grün: `corepack pnpm test`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
