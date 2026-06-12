@@ -10,7 +10,7 @@ import { hiddenZoneChoicePayload } from "../../choices/hidden-zone-choice";
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
-} from "../install-rez-sequence-handlers";
+} from "./scored-agenda-sequence-host";
 import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
 
 /**

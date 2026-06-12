@@ -4,6 +4,11 @@
 
 `in_progress`
 
+## Paketfortschritt
+
+- P0 abgeschlossen mit Commit `916659ef`: Prozessartefakt, Worktree und Preflight.
+- P1 abgeschlossen: `scored-agenda-sequence-host.ts` enthält Host-, Result- und Payload-Typen. `install-rez-sequence-handlers.ts` re-exportiert die Typen stabil, während DFR, Security Purge und Priority Requisition direkt aus dem neuen Host-Typmodul importieren. P1-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+
 ## Quelle/Vorgabe
 
 Eingefügter Statusbericht vom 2026-06-12 nach dem Merge `4292dc5c0c08f614c100b14a65db12f6e72f509d` mit Folgeempfehlungen zur Engine-Codeoptimierung.
