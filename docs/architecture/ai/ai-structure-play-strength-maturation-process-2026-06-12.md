@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_6_structured_run_alignment
+ai_mat_7_target_choice_candidate
 
 ## Quelle/Vorgabe
 
@@ -167,7 +167,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-3 | complete | `682fa54f` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot/pilot-scope-common.ts packages/ai/src/decision/pilot/pilot-scope-registry.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/semantic-ai-runtime-cutover.test.ts` |
 | AI-MAT-4 | complete | `6b781134` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot/runner-safe-access-pilot.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts` |
 | AI-MAT-5 | complete | `2df0c774` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts packages/ai/src/decision/run-target-action-alignment.test.ts` |
-| AI-MAT-6 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/run-target-action-alignment.ts packages/ai/src/decision/run-target-action-alignment.test.ts` |
+| AI-MAT-6 | complete | `21a29a29` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/run-target-action-alignment.ts packages/ai/src/decision/run-target-action-alignment.test.ts` |
+| AI-MAT-7 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/target-choice-shadow.ts packages/ai/src/decision/target-choice-shadow.test.ts` |
 
 ## Check-Nachweise
 
@@ -181,6 +182,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-5`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 - `AI-MAT-6`: `corepack pnpm --filter @netgrid/ai test -- src/decision/run-target-action-alignment.test.ts src/actions/action-semantic-coverage.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1212 Tests ausgefuehrt.
 - `AI-MAT-6`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-7`: `corepack pnpm --filter @netgrid/ai test -- src/decision/target-choice-shadow.test.ts src/action-semantic-candidate.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1214 Tests ausgefuehrt.
+- `AI-MAT-7`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

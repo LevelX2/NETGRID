@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import {
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
@@ -59,6 +60,71 @@ describe("TargetChoiceShadow", () => {
       "remote_1",
     ]);
     expect(report.blockedRequirements).toEqual([]);
+  });
+
+  it("ranks side-safe target options from semantic candidate target context", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "run-server",
+        type: "start_run",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      candidate: semanticCandidate({
+        actionId: "run-server",
+        selectedTargetIds: ["remote_1"],
+        availableTargetIds: ["hq", "rd"],
+      }),
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "hq",
+      "rd",
+      "remote_1",
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining([
+        "target_option_source:semantic_candidate_target_context",
+        "candidate_action_id:run-server",
+      ]),
+    );
+    expect(report.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    });
+  });
+
+  it("keeps explicit side-safe target maps ahead of semantic candidate context", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "run-server",
+        type: "start_run",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      candidate: semanticCandidate({
+        actionId: "run-server",
+        selectedTargetIds: ["remote_1"],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        server: ["rd"],
+      },
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual(["rd"]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining(["target_option_source:explicit_side_safe_map"]),
+    );
   });
 
   it("blocks engine-only targets instead of ranking hidden options", () => {
@@ -224,5 +290,71 @@ function action(options: {
       : {}),
     visibility: "private_to_actor",
     expiresAtStateVersion: 1,
+  };
+}
+
+function semanticCandidate(params: {
+  actionId: string;
+  selectedTargetIds?: readonly string[];
+  availableTargetIds?: readonly string[];
+}): ActionSemanticCandidate {
+  return {
+    actionId: params.actionId,
+    actionType: "start_run",
+    actorSide: "runner",
+    observerSide: "runner",
+    visibilityScope: "actor_private",
+    legalActionRef: {
+      actionId: params.actionId,
+      actionType: "start_run",
+      originalPayloadKeys: ["serverId"],
+    },
+    stateVersion: 1,
+    sourceKind: "basic_action",
+    abilityBindingMethod: "unresolved",
+    semanticActionType: "run.start",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "known",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    targetContext: {
+      selectedTargets: (params.selectedTargetIds ?? []).map((targetId) => ({
+        targetId,
+        targetKind: "server",
+        targetSide: "corp",
+        visibilityScope: "actor_private",
+        evidence: ["test_selected_target"],
+      })),
+      availableTargets: (params.availableTargetIds ?? []).map((targetId) => ({
+        targetId,
+        targetKind: "server",
+        targetSide: "corp",
+        evidence: ["test_available_target"],
+      })),
+      targetKind: "server",
+      targetZones: [],
+      targetSide: "corp",
+      hiddenInfoPolicy: "side_safe_engine_input_only",
+      availableTargetsStatus: "engine_provided",
+      targetProfileMatches: [],
+      targetConstraintResults: [],
+    },
+    boardContext: {
+      source: "not_projected",
+      sideSafe: true,
+      notes: ["test"],
+    },
+    confidence: "high",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: ["test_candidate"],
   };
 }
