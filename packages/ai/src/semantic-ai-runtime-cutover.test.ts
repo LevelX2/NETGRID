@@ -468,6 +468,108 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
+    const remoteAgenda = visibleCard("remote-agenda-below-rez-floor", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-below-rez-floor",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [visibleCard("corp-ice-in-hq", "corp", "ice")];
+    input.playerView.opponent.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            rezzed: false,
+            rezCost: 3,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_floor_funding_need:true",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "corp_remote_rez_floor_penalty",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "agenda_development_risk:below_remote_rez_floor",
+    );
+  });
+
+  it("allows remote agenda advance when credits still cover the unrezzed ice rez floor", () => {
+    const remoteAgenda = visibleCard("remote-agenda-with-rez-floor", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-with-rez-floor",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-unrezzed-ice", "corp", "ice", {
+            rezzed: false,
+            rezCost: 3,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("advance-with-rez-floor");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_floor:3",
+        "credits_after_action:4",
+        "low_rez_reserve:false",
+      ]),
+    );
+  });
+
   it("uses a breaker coverage plan step before a blocked remote contest", () => {
     const input = aiInput("runner", [
       legalAction(

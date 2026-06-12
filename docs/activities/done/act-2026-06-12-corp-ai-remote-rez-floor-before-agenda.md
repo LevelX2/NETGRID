@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-06-12-corp-ai-remote-rez-floor-before-agenda
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-12
-startedAt:
-completedAt:
+startedAt: 2026-06-12
+completedAt: 2026-06-12
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/semantic-ai-runtime-cutover.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts -t "remote agenda|remote rez floor|naked remote agenda|protected remote score"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/decision-snapshot-suite.test.ts src/decision/threat-opportunity.test.ts
+  - corepack pnpm --filter @netgrid/ai test
 ---
 
 # Korp-KI: Remote-Agenda nur mit belastbarem Rez-Floor entwickeln
@@ -91,4 +99,6 @@ Die Korp-KI soll eine echte Agenda nicht in ein scheinbar geschütztes Remote le
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Korp-Semantic-Runtime bewertet Agenda-Installationen und `advance_card` auf Remote-Score-Linien jetzt gegen einen side-sicheren Remote-Rez-Floor: Wenn nach der Aktion nicht genug Credits übrig bleiben, um das relevante unrezzed ICE vor dem Remote zu rezzen, erhält die Score-Line einen klaren Malus mit Evidence `remote_rez_floor`, `credits_after_action`, `low_rez_reserve` und `agenda_development_risk:below_remote_rez_floor`. `gain_credit` und `draw_card` erhalten nur dann einen Zusatzwert, wenn ein konkreter Remote-Rez-Floor-Funding-Need besteht. Same-Turn-Score und Linien mit ausreichender Reserve bleiben erlaubt.
+
+Regressionstests in `semantic-ai-runtime-cutover.test.ts` decken den gemeldeten Zug-11-Fall und die Gegenprobe mit ausreichender Rezreserve ab. Zusätzlich liefen die Decision-Snapshot-/Threat-Opportunity-Checks, der vollständige `@netgrid/ai`-Testlauf, Typecheck und Diffcheck grün. Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertragsänderung.

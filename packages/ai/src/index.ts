@@ -10019,6 +10019,15 @@ function semanticRuntimeCorpScoreComponents(
         reason: scopeId,
       });
     }
+    const rezFloor = semanticRuntimeCorpRemoteRezFloorAssessment(input, action);
+    if (rezFloor?.blockedByFloor) {
+      components.push({
+        key: "corp_remote_rez_floor_penalty",
+        label: "Remote-Rez-Floor",
+        value: -2400,
+        reason: rezFloor.evidence.join("|"),
+      });
+    }
   }
   if (action.type === "rez_ice") {
     components.push({
@@ -10077,6 +10086,15 @@ function semanticRuntimeCorpScoreComponents(
         reason: scopeId,
       });
     }
+    const rezFloor = semanticRuntimeCorpRemoteRezFloorAssessment(input, action);
+    if (rezFloor?.blockedByFloor) {
+      components.push({
+        key: "corp_remote_rez_floor_penalty",
+        label: "Remote-Rez-Floor",
+        value: -2400,
+        reason: rezFloor.evidence.join("|"),
+      });
+    }
   }
   if (action.type === "gain_credit" && credits < 6) {
     components.push({
@@ -10093,6 +10111,14 @@ function semanticRuntimeCorpScoreComponents(
         reason: "remote_instability",
       });
     }
+    if (semanticRuntimeCorpHasRemoteRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_remote_rez_floor_credit_reserve",
+        label: "Remote-Rez-Floor",
+        value: 900,
+        reason: "low_rez_reserve",
+      });
+    }
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
@@ -10107,6 +10133,14 @@ function semanticRuntimeCorpScoreComponents(
         label: "Remote-Nachschub",
         value: 200,
         reason: "remote_instability",
+      });
+    }
+    if (semanticRuntimeCorpHasRemoteRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_remote_rez_floor_draw_fallback",
+        label: "Remote-Rez-Floor",
+        value: 450,
+        reason: "low_rez_reserve",
       });
     }
   }
@@ -10314,6 +10348,97 @@ function semanticRuntimeCorpAdvanceRemoteScore(
   return semanticRuntimeCorpHasStabilizingAlternative(input, action)
     ? -2700
     : -1700;
+}
+
+type CorpRemoteRezFloorAssessment = {
+  serverId: string;
+  rezFloor: number;
+  creditsAfterAction: number;
+  blockedByFloor: boolean;
+  evidence: string[];
+};
+
+function semanticRuntimeCorpRemoteRezFloorAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpRemoteRezFloorAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.type !== "advance_card" && action.type !== "install_card")
+    return undefined;
+  if (
+    action.type === "install_card" &&
+    (action.payload?.placement === "ice" ||
+      !semanticRuntimeCorpActionIsScoreLine(input, action))
+  )
+    return undefined;
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (!serverId || !isRemoteServerTarget(serverId)) return undefined;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  const rezFloor = semanticRuntimeCorpRemoteRezFloor(server);
+  const creditsAfterAction = input.playerView.own.credits - actionCreditCost(action);
+  const completesScore = semanticRuntimeCorpAdvanceCompletesScore(input, action);
+  const blockedByFloor =
+    !completesScore && rezFloor > 0 && creditsAfterAction < rezFloor;
+  return {
+    serverId,
+    rezFloor,
+    creditsAfterAction,
+    blockedByFloor,
+    evidence: [
+      `remote_rez_floor_server:${serverId}`,
+      `remote_rez_floor:${rezFloor}`,
+      `credits_after_action:${creditsAfterAction}`,
+      `low_rez_reserve:${blockedByFloor}`,
+      ...(blockedByFloor
+        ? ["agenda_development_risk:below_remote_rez_floor"]
+        : ["agenda_development_risk:remote_rez_floor_met"]),
+      ...(completesScore ? ["corp_remote_score_line:scoreable_after_action"] : []),
+    ],
+  };
+}
+
+function semanticRuntimeCorpRemoteRezFloor(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): number {
+  if (!server || server.ice.length === 0) return 0;
+  if (server.ice.some((ice) => ice.rezzed === true)) return 0;
+  const rezCosts = server.ice
+    .filter((ice) => ice.rezzed !== true)
+    .map(semanticRuntimeVisibleIceRezCost)
+    .filter((cost): cost is number => cost !== undefined && cost > 0);
+  if (rezCosts.length === 0) return 2;
+  return Math.min(...rezCosts);
+}
+
+function semanticRuntimeVisibleIceRezCost(card: VisibleCard): number | undefined {
+  return (
+    card.rezCost ??
+    (card.definitionId
+      ? (RUNTIME_CARDS[card.definitionId]?.numeric.rezCost ??
+        DEMO_CARDS_BY_ID[card.definitionId]?.rezCost)
+      : undefined)
+  );
+}
+
+function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
+  input: AiDecisionInput,
+): boolean {
+  if (input.side !== "corp") return false;
+  const currentCredits = input.playerView.own.credits;
+  if (
+    input.playerView.servers.some((server) => {
+      if (!isRemoteServerTarget(server.id)) return false;
+      if (!semanticRuntimeCorpRemoteHasScoreLine(server)) return false;
+      const rezFloor = semanticRuntimeCorpRemoteRezFloor(server);
+      return rezFloor > 0 && currentCredits < rezFloor;
+    })
+  ) {
+    return true;
+  }
+  return input.legalActions.some((action) => {
+    const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(input, action);
+    return assessment?.blockedByFloor === true;
+  });
 }
 
 function semanticRuntimeCorpActionServerId(
@@ -11030,6 +11155,9 @@ function semanticRuntimeCorpEvidence(
   if (semanticRuntimeCorpHasUnsafeRemoteScoreAction(input)) {
     evidence.push("corp_remote_risk:unsafe_score_action_available");
   }
+  if (semanticRuntimeCorpHasRemoteRezFloorFundingNeed(input)) {
+    evidence.push("remote_rez_floor_funding_need:true");
+  }
   if (action.type === "gain_credit") {
     evidence.push("corp_safe_alternative:economy");
   }
@@ -11093,6 +11221,13 @@ function semanticRuntimeCorpEvidence(
   }
   if (semanticRuntimeCorpAdvanceCompletesScore(input, action)) {
     evidence.push("corp_remote_score_line:scoreable_after_action");
+  }
+  const rezFloorAssessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+    input,
+    action,
+  );
+  if (rezFloorAssessment) {
+    evidence.push(...rezFloorAssessment.evidence);
   }
   return evidence;
 }
