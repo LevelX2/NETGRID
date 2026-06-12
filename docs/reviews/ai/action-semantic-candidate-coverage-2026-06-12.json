@@ -142,6 +142,19 @@
       "safe": true,
       "unsafeRows": 0,
       "forbiddenMarkers": []
+    },
+    "sourceBreakdown": {
+      "syntheticCandidates": 11,
+      "engineBackedCandidates": 33,
+      "sourceResolvedRate": 1,
+      "abilityResolvedRate": 0.0455,
+      "targetContextRate": 0.0682,
+      "costKnownRate": 1,
+      "timingKnownRate": 1,
+      "hiddenInfoBlockedCount": 1,
+      "schemaGapCount": 18,
+      "hiddenInfoLeaks": 0,
+      "legalActionGenerationChanges": 0
     }
   },
   "gates": {

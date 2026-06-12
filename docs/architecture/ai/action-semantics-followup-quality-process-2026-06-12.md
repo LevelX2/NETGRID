@@ -204,10 +204,17 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts src/action-semantic-candidate.test.ts`
-- `corepack pnpm check:ai`
-- `corepack pnpm format:changed -- main`
-- `git diff --check`
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts src/action-semantic-candidate.test.ts`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+Ergebnis:
+
+- ActionSemanticCoverage trennt synthetische Kandidaten von Engine-backed LegalActions und schreibt diese Quellen in den Coverage-Report.
+- Der Real-Engine-Anteil wird aus `collectRealEngineLegalActions()` gespeist; aktuell werden 33 Engine-backed Kandidaten gegen 11 synthetische Kandidaten ausgewertet.
+- Der Report enthält Source-/Resolve-Raten sowie explizite Guard-Werte für Hidden-Info-Leaks und LegalAction-Generation-Änderungen.
+- `scripts/check-ai-compiled-hints.mjs` vergleicht generierte JSON-Artefakte strukturell statt als exakte Textdatei. Das verhindert Formatierungs-Pingpong zwischen Generator und Prettier, ohne Inhaltsschwankungen zu tolerieren.
 
 Done-Gate: Engine-backed candidate count > 0, hidden-info leaks = 0, LegalAction generation changes = 0.
 

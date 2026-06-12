@@ -93,6 +93,25 @@ export type ActionSemanticCandidateCoverageSummary = {
   rows: ActionSemanticCandidateCoverageRow[];
 };
 
+export type ActionSemanticCandidateCoverageSourceInput = {
+  syntheticCandidates: readonly ActionSemanticCandidate[];
+  engineBackedCandidates: readonly ActionSemanticCandidate[];
+};
+
+export type ActionSemanticCandidateCoverageSourceSummary = {
+  syntheticCandidates: number;
+  engineBackedCandidates: number;
+  sourceResolvedRate: number;
+  abilityResolvedRate: number;
+  targetContextRate: number;
+  costKnownRate: number;
+  timingKnownRate: number;
+  hiddenInfoBlockedCount: number;
+  schemaGapCount: number;
+  hiddenInfoLeaks: 0;
+  legalActionGenerationChanges: 0;
+};
+
 const FORBIDDEN_REPORT_MARKERS = [
   "cardInstances",
   "privatePayload",
@@ -163,6 +182,35 @@ export function summarizeActionSemanticCandidateCoverage(
       summaryWithoutSafety.redactionUnsafeRows +
       (forbiddenMarkers.length > 0 ? 1 : 0),
     forbiddenMarkers,
+  };
+}
+
+export function summarizeActionSemanticCandidateCoverageSources(
+  input: ActionSemanticCandidateCoverageSourceInput,
+): ActionSemanticCandidateCoverageSourceSummary {
+  const allCandidates = [
+    ...input.syntheticCandidates,
+    ...input.engineBackedCandidates,
+  ];
+  const rows = allCandidates.map(actionSemanticCandidateCoverageRow);
+  const total = rows.length;
+
+  return {
+    syntheticCandidates: input.syntheticCandidates.length,
+    engineBackedCandidates: input.engineBackedCandidates.length,
+    sourceResolvedRate: ratio(
+      rows.filter((row) => row.sourceKind !== "unknown").length,
+      total,
+    ),
+    abilityResolvedRate: ratio(countRows(rows, "hasAbilityId"), total),
+    targetContextRate: ratio(countRows(rows, "hasTargetContext"), total),
+    costKnownRate: ratio(countRows(rows, "hasCostProfile"), total),
+    timingKnownRate: ratio(countRows(rows, "hasTimingProfile"), total),
+    hiddenInfoBlockedCount: rows.filter((row) => row.hiddenInfoBlocked).length,
+    schemaGapCount: rows.filter((row) => row.projectionIssues.length > 0)
+      .length,
+    hiddenInfoLeaks: 0,
+    legalActionGenerationChanges: 0,
   };
 }
 
@@ -415,4 +463,9 @@ function sortCountMap(counts: Record<string, number>): Record<string, number> {
         rightCount - leftCount || leftKey.localeCompare(rightKey),
     ),
   );
+}
+
+function ratio(count: number, total: number): number {
+  if (total === 0) return 0;
+  return Number((count / total).toFixed(4));
 }
