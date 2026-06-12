@@ -73,6 +73,20 @@ export type SemanticShadowLeagueScenarioReport = {
   agreement?: boolean;
   observedMistakes: AiMistakeClass[];
   blockers: Record<string, number>;
+  remoteContestPilotCandidate?: SemanticShadowLeagueRemoteContestPilotCandidate;
+  evidence: string[];
+};
+
+export type SemanticShadowLeagueRemoteContestPilotCandidate = {
+  actionId: string;
+  targetServerId?: string;
+  targetKind?: string;
+  recommendation?: string;
+  pathPassability?: string;
+  scoreThreat?: boolean;
+  reportOnly: true;
+  productiveUseAllowed: false;
+  reason: string;
   evidence: string[];
 };
 
@@ -90,6 +104,8 @@ export type SemanticShadowLeagueReport = {
     pilotEligibleCount: number;
     pilotWouldOverrideCount: number;
     scopeBreakdown: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>;
+    remoteContestPilotCandidateCount: number;
+    remoteContestPilotCandidateScenarioIds: string[];
     rankedActionCount: number;
     rejectedActionCount: number;
     topScoreAverage: number | null;
@@ -170,6 +186,11 @@ function buildScenarioReport(
     : undefined;
   const mistakes = classifyDecisionTraceMistakes(sample.frame, sample.trace);
   const pilotScopes = eligiblePilotScopes(sample, top, topCandidate?.actionType);
+  const remoteContestPilotCandidate = remoteContestPilotCandidateFor(
+    sample,
+    top,
+    topCandidate?.actionType,
+  );
   const report: SemanticShadowLeagueScenarioReport = {
     scenarioId: safe(sample.scenarioId),
     side: sample.side,
@@ -193,6 +214,7 @@ function buildScenarioReport(
     blockers: countStrings(
       sample.trace.rejectedActions.flatMap((action) => action.blockers),
     ),
+    ...(remoteContestPilotCandidate ? { remoteContestPilotCandidate } : {}),
     evidence: [
       `scenario:${safe(sample.scenarioId)}`,
       `side:${sample.side}`,
@@ -203,6 +225,9 @@ function buildScenarioReport(
       `pilot_scope_eligible:${pilotScopes.length > 0}`,
       `pilot_would_override:${pilotScopes.length > 0}`,
       ...pilotScopes.map((scope) => `pilot_scope:${scope}:eligible`),
+      ...(remoteContestPilotCandidate
+        ? ["remote_contest_pilot_candidate:report_only"]
+        : []),
       ...(expectation?.evidence ?? []).map(safe),
     ],
   };
@@ -236,6 +261,13 @@ function buildLeagueMetrics(
       scenario.evidence.includes("pilot_would_override:true"),
     ).length,
     scopeBreakdown: pilotScopeBreakdown(scenarios),
+    remoteContestPilotCandidateCount: scenarios.filter(
+      (scenario) => scenario.remoteContestPilotCandidate !== undefined,
+    ).length,
+    remoteContestPilotCandidateScenarioIds: scenarios
+      .filter((scenario) => scenario.remoteContestPilotCandidate !== undefined)
+      .map((scenario) => scenario.scenarioId)
+      .sort(),
     rankedActionCount: scenarios.reduce(
       (sum, scenario) => sum + scenario.rankedActionCount,
       0,
@@ -258,6 +290,54 @@ function buildLeagueMetrics(
       ),
     ),
   };
+}
+
+function remoteContestPilotCandidateFor(
+  sample: RealEngineDecisionCorpusSample,
+  top: SemanticRankedAction | undefined,
+  topActionType: string | undefined,
+): SemanticShadowLeagueRemoteContestPilotCandidate | undefined {
+  if (!top || sample.side !== "runner" || topActionType !== "start_run") {
+    return undefined;
+  }
+  if (!rankedActionHasUtilityFamily(top, "remote_contest")) return undefined;
+  const runTarget = sample.frame.runner?.runTargets?.find(
+    (target) =>
+      target.actionId === top.actionId &&
+      (target.targetKind === "remote" || target.accessTargetKind === "remote"),
+  );
+  if (!runTarget) return undefined;
+  return {
+    actionId: safe(top.actionId),
+    targetServerId: safe(runTarget.targetServerId),
+    targetKind: safe(runTarget.targetKind),
+    recommendation: safe(runTarget.recommendation),
+    pathPassability: safe(runTarget.pathPassability),
+    scoreThreat: runTarget.scoreThreat,
+    reportOnly: true,
+    productiveUseAllowed: false,
+    reason: "remote_contest_target_calibration_required",
+    evidence: [
+      "remote_contest_pilot_candidate:report_only",
+      "productive_use_allowed:false",
+      `target_kind:${safe(runTarget.targetKind)}`,
+      `recommendation:${safe(runTarget.recommendation)}`,
+      `path_passability:${safe(runTarget.pathPassability)}`,
+      `score_threat:${runTarget.scoreThreat}`,
+    ],
+  };
+}
+
+function rankedActionHasUtilityFamily(
+  action: SemanticRankedAction,
+  family: string,
+): boolean {
+  if (action.primaryGoalId?.includes(family)) return true;
+  return action.components.some(
+    (component) =>
+      component.component === "goal_fit" &&
+      component.evidence.some((entry) => entry === `utility_family:${family}`),
+  );
 }
 
 function pilotScopeBreakdown(

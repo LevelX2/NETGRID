@@ -45,6 +45,10 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(8);
     expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(6);
     expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(1);
+    expect(report.metrics.remoteContestPilotCandidateCount).toBe(1);
+    expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
+      "runner_real_remote_score_threat",
+    ]);
     expect(report.topDisagreementReasons).toEqual([
       "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
       "runner_real_damage_buffer_needed:expected=draw_card:observed=start_run",
@@ -72,6 +76,20 @@ describe("SemanticShadowLeague", () => {
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
     ).toEqual(["start_run"]);
+    expect(
+      scenario(report, "runner_real_remote_score_threat")
+        .remoteContestPilotCandidate,
+    ).toMatchObject({
+      targetKind: "remote",
+      scoreThreat: true,
+      reportOnly: true,
+      productiveUseAllowed: false,
+      reason: "remote_contest_target_calibration_required",
+      evidence: expect.arrayContaining([
+        "remote_contest_pilot_candidate:report_only",
+        "productive_use_allowed:false",
+      ]),
+    });
   });
 });
 

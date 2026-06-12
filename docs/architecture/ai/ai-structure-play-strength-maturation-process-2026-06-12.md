@@ -2,7 +2,7 @@
 
 ## Status
 
-ai_mat_4_runner_safe_access_risk
+ai_mat_5_remote_contest_diagnostic
 
 ## Quelle/Vorgabe
 
@@ -165,7 +165,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 | AI-MAT-1 | complete | `0576f2e5` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md` |
 | AI-MAT-2 | complete | `56d75425` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot-scope-registry.ts packages/ai/src/decision/pilot/basic-setup-pilot.ts packages/ai/src/decision/pilot/corp-score-window-pilot.ts packages/ai/src/decision/pilot/pilot-scope-common.ts packages/ai/src/decision/pilot/pilot-scope-registry.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/decision/pilot/runner-safe-access-pilot.ts` |
 | AI-MAT-3 | complete | `682fa54f` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot/pilot-scope-common.ts packages/ai/src/decision/pilot/pilot-scope-registry.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/semantic-ai-runtime-cutover.test.ts` |
-| AI-MAT-4 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot/runner-safe-access-pilot.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts` |
+| AI-MAT-4 | complete | `6b781134` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/decision/pilot/runner-safe-access-pilot.ts packages/ai/src/decision/pilot/pilot-scope-registry.test.ts packages/ai/src/evaluation/real-engine-decision-corpus.test.ts` |
+| AI-MAT-5 | complete in current package commit | pending | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md packages/ai/src/evaluation/semantic-shadow-league.ts packages/ai/src/evaluation/semantic-shadow-league.test.ts packages/ai/src/decision/run-target-action-alignment.test.ts` |
 
 ## Check-Nachweise
 
@@ -175,6 +176,8 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - `AI-MAT-3`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 - `AI-MAT-4`: `corepack pnpm --filter @netgrid/ai test -- src/decision/pilot/pilot-scope-registry.test.ts src/evaluation/real-engine-decision-corpus.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1210 Tests ausgefuehrt.
 - `AI-MAT-4`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
+- `AI-MAT-5`: `corepack pnpm --filter @netgrid/ai test -- src/evaluation/semantic-shadow-league.test.ts src/decision/run-target-action-alignment.test.ts` lief gruen; wegen Workspace-Argumentweitergabe wurden 76 Testdateien mit 1211 Tests ausgefuehrt.
+- `AI-MAT-5`: `corepack pnpm --filter @netgrid/ai typecheck` gruen.
 
 ## Harte Git-Disziplin fuer Folgepakete
 

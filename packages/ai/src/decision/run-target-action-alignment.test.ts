@@ -19,6 +19,27 @@ describe("run target action alignment", () => {
     });
   });
 
+  it("aligns remote target context without implying pilot eligibility", () => {
+    expect(
+      alignRunTargetAction(runCandidate("run-remote-1", "remote_1"), {
+        targetServerId: "remote_1",
+        targetKind: "remote",
+      }),
+    ).toMatchObject({
+      actionId: "run-remote-1",
+      serverId: "remote_1",
+      runTargetId: "remote_1",
+      targetKind: "remote",
+      aligned: true,
+      evidence: expect.arrayContaining([
+        "candidate_semantic:run.start",
+        "candidate_server:remote_1",
+        "run_target:remote_1",
+        "aligned:true",
+      ]),
+    });
+  });
+
   it("boosts HQ opportunity only for the HQ run action", () => {
     const trace = buildSemanticShadowDecision(
       frame({
