@@ -292,6 +292,20 @@ Done-Gate: TargetContext beschreibt nur bereits legale, side-safe Zieloptionen.
 
 Commit: `feat(ai): project legal action target context`
 
+Ergebnis 2026-06-12:
+
+- `LegalAction.choiceRequirements[].optionIds` werden jetzt als `targetKind: "choice"` in `targetContext.availableTargets` übernommen.
+- Die Projektion nutzt nur bereits vorhandene LegalAction-Option-IDs und keine `ChoiceRequest`-Labels, Kartenwerte oder private Option-Payloads.
+- Hidden-Info-TargetRequirements bleiben blockiert; Choice-Optionen bleiben actor-private Candidate-Diagnostik und erzeugen keine TargetProfile-Scoring-Wirkung.
+
+Checks 2026-06-12:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
 ### P9 Kosten- und Timing-Projektion
 
 Ziel: Kosten und Timing belastbarer ausdrücken.

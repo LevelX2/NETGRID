@@ -32,10 +32,17 @@ export function applyTargetContextProjection(
     hiddenTargetRequirement === true
       ? []
       : selectedLegalTargetsForAction(action, selectedTargets);
-  const sideSafeAvailableTargets = availableTargets?.map((target) => ({
-    ...target,
-    evidence: [...target.evidence],
-  }));
+  const choiceOptionTargets = choiceOptionTargetsForAction(action);
+  const sideSafeAvailableTargets =
+    availableTargets !== undefined || choiceOptionTargets.length > 0
+      ? [
+          ...(availableTargets?.map((target) => ({
+            ...target,
+            evidence: [...target.evidence],
+          })) ?? []),
+          ...choiceOptionTargets,
+        ]
+      : undefined;
   const targetContext = targetContextForAction(
     action,
     sideSafeSelectedTargets,
@@ -98,6 +105,25 @@ function selectedLegalTargetsForAction(
       evidence: [`AI039 selected target for requirement ${requirementId}`],
     };
   });
+}
+
+function choiceOptionTargetsForAction(
+  action: LegalAction,
+): LegalTargetSummary[] {
+  return [
+    ...new Set(
+      (action.choiceRequirements ?? []).flatMap(
+        (requirement) => requirement.optionIds,
+      ),
+    ),
+  ]
+    .sort()
+    .map((optionId) => ({
+      targetId: optionId,
+      targetKind: "choice",
+      targetSide: action.side,
+      evidence: ["AI039 legal ChoiceRequirement option id"],
+    }));
 }
 
 function targetContextForAction(
@@ -214,7 +240,8 @@ function updateTargetContextGate(
     return {
       ...gate,
       status,
-      severity: status === "pass" || status === "not_applicable" ? "info" : "warning",
+      severity:
+        status === "pass" || status === "not_applicable" ? "info" : "warning",
       reason:
         reason ??
         (status === "pass"

@@ -383,6 +383,20 @@ describe("buildActionSemanticCandidates", () => {
             },
           ],
         }),
+        legalAction("resolve_choice", 4, {
+          choiceRequirements: [
+            {
+              choiceId: "actor-private-choice",
+              minSelections: 1,
+              maxSelections: 1,
+              optionIds: ["choice_option_keep", "choice_option_discard"],
+            },
+          ],
+          payload: {
+            choiceVisibility: "hidden_info_barrier",
+            secretChoiceLabel: "unprojected private option label",
+          },
+        }),
       ],
       selectedTargetsByActionId: {
         "ai036-0-trash_accessed_card": {
@@ -405,8 +419,15 @@ describe("buildActionSemanticCandidates", () => {
     const available = candidates[1];
     const unavailable = candidates[2];
     const hiddenBlocked = candidates[3];
-    if (!selected || !available || !unavailable || !hiddenBlocked) {
-      throw new Error("Expected four AI039 candidates");
+    const choiceOptions = candidates[4];
+    if (
+      !selected ||
+      !available ||
+      !unavailable ||
+      !hiddenBlocked ||
+      !choiceOptions
+    ) {
+      throw new Error("Expected five AI039 candidates");
     }
 
     expect(selected.targetContext?.selectedTargets).toEqual([
@@ -444,6 +465,31 @@ describe("buildActionSemanticCandidates", () => {
     expect(hiddenBlocked.primaryProjectionStatus).toBe("hidden_info_blocked");
     expect(hiddenBlocked.projectionIssues).toContain("hidden_info_blocked");
     expect(JSON.stringify(hiddenBlocked)).not.toContain("hidden-resource-card");
+
+    expect(choiceOptions.targetContext?.targetKind).toBe("choice");
+    expect(choiceOptions.targetContext?.availableTargetsStatus).toBe(
+      "engine_provided",
+    );
+    expect(choiceOptions.targetContext?.availableTargets).toEqual([
+      {
+        targetId: "choice_option_discard",
+        targetKind: "choice",
+        targetSide: "runner",
+        evidence: ["AI039 legal ChoiceRequirement option id"],
+      },
+      {
+        targetId: "choice_option_keep",
+        targetKind: "choice",
+        targetSide: "runner",
+        evidence: ["AI039 legal ChoiceRequirement option id"],
+      },
+    ]);
+    expect(choiceOptions.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+    expect(JSON.stringify(choiceOptions)).not.toContain(
+      "unprojected private option label",
+    );
   });
 
   it("normalizes action cost and timing profiles without scoring", () => {
