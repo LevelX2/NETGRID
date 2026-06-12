@@ -24,6 +24,19 @@ function synthesizeRunnerNeutralGoals(
   );
   const runTargets = frame.runner?.runTargets ?? [];
 
+  if (
+    runTargets.some(
+      (target) =>
+        target.recommendation === "draw_for_damage_buffer" ||
+        target.blinkRiskAssessment?.riskSeverity === "high" ||
+        target.blinkRiskAssessment?.riskSeverity === "lethal",
+    )
+  ) {
+    goals.push(goal("runner.neutral.survival_risk", "risk_control", 960, [
+      "neutral_goal:survival_risk",
+      "run_target:flatline_or_damage_buffer",
+    ]));
+  }
   if (semantics.has("economy.gain_credit") || frame.economyContext?.creditPressure === "high") {
     goals.push(goal("runner.neutral.economy", "economy", 720, [
       "neutral_goal:economy",

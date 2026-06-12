@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { buildSemanticDecisionFrame } from "./semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
 
@@ -112,6 +113,150 @@ describe("SemanticShadowDecision", () => {
         actionId: "install-expensive",
         blockers: expect.arrayContaining(["cannot_pay"]),
       }),
+    );
+  });
+
+  it("keeps remote score threats above deck R&D pressure", () => {
+    const input = inputFor("runner", [
+      legalAction("run-rd", "start_run", "runner", 0, {
+        payload: { serverId: "rd" },
+      }),
+      legalAction("run-remote", "start_run", "runner", 0, {
+        payload: { serverId: "remote_1" },
+      }),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      runner: {
+        runTargets: [
+          runTarget({
+            actionId: "run-rd",
+            targetServerId: "rd",
+            targetKind: "rd",
+            recommendation: "run_now",
+            accessPayoff: "fresh",
+          }),
+          runTarget({
+            actionId: "run-remote",
+            targetServerId: "remote_1",
+            targetKind: "remote",
+            recommendation: "run_now",
+            accessPayoff: "score_threat",
+            scoreThreat: true,
+          }),
+        ],
+      },
+      doctrineDiagnostic: doctrine("runner", "runner.rnd_pressure"),
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions[0]).toMatchObject({
+      actionId: "run-remote",
+      primaryGoalId: "runner.neutral.remote_contest_if_score_threat",
+    });
+    expect(trace.rankedActions[0]?.score).toBeGreaterThan(
+      trace.rankedActions.find((action) => action.actionId === "run-rd")?.score ?? 0,
+    );
+  });
+
+  it("keeps flatline risk above access payoff from doctrine pressure", () => {
+    const input = inputFor("runner", [
+      legalAction("draw-1", "draw_card", "runner"),
+      legalAction("run-hq", "start_run", "runner", 0, {
+        payload: { serverId: "hq" },
+      }),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      runner: {
+        runTargets: [
+          runTarget({
+            actionId: "run-hq",
+            targetServerId: "hq",
+            targetKind: "hq",
+            recommendation: "draw_for_damage_buffer",
+            accessPayoff: "agenda",
+            blinkRiskSeverity: "high",
+          }),
+        ],
+      },
+      doctrineDiagnostic: doctrine("runner", "runner.hq_pressure"),
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions[0]).toMatchObject({
+      actionId: "draw-1",
+      primaryGoalId: "runner.neutral.survival_risk",
+    });
+    expect(trace.rankedActions[0]?.components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ component: "threat_response" }),
+      ]),
+    );
+  });
+
+  it("keeps low credits and cannot-pay gates above score ambition", () => {
+    const input = inputFor("corp", [
+      legalAction("score-expensive", "score_agenda", "corp", 4),
+      legalAction("gain-1", "gain_credit", "corp"),
+    ]);
+    input.playerView.own.credits = 1;
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "corp",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      doctrineDiagnostic: doctrine("corp", "corp.fast_advance"),
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions[0]?.actionId).toBe("gain-1");
+    expect(trace.rejectedActions).toContainEqual(
+      expect.objectContaining({
+        actionId: "score-expensive",
+        blockers: expect.arrayContaining(["cannot_pay"]),
+      }),
+    );
+  });
+
+  it("keeps legal corp score windows above generic economy", () => {
+    const input = inputFor("corp", [
+      legalAction("score-1", "score_agenda", "corp"),
+      legalAction("gain-1", "gain_credit", "corp"),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "corp",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      doctrineDiagnostic: doctrine("corp", "corp.asset_economy"),
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions[0]).toMatchObject({
+      actionId: "score-1",
+      primaryGoalId: "corp.neutral.score_agenda",
+    });
+    expect(trace.rankedActions[0]?.score).toBeGreaterThan(
+      trace.rankedActions.find((action) => action.actionId === "gain-1")?.score ?? 0,
     );
   });
 
@@ -319,6 +464,7 @@ function legalAction(
   credits = 0,
   options: {
     targetRequirements?: LegalAction["targetRequirements"];
+    payload?: LegalAction["payload"];
   } = {},
 ): LegalAction {
   return {
@@ -332,6 +478,7 @@ function legalAction(
     targetRequirements: options.targetRequirements ?? [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 5,
+    ...(options.payload ? { payload: options.payload } : {}),
   };
 }
 
@@ -349,17 +496,24 @@ function visibleCard(cardId: string) {
 }
 
 function runnerRemoteContestDoctrine(): DeckDoctrineV2Diagnostic {
+  return doctrine("runner", "runner.remote_contest");
+}
+
+function doctrine(
+  side: "runner" | "corp",
+  strategyId: string,
+): DeckDoctrineV2Diagnostic {
   return {
     schemaVersion: "deck-doctrine-v2-diagnostic-v1",
     scope: "diagnostic_only",
     productiveUseAllowed: false,
-    deckSnapshotId: "runner-remote-test",
-    side: "runner",
+    deckSnapshotId: `${side}-${strategyId}-test`,
+    side,
     status: "complete",
     neutralDoctrine: false,
     strategyDiagnostics: [
       {
-        strategyId: "runner.remote_contest",
+        strategyId,
         status: "complete",
         anchorScore: 80,
         supportScore: 80,
@@ -397,5 +551,107 @@ function runnerRemoteContestDoctrine(): DeckDoctrineV2Diagnostic {
       engineMutation: false,
       hiddenInfoProjection: false,
     },
+  };
+}
+
+function runTarget(params: {
+  actionId: string;
+  targetServerId: string;
+  targetKind: RunnerRunTargetEvaluation["targetKind"];
+  recommendation: RunnerRunTargetEvaluation["recommendation"];
+  accessPayoff: RunnerRunTargetEvaluation["accessPayoff"];
+  scoreThreat?: boolean;
+  blinkRiskSeverity?: NonNullable<
+    RunnerRunTargetEvaluation["blinkRiskAssessment"]
+  >["riskSeverity"];
+}): RunnerRunTargetEvaluation {
+  return {
+    schemaVersion: "runner-run-target-evaluation-v1",
+    targetServerId: params.targetServerId,
+    targetKind: params.targetKind,
+    accessServerId: params.targetServerId,
+    accessTargetKind: params.targetKind,
+    actionId: params.actionId,
+    accessPayoff: params.accessPayoff,
+    knownAccessState: "unknown",
+    multiaccessAvailable: false,
+    pathPassability: "reachable",
+    pathCost: 0,
+    creditsAfterRun: 5,
+    stealOrTrashAffordable: "unknown",
+    installedRunPayoff: runPayoff(),
+    runActionPayoff: runPayoff(),
+    runActionProjection: {
+      actionId: params.actionId,
+      actionType: "start_run",
+      sourceKind: "basic_action",
+      targetServerId: params.targetServerId,
+      targetKind: params.targetKind,
+      accessServerId: params.targetServerId,
+      structure: "direct_start_run",
+      accessPayoffSignals: [],
+      constraintSignals: [],
+      riskSignals: [],
+      noNoisyBreakers: false,
+      bypassFirstIce: false,
+      projectionStatus: "concrete_target",
+      evidence: [`test_run_target:${params.targetServerId}`],
+    },
+    riskyUniversalCoverage: false,
+    ...(params.blinkRiskSeverity
+      ? {
+          blinkRiskAssessment: blinkRisk(params.blinkRiskSeverity),
+        }
+      : {}),
+    scoreThreat: params.scoreThreat ?? false,
+    recommendation: params.recommendation,
+    score: params.scoreThreat ? 100 : 80,
+    evidence: [
+      `target:${params.targetServerId}`,
+      `recommendation:${params.recommendation}`,
+    ],
+  };
+}
+
+function runPayoff(): RunnerRunTargetEvaluation["installedRunPayoff"] {
+  return {
+    immediateAccessValue: 0,
+    futureSetupValue: 0,
+    purgeTaxValue: 0,
+    economyValue: 0,
+    riskPenalty: 0,
+    scoreBonus: 0,
+    multiaccessAvailable: false,
+    evidence: ["test_payoff"],
+  };
+}
+
+function blinkRisk(
+  riskSeverity: NonNullable<
+    RunnerRunTargetEvaluation["blinkRiskAssessment"]
+  >["riskSeverity"],
+): NonNullable<RunnerRunTargetEvaluation["blinkRiskAssessment"]> {
+  return {
+    currentHandCount: 1,
+    handAfterActionCost: 1,
+    blinkUsesLikely: 1,
+    visibleSubroutinesLikely: 1,
+    maxSingleFailureDamage: 2,
+    worstCaseDamageEstimate: 2,
+    lethalOnAnyFailure: riskSeverity === "lethal",
+    lethalOnHighFailure: riskSeverity === "high" || riskSeverity === "lethal",
+    survivesOneFailedBlinkUse: false,
+    riskSeverity,
+    payoffOverride: "none",
+    stableCoverageAvailable: false,
+    pathDependsOnBlink: true,
+    breakWouldBeExcludedInEncounter: false,
+    blockedByHandBuffer: riskSeverity === "high" || riskSeverity === "lethal",
+    noProgressRunExpected: false,
+    expectedEtrUnbroken: false,
+    recentFailure: false,
+    recentDamageAmount: 0,
+    sameServerRepeatedRiskPenalty: 0,
+    evidence: [`blink_risk:${riskSeverity}`],
   };
 }

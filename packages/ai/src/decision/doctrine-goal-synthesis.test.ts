@@ -206,6 +206,27 @@ describe("doctrine goal synthesis", () => {
     expect(goals.some((goal) => goal.family === "damage_pressure")).toBe(false);
   });
 
+  it("keeps doctrine payoff priorities below acute boardstate goal bands", () => {
+    const runnerGoals = synthesizeDoctrineTacticalGoals(
+      diagnostic("runner", "complete", false, [
+        strategy("runner.rnd_pressure", "complete"),
+        strategy("runner.hq_pressure", "complete"),
+      ]),
+    );
+    const corpGoals = synthesizeDoctrineTacticalGoals(
+      diagnostic("corp", "complete", false, [
+        strategy("corp.fast_advance", "complete"),
+      ]),
+    );
+
+    expect(Math.max(...runnerGoals.map((goal) => goal.priority))).toBeLessThan(
+      820,
+    );
+    expect(Math.max(...corpGoals.map((goal) => goal.priority))).toBeLessThan(
+      860,
+    );
+  });
+
   it("does not synthesize punish or damage goals from unsupported payoffs", () => {
     const goals = synthesizeDoctrineTacticalGoals(
       diagnostic("corp", "complete", false, [
