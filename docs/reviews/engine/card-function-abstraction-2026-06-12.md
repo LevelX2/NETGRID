@@ -12,15 +12,15 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 ## Zählung
 
-| Kategorie | Anzahl |
-| --- | ---: |
-| functional_kind_uses_card_name | 33 |
-| false_positive | 33 |
-| test_only_card_name | 103 |
-| allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 257 |
-| mechanics_constant_controls_behavior_by_card_id | 49 |
-| payload_key_uses_card_name | 2 |
+| Kategorie                                       | Anzahl |
+| ----------------------------------------------- | -----: |
+| functional_kind_uses_card_name                  |     33 |
+| false_positive                                  |     33 |
+| test_only_card_name                             |    103 |
+| allowed_catalog_reference                       |     43 |
+| runtime_state_field_uses_card_name              |    257 |
+| mechanics_constant_controls_behavior_by_card_id |     49 |
+| payload_key_uses_card_name                      |      2 |
 
 ## Problemstellen
 
@@ -368,17 +368,17 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 ## Abstraktionsplan
 
-| Priorität | Fundklasse | Zielbaustein | State-Ziel |
-| --- | --- | --- | --- |
-| slice_now | Preying Mantis | `optional_extra_action_with_delayed_damage` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
-| slice_done | Quest for Cattekin | `start_turn_random_effect_table` | `runnerTurnFlags.persistentModifiers[]` |
-| deferred_refactor_required | Pirate Broadcast | `multi_server_success_sequence` | `runnerTurnFlags.pendingSequences[]` |
-| deferred_refactor_required | Bizarre Encryption Scheme | `delayed_agenda_access_replacement` | `runDurationEffects[]`, `delayedAccessEffects[]` |
-| deferred_refactor_required | Code Viral Cache | `purge_replacement_with_runner_virus_counter_cleanup` | `replacementEffects[]` |
-| deferred_refactor_required | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
-| deferred_refactor_required | Krumz | `recurring_trace_credit_pool` | `recurringCreditPools[]` |
-| deferred_refactor_required | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
-| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
+| Priorität                  | Fundklasse                      | Zielbaustein                                                                        | State-Ziel                                                                                            |
+| -------------------------- | ------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| slice_now                  | Preying Mantis                  | `optional_extra_action_with_delayed_damage`                                         | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
+| slice_done                 | Quest for Cattekin              | `start_turn_random_effect_table`                                                    | `runnerTurnFlags.persistentModifiers[]`                                                               |
+| deferred_refactor_required | Pirate Broadcast                | `multi_server_success_sequence`                                                     | `runnerTurnFlags.pendingSequences[]`                                                                  |
+| deferred_refactor_required | Bizarre Encryption Scheme       | `delayed_agenda_access_replacement`                                                 | `runDurationEffects[]`, `delayedAccessEffects[]`                                                      |
+| deferred_refactor_required | Code Viral Cache                | `purge_replacement_with_runner_virus_counter_cleanup`                               | `replacementEffects[]`                                                                                |
+| deferred_refactor_required | Startup Immolator               | `trash_fully_broken_passed_ice`                                                     | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`                                            |
+| deferred_refactor_required | Krumz                           | `recurring_trace_credit_pool`                                                       | `recurringCreditPools[]`                                                                              |
+| deferred_refactor_required | Siren                           | `start_run_redirect_to_source_fort`                                                 | `runStartInterventions[]`                                                                             |
+| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]`                                                                             |
 
 ## Nächste Umsetzung
 
@@ -390,13 +390,13 @@ Die Guard-Nachpflege und der `Quest for Cattekin`-Slice sind umgesetzt. Die näc
 Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5762 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
-| Kategorie | Anzahl |
-| --- | ---: |
-| new_unclassified_card_name_leak | 1302 |
-| functional_kind_uses_card_name | 41 |
-| runtime_state_field_uses_card_name | 4312 |
-| resolver_function_uses_card_name | 105 |
-| payload_key_uses_card_name | 2 |
+| Kategorie                          | Anzahl |
+| ---------------------------------- | -----: |
+| new_unclassified_card_name_leak    |   1302 |
+| functional_kind_uses_card_name     |     41 |
+| runtime_state_field_uses_card_name |   4312 |
+| resolver_function_uses_card_name   |    105 |
+| payload_key_uses_card_name         |      2 |
 
 ## Erlaubte Referenzen
 
