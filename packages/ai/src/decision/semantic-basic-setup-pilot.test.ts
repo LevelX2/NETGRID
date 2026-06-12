@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   AI_PLAY_STRENGTH_PILOT_ENV,
   BASIC_SETUP_PILOT_MODE,
@@ -227,17 +228,96 @@ function frame(
   } = {},
 ): SemanticDecisionFrame {
   const side = options.side ?? "runner";
+  const actionCandidates =
+    options.runner?.runTargets?.map((target) =>
+      runCandidateFromTarget(target.actionId, target.targetServerId),
+    ) ?? [];
   return {
     schemaVersion: "semantic-decision-frame-v1",
     side,
     stateVersion: 1,
     profileId: `${side}:test`,
     legalActionIds,
-    actionCandidates: [],
+    actionCandidates,
     tacticalGoals: [],
     ...(options.runner ? { runner: options.runner } : {}),
     evidence: ["test_frame"],
     hiddenInfoPolicy: "player_view_only",
+  };
+}
+
+function runCandidateFromTarget(
+  actionId: string,
+  serverId: string,
+): ActionSemanticCandidate {
+  const serverKind =
+    serverId === "hq" || serverId === "rd" || serverId === "archives"
+      ? serverId
+      : serverId.startsWith("remote_")
+        ? "remote"
+        : undefined;
+  return {
+    actionId,
+    actionType: "start_run",
+    actorSide: "runner",
+    observerSide: "runner",
+    visibilityScope: "actor_private",
+    legalActionRef: {
+      actionId,
+      actionType: "start_run",
+      originalPayloadKeys: ["serverId"],
+    },
+    stateVersion: 1,
+    sourceKind: "basic_action",
+    abilityBindingMethod: "unresolved",
+    semanticActionType: "run.start",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "known",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    runProjectionSummary: {
+      serverId,
+      ...(serverKind ? { serverKind } : {}),
+      source: "target_context",
+      evidence: [`test_run_projection_summary:${serverId}`],
+    },
+    targetContext: {
+      selectedTargets: [
+        {
+          targetId: serverId,
+          targetKind: "server",
+          targetSide: "corp",
+          visibilityScope: "actor_private",
+          evidence: ["selected_target:server"],
+        },
+      ],
+      targetKind: "server",
+      targetZones: [],
+      targetSide: "corp",
+      hiddenInfoPolicy: "side_safe_engine_input_only",
+      availableTargetsStatus: "not_available",
+      targetProfileMatches: [],
+      targetConstraintResults: [],
+    },
+    boardContext: {
+      source: "not_projected",
+      sideSafe: true,
+      stateVersion: 1,
+      timingPoint: "runner_action.main",
+      notes: ["test"],
+    },
+    confidence: "high",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [`run_action_projection_target:${serverId}`],
   };
 }
 
