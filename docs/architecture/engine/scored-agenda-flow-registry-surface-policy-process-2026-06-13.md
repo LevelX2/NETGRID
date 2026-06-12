@@ -7,6 +7,7 @@
 ## Paketfortschritt
 
 - P0 abgeschlossen: Prozessartefakt, Worktree und Zielabgrenzung.
+- P1 abgeschlossen: `scored-agenda-score-time-types.ts` und `scored-agenda-score-time-registry.ts` definieren den Score-Time-Start-Vertrag und registrieren DFR, Ice Transmutation, Priority Requisition und Security Purge. Registry-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
