@@ -117,6 +117,55 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps evaluation modules away from pilot runtime selection internals", () => {
+    const allowedPilotImports = new Set([
+      "pilot-scope-registry",
+      "remote-contest-candidate",
+    ]);
+    const violations = productionFiles("evaluation").flatMap((file) =>
+      importsFrom(file).flatMap((reference) => {
+        if (!resolvesToSrcArea(file, reference.importSource, path.join("decision", "pilot"))) {
+          return [];
+        }
+        if (allowedPilotImports.has(resolvedImportBasename(file, reference.importSource))) {
+          return [];
+        }
+        return [
+          violation(
+            file,
+            reference,
+            "evaluation modules may import only pilot registry types or report helpers",
+          ),
+        ];
+      }),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps runtime and action semantics below higher-level analysis layers", () => {
+    const runtimeViolations = productionFiles("runtime").flatMap((file) =>
+      importsFrom(file)
+        .filter((reference) =>
+          resolvesToSrcArea(file, reference.importSource, "evaluation"),
+        )
+        .map((reference) =>
+          violation(file, reference, "runtime modules must not import evaluation"),
+        ),
+    );
+    const actionViolations = productionFiles("actions").flatMap((file) =>
+      importsFrom(file)
+        .filter((reference) =>
+          resolvesToSrcArea(file, reference.importSource, "decision"),
+        )
+        .map((reference) =>
+          violation(file, reference, "actions modules must not import decision"),
+        ),
+    );
+
+    expect([...runtimeViolations, ...actionViolations]).toEqual([]);
+  });
+
   it("keeps diagnostics modules from choosing actions", () => {
     const violations = productionFiles("diagnostics").flatMap((file) => {
       const content = readFileSync(file, "utf8");
@@ -145,7 +194,9 @@ describe("AI module boundaries", () => {
   });
 });
 
-function productionFiles(area: "decision" | "evaluation" | "diagnostics"): string[] {
+function productionFiles(
+  area: "actions" | "decision" | "diagnostics" | "evaluation" | "runtime",
+): string[] {
   const root = path.join(srcDir, area);
   return collectSourceFiles(root).filter((file) => !file.endsWith(".test.ts"));
 }
@@ -168,7 +219,10 @@ function importsFrom(file: string): ImportReference[] {
   const references: ImportReference[] = [];
   const fromImportPattern =
     /\bimport\s+(type\s+)?[\s\S]*?\bfrom\s+["']([^"']+)["']/g;
+  const fromExportPattern =
+    /\bexport\s+(type\s+)?(?:\{[\s\S]*?\}|\*)\s+from\s+["']([^"']+)["']/g;
   const sideEffectImportPattern = /\bimport\s+["']([^"']+)["']/g;
+  const dynamicImportPattern = /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g;
 
   for (const match of content.matchAll(fromImportPattern)) {
     references.push({
@@ -178,7 +232,23 @@ function importsFrom(file: string): ImportReference[] {
     });
   }
 
+  for (const match of content.matchAll(fromExportPattern)) {
+    references.push({
+      importSource: match[2] ?? "",
+      isTypeOnly: Boolean(match[1]),
+      line: lineForIndex(content, match.index ?? 0),
+    });
+  }
+
   for (const match of content.matchAll(sideEffectImportPattern)) {
+    references.push({
+      importSource: match[1] ?? "",
+      isTypeOnly: false,
+      line: lineForIndex(content, match.index ?? 0),
+    });
+  }
+
+  for (const match of content.matchAll(dynamicImportPattern)) {
     references.push({
       importSource: match[1] ?? "",
       isTypeOnly: false,
