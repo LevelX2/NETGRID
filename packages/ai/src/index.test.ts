@@ -831,7 +831,11 @@ describe("MVP 0.3 AI controller contract", () => {
       unbreakableIceTitle: "Too Many Doors",
     });
     expect(
-      assessKnownRezzedIcePath([innerTooManyDoors, outerTutor], [codecracker], 5),
+      assessKnownRezzedIcePath(
+        [innerTooManyDoors, outerTutor],
+        [codecracker],
+        5,
+      ),
     ).toMatchObject({
       blocked: false,
       canReachAccess: true,
@@ -5968,7 +5972,9 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(payoutAction).toBeDefined();
     expect(basicCredit).toBeDefined();
     if (!payoutAction || !basicCredit)
-      throw new Error("Missing advancement-counter payout zero-counter fixture");
+      throw new Error(
+        "Missing advancement-counter payout zero-counter fixture",
+      );
 
     const decision = chooseCorpAction({
       ...input,
@@ -8043,6 +8049,121 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda/,
     );
+  });
+
+  it("applies advancement operation basic advance dominance for only Vapor Ops", () => {
+    const input = corpAdvancementDominanceInput(
+      "ai-advancement-dominance-vapor-only",
+      (state) => {
+        addCorpRootToServerForTest(
+          state,
+          "remote_1",
+          "onr_v1_347_vapor-ops",
+          0,
+        );
+      },
+    );
+    const teamRestructuring = teamRestructuringAction(input);
+    const vaporAdvance = advanceActionForDefinition(
+      input,
+      "onr_v1_347_vapor-ops",
+    );
+
+    expect(teamRestructuring).toBeDefined();
+    expect(vaporAdvance).toBeDefined();
+    if (!teamRestructuring || !vaporAdvance)
+      throw new Error("Missing Vapor Ops dominance fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [teamRestructuring, vaporAdvance],
+    });
+    const operationAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === teamRestructuring.actionId,
+      );
+    const vaporAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === vaporAdvance.actionId,
+    );
+
+    expect(decision.actionId).not.toBe(teamRestructuring.actionId);
+    if (operationAlternative && vaporAlternative) {
+      expect(operationAlternative.priority).toBeLessThan(
+        vaporAlternative.priority ?? 0,
+      );
+    }
+  });
+
+  it("prefers Basic Advance over Team Restructuring for one advanceable agenda", () => {
+    const input = corpAdvancementDominanceInput(
+      "ai-advancement-dominance-agenda-only",
+      (state) => {
+        addCorpRootToServerForTest(state, "remote_1", "simple_agenda", 1);
+      },
+    );
+    const teamRestructuring = teamRestructuringAction(input);
+    const agendaAdvance = advanceActionForDefinition(input, "simple_agenda");
+
+    expect(teamRestructuring).toBeDefined();
+    expect(agendaAdvance).toBeDefined();
+    if (!teamRestructuring || !agendaAdvance)
+      throw new Error("Missing agenda dominance fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [teamRestructuring, agendaAdvance],
+    });
+    const operationAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === teamRestructuring.actionId,
+      );
+    const agendaAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === agendaAdvance.actionId,
+    );
+
+    expect(decision.actionId).toBe(agendaAdvance.actionId);
+    expect(operationAlternative?.priority ?? 0).toBeLessThan(
+      agendaAlternative?.priority ?? 0,
+    );
+  });
+
+  it("allows Team Restructuring to win with two meaningful advanceable targets", () => {
+    const input = corpAdvancementDominanceInput(
+      "ai-advancement-dominance-two-targets",
+      (state) => {
+        addCorpRootToServerForTest(state, "remote_1", "simple_agenda", 2);
+        addCorpRootToServerForTest(
+          state,
+          "remote_2",
+          "onr_v1_347_vapor-ops",
+          0,
+        );
+      },
+    );
+    const teamRestructuring = teamRestructuringAction(input);
+    const agendaAdvance = advanceActionForDefinition(input, "simple_agenda");
+    const vaporAdvance = advanceActionForDefinition(
+      input,
+      "onr_v1_347_vapor-ops",
+    );
+
+    expect(teamRestructuring).toBeDefined();
+    expect(agendaAdvance).toBeDefined();
+    expect(vaporAdvance).toBeDefined();
+    if (!teamRestructuring || !agendaAdvance || !vaporAdvance)
+      throw new Error("Missing two-target dominance fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [teamRestructuring, agendaAdvance, vaporAdvance],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(teamRestructuring.actionId);
+    expect(debugText).toContain(
+      "advancement_counter_placement_incremental_second_counter:true",
+    );
+    expect(debugText).toContain("dominated_by_basic_advance:false");
   });
 
   it("converts legal Corp score windows before economy, draw, remote build, or further advances", () => {
@@ -14418,7 +14539,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(activatedRecovery).toBeDefined();
     expect(gain).toBeDefined();
     if (!activatedRecovery || !gain)
@@ -14517,7 +14640,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(activatedRecovery).toBeDefined();
     expect(gain).toBeDefined();
     if (!activatedRecovery || !gain)
@@ -14595,7 +14720,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(recovery).toBeDefined();
     expect(gain).toBeDefined();
     if (!recovery || !gain)
@@ -26634,6 +26761,39 @@ function corpActionPhaseInput(
   });
 }
 
+function corpAdvancementDominanceInput(
+  seed: string,
+  mutate: (state: GameState) => void,
+) {
+  return corpActionPhaseInput(seed, (state) => {
+    state.corp.credits = 6;
+    addCorpCardToHqForTest(state, "onr_v1_305_team-restructuring");
+    mutate(state);
+  });
+}
+
+function teamRestructuringAction(
+  input: AiDecisionInput,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "play_operation" &&
+      sourceDefinitionFromInput(input, action) ===
+        "onr_v1_305_team-restructuring",
+  );
+}
+
+function advanceActionForDefinition(
+  input: AiDecisionInput,
+  definitionId: string,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "advance_card" &&
+      sourceDefinitionFromInput(input, action) === definitionId,
+  );
+}
+
 function corpFutureIceOrderingInput(
   seed: string,
   hqDefinitionIds: string[],
@@ -29831,6 +29991,35 @@ function putCorpRootInServer(
     faceup: options.faceup ?? false,
     rezzed: options.rezzed ?? false,
     advancementCounters,
+  };
+  return id;
+}
+
+function addCorpRootToServerForTest(
+  state: GameState,
+  serverId: `remote_${number}`,
+  definitionId: string,
+  advancementCounters: number,
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const id =
+    `test_corp_root_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error(`Missing ${serverId}`);
+  server.root.push(id);
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: false,
+    rezzed: false,
+    advancementCounters,
+    strengthModifier: 0,
   };
   return id;
 }
