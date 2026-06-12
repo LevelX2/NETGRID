@@ -44,6 +44,8 @@ import {
 } from "../remote-role-ontology-consumer";
 import { classifyTagPunishLegalActionFromOntology } from "../tag-punish-ontology-consumer";
 
+const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
+
 export type CorpPlanKind =
   | "score_now"
   | "score_next_turn"
@@ -335,6 +337,24 @@ export type RemoteScoreHorizon = {
   estimatedTurnsToScore?: number;
   contestCapacity?: RunnerContestCapacity["capacity"];
   reasons: string[];
+  evidence: string[];
+};
+
+type CorpAdvancementCounterPlacementProfile = {
+  maxTargets: number;
+  counterPerTarget: number;
+  distinctTargets: boolean;
+  effectOnly: boolean;
+};
+
+type CorpAdvancementCounterPlacementAssessment = {
+  dominatedByBasicAdvance: boolean;
+  selectedTargets: number;
+  maxTargets: number;
+  basicAdvanceEquivalentAvailable: boolean;
+  primaryCountersAdded: number;
+  secondCounterValue: number;
+  scoreModifier: number;
   evidence: string[];
 };
 
@@ -4307,9 +4327,9 @@ function evaluateCorpInstalledEconomyActions(
           ? "scored_agenda_counter_economy"
           : best.kind === "advancement_counter_payout"
             ? "installed_corp_economy_advancement_counter_payout"
-          : best.kind === "pool_payout"
-            ? "installed_corp_economy_pool_payout"
-            : "installed_corp_economy_direct_payout",
+            : best.kind === "pool_payout"
+              ? "installed_corp_economy_pool_payout"
+              : "installed_corp_economy_direct_payout",
     ],
     evidence: [
       "installed_corp_economy:true",
@@ -6562,9 +6582,202 @@ function isAdvancementCounterScoreSetupAction(
   action: LegalAction,
   context: CorpEvaluationContext = createCorpEvaluationContext(input),
 ): boolean {
+  const placement = corpAdvancementCounterPlacementAssessment(
+    input,
+    action,
+    context,
+  );
+  if (placement) return placement.basicAdvanceEquivalentAvailable;
   const added = advancementCountersAddedByAction(input, action);
   if (added <= 0 || action.type === "advance_card") return false;
   return Boolean(bestRemoteAdvancementTarget(input, context, added));
+}
+
+function corpAdvancementCounterPlacementAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): CorpAdvancementCounterPlacementAssessment | undefined {
+  const profile = corpAdvancementCounterPlacementProfileForAction(
+    input,
+    action,
+  );
+  if (!profile) return undefined;
+  const targets = corpBasicAdvanceEquivalentTargets(input, context).sort(
+    (left, right) =>
+      right.value - left.value ||
+      left.card.instanceId.localeCompare(right.card.instanceId),
+  );
+  const meaningfulTargets = targets.filter((target) => target.value > 0);
+  const selectedTargets = Math.min(
+    profile.maxTargets,
+    meaningfulTargets.length,
+  );
+  const basicAdvanceEquivalentAvailable = meaningfulTargets.length > 0;
+  const secondCounterValue =
+    selectedTargets >= 2 ? (meaningfulTargets[1]?.value ?? 0) : 0;
+  const dominatedByBasicAdvance =
+    profile.effectOnly &&
+    profile.counterPerTarget === 1 &&
+    profile.distinctTargets &&
+    selectedTargets <= 1 &&
+    basicAdvanceEquivalentAvailable;
+  const scoreModifier = dominatedByBasicAdvance
+    ? -260
+    : secondCounterValue > 0
+      ? Math.min(130, 55 + secondCounterValue)
+      : -45;
+  const sourceDefinitionId =
+    sourceCardForAction(input, action)?.definitionId ?? "unknown";
+  const evidence = [
+    "advancement_counter_placement:true",
+    `advancement_source:${sourceDefinitionId}`,
+    `advancement_selected_targets:${selectedTargets}`,
+    `advancement_max_targets:${profile.maxTargets}`,
+    `advancement_distinct_targets:${profile.distinctTargets}`,
+    `advancement_counter_per_target:${profile.counterPerTarget}`,
+    `basic_advance_equivalent_available:${basicAdvanceEquivalentAvailable}`,
+    `dominated_by_basic_advance:${dominatedByBasicAdvance}`,
+    `card_spend_without_incremental_counter_value:${dominatedByBasicAdvance}`,
+    `advancement_second_counter_value:${secondCounterValue}`,
+    ...(dominatedByBasicAdvance
+      ? [
+          "advancement_counter_placement_dominated_by_basic_advance",
+          "reason:single_counter_can_be_produced_by_basic_advance_without_spending_card",
+        ]
+      : secondCounterValue > 0
+        ? ["advancement_counter_placement_incremental_second_counter:true"]
+        : ["advancement_counter_placement_incremental_second_counter:false"]),
+  ];
+  return {
+    dominatedByBasicAdvance,
+    selectedTargets,
+    maxTargets: profile.maxTargets,
+    basicAdvanceEquivalentAvailable,
+    primaryCountersAdded: profile.counterPerTarget,
+    secondCounterValue,
+    scoreModifier,
+    evidence,
+  };
+}
+
+function corpAdvancementCounterPlacementProfileForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpAdvancementCounterPlacementProfile | undefined {
+  if (action.type !== "play_operation") return undefined;
+  const sourceCard = sourceCardForAction(input, action);
+  const definitionId = sourceCard?.definitionId;
+  if (!definitionId) return undefined;
+  const text = normalizedRulesTextForDefinition(definitionId);
+  if (
+    definitionId === TEAM_RESTRUCTURING_CARD_ID ||
+    /\badd one advancement counter to each of up to two installed cards that can be advanced\b/.test(
+      text,
+    )
+  ) {
+    return {
+      maxTargets: 2,
+      counterPerTarget: 1,
+      distinctTargets: true,
+      effectOnly: true,
+    };
+  }
+  return undefined;
+}
+
+function corpBasicAdvanceEquivalentTargets(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): Array<{ card: VisibleCard; serverId: string; value: number }> {
+  return input.legalActions
+    .filter(
+      (action) => action.side === "corp" && action.type === "advance_card",
+    )
+    .map((action) => visibleCardServerForAction(input, action))
+    .filter(
+      (
+        located,
+      ): located is {
+        card: VisibleCard;
+        serverId: string;
+      } => Boolean(located),
+    )
+    .map((located) => ({
+      ...located,
+      value: corpAdvancementTargetValue(input, located, context),
+    }));
+}
+
+function corpAdvancementTargetValue(
+  input: AiDecisionInput,
+  located: { card: VisibleCard; serverId: string },
+  context: CorpEvaluationContext,
+): number {
+  const definitionId = located.card.definitionId;
+  if (!definitionId) return 0;
+  const runtime = RUNTIME_CARDS[definitionId];
+  const demo = DEMO_CARDS_BY_ID[definitionId];
+  const type = located.card.type ?? runtime?.type ?? demo?.type;
+  const requirement =
+    located.card.advancementRequirement ??
+    runtime?.numeric.advancementRequirement ??
+    demo?.advancementRequirement;
+  const counters = located.card.advancementCounters ?? 0;
+  const remaining =
+    typeof requirement === "number"
+      ? Math.max(0, requirement - counters - 1)
+      : 99;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === located.serverId,
+  );
+  const protectedBonus = Math.min(server?.ice.length ?? 0, 2) * 12;
+  if (type === "agenda" || isAgendaDefinition(definitionId)) {
+    const contest = evaluateRunnerContestCapacity(
+      input,
+      located.serverId,
+      context,
+    );
+    const contestValue =
+      contest.capacity === "low" ? 35 : contest.capacity === "high" ? -25 : 0;
+    return (
+      140 +
+      (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) +
+      protectedBonus +
+      contestValue
+    );
+  }
+  const text = normalizedRulesTextForDefinition(definitionId);
+  if (
+    /advancement counter|advance .* before|can be advanced|counter.*credit|gain \d/.test(
+      text,
+    )
+  ) {
+    return 45 + protectedBonus;
+  }
+  return 0;
+}
+
+function normalizedRulesTextForDefinition(definitionId: string): string {
+  return `${RUNTIME_CARDS[definitionId]?.text ?? ""} ${
+    DEMO_CARDS_BY_ID[definitionId]?.rulesText ?? ""
+  }`
+    .toLocaleLowerCase("en-US")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function sourceCardForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  if (action.source !== "basic_action" && action.source !== "game_rule") {
+    const source = findVisibleCard(input, action.source);
+    if (source) return source;
+  }
+  const cardId =
+    typeof action.payload?.cardId === "string" ? action.payload.cardId : "";
+  return cardId ? findVisibleCard(input, cardId) : undefined;
 }
 
 function advancementCountersAddedByAction(
@@ -6699,10 +6912,14 @@ function remoteScoreHorizonForAction(
 ): RemoteScoreHorizon | undefined {
   if (context.scoreHorizonByActionId.has(action.actionId))
     return context.scoreHorizonByActionId.get(action.actionId);
-  const advancementCountersAdded = advancementCountersAddedByAction(
+  const placementAssessment = corpAdvancementCounterPlacementAssessment(
     input,
     action,
+    context,
   );
+  const advancementCountersAdded =
+    placementAssessment?.primaryCountersAdded ??
+    advancementCountersAddedByAction(input, action);
   if (
     action.type !== "score_agenda" &&
     action.type !== "advance_card" &&
@@ -6760,12 +6977,21 @@ function remoteScoreHorizonForAction(
       ? 35
       : 0;
   const scoreModifier =
-    baseScoreModifier - unsafeCheapContestPenalty + protectedRemoteBonus;
+    baseScoreModifier -
+    unsafeCheapContestPenalty +
+    protectedRemoteBonus +
+    (placementAssessment?.scoreModifier ?? 0);
   const reasons = scoreHorizonReasons(
     action.type,
     advancesRemaining,
     contest?.capacity,
   ).concat(
+    placementAssessment?.dominatedByBasicAdvance
+      ? ["score_horizon_advancement_counter_basic_advance_dominated"]
+      : [],
+    placementAssessment && placementAssessment.secondCounterValue > 0
+      ? ["score_horizon_advancement_counter_incremental_second_target"]
+      : [],
     effectiveSafety?.cheaplyContestable
       ? ["score_horizon_remote_cheaply_contestable"]
       : [],
@@ -6781,6 +7007,7 @@ function remoteScoreHorizonForAction(
     `score_horizon_advances_remaining_after_action:${advancesRemaining}`,
     `score_horizon_turns_to_score:${estimatedTurnsToScore}`,
     ...(contest ? [`score_horizon_contest_capacity:${contest.capacity}`] : []),
+    ...(placementAssessment?.evidence ?? []),
     ...(effectiveSafety &&
     (effectiveSafety.cheaplyContestable ||
       effectiveSafety.effectivelyProtected ||
@@ -7828,13 +8055,23 @@ function actionPriority(
   if (
     kind === "score_next_turn" &&
     isAdvancementCounterScoreSetupAction(input, action, context)
-  )
+  ) {
+    const placement = corpAdvancementCounterPlacementAssessment(
+      input,
+      action,
+      context,
+    );
+    if (placement?.dominatedByBasicAdvance) return -100;
     return (
       92 +
       boundedScoreHorizonActionBonus(input, action, context) +
+      (placement && placement.secondCounterValue > 0
+        ? 90 + Math.min(120, placement.secondCounterValue * 2)
+        : 0) +
       corpUnsafeScoreConversionActionBonus(input, action, context) +
       corpScoreTerminalActionPriorityBonus(input, action, context)
     );
+  }
   if (
     (kind === "protect_hq" || kind === "protect_rnd") &&
     action.type === "install_card" &&
