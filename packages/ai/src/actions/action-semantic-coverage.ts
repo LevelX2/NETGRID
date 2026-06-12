@@ -1,5 +1,6 @@
 import type {
   ActionPrimaryProjectionStatus,
+  ActionProjectionIssue,
   ActionSemanticCandidate,
   ActionSemanticSourceKind,
 } from "../action-semantic-candidate";
@@ -45,12 +46,16 @@ export type ActionSemanticCandidateCoverageRow = {
   sourceKind: ActionSemanticSourceKind;
   hasSourceCardId: boolean;
   hasAbilityId: boolean;
+  hasPrimitiveKind: boolean;
+  hasEffectKind: boolean;
   hasCostProfile: boolean;
   hasTimingProfile: boolean;
   hasTargetContext: boolean;
   targetContextStatus: ActionSemanticTargetContextStatus;
+  hiddenInfoBlocked: boolean;
   usesNeutralFallback: boolean;
   redactionSafe: boolean;
+  projectionIssues: ActionProjectionIssue[];
   groups: ActionSemanticCoverageGroup[];
 };
 
@@ -60,9 +65,13 @@ export type ActionSemanticCandidateCoverageSummary = {
   redactionSafe: boolean;
   redactionUnsafeRows: number;
   forbiddenMarkers: string[];
+  hiddenInfoBlockers: number;
+  schemaGapRows: number;
   fieldCoverage: {
     hasSourceCardId: number;
     hasAbilityId: number;
+    hasPrimitiveKind: number;
+    hasEffectKind: number;
     hasCostProfile: number;
     hasTimingProfile: number;
     hasTargetContext: number;
@@ -73,6 +82,8 @@ export type ActionSemanticCandidateCoverageSummary = {
   semanticActionTypes: Record<string, number>;
   primaryProjectionStatuses: Record<string, number>;
   sourceKinds: Record<string, number>;
+  projectionIssues: Record<string, number>;
+  schemaGaps: Record<string, number>;
   targetContextStatuses: Record<string, number>;
   targetContextByGroup: Record<
     ActionSemanticCoverageGroup,
@@ -108,9 +119,13 @@ export function summarizeActionSemanticCandidateCoverage(
     redactionSafe: rows.every((row) => row.redactionSafe),
     redactionUnsafeRows: rows.filter((row) => !row.redactionSafe).length,
     forbiddenMarkers: [] as string[],
+    hiddenInfoBlockers: rows.filter((row) => row.hiddenInfoBlocked).length,
+    schemaGapRows: rows.filter((row) => row.projectionIssues.length > 0).length,
     fieldCoverage: {
       hasSourceCardId: countRows(rows, "hasSourceCardId"),
       hasAbilityId: countRows(rows, "hasAbilityId"),
+      hasPrimitiveKind: countRows(rows, "hasPrimitiveKind"),
+      hasEffectKind: countRows(rows, "hasEffectKind"),
       hasCostProfile: countRows(rows, "hasCostProfile"),
       hasTimingProfile: countRows(rows, "hasTimingProfile"),
       hasTargetContext: countRows(rows, "hasTargetContext"),
@@ -124,6 +139,16 @@ export function summarizeActionSemanticCandidateCoverage(
       (row) => row.primaryProjectionStatus,
     ),
     sourceKinds: countBy(rows, (row) => row.sourceKind),
+    projectionIssues: countBy(
+      rows.flatMap((row) => row.projectionIssues),
+      (issue) => issue,
+    ),
+    schemaGaps: countBy(
+      rows.flatMap((row) =>
+        row.projectionIssues.filter((issue) => issue !== "hidden_info_blocked"),
+      ),
+      (issue) => issue,
+    ),
     targetContextStatuses: countBy(rows, (row) => row.targetContextStatus),
     targetContextByGroup: targetContextCountsByGroup(rows),
     groups: groupCounts(rows),
@@ -163,6 +188,8 @@ export function formatActionSemanticCandidateCoverageReport(
     `Candidates: ${summary.totalCandidates}`,
     `Redaction safe: ${summary.redactionSafe ? 1 : 0}`,
     `Forbidden markers: ${summary.forbiddenMarkers.length > 0 ? summary.forbiddenMarkers.join(", ") : "none"}`,
+    `Hidden-info blockers: ${summary.hiddenInfoBlockers}`,
+    `Schema-gap rows: ${summary.schemaGapRows}`,
     "",
     "## Field Coverage",
     "",
@@ -183,6 +210,14 @@ export function formatActionSemanticCandidateCoverageReport(
     "## Source Kinds",
     "",
     countMapTable(summary.sourceKinds),
+    "",
+    "## Projection Issues",
+    "",
+    countMapTable(summary.projectionIssues),
+    "",
+    "## Schema Gaps",
+    "",
+    countMapTable(summary.schemaGaps),
     "",
     "## Target Context",
     "",
@@ -208,14 +243,20 @@ function actionSemanticCandidateCoverageRow(
     sourceKind: candidate.sourceKind,
     hasSourceCardId: candidate.sourceCardId !== undefined,
     hasAbilityId: candidate.abilityId !== undefined,
+    hasPrimitiveKind: candidate.primitiveKind !== undefined,
+    hasEffectKind: candidate.effectKind !== undefined,
     hasCostProfile: candidate.costProfile.costKnownStatus !== "unknown",
     hasTimingProfile: candidate.timingProfile.window !== undefined,
     hasTargetContext: candidate.targetContext !== undefined,
     targetContextStatus,
+    hiddenInfoBlocked: candidate.projectionIssues.includes(
+      "hidden_info_blocked",
+    ),
     usesNeutralFallback:
       candidate.primaryProjectionStatus === "neutral_projected" ||
       candidate.sourceKind === "unknown" ||
       candidate.semanticActionType === "unknown",
+    projectionIssues: [...candidate.projectionIssues].sort(),
     groups: groupsForCandidate(candidate),
   };
   return {
@@ -292,6 +333,8 @@ function countRows(
     ActionSemanticCandidateCoverageRow,
     | "hasSourceCardId"
     | "hasAbilityId"
+    | "hasPrimitiveKind"
+    | "hasEffectKind"
     | "hasCostProfile"
     | "hasTimingProfile"
     | "hasTargetContext"

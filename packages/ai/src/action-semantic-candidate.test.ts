@@ -209,6 +209,37 @@ describe("buildActionSemanticCandidates", () => {
     ]);
   });
 
+  it("classifies every current LegalAction type without strategy or scoring anchors", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: ALL_ACTION_TYPES.map((type, index) =>
+        legalAction(type, index),
+      ),
+      observerSide: "system",
+    });
+
+    expect(candidates).toHaveLength(ALL_ACTION_TYPES.length);
+    for (const candidate of candidates) {
+      expect(candidate.semanticActionType).not.toBe("unknown");
+      expect(candidate.confidence).not.toBe("none");
+      expect(candidate.strategySupport).toEqual([]);
+      expect(candidate.actionTacticSignals).toEqual([]);
+      expect(candidate.cardContextSignals).toEqual([]);
+      expect(candidate.hardGates).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            gateId: "runtime_no_effect",
+            status: "pass",
+          }),
+        ]),
+      );
+    }
+
+    const serialized = JSON.stringify(candidates);
+    expect(serialized).not.toContain("planWeight");
+    expect(serialized).not.toContain("scoringWeight");
+    expect(serialized).not.toContain("selectedActionId");
+  });
+
   it("binds card source and ability only from side-safe LegalAction evidence", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
@@ -290,6 +321,7 @@ describe("buildActionSemanticCandidates", () => {
           },
         }),
       ],
+      observerSide: "runner",
     });
     if (!candidate) throw new Error("Expected primitive payload candidate");
 
@@ -306,6 +338,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.primitiveKind).toBe("successful_run_before_access_effect");
     expect(candidate.effectKind).toBe("corp_lose_credits");
     expect(candidate.abilityBindingMethod).toBe("engine_payload");
+    expect(candidate.observerSide).toBe("runner");
     expect(candidate.visibilityScope).toBe("actor_private");
     expect(candidate.actionTacticSignals).toEqual([]);
     expect(candidate.strategySupport).toEqual([]);
@@ -381,6 +414,20 @@ describe("buildActionSemanticCandidates", () => {
             },
           ],
         }),
+        legalAction("resolve_choice", 4, {
+          choiceRequirements: [
+            {
+              choiceId: "actor-private-choice",
+              minSelections: 1,
+              maxSelections: 1,
+              optionIds: ["choice_option_keep", "choice_option_discard"],
+            },
+          ],
+          payload: {
+            choiceVisibility: "hidden_info_barrier",
+            secretChoiceLabel: "unprojected private option label",
+          },
+        }),
       ],
       selectedTargetsByActionId: {
         "ai036-0-trash_accessed_card": {
@@ -403,8 +450,15 @@ describe("buildActionSemanticCandidates", () => {
     const available = candidates[1];
     const unavailable = candidates[2];
     const hiddenBlocked = candidates[3];
-    if (!selected || !available || !unavailable || !hiddenBlocked) {
-      throw new Error("Expected four AI039 candidates");
+    const choiceOptions = candidates[4];
+    if (
+      !selected ||
+      !available ||
+      !unavailable ||
+      !hiddenBlocked ||
+      !choiceOptions
+    ) {
+      throw new Error("Expected five AI039 candidates");
     }
 
     expect(selected.targetContext?.selectedTargets).toEqual([
@@ -442,6 +496,31 @@ describe("buildActionSemanticCandidates", () => {
     expect(hiddenBlocked.primaryProjectionStatus).toBe("hidden_info_blocked");
     expect(hiddenBlocked.projectionIssues).toContain("hidden_info_blocked");
     expect(JSON.stringify(hiddenBlocked)).not.toContain("hidden-resource-card");
+
+    expect(choiceOptions.targetContext?.targetKind).toBe("choice");
+    expect(choiceOptions.targetContext?.availableTargetsStatus).toBe(
+      "engine_provided",
+    );
+    expect(choiceOptions.targetContext?.availableTargets).toEqual([
+      {
+        targetId: "choice_option_discard",
+        targetKind: "choice",
+        targetSide: "runner",
+        evidence: ["AI039 legal ChoiceRequirement option id"],
+      },
+      {
+        targetId: "choice_option_keep",
+        targetKind: "choice",
+        targetSide: "runner",
+        evidence: ["AI039 legal ChoiceRequirement option id"],
+      },
+    ]);
+    expect(choiceOptions.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+    expect(JSON.stringify(choiceOptions)).not.toContain(
+      "unprojected private option label",
+    );
   });
 
   it("normalizes action cost and timing profiles without scoring", () => {
@@ -467,14 +546,45 @@ describe("buildActionSemanticCandidates", () => {
           timingPoint: "corp_action.main",
           costs: [],
         }),
+        legalAction("resolve_choice", 3, {
+          side: "corp",
+          source: "game_rule",
+          timingPoint: "corp_action.main",
+          payload: {
+            cardImplementationPrimitiveKind:
+              "score_install_hq_cards_into_new_remote_then_rez",
+            cardImplementationAbilityKey: "hq_to_new_remote_install_rez:0",
+            cardImplementationTemporaryCreditBudget: 10,
+            temporaryCreditsProvided: 10,
+            temporaryCreditsSpent: 9,
+            temporaryCreditsRemaining: 1,
+            temporaryCreditsReturned: 1,
+            corpCreditsSpent: 0,
+            hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+          },
+        }),
+        legalAction("trigger_ability", 4, {
+          side: "runner",
+          source: "hidden-resource-source",
+          timingPoint: "access.resolve_card",
+          payload: {
+            cardImplementationPrimitiveKind:
+              "successful_run_before_access_effect",
+            cardImplementationCostKind: "reveal_and_tap_source",
+            publicRevealKind: "reveal",
+            sourceTapped: true,
+          },
+        }),
       ],
     });
 
     const gainCredit = candidates[0];
     const rezIce = candidates[1];
     const endTurn = candidates[2];
-    if (!gainCredit || !rezIce || !endTurn) {
-      throw new Error("Expected three AI040 candidates");
+    const dataFortSequence = candidates[3];
+    const revealTap = candidates[4];
+    if (!gainCredit || !rezIce || !endTurn || !dataFortSequence || !revealTap) {
+      throw new Error("Expected five AI040 candidates");
     }
 
     expect(gainCredit.costProfile).toMatchObject({
@@ -516,6 +626,50 @@ describe("buildActionSemanticCandidates", () => {
       phase: "corp_action_phase",
       turnSide: "corp",
       window: "corp_action.main",
+    });
+
+    expect(dataFortSequence.costProfile).toMatchObject({
+      creditCost: 0,
+      costKnownStatus: "known",
+      temporaryCredits: {
+        budget: 10,
+        provided: 10,
+        spent: 9,
+        remaining: 1,
+        returned: 1,
+      },
+    });
+    expect(dataFortSequence.costProfile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "cardImplementationTemporaryCreditBudget",
+        "temporaryCreditsProvided",
+        "temporaryCreditsSpent",
+        "temporaryCreditsRemaining",
+        "temporaryCreditsReturned",
+        "corpCreditsSpent",
+      ]),
+    );
+    expect(dataFortSequence.timingProfile).toMatchObject({
+      phase: "corp_action_phase",
+      scoreWindow: true,
+    });
+
+    expect(revealTap.costProfile).toMatchObject({
+      tapCost: true,
+      revealCost: true,
+      costKnownStatus: "known",
+    });
+    expect(revealTap.costProfile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "cardImplementationCostKind",
+        "publicRevealKind",
+        "sourceTapped",
+      ]),
+    );
+    expect(revealTap.timingProfile).toMatchObject({
+      phase: "run",
+      accessPhase: true,
+      responseWindow: true,
     });
   });
 

@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import type { LegalAction } from "@netgrid/shared";
 
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   FORBIDDEN_SHADOW_TRACE_CONSUMERS,
@@ -14,10 +19,18 @@ import {
   buildShadowEvaluationBatchReport,
   buildShadowRegressionFixturesReport,
   buildShadowReadinessReviewReport,
+  buildSemanticShadowDecisionTraceReport,
   DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
   runRuntimeShadowHarness,
+  semanticShadowDecisionTraceEnabled,
   type ShadowDecisionTrace,
 } from "./controlled-shadow-mode";
+import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
+
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../..",
+);
 
 describe("buildShadowModeTraceContractReport", () => {
   it("defines a developer-only no-runtime-effect trace contract", () => {
@@ -87,13 +100,15 @@ describe("buildShadowModeTraceContractReport", () => {
   it("keeps every controlled shadow mode no-effect flag false", () => {
     const report = buildShadowModeTraceContractReport();
 
-    expect(report.noEffectFlags).toEqual(CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS);
+    expect(report.noEffectFlags).toEqual(
+      CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+    );
     expect(Object.values(report.noEffectFlags)).toEqual(
       expect.arrayContaining([false]),
     );
-    expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
-      true,
-    );
+    expect(
+      Object.values(report.noEffectFlags).every((value) => value === false),
+    ).toBe(true);
   });
 });
 
@@ -149,7 +164,9 @@ describe("buildShadowScenarioCorpusReport", () => {
     const report = buildShadowScenarioCorpusReport();
 
     expect(
-      report.fixtures.every((fixture) => fixture.hiddenInfoBoundary.length >= 2),
+      report.fixtures.every(
+        (fixture) => fixture.hiddenInfoBoundary.length >= 2,
+      ),
     ).toBe(true);
     expect(
       report.fixtures.find(
@@ -167,9 +184,9 @@ describe("buildShadowScenarioCorpusReport", () => {
 
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.noRuntimeEffect).toBe(true);
-    expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
-      true,
-    );
+    expect(
+      Object.values(report.noEffectFlags).every((value) => value === false),
+    ).toBe(true);
   });
 });
 
@@ -258,9 +275,7 @@ describe("buildLegacySemanticComparisonReport", () => {
     const report = buildLegacySemanticComparisonReport();
 
     expect(report.schemaVersion).toBe("legacy-semantic-shadow-comparison-v1");
-    expect(report.scope).toBe(
-      "legacy_semantic_shadow_comparison_report_only",
-    );
+    expect(report.scope).toBe("legacy_semantic_shadow_comparison_report_only");
     expect(report.runtimeConsumerStatus).toBe("none");
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.productiveUseAllowed).toBe(false);
@@ -401,7 +416,9 @@ describe("buildShadowMetricsAndGatesReport", () => {
     expect(report.scope).toBe("shadow_metrics_and_quality_gates_report_only");
     expect(report.hardGates).toHaveLength(6);
     expect(report.hardGates.every((gate) => gate.value === 0)).toBe(true);
-    expect(report.hardGates.every((gate) => gate.requiredValue === 0)).toBe(true);
+    expect(report.hardGates.every((gate) => gate.requiredValue === 0)).toBe(
+      true,
+    );
     expect(report.hardGates.every((gate) => gate.status === "pass")).toBe(true);
   });
 
@@ -477,9 +494,9 @@ describe("runRuntimeShadowHarness", () => {
       stateVersion: 1,
     });
 
-    expect(DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG.semanticAiShadowModeEnabled).toBe(
-      false,
-    );
+    expect(
+      DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG.semanticAiShadowModeEnabled,
+    ).toBe(false);
     expect(result.shadowDiagnosticsEnabled).toBe(false);
     expect(result.actualDecision).toBe(legacyDecision);
     expect(result.legacyDecision).toBe(legacyDecision);
@@ -511,7 +528,9 @@ describe("runRuntimeShadowHarness", () => {
     expect(result.shadowDiagnosticsEnabled).toBe(true);
     expect(result.actualDecision).toBe(legacyDecision);
     expect(result.actualDecisionEqualsLegacyDecision).toBe(true);
-    expect(result.semanticShadowDecision?.scoreStatus).toBe("ranked_shadow_only");
+    expect(result.semanticShadowDecision?.scoreStatus).toBe(
+      "ranked_shadow_only",
+    );
     expect(result.trace?.visibilityScope).toBe("developer_only");
     expect(result.trace?.noRuntimeEffect).toBe(true);
   });
@@ -549,7 +568,9 @@ describe("buildRuntimeShadowHarnessReport", () => {
     const report = buildRuntimeShadowHarnessReport();
 
     expect(report.schemaVersion).toBe("runtime-shadow-harness-v1");
-    expect(report.scope).toBe("runtime_shadow_harness_default_off_diagnostic_only");
+    expect(report.scope).toBe(
+      "runtime_shadow_harness_default_off_diagnostic_only",
+    );
     expect(report.configContract.semanticAiShadowModeEnabled).toBe(false);
     expect(report.configContract.diagnosticsOnly).toBe(true);
     expect(report.configContract.visibilityScope).toBe("developer_only");
@@ -696,7 +717,9 @@ describe("buildShadowReadinessReviewReport", () => {
     expect(report.cutoverAllowed).toBe(false);
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.productiveUseAllowed).toBe(false);
-    expect(report.recommendedNextStep).toBe("limited_internal_shadow_simulation");
+    expect(report.recommendedNextStep).toBe(
+      "limited_internal_shadow_simulation",
+    );
   });
 
   it("keeps hard safety gates green while carrying quality gaps", () => {
@@ -732,6 +755,133 @@ describe("buildShadowReadinessReviewReport", () => {
         "Disable diagnostic harness and continue using Legacy decision only.",
       ]),
     );
+  });
+});
+
+describe("buildSemanticShadowDecisionTraceReport", () => {
+  it("treats NETGRID_AI_SEMANTIC_TRACE as a local default-off flag", () => {
+    expect(semanticShadowDecisionTraceEnabled({})).toBe(false);
+    expect(
+      semanticShadowDecisionTraceEnabled({ NETGRID_AI_SEMANTIC_TRACE: "1" }),
+    ).toBe(true);
+    expect(
+      semanticShadowDecisionTraceEnabled({
+        NETGRID_AI_SEMANTIC_TRACE: "true",
+      }),
+    ).toBe(false);
+  });
+
+  it("builds a no-effect trace from LegalActions, candidates, BasicAction semantics and doctrine", () => {
+    const legalActions = [
+      legalAction("gain_credit", 0, { source: "basic_action" }),
+      legalAction("trash_resource", 1, {
+        source: "basic_action",
+        targetRequirements: [
+          {
+            id: "hidden-resource",
+            kind: "card",
+            side: "runner",
+            visibility: "engine_only",
+          },
+        ],
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({ legalActions });
+    const doctrine = buildDeckDoctrineV2Diagnostic({
+      deckSnapshotId: "p14-anchorless-runner",
+      side: "runner",
+      cards: [{ cardId: "simple_run_event", quantity: 3 }],
+    });
+
+    const report = buildSemanticShadowDecisionTraceReport({
+      traceId: "p14-semantic-trace",
+      actorSide: "runner",
+      stateVersion: 9,
+      legalActions,
+      actionSemanticCandidates: candidates,
+      basicActionSemantics: {
+        gain_credit: {
+          semanticActionType: "economy.gain_credit",
+          primaryProjectionStatus: "projected",
+          confidence: "high",
+        },
+      },
+      deckDoctrine: doctrine,
+      env: {},
+    });
+
+    expect(report.schemaVersion).toBe("semantic-shadow-decision-trace-v1");
+    expect(report.scope).toBe("semantic_shadow_decision_trace_local_only");
+    expect(report.featureFlag).toMatchObject({
+      name: "NETGRID_AI_SEMANTIC_TRACE",
+      enabled: false,
+      status: "disabled_default",
+      defaultState: "disabled",
+      source: "local_env_only",
+    });
+    expect(report.inputSummary).toMatchObject({
+      legalActionCount: 2,
+      candidateCount: 2,
+      basicActionSemanticCount: 1,
+      doctrineStatus: "anchorless",
+      featureFlagEnabled: false,
+    });
+    expect(report.ranking[0]).toMatchObject({
+      actionId: "p14-0-gain_credit",
+      actionType: "gain_credit",
+      rankIndex: 0,
+      scoreStatus: "ranked_shadow_only",
+      semanticActionType: "economy.gain_credit",
+      basicActionSemanticType: "economy.gain_credit",
+      doctrineStatus: "anchorless",
+    });
+    expect(report.ranking[1]).toMatchObject({
+      actionId: "p14-1-trash_resource",
+      scoreStatus: "blocked_by_gate",
+      gapReasons: expect.arrayContaining(["hidden_info_blocked"]),
+    });
+    expect(report.gateReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          candidateId: "p14-1-trash_resource",
+          scoreStatus: "blocked_by_gate",
+        }),
+      ]),
+    );
+    expect(report.selectedActionId).toBeUndefined();
+    expect(report.actualDecisionOverrideCount).toBe(0);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
+  });
+
+  it("marks enabled_local without changing or replacing the legacy decision path", () => {
+    const legalActions = [
+      legalAction("draw_card", 0, { source: "basic_action" }),
+    ];
+    const report = buildSemanticShadowDecisionTraceReport({
+      traceId: "p14-enabled-local",
+      actorSide: "runner",
+      legalActions,
+      actionSemanticCandidates: buildActionSemanticCandidates({ legalActions }),
+      env: { NETGRID_AI_SEMANTIC_TRACE: "1" },
+    });
+
+    expect(report.featureFlag.enabled).toBe(true);
+    expect(report.featureFlag.status).toBe("enabled_local");
+    expect(report.selectedActionId).toBeUndefined();
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.actualDecisionOverrideCount).toBe(0);
+  });
+
+  it("stays out of runtime decision modules", () => {
+    const indexSource = readFileSync(
+      path.join(repoRoot, "packages/ai/src/index.ts"),
+      "utf8",
+    );
+
+    expect(indexSource).not.toContain("NETGRID_AI_SEMANTIC_TRACE");
+    expect(indexSource).not.toContain("buildSemanticShadowDecisionTraceReport");
   });
 });
 
@@ -814,3 +964,23 @@ describe("ShadowDecisionTrace", () => {
     expect(trace.hardGates.actualDecisionOverrideCount).toBe(0);
   });
 });
+
+function legalAction(
+  type: LegalAction["type"],
+  index: number,
+  overrides: Partial<LegalAction> = {},
+): LegalAction {
+  return {
+    actionId: `p14-${index}-${type}`,
+    side: index % 2 === 0 ? "runner" : "corp",
+    type,
+    label: `P14 fixture ${type}`,
+    source: "basic_action",
+    timingPoint: index % 2 === 0 ? "runner_action.main" : "corp_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 9,
+    ...overrides,
+  };
+}

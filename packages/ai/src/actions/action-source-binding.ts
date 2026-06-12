@@ -8,6 +8,14 @@ import type {
   SideSafeActionAbilityBinding,
 } from "../action-semantic-candidate";
 
+/**
+ * @aiProjection Copies side-safe Engine source and CardImplementation primitive
+ * descriptors onto an already legal ActionSemanticCandidate.
+ * @authority This binding never creates actions, legality, targets or planner
+ * weights; applyAction and LegalActions remain authoritative.
+ * @visibility Payload metadata is read only for the observing actor and must not
+ * be promoted into public or opponent hidden-info surfaces.
+ */
 export function applyCardActionSourceBinding(
   candidate: ActionSemanticCandidate,
   action: LegalAction,

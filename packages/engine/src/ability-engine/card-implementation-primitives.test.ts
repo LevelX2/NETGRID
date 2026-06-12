@@ -1,37 +1,39 @@
-import type { CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import primitiveContractManifest from "../../../../data/ai/card-implementation-primitive-contracts.json";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
-import type { CardImplementationDefinition } from "../card-implementations/types";
-
-type PrimitiveAbilityRecord = {
-  abilityKey: string;
-  cardDefinitionId: CardDefinitionId;
-  scope: string;
-};
+import {
+  primitiveContractRecords,
+  type CardImplementationPrimitiveContractRecord,
+} from "./card-implementation-primitive-contracts";
 
 describe("card implementation primitive ability keys", () => {
   it("are unique per card definition for primitive-backed abilities", () => {
     const failures: string[] = [];
 
-    for (const implementation of CARD_IMPLEMENTATIONS) {
+    const records = primitiveContractRecords(CARD_IMPLEMENTATIONS);
+    for (const cardDefinitionId of new Set(
+      records.map((record) => record.cardDefinitionId),
+    )) {
       const seen = new Map<string, string[]>();
-      for (const record of primitiveAbilityRecords(implementation)) {
+      for (const record of records.filter(
+        (candidate) => candidate.cardDefinitionId === cardDefinitionId,
+      )) {
         if (record.abilityKey.trim() === "") {
           failures.push(
-            `${record.cardDefinitionId}:${record.scope}: empty abilityKey`,
+            `${record.cardDefinitionId}:${primitiveAbilityRecordScope(record)}: empty abilityKey`,
           );
           continue;
         }
         seen.set(record.abilityKey, [
           ...(seen.get(record.abilityKey) ?? []),
-          record.scope,
+          primitiveAbilityRecordScope(record),
         ]);
       }
 
       for (const [abilityKey, scopes] of seen) {
         if (scopes.length > 1) {
           failures.push(
-            `${implementation.cardDefinitionId}: duplicate abilityKey ${abilityKey} in ${scopes.join(", ")}`,
+            `${cardDefinitionId}: duplicate abilityKey ${abilityKey} in ${scopes.join(", ")}`,
           );
         }
       }
@@ -39,38 +41,27 @@ describe("card implementation primitive ability keys", () => {
 
     expect(failures).toEqual([]);
   });
+
+  it("matches the checked-in primitive contract manifest", () => {
+    const derived = primitiveContractRecords(CARD_IMPLEMENTATIONS);
+    const manifest =
+      primitiveContractManifest as CardImplementationPrimitiveContractRecord[];
+
+    expect(derived).toEqual(manifest);
+    expect(manifest).toHaveLength(4);
+    for (const record of manifest) {
+      expect(record.visibility).toMatch(/^(public|hidden_info_barrier)$/);
+      expect(record.hiddenInfoClass).toMatch(/^(public|hidden_info_barrier)$/);
+      expect(record.resolverModule).toBeTruthy();
+      if (record.hiddenInfoClass === "hidden_info_barrier") {
+        expect(record.visibility).toBe("hidden_info_barrier");
+      }
+    }
+  });
 });
 
-function primitiveAbilityRecords(
-  implementation: CardImplementationDefinition,
-): PrimitiveAbilityRecord[] {
-  const records: PrimitiveAbilityRecord[] = [];
-  implementation.successfulRunFollowups?.forEach((followup, index) => {
-    if (followup.kind !== "successful_run_before_access_effect") return;
-    records.push({
-      abilityKey: followup.abilityKey ?? "successful_run_before_access:0",
-      cardDefinitionId: implementation.cardDefinitionId,
-      scope: `successfulRunFollowups[${index}].${followup.kind}`,
-    });
-  });
-
-  const scoredAgenda = implementation.scoredAgenda;
-  if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {
-    records.push({
-      abilityKey: scoredAgenda.abilityKey ?? "scored_ice_mark:0",
-      cardDefinitionId: implementation.cardDefinitionId,
-      scope: `scoredAgenda.${scoredAgenda.kind}`,
-    });
-  }
-  if (
-    scoredAgenda?.kind === "score_install_hq_cards_into_new_remote_then_rez"
-  ) {
-    records.push({
-      abilityKey: scoredAgenda.abilityKey ?? "hq_to_new_remote_install_rez:0",
-      cardDefinitionId: implementation.cardDefinitionId,
-      scope: `scoredAgenda.${scoredAgenda.kind}`,
-    });
-  }
-
-  return records;
+function primitiveAbilityRecordScope(
+  record: CardImplementationPrimitiveContractRecord,
+): string {
+  return `${record.primitiveKind}.${record.effectKind}`;
 }

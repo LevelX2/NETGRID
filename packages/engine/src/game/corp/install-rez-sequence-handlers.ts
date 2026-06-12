@@ -29,6 +29,14 @@ type PrevalidatedHqToNewRemoteInstall = {
   destination: "ice" | "root";
 };
 
+/**
+ * @contract Hosts CardImplementation install/rez sequence choices while the
+ * Rules Engine remains the only legality authority.
+ * @authority Handler callbacks must mutate state only after side, source,
+ * hidden-zone order, cost and target checks have passed.
+ * @visibility Hidden-zone choices may expose actor labels but public/opponent
+ * surfaces receive counts or public card facts only.
+ */
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
     GameState,
@@ -48,6 +56,8 @@ export type CorpInstallRezSequenceHandlerHost = {
       definition: CardDefinition,
       server: CorpServer,
     ) => boolean;
+    isRegionUpgrade: (definition: CardDefinition) => boolean;
+    rootInstallRezzesOnInstall: (definition: CardDefinition) => boolean;
     rezCostForCard: (cardId: CardInstanceId) => number;
     isPriorityRequisitionCandidate: (cardId: CardInstanceId) => boolean;
   };
@@ -58,6 +68,11 @@ export type CorpInstallRezSequenceHandlerHost = {
   servers: {
     createRemote: () => CorpServer;
     mustServer: (serverId: string) => CorpServer;
+    trashOlderRegionUpgradesInServer: (
+      server: CorpServer,
+      keepCardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
   };
   credits: {
     spendCorpCredits: (amount: number) => void;
@@ -638,6 +653,11 @@ function resolvePriorityRequisitionChoice(
   };
 }
 
+/**
+ * @mvpBoundary This path installs selected HQ cards first and opens one
+ * follow-up rez choice. Region and rez-on-install correctness requires the
+ * ordered install/rez sequence work in this process.
+ */
 function resolveHqToNewRemoteInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
@@ -682,6 +702,7 @@ function resolveHqToNewRemoteInstallRezChoice(
     selectedIds,
   );
   const temporaryCreditAmount = sequence.temporaryCredits.amount;
+  validateImmediateRootRezBudget(host, selectedCards, temporaryCreditAmount);
   if (selectedCards.length === 0) {
     delete host.state.pendingChoice;
     host.legalAction.payload = {
@@ -717,6 +738,10 @@ function resolveHqToNewRemoteInstallRezChoice(
 
   const server = host.servers.createRemote();
   const installedIds: CardInstanceId[] = [];
+  const immediateRezzedIds: CardInstanceId[] = [];
+  let temporaryCreditsRemaining = temporaryCreditAmount;
+  let temporaryCreditsSpent = 0;
+  let corpCreditsSpent = 0;
   for (const { cardId, definition, destination } of selectedCards) {
     host.zones.removeFromAllZones(cardId);
     if (destination === "ice") {
@@ -731,12 +756,36 @@ function resolveHqToNewRemoteInstallRezChoice(
       continue;
     }
     server.root.push(cardId);
+    const rootRezOnInstall = requiresOrderedRootInstallRezSequence(
+      host,
+      definition,
+    );
+    if (rootRezOnInstall) {
+      const payment = spendDataFortReclamationRezCost(
+        host,
+        cardId,
+        temporaryCreditsRemaining,
+      );
+      temporaryCreditsRemaining = payment.temporaryCreditsRemaining;
+      temporaryCreditsSpent += payment.temporaryCreditsSpent;
+      corpCreditsSpent += payment.corpCreditsSpent;
+    }
     host.state.cardInstances[cardId] = {
       ...host.cards.mustInstance(cardId),
-      faceup: false,
-      rezzed: false,
+      faceup: rootRezOnInstall,
+      rezzed: rootRezOnInstall,
       zone: { side: "corp", zone: "serverRoot", serverId: server.id },
     };
+    if (rootRezOnInstall) {
+      immediateRezzedIds.push(cardId);
+      host.callbacks.resolveCorpRootRez(cardId);
+      if (host.cards.isRegionUpgrade(definition))
+        host.servers.trashOlderRegionUpgradesInServer(
+          server,
+          cardId,
+          host.legalAction,
+        );
+    }
     installedIds.push(cardId);
   }
   const installedIceCount = selectedCards.filter(
@@ -761,17 +810,21 @@ function resolveHqToNewRemoteInstallRezChoice(
     cardImplementationSequenceCreatedServerId: server.id,
     cardImplementationTemporaryCreditBudget: temporaryCreditAmount,
     temporaryCreditsProvided: temporaryCreditAmount,
-    temporaryCreditsSpent: 0,
-    corpCreditsSpent: 0,
-    temporaryCreditsRemaining: temporaryCreditAmount,
+    temporaryCreditsSpent,
+    corpCreditsSpent,
+    temporaryCreditsRemaining,
+    immediateRezzedCount: immediateRezzedIds.length,
     dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
     dataFortReclamationRezCandidateCount: rezCandidates.length,
+    ...(rezCandidates.length === 0
+      ? { temporaryCreditsReturned: temporaryCreditsRemaining }
+      : {}),
   };
   if (rezCandidates.length > 0) {
     host.state.pendingChoice = {
       choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_rez_${host.state.stateVersion + 1}`,
       side: "corp",
-      source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:${agendaId}:${server.id}:${temporaryCreditAmount}:${host.state.stateVersion + 1}`,
+      source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:${agendaId}:${server.id}:${temporaryCreditsRemaining}:${host.state.stateVersion + 1}`,
       prompt: "Data Fort Reclamation: installierte Karten rezzen.",
       kind: "select_cards",
       options: rezCandidates.sort().map((cardId) => {
@@ -791,9 +844,10 @@ function resolveHqToNewRemoteInstallRezChoice(
     createdServerId: server.id,
     selectedCardIds: selectedIds,
     installedCardIds: installedIds,
+    rezzedCardIds: immediateRezzedIds,
     temporaryCreditsGranted: temporaryCreditAmount,
     ...(rezCandidates.length === 0
-      ? { temporaryCreditsReturned: temporaryCreditAmount }
+      ? { temporaryCreditsReturned: temporaryCreditsRemaining }
       : {}),
     resolvedPayload: host.legalAction.payload ?? {},
   };
@@ -830,6 +884,41 @@ function prevalidateHqToNewRemoteInstallSelection(
   return selectedCards;
 }
 
+function validateImmediateRootRezBudget(
+  host: CorpInstallRezSequenceHandlerHost,
+  selectedCards: readonly PrevalidatedHqToNewRemoteInstall[],
+  temporaryCreditAmount: number,
+): void {
+  let temporaryCreditsRemaining = temporaryCreditAmount;
+  let corpCreditsAvailable = host.state.corp.credits;
+  for (const { cardId, definition, destination } of selectedCards) {
+    if (
+      destination !== "root" ||
+      !requiresOrderedRootInstallRezSequence(host, definition)
+    )
+      continue;
+    const rezCost = host.cards.rezCostForCard(cardId);
+    const temporary = Math.min(temporaryCreditsRemaining, rezCost);
+    const corp = rezCost - temporary;
+    if (corpCreditsAvailable < corp)
+      throw new Error(
+        "Die Korp kann die Data-Fort-Reclamation-Rez-on-install-Kosten nicht bezahlen.",
+      );
+    temporaryCreditsRemaining -= temporary;
+    corpCreditsAvailable -= corp;
+  }
+}
+
+function requiresOrderedRootInstallRezSequence(
+  host: CorpInstallRezSequenceHandlerHost,
+  definition: CardDefinition,
+): boolean {
+  return (
+    host.cards.isRegionUpgrade(definition) ||
+    host.cards.rootInstallRezzesOnInstall(definition)
+  );
+}
+
 function resolveHqToNewRemoteInstallRezRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
@@ -861,11 +950,16 @@ function resolveHqToNewRemoteInstallRezRezChoice(
   });
   host.servers.mustServer(serverId);
   const temporaryCreditAmount = sequence.temporaryCredits.amount;
-  if (Math.floor(Number(temporaryCreditText)) !== temporaryCreditAmount)
+  const parsedTemporaryCredits = Math.floor(Number(temporaryCreditText));
+  if (
+    !Number.isInteger(parsedTemporaryCredits) ||
+    parsedTemporaryCredits < 0 ||
+    parsedTemporaryCredits > temporaryCreditAmount
+  )
     throw new Error(
       "Die temporaeren Rez-Credits passen nicht zum Install-/Rez-Primitive.",
     );
-  let temporaryCreditsRemaining = temporaryCreditAmount;
+  let temporaryCreditsRemaining = parsedTemporaryCredits;
   const selectedIds = selectedChoiceCardIds(host, choice);
   const selectedSet = new Set(selectedIds);
   if (selectedSet.size !== selectedIds.length)
@@ -882,19 +976,14 @@ function resolveHqToNewRemoteInstallRezRezChoice(
   let rezzedIceCount = 0;
   let rezzedRootCount = 0;
   for (const cardId of selectedIds) {
-    const rezCost = host.cards.rezCostForCard(cardId);
-    const temporary = Math.min(temporaryCreditsRemaining, rezCost);
-    const corp = rezCost - temporary;
-    if (host.state.corp.credits < corp)
-      throw new Error(
-        "Die Korp kann die Install-/Rez-Primitive-Rez-Kosten nicht bezahlen.",
-      );
-    temporaryCreditsRemaining -= temporary;
-    temporaryCreditsSpent += temporary;
-    if (corp > 0) {
-      host.credits.spendCorpCredits(corp);
-      corpCreditsSpent += corp;
-    }
+    const payment = spendDataFortReclamationRezCost(
+      host,
+      cardId,
+      temporaryCreditsRemaining,
+    );
+    temporaryCreditsRemaining = payment.temporaryCreditsRemaining;
+    temporaryCreditsSpent += payment.temporaryCreditsSpent;
+    corpCreditsSpent += payment.corpCreditsSpent;
     const definition = host.cards.definitionFor(cardId);
     const instance = host.cards.mustInstance(cardId);
     host.state.cardInstances[cardId] = {
@@ -936,6 +1025,31 @@ function resolveHqToNewRemoteInstallRezRezChoice(
     temporaryCreditsGranted: temporaryCreditAmount,
     temporaryCreditsReturned: temporaryCreditsRemaining,
     resolvedPayload: host.legalAction.payload ?? {},
+  };
+}
+
+function spendDataFortReclamationRezCost(
+  host: CorpInstallRezSequenceHandlerHost,
+  cardId: CardInstanceId,
+  temporaryCreditsRemaining: number,
+): {
+  temporaryCreditsSpent: number;
+  temporaryCreditsRemaining: number;
+  corpCreditsSpent: number;
+} {
+  const rezCost = host.cards.rezCostForCard(cardId);
+  const temporaryCreditsSpent = Math.min(temporaryCreditsRemaining, rezCost);
+  const corpCreditsSpent = rezCost - temporaryCreditsSpent;
+  if (host.state.corp.credits < corpCreditsSpent)
+    throw new Error(
+      "Die Korp kann die Install-/Rez-Primitive-Rez-Kosten nicht bezahlen.",
+    );
+  if (corpCreditsSpent > 0) host.credits.spendCorpCredits(corpCreditsSpent);
+  return {
+    temporaryCreditsSpent,
+    temporaryCreditsRemaining:
+      temporaryCreditsRemaining - temporaryCreditsSpent,
+    corpCreditsSpent,
   };
 }
 

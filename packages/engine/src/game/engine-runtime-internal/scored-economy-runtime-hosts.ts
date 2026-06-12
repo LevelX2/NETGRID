@@ -721,13 +721,16 @@ export function createScoredEconomyRuntimeHosts(
     isCorpInstallableCardType,
     revealCorpRdTop,
     rezzedCorpRootCardIds,
+    rootInstallRezzesOnInstall,
     runRezWindowHostForState,
     scoredAgendaImplementationForDefinition,
     scoredAgendaKindForDefinition,
     spendVisibleCardCounter,
     trashCorpInstalledCardToArchives,
+    trashOlderRegionUpgradesInServer,
     uniqueDirectLongtailImplementationForCard,
     uniqueDirectLongtailImplementationForDefinition,
+    isRegionUpgrade,
   } = deps;
 
   function corpInstallRezSequenceHandlerHost(
@@ -750,6 +753,8 @@ export function createScoredEconomyRuntimeHosts(
           isCorpInstallableCardType(definition),
         canInstallCorpRootCardInServer: (definition, server) =>
           canInstallCorpRootCardInServer(state, definition, server),
+        isRegionUpgrade,
+        rootInstallRezzesOnInstall,
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
         isPriorityRequisitionCandidate: (cardId) => {
           const instance = state.cardInstances[cardId];
@@ -775,6 +780,13 @@ export function createScoredEconomyRuntimeHosts(
       servers: {
         createRemote: () => createRemote(state),
         mustServer: (serverId) => mustServer(state, serverId),
+        trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
+          trashOlderRegionUpgradesInServer(
+            state,
+            server,
+            keepCardId,
+            legalAction,
+          ),
       },
       credits: {
         spendCorpCredits: (amount) => spendCredits(state, "corp", amount),

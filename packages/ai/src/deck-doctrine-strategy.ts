@@ -129,6 +129,79 @@ export type AiDeckStrategyProfile = {
   };
 };
 
+export type DeckDoctrineV2DiagnosticStatus =
+  | "anchorless"
+  | "partial"
+  | "complete"
+  | "unknown_snapshot";
+
+export type DeckDoctrineV2CardRoleDiagnosticStatus =
+  | "anchorless"
+  | "partial"
+  | "complete";
+
+export type DeckDoctrineV2CardRoleDiagnostic = {
+  cardId: string;
+  quantity: number;
+  status: DeckDoctrineV2CardRoleDiagnosticStatus;
+  roles: string[];
+  functionSignals: string[];
+  strategyAnchors: string[];
+  warnings: string[];
+};
+
+export type DeckDoctrineV2RoleDiagnosticSummary = {
+  status: DeckDoctrineV2DiagnosticStatus;
+  cardCount: number;
+  cardRows: number;
+  completeCards: number;
+  partialCards: number;
+  anchorlessCards: number;
+  cardsWithoutRoles: string[];
+  roleSignalCount: number;
+  functionSignalCount: number;
+  strategyAnchorCount: number;
+};
+
+export type DeckDoctrineV2StrategyDiagnostic = {
+  strategyId: string;
+  status: Exclude<DeckDoctrineV2DiagnosticStatus, "unknown_snapshot">;
+  anchorScore: number;
+  supportScore: number;
+  finalScore: number;
+  confidence: DeckStrategyConfidence;
+  anchorEvidenceCount: number;
+  supportEvidenceCount: number;
+  supportGaps: string[];
+};
+
+export type DeckDoctrineV2Diagnostic = {
+  schemaVersion: "deck-doctrine-v2-diagnostic-v1";
+  scope: "diagnostic_only";
+  productiveUseAllowed: false;
+  deckSnapshotId: string;
+  side: Side | "unknown";
+  status: DeckDoctrineV2DiagnosticStatus;
+  neutralDoctrine: boolean;
+  strategyDiagnostics: DeckDoctrineV2StrategyDiagnostic[];
+  rolesStatus: DeckDoctrineV2RoleDiagnosticSummary;
+  cardRoles: DeckDoctrineV2CardRoleDiagnostic[];
+  warnings: string[];
+  source: {
+    strategyProfile: "buildDeckStrategyProfile";
+    mode: "report_only";
+    plannerEffect: "none";
+  };
+  noEffectFlags: {
+    actionSelection: false;
+    plannerWeights: false;
+    scoring: false;
+    legalActionGeneration: false;
+    engineMutation: false;
+    hiddenInfoProjection: false;
+  };
+};
+
 type CoverageBucket = {
   count: number;
   searchable: boolean | "unknown";
@@ -228,7 +301,9 @@ type DeckStrategyStats = {
   cardTypeCounts: Record<string, number>;
 };
 
-const STRATEGY_GOALS = (strategyGoalsData.strategyGoals as StrategyGoal[]).slice();
+const STRATEGY_GOALS = (
+  strategyGoalsData.strategyGoals as StrategyGoal[]
+).slice();
 const STRATEGY_GOALS_BY_ID = new Map(
   STRATEGY_GOALS.map((goal) => [goal.strategyId, goal]),
 );
@@ -280,9 +355,9 @@ export function buildDeckStrategyProfile(
   const stats = deckStrategyStats(snapshot);
   const anchorEvidenceByStrategy = collectAnchorEvidence(stats);
   const strategyScores: Record<string, DeckStrategyScore> = {};
-  for (const goal of STRATEGY_GOALS.filter((entry) => entry.side === snapshot.side).sort(
-    (left, right) => left.strategyId.localeCompare(right.strategyId),
-  )) {
+  for (const goal of STRATEGY_GOALS.filter(
+    (entry) => entry.side === snapshot.side,
+  ).sort((left, right) => left.strategyId.localeCompare(right.strategyId))) {
     const anchorEvidence = sortedEvidence(
       anchorEvidenceByStrategy.get(goal.strategyId) ?? [],
     );
@@ -343,7 +418,85 @@ export function buildDeckStrategyProfile(
   });
 }
 
-function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategyStats {
+export function buildDeckDoctrineV2Diagnostic(
+  snapshot?: AiDeckDoctrineDeckSnapshot,
+): DeckDoctrineV2Diagnostic {
+  if (snapshot === undefined || snapshot.cards.length === 0) {
+    return {
+      schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+      deckSnapshotId: snapshot?.deckSnapshotId ?? "unknown_snapshot",
+      side: snapshot?.side ?? "unknown",
+      status: "unknown_snapshot",
+      neutralDoctrine: true,
+      strategyDiagnostics: [],
+      rolesStatus: emptyRoleDiagnosticSummary("unknown_snapshot"),
+      cardRoles: [],
+      warnings: ["unknown_snapshot"],
+      source: {
+        strategyProfile: "buildDeckStrategyProfile",
+        mode: "report_only",
+        plannerEffect: "none",
+      },
+      noEffectFlags: deckDoctrineV2NoEffectFlags(),
+    };
+  }
+
+  const strategyProfile = buildDeckStrategyProfile(snapshot);
+  const cardRoles = deckDoctrineV2CardRoles(snapshot);
+  const rolesStatus = summarizeDeckDoctrineV2Roles(
+    strategyProfile.cardCount,
+    cardRoles,
+  );
+  const strategyDiagnostics = Object.entries(strategyProfile.strategyScores)
+    .map(([strategyId, score]) => ({
+      strategyId,
+      status: deckDoctrineV2StrategyStatus(score),
+      anchorScore: score.anchorScore,
+      supportScore: score.supportScore,
+      finalScore: score.finalScore,
+      confidence: score.confidence,
+      anchorEvidenceCount: score.anchorEvidence.length,
+      supportEvidenceCount: score.supportEvidence.length,
+      supportGaps: [...score.supportGaps],
+    }))
+    .sort(
+      (left, right) =>
+        right.finalScore - left.finalScore ||
+        left.strategyId.localeCompare(right.strategyId),
+    );
+  const status = deckDoctrineV2Status(strategyDiagnostics, rolesStatus);
+
+  return {
+    schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+    scope: "diagnostic_only",
+    productiveUseAllowed: false,
+    deckSnapshotId: snapshot.deckSnapshotId,
+    side: snapshot.side,
+    status,
+    neutralDoctrine: status === "anchorless",
+    strategyDiagnostics,
+    rolesStatus,
+    cardRoles,
+    warnings: sortedUnique([
+      ...strategyProfile.warnings,
+      ...(status === "anchorless"
+        ? ["NeutralDoctrine: no strategy anchor"]
+        : []),
+    ]),
+    source: {
+      strategyProfile: "buildDeckStrategyProfile",
+      mode: "report_only",
+      plannerEffect: "none",
+    },
+    noEffectFlags: deckDoctrineV2NoEffectFlags(),
+  };
+}
+
+function deckStrategyStats(
+  snapshot: AiDeckDoctrineDeckSnapshot,
+): DeckStrategyStats {
   const functionSignalCounts: Record<string, number> = {};
   const legacySignalCounts: Record<string, number> = {};
   const cardTypeCounts: Record<string, number> = {};
@@ -357,11 +510,13 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
     if (quantity === 0) continue;
     const hint = COMPILED_HINTS_BY_CARD.get(entry.cardId);
     const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
-    const runtimeCard = RUNTIME_CARDS[
-      entry.cardId
-    ] as RuntimeCardForStrategy | undefined;
+    const runtimeCard = RUNTIME_CARDS[entry.cardId] as
+      | RuntimeCardForStrategy
+      | undefined;
     const cardType = hint?.cardType ?? inspector?.cardType ?? runtimeCard?.type;
-    const functionSignals = sortedUnique(inspector?.derivedFunctionSignals ?? []);
+    const functionSignals = sortedUnique(
+      inspector?.derivedFunctionSignals ?? [],
+    );
     const derivedStrategyAnchors = sortedUnique(
       (inspector?.derivedStrategyAnchors ?? []).filter((strategyId) =>
         strategyMatchesSide(strategyId, snapshot.side),
@@ -385,7 +540,8 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
     )) {
       increment(functionSignalCounts, signal, quantity);
     }
-    for (const role of roles) increment(legacySignalCounts, `role:${role}`, quantity);
+    for (const role of roles)
+      increment(legacySignalCounts, `role:${role}`, quantity);
     for (const role of planRoles) {
       increment(legacySignalCounts, `planRole:${role}`, quantity);
     }
@@ -411,7 +567,9 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
         riskTags: sortedUnique(hint?.riskTags ?? []),
         accessBreakerCoverageBlocked,
         effects: hint?.effects ?? [],
-        ...(hint?.remoteRole?.kind ? { remoteRoleKind: hint.remoteRole.kind } : {}),
+        ...(hint?.remoteRole?.kind
+          ? { remoteRoleKind: hint.remoteRole.kind }
+          : {}),
         ...(hint?.costProfile?.reserveRisk
           ? { costProfileReserveRisk: hint.costProfile.reserveRisk }
           : {}),
@@ -435,6 +593,182 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
     functionSignalCounts,
     legacySignalCounts,
     cardTypeCounts,
+  };
+}
+
+function deckDoctrineV2CardRoles(
+  snapshot: AiDeckDoctrineDeckSnapshot,
+): DeckDoctrineV2CardRoleDiagnostic[] {
+  return snapshot.cards
+    .slice()
+    .sort((left, right) => left.cardId.localeCompare(right.cardId))
+    .filter((entry) => Math.max(0, entry.quantity) > 0)
+    .map((entry) => {
+      const hint = COMPILED_HINTS_BY_CARD.get(entry.cardId);
+      const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
+      const roles = sortedUnique([
+        ...(hint?.roles ?? []),
+        ...(hint?.planRoles ?? []),
+        ...(hint?.lineSupport ?? []),
+        ...(hint?.strategicRole ?? []),
+        ...(inspector?.strategicRoleStatus?.validValues ?? []),
+      ]);
+      const functionSignals = sortedUnique(
+        inspector?.derivedFunctionSignals ?? [],
+      );
+      const strategyAnchors = sortedUnique([
+        ...(inspector?.derivedStrategyAnchors ?? []).filter((strategyId) =>
+          strategyMatchesSide(strategyId, snapshot.side),
+        ),
+        ...(inspector?.lineSupportClassification ?? []).flatMap(
+          (classification) => [
+            ...(strategyMatchesSide(classification.value, snapshot.side)
+              ? [classification.value]
+              : []),
+            ...(classification.mapsTo ?? []).filter((strategyId) =>
+              strategyMatchesSide(strategyId, snapshot.side),
+            ),
+          ],
+        ),
+      ]);
+      const status =
+        roles.length > 0 &&
+        functionSignals.length > 0 &&
+        strategyAnchors.length > 0
+          ? "complete"
+          : roles.length > 0 ||
+              functionSignals.length > 0 ||
+              strategyAnchors.length > 0
+            ? "partial"
+            : "anchorless";
+
+      return {
+        cardId: entry.cardId,
+        quantity: Math.max(0, entry.quantity),
+        status,
+        roles,
+        functionSignals,
+        strategyAnchors,
+        warnings: sortedUnique([
+          ...(hint === undefined ? ["missing_compiled_hint"] : []),
+          ...(inspector === undefined ? ["missing_inspector_index"] : []),
+          ...(inspector?.warningCategories ?? []),
+        ]),
+      };
+    });
+}
+
+function summarizeDeckDoctrineV2Roles(
+  cardCount: number,
+  cardRoles: readonly DeckDoctrineV2CardRoleDiagnostic[],
+): DeckDoctrineV2RoleDiagnosticSummary {
+  if (cardRoles.length === 0)
+    return emptyRoleDiagnosticSummary("unknown_snapshot");
+
+  const completeCards = cardRoles.filter(
+    (entry) => entry.status === "complete",
+  ).length;
+  const partialCards = cardRoles.filter(
+    (entry) => entry.status === "partial",
+  ).length;
+  const anchorlessCards = cardRoles.filter(
+    (entry) => entry.status === "anchorless",
+  ).length;
+  const cardsWithoutRoles = cardRoles
+    .filter((entry) => entry.roles.length === 0)
+    .map((entry) => entry.cardId);
+  const strategyAnchorCount = cardRoles.reduce(
+    (sum, entry) => sum + entry.strategyAnchors.length * entry.quantity,
+    0,
+  );
+  const status =
+    strategyAnchorCount === 0
+      ? "anchorless"
+      : anchorlessCards === 0 && partialCards === 0
+        ? "complete"
+        : "partial";
+
+  return {
+    status,
+    cardCount,
+    cardRows: cardRoles.length,
+    completeCards,
+    partialCards,
+    anchorlessCards,
+    cardsWithoutRoles,
+    roleSignalCount: cardRoles.reduce(
+      (sum, entry) => sum + entry.roles.length * entry.quantity,
+      0,
+    ),
+    functionSignalCount: cardRoles.reduce(
+      (sum, entry) => sum + entry.functionSignals.length * entry.quantity,
+      0,
+    ),
+    strategyAnchorCount,
+  };
+}
+
+function emptyRoleDiagnosticSummary(
+  status: DeckDoctrineV2DiagnosticStatus,
+): DeckDoctrineV2RoleDiagnosticSummary {
+  return {
+    status,
+    cardCount: 0,
+    cardRows: 0,
+    completeCards: 0,
+    partialCards: 0,
+    anchorlessCards: 0,
+    cardsWithoutRoles: [],
+    roleSignalCount: 0,
+    functionSignalCount: 0,
+    strategyAnchorCount: 0,
+  };
+}
+
+function deckDoctrineV2StrategyStatus(
+  score: DeckStrategyScore,
+): DeckDoctrineV2StrategyDiagnostic["status"] {
+  if (score.anchorEvidence.length === 0 && score.anchorScore === 0) {
+    return "anchorless";
+  }
+  if (
+    score.supportGaps.length === 0 &&
+    score.anchorEvidence.length > 0 &&
+    score.finalScore >= 45
+  ) {
+    return "complete";
+  }
+  return "partial";
+}
+
+function deckDoctrineV2Status(
+  strategyDiagnostics: readonly DeckDoctrineV2StrategyDiagnostic[],
+  rolesStatus: DeckDoctrineV2RoleDiagnosticSummary,
+): DeckDoctrineV2DiagnosticStatus {
+  if (rolesStatus.status === "unknown_snapshot") return "unknown_snapshot";
+  if (
+    strategyDiagnostics.every((entry) => entry.status === "anchorless") ||
+    rolesStatus.strategyAnchorCount === 0
+  ) {
+    return "anchorless";
+  }
+  if (
+    rolesStatus.status === "complete" &&
+    strategyDiagnostics.some((entry) => entry.status === "complete")
+  ) {
+    return "complete";
+  }
+  return "partial";
+}
+
+function deckDoctrineV2NoEffectFlags(): DeckDoctrineV2Diagnostic["noEffectFlags"] {
+  return {
+    actionSelection: false,
+    plannerWeights: false,
+    scoring: false,
+    legalActionGeneration: false,
+    engineMutation: false,
+    hiddenInfoProjection: false,
   };
 }
 
@@ -468,7 +802,8 @@ function collectAnchorEvidence(
 
     if (
       card.strategicRoles.some((role) => ANCHOR_STRATEGIC_ROLES.has(role)) &&
-      (card.derivedStrategyAnchors.length > 0 || lineSupportStrategies.length > 0)
+      (card.derivedStrategyAnchors.length > 0 ||
+        lineSupportStrategies.length > 0)
     ) {
       for (const strategyId of sortedUnique([
         ...card.derivedStrategyAnchors,
@@ -494,7 +829,8 @@ function lineSupportAnchorsForCard(
   side: Side,
 ): Array<{ strategyId: string; value: string; reason: string }> {
   const inspector = INSPECTOR_BY_CARD.get(card.cardId);
-  const anchors: Array<{ strategyId: string; value: string; reason: string }> = [];
+  const anchors: Array<{ strategyId: string; value: string; reason: string }> =
+    [];
   for (const classification of inspector?.lineSupportClassification ?? []) {
     const triage = classification.triageCategory;
     const exactStrategy = strategyMatchesSide(classification.value, side)
@@ -531,7 +867,10 @@ function lineSupportAnchorsForCard(
       reason: "compiled_lineSupport_strategy_goal",
     });
   }
-  return sortedUniqueObjects(anchors, (entry) => `${entry.strategyId}:${entry.value}`);
+  return sortedUniqueObjects(
+    anchors,
+    (entry) => `${entry.strategyId}:${entry.value}`,
+  );
 }
 
 function lineSupportAnchorAllowed(
@@ -574,11 +913,18 @@ function scoreSupport(
   const gaps: string[] = [];
   for (const dimension of dimensions) {
     const weight = weights[dimension] ?? 1 / dimensions.length;
-    const component = supportComponentScore(dimension, goal, stats, anchorEvidence);
+    const component = supportComponentScore(
+      dimension,
+      goal,
+      stats,
+      anchorEvidence,
+    );
     weightedScore += component.score * weight;
     weightTotal += weight;
     evidence.push(...component.evidence);
-    gaps.push(...supportGapsForDimension(dimension, component.score, goal, stats));
+    gaps.push(
+      ...supportGapsForDimension(dimension, component.score, goal, stats),
+    );
   }
   return {
     score: clampRound(weightedScore / Math.max(0.001, weightTotal), 0, 100),
@@ -597,7 +943,12 @@ function supportComponentScore(
     case "agendaDensity":
       return evidenceFromCardType(stats, "agenda", dimension, 3);
     case "ambush":
-      return evidenceFromSignals(stats, dimension, ["remote.ambush", "access.punish"], 2);
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        ["remote.ambush", "access.punish"],
+        2,
+      );
     case "assetDensity":
       return evidenceFromSignalsAndType(
         stats,
@@ -614,13 +965,23 @@ function supportComponentScore(
       return evidenceFromSignals(
         stats,
         dimension,
-        ["access.rnd_multiaccess", "access.hq_multiaccess", "info.rnd_topdeck", "info.hq"],
+        [
+          "access.rnd_multiaccess",
+          "access.hq_multiaccess",
+          "info.rnd_topdeck",
+          "info.hq",
+        ],
         2,
       );
     case "centralDefense":
       return centralDefenseSupport(stats, dimension);
     case "damageOrTagPayoff":
-      return evidenceFromSignals(stats, dimension, ["damage.payoff", "tag.payoff"], 2);
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        ["damage.payoff", "tag.payoff"],
+        2,
+      );
     case "damagePayoff":
       return evidenceFromSignals(stats, dimension, ["damage.payoff"], 2);
     case "defense":
@@ -664,12 +1025,21 @@ function supportComponentScore(
     case "pressurePayoff":
       return pressurePayoffSupport(stats, dimension, anchorEvidence);
     case "punishPayoff":
-      return evidenceFromSignals(stats, dimension, ["tag.payoff", "damage.payoff"], 2);
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        ["tag.payoff", "damage.payoff"],
+        2,
+      );
     case "remoteAccess":
       return evidenceFromSignals(
         stats,
         dimension,
-        ["economy.trash_credit", "access.rnd_multiaccess", "access.hq_multiaccess"],
+        [
+          "economy.trash_credit",
+          "access.rnd_multiaccess",
+          "access.hq_multiaccess",
+        ],
         2,
       );
     case "remoteProtection":
@@ -685,7 +1055,12 @@ function supportComponentScore(
       return evidenceFromSignalsAndType(
         stats,
         dimension,
-        ["remote.asset_economy", "remote.scoring_protection", "remote.bait", "remote.ambush"],
+        [
+          "remote.asset_economy",
+          "remote.scoring_protection",
+          "remote.bait",
+          "remote.ambush",
+        ],
         "upgrade",
         3,
       );
@@ -713,11 +1088,21 @@ function supportComponentScore(
         3,
       );
     case "tagOrTrace":
-      return evidenceFromSignals(stats, dimension, ["tag.source", "trace.source"], 2);
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        ["tag.source", "trace.source"],
+        2,
+      );
     case "tagSource":
       return evidenceFromSignals(stats, dimension, ["tag.source"], 2);
     case "threatAssessment":
-      return evidenceFromSignals(stats, dimension, ["info.expose", "info.hq", "info.rnd_topdeck"], 1);
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        ["info.expose", "info.hq", "info.rnd_topdeck"],
+        1,
+      );
     case "traceSupport":
       return evidenceFromSignals(
         stats,
@@ -738,7 +1123,9 @@ function evidenceFromSignals(
 ): { score: number; evidence: DeckStrategyEvidence[] } {
   const signalSet = new Set(signalIds);
   const evidence = stats.cards
-    .filter((card) => card.functionSignals.some((signal) => signalSet.has(signal)))
+    .filter((card) =>
+      card.functionSignals.some((signal) => signalSet.has(signal)),
+    )
     .flatMap((card) =>
       card.functionSignals
         .filter((signal) => signalSet.has(signal))
@@ -776,7 +1163,10 @@ function evidenceFromCardType(
       reason: `support:${dimension}`,
     }));
   return {
-    score: supportCountScore(stats.cardTypeCounts[cardType] ?? 0, fullSupportCount),
+    score: supportCountScore(
+      stats.cardTypeCounts[cardType] ?? 0,
+      fullSupportCount,
+    ),
     evidence: sortedEvidence(evidence),
   };
 }
@@ -788,11 +1178,24 @@ function evidenceFromSignalsAndType(
   cardType: string,
   fullSupportCount: number,
 ): { score: number; evidence: DeckStrategyEvidence[] } {
-  const signalSupport = evidenceFromSignals(stats, dimension, signalIds, fullSupportCount);
-  const typeSupport = evidenceFromCardType(stats, cardType, dimension, fullSupportCount);
+  const signalSupport = evidenceFromSignals(
+    stats,
+    dimension,
+    signalIds,
+    fullSupportCount,
+  );
+  const typeSupport = evidenceFromCardType(
+    stats,
+    cardType,
+    dimension,
+    fullSupportCount,
+  );
   return {
     score: Math.max(signalSupport.score, typeSupport.score),
-    evidence: sortedEvidence([...signalSupport.evidence, ...typeSupport.evidence]),
+    evidence: sortedEvidence([
+      ...signalSupport.evidence,
+      ...typeSupport.evidence,
+    ]),
   };
 }
 
@@ -807,9 +1210,7 @@ function accessCapableSignalCount(
 }
 
 function breakerProfileBlocksAccessCoverage(
-  profile:
-    | { sideEffects?: string[]; restrictions?: string[] }
-    | undefined,
+  profile: { sideEffects?: string[]; restrictions?: string[] } | undefined,
 ): boolean {
   if (!profile) return false;
   if (profile.sideEffects?.includes("ends_run_after_use")) return true;
@@ -828,16 +1229,18 @@ function breakerCoverageSupport(
     universal + accessCapableSignalCount(stats, "breaker.code_gate");
   const sentry = universal + accessCapableSignalCount(stats, "breaker.sentry");
   const covered = [wall, codeGate, sentry].filter((count) => count > 0).length;
-  const score = covered === 3 ? 100 : covered === 2 ? 72 : covered === 1 ? 38 : 0;
+  const score =
+    covered === 3 ? 100 : covered === 2 ? 72 : covered === 1 ? 38 : 0;
   return {
     score,
     evidence: sortedEvidence(
       stats.cards
-        .filter((card) =>
-          !card.accessBreakerCoverageBlocked &&
-          card.functionSignals.some((signal) =>
-            BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
-          ),
+        .filter(
+          (card) =>
+            !card.accessBreakerCoverageBlocked &&
+            card.functionSignals.some((signal) =>
+              BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
+            ),
         )
         .flatMap((card) =>
           card.functionSignals
@@ -899,12 +1302,22 @@ function iceSupport(
   const signalSupport = evidenceFromSignals(
     stats,
     dimension,
-    ["ice.etr", "ice.future_pressure", "tax.ice", "trace.source", "tag.source", "damage.payoff"],
+    [
+      "ice.etr",
+      "ice.future_pressure",
+      "tax.ice",
+      "trace.source",
+      "tag.source",
+      "damage.payoff",
+    ],
     4,
   );
   return {
     score: Math.max(typeSupport.score, signalSupport.score),
-    evidence: sortedEvidence([...typeSupport.evidence, ...signalSupport.evidence]),
+    evidence: sortedEvidence([
+      ...typeSupport.evidence,
+      ...signalSupport.evidence,
+    ]),
   };
 }
 
@@ -916,7 +1329,9 @@ function memorySupport(
     (card) =>
       card.roles.includes("memory") ||
       card.requiredMechanics.includes("memory") ||
-      card.effects.some((effect) => effect.kind === "memory" || effect.kind === "hand_size"),
+      card.effects.some(
+        (effect) => effect.kind === "memory" || effect.kind === "hand_size",
+      ),
   );
   const count = cards.reduce((sum, card) => sum + card.quantity, 0);
   return {
@@ -941,7 +1356,12 @@ function pressurePayoffSupport(
   const signalSupport = evidenceFromSignals(
     stats,
     dimension,
-    ["access.rnd_multiaccess", "access.hq_multiaccess", "info.rnd_topdeck", "info.hq"],
+    [
+      "access.rnd_multiaccess",
+      "access.hq_multiaccess",
+      "info.rnd_topdeck",
+      "info.hq",
+    ],
     2,
   );
   const score = Math.max(
@@ -951,7 +1371,10 @@ function pressurePayoffSupport(
       2,
     ),
   );
-  return { score, evidence: sortedEvidence([...signalSupport.evidence, ...anchorEvidence]) };
+  return {
+    score,
+    evidence: sortedEvidence([...signalSupport.evidence, ...anchorEvidence]),
+  };
 }
 
 function remoteScoringSupport(
@@ -976,7 +1399,10 @@ function remoteScoringSupport(
         2,
       ),
     ),
-    evidence: sortedEvidence([...signalSupport.evidence, ...remoteAnchorEvidence]),
+    evidence: sortedEvidence([
+      ...signalSupport.evidence,
+      ...remoteAnchorEvidence,
+    ]),
   };
 }
 
@@ -1004,11 +1430,16 @@ function supportGapsForDimension(
   goal: StrategyGoal,
   stats: DeckStrategyStats,
 ): string[] {
-  if (stats.side === "runner" && dimension === "breakerCoverage" && score < 100) {
+  if (
+    stats.side === "runner" &&
+    dimension === "breakerCoverage" &&
+    score < 100
+  ) {
     return runnerGapsForDimension(dimension, stats);
   }
   const required = goal.requiredSupport?.[dimension] ?? "recommended";
-  const threshold = required === "required" ? 45 : required === "recommended" ? 30 : 25;
+  const threshold =
+    required === "required" ? 45 : required === "recommended" ? 30 : 25;
   if (score >= threshold) return [];
   if (stats.side === "runner") return runnerGapsForDimension(dimension, stats);
   return corpGapsForDimension(dimension, stats);
@@ -1093,7 +1524,11 @@ function scoreFinal(
       : goal.detectionMode === "support_requirement"
         ? { anchor: 0.45, support: 0.55 }
         : { anchor: 0.6, support: 0.4 };
-  return clampRound(anchorScore * weights.anchor + supportScore * weights.support, 0, 100);
+  return clampRound(
+    anchorScore * weights.anchor + supportScore * weights.support,
+    0,
+    100,
+  );
 }
 
 function confidenceFor(
@@ -1101,7 +1536,8 @@ function confidenceFor(
   supportScore: number,
   finalScore: number,
 ): DeckStrategyConfidence {
-  if (finalScore >= 65 && (anchorScore >= 35 || supportScore >= 70)) return "high";
+  if (finalScore >= 65 && (anchorScore >= 35 || supportScore >= 70))
+    return "high";
   if (finalScore >= 35 || anchorScore > 0) return "medium";
   return "low";
 }
@@ -1159,11 +1595,15 @@ function buildRunnerProfiles(
       rnd:
         (stats.functionSignalCounts["access.rnd_multiaccess"] ?? 0) +
         (stats.functionSignalCounts["info.rnd_topdeck"] ?? 0) +
-        Math.round((strategyScores["runner.rnd_pressure"]?.anchorScore ?? 0) / 30),
+        Math.round(
+          (strategyScores["runner.rnd_pressure"]?.anchorScore ?? 0) / 30,
+        ),
       hq:
         (stats.functionSignalCounts["access.hq_multiaccess"] ?? 0) +
         (stats.functionSignalCounts["info.hq"] ?? 0) +
-        Math.round((strategyScores["runner.hq_pressure"]?.anchorScore ?? 0) / 30),
+        Math.round(
+          (strategyScores["runner.hq_pressure"]?.anchorScore ?? 0) / 30,
+        ),
       remote: Math.round(
         ((strategyScores["runner.remote_contest"]?.anchorScore ?? 0) +
           (strategyScores["runner.remote_trash"]?.anchorScore ?? 0)) /
@@ -1180,7 +1620,10 @@ function buildRunnerProfiles(
   };
 }
 
-function buildCorpProfiles(stats: DeckStrategyStats, strategyScores: Record<string, DeckStrategyScore>): CorpDeckStrategyProfiles {
+function buildCorpProfiles(
+  stats: DeckStrategyStats,
+  strategyScores: Record<string, DeckStrategyScore>,
+): CorpDeckStrategyProfiles {
   const programTrashCount = legacyValueCount(stats, "program_trash");
   const regionSupport = stats.cards
     .filter(
@@ -1232,10 +1675,14 @@ function buildCorpProfiles(stats: DeckStrategyStats, strategyScores: Record<stri
         (stats.functionSignalCounts["score.agenda_action"] ?? 0),
       agendaInstallAdvanceScoreSupport:
         (stats.cardTypeCounts.agenda ?? 0) +
-        Math.round((strategyScores["corp.fast_advance"]?.anchorScore ?? 0) / 30),
+        Math.round(
+          (strategyScores["corp.fast_advance"]?.anchorScore ?? 0) / 30,
+        ),
       remoteScoringProtection:
         (stats.functionSignalCounts["remote.scoring_protection"] ?? 0) +
-        Math.round((strategyScores["corp.remote_scoring"]?.anchorScore ?? 0) / 30),
+        Math.round(
+          (strategyScores["corp.remote_scoring"]?.anchorScore ?? 0) / 30,
+        ),
       stealTax: stats.functionSignalCounts["remote.agenda_steal_tax"] ?? 0,
     },
     economyProfile: {
@@ -1252,10 +1699,12 @@ function buildCorpProfiles(stats: DeckStrategyStats, strategyScores: Record<stri
       traceDensity: stats.functionSignalCounts["trace.source"] ?? 0,
     },
     remoteProfile: {
-      scoringProtection: stats.functionSignalCounts["remote.scoring_protection"] ?? 0,
+      scoringProtection:
+        stats.functionSignalCounts["remote.scoring_protection"] ?? 0,
       ambush: stats.functionSignalCounts["remote.ambush"] ?? 0,
       assetEconomy,
-      regionCityGridUpgradeSupport: regionSupport > 0 ? regionSupport : "unknown",
+      regionCityGridUpgradeSupport:
+        regionSupport > 0 ? regionSupport : "unknown",
     },
   };
 }
@@ -1347,7 +1796,9 @@ function increment(
   record[key] = (record[key] ?? 0) + amount;
 }
 
-function sortedEvidence(evidence: DeckStrategyEvidence[]): DeckStrategyEvidence[] {
+function sortedEvidence(
+  evidence: DeckStrategyEvidence[],
+): DeckStrategyEvidence[] {
   return sortedUniqueObjects(
     evidence,
     (entry) =>
@@ -1365,7 +1816,10 @@ function sortedUnique(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))].sort();
 }
 
-function sortedUniqueObjects<T>(values: T[], keyFor: (value: T) => string): T[] {
+function sortedUniqueObjects<T>(
+  values: T[],
+  keyFor: (value: T) => string,
+): T[] {
   const seen = new Set<string>();
   const result: T[] = [];
   for (const value of values) {

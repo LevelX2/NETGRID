@@ -40,12 +40,17 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
     numberPayload(action, "accessTrashTotalCost") ??
     numberPayload(action, "stealCost") ??
     numberPayload(action, "paymentAmount") ??
-    numberPayload(action, "rezCostPaid");
+    numberPayload(action, "rezCostPaid") ??
+    numberPayload(action, "corpCreditsSpent") ??
+    numberPayload(action, "runnerCreditsSpent");
   const creditCost = explicitCreditCost ?? payloadCreditCost;
   const trashCost = numberPayload(action, "accessTrashTotalCost");
   const agendaPointCost =
     numberPayload(action, "agendaPointCost") ??
     numberPayload(action, "agendaPointCostPaid");
+  const temporaryCredits = temporaryCreditsForAction(action);
+  const tapCost = tapCostForAction(action);
+  const revealCost = revealCostForAction(action);
   const xValue = xValueForAction(action);
   const variableCost = variableCostForAction(action);
   const hasKnownCost =
@@ -53,6 +58,9 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
     creditCost !== undefined ||
     trashCost !== undefined ||
     agendaPointCost !== undefined ||
+    temporaryCredits !== undefined ||
+    tapCost ||
+    revealCost ||
     xValue !== undefined ||
     variableCost !== undefined;
 
@@ -61,6 +69,9 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
     ...(creditCost !== undefined ? { creditCost } : {}),
     ...(trashCost !== undefined ? { trashCost } : {}),
     ...(agendaPointCost !== undefined ? { agendaPointCost } : {}),
+    ...(temporaryCredits !== undefined ? { temporaryCredits } : {}),
+    ...(tapCost ? { tapCost } : {}),
+    ...(revealCost ? { revealCost } : {}),
     ...(xValue !== undefined ? { xValue } : {}),
     paidBy: action.side,
     beneficiary: beneficiaryForAction(action),
@@ -85,12 +96,14 @@ function sumCost(
   return values.reduce((sum, value) => sum + value, 0);
 }
 
-function stringPayload(
-  action: LegalAction,
-  key: string,
-): string | undefined {
+function stringPayload(action: LegalAction, key: string): string | undefined {
   const value = action.payload?.[key];
   return typeof value === "string" ? value : undefined;
+}
+
+function booleanPayload(action: LegalAction, key: string): boolean | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "boolean" ? value : undefined;
 }
 
 function xValueForAction(
@@ -99,7 +112,8 @@ function xValueForAction(
   const value = action.payload?.xValue;
   if (typeof value === "number") return value;
   if (value === "choice" || value === "unknown") return value;
-  if (action.payload !== undefined && "xValue" in action.payload) return "unknown";
+  if (action.payload !== undefined && "xValue" in action.payload)
+    return "unknown";
   return undefined;
 }
 
@@ -128,6 +142,52 @@ function variableCostForAction(
   };
 }
 
+function temporaryCreditsForAction(
+  action: LegalAction,
+): ActionCostProfile["temporaryCredits"] | undefined {
+  const temporaryCredits = {
+    budget: numberPayload(action, "cardImplementationTemporaryCreditBudget"),
+    provided: numberPayload(action, "temporaryCreditsProvided"),
+    spent: numberPayload(action, "temporaryCreditsSpent"),
+    remaining: numberPayload(action, "temporaryCreditsRemaining"),
+    returned: numberPayload(action, "temporaryCreditsReturned"),
+  };
+  if (Object.values(temporaryCredits).every((value) => value === undefined)) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    Object.entries(temporaryCredits).filter(([, value]) => value !== undefined),
+  ) as NonNullable<ActionCostProfile["temporaryCredits"]>;
+}
+
+function tapCostForAction(action: LegalAction): boolean {
+  const costKind = cardImplementationCostKind(action);
+  return (
+    booleanPayload(action, "cardImplementationTapSourceCost") === true ||
+    booleanPayload(action, "sourceTapped") === true ||
+    costKind === "tap_source" ||
+    costKind === "credit_and_tap_source" ||
+    costKind === "reveal_and_tap_source"
+  );
+}
+
+function revealCostForAction(action: LegalAction): boolean {
+  const costKind = cardImplementationCostKind(action);
+  return (
+    costKind === "reveal_and_tap_source" ||
+    (tapCostForAction(action) &&
+      (stringPayload(action, "publicRevealKind") !== undefined ||
+        stringPayload(action, "revealKind") !== undefined))
+  );
+}
+
+function cardImplementationCostKind(action: LegalAction): string | undefined {
+  return (
+    stringPayload(action, "cardImplementationCostKind") ??
+    stringPayload(action, "cardImplementationCost")
+  );
+}
+
 function beneficiaryForAction(
   action: LegalAction,
 ): NonNullable<ActionCostProfile["beneficiary"]> {
@@ -144,8 +204,21 @@ function additionalCostFields(action: LegalAction): string[] {
     "stealCost",
     "paymentAmount",
     "rezCostPaid",
+    "corpCreditsSpent",
+    "runnerCreditsSpent",
     "agendaPointCost",
     "agendaPointCostPaid",
+    "cardImplementationTemporaryCreditBudget",
+    "temporaryCreditsProvided",
+    "temporaryCreditsSpent",
+    "temporaryCreditsRemaining",
+    "temporaryCreditsReturned",
+    "cardImplementationCostKind",
+    "cardImplementationCost",
+    "cardImplementationTapSourceCost",
+    "sourceTapped",
+    "publicRevealKind",
+    "revealKind",
     "variableRezKind",
     "variableRezAdditionalCost",
     "variableRezValue",
@@ -154,10 +227,7 @@ function additionalCostFields(action: LegalAction): string[] {
   return fields.filter((field) => action.payload?.[field] !== undefined);
 }
 
-function numberPayload(
-  action: LegalAction,
-  key: string,
-): number | undefined {
+function numberPayload(action: LegalAction, key: string): number | undefined {
   const value = action.payload?.[key];
   if (typeof value !== "number") return undefined;
   return value;
@@ -175,7 +245,7 @@ function timingProfileForAction(action: LegalAction): ActionTimingProfile {
       ? { encounterPhase: "encounter_ice" }
       : {}),
     ...(timingPoint.startsWith("access.") ? { accessPhase: true } : {}),
-    ...(action.type === "score_agenda" ? { scoreWindow: true } : {}),
+    ...(scoreWindowForAction(action) ? { scoreWindow: true } : {}),
     ...(action.type === "rez_ice" || action.type === "decline_rez"
       ? { rezWindow: true }
       : {}),
@@ -184,6 +254,24 @@ function timingProfileForAction(action: LegalAction): ActionTimingProfile {
       ? { responseWindow: true }
       : {}),
   };
+}
+
+function scoreWindowForAction(action: LegalAction): boolean {
+  const primitiveKind = stringPayload(
+    action,
+    "cardImplementationPrimitiveKind",
+  );
+  const abilityKey = stringPayload(action, "cardImplementationAbilityKey");
+  const hiddenZoneAction = stringPayload(action, "hiddenZoneAction");
+  return (
+    action.type === "score_agenda" ||
+    primitiveKind === "score_install_hq_cards_into_new_remote_then_rez" ||
+    primitiveKind === "select_rezzed_ice_mark_modifier" ||
+    abilityKey === "hq_to_new_remote_install_rez:0" ||
+    abilityKey === "scored_ice_mark:0" ||
+    hiddenZoneAction?.startsWith("v1922_data_fort_reclamation_") === true ||
+    hiddenZoneAction === "v162_priority_requisition_free_rez"
+  );
 }
 
 function phaseForTimingPoint(timingPoint: LegalAction["timingPoint"]): string {

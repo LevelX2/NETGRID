@@ -605,6 +605,15 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(corpCreditViewBeforeReveal).not.toContain(
       "successful_run_before_access",
     );
+    for (const fieldName of [
+      "cardImplementationAbilityId",
+      "cardImplementationAbilityKey",
+      "cardImplementationPrimitiveKind",
+      "cardImplementationEffectKind",
+    ]) {
+      expect(corpCreditViewBeforeReveal).not.toContain(fieldName);
+    }
+    expect(corpCreditViewBeforeReveal).not.toContain(String(creditSourceId));
     const creditReplayStart = creditState.eventLog.length;
     const creditReplayInitial = structuredClone(creditState);
     let result = applyLegal(creditState, "runner", creditAction!);
@@ -628,6 +637,17 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(creditPublicPayload).not.toHaveProperty(
       "cardImplementationAbilityId",
+    );
+    for (const fieldName of [
+      "cardImplementationAbilityId",
+      "cardImplementationAbilityKey",
+      "cardImplementationPrimitiveKind",
+      "cardImplementationEffectKind",
+    ]) {
+      expect(JSON.stringify(creditPublicPayload)).not.toContain(fieldName);
+    }
+    expect(JSON.stringify(creditPublicPayload)).not.toContain(
+      String(creditSourceId),
     );
     expect(
       getPlayerView(creditState, "corp").opponent.rig?.some(

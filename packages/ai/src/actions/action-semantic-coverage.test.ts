@@ -4,14 +4,26 @@ import {
   getLegalActions,
 } from "@netgrid/engine";
 import type { GameState, LegalAction, Side } from "@netgrid/shared";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import {
+  buildActionSemanticCandidates,
+  type ActionSemanticCandidate,
+} from "../action-semantic-candidate";
 import {
   ACTION_SEMANTIC_COVERAGE_GROUPS,
+  type ActionSemanticCandidateCoverageSummary,
   formatActionSemanticCandidateCoverageReport,
   summarizeActionSemanticCandidateCoverage,
 } from "./action-semantic-coverage";
+
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../..",
+);
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -368,6 +380,39 @@ describe("Action semantic coverage", () => {
     expect(report).not.toContain("privatePayload");
     expect(report).not.toContain("fullGameState");
   });
+
+  it("matches the checked-in ActionSemanticCandidate coverage report", () => {
+    const candidates = coverageReportFixtureCandidates();
+    const summary = summarizeActionSemanticCandidateCoverage(candidates);
+    const artifact = coverageReportArtifact(summary);
+    const checkedInReport = JSON.parse(
+      readFileSync(
+        path.join(
+          repoRoot,
+          "docs/reviews/ai/action-semantic-candidate-coverage-2026-06-12.json",
+        ),
+        "utf8",
+      ),
+    );
+
+    expect(artifact).toEqual(checkedInReport);
+    expect(summary.fieldCoverage.hasPrimitiveKind).toBe(1);
+    expect(summary.fieldCoverage.hasEffectKind).toBe(1);
+    expect(summary.hiddenInfoBlockers).toBe(1);
+    expect(summary.schemaGaps).toMatchObject({
+      target_context_unavailable: 6,
+    });
+    expect(formatActionSemanticCandidateCoverageReport(summary)).toContain(
+      "## Projection Issues",
+    );
+
+    const serialized = JSON.stringify(artifact);
+    expect(serialized).not.toContain("sourceCardInstanceId");
+    expect(serialized).not.toContain("runner-hidden-instance");
+    expect(serialized).not.toContain("corp-hidden-instance");
+    expect(serialized).not.toContain("privatePayload");
+    expect(serialized).not.toContain("fullGameState");
+  });
 });
 
 function legalAction(
@@ -428,6 +473,155 @@ function costFor(index: number): LegalAction["costs"] {
   if (index % 3 === 0) return [{ clicks: 1 }];
   if (index % 3 === 1) return [{ credits: 2 }];
   return [];
+}
+
+function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
+  return buildActionSemanticCandidates({
+    legalActions: [
+      legalAction("gain_credit", 0, { source: "basic_action" }),
+      legalAction("resolve_choice", 1, { source: "game_rule" }),
+      legalAction("start_run", 2, {
+        source: "basic_action",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            side: "corp",
+            visibility: "public",
+          },
+        ],
+      }),
+      legalAction("access_card", 3, { source: "game_rule" }),
+      legalAction("resolve_choice", 4, {
+        source: "game_rule",
+        visibility: "private_to_actor",
+        payload: {
+          sourceCardId: "runner-hidden-instance",
+          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          cardImplementationAbilityId:
+            "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+          cardImplementationAbilityKey: "successful_run_before_access:0",
+          cardImplementationPrimitiveKind:
+            "successful_run_before_access_effect",
+          cardImplementationEffectKind: "corp_lose_credits",
+        },
+      }),
+      legalAction("trigger_ability", 5, {
+        side: "runner",
+        source: "runner-hidden-instance",
+        abilityRef: {
+          sourceCardInstanceId: "runner-hidden-instance",
+          abilityId: "runner.visible.ability",
+        },
+        payload: { sourceDefinitionId: "runner-visible-definition" },
+      }),
+      legalAction("install_card", 6, {
+        side: "corp",
+        source: "corp-hidden-instance",
+        payload: { sourceDefinitionId: "corp-visible-definition" },
+      }),
+      legalAction("advance_card", 7, {
+        side: "corp",
+        source: "basic_action",
+      }),
+      legalAction("score_agenda", 8, {
+        side: "corp",
+        source: "game_rule",
+      }),
+      legalAction("rez_ice", 9, {
+        side: "corp",
+        source: "game_rule",
+        timingPoint: "run.encounter_ice",
+      }),
+      legalAction("trash_resource", 10, {
+        source: "basic_action",
+        targetRequirements: [
+          {
+            id: "resource",
+            kind: "card",
+            side: "runner",
+            visibility: "engine_only",
+          },
+        ],
+      }),
+    ],
+    observerSide: "system",
+    stateVersion: 612,
+    availableTargetsByActionId: {
+      "coverage-2-start_run": [
+        {
+          targetId: "hq",
+          targetKind: "server",
+          targetSide: "corp",
+          evidence: ["coverage report fixture legal server"],
+        },
+      ],
+    },
+  });
+}
+
+function coverageReportArtifact(
+  summary: ActionSemanticCandidateCoverageSummary,
+): unknown {
+  return {
+    schemaVersion: "action-semantic-candidate-coverage-report-v2",
+    date: "2026-06-12",
+    status: "done",
+    runtimeConsumerStatus: "none",
+    source: {
+      builder:
+        "packages/ai/src/actions/action-semantic-coverage.ts:summarizeActionSemanticCandidateCoverage",
+      fixture:
+        "packages/ai/src/actions/action-semantic-coverage.test.ts:coverageReportFixtureCandidates",
+    },
+    metrics: {
+      totalCandidates: summary.totalCandidates,
+      sources: summary.sourceKinds,
+      abilities: {
+        hasAbilityId: summary.fieldCoverage.hasAbilityId,
+      },
+      primitives: {
+        hasPrimitiveKind: summary.fieldCoverage.hasPrimitiveKind,
+        hasEffectKind: summary.fieldCoverage.hasEffectKind,
+      },
+      costs: {
+        hasCostProfile: summary.fieldCoverage.hasCostProfile,
+      },
+      timing: {
+        hasTimingProfile: summary.fieldCoverage.hasTimingProfile,
+      },
+      targetContext: {
+        hasTargetContext: summary.fieldCoverage.hasTargetContext,
+        statuses: summary.targetContextStatuses,
+        byGroup: summary.targetContextByGroup,
+      },
+      hiddenInfoBlockers: summary.hiddenInfoBlockers,
+      schemaGaps: summary.schemaGaps,
+      projectionIssues: summary.projectionIssues,
+      projectionStatuses: summary.primaryProjectionStatuses,
+      coverageGroups: summary.groups,
+      neutralFallbacks: summary.fieldCoverage.usesNeutralFallback,
+      redaction: {
+        safe: summary.redactionSafe,
+        unsafeRows: summary.redactionUnsafeRows,
+        forbiddenMarkers: summary.forbiddenMarkers,
+      },
+    },
+    gates: {
+      deterministic: true,
+      hiddenInfoLeaks: summary.redactionSafe ? 0 : summary.redactionUnsafeRows,
+      runtimeBehaviorChanges: 0,
+      actionSelectionChanges: 0,
+      legalActionGenerationChanges: 0,
+    },
+    noEffectFlags: [
+      "no_runtime_scoring",
+      "no_action_selection",
+      "no_legal_action_generation",
+      "no_hidden_info_projection",
+      "report_only",
+    ],
+  };
 }
 
 function collectRealEngineLegalActions(): LegalAction[] {

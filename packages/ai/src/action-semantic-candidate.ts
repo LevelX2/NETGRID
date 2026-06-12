@@ -108,6 +108,15 @@ export type ActionCostProfile = {
   creditCost?: number;
   trashCost?: number;
   agendaPointCost?: number;
+  temporaryCredits?: {
+    budget?: number;
+    provided?: number;
+    spent?: number;
+    remaining?: number;
+    returned?: number;
+  };
+  tapCost?: boolean;
+  revealCost?: boolean;
   forfeitAgenda?: boolean;
   selfDamage?: DamageAmount[];
   selfTag?: number;
@@ -217,6 +226,13 @@ export type BoardContextSummary = {
   notes: string[];
 };
 
+/**
+ * @aiProjection Read-only descriptor for an Engine-provided LegalAction.
+ * @authority Candidates must not influence legality or create actions; they can
+ * only explain or rank actions that already exist.
+ * @visibility Fields must be built from the observer's side-safe projection and
+ * hidden-info barriers must remain explicit.
+ */
 export type ActionSemanticCandidate = {
   actionId: string;
   actionType: string;
