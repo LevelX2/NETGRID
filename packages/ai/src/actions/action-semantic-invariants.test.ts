@@ -124,4 +124,48 @@ describe("Action semantic invariants", () => {
       expect(source).not.toContain("buildActionSemanticInvariantReport");
     }
   });
+
+  it("keeps originalset play-strength semantic worklists complete and diagnostic", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-originalset-play-strength-semantic-worklists-2026-06-12.md",
+      ),
+      "utf8",
+    );
+
+    expect(report).toContain("diagnostic_worklists_only");
+    expect(report).toContain("`productiveUseAllowed`: `false`");
+    expect(report).toContain("`semanticExecutionAllowed`: `false`");
+    expect(report).toContain("`runtimeConsumerStatus`: `none`");
+    expect(report).toContain("`noRuntimeEffect`: `true`");
+    expect(report).toContain("Taktiksignale müssen funktionale Wirkung beschreiben");
+    expect(report).toContain(
+      "Damage, Tag, Conditions, TargetProfiles und RiskProjection bleiben getrennte Prüfflächen",
+    );
+
+    const expectedWorklists = [
+      "AI-ORIG-WL-01-runner-multiaccess-access-payoff",
+      "AI-ORIG-WL-02-runner-breaker-search-install",
+      "AI-ORIG-WL-03-runner-survival-damage-prevention",
+      "AI-ORIG-WL-04-runner-economy-banks-commitments",
+      "AI-ORIG-WL-05-runner-risky-random-run-tools",
+      "AI-ORIG-WL-06-corp-score-windows-advance-support",
+      "AI-ORIG-WL-07-corp-rez-economy-ice-tax",
+      "AI-ORIG-WL-08-corp-tag-punish",
+      "AI-ORIG-WL-09-corp-damage-ambush-access-punish",
+      "AI-ORIG-WL-10-corp-asset-economy",
+      "AI-ORIG-WL-11-target-profile-gaps",
+      "AI-ORIG-WL-12-risk-projection-gaps",
+    ];
+
+    for (const worklist of expectedWorklists) {
+      expect(report).toContain(`\`${worklist}\``);
+    }
+    expect(
+      [...report.matchAll(/`AI-ORIG-WL-\d{2}-[^`]+`/g)].map(
+        (match) => match[0],
+      ),
+    ).toHaveLength(expectedWorklists.length);
+  });
 });
