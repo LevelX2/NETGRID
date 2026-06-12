@@ -88,6 +88,7 @@ Der Prozess stoppt ohne Nachfrage, wenn eine Änderung Engine-Validierung, `appl
 | Prozess-Setup | complete | `d63f0d5e` | Prozessartefakt angelegt und Worktree vorbereitet. |
 | AI-MAT2-0 | complete | AI-MAT2-0 commit | Local/GitHub Sync Audit, Final-Report-Status, Env-Name und 80/1236-AI-Teststand synchronisiert. |
 | AI-MAT2-1 | complete | AI-MAT2-1 commit | Offizieller Pilot-Env-Vertrag dokumentiert; Legacy-Env ohne Runtime-Wirkung getestet. Checks: Registry-Test 10/10, Typecheck grün. |
+| AI-MAT2-2 | complete | AI-MAT2-2 commit | ID-/Builder-/Sample-Parität hart getestet und Shadow-League-Baseline auf 30 Code-Szenarien aktualisiert. Checks: Corpus 3/3, ShadowLeague 2/2, Typecheck grün. |
 
 ## Paketdetails
 

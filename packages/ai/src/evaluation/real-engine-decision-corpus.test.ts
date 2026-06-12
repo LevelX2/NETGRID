@@ -36,11 +36,15 @@ describe("RealEngineDecisionCorpus", () => {
     const scenarios = buildRealEngineDecisionCorpusScenarios();
     const samples = buildRealEngineDecisionCorpus(scenarios);
 
+    expect(scenarios.map((scenario) => scenario.scenarioId)).toEqual(
+      REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
+    );
+    expect(scenarios.length).toBe(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length);
     expect(samples.map((sample) => sample.scenarioId)).toEqual(
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
+    expect(samples.length).toBe(scenarios.length);
     expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBeGreaterThanOrEqual(30);
-    expect(samples.length).toBeGreaterThanOrEqual(30);
     expect(samples.filter((sample) => sample.legalActionCount === 0)).toEqual(
       [],
     );

@@ -22,7 +22,15 @@ describe("SemanticShadowLeague", () => {
     expect(report.scenarioCount).toBe(
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length,
     );
+    expect(report.scenarioCount).toBe(samples.length);
     expect(report.sideCounts).toEqual(expectedSideCounts(samples));
+    expect(
+      report.metrics.pilotEligibilityBySide.runner.scenarioCount +
+        report.metrics.pilotEligibilityBySide.corp.scenarioCount,
+    ).toBe(samples.length);
+    expect(report.evidence).toEqual(
+      expect.arrayContaining([`scenario_count:${samples.length}`]),
+    );
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");

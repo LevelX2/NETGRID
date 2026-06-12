@@ -12,11 +12,22 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 
 | Feld | Wert |
 | --- | ---: |
-| sampleCount | 18 |
+| sampleCount | 30 |
+| runnerScenarioCount | 15 |
+| corpScenarioCount | 15 |
+| agreementComparedCount | 12 |
+| agreementCount | 9 |
 | agreementRate | 0.75 |
 | mistakeCount | 1 |
-| pilotEligibleCount | 15 |
-| pilotWouldOverrideCount | 15 |
+| pilotEligibleCount | 26 |
+| pilotWouldOverrideCount | 26 |
+| pilotEligibilityRate | 0.867 |
+| remoteContestPilotCandidateCount | 1 |
+| rankedActionCount | 430 |
+| rejectedActionCount | 0 |
+| topScoreAverage | 99.567 |
+| topScoreMin | 0 |
+| topScoreMax | 153 |
 | redactionStatus | passed |
 
 ## Mistake Count By Class
@@ -24,15 +35,23 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 | Klasse | Wert |
 | --- | ---: |
 | hidden_info_dependency | 0 |
+| missed_score_window | 1 |
 | total_observed | 1 |
 
 ## Scope Breakdown
 
 | Scope | eligibleCount | wouldOverrideCount | Szenarien |
 | --- | ---: | ---: | --- |
-| `basic_setup` | 8 | 8 | `runner_real_low_credits`, `runner_real_click_limited_economy`, `corp_real_advance_score_window`, `corp_real_low_rez_reserve`, `corp_real_basic_economy_draw`, `corp_real_remote_defense_setup`, `corp_real_install_credit_pressure`, `corp_real_high_credit_main_window` |
-| `runner_safe_access` | 6 | 6 | `runner_real_safe_hq_access`, `runner_real_safe_rd_access`, `runner_real_damage_buffer_needed`, `runner_real_tag_cleanup`, `runner_real_remote_probe`, `runner_real_rnd_pressure_with_buffer` |
-| `corp_score_window` | 1 | 1 | `corp_real_score_agenda_window` |
+| `basic_setup` | 13 | 13 | `runner_real_low_credits`, `runner_real_click_limited_economy`, `runner_real_tagged_low_credits`, `corp_real_advance_score_window`, `corp_real_low_rez_reserve`, `corp_real_basic_economy_draw`, `corp_real_remote_defense_setup`, `corp_real_install_credit_pressure`, `corp_real_high_credit_main_window`, `corp_real_remote_ice_defense`, `corp_real_low_credit_main_window`, `corp_real_remote_double_asset_setup`, `corp_real_draw_pressure_window` |
+| `runner_safe_access` | 11 | 11 | `runner_real_safe_hq_access`, `runner_real_safe_rd_access`, `runner_real_damage_buffer_needed`, `runner_real_tag_cleanup`, `runner_real_remote_probe`, `runner_real_rnd_pressure_with_buffer`, `runner_real_high_credits_setup`, `runner_real_empty_hand_draw`, `runner_real_safe_archives_access`, `runner_real_remote_with_ice_probe`, `runner_real_low_click_tag_cleanup` |
+| `corp_score_window` | 2 | 2 | `corp_real_score_agenda_window`, `corp_real_score_low_credits` |
+
+## RemoteContest Candidate
+
+| Feld | Wert |
+| --- | --- |
+| candidateCount | 1 |
+| scenarioIds | `runner_real_remote_score_threat` |
 
 ## Top Disagreement Reasons
 
@@ -45,11 +64,12 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 - `pilotWouldOverrideCount` ist report-only und bedeutet: Die Shadow-Top-Action wäre unter Scope-Regeln eligible, wenn Runtime-Choice, Score-Gap und Opt-in passen. Es ist keine produktive Entscheidung.
 - Die `runner_safe_access`-Eligibility in `runner_real_damage_buffer_needed` und `runner_real_tag_cleanup` ist ein bewusst sichtbarer Baseline-Befund, kein Freigabesignal.
 - `redactionStatus: passed` bestätigt nur den lokalen Report-Scrub. Es erweitert keine Hidden-Info-Allowlist.
-- Nach dem lokalen Merge des aktuellen `main` umfasst der Korpus 18 statt 12 Szenarien. Die drei Top-Disagreements bleiben unverändert; die zusätzlichen Szenarien erhöhen die Pilot-Scope-Eligibility.
+- Nach AI-MAT2-2 umfasst der Korpus lokal 30 Szenarien. Die drei Top-Disagreements bleiben unverändert; die zusätzlichen Szenarien erhöhen die Pilot-Scope-Eligibility.
+- Die hier gelisteten Metriken wurden am 2026-06-13 aus `buildSemanticShadowLeagueReport(buildRealEngineDecisionCorpus(buildRealEngineDecisionCorpusScenarios()))` erzeugt, nicht aus einer separaten Erwartungsliste gepflegt.
 
 ## Verifikation
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts`: 2 Tests bestanden.
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/play-strength-benchmark.test.ts`: 1 Test bestanden.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/real-engine-decision-corpus.test.ts`: bestanden.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts`: bestanden.
 - `corepack pnpm --filter @netgrid/ai typecheck`: bestanden.
 - `git diff --check`: bestanden.
