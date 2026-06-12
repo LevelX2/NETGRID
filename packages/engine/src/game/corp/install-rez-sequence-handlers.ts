@@ -29,6 +29,14 @@ type PrevalidatedHqToNewRemoteInstall = {
   destination: "ice" | "root";
 };
 
+/**
+ * @contract Hosts CardImplementation install/rez sequence choices while the
+ * Rules Engine remains the only legality authority.
+ * @authority Handler callbacks must mutate state only after side, source,
+ * hidden-zone order, cost and target checks have passed.
+ * @visibility Hidden-zone choices may expose actor labels but public/opponent
+ * surfaces receive counts or public card facts only.
+ */
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
     GameState,
@@ -638,6 +646,11 @@ function resolvePriorityRequisitionChoice(
   };
 }
 
+/**
+ * @mvpBoundary This path installs selected HQ cards first and opens one
+ * follow-up rez choice. Region and rez-on-install correctness requires the
+ * ordered install/rez sequence work in this process.
+ */
 function resolveHqToNewRemoteInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {

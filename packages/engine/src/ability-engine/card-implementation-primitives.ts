@@ -35,6 +35,14 @@ export type CardImplementationEffectKind =
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 
+/**
+ * @contract Builds read-only CardImplementation primitive metadata for
+ * LegalAction and AI projection.
+ * @authority Does not create legality; runtime resolvers still revalidate side,
+ * source, timing, costs, targets and choices.
+ * @visibility Actor-private source ids must not be copied into public events or
+ * opponent views.
+ */
 export function cardImplementationPrimitivePayload(input: {
   sourceCardId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;

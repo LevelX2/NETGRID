@@ -424,6 +424,26 @@ Checks:
 - Grün: `corepack pnpm format:changed -- origin/main`
 - Grün: `git diff --check origin/main..HEAD`
 
+## P2 Ergebnis
+
+Umgesetzt:
+
+- Contract-Kommentare an den Architekturgrenzen ergänzt:
+  - `card-implementation-primitives.ts`
+  - `install-rez-sequence-handlers.ts`
+  - `action-source-binding.ts`
+  - `action-semantic-candidate.ts`
+  - `check-format-changed.mjs`
+- Kommentare bleiben funktional: Contract, Authority, Visibility oder MVP-Grenze.
+- Keine Kommentare in einzelne Karten, keine Strategie- oder Scoring-Empfehlungen.
+
+Checks:
+
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.

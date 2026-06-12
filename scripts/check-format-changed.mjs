@@ -4,6 +4,13 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+/**
+ * @contract Checks only files changed against a chosen Git base plus local
+ * staged, working-tree and untracked files that Prettier can parse.
+ * @authority This is a scoped package gate; repo-wide format baseline remains a
+ * separate decision.
+ * @visibility Emits file paths only, never file contents.
+ */
 const repoRoot = process.cwd();
 const options = parseArgs(process.argv.slice(2));
 if (options.selfTest) {
