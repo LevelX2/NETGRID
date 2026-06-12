@@ -3416,7 +3416,6 @@ type BadPublicityActionEvidence = {
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
 const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
-const INFORMATION_LAUNDERING_CARD_ID = "onr_v1_328_information-laundering";
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -16006,20 +16005,20 @@ function scoreCorpAction(
         );
       } else if (
         action.type === "activated_card_ability" &&
-        sourceDefinitionIdForAction(input, action) ===
-          INFORMATION_LAUNDERING_CARD_ID
+        isSourceAdvancementCounterCreditPayoutAction(action)
       ) {
-        const assessment = corpInformationLaunderingEconomyAssessment(
+        const assessment = corpSourceAdvancementCounterCreditPayoutAssessment(
           input,
           action,
           features,
         );
         score = assessment.score;
-        reasonCode = "corp.installed_economy.information_laundering";
+        reasonCode =
+          "corp.installed_economy.source_advancement_counter_credit_payout";
         explanation =
           assessment.payout > 0
-            ? "Die Corp nutzt Information Laundering als vorbereitete Credit-Quelle."
-            : "Information Laundering ist legal, hat ohne Advancement-Counter aber keinen Credit-Wert.";
+            ? "Die Corp nutzt eine vorbereitete Advancement-Counter-Credit-Quelle."
+            : "Die Fähigkeit ist legal, hat ohne Advancement-Counter aber keinen Credit-Wert.";
         evidence.push(...assessment.evidence);
       } else {
         score = 260;
@@ -16121,17 +16120,33 @@ function scoreCorpAction(
   };
 }
 
-function corpInformationLaunderingEconomyAssessment(
+function isSourceAdvancementCounterCreditPayoutAction(
+  action: LegalAction,
+): boolean {
+  return (
+    action.payload?.cardImplementationEconomyKind ===
+      "gain_credits_per_advancement_counter_on_source" &&
+    typeof action.payload.cardImplementationAmountPerAdvancementCounter ===
+      "number"
+  );
+}
+
+function corpSourceAdvancementCounterCreditPayoutAssessment(
   input: AiDecisionInput,
   action: LegalAction,
   features: AiFeatures,
 ): { score: number; payout: number; advancementCounters: number; evidence: string[] } {
   const source = findVisibleCard(input, action.source);
+  const amountPerCounter =
+    typeof action.payload?.cardImplementationAmountPerAdvancementCounter ===
+    "number"
+      ? action.payload.cardImplementationAmountPerAdvancementCounter
+      : 0;
   const advancementCounters = Math.max(
     0,
     Math.floor(source?.advancementCounters ?? 0),
   );
-  const payout = advancementCounters * 4;
+  const payout = advancementCounters * amountPerCounter;
   const clickCost = actionClickCost(action);
   const lowCredits = features.credits < 5;
   if (payout <= 0) {
@@ -16142,12 +16157,15 @@ function corpInformationLaunderingEconomyAssessment(
       evidence: [
         "installed_corp_economy:true",
         "installed_corp_economy_kind:advancement_counter_payout",
-        `installed_corp_economy_source:${INFORMATION_LAUNDERING_CARD_ID}`,
+        `installed_corp_economy_source:${sourceDefinitionIdForAction(input, action) ?? "unknown"}`,
         `installed_corp_economy_advancement_counters:${advancementCounters}`,
+        `installed_corp_economy_amount_per_counter:${amountPerCounter}`,
         "installed_corp_economy_immediate_gain:0",
         "installed_corp_economy_net_credits:0",
-        "information_laundering_zero_counter_payout:true",
-        "information_laundering_self_trash_without_credit_value:true",
+        "source_advancement_counter_payout_zero_counter_payout:true",
+        ...(action.payload?.cardImplementationTrashesSource === true
+          ? ["source_advancement_counter_payout_trashes_source:true"]
+          : []),
       ],
     };
   }
@@ -16163,11 +16181,15 @@ function corpInformationLaunderingEconomyAssessment(
     evidence: [
       "installed_corp_economy:true",
       "installed_corp_economy_kind:advancement_counter_payout",
-      `installed_corp_economy_source:${INFORMATION_LAUNDERING_CARD_ID}`,
+      `installed_corp_economy_source:${sourceDefinitionIdForAction(input, action) ?? "unknown"}`,
       `installed_corp_economy_advancement_counters:${advancementCounters}`,
+      `installed_corp_economy_amount_per_counter:${amountPerCounter}`,
       `installed_corp_economy_immediate_gain:${payout}`,
       `installed_corp_economy_net_credits:${payout}`,
-      "information_laundering_prepared_payout:true",
+      "source_advancement_counter_payout_prepared:true",
+      ...(action.payload?.cardImplementationTrashesSource === true
+        ? ["source_advancement_counter_payout_trashes_source:true"]
+        : []),
     ],
   };
 }

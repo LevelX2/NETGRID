@@ -1642,6 +1642,8 @@ function activatedAbilityPayload(
   abilityIndex: number,
   state?: GameState,
 ): Record<string, string | number | boolean> {
+  const advancementCounterCreditPayout =
+    gainCreditsPerAdvancementCounterOnSourceEffect(ability);
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -1667,6 +1669,16 @@ function activatedAbilityPayload(
     ...(hasTapSourceCostForActivatedAbility(ability)
       ? { cardImplementationTapSourceCost: true }
       : {}),
+    ...(advancementCounterCreditPayout
+      ? {
+          cardImplementationEconomyKind:
+            "gain_credits_per_advancement_counter_on_source",
+          cardImplementationAmountPerAdvancementCounter:
+            advancementCounterCreditPayout.amountPerCounter,
+          cardImplementationTrashesSource:
+            hasTrashSourceEffectForActivatedAbility(ability),
+        }
+      : {}),
     ...(randomCorpHqDiscardCostForActivatedAbility(ability) > 0
       ? {
           cardImplementationRandomHqDiscardCost:
@@ -1686,6 +1698,32 @@ function activatedAbilityPayload(
         }
       : {}),
   };
+}
+
+function gainCreditsPerAdvancementCounterOnSourceEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "gain_credits_per_advancement_counter_on_source" }
+    >
+  | undefined {
+  return ability.effects.find(
+    (effect) =>
+      effect.kind === "gain_credits_per_advancement_counter_on_source" &&
+      (effect.recipient === "controller" || effect.recipient === "corp"),
+  ) as
+    | Extract<
+        CardEffectImplementation,
+        { kind: "gain_credits_per_advancement_counter_on_source" }
+      >
+    | undefined;
+}
+
+function hasTrashSourceEffectForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  return ability.effects.some((effect) => effect.kind === "trash_source");
 }
 
 function exposeInstalledCardEffect(
