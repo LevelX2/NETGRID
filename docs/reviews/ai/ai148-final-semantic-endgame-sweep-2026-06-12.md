@@ -26,22 +26,22 @@ AI148 schließt den AI140-AI148-Block mit finalen A-D-Sweeps und technischen Gat
 | Metrik | x5 | x10 |
 | --- | ---: | ---: |
 | Spiele | 20 | 40 |
-| Entscheidungen | 2498 | 5264 |
+| Entscheidungen | 2492 | 5178 |
 | IllegalActions | 0 | 0 |
 | Replay-Failures | 0 | 0 |
 | Redaction-safe | 1 | 1 |
-| Action-Limits | 9 | 21 |
-| Repeated No-Progress Run | 31 | 53 |
-| Unsafe Score Chosen | 3 | 8 |
-| Passive Action With Score Line Available | 4 | 8 |
-| Durchschnittliche Spiellänge | 124.9 | 131.6 |
-| Corp Agenda Scores | 12 | 25 |
-| Runner Agenda Steals | 33 | 57 |
-| Corp Flatlines | 5 | 8 |
+| Action-Limits | 11 | 23 |
+| Repeated No-Progress Run | 33 | 56 |
+| Unsafe Score Chosen | 4 | 7 |
+| Passive Action With Score Line Available | 7 | 14 |
+| Durchschnittliche Spiellänge | 124.6 | 129.45 |
+| Corp Agenda Scores | 13 | 23 |
+| Runner Agenda Steals | 28 | 49 |
+| Corp Flatlines | 5 | 10 |
 
 ## Schlussfolgerung
 
-Der Block verbessert die Diagnose- und Entscheidungsgrundlage für Endgame-Optimierungen, ändert aber bewusst keine Runtime-Auswahl. Das ist fachlich richtig: Die stärksten Schattenbefunde zeigen echte Optimierungsrichtungen, erfüllen aber das same-state LegalAction-Kriterium nicht. Der nächste sinnvolle Schritt ist daher kein pauschales Scoring-Tuning, sondern ein gezielter Fixture-Aufbau für konkrete Runner-Coverage- und Corp-Tempo-Fälle.
+Der Block verbessert die Diagnose- und Entscheidungsgrundlage für Endgame-Optimierungen, ändert aber bewusst keine Runtime-Auswahl. Das ist fachlich richtig: Die stärksten Schattenbefunde zeigen echte Optimierungsrichtungen, erfüllen aber das same-state LegalAction-Kriterium nicht. Nach dem lokalen Merge des inzwischen weitergelaufenen `main` bleibt Safety grün; die Action-Limit-Zahlen steigen gegenüber dem Vor-Merge-Sweep leicht auf 11 im x5- und 23 im x10-Lauf. Der nächste sinnvolle Schritt ist daher kein pauschales Scoring-Tuning, sondern ein gezielter Fixture-Aufbau für konkrete Runner-Coverage- und Corp-Tempo-Fälle auf dem integrierten Stand.
 
 ## Verifikation
 
