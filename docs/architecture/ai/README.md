@@ -27,3 +27,7 @@
 ## Regel
 
 Konkrete Benchmarks, Regressionen und Diagnoseberichte liegen unter `docs/reviews/ai/`. Abgeschlossene Doctrine- und Deck-Legal-Approval-Spuren liegen unter `docs/releases/ai/`.
+
+## Lokaler Play-Strength-Pilot
+
+Der einzige gültige Env-Name für lokale Play-Strength-Pilot-Scopes ist `NETGRID_AI_PLAY_STRENGTH_PILOT`. Unterstützte Werte sind `basic_setup`, `runner_safe_access`, `corp_score_window` und `all`; mehrere Werte dürfen per Komma, Semikolon oder Whitespace getrennt werden. Der historische/falsche Name `AI_PLAY_STRENGTH_PILOT_SCOPE` wird nicht als Runtime-Vertrag gelesen.

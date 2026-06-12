@@ -18,6 +18,7 @@ import type { SemanticRuntimeChoice } from "../../runtime/semantic-runtime-types
 
 describe("pilot-scope-registry", () => {
   const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+  const originalLegacyPilot = process.env.AI_PLAY_STRENGTH_PILOT_SCOPE;
   const originalCalibration =
     process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
 
@@ -26,6 +27,11 @@ describe("pilot-scope-registry", () => {
       delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     } else {
       process.env[AI_PLAY_STRENGTH_PILOT_ENV] = originalPilot;
+    }
+    if (originalLegacyPilot === undefined) {
+      delete process.env.AI_PLAY_STRENGTH_PILOT_SCOPE;
+    } else {
+      process.env.AI_PLAY_STRENGTH_PILOT_SCOPE = originalLegacyPilot;
     }
     if (originalCalibration === undefined) {
       delete process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
@@ -55,6 +61,27 @@ describe("pilot-scope-registry", () => {
       BASIC_SETUP_PILOT_MODE,
       CORP_SCORE_WINDOW_PILOT_MODE,
     ]);
+  });
+
+  it("uses only NETGRID_AI_PLAY_STRENGTH_PILOT as the runtime env contract", () => {
+    process.env.AI_PLAY_STRENGTH_PILOT_SCOPE = BASIC_SETUP_PILOT_MODE;
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+
+    const params = {
+      frame: frame(["gain-1", "draw-1"]),
+      trace: trace("draw-1", 122, "setup"),
+      currentChoice: choice("gain-1", "gain_credit", 100),
+      choices: [
+        choice("gain-1", "gain_credit", 100),
+        choice("draw-1", "draw_card", 122),
+      ],
+    };
+
+    expect(semanticPilotChoice(params)).toBeUndefined();
+
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+
+    expect(semanticPilotChoice(params)?.choice.action.actionId).toBe("draw-1");
   });
 
   it("allows only basic setup resource actions for the basic scope", () => {

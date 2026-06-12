@@ -15,7 +15,7 @@ Die Paketserie hat den Play-Strength-Spine strukturell breiter, messbarer und si
 Umgesetzt wurden:
 
 - Pilot-Scopes sind aus der alten Einzeldatei in eigene Scope-Module verschoben; der alte Importpfad bleibt als Fassade erhalten.
-- `NETGRID_AI_PLAY_STRENGTH_PILOT` unterstuetzt mehrere lokale Scopes und `all`.
+- `NETGRID_AI_PLAY_STRENGTH_PILOT` ist der einzige gueltige lokale Env-Name. Unterstuetzt sind `basic_setup`, `runner_safe_access`, `corp_score_window`, `all` sowie Komma-, Semikolon- und Whitespace-Trennung.
 - RunnerSafeAccess blockt jetzt riskante Universal-Coverage, negative Credit-Projektionen und unaffordbare Access-Trash-Faelle granular.
 - Remote-Contest bleibt report-only als Shadow-League-Kandidat sichtbar.
 - RunTarget-Alignment und TargetChoiceShadow nutzen strukturierte Target-Kontexte vor Evidence-Fallbacks.
