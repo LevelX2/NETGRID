@@ -416,6 +416,8 @@ function classifySelfplayActionLimitSubclusterEntry(
     return classifyLateGainCreditSubclusterEntry(entry, text);
   }
   if (entry.actionType === "draw_card") {
+    // AI109 showed coverage gaps may only appear as structured trace flags, so
+    // those draws are separated from true no-goal late draws.
     return entryHasDrawOrCoverageNeed(entry, text)
       ? "late_draw_for_coverage_or_hand_goal"
       : "late_draw_without_coverage_or_hand_goal";
@@ -576,6 +578,8 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
 function corpLateGainCreditHasSafeProgressAlternative(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
+  // AI110 keeps economy-only and opaque ability references out of "safe
+  // progress"; this bucket needs a scoreline action that was actually legal.
   return (
     entry.corpScoreTerminalWindowScoreLegal === true ||
     entry.corpScoreTerminalWindowAdvanceToScoreLegal === true ||
