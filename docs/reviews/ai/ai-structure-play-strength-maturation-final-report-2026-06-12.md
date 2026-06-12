@@ -2,7 +2,7 @@
 
 Datum: 2026-06-12
 
-Status: AI-MAT-0 bis AI-MAT-19 umgesetzt und paketweise committed. FINAL-GREEN und lokaler Main-Merge folgen als separater Integrationsschritt.
+Status: AI-MAT-0 bis AI-MAT-20 umgesetzt, paketweise committed und FINAL-GREEN im Arbeitsbranch gruen. Lokaler Main-Merge folgt als separater Integrationsschritt.
 
 Arbeitsbranch: `codex/ai-structure-play-strength-maturation`
 
@@ -74,18 +74,22 @@ Unveraendert gueltig:
 - `c1201d7e` AI-MAT-18
 - `6f3c13aa` AI-MAT-19
 
-## Verifikation bis AI-MAT-19
+## Verifikation
 
-Alle paketbezogenen AI-Test- und Typecheck-Laeufe waren gruen. Wegen Workspace-Argumentweitergabe fuehrten fokussierte `@netgrid/ai test -- ...`-Kommandos jeweils die volle AI-Test-Suite aus. Der letzte Paketlauf vor diesem Report war:
+Alle paketbezogenen AI-Test- und Typecheck-Laeufe waren gruen. Wegen Workspace-Argumentweitergabe fuehrten fokussierte `@netgrid/ai test -- ...`-Kommandos jeweils die volle AI-Test-Suite aus.
 
-- `corepack pnpm --filter @netgrid/ai test -- src/actions/action-semantic-invariants.test.ts`: 76 Testdateien, 1219 Tests, gruen.
+- Letzter Paketlauf vor AI-MAT-20: `corepack pnpm --filter @netgrid/ai test -- src/actions/action-semantic-invariants.test.ts`: 76 Testdateien, 1219 Tests, gruen.
 - `corepack pnpm --filter @netgrid/ai typecheck`: gruen.
-- `git diff --check`: wird fuer AI-MAT-20 vor Commit ausgefuehrt.
+- `git diff --check`: gruen.
+
+FINAL-GREEN im Arbeitsbranch:
+
+- `corepack pnpm --filter @netgrid/ai test`: 76 Testdateien, 1219 Tests, gruen.
+- `corepack pnpm --filter @netgrid/ai typecheck`: gruen.
+- `git diff --check`: gruen.
 
 ## Noch offen
 
-- AI-MAT-20 committen.
-- FINAL-GREEN ausfuehren.
 - Arbeitsbranch mit aktuellem `main` abgleichen.
 - Lokal nach `main` integrieren.
 - Main erneut pruefen.
