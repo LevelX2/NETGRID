@@ -8,7 +8,7 @@ import type {
   ActionSemanticSourceKind,
 } from "../action-semantic-candidate";
 
-type BasicActionSemanticClassification = {
+export type BasicActionSemanticClassification = {
   semanticActionType: string;
   primaryProjectionStatus: ActionPrimaryProjectionStatus;
   confidence: Exclude<ActionSemanticConfidence, "none">;

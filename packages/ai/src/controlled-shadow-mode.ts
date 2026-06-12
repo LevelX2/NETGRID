@@ -1,12 +1,16 @@
+import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionGateId,
   ActionPrimaryProjectionStatus,
   ActionProjectionIssue,
+  ActionSemanticCandidate,
 } from "./action-semantic-candidate";
 import type {
   DeckDoctrineV2ReadinessStatus,
   TacticalGoalFamily,
 } from "./action-doctrine-goal-diagnostics";
+import type { BasicActionSemanticClassification } from "./actions/basic-action-semantics";
+import type { DeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
 
 export const SHADOW_MODE_TRACE_CONTRACT_SCHEMA_VERSION =
   "shadow-mode-trace-contract-v1" as const;
@@ -16,6 +20,9 @@ export const SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION =
 
 export const SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION =
   "semantic-shadow-decision-v0" as const;
+
+export const SEMANTIC_SHADOW_DECISION_TRACE_SCHEMA_VERSION =
+  "semantic-shadow-decision-trace-v1" as const;
 
 export const LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION =
   "legacy-semantic-shadow-comparison-v1" as const;
@@ -230,6 +237,68 @@ export type SemanticShadowDecisionTrace = {
   blockedCandidates: ShadowBlockingReason[];
   whyNot: WhyNotTrace[];
   noRuntimeEffect: true;
+};
+
+export type SemanticShadowDecisionTraceFeatureFlag = {
+  name: "NETGRID_AI_SEMANTIC_TRACE";
+  enabled: boolean;
+  status: "enabled_local" | "disabled_default";
+  defaultState: "disabled";
+  source: "local_env_only";
+};
+
+export type SemanticShadowDecisionTraceInput = {
+  traceId: string;
+  actorSide: ShadowActorSide;
+  stateVersion?: number;
+  legalActions: readonly LegalAction[];
+  actionSemanticCandidates: readonly ActionSemanticCandidate[];
+  basicActionSemantics?: Partial<
+    Record<LegalAction["type"], BasicActionSemanticClassification>
+  >;
+  deckDoctrine?: DeckDoctrineV2Diagnostic;
+  env?: Readonly<Record<string, string | undefined>>;
+};
+
+export type SemanticShadowDecisionTraceRankingEntry = {
+  candidateId: string;
+  actionId: string;
+  actionType: string;
+  rankIndex: number;
+  scoreStatus: SemanticShadowScoreStatus;
+  semanticActionType: string;
+  basicActionSemanticType?: string;
+  doctrineStatus?: DeckDoctrineV2Diagnostic["status"];
+  gateReasons: string[];
+  gapReasons: ActionProjectionIssue[];
+  evidence: string[];
+};
+
+export type SemanticShadowDecisionTraceInputSummary = {
+  legalActionCount: number;
+  candidateCount: number;
+  basicActionSemanticCount: number;
+  doctrineStatus: DeckDoctrineV2Diagnostic["status"] | "not_provided";
+  featureFlagEnabled: boolean;
+};
+
+export type SemanticShadowDecisionTraceReport = {
+  schemaVersion: typeof SEMANTIC_SHADOW_DECISION_TRACE_SCHEMA_VERSION;
+  scope: "semantic_shadow_decision_trace_local_only";
+  traceId: string;
+  actorSide: ShadowActorSide;
+  stateVersion?: number;
+  featureFlag: SemanticShadowDecisionTraceFeatureFlag;
+  inputSummary: SemanticShadowDecisionTraceInputSummary;
+  ranking: SemanticShadowDecisionTraceRankingEntry[];
+  gateReasons: ShadowBlockingReason[];
+  selectedActionId?: string;
+  runtimeConsumerStatus: "none";
+  semanticExecutionAllowed: false;
+  productiveUseAllowed: false;
+  actualDecisionOverrideCount: 0;
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
 };
 
 export type LegalActionTraceSummary = {
@@ -710,7 +779,11 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
     description: "Runner compares drawing with gaining a credit.",
     expectedLegalActionTypes: ["draw_card", "gain_credit"],
     expectedTacticalGoals: ["runner_economy_stabilize", "runner_rig_setup"],
-    requiredCandidateFields: ["semanticActionType", "costProfile", "timingProfile"],
+    requiredCandidateFields: [
+      "semanticActionType",
+      "costProfile",
+      "timingProfile",
+    ],
   }),
   scenario({
     scenarioId: "runner_install_program",
@@ -732,10 +805,7 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
     expectedLegalActionTypes: ["install_card"],
     expectedTacticalGoals: ["runner_rig_setup", "runner_central_pressure"],
     requiredCandidateFields: ["sourceCardId", "cardContextSignals", "risks"],
-    knownProjectionGaps: [
-      "ability_unresolved",
-      "card_semantics_unavailable",
-    ],
+    knownProjectionGaps: ["ability_unresolved", "card_semantics_unavailable"],
   }),
   scenario({
     scenarioId: "runner_start_hq_run",
@@ -756,7 +826,8 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
   scenario({
     scenarioId: "runner_remote_contest",
     side: "runner",
-    description: "Runner pressures a remote without projecting hidden contents.",
+    description:
+      "Runner pressures a remote without projecting hidden contents.",
     expectedLegalActionTypes: ["start_run"],
     expectedTacticalGoals: ["runner_remote_contest"],
     requiredCandidateFields: ["targetContext", "hardGates"],
@@ -917,10 +988,7 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
     expectedLegalActionTypes: ["play_operation", "trigger_ability"],
     expectedTacticalGoals: ["corp_tag_trace_punish"],
     requiredCandidateFields: ["conditions", "risks", "hardGates"],
-    knownProjectionGaps: [
-      "ability_unresolved",
-      "card_semantics_unavailable",
-    ],
+    knownProjectionGaps: ["ability_unresolved", "card_semantics_unavailable"],
   }),
   scenario({
     scenarioId: "corp_ambush_or_remote_bait",
@@ -930,10 +998,7 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
     expectedLegalActionTypes: ["install_card", "advance_card"],
     expectedTacticalGoals: ["corp_remote_score_window"],
     requiredCandidateFields: ["targetContext", "conditions", "risks"],
-    knownProjectionGaps: [
-      "target_context_unavailable",
-      "hidden_info_blocked",
-    ],
+    knownProjectionGaps: ["target_context_unavailable", "hidden_info_blocked"],
     hiddenInfoBoundary: [
       "Runner-unknown remote contents are not projected into the shadow trace.",
     ],
@@ -959,7 +1024,8 @@ export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
   scenario({
     scenarioId: "x_value_choice",
     side: "runner",
-    description: "Advanced X-value choice reports unknown cost instead of guessing.",
+    description:
+      "Advanced X-value choice reports unknown cost instead of guessing.",
     expectedLegalActionTypes: ["resolve_choice"],
     expectedTacticalGoals: ["runner_rig_setup"],
     requiredCandidateFields: ["costProfile", "timingProfile", "hardGates"],
@@ -1112,10 +1178,84 @@ export function buildSemanticShadowDecisionReport(
   };
 }
 
+export function semanticShadowDecisionTraceEnabled(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  return env.NETGRID_AI_SEMANTIC_TRACE === "1";
+}
+
+export function buildSemanticShadowDecisionTraceReport(
+  input: SemanticShadowDecisionTraceInput,
+): SemanticShadowDecisionTraceReport {
+  const featureFlag = semanticShadowDecisionTraceFeatureFlag(input.env);
+  const candidatesByActionId = new Map(
+    input.actionSemanticCandidates.map((candidate) => [
+      candidate.actionId,
+      candidate,
+    ]),
+  );
+  const rankedRows = input.legalActions
+    .map((action, inputIndex) => {
+      const candidate = candidatesByActionId.get(action.actionId);
+      return semanticShadowDecisionTraceRankingEntry({
+        action,
+        inputIndex,
+        ...(candidate !== undefined ? { candidate } : {}),
+        ...(input.basicActionSemantics !== undefined
+          ? { basicActionSemantics: input.basicActionSemantics }
+          : {}),
+        ...(input.deckDoctrine !== undefined
+          ? { deckDoctrine: input.deckDoctrine }
+          : {}),
+      });
+    })
+    .sort(
+      (left, right) =>
+        traceScoreStatusPriority(left.scoreStatus) -
+          traceScoreStatusPriority(right.scoreStatus) ||
+        left.inputIndex - right.inputIndex,
+    )
+    .map(({ inputIndex: _inputIndex, ...entry }, rankIndex) => ({
+      ...entry,
+      rankIndex,
+    }));
+  const gateReasons = rankedRows.flatMap((entry) =>
+    semanticShadowDecisionTraceBlockingReasons(entry),
+  );
+
+  return {
+    schemaVersion: SEMANTIC_SHADOW_DECISION_TRACE_SCHEMA_VERSION,
+    scope: "semantic_shadow_decision_trace_local_only",
+    traceId: input.traceId,
+    actorSide: input.actorSide,
+    ...(input.stateVersion !== undefined
+      ? { stateVersion: input.stateVersion }
+      : {}),
+    featureFlag,
+    inputSummary: {
+      legalActionCount: input.legalActions.length,
+      candidateCount: input.actionSemanticCandidates.length,
+      basicActionSemanticCount: Object.keys(input.basicActionSemantics ?? {})
+        .length,
+      doctrineStatus: input.deckDoctrine?.status ?? "not_provided",
+      featureFlagEnabled: featureFlag.enabled,
+    },
+    ranking: rankedRows,
+    gateReasons,
+    runtimeConsumerStatus: "none",
+    semanticExecutionAllowed: false,
+    productiveUseAllowed: false,
+    actualDecisionOverrideCount: 0,
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 export function buildLegacySemanticComparisonReport(
   fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
-  semanticReport: SemanticShadowDecisionReport =
-    buildSemanticShadowDecisionReport(fixtures),
+  semanticReport: SemanticShadowDecisionReport = buildSemanticShadowDecisionReport(
+    fixtures,
+  ),
 ): LegacySemanticComparisonReport {
   const comparisons = fixtures.map((fixture) => {
     const result = semanticReport.scenarioResults.find(
@@ -1139,8 +1279,7 @@ export function buildLegacySemanticComparisonReport(
 }
 
 export function buildDeviationTriageReport(
-  comparisonReport: LegacySemanticComparisonReport =
-    buildLegacySemanticComparisonReport(),
+  comparisonReport: LegacySemanticComparisonReport = buildLegacySemanticComparisonReport(),
 ): DeviationTriageReport {
   const triageEntries = comparisonReport.comparisons.flatMap(triageComparison);
   const humanReviewList = buildHumanReviewList(triageEntries);
@@ -1167,11 +1306,13 @@ export function buildDeviationTriageReport(
 }
 
 export function buildShadowMetricsAndGatesReport(
-  semanticReport: SemanticShadowDecisionReport =
-    buildSemanticShadowDecisionReport(),
+  semanticReport: SemanticShadowDecisionReport = buildSemanticShadowDecisionReport(),
   triageReport: DeviationTriageReport = buildDeviationTriageReport(),
 ): ShadowMetricsAndGatesReport {
-  const qualityMetrics = buildShadowQualityMetrics(semanticReport, triageReport);
+  const qualityMetrics = buildShadowQualityMetrics(
+    semanticReport,
+    triageReport,
+  );
 
   return {
     schemaVersion: SHADOW_METRICS_GATES_SCHEMA_VERSION,
@@ -1253,6 +1394,135 @@ export function buildRuntimeShadowHarnessReport(): RuntimeShadowHarnessReport {
   };
 }
 
+function semanticShadowDecisionTraceFeatureFlag(
+  env: Readonly<Record<string, string | undefined>> | undefined,
+): SemanticShadowDecisionTraceFeatureFlag {
+  const enabled = semanticShadowDecisionTraceEnabled(env ?? process.env);
+  return {
+    name: "NETGRID_AI_SEMANTIC_TRACE",
+    enabled,
+    status: enabled ? "enabled_local" : "disabled_default",
+    defaultState: "disabled",
+    source: "local_env_only",
+  };
+}
+
+function semanticShadowDecisionTraceRankingEntry(params: {
+  action: LegalAction;
+  inputIndex: number;
+  candidate?: ActionSemanticCandidate;
+  basicActionSemantics?: Partial<
+    Record<LegalAction["type"], BasicActionSemanticClassification>
+  >;
+  deckDoctrine?: DeckDoctrineV2Diagnostic;
+}): SemanticShadowDecisionTraceRankingEntry & { inputIndex: number } {
+  const basicSemantics = params.basicActionSemantics?.[params.action.type];
+  const gapReasons = sortedUniqueProjectionIssues([
+    ...(params.candidate?.projectionIssues ?? []),
+    ...(basicSemantics?.projectionIssues ?? []),
+  ]);
+  const gateReasons = [
+    ...(params.candidate?.hardGates ?? [])
+      .filter((gate) => gate.status === "block" || gate.severity === "error")
+      .map(
+        (gate) =>
+          `${gate.gateId}:${gate.reason ?? "semantic trace gate blocked"}`,
+      ),
+    ...(gapReasons.includes("hidden_info_blocked")
+      ? ["hidden_info:hidden_info_blocked"]
+      : []),
+  ];
+  const scoreStatus = semanticTraceScoreStatus(
+    params.candidate,
+    gateReasons,
+    gapReasons,
+  );
+
+  return {
+    candidateId: params.candidate?.actionId ?? params.action.actionId,
+    actionId: params.action.actionId,
+    actionType: params.action.type,
+    rankIndex: params.inputIndex,
+    inputIndex: params.inputIndex,
+    scoreStatus,
+    semanticActionType:
+      params.candidate?.semanticActionType ??
+      basicSemantics?.semanticActionType ??
+      "unknown",
+    ...(basicSemantics !== undefined
+      ? { basicActionSemanticType: basicSemantics.semanticActionType }
+      : {}),
+    ...(params.deckDoctrine !== undefined
+      ? { doctrineStatus: params.deckDoctrine.status }
+      : {}),
+    gateReasons,
+    gapReasons,
+    evidence: [
+      `LegalAction:${params.action.type}`,
+      ...(params.candidate !== undefined
+        ? [
+            `ActionSemanticCandidate:${params.candidate.primaryProjectionStatus}`,
+            `sourceKind:${params.candidate.sourceKind}`,
+          ]
+        : ["ActionSemanticCandidate:missing"]),
+      ...(basicSemantics !== undefined
+        ? [`BasicActionSemantic:${basicSemantics.semanticActionType}`]
+        : []),
+      ...(params.deckDoctrine !== undefined
+        ? [`DeckDoctrineV2:${params.deckDoctrine.status}`]
+        : []),
+    ],
+  };
+}
+
+function semanticTraceScoreStatus(
+  candidate: ActionSemanticCandidate | undefined,
+  gateReasons: readonly string[],
+  gapReasons: readonly ActionProjectionIssue[],
+): SemanticShadowScoreStatus {
+  if (candidate === undefined) return "no_candidate";
+  if (gateReasons.length > 0) return "blocked_by_gate";
+  if (gapReasons.length > 0) return "blocked_by_gap";
+  return "ranked_shadow_only";
+}
+
+function traceScoreStatusPriority(status: SemanticShadowScoreStatus): number {
+  if (status === "ranked_shadow_only") return 0;
+  if (status === "blocked_by_gap") return 1;
+  if (status === "blocked_by_gate") return 2;
+  if (status === "no_candidate") return 3;
+  return 4;
+}
+
+function semanticShadowDecisionTraceBlockingReasons(
+  entry: SemanticShadowDecisionTraceRankingEntry,
+): ShadowBlockingReason[] {
+  if (entry.scoreStatus === "blocked_by_gate") {
+    return entry.gateReasons.map((reason) => ({
+      candidateId: entry.candidateId,
+      scoreStatus: "blocked_by_gate",
+      reason,
+      evidence: [reason, ...entry.evidence],
+    }));
+  }
+  if (entry.scoreStatus === "blocked_by_gap") {
+    return entry.gapReasons.map((gap) => ({
+      candidateId: entry.candidateId,
+      scoreStatus: "blocked_by_gap",
+      gap,
+      reason: `Projection gap blocks semantic trace ranking: ${gap}`,
+      evidence: [gap, ...entry.evidence],
+    }));
+  }
+  return [];
+}
+
+function sortedUniqueProjectionIssues(
+  issues: readonly ActionProjectionIssue[],
+): ActionProjectionIssue[] {
+  return [...new Set(issues)].sort();
+}
+
 export function buildShadowEvaluationBatchReport(
   fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
 ): ShadowEvaluationBatchReport {
@@ -1300,7 +1570,8 @@ export function buildShadowRegressionFixturesReport(
     schemaVersion: SHADOW_REGRESSION_FIXTURES_SCHEMA_VERSION,
     scope: "shadow_regression_fixtures",
     sourceBatchSchema: SHADOW_EVALUATION_BATCH_SCHEMA_VERSION,
-    fixtureFile: "data/scenarios/ai059-shadow-regression-fixtures-2026-06-04.json",
+    fixtureFile:
+      "data/scenarios/ai059-shadow-regression-fixtures-2026-06-04.json",
     fixtures,
     fixtureTypes: SHADOW_REGRESSION_FIXTURE_TYPES,
     activeFixtureCount: fixtures.filter((fixture) => fixture.active).length,
@@ -1319,8 +1590,9 @@ export function buildShadowRegressionFixturesReport(
 export function buildShadowReadinessReviewReport(
   metricsReport: ShadowMetricsAndGatesReport = buildShadowMetricsAndGatesReport(),
   batchReport: ShadowEvaluationBatchReport = buildShadowEvaluationBatchReport(),
-  regressionReport: ShadowRegressionFixturesReport =
-    buildShadowRegressionFixturesReport(batchReport),
+  regressionReport: ShadowRegressionFixturesReport = buildShadowRegressionFixturesReport(
+    batchReport,
+  ),
 ): ShadowReadinessReviewReport {
   const hardGateFailureCount = metricsReport.hardGates.filter(
     (gate) => gate.status !== "pass",
@@ -1333,8 +1605,7 @@ export function buildShadowReadinessReviewReport(
     metricsReport.qualityMetrics,
     "semanticBlockedByGapRate",
   );
-  const blockers =
-    hardGateFailureCount > 0 ? ["hard_safety_gate_failure"] : [];
+  const blockers = hardGateFailureCount > 0 ? ["hard_safety_gate_failure"] : [];
   const qualityGaps = [
     ...(semanticDecisionAvailableRate !== null &&
     semanticDecisionAvailableRate < 0.8
@@ -1344,7 +1615,9 @@ export function buildShadowReadinessReviewReport(
       ? ["target, ability, card and cost gaps remain classified"]
       : []),
     ...(regressionReport.inactiveFixtureCount > 0
-      ? ["semantic improvement regression fixture inactive due missing evidence"]
+      ? [
+          "semantic improvement regression fixture inactive due missing evidence",
+        ]
       : []),
     "runtime-backed fixture rate remains 0 in this process",
   ];
@@ -1449,7 +1722,9 @@ export function buildSemanticShadowDecisionForFixture(
   const blockingReasons =
     scoreStatus === "ranked_shadow_only"
       ? []
-      : ranking.flatMap((candidate) => blockingReasonsForCandidate(fixture, candidate));
+      : ranking.flatMap((candidate) =>
+          blockingReasonsForCandidate(fixture, candidate),
+        );
   const whyNot =
     scoreStatus === "ranked_shadow_only"
       ? whyNotForRankedCandidates(ranking)
@@ -1469,7 +1744,9 @@ export function buildSemanticShadowDecisionForFixture(
 
 function selectedFieldsForRanking(
   ranking: readonly ShadowCandidateRank[],
-): Pick<SemanticShadowDecision, "selectedActionId" | "selectedCandidateId"> | {} {
+):
+  | Pick<SemanticShadowDecision, "selectedActionId" | "selectedCandidateId">
+  | {} {
   const topCandidate = ranking[0];
   if (topCandidate === undefined) return {};
   return {
@@ -1644,7 +1921,8 @@ function summarizeShadowScenarioCorpus(
         "multi_ability_card_unresolved",
       ].includes(fixture.scenarioId),
     ).length,
-    allowedShadowCount: fixtures.filter((fixture) => fixture.allowedShadow).length,
+    allowedShadowCount: fixtures.filter((fixture) => fixture.allowedShadow)
+      .length,
     syntheticLegalActionCount: fixtures.filter(
       (fixture) => fixture.setupKind === "synthetic_legal_actions",
     ).length,
@@ -1799,8 +2077,9 @@ function countDecisions(
   scenarioResults: readonly SemanticShadowDecisionScenarioResult[],
   status: SemanticShadowScoreStatus,
 ): number {
-  return scenarioResults.filter((result) => result.decision.scoreStatus === status)
-    .length;
+  return scenarioResults.filter(
+    (result) => result.decision.scoreStatus === status,
+  ).length;
 }
 
 function deltaCategoriesForBlockedDecision(
@@ -1832,9 +2111,9 @@ function deltaCategoriesForBlockedDecision(
     return ["legacy_selected_unknown_semantics" as const];
   });
 
-  return categories.length > 0 ? [...new Set(categories)] : [
-    "legacy_selected_unknown_semantics",
-  ];
+  return categories.length > 0
+    ? [...new Set(categories)]
+    : ["legacy_selected_unknown_semantics"];
 }
 
 function deltaCategoriesForActionType(
@@ -2010,7 +2289,10 @@ function reviewQuestionForClass(triageClass: DeviationTriageClass): string {
 
 function requiredEvidenceForClass(triageClass: DeviationTriageClass): string[] {
   if (triageClass === "missing_target_context") {
-    return ["LegalAction target requirements", "side-safe selected or available targets"];
+    return [
+      "LegalAction target requirements",
+      "side-safe selected or available targets",
+    ];
   }
   if (triageClass === "missing_ability_binding") {
     return ["sourceCardId", "abilityId", "binding evidence"];
@@ -2019,7 +2301,10 @@ function requiredEvidenceForClass(triageClass: DeviationTriageClass): string[] {
     return ["costProfile", "timingProfile"];
   }
   if (triageClass === "needs_card_semantics_review") {
-    return ["ActionCardSemanticProfile", "ability semantic profile if applicable"];
+    return [
+      "ActionCardSemanticProfile",
+      "ability semantic profile if applicable",
+    ];
   }
   if (triageClass === "hidden_info_blocker") {
     return ["HiddenInfoBoundary", "side-safe visibility policy"];
@@ -2202,7 +2487,9 @@ function buildShadowQualityGates(
           ? "pass"
           : "fail_quality_gap",
       failurePolicy: "carry_to_readiness_review",
-      evidence: ["Later tightening target: semanticDecisionAvailableRate >= 95%."],
+      evidence: [
+        "Later tightening target: semanticDecisionAvailableRate >= 95%.",
+      ],
     },
     {
       gateId: "human_review_rate_documented",
@@ -2212,7 +2499,9 @@ function buildShadowQualityGates(
       currentValue: metricValue(metrics, "humanReviewRate"),
       status: "pass",
       failurePolicy: "carry_to_readiness_review",
-      evidence: ["Human-review rate is documented but has no hard threshold in AI056."],
+      evidence: [
+        "Human-review rate is documented but has no hard threshold in AI056.",
+      ],
     },
   ];
 }
@@ -2228,7 +2517,9 @@ function roundRate(value: number): number {
   return Math.round(value * 10000) / 10000;
 }
 
-function buildRuntimeShadowTrace<TLegacyDecision extends RuntimeShadowLegacyDecisionLike>(
+function buildRuntimeShadowTrace<
+  TLegacyDecision extends RuntimeShadowLegacyDecisionLike,
+>(
   legacyDecision: TLegacyDecision,
   semanticShadowDecision: SemanticShadowDecision,
   fixture: ShadowScenarioFixture,
@@ -2258,12 +2549,14 @@ function buildRuntimeShadowTrace<TLegacyDecision extends RuntimeShadowLegacyDeci
       whyNot: [...semanticShadowDecision.whyNot],
       noRuntimeEffect: true,
     },
-    legalActionSummary: fixture.expectedLegalActionTypes.map((actionType, index) => ({
-      actionId: `${fixture.scenarioId}.${actionType}.${index + 1}`,
-      actionType,
-      source: "engine_legal_actions",
-      visibilityScope: "developer_only",
-    })),
+    legalActionSummary: fixture.expectedLegalActionTypes.map(
+      (actionType, index) => ({
+        actionId: `${fixture.scenarioId}.${actionType}.${index + 1}`,
+        actionType,
+        source: "engine_legal_actions",
+        visibilityScope: "developer_only",
+      }),
+    ),
     candidateSummary: semanticShadowDecision.ranking.map((candidate) => ({
       candidateId: candidate.candidateId,
       actionId: candidate.actionId,

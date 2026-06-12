@@ -615,6 +615,25 @@ Checks:
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
 
+## P14 Ergebnis
+
+Umgesetzt:
+
+- `BasicActionSemanticClassification` ist als Typ exportiert und kann von Shadow-Diagnostik konsumiert werden, ohne Runtime-Entscheidungen zu beeinflussen.
+- `buildSemanticShadowDecisionTraceReport(...)` erzeugt einen lokalen Diagnosebericht aus `LegalAction`, `ActionSemanticCandidate`, optionaler BasicAction-Semantik und optionaler DeckDoctrine-v2-Diagnostik.
+- Das Feature-Flag `NETGRID_AI_SEMANTIC_TRACE=1` wird nur als lokaler Default-off-Schalter abgebildet; es ersetzt keinen Legacy-Entscheidungspfad.
+- Das Trace-Ranking bleibt deterministisch, nicht-produktiv und no-effect: keine `selectedActionId`, `runtimeConsumerStatus: "none"`, `semanticExecutionAllowed: false`, `productiveUseAllowed: false`, `actualDecisionOverrideCount: 0`.
+- Hidden-Info-/Gate- und Projektionslücken werden nur als blockierende Diagnosegründe ausgegeben.
+- Tests belegen, dass der Trace nicht über `packages/ai/src/index.ts` in Runtime-Entscheidungsmodule exportiert wird.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/controlled-shadow-mode.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai test`
+- Grün: `corepack pnpm check:ai` mit bestehender Warnungs-Baseline, aber ohne Fehler.
+- Zunächst rot, danach nach Prettier-Korrektur grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
