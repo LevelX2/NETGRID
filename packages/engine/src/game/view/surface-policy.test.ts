@@ -1,0 +1,54 @@
+import { describe, expect, it } from "vitest";
+import { sanitizeForSurface } from "./surface-policy";
+
+describe("surface policy", () => {
+  it("allows actor-private choice metadata on actor-private surfaces", () => {
+    expect(
+      sanitizeForSurface(
+        {
+          hiddenHqCardIds: "corp_card_1,corp_card_2",
+          actorPrivateLabel: "Archer",
+        },
+        "actor_private",
+      ),
+    ).toEqual({
+      hiddenHqCardIds: "corp_card_1,corp_card_2",
+      actorPrivateLabel: "Archer",
+    });
+  });
+
+  it.each(["opponent_view", "public_event", "replay_public"] as const)(
+    "rejects hidden card lists on %s surfaces",
+    (surfaceKind) => {
+      expect(() =>
+        sanitizeForSurface({ hiddenHqCardIds: "corp_card_1" }, surfaceKind),
+      ).toThrow(/hidden card data/);
+    },
+  );
+
+  it.each(["opponent_view", "public_event", "replay_public"] as const)(
+    "rejects actor-private labels on %s surfaces",
+    (surfaceKind) => {
+      expect(() =>
+        sanitizeForSurface({ actorPrivateLabel: "Archer" }, surfaceKind),
+      ).toThrow(/actor-private labels/);
+    },
+  );
+
+  it("allows developer trace to keep diagnostic primitive fields", () => {
+    expect(
+      sanitizeForSurface(
+        {
+          hiddenHqCardIds: "corp_card_1",
+          actorPrivateLabel: "Archer",
+          step: "select_hq_cards",
+        },
+        "developer_trace",
+      ),
+    ).toEqual({
+      hiddenHqCardIds: "corp_card_1",
+      actorPrivateLabel: "Archer",
+      step: "select_hq_cards",
+    });
+  });
+});
