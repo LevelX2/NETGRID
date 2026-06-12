@@ -650,6 +650,15 @@ Analyse roter Tests:
 - Im finalen Testblock traten keine roten Tests auf.
 - Es waren daher keine durch diesen Branch verursachten Testfehler zu beseitigen.
 
+Main-Abgleich nach lokalem `main`-Merge:
+
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm -r --if-present typecheck`
+- Grün: `corepack pnpm test`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check main..HEAD`
+- Rot: `corepack pnpm format:changed -- origin/main` wegen 34 Dateien aus bereits vorhandenen lokalen `main`-Commits außerhalb dieses Branch-Diffs.
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
