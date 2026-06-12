@@ -394,6 +394,22 @@ Done-Gate: Inventar/Review liegt vor und trifft keine ungesicherte Löschentsche
 
 Commit: `docs(ai): inventory local report hygiene`
 
+#### P9 Ergebnis
+
+Umgesetzt:
+
+- Lokale Prozesscommits seit `main` inventarisiert.
+- Geänderte Dateien und größte Prozessdiffs nach Daten-, Report-, Script- und Testartefakten gruppiert.
+- Große Diagnose- und AI-JSON-Artefakte bewertet: deterministisch und gate-/review-relevant, daher keine Löschung ohne separates Gate.
+- Ältere große `docs/reviews/ai/*.json`-Artefakte als außerhalb dieses Prozessdiffs liegend klassifiziert.
+- Bericht erstellt: `docs/reviews/ai/action-semantics-followup-local-report-hygiene-2026-06-12.md`.
+
+Checks:
+
+- Grün: `git log --oneline main..HEAD`
+- Grün: `git diff --name-status main..HEAD`
+- Grün: `git diff --check`
+
 ### P10 Finaler Volltest
 
 Ziel: Alle Änderungen abschließend prüfen und lokal nach `main` integrieren.
