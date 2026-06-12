@@ -9,6 +9,7 @@
 - P0 abgeschlossen mit Commit `916659ef`: Prozessartefakt, Worktree und Preflight.
 - P1 abgeschlossen: `scored-agenda-sequence-host.ts` enthält Host-, Result- und Payload-Typen. `install-rez-sequence-handlers.ts` re-exportiert die Typen stabil, während DFR, Security Purge und Priority Requisition direkt aus dem neuen Host-Typmodul importieren. P1-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P2 abgeschlossen: `priority-requisition-sequence.test.ts` prüft neben Source-Routing nun actor-private/public option labels und den Free-Rez-Payload-Vertrag mit `rezCostPaid: 0` ohne Credit-Abzug. Modul- und Integrationstest für Priority Requisition, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P3 abgeschlossen: `scored-agenda-sequence-registry.ts` registriert Priority Requisition, DFR-Install, DFR-Rez und Security-Purge-Target als Choice-Resolver mit eindeutigen IDs. Der Dispatcher ruft nur noch `resolveScoredAgendaSequenceChoice` auf. Registry-/Sequenztests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 

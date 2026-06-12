@@ -1,21 +1,8 @@
-import {
-  isHqToNewRemoteInstallRezChoiceSource,
-  isHqToNewRemoteInstallRezRezChoiceSource,
-  resolveHqToNewRemoteInstallRezChoice,
-  resolveHqToNewRemoteInstallRezRezChoice,
-} from "./scored-agenda/data-fort-reclamation-sequence";
-import {
-  isSecurityPurgeInstallTargetChoiceSource,
-  resolveSecurityPurgeInstallTargetChoice,
-} from "./scored-agenda/security-purge-sequence";
-import {
-  isPriorityRequisitionChoiceSource,
-  resolvePriorityRequisitionChoice,
-} from "./scored-agenda/priority-requisition-sequence";
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "./scored-agenda/scored-agenda-sequence-host";
+import { resolveScoredAgendaSequenceChoice } from "./scored-agenda/scored-agenda-sequence-registry";
 export { startDataFortReclamationChoice } from "./scored-agenda/data-fort-reclamation-sequence";
 export { startPriorityRequisitionChoice } from "./scored-agenda/priority-requisition-sequence";
 export { resolveSecurityPurgeAgendaPurge } from "./scored-agenda/security-purge-sequence";
@@ -32,14 +19,5 @@ export type {
 export function handleCorpInstallRezSequenceChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
-  const source = host.state.pendingChoice?.source ?? "";
-  if (isPriorityRequisitionChoiceSource(source))
-    return resolvePriorityRequisitionChoice(host);
-  if (isHqToNewRemoteInstallRezRezChoiceSource(source))
-    return resolveHqToNewRemoteInstallRezRezChoice(host);
-  if (isHqToNewRemoteInstallRezChoiceSource(source))
-    return resolveHqToNewRemoteInstallRezChoice(host);
-  if (isSecurityPurgeInstallTargetChoiceSource(source))
-    return resolveSecurityPurgeInstallTargetChoice(host);
-  return { handled: false };
+  return resolveScoredAgendaSequenceChoice(host);
 }
