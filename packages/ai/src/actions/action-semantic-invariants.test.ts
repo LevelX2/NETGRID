@@ -168,4 +168,44 @@ describe("Action semantic invariants", () => {
       ),
     ).toHaveLength(expectedWorklists.length);
   });
+
+  it("keeps proteus play-strength readiness diagnostic and gated behind originalset stability", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-proteus-play-strength-readiness-2026-06-12.md",
+      ),
+      "utf8",
+    );
+
+    expect(report).toContain("diagnostic_readiness_only");
+    expect(report).toContain(
+      "Proteus bleibt für KI-Play-Strength zurückgestellt",
+    );
+    expect(report).toContain("Originalset-Worklists haben Vorrang");
+    expect(report).toContain("`productiveUseAllowed`: `false`");
+    expect(report).toContain("`semanticExecutionAllowed`: `false`");
+    expect(report).toContain("`runtimeConsumerStatus`: `none`");
+    expect(report).toContain("`noRuntimeEffect`: `true`");
+
+    const expectedReadinessAreas = [
+      "AI-PROTEUS-READ-01-random-outcomes",
+      "AI-PROTEUS-READ-02-bad-publicity",
+      "AI-PROTEUS-READ-03-ambush-virus",
+      "AI-PROTEUS-READ-04-variable-x-costs",
+      "AI-PROTEUS-READ-05-temporary-actions",
+      "AI-PROTEUS-READ-06-complex-run-modification",
+      "AI-PROTEUS-READ-07-target-choice-gaps",
+      "AI-PROTEUS-READ-08-risk-projection-gaps",
+    ];
+
+    for (const readinessArea of expectedReadinessAreas) {
+      expect(report).toContain(`\`${readinessArea}\``);
+    }
+    expect(
+      [...report.matchAll(/`AI-PROTEUS-READ-\d{2}-[^`]+`/g)].map(
+        (match) => match[0],
+      ),
+    ).toHaveLength(expectedReadinessAreas.length);
+  });
 });
