@@ -655,8 +655,9 @@ function resolvePriorityRequisitionChoice(
 
 /**
  * @mvpBoundary This path installs selected HQ cards first and opens one
- * follow-up rez choice. Region and rez-on-install correctness requires the
- * ordered install/rez sequence work in this process.
+ * follow-up rez choice. Region replacement and required root rez-on-install
+ * now run inside the ordered install/rez sequence. A fully interactive
+ * optional rez choice after each individual non-required card remains deferred.
  */
 function resolveHqToNewRemoteInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,

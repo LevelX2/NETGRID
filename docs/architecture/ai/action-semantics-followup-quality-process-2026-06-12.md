@@ -129,6 +129,23 @@ Done-Gate: Abschlussdokumentation widerspricht nicht mehr dem tatsächlichen Sta
 
 Commit: `docs(ai): clean up action semantics baseline`
 
+#### P1 Ergebnis
+
+Umgesetzt:
+
+- Vorige Foundation-Prozessdatei auf `complete` gesetzt.
+- P15-Baseline-Widerspruch präzisiert: Branch-Diff gegen lokalen `main` war grün; die historische `origin/main`-Rotmeldung gehörte zur damals ungepushten lokalen Main-Baseline.
+- Separater AI022-/Hints-Strang als Stash `ai022-hints-local-baseline-before-followup-process` dokumentiert.
+- Abschlusskriterien auf die jeweils dokumentierte Paket- oder Integrationsbasis bezogen.
+- Data-Fort-Reclamation-Kommentar aktualisiert: Region-Replacement und required root rez-on-install sind umgesetzt; vollständig interaktive optionale Rez-Choice je nicht-required Karte bleibt deferred.
+
+Checks:
+
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Grün: `git diff --check`
+
 ### P2 TargetProfile-Gap-Closure Sprint 1
 
 Ziel: TargetProfile-Gaps messbar reduzieren, zuerst klare Proteus-Muster.
