@@ -29,6 +29,7 @@ NETGRID ist eine private Webapplikation für regelgeführtes, deterministisches 
 - PlayerViews, PublicEvents, KI-Inputs, Fehler, Logs, Reconnect, Undo und Replay dürfen keine verdeckten Informationen leaken.
 - Jede erfolgreiche Transition erzeugt Event, StateVersion und StateHash.
 - Zufall wird über Seed, RandomCounter und RandomDrawRecords reproduzierbar.
+- Wiederverwendbare Engine-, KI-, Test- und Helper-Bausteine werden funktionsbeschreibend benannt; konkrete Kartennamen gehören in CardImplementation-, Fixture-, Nachweis- oder Anzeige-Kontexte, aber nicht als allgemeine Regel- oder Bewertungsbedingung. Siehe [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Der Kartenpool bleibt für MVP 0.1 und 0.2 auf feste Demo-Decks begrenzt.
 - V0.3 bleibt ebenfalls beim vorhandenen Demo-Kartenpool und erweitert zuerst KI, Controller und Simulation.
 - V0.4 erweitert nur interne fiktive Karten mit Manifest-, Test-, Visibility- und Replay-Pflicht.
