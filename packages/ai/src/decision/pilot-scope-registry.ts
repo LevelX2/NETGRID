@@ -1,6 +1,7 @@
 import type { LegalAction } from "@netgrid/shared";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
+import { semanticShadowCalibrationProfileFromEnv } from "./semantic-shadow-calibration";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
 import type { SemanticDecisionTrace } from "./semantic-decision-trace";
 
@@ -28,7 +29,6 @@ export type SemanticBasicSetupPilotResult = {
 
 type RankedAction = SemanticDecisionTrace["rankedActions"][number];
 
-const MINIMUM_PILOT_SCORE_GAP = 20;
 const PILOT_SCOPES = [
   BASIC_SETUP_PILOT_MODE,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
@@ -69,7 +69,9 @@ export function semanticPilotChoice(params: {
   if (!top) return undefined;
   if (!params.frame.legalActionIds.includes(top.actionId)) return undefined;
   if (top.blockers.length > 0) return undefined;
-  if (top.score - params.currentChoice.score < MINIMUM_PILOT_SCORE_GAP) {
+  const minimumScoreGap =
+    semanticShadowCalibrationProfileFromEnv().pilotMinimumScoreGap;
+  if (top.score - params.currentChoice.score < minimumScoreGap) {
     return undefined;
   }
   const matchingChoice = params.choices.find(

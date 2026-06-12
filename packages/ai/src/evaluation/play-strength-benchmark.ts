@@ -1,6 +1,12 @@
 import type { AiDecision } from "@netgrid/shared";
+import {
+  SEMANTIC_SHADOW_BASELINE_V1,
+  SEMANTIC_SHADOW_CALIBRATED_V1,
+  type SemanticShadowCalibrationProfile,
+} from "../decision/semantic-shadow-calibration";
 import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
+import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { redactSemanticString } from "../diagnostics/semantic-redaction";
 import { compareSemanticShadowToRuntime } from "./semantic-shadow-report";
 import type { AiMistakeClass } from "./mistake-taxonomy";
@@ -23,6 +29,20 @@ export type PlayStrengthCalibrationBenchmark = {
     rate: number;
   };
   scoreComponentContribution: Record<string, number>;
+  evidence: string[];
+};
+
+export type PlayStrengthCalibrationProfileDiff = {
+  baselineProfileId: string;
+  candidateProfileId: string;
+  baselineReference: string;
+  sampleCount: number;
+  changedScoreSampleCount: number;
+  topActionChangedCount: number;
+  averageTopScoreDelta: number;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
   evidence: string[];
 };
 
@@ -65,6 +85,50 @@ export function buildPlayStrengthCalibrationBenchmark(
   };
 }
 
+export function comparePlayStrengthCalibrationProfiles(
+  samples: readonly Pick<PlayStrengthBenchmarkSample, "snapshotId" | "frame">[],
+  baselineProfile: SemanticShadowCalibrationProfile = SEMANTIC_SHADOW_BASELINE_V1,
+  candidateProfile: SemanticShadowCalibrationProfile = SEMANTIC_SHADOW_CALIBRATED_V1,
+): PlayStrengthCalibrationProfileDiff {
+  const scoreDiffs = samples.map((sample) => {
+    const baseline = buildSemanticShadowDecision(sample.frame, {
+      calibrationProfile: baselineProfile,
+    });
+    const candidate = buildSemanticShadowDecision(sample.frame, {
+      calibrationProfile: candidateProfile,
+    });
+    const baselineTop = baseline.rankedActions[0];
+    const candidateTop = candidate.rankedActions[0];
+    return {
+      snapshotId: sample.snapshotId,
+      scoreChanged:
+        JSON.stringify(scoreMap(baseline)) !== JSON.stringify(scoreMap(candidate)),
+      topActionChanged: baselineTop?.actionId !== candidateTop?.actionId,
+      topScoreDelta: (candidateTop?.score ?? 0) - (baselineTop?.score ?? 0),
+    };
+  });
+  return {
+    baselineProfileId: baselineProfile.profileId,
+    candidateProfileId: candidateProfile.profileId,
+    baselineReference: candidateProfile.baselineReference,
+    sampleCount: samples.length,
+    changedScoreSampleCount: scoreDiffs.filter((diff) => diff.scoreChanged).length,
+    topActionChangedCount: scoreDiffs.filter((diff) => diff.topActionChanged)
+      .length,
+    averageTopScoreDelta: average(scoreDiffs.map((diff) => diff.topScoreDelta)),
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    evidence: [
+      "play_strength_calibration_profile_diff:diagnostic_only",
+      `baseline_profile:${baselineProfile.profileId}`,
+      `candidate_profile:${candidateProfile.profileId}`,
+      `baseline_reference:${candidateProfile.baselineReference}`,
+      "runtime_weight_change:false",
+    ].map(redactSemanticString),
+  };
+}
+
 function average(values: readonly number[]): number {
   if (values.length === 0) return 0;
   return round(values.reduce((sum, value) => sum + value, 0) / values.length);
@@ -93,6 +157,12 @@ function scoreComponentContribution(
     }
   }
   return totals;
+}
+
+function scoreMap(trace: SemanticDecisionTrace): Record<string, number> {
+  return Object.fromEntries(
+    trace.rankedActions.map((action) => [action.actionId, action.score]),
+  );
 }
 
 function round(value: number): number {

@@ -9,18 +9,26 @@ import {
   pilotScopeAllowsAction,
   semanticPilotChoice,
 } from "./pilot-scope-registry";
+import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "./semantic-shadow-calibration";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
 import type { SemanticDecisionTrace } from "./semantic-decision-trace";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 
 describe("pilot-scope-registry", () => {
   const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+  const originalCalibration =
+    process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
 
   afterEach(() => {
     if (originalPilot === undefined) {
       delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     } else {
       process.env[AI_PLAY_STRENGTH_PILOT_ENV] = originalPilot;
+    }
+    if (originalCalibration === undefined) {
+      delete process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
+    } else {
+      process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV] = originalCalibration;
     }
   });
 
@@ -157,6 +165,28 @@ describe("pilot-scope-registry", () => {
         "pilot_scope_reason:runner_safe_access_central_reachable_allowed",
       ]),
     );
+  });
+
+  it("takes the pilot minimum score gap from the active calibration profile", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+    delete process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
+
+    const params = {
+      frame: frame(["gain-1", "draw-1"]),
+      trace: trace("draw-1", 122, "setup"),
+      currentChoice: choice("gain-1", "gain_credit", 100),
+      choices: [
+        choice("gain-1", "gain_credit", 100),
+        choice("draw-1", "draw_card", 122),
+      ],
+    };
+
+    expect(semanticPilotChoice(params)?.choice.action.actionId).toBe("draw-1");
+
+    process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV] =
+      "shadow_calibrated_v1";
+
+    expect(semanticPilotChoice(params)).toBeUndefined();
   });
 });
 
