@@ -662,7 +662,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(cardCounterAmount(state, cacheId, "virus")).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_155_code-viral-cache",
-      codeViralCachePreservedCounters: 2,
+      preservedCounterAmount: 2,
       remainingVirusCounters: 2,
     });
 

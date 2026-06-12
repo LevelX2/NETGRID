@@ -275,7 +275,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     constants: {
       RUNNER_EVENT_RESOLVERS: {},
-      CODE_VIRAL_CACHE_ID: "code_viral_cache",
       STACK_SEARCH_PROGRAM_CARD_IDS: new Set(),
       SELF_MODIFYING_CODE_ID: "self_modifying_code",
       SHORT_CIRCUIT_RESOURCE_CARD_ID: "short_circuit",

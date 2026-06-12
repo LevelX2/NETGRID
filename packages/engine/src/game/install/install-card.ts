@@ -12,7 +12,6 @@ import {
 } from "@netgrid/shared";
 import {
   BUTCHER_BOY_ID,
-  CODE_VIRAL_CACHE_ID,
   SKIVVISS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
@@ -311,14 +310,7 @@ function installRunnerCard(
     if (!selectedSubtype || !allowed.includes(selectedSubtype))
       throw new Error("Die Installation benötigt einen gültigen Icebreaker-Typ.");
   }
-  if (
-    definition.id === CODE_VIRAL_CACHE_ID &&
-    host.runner.ensureTurnFlags().successfulHqRunThisTurn !== true
-  ) {
-    throw new Error(
-      "Code Viral Cache darf nur nach erfolgreichem HQ-Run in diesem Zug installiert werden.",
-    );
-  }
+  validateRunnerInstallCapabilities(host, definition);
   const restrictiveTargetServerId =
     selectedServerId && selectedServerId !== "new_remote"
       ? (selectedServerId as Exclude<ServerId, "new_remote">)
@@ -438,6 +430,28 @@ function installRunnerCard(
   if (definition.id === "v099_host_resource")
     host.runner.startRunnerHostingChoice(cardId, legalAction);
   host.lifecycle.executeOnInstall(legalAction, definition, cardId);
+}
+
+function validateRunnerInstallCapabilities(
+  host: InstallCardHost,
+  definition: CardDefinition,
+): void {
+  const installCapabilities =
+    cardImplementationForDefinitionId(definition.id)?.installCapabilities ?? [];
+  for (const capability of installCapabilities) {
+    if (capability.kind !== "runner_made_successful_run_on_server_this_turn")
+      continue;
+    const flags = host.runner.ensureTurnFlags();
+    const allowed =
+      (capability.server === "hq" && flags.successfulHqRunThisTurn === true) ||
+      (capability.server === "rd" && flags.successfulRdRunThisTurn === true) ||
+      (capability.server === "any_data_fort" &&
+        flags.successfulRunThisTurn === true);
+    if (!allowed)
+      throw new Error(
+        "Diese Karte darf erst nach einem passenden erfolgreichen Run in diesem Zug installiert werden.",
+      );
+  }
 }
 
 function installRunnerHardware(

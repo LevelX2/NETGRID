@@ -219,7 +219,7 @@ export type CardHiddenReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "code_viral_cache_purge_replacement";
+      kind: "purge_replacement_with_runner_virus_counter_cleanup";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
@@ -561,6 +561,11 @@ export type CardInstallCapabilityImplementation =
     }
   | {
       kind: "install_only_in_hq_or_rd";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "runner_made_successful_run_on_server_this_turn";
+      server: Extract<ServerId, "hq" | "rd"> | "any_data_fort";
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
