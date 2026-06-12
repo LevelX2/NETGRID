@@ -3,6 +3,8 @@ import {
   SEMANTIC_SHADOW_BASELINE_V1,
   SEMANTIC_SHADOW_CALIBRATED_V1,
   type SemanticShadowCalibrationProfile,
+  type SemanticShadowCalibrationBenchmarkMetadata,
+  type SemanticShadowCalibrationCorpusLock,
 } from "../decision/semantic-shadow-calibration";
 import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
@@ -40,6 +42,8 @@ export type PlayStrengthCalibrationProfileDiff = {
   baselineReference: string;
   baselineReportPath: string;
   baselineScenarioCount: number;
+  createdFromBenchmark: SemanticShadowCalibrationBenchmarkMetadata;
+  lockedAgainstCorpus: SemanticShadowCalibrationCorpusLock;
   sampleCount: number;
   changedScoreSampleCount: number;
   topActionChangedCount: number;
@@ -119,6 +123,8 @@ export function comparePlayStrengthCalibrationProfiles(
     baselineReference: candidateProfile.baselineReference,
     baselineReportPath: candidateProfile.baselineReportPath,
     baselineScenarioCount: candidateProfile.baselineScenarioCount,
+    createdFromBenchmark: candidateProfile.createdFromBenchmark,
+    lockedAgainstCorpus: candidateProfile.lockedAgainstCorpus,
     sampleCount: samples.length,
     changedScoreSampleCount: scoreDiffs.filter((diff) => diff.scoreChanged).length,
     topActionChangedCount: scoreDiffs.filter((diff) => diff.topActionChanged)
@@ -134,6 +140,9 @@ export function comparePlayStrengthCalibrationProfiles(
       `baseline_reference:${candidateProfile.baselineReference}`,
       `baseline_report_path:${candidateProfile.baselineReportPath}`,
       `baseline_scenario_count:${candidateProfile.baselineScenarioCount}`,
+      `created_from_benchmark:${candidateProfile.createdFromBenchmark.benchmarkId}`,
+      `locked_against_corpus:${candidateProfile.lockedAgainstCorpus.corpusId}`,
+      `locked_corpus_scenario_count:${candidateProfile.lockedAgainstCorpus.scenarioCount}`,
       "runtime_weight_change:false",
     ].map(redactSemanticString),
   };

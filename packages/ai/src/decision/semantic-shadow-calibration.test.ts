@@ -40,6 +40,18 @@ describe("SemanticShadowCalibration", () => {
         "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
       );
       expect(profile.baselineScenarioCount).toBe(18);
+      expect(profile.createdFromBenchmark).toMatchObject({
+        benchmarkId: "play-strength-calibration-baseline-2026-06-12",
+        source: "play_strength_benchmark",
+        sampleCount: 50,
+        reportPath:
+          "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md",
+      });
+      expect(profile.lockedAgainstCorpus).toMatchObject({
+        corpusId: "real-engine-decision-corpus-v2-2026-06-13",
+        scenarioCount: 50,
+        scenarioIdSource: "REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS",
+      });
       expect(profile.intendedScopes).toEqual(
         expect.arrayContaining([
           "semantic_shadow_league",
@@ -55,6 +67,9 @@ describe("SemanticShadowCalibration", () => {
           "baseline_reference:ai-shadow-league-baseline-2026-06-12",
           "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
           "baseline_scenario_count:18",
+          "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
+          "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
+          "locked_corpus_scenario_count:50",
         ]),
       );
       expect(profile.productiveUseAllowed).toBe(false);

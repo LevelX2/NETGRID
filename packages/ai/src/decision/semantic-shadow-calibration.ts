@@ -17,6 +17,26 @@ export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE =
 export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH =
   "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md" as const;
 export const SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT = 18;
+export const SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID =
+  "play-strength-calibration-baseline-2026-06-12" as const;
+export const SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_ID =
+  "real-engine-decision-corpus-v2-2026-06-13" as const;
+export const SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT = 50;
+
+export type SemanticShadowCalibrationBenchmarkMetadata = {
+  benchmarkId: typeof SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID;
+  source: "play_strength_benchmark";
+  sampleCount: number;
+  reportPath: "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md";
+  evidence: string[];
+};
+
+export type SemanticShadowCalibrationCorpusLock = {
+  corpusId: typeof SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_ID;
+  scenarioCount: typeof SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT;
+  scenarioIdSource: "REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS";
+  evidence: string[];
+};
 
 export type SemanticShadowCalibrationProfile = {
   schemaVersion: typeof SEMANTIC_SHADOW_CALIBRATION_PROFILE_SCHEMA_VERSION;
@@ -28,6 +48,8 @@ export type SemanticShadowCalibrationProfile = {
   baselineReference: string;
   baselineReportPath: string;
   baselineScenarioCount: number;
+  createdFromBenchmark: SemanticShadowCalibrationBenchmarkMetadata;
+  lockedAgainstCorpus: SemanticShadowCalibrationCorpusLock;
   weightSummary: Record<string, string | number>;
   pilotMinimumScoreGap: number;
   componentWeights: Record<ScoreComponent, number>;
@@ -53,6 +75,8 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
   baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
   baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
   baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
+  createdFromBenchmark: calibrationBenchmarkMetadata(),
+  lockedAgainstCorpus: calibrationCorpusLock(),
   weightSummary: {
     componentWeights: "all_components_1x",
     opportunityPriorityBonus: "low:2,medium:6,high:12,critical:18",
@@ -91,6 +115,9 @@ export const SEMANTIC_SHADOW_BASELINE_V1: SemanticShadowCalibrationProfile = {
     "baseline_reference:ai-shadow-league-baseline-2026-06-12",
     "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
     "baseline_scenario_count:18",
+    "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
+    "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
+    "locked_corpus_scenario_count:50",
   ],
 };
 
@@ -108,6 +135,8 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
   baselineReference: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REFERENCE,
   baselineReportPath: SEMANTIC_SHADOW_CALIBRATION_BASELINE_REPORT_PATH,
   baselineScenarioCount: SEMANTIC_SHADOW_CALIBRATION_BASELINE_SCENARIO_COUNT,
+  createdFromBenchmark: calibrationBenchmarkMetadata(),
+  lockedAgainstCorpus: calibrationCorpusLock(),
   weightSummary: {
     componentWeights:
       "cost:1.15,timing:1.1,risk:1.25,plan:1.05,target:1.2,opportunity:1.15,threat:1.2",
@@ -147,8 +176,37 @@ export const SEMANTIC_SHADOW_CALIBRATED_V1: SemanticShadowCalibrationProfile = {
     "baseline_reference:ai-shadow-league-baseline-2026-06-12",
     "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
     "baseline_scenario_count:18",
+    "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
+    "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
+    "locked_corpus_scenario_count:50",
   ],
 };
+
+function calibrationBenchmarkMetadata(): SemanticShadowCalibrationBenchmarkMetadata {
+  return {
+    benchmarkId: SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID,
+    source: "play_strength_benchmark",
+    sampleCount: SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT,
+    reportPath:
+      "docs/reviews/ai/ai-play-strength-calibration-baseline-2026-06-12.md",
+    evidence: [
+      `created_from_benchmark:${SEMANTIC_SHADOW_CALIBRATION_CREATED_FROM_BENCHMARK_ID}`,
+      `benchmark_sample_count:${SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT}`,
+    ],
+  };
+}
+
+function calibrationCorpusLock(): SemanticShadowCalibrationCorpusLock {
+  return {
+    corpusId: SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_ID,
+    scenarioCount: SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT,
+    scenarioIdSource: "REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS",
+    evidence: [
+      `locked_against_corpus:${SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_ID}`,
+      `locked_corpus_scenario_count:${SEMANTIC_SHADOW_CALIBRATION_LOCKED_CORPUS_SCENARIO_COUNT}`,
+    ],
+  };
+}
 
 export function resolveSemanticShadowCalibrationProfile(
   profile:
