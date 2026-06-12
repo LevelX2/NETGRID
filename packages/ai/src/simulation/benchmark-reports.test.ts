@@ -582,15 +582,31 @@ describe("benchmark report formatting", () => {
         }),
       ],
     };
+    const plausibleOnlySummary: AiSimulationSummary = {
+      ...reserveSummary,
+      seed: "selfplay-action-limit-runner-plausible-only-subcluster",
+      finalStateHash: "fnv1a:selfplay-action-limit-runner-plausible-only-subcluster",
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit", {
+          selectedActionId: "runner-plausible-only-gain",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          runnerEconomyChoicePlausible: true,
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRemote: true,
+        }),
+      ],
+    };
 
     const subclusters = summarizeSelfplayActionLimitSubclusters([
       reserveSummary,
       noAlternativeSummary,
+      plausibleOnlySummary,
     ]);
 
     expect(subclusters.runner_late_gain_credit_real_reserve).toBe(1);
     expect(subclusters.runner_late_gain_credit_no_safe_alternative).toBe(1);
-    expect(subclusters.runner_late_gain_credit_without_funding_need).toBe(0);
+    expect(subclusters.runner_late_gain_credit_without_funding_need).toBe(1);
   });
 
   it("splits corp gain-credit stalls by rez or scoreline alternative", () => {

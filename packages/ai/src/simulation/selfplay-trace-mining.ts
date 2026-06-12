@@ -520,7 +520,6 @@ function runnerLateGainCreditHasReserveOrSafetyNeed(
     entry.runnerReservePreservingEconomy === true ||
     entry.runnerBelowReserveBefore === true ||
     entry.runnerCreditStarvedWithLegalEconomy === true ||
-    entry.runnerEconomyChoicePlausible === true ||
     (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
     /known_unaffordable_path:true|missing_breaker_coverage:true|debtrepaymentrisk:high|encounter_survival/.test(
       text,
