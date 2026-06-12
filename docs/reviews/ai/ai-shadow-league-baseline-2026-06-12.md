@@ -20,8 +20,12 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 | agreementRate | 0.75 |
 | mistakeCount | 1 |
 | pilotEligibleCount | 26 |
+| scopeCandidateCount | 90 |
+| scopeAllowedCount | 26 |
 | pilotWouldOverrideCount | 26 |
+| pilotActualOverrideCount | 0 |
 | pilotEligibilityRate | 0.867 |
+| averageScoreGap | 21.276 |
 | remoteContestPilotCandidateCount | 1 |
 | rankedActionCount | 430 |
 | rejectedActionCount | 0 |
@@ -46,6 +50,17 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 | `runner_safe_access` | 11 | 11 | `runner_real_safe_hq_access`, `runner_real_safe_rd_access`, `runner_real_damage_buffer_needed`, `runner_real_tag_cleanup`, `runner_real_remote_probe`, `runner_real_rnd_pressure_with_buffer`, `runner_real_high_credits_setup`, `runner_real_empty_hand_draw`, `runner_real_safe_archives_access`, `runner_real_remote_with_ice_probe`, `runner_real_low_click_tag_cleanup` |
 | `corp_score_window` | 2 | 2 | `corp_real_score_agenda_window`, `corp_real_score_low_credits` |
 
+## Blocked By Reason
+
+| Reason | Count |
+| --- | ---: |
+| `basic_setup_action_type_blocked` | 17 |
+| `corp_score_window_action_type_blocked` | 13 |
+| `corp_score_window_wrong_side` | 15 |
+| `runner_safe_access_action_type_blocked` | 3 |
+| `runner_safe_access_non_central_target` | 1 |
+| `runner_safe_access_wrong_side` | 15 |
+
 ## RemoteContest Candidate
 
 | Feld | Wert |
@@ -61,7 +76,9 @@ Lokale, versionierte Semantic-Shadow-League-Baseline für den Real-Engine-Decisi
 
 ## Einordnung
 
-- `pilotWouldOverrideCount` ist report-only und bedeutet: Die Shadow-Top-Action wäre unter Scope-Regeln eligible, wenn Runtime-Choice, Score-Gap und Opt-in passen. Es ist keine produktive Entscheidung.
+- `pilotEligibleCount` zählt Szenarien mit mindestens einem erlaubten Scope. `scopeCandidateCount` zählt geprüfte Szenario/Scope-Paare. `scopeAllowedCount` zählt erlaubte Szenario/Scope-Paare.
+- `pilotWouldOverrideCount` ist report-only und bedeutet: Die Shadow-Top-Action hätte bei erlaubtem Scope und positivem Score-Gap ein hypothetisches Override-Potenzial. Es ist keine produktive Entscheidung.
+- `pilotActualOverrideCount` bleibt 0, weil die Shadow-League keinen Runtime-Consumer hat.
 - Die `runner_safe_access`-Eligibility in `runner_real_damage_buffer_needed` und `runner_real_tag_cleanup` ist ein bewusst sichtbarer Baseline-Befund, kein Freigabesignal.
 - `redactionStatus: passed` bestätigt nur den lokalen Report-Scrub. Es erweitert keine Hidden-Info-Allowlist.
 - Nach AI-MAT2-2 umfasst der Korpus lokal 30 Szenarien. Die drei Top-Disagreements bleiben unverändert; die zusätzlichen Szenarien erhöhen die Pilot-Scope-Eligibility.

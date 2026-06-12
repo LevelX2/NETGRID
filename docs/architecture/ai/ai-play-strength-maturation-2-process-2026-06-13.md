@@ -90,6 +90,7 @@ Der Prozess stoppt ohne Nachfrage, wenn eine Änderung Engine-Validierung, `appl
 | AI-MAT2-1 | complete | AI-MAT2-1 commit | Offizieller Pilot-Env-Vertrag dokumentiert; Legacy-Env ohne Runtime-Wirkung getestet. Checks: Registry-Test 10/10, Typecheck grün. |
 | AI-MAT2-2 | complete | AI-MAT2-2 commit | ID-/Builder-/Sample-Parität hart getestet und Shadow-League-Baseline auf 30 Code-Szenarien aktualisiert. Checks: Corpus 3/3, ShadowLeague 2/2, Typecheck grün. |
 | AI-MAT2-3 | complete | AI-MAT2-3 commit | Corpus-Szenarien nutzen `RealEngineFixtureBuilder`; direkter State-Mutationsguard in den Corpus-Tests ergänzt. Checks: Corpus 4/4, Typecheck grün. |
+| AI-MAT2-4 | complete | AI-MAT2-4 commit | Pilot-Metriken in Scope-Kandidatur, Scope-Erlaubnis, hypothetisches Override und tatsächliches Override getrennt. Checks: ShadowLeague 2/2, Registry 10/10, Typecheck grün. |
 
 ## Paketdetails
 

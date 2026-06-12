@@ -49,7 +49,16 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
     expect(report.metrics.pilotEligibleCount).toBe(26);
+    expect(report.metrics.scopeCandidateCount).toBe(90);
+    expect(report.metrics.scopeAllowedCount).toBe(26);
     expect(report.metrics.pilotWouldOverrideCount).toBe(26);
+    expect(report.metrics.pilotActualOverrideCount).toBe(0);
+    expect(report.metrics.averageScoreGap).toBe(21.276);
+    expect(report.metrics.blockedByReason).toMatchObject({
+      basic_setup_action_type_blocked: 17,
+      corp_score_window_wrong_side: 15,
+      runner_safe_access_wrong_side: 15,
+    });
     expect(report.metrics.pilotEligibilityRate).toBe(0.867);
     expect(report.metrics.pilotEligibilityBySide.runner).toEqual({
       scenarioCount: 15,
@@ -111,33 +120,57 @@ describe("SemanticShadowLeague", () => {
         "productive_use_allowed:false",
       ]),
     });
-    expect(scenario(report, "runner_real_low_credits").pilotEligibility).toEqual({
+    expect(scenario(report, "runner_real_low_credits").pilotEligibility).toMatchObject({
       eligible: true,
+      scopeCandidateCount: 3,
+      scopeAllowedCount: 1,
       wouldOverride: true,
+      actualOverride: false,
       scopes: ["basic_setup"],
+      scoreGap: 37,
+      blockedByReason: {
+        corp_score_window_wrong_side: 1,
+        runner_safe_access_action_type_blocked: 1,
+      },
       reportOnly: true,
       productiveUseAllowed: false,
-      evidence: [
+      evidence: expect.arrayContaining([
         "pilot_scope_eligible:true",
+        "pilot_scope_candidate_count:3",
+        "pilot_scope_allowed_count:1",
         "pilot_would_override:true",
+        "pilot_actual_override:false",
+        "score_gap:37",
         "pilot_eligibility:report_only",
         "productive_use_allowed:false",
         "pilot_scope:basic_setup:eligible",
-      ],
+      ]),
     });
-    expect(scenario(report, "runner_real_safe_hq_access").pilotEligibility).toEqual({
+    expect(scenario(report, "runner_real_safe_hq_access").pilotEligibility).toMatchObject({
       eligible: true,
+      scopeCandidateCount: 3,
+      scopeAllowedCount: 1,
       wouldOverride: true,
+      actualOverride: false,
       scopes: ["runner_safe_access"],
+      scoreGap: 7,
+      blockedByReason: {
+        basic_setup_action_type_blocked: 1,
+        corp_score_window_wrong_side: 1,
+      },
       reportOnly: true,
       productiveUseAllowed: false,
-      evidence: [
+      evidence: expect.arrayContaining([
         "pilot_scope_eligible:true",
+        "pilot_scope_candidate_count:3",
+        "pilot_scope_allowed_count:1",
         "pilot_would_override:true",
+        "pilot_actual_override:false",
+        "score_gap:7",
         "pilot_eligibility:report_only",
         "productive_use_allowed:false",
         "pilot_scope:runner_safe_access:eligible",
-      ],
+      ]),
     });
     expect(
       report.scenarios.every(

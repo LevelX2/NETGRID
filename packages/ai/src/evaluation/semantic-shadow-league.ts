@@ -5,6 +5,7 @@ import {
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   pilotScopeAllowsAction,
   type AiPlayStrengthPilotScope,
+  type PilotScopeDecision,
 } from "../decision/pilot-scope-registry";
 import type { SemanticRankedAction } from "../decision/semantic-decision-trace";
 import {
@@ -80,8 +81,13 @@ export type SemanticShadowLeagueScenarioReport = {
 
 export type SemanticShadowLeaguePilotEligibility = {
   eligible: boolean;
+  scopeCandidateCount: number;
+  scopeAllowedCount: number;
   wouldOverride: boolean;
+  actualOverride: false;
   scopes: AiPlayStrengthPilotScope[];
+  scoreGap: number | null;
+  blockedByReason: Record<string, number>;
   reportOnly: true;
   productiveUseAllowed: false;
   evidence: string[];
@@ -112,7 +118,12 @@ export type SemanticShadowLeagueReport = {
     mistakeCount: number;
     mistakesByClass: Record<AiMistakeClass, number>;
     pilotEligibleCount: number;
+    scopeCandidateCount: number;
+    scopeAllowedCount: number;
     pilotWouldOverrideCount: number;
+    pilotActualOverrideCount: number;
+    blockedByReason: Record<string, number>;
+    averageScoreGap: number | null;
     pilotEligibilityRate: number | null;
     pilotEligibilityBySide: Record<Side, SemanticShadowLeaguePilotEligibilityBySide>;
     scopeBreakdown: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>;
@@ -223,8 +234,10 @@ function buildScenarioReport(
       })
     : undefined;
   const mistakes = classifyDecisionTraceMistakes(sample.frame, sample.trace);
-  const pilotScopes = eligiblePilotScopes(sample, top, topCandidate?.actionType);
-  const pilotEligibility = buildPilotEligibility(pilotScopes);
+  const pilotEligibility = buildPilotEligibility(
+    pilotScopeDecisions(sample, top, topCandidate?.actionType),
+    scoreGapForTop(sample.trace.rankedActions),
+  );
   const remoteContestPilotCandidate = remoteContestPilotCandidateFor(
     sample,
     top,
@@ -280,12 +293,26 @@ function buildLeagueMetrics(
   const pilotEligibleCount = scenarios.filter(
     (scenario) => scenario.pilotEligibility.eligible,
   ).length;
+  const scopeCandidateCount = scenarios.reduce(
+    (sum, scenario) => sum + scenario.pilotEligibility.scopeCandidateCount,
+    0,
+  );
+  const scopeAllowedCount = scenarios.reduce(
+    (sum, scenario) => sum + scenario.pilotEligibility.scopeAllowedCount,
+    0,
+  );
   const pilotWouldOverrideCount = scenarios.filter(
     (scenario) => scenario.pilotEligibility.wouldOverride,
+  ).length;
+  const pilotActualOverrideCount = scenarios.filter(
+    (scenario) => scenario.pilotEligibility.actualOverride,
   ).length;
   const topScores = scenarios
     .map((scenario) => scenario.topScore)
     .filter((score): score is number => score !== undefined);
+  const scoreGaps = scenarios
+    .map((scenario) => scenario.pilotEligibility.scoreGap)
+    .filter((scoreGap): scoreGap is number => scoreGap !== null);
   return {
     agreementComparedCount: compared.length,
     agreementCount,
@@ -299,7 +326,21 @@ function buildLeagueMetrics(
       scenarios.flatMap((scenario) => scenario.observedMistakes),
     ),
     pilotEligibleCount,
+    scopeCandidateCount,
+    scopeAllowedCount,
     pilotWouldOverrideCount,
+    pilotActualOverrideCount,
+    blockedByReason: countStrings(
+      scenarios.flatMap((scenario) =>
+        Object.entries(scenario.pilotEligibility.blockedByReason).flatMap(
+          ([reason, count]) => Array.from({ length: count }, () => reason),
+        ),
+      ),
+    ),
+    averageScoreGap:
+      scoreGaps.length > 0
+        ? roundMetric(scoreGaps.reduce((sum, scoreGap) => sum + scoreGap, 0) / scoreGaps.length)
+        : null,
     pilotEligibilityRate:
       scenarios.length > 0 ? roundMetric(pilotEligibleCount / scenarios.length) : null,
     pilotEligibilityBySide: pilotEligibilityBySide(scenarios),
@@ -384,21 +425,42 @@ function rankedActionHasUtilityFamily(
 }
 
 function buildPilotEligibility(
-  scopes: readonly AiPlayStrengthPilotScope[],
+  decisions: readonly PilotScopeDecision[],
+  scoreGap: number | null,
 ): SemanticShadowLeaguePilotEligibility {
+  const allowedDecisions = decisions.filter((decision) => decision.allowed);
+  const scopes = allowedDecisions.map((decision) => decision.scope);
   const eligible = scopes.length > 0;
+  const wouldOverride = eligible && scoreGap !== null && scoreGap > 0;
+  const blockedByReason = countStrings(
+    decisions
+      .filter((decision) => !decision.allowed)
+      .map((decision) => decision.reason),
+  );
   return {
     eligible,
-    wouldOverride: eligible,
+    scopeCandidateCount: decisions.length,
+    scopeAllowedCount: scopes.length,
+    wouldOverride,
+    actualOverride: false,
     scopes: [...scopes].sort(),
+    scoreGap,
+    blockedByReason,
     reportOnly: true,
     productiveUseAllowed: false,
     evidence: [
       `pilot_scope_eligible:${eligible}`,
-      `pilot_would_override:${eligible}`,
+      `pilot_scope_candidate_count:${decisions.length}`,
+      `pilot_scope_allowed_count:${scopes.length}`,
+      `pilot_would_override:${wouldOverride}`,
+      "pilot_actual_override:false",
+      `score_gap:${scoreGap ?? "none"}`,
       "pilot_eligibility:report_only",
       "productive_use_allowed:false",
       ...scopes.map((scope) => `pilot_scope:${scope}:eligible`),
+      ...Object.entries(blockedByReason).map(
+        ([reason, count]) => `pilot_scope_blocked:${reason}:${count}`,
+      ),
     ],
   };
 }
@@ -418,7 +480,9 @@ function pilotScopeBreakdown(
   for (const scenario of scenarios) {
     for (const scope of scenario.pilotEligibility.scopes) {
       result[scope].eligibleCount += 1;
-      result[scope].wouldOverrideCount += 1;
+      if (scenario.pilotEligibility.wouldOverride) {
+        result[scope].wouldOverrideCount += 1;
+      }
       result[scope].scenarioIds.push(scenario.scenarioId);
     }
   }
@@ -481,11 +545,11 @@ function topAgreesWithExpectation(
   );
 }
 
-function eligiblePilotScopes(
+function pilotScopeDecisions(
   sample: RealEngineDecisionCorpusSample,
   top: SemanticRankedAction | undefined,
   topActionType: string | undefined,
-): AiPlayStrengthPilotScope[] {
+): PilotScopeDecision[] {
   if (!top || !topActionType) return [];
   const action = syntheticLegalActionForTop(sample, top, topActionType);
   const scopes: readonly AiPlayStrengthPilotScope[] = [
@@ -493,15 +557,22 @@ function eligiblePilotScopes(
     RUNNER_SAFE_ACCESS_PILOT_MODE,
     CORP_SCORE_WINDOW_PILOT_MODE,
   ];
-  return scopes.filter(
-    (scope) =>
-      pilotScopeAllowsAction({
-        scope,
-        frame: sample.frame,
-        action,
-        top,
-      }).allowed,
+  return scopes.map((scope) =>
+    pilotScopeAllowsAction({
+      scope,
+      frame: sample.frame,
+      action,
+      top,
+    }),
   );
+}
+
+function scoreGapForTop(
+  rankedActions: readonly SemanticRankedAction[],
+): number | null {
+  const [top, next] = rankedActions;
+  if (!top || !next) return null;
+  return roundMetric(top.score - next.score);
 }
 
 function syntheticLegalActionForTop(
