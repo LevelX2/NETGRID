@@ -19,7 +19,10 @@ import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "./scored-agenda-sequence-host";
-import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
+import {
+  applySequencePayloadPatch,
+  corpSequenceContextPayload,
+} from "./scored-agenda-sequence-types";
 
 /**
  * @contract Data Fort Reclamation owns the hidden HQ install/rez sequence.
@@ -130,8 +133,7 @@ export function startDataFortReclamationChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
+  applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
     ...corpSequenceContextPayload({
       step: "data_fort_reclamation_hq_choice_opened",
@@ -150,7 +152,7 @@ export function startDataFortReclamationChoice(
       ),
     }),
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
-  };
+  });
   return { handled: true, stateChanged: true };
 }
 

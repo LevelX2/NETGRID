@@ -11,7 +11,10 @@ import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
 } from "./scored-agenda-sequence-host";
-import { corpSequenceContextPayload } from "./scored-agenda-sequence-types";
+import {
+  applySequencePayloadPatch,
+  corpSequenceContextPayload,
+} from "./scored-agenda-sequence-types";
 
 /**
  * @contract Security Purge owns the scored-agenda reveal, target-choice and
@@ -63,8 +66,7 @@ export function resolveSecurityPurgeAgendaPurge(
       stateVersion: host.state.stateVersion + 1,
       visibility: "hidden_info_barrier",
     };
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
+    applySequencePayloadPatch(host.legalAction, {
       ...basePayload,
       ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3_target_choice"),
       ...corpSequenceContextPayload({
@@ -76,7 +78,7 @@ export function resolveSecurityPurgeAgendaPurge(
         securityPurgeTargetChoiceOpened: true,
         securityPurgeTargetChoiceCount: revealedIceIds.length,
       }),
-    };
+    });
     return {
       handled: true,
       stateChanged: true,
