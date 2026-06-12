@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
+  benchmarkDeckFromSnapshot,
   benchmarkDeckFromFrozenLocalSnapshot,
   runAiSelfplayTraceMining,
 } from "../packages/ai/src/index";
@@ -19,6 +20,9 @@ type TracePairFile = {
     corp: string;
   };
 };
+type TracePairSetFile = {
+  pairs: TracePairFile[];
+};
 
 const DEFAULT_SEEDS = [
   "ai-v143-tuning-001",
@@ -33,15 +37,19 @@ const DEFAULT_PAIR_IDS: PairId[] = ["a", "b", "c", "d"];
 const repoRoot = findRepoRoot(process.cwd());
 const args = parseArgs(process.argv.slice(2));
 const outPath = resolve(repoRoot, args.out);
-const pairIds = args.pairs ?? DEFAULT_PAIR_IDS;
+const pairIds = args.noDefaultPairs ? [] : (args.pairs ?? DEFAULT_PAIR_IDS);
+const pairFiles = args.pairFiles ?? [];
 const seeds = args.seeds ?? DEFAULT_SEEDS;
 const maxActions = args.maxActions ?? 160;
 const maxFindings = args.maxFindings ?? 50;
 
-const pairs = pairIds.map((id) => readPair(id));
+const pairs = [
+  ...pairIds.map((id) => readPair(id)),
+  ...pairFiles.flatMap((path) => readPairFile(path)),
+];
 const matrix = pairs.map(({ pair }) => {
-  const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
-  const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
+  const runner = benchmarkDeckFromAnySnapshot(pair.runner);
+  const corp = benchmarkDeckFromAnySnapshot(pair.corp);
   const result = runAiSelfplayTraceMining({
     seeds,
     runnerDeck: runner.deck,
@@ -111,6 +119,7 @@ const output = {
   gitHead: git(["rev-parse", "--short", "HEAD"]),
   config: {
     pairIds,
+    pairFiles,
     seeds,
     maxActions,
     maxFindings,
@@ -134,12 +143,16 @@ console.log(JSON.stringify(output.aggregate, null, 2));
 function parseArgs(argv: string[]): {
   out: string;
   pairs?: PairId[];
+  noDefaultPairs?: boolean;
+  pairFiles?: string[];
   seeds?: string[];
   maxActions?: number;
   maxFindings?: number;
 } {
   let out: string | undefined;
   let pairs: PairId[] | undefined;
+  let noDefaultPairs = false;
+  const pairFiles: string[] = [];
   let seeds: string[] | undefined;
   let maxActionsArg: number | undefined;
   let maxFindingsArg: number | undefined;
@@ -158,6 +171,15 @@ function parseArgs(argv: string[]): {
         .filter((value): value is PairId =>
           ["a", "b", "c", "d"].includes(value),
         );
+      index += 1;
+      continue;
+    }
+    if (arg === "--no-default-pairs") {
+      noDefaultPairs = true;
+      continue;
+    }
+    if (arg === "--pair-file" && next) {
+      pairFiles.push(next);
       index += 1;
       continue;
     }
@@ -186,6 +208,8 @@ function parseArgs(argv: string[]): {
   return {
     out,
     ...(pairs && pairs.length > 0 ? { pairs } : {}),
+    ...(noDefaultPairs ? { noDefaultPairs } : {}),
+    ...(pairFiles.length > 0 ? { pairFiles } : {}),
     ...(seeds && seeds.length > 0 ? { seeds } : {}),
     ...(Number.isFinite(maxActionsArg) ? { maxActions: maxActionsArg } : {}),
     ...(Number.isFinite(maxFindingsArg) ? { maxFindings: maxFindingsArg } : {}),
@@ -201,6 +225,30 @@ function readPair(id: PairId): TracePairFile {
     `ai-selfplay-trace-mining-${id}.json`,
   );
   return JSON.parse(readFileSync(path, "utf8")) as TracePairFile;
+}
+
+function readPairFile(path: string): TracePairFile[] {
+  const parsed = JSON.parse(
+    readFileSync(resolve(repoRoot, path), "utf8"),
+  ) as TracePairFile | TracePairSetFile;
+  if ("pairs" in parsed) return parsed.pairs;
+  return [parsed];
+}
+
+function benchmarkDeckFromAnySnapshot(
+  snapshotId: string,
+): ReturnType<typeof benchmarkDeckFromFrozenLocalSnapshot> {
+  try {
+    return benchmarkDeckFromFrozenLocalSnapshot(snapshotId);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      !error.message.includes("Unknown frozen local benchmark deck snapshot")
+    ) {
+      throw error;
+    }
+  }
+  return benchmarkDeckFromSnapshot(snapshotId);
 }
 
 function findRepoRoot(start: string): string {
