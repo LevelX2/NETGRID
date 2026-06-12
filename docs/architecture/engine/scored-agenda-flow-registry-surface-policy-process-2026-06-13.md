@@ -12,6 +12,7 @@
 - P3 abgeschlossen: `subtype-reveal-economy-sequence.ts` kapselt Start und Resolve für `reveal_installed_ice_subtype_for_credits`; `scored-agenda-flow.ts` delegiert nur noch. Modul- und Flow-Test, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P4 abgeschlossen: Corporate War, Corporate Retreat und Employee Empowerment liegen in eigenen Scored-Agenda-Modulen. `scored-agenda-flow.ts` re-exportiert Employee Empowerment weiter stabil für bestehende Runtime-Bootstrap-Imports und liegt nach dem Paket bei 432 Zeilen. Scored-Agenda-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P5 abgeschlossen: `applySequenceResolution` verbindet `SequenceResolution`, Sanitizer und `CorpInstallRezSequenceHandlerResult`; ein risikoarmer Priority-Requisition-Pfad nutzt den Helper. Die Contract-Matrix prüft sanitized Resolution-Patches. Scored-Agenda-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P6 abgeschlossen: `toPublicEvent` und side-spezifische PublicEvent-Projektionen nutzen `sanitizeEventPayloadForSurface`. Event-Payloads dürfen weiterhin legitime öffentliche Arrays und generische Labels tragen, blockieren aber Hidden-Card-Listen und actor-private/private Labels. PublicEvent-/Surface-Policy-Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
