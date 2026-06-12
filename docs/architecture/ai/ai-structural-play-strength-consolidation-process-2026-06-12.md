@@ -2,7 +2,7 @@
 
 ## Status
 
-final_report_ready
+final_green_passed
 
 ## Quelle/Vorgabe
 
