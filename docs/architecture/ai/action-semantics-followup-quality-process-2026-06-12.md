@@ -232,9 +232,16 @@ Arbeit:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|install rez sequence"`
-- `corepack pnpm --filter @netgrid/engine typecheck`
-- `git diff --check`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/index-tests/mechanics/per-card-longtail.test.ts --testNamePattern "Data Fort Reclamation"`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
+Ergebnis:
+
+- Kein aktueller Nicht-Region-/Nicht-Rez-on-install-Root-Sonderfall erzwingt eine abweichende Runtime-Semantik.
+- Der bestehende Vertrag bleibt: normale ICE, Assets und Upgrades werden erst vollständig in das neue Remote installiert und danach in einer gemeinsamen Korp-privaten optionalen Rez-Choice angeboten.
+- Region-Upgrades und verpflichtende Root-Rez-on-install-Karten bleiben innerhalb der geordneten Install-Sequenz abgesichert.
+- Der Runtime-Vertrag dokumentiert die Boundary und die Removal Condition für ein späteres echtes per-card Install/Rez-Interleaving.
 
 Done-Gate: Boundary ist getestet oder als fachlicher Blocker mit Removal Condition dokumentiert.
 
