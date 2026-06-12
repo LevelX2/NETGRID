@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { SemanticDecisionFrame } from "../semantic-decision-frame";
+import { alignRunTargetAction } from "../run-target-action-alignment";
 import {
   block,
   decision,
@@ -44,8 +45,38 @@ export function runnerSafeAccessDecision(
   if (!matchingRunTarget) {
     return block(RUNNER_SAFE_ACCESS_PILOT_MODE, "runner_safe_access_target_missing", evidence);
   }
-  const targetEvidence = [
+  const candidate = frame.actionCandidates.find(
+    (candidate) => candidate.actionId === action.actionId,
+  );
+  if (!candidate) {
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_candidate_missing",
+      evidence,
+    );
+  }
+  const alignment = alignRunTargetAction(candidate, matchingRunTarget);
+  const alignmentEvidence = [
     ...evidence,
+    ...alignment.evidence,
+    ...(alignment.source ? [`alignment_source:${alignment.source}`] : []),
+  ];
+  if (!alignment.aligned) {
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_alignment_blocked",
+      alignmentEvidence,
+    );
+  }
+  if (alignment.source === "evidence") {
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_structured_alignment_required",
+      alignmentEvidence,
+    );
+  }
+  const targetEvidence = [
+    ...alignmentEvidence,
     `target_kind:${matchingRunTarget.targetKind}`,
     `recommendation:${matchingRunTarget.recommendation}`,
     `path_passability:${matchingRunTarget.pathPassability}`,
