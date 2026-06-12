@@ -500,6 +500,22 @@ Checks:
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
 
+## P6 Ergebnis
+
+Umgesetzt:
+
+- Read-only Manifest `data/ai/card-implementation-primitive-contracts.json` ergänzt.
+- Extractor `primitiveContractRecords(...)` ergänzt, der aus `CARD_IMPLEMENTATIONS` deterministische Contract-Records ableitet.
+- Ability-Key-Test nutzt den Extractor und prüft zusätzlich, dass das versionierte Manifest keinen Drift zur Registry hat.
+- Manifest-Felder decken `cardDefinitionId`, `abilityKey`, `primitiveKind`, `effectKind`, `timing`, `sourceZone`, `sourceType`, `visibility`, `requiresTarget`, `targetKind`, `hiddenInfoClass` und `resolverModule` ab.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/ability-engine/card-implementation-primitives.test.ts`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
