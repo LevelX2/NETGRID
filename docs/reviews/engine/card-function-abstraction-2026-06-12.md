@@ -8,7 +8,7 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 
 Dieser Review ist ein Inventar mit erstem vertikalem Refactor-Slice, kein Abschlussbericht über vollständige Bereinigung. Der Preying-Mantis-Pfad ist generisch umgestellt; die übrigen Kandidaten bleiben sichtbar offen.
 
-Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und wird im Folgeprozess um automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung erweitert; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.
+Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und ergänzt eine automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.
 
 ## Zählung
 
@@ -391,8 +391,20 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-
 Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+
+## Automatisch abgeleiteter Guard
+
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5775 problemzonenrelevante Fingerprints als Baseline.
+Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
+
+| Kategorie                          | Anzahl |
+| ---------------------------------- | -----: |
+| new_unclassified_card_name_leak    |   1302 |
+| functional_kind_uses_card_name     |     41 |
+| runtime_state_field_uses_card_name |   4325 |
+| resolver_function_uses_card_name   |    105 |
+| payload_key_uses_card_name         |      2 |
 
 ## Erlaubte Referenzen
 
