@@ -727,6 +727,7 @@ export function createScoredEconomyRuntimeHosts(
     scoredAgendaKindForDefinition,
     spendVisibleCardCounter,
     trashCorpInstalledCardToArchives,
+    trashOlderRegionUpgradesInServer,
     uniqueDirectLongtailImplementationForCard,
     uniqueDirectLongtailImplementationForDefinition,
     isRegionUpgrade,
@@ -779,6 +780,13 @@ export function createScoredEconomyRuntimeHosts(
       servers: {
         createRemote: () => createRemote(state),
         mustServer: (serverId) => mustServer(state, serverId),
+        trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
+          trashOlderRegionUpgradesInServer(
+            state,
+            server,
+            keepCardId,
+            legalAction,
+          ),
       },
       credits: {
         spendCorpCredits: (amount) => spendCredits(state, "corp", amount),

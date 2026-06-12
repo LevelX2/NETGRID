@@ -479,6 +479,27 @@ Checks:
 - Grün: `corepack pnpm format:changed -- main`
 - Grün: `git diff --check`
 
+## P5 Ergebnis
+
+Umgesetzt:
+
+- Data Fort Reclamation installiert Root-Karten mit required `rez-on-install` jetzt im Installationsschritt sofort rezzed.
+- Region-Upgrades laufen nicht mehr in die P4-Ablehnung, sondern werden beim Installieren gerezzt und ersetzen ältere Regionen im neuen Fort.
+- Temporäre Data-Fort-Credits werden zuerst verwendet; danach werden Korp-Credits herangezogen.
+- Die Budgetprüfung für required Root-Rez läuft vor der ersten State-Mutation.
+- Die bestehende private Rez-Choice für normale optionale Nicht-Region-Rezzes bleibt erhalten. Sie ist weiterhin hidden-info-sicher; der vormals blockierende Region-/required-rez-on-install-Regelbruch ist beseitigt.
+
+Boundary:
+
+- Eine vollständig interaktive optionale Rez-Choice nach jeder einzelnen nicht-required Karte wäre ein weiterer UX-/Choice-Flow-Vertrag. Dieser Prozess löst die fachlich harte Region-/required-rez-on-install-Grenze ohne neuen Public-Payload-Vertrag.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|Region|install rez sequence"`
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ## Verifikationsregeln
 
 - Nach jedem Paket mindestens die Paketchecks ausführen.
