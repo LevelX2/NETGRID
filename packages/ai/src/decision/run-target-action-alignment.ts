@@ -1,4 +1,7 @@
-import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type {
+  ActionRunProjectionSummary,
+  ActionSemanticCandidate,
+} from "../action-semantic-candidate";
 import type { RunnerRunTargetKind } from "../runner-run-target-evaluation";
 
 export type RunTargetActionAlignment = {
@@ -6,6 +9,7 @@ export type RunTargetActionAlignment = {
   serverId?: string;
   targetKind?: RunnerRunTargetKind;
   runTargetId?: string;
+  source?: ActionRunProjectionSummary["source"] | "evidence";
   aligned: boolean;
   evidence: string[];
 };
@@ -21,7 +25,8 @@ export function alignRunTargetAction(
   target: RunTargetActionAlignmentTarget,
 ): RunTargetActionAlignment {
   const runTargetId = normalizeServerId(target.targetServerId ?? target.targetId);
-  const candidateServerIds = candidateRunServerIds(candidate);
+  const candidateServers = candidateRunServers(candidate);
+  const candidateServerIds = candidateServers.serverIds;
   const aligned =
     candidate.semanticActionType === "run.start" &&
     runTargetId !== undefined &&
@@ -32,17 +37,31 @@ export function alignRunTargetAction(
     ...(serverId ? { serverId } : {}),
     ...(target.targetKind ? { targetKind: target.targetKind } : {}),
     ...(runTargetId ? { runTargetId } : {}),
+    ...(candidateServers.source ? { source: candidateServers.source } : {}),
     aligned,
     evidence: [
       `candidate_semantic:${candidate.semanticActionType}`,
       ...(serverId ? [`candidate_server:${serverId}`] : ["candidate_server:none"]),
+      ...(candidateServers.source
+        ? [`candidate_server_source:${candidateServers.source}`]
+        : ["candidate_server_source:none"]),
       ...(runTargetId ? [`run_target:${runTargetId}`] : ["run_target:none"]),
       `aligned:${aligned}`,
     ],
   };
 }
 
-function candidateRunServerIds(candidate: ActionSemanticCandidate): string[] {
+function candidateRunServers(candidate: ActionSemanticCandidate): {
+  serverIds: string[];
+  source?: ActionRunProjectionSummary["source"] | "evidence";
+} {
+  const fromSummary = normalizeServerId(candidate.runProjectionSummary?.serverId);
+  if (fromSummary) {
+    return {
+      serverIds: [fromSummary],
+      source: candidate.runProjectionSummary?.source ?? "run_action_projection",
+    };
+  }
   const fromTargets = [
     ...(candidate.targetContext?.selectedTargets ?? []),
     ...(candidate.targetContext?.availableTargets ?? []),
@@ -50,7 +69,12 @@ function candidateRunServerIds(candidate: ActionSemanticCandidate): string[] {
     .filter((target) => target.targetKind === "server")
     .map((target) => normalizeServerId(target.targetId))
     .filter((targetId): targetId is string => targetId !== undefined);
-  if (fromTargets.length > 0) return uniqueStrings(fromTargets);
+  if (fromTargets.length > 0) {
+    return {
+      serverIds: uniqueStrings(fromTargets),
+      source: "target_context",
+    };
+  }
   const fromEvidence = candidate.evidence
     .flatMap((entry) => [
       parseEvidenceServer(entry, "run_action_projection_target:"),
@@ -58,7 +82,10 @@ function candidateRunServerIds(candidate: ActionSemanticCandidate): string[] {
       parseEvidenceServer(entry, "server:"),
     ])
     .filter((targetId): targetId is string => targetId !== undefined);
-  return uniqueStrings(fromEvidence);
+  return {
+    serverIds: uniqueStrings(fromEvidence),
+    ...(fromEvidence.length > 0 ? { source: "evidence" as const } : {}),
+  };
 }
 
 function parseEvidenceServer(

@@ -92,6 +92,7 @@ Der Prozess stoppt ohne Nachfrage, wenn eine Änderung Engine-Validierung, `appl
 | AI-MAT2-3 | complete | AI-MAT2-3 commit | Corpus-Szenarien nutzen `RealEngineFixtureBuilder`; direkter State-Mutationsguard in den Corpus-Tests ergänzt. Checks: Corpus 4/4, Typecheck grün. |
 | AI-MAT2-4 | complete | AI-MAT2-4 commit | Pilot-Metriken in Scope-Kandidatur, Scope-Erlaubnis, hypothetisches Override und tatsächliches Override getrennt. Checks: ShadowLeague 2/2, Registry 10/10, Typecheck grün. |
 | AI-MAT2-5 | complete | AI-MAT2-5 commit | PilotScopeDecisionMatrix in Registry und side-safe Debug-Formatter ergänzt. Checks: Registry 11/11, DecisionDebug 5/5, Typecheck grün. |
+| AI-MAT2-6 | complete | AI-MAT2-6 commit | `runProjectionSummary` am Candidate ergänzt; Alignment nutzt Summary vor TargetContext vor Evidence-Fallback. Checks: Alignment 9/9, ActionSemanticCoverage 5/5, Typecheck grün. |
 
 ## Paketdetails
 

@@ -58,8 +58,63 @@ describe("run target action alignment", () => {
       aligned: false,
       evidence: expect.arrayContaining([
         "candidate_server:remote_1",
+        "candidate_server_source:target_context",
         "run_target:hq",
         "aligned:false",
+      ]),
+    });
+  });
+
+  it("prefers structured run projection summary over target context", () => {
+    const candidate = {
+      ...runCandidate("run-hq-summary", "remote_1"),
+      runProjectionSummary: {
+        serverId: "hq",
+        serverKind: "hq",
+        source: "run_action_projection",
+        evidence: ["summary:hq"],
+      },
+    } satisfies ActionSemanticCandidate;
+
+    expect(
+      alignRunTargetAction(candidate, {
+        targetServerId: "hq",
+        targetKind: "hq",
+      }),
+    ).toMatchObject({
+      actionId: "run-hq-summary",
+      serverId: "hq",
+      runTargetId: "hq",
+      source: "run_action_projection",
+      aligned: true,
+      evidence: expect.arrayContaining([
+        "candidate_server:hq",
+        "candidate_server_source:run_action_projection",
+        "aligned:true",
+      ]),
+    });
+  });
+
+  it("marks evidence-only alignment as a fallback source", () => {
+    const candidate = {
+      ...runCandidate("run-hq-evidence"),
+      evidence: ["run_action_projection_target:hq"],
+    };
+
+    expect(
+      alignRunTargetAction(candidate, {
+        targetServerId: "hq",
+        targetKind: "hq",
+      }),
+    ).toMatchObject({
+      actionId: "run-hq-evidence",
+      serverId: "hq",
+      runTargetId: "hq",
+      source: "evidence",
+      aligned: true,
+      evidence: expect.arrayContaining([
+        "candidate_server:hq",
+        "candidate_server_source:evidence",
       ]),
     });
   });

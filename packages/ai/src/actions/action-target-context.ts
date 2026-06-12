@@ -1,6 +1,7 @@
 import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionProjectionIssue,
+  ActionRunProjectionSummary,
   ActionSemanticCandidate,
   ActionGateResult,
   ActionTargetContext,
@@ -22,8 +23,10 @@ export function applyTargetContextProjection(
   );
 
   if (!hasTargetRequirement && availableTargets === undefined) {
+    const runProjectionSummary = runProjectionSummaryFromAction(action);
     return {
       ...candidate,
+      ...(runProjectionSummary ? { runProjectionSummary } : {}),
       hardGates: updateTargetContextGate(candidate.hardGates, "not_applicable"),
     };
   }
@@ -58,10 +61,14 @@ export function applyTargetContextProjection(
     hasTargetRequirement,
     hiddenTargetRequirement,
   );
+  const runProjectionSummary =
+    runProjectionSummaryFromAction(action, targetContext) ??
+    candidate.runProjectionSummary;
 
   return {
     ...candidate,
     targetContext,
+    ...(runProjectionSummary ? { runProjectionSummary } : {}),
     primaryProjectionStatus: hiddenTargetRequirement
       ? "hidden_info_blocked"
       : hasProjectedTargetContext
@@ -81,6 +88,72 @@ export function applyTargetContextProjection(
         ? ["AI039 target context projected from side-safe input"]
         : ["AI039 target context unavailable"]),
     ],
+  };
+}
+
+function normalizeServerId(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase().replace(/^server[:.]/, "");
+  if (normalized === "hq") return "hq";
+  if (
+    normalized === "rd" ||
+    normalized === "rnd" ||
+    normalized === "r&d" ||
+    normalized === "r_d"
+  ) {
+    return "rd";
+  }
+  if (normalized === "archives") return "archives";
+  if (normalized.startsWith("remote_")) return normalized;
+  return undefined;
+}
+
+function serverKindForId(
+  serverId: string,
+): NonNullable<ActionRunProjectionSummary["serverKind"]> | undefined {
+  if (serverId === "hq") return "hq";
+  if (serverId === "rd") return "rd";
+  if (serverId === "archives") return "archives";
+  if (serverId.startsWith("remote_")) return "remote";
+  return undefined;
+}
+
+function runProjectionSummaryFromAction(
+  action: LegalAction,
+  targetContext?: ActionTargetContext,
+): ActionRunProjectionSummary | undefined {
+  const payloadServerId = normalizeServerId(action.payload?.serverId);
+  if (payloadServerId) {
+    return buildRunProjectionSummary(
+      payloadServerId,
+      "legal_action_payload",
+      [`run_projection_summary_payload_server:${payloadServerId}`],
+    );
+  }
+  const targetServerId = [
+    ...(targetContext?.selectedTargets ?? []),
+    ...(targetContext?.availableTargets ?? []),
+  ]
+    .filter((target) => target.targetKind === "server")
+    .map((target) => normalizeServerId(target.targetId))
+    .find((serverId): serverId is string => serverId !== undefined);
+  if (!targetServerId) return undefined;
+  return buildRunProjectionSummary(targetServerId, "target_context", [
+    `run_projection_summary_target_context:${targetServerId}`,
+  ]);
+}
+
+function buildRunProjectionSummary(
+  serverId: string,
+  source: ActionRunProjectionSummary["source"],
+  evidence: string[],
+): ActionRunProjectionSummary {
+  const serverKind = serverKindForId(serverId);
+  return {
+    serverId,
+    ...(serverKind ? { serverKind } : {}),
+    source,
+    evidence,
   };
 }
 

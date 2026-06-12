@@ -354,6 +354,7 @@ function targetServerIdsForRunAction(
   signals: readonly string[],
 ): string[] {
   const directTargets = [
+    candidate?.runProjectionSummary?.serverId,
     concretePayloadServerId(action),
     ...payloadStringValues(action, [
       "targetServerId",

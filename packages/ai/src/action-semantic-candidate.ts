@@ -218,6 +218,13 @@ export type ActionTargetContext = {
   targetConstraintResults: ConstraintResult[];
 };
 
+export type ActionRunProjectionSummary = {
+  serverId?: string;
+  serverKind?: "hq" | "rd" | "archives" | "remote";
+  source: "legal_action_payload" | "target_context" | "run_action_projection";
+  evidence: string[];
+};
+
 export type BoardContextSummary = {
   source: "ai_decision_input" | "player_view" | "not_projected";
   sideSafe: boolean;
@@ -271,6 +278,7 @@ export type ActionSemanticCandidate = {
   costProfile: ActionCostProfile;
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
+  runProjectionSummary?: ActionRunProjectionSummary;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
   primaryProjectionStatus: ActionPrimaryProjectionStatus;
