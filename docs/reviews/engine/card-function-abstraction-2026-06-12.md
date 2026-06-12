@@ -14,11 +14,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie                                       | Anzahl |
 | ----------------------------------------------- | -----: |
-| functional_kind_uses_card_name                  |     35 |
+| functional_kind_uses_card_name                  |     33 |
 | false_positive                                  |     33 |
 | test_only_card_name                             |    103 |
 | allowed_catalog_reference                       |     43 |
-| runtime_state_field_uses_card_name              |    263 |
+| runtime_state_field_uses_card_name              |    257 |
 | mechanics_constant_controls_behavior_by_card_id |     49 |
 | payload_key_uses_card_name                      |      2 |
 
@@ -37,9 +37,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:218` Bizarre Encryption Scheme / `bizarre_encryption_scheme` -> `delayed_agenda_access_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:222` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:232` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:271` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:773` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:795` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
+- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:789` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:811` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-war.ts:8` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/project-babylon.ts:8` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:8` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
@@ -53,7 +52,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts:8` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/programs/startup-immolator.ts:8` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/code-viral-cache.ts:8` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/quest-for-cattekin.ts:8` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/proteus/corp/assets/siren.ts:15` Siren / `siren` -> `start_run_redirect_to_source_fort`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/run-fort-trigger-execution.ts:68` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
@@ -83,10 +81,10 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:488` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:489` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/choices/pending-choice-resolution.ts:523` Code Viral Cache / `code_viral_cache` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:154` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:303` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:325` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:332` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:156` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:305` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:327` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda-flow.ts:334` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/create-game.ts:213` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:640` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:662` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -212,19 +210,14 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1185` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1189` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2136` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2160` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2196` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2200` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2269` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2271` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2309` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2310` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2359` Krumz / `krumz` -> `recurring_trace_credit_pool`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2365` Krumz / `krumz` -> `recurring_trace_credit_pool`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2705` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2713` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2732` Quest for Cattekin / `quest_for_cattekin` -> `start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2746` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2201` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2205` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2274` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2276` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2314` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2315` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2364` Krumz / `krumz` -> `recurring_trace_credit_pool`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2370` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts:640` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:360` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:368` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
@@ -260,17 +253,17 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-resolution.ts:495` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-resolution.ts:762` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-resolution.ts:764` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:367` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:372` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:377` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:398` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:541` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:546` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:563` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:568` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:575` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:582` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:692` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:371` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:376` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:381` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:402` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:545` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:550` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:573` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:578` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:585` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:592` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/encounter-special-windows.ts:702` Startup Immolator / `startup_immolator` -> `trash_fully_broken_passed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:48` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:241` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:242` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
@@ -289,8 +282,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:83` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:232` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:641` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:977` Krumz / `krumz` -> `recurring_trace_credit_pool`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:977` Krumz / `krumz` -> `recurring_trace_credit_pool`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:983` Krumz / `krumz` -> `recurring_trace_credit_pool`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-flow-hosts.ts:983` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:53` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:54` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:55` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
@@ -368,8 +361,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1364` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1410` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1441` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1451` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1465` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1470` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
@@ -379,7 +371,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | Priorität                  | Fundklasse                      | Zielbaustein                                                                        | State-Ziel                                                                                            |
 | -------------------------- | ------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | slice_now                  | Preying Mantis                  | `optional_extra_action_with_delayed_damage`                                         | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
-| deferred_refactor_required | Quest for Cattekin              | `start_turn_random_effect_table`                                                    | `runnerTurnFlags.persistentModifiers[]`                                                               |
+| slice_done                 | Quest for Cattekin              | `start_turn_random_effect_table`                                                    | `runnerTurnFlags.persistentModifiers[]`                                                               |
 | deferred_refactor_required | Pirate Broadcast                | `multi_server_success_sequence`                                                     | `runnerTurnFlags.pendingSequences[]`                                                                  |
 | deferred_refactor_required | Bizarre Encryption Scheme       | `delayed_agenda_access_replacement`                                                 | `runDurationEffects[]`, `delayedAccessEffects[]`                                                      |
 | deferred_refactor_required | Code Viral Cache                | `purge_replacement_with_runner_virus_counter_cleanup`                               | `replacementEffects[]`                                                                                |
@@ -391,18 +383,18 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+Die Guard-Nachpflege und der `Quest for Cattekin`-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Code Viral Cache`, `Krumz` und `Startup Immolator`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5779 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5763 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie                          | Anzahl |
 | ---------------------------------- | -----: |
-| new_unclassified_card_name_leak    |   1302 |
+| new_unclassified_card_name_leak    |   1303 |
 | functional_kind_uses_card_name     |     41 |
-| runtime_state_field_uses_card_name |   4329 |
+| runtime_state_field_uses_card_name |   4312 |
 | resolver_function_uses_card_name   |    105 |
 | payload_key_uses_card_name         |      2 |
 

@@ -12,7 +12,7 @@ import {
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
-} from "../install-rez-sequence-handlers";
+} from "./scored-agenda-sequence-host";
 
 /**
  * @contract Priority Requisition owns the scored-agenda free-rez choice for a
