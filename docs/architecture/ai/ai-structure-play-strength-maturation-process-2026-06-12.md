@@ -2,7 +2,7 @@
 
 ## Status
 
-created
+ai_mat_1_git_discipline
 
 ## Quelle/Vorgabe
 
@@ -155,6 +155,23 @@ Jedes Paket enthält: Ziel, Kernartefakte, Checks, Done-Gate und Commit-Message.
 - Kein `git add .`, kein `git add -A`.
 - Keine Testlöschung, kein `test.skip`, kein `test.only`.
 - Nicht ausgeführte Checks werden im Paketartefakt begründet.
+
+## Paketstatus und Staging-Nachweise
+
+| Paket | Status | Commit | Staging-Nachweis |
+| --- | --- | --- | --- |
+| Prozess-Setup | complete | `d41f18aa` | `git add -- docs/architecture/ai/ai-structure-play-strength-maturation-process-2026-06-12.md` |
+| AI-MAT-0 | complete | `e4604a27` | `git add -- docs/architecture/ai/README.md docs/reviews/ai/ai-structural-play-strength-consolidation-final-report-2026-06-12.md docs/reviews/ai/ai-structure-play-strength-maturation-preflight-2026-06-12.md` |
+| AI-MAT-1 | in progress | pending | Nur dieses Prozessartefakt wird gestaged. |
+
+## Harte Git-Disziplin fuer Folgepakete
+
+- Jedes Paket prueft vor dem Commit `git status --short` und `git diff --check`.
+- Jedes Paket staged ausschliesslich die direkt zum Paket gehoerenden Pfade mit `git add -- <pfad> ...`.
+- Ein Paketcommit darf keine fremden Arbeitsdateien, generierten Caches, Laufzeitdaten oder zusammengefassten Folgepakete enthalten.
+- Werden waehrend eines Pakets bestehende lokale Fremdaenderungen sichtbar, werden sie nicht gestasht, nicht reverted und nicht mitcommitted. Das Paket dokumentiert dann die betroffenen Pfade und arbeitet nur weiter, wenn die Paketgrenze eindeutig bleibt.
+- Mechanische Formatierung ist nur paketbezogen erlaubt und muss vor dem Commit als eigener betroffener Pfad sichtbar sein.
+- Der finale Main-Merge bleibt ein eigener Integrationsschritt nach `FINAL-GREEN`; vorher wird nicht im Hauptworkspace gearbeitet.
 
 ## Worktree-, Git- und Integrationsregeln
 
