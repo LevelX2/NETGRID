@@ -1,10 +1,14 @@
 # Card Function Abstraction Review 2026-06-12
 
-Status: inventory
+Status: inventory_with_vertical_slice
 
 ## Kurzbefund
 
 Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisch sind kartenspezifische Namen in funktionalen `kind`-Werten, Payload-Keys, Runtime-State-Feldern, Resolvernamen und verhaltenssteuernden Konstanten.
+
+Dieser Review ist ein Inventar mit erstem vertikalem Refactor-Slice, kein Abschlussbericht über vollständige Bereinigung. Der Preying-Mantis-Pfad ist generisch umgestellt; die übrigen Kandidaten bleiben sichtbar offen.
+
+Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und ergänzt eine automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.
 
 ## Zählung
 
@@ -357,15 +361,15 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:120` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1143` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1154` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1198` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1205` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1363` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1409` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1440` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1450` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1464` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1144` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1155` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1199` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1206` Siren / `siren` -> `start_run_redirect_to_source_fort`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1364` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1410` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1441` Startup Immolator / `startupImmolator` -> `abilityUseLedger`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1451` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1465` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
@@ -386,7 +390,21 @@ Kartennamen sind in Katalog- und Testkontexten weiterhin zulässig. Problematisc
 
 ## Nächste Umsetzung
 
-Der erste Code-Slice refaktoriert `Preying Mantis`, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
+Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
+Die nächste technische Nachpflege ist der Guard-Ausbau von statischen Known-Tokens zu automatisch abgeleiteten Kartennamenvarianten. Danach sind `Quest for Cattekin`, `Code Viral Cache` und `Krumz` die sinnvollsten kleineren Folge-Slices; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+
+## Automatisch abgeleiteter Guard
+
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5779 problemzonenrelevante Fingerprints als Baseline.
+Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
+
+| Kategorie                          | Anzahl |
+| ---------------------------------- | -----: |
+| new_unclassified_card_name_leak    |   1302 |
+| functional_kind_uses_card_name     |     41 |
+| runtime_state_field_uses_card_name |   4329 |
+| resolver_function_uses_card_name   |    105 |
+| payload_key_uses_card_name         |      2 |
 
 ## Erlaubte Referenzen
 

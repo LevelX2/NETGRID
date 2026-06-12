@@ -951,6 +951,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           : host.payment.spendCredits(state, side, amount),
       trashCorpInstalledCard: (cardId) =>
         host.zones.trashCorpInstalledCardToArchives(state, cardId),
+      trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
+        host.zones.trashRunnerInstalledCardToHeap(
+          state,
+          cardId,
+          legalAction,
+        ),
     });
   }
 

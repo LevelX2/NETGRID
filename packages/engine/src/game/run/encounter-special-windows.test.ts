@@ -279,6 +279,7 @@ describe("encounter special windows boundary", () => {
     state.timingPoint = "run.jack_out_window";
     state.run!.phase = "movement";
     const trashed: CardInstanceId[] = [];
+    const runnerTrashed: CardInstanceId[] = [];
     const host = encounterSpecialWindowHost(state, {
       quoteIceRezCost: () => 3,
       spendCredits: (side, amount) => {
@@ -286,6 +287,13 @@ describe("encounter special windows boundary", () => {
       },
       trashCorpInstalledCard: (cardId) => {
         trashed.push(cardId);
+      },
+      trashRunnerInstalledCardToHeap: (cardId) => {
+        runnerTrashed.push(cardId);
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.heap = [...(state.runner.heap ?? []), cardId];
       },
     });
 
@@ -319,6 +327,9 @@ describe("encounter special windows boundary", () => {
     });
     expect(state.runner.credits).toBe(3);
     expect(trashed).toEqual(["ice_current"]);
+    expect(runnerTrashed).toEqual(["startup_1"]);
+    expect(state.runner.rig.programs).not.toContain("startup_1");
+    expect(state.runner.heap).toContain("startup_1");
     expect(state.run?.startupImmolatorPendingPassedIceId).toBeUndefined();
     expect(state.runnerTurnFlags?.startupImmolatorUsedSourceIdsThisTurn).toEqual([
       "startup_1",

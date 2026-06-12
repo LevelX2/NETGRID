@@ -3845,7 +3845,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 20;
     state.corp.credits = 10;
     installRunnerProgramForTest(state, "simple_fracter");
-    installRunnerProgramForTest(state, "onr_v1_068_startup-immolator");
+    const startupImmolatorId = installRunnerProgramForTest(
+      state,
+      "onr_v1_068_startup-immolator",
+    );
     putCorpRootInRemote(state, "simple_economy_asset");
     const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
     const initial = structuredClone(state);
@@ -3907,6 +3910,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(
       state.corp.servers.find((server) => server.id === "remote_1")?.ice,
     ).not.toContain(iceId);
+    expect(state.runner.heap).toContain(startupImmolatorId);
+    expect(state.runner.rig.programs).not.toContain(startupImmolatorId);
     expect(state.runner.credits).toBe(15);
     expect(
       getLegalActions(state, "runner").some(
