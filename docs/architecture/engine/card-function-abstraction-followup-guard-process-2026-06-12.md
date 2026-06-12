@@ -1,6 +1,6 @@
 # Engine Card Function Abstraction Follow-up Guard Process 2026-06-12
 
-Status: in_progress
+Status: completed_locally_merged_to_main
 
 ## Quelle/Vorgabe
 
@@ -104,3 +104,14 @@ Abschluss:
 - Neue funktionale Kartennamen-Leaks außerhalb erlaubter Kontexte würden den Guard brechen.
 - Paket- und Finalchecks sind ausgeführt.
 - Branch ist lokal nach `main` integriert.
+
+## Abschlussnotiz 2026-06-12
+
+Paket 0 bis Paket 2 sind abgeschlossen und committet. Ausgeführt wurden:
+
+- `corepack pnpm check:card-function-abstraction`
+- `node scripts/check-card-name-leakage-in-runtime.mjs --self-test-new-leak`
+- `node scripts/check-format-changed.mjs -- main`
+- `git diff --check`
+
+Der Format-Check lief im Worktree über eine lokale `node_modules`-Junction auf die vorhandene Root-Installation, weil der frische Worktree keine eigene Dependency-Installation enthielt. Die Junction ist nicht versioniert.
