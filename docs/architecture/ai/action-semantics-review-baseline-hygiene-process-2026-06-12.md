@@ -115,6 +115,25 @@ Done-Gate: GitHub kann entweder den Merge über `origin/main` oder die P0-P10-Co
 
 Commit: `docs(ai): record remote review baseline`
 
+#### P1 Ergebnis
+
+Umgesetzt:
+
+- `codex/action-semantics-followup-quality` wurde nach `origin/codex/action-semantics-followup-quality` gepusht.
+- `b3c004d7` ist inzwischen Ancestor von `origin/main`; der im Prüfbefund fehlende Merge ist damit remote über `main` sichtbar.
+- Die P0-P10-Commitfolge wurde gegen `b3c004d7^1` dokumentiert, weil `origin/main..codex/action-semantics-followup-quality` leer ist, sobald `origin/main` die Branch-Commits enthält.
+- AI022-/Hints-Stash bleibt out-of-scope: `stash@{0}: ai022-hints-local-baseline-before-followup-process`.
+- Remote-Proof-Bericht erstellt: `docs/reviews/ai/action-semantics-review-baseline-remote-proof-2026-06-12.md`.
+
+Checks:
+
+- Grün: `git fetch origin --prune`
+- Grün: `git merge-base --is-ancestor b3c004d7 origin/main`
+- Grün: `git branch -r --list origin/codex/action-semantics-followup-quality`
+- Grün: `git log --oneline --reverse b3c004d7^1..codex/action-semantics-followup-quality`
+- Grün: `git diff --name-status b3c004d7^1..codex/action-semantics-followup-quality`
+- Grün: `git stash list --max-count=3`
+
 ### P2 Report-Artefakt-Hygiene
 
 Ziel: Neue AI-Reports seit `origin/main` sind inventarisiert und klassifiziert.
