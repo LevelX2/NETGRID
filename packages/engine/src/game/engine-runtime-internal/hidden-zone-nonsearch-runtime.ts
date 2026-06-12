@@ -581,16 +581,29 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error(
         "Die Forged-Activation-Orders-Korp-Entscheidung ist ungueltig.",
       );
+    const targetWasKnownToRunner =
+      mustInstance(state.cardInstances, targetIceId).faceup === true ||
+      mustInstance(state.cardInstances, targetIceId).rezzed === true;
     trashCorpInstalledCardToArchives(state, targetIceId);
+    if (!targetWasKnownToRunner) {
+      state.cardInstances[targetIceId] = {
+        ...mustInstance(state.cardInstances, targetIceId),
+        faceup: false,
+        rezzed: false,
+      };
+    }
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       corpDecision: "trash_ice",
       trashedCount: 1,
-      targetCardDefinitionId: definition.id,
+      ...(targetWasKnownToRunner ? { targetCardDefinitionId: definition.id } : {}),
       targetServerLabel: serverLabel,
       targetIcePositionLabel: icePositionLabel,
+      targetVisibility: targetWasKnownToRunner
+        ? "public_installed_ice"
+        : "hidden_installed_ice_position",
     };
   }
 

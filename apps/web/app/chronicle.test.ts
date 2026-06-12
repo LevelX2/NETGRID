@@ -1868,9 +1868,9 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
         corpDecision: "trash_ice",
-        targetCardDefinitionId: "simple_barrier_ice",
         targetServerLabel: "HQ",
         targetIcePositionLabel: "ICE 2 in HQ",
+        targetVisibility: "hidden_installed_ice_position",
         trashedCount: 1,
         aiExplanation: "legal choice",
       }),
@@ -1900,8 +1900,9 @@ describe("formatChronicleEvent", () => {
       "ICE 2 in HQ",
     ]);
     expect(corpTrash.title).toBe(
-      "Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu trashen.",
+      "Die Korp-KI hat entschieden, ICE 2 in HQ zu trashen.",
     );
+    expect(corpTrash.title).not.toContain("Simple Barrier ICE");
     expect(corpTrash.chips).toEqual([
       "Korp",
       "KI",
