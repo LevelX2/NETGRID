@@ -130,6 +130,65 @@ describe("SemanticShadowDecision", () => {
     expect(traceJson).not.toContain("cardInstances");
     expect(traceJson).not.toContain("fullGameState");
   });
+
+  it("summarizes target choice shadow without creating selections", () => {
+    const input = inputFor("runner", [
+      legalAction("run-hq", "start_run", "runner", 0, {
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+        selectedTargetsByActionId: {
+          "run-hq": { server: "hq" },
+        },
+      }),
+      tacticalGoals: [
+        {
+          goalId: "runner.neutral.safe_run_access",
+          family: "pressure",
+          priority: 900,
+          urgency: "high",
+          source: "neutral",
+          evidence: ["test_goal"],
+        },
+      ],
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.targetChoiceShadow).toMatchObject({
+      scope: "target_choice_shadow_trace_summary",
+      reportOnly: true,
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      actionCount: 1,
+      rankedOptionCount: 1,
+      topActionId: "run-hq",
+      topOptionId: "hq",
+      selectionOutput: {
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+      },
+      evidence: expect.arrayContaining([
+        "target_choice_shadow:trace_summary",
+        "selected_choices_created:false",
+        "selected_targets_created:false",
+      ]),
+    });
+    expect(JSON.stringify(trace)).not.toMatch(/privatePayload|cardInstances|fullGameState/i);
+  });
 });
 
 function frameForEconomyChoice() {
@@ -214,6 +273,9 @@ function legalAction(
   type: LegalAction["type"],
   side: "runner" | "corp",
   credits = 0,
+  options: {
+    targetRequirements?: LegalAction["targetRequirements"];
+  } = {},
 ): LegalAction {
   return {
     actionId,
@@ -223,7 +285,7 @@ function legalAction(
     source: "basic_action",
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: credits > 0 ? [{ credits }] : [],
-    targetRequirements: [],
+    targetRequirements: options.targetRequirements ?? [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 5,
   };
