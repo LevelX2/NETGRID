@@ -4,6 +4,9 @@ import {
   findForbiddenSemanticPath,
   redactSemanticString,
 } from "../diagnostics/semantic-redaction";
+import type { AiOpportunityProjection } from "./opportunity-projection";
+import type { TacticalGoalUtilityFamily } from "./tactical-goal-utility";
+import type { AiThreatProjection } from "./threat-projection";
 
 export const TARGET_CHOICE_SHADOW_SCHEMA_VERSION =
   "target-choice-shadow-v1" as const;
@@ -50,6 +53,9 @@ export type BuildTargetChoiceShadowReportParams = {
   preferredOptionIds?: readonly string[];
   avoidOptionIds?: readonly string[];
   sideSafeTargetIdsByRequirementId?: Readonly<Record<string, readonly string[]>>;
+  utilityFamilies?: readonly TacticalGoalUtilityFamily[];
+  threats?: readonly AiThreatProjection[];
+  opportunities?: readonly AiOpportunityProjection[];
 };
 
 export function buildTargetChoiceShadowReport(
@@ -132,6 +138,7 @@ function targetOptions(
           `target_requirement_side:${requirement.side ?? "unknown"}`,
           ...targetOptions.evidence,
         ],
+        targetContextScore(params, optionId),
       ),
     );
   });
@@ -145,6 +152,7 @@ function option(
   preferred: ReadonlySet<string>,
   avoid: ReadonlySet<string>,
   evidence: readonly string[],
+  contextScore: TargetChoiceShadowContextScore = { scoreDelta: 0, evidence: [] },
 ): TargetChoiceShadowOption {
   const safeOptionId = safe(optionId);
   const preferenceBonus = preferred.has(safeOptionId) ? 25 : 0;
@@ -160,9 +168,12 @@ function option(
       orderPenalty +
       targetShapeBonus(safeOptionId) +
       preferenceBonus -
-      avoidPenalty,
+      avoidPenalty +
+      contextScore.scoreDelta,
     evidence: [
       ...evidence.map(safe),
+      ...contextScore.evidence.map(safe),
+      `context_score_delta:${contextScore.scoreDelta}`,
       `preferred:${preferenceBonus > 0}`,
       `avoid:${avoidPenalty > 0}`,
     ],
@@ -226,6 +237,138 @@ function targetShapeBonus(optionId: string): number {
   if (optionId === "hq" || optionId === "rd") return 10;
   if (optionId.startsWith("remote_")) return 5;
   return 0;
+}
+
+type TargetChoiceShadowContextScore = {
+  scoreDelta: number;
+  evidence: string[];
+};
+
+function targetContextScore(
+  params: BuildTargetChoiceShadowReportParams,
+  optionId: string,
+): TargetChoiceShadowContextScore {
+  const safeOptionId = safe(optionId);
+  let scoreDelta = 0;
+  const evidence: string[] = [];
+  const utilityFamilies = new Set(params.utilityFamilies ?? []);
+  const matchingOpportunities = (params.opportunities ?? []).filter(
+    (opportunity) => safe(opportunity.targetId ?? "") === safeOptionId,
+  );
+  const matchingThreats = (params.threats ?? []).filter(
+    (threat) => safe(threat.targetId ?? "") === safeOptionId,
+  );
+
+  for (const opportunity of matchingOpportunities) {
+    const delta = opportunityPriorityBonus(opportunity.priority);
+    scoreDelta += delta;
+    evidence.push(
+      `opportunity:${opportunity.opportunity}`,
+      `opportunity_priority:${opportunity.priority}`,
+      `opportunity_score_delta:${delta}`,
+    );
+  }
+
+  for (const threat of matchingThreats) {
+    const penalty = threatSeverityPenalty(threat.severity);
+    scoreDelta -= penalty;
+    evidence.push(
+      `threat:${threat.threat}`,
+      `threat_severity:${threat.severity}`,
+      `threat_score_delta:-${penalty}`,
+    );
+  }
+
+  if (utilityFamilies.has("remote_contest") && isRemoteTarget(safeOptionId)) {
+    scoreDelta += 24;
+    evidence.push("utility_family:remote_contest", "utility_score_delta:24");
+  }
+
+  if (
+    utilityFamilies.has("run_access") &&
+    matchingOpportunities.some((opportunity) =>
+      opportunity.opportunity === "known_agenda_payoff" ||
+      opportunity.opportunity === "safe_central_access",
+    )
+  ) {
+    const delta = isCentralTarget(safeOptionId) ? 18 : 10;
+    scoreDelta += delta;
+    evidence.push("utility_family:run_access", `utility_score_delta:${delta}`);
+  }
+
+  if (
+    utilityFamilies.has("survival") &&
+    isRemoteTarget(safeOptionId) &&
+    matchingOpportunities.length === 0
+  ) {
+    scoreDelta -= 18;
+    evidence.push("utility_family:survival", "utility_score_delta:-18");
+  }
+
+  if (
+    utilityFamilies.has("corp_scoreline") &&
+    (isScorelineTarget(params.action, safeOptionId) ||
+      hasTargetlessScoreWindow(params.opportunities ?? []))
+  ) {
+    scoreDelta += 22;
+    evidence.push("utility_family:corp_scoreline", "utility_score_delta:22");
+  }
+
+  return { scoreDelta, evidence };
+}
+
+function opportunityPriorityBonus(
+  priority: AiOpportunityProjection["priority"],
+): number {
+  switch (priority) {
+    case "critical":
+      return 28;
+    case "high":
+      return 20;
+    case "medium":
+      return 12;
+    case "low":
+      return 6;
+  }
+}
+
+function threatSeverityPenalty(severity: AiThreatProjection["severity"]): number {
+  switch (severity) {
+    case "critical":
+      return 32;
+    case "high":
+      return 24;
+    case "medium":
+      return 12;
+    case "low":
+      return 6;
+  }
+}
+
+function isCentralTarget(optionId: string): boolean {
+  return optionId === "hq" || optionId === "rd" || optionId === "archives";
+}
+
+function isRemoteTarget(optionId: string): boolean {
+  return optionId.startsWith("remote_");
+}
+
+function isScorelineTarget(action: LegalAction, optionId: string): boolean {
+  return (
+    action.type === "advance_card" ||
+    action.type === "score_agenda" ||
+    optionId.includes("agenda") ||
+    optionId.includes("score")
+  );
+}
+
+function hasTargetlessScoreWindow(
+  opportunities: readonly AiOpportunityProjection[],
+): boolean {
+  return opportunities.some(
+    (opportunity) =>
+      opportunity.opportunity === "score_window" && opportunity.targetId === undefined,
+  );
 }
 
 function targetOptionIdsForRequirement(

@@ -62,6 +62,156 @@ describe("TargetChoiceShadow", () => {
     expect(report.blockedRequirements).toEqual([]);
   });
 
+  it("raises remote targets when remote-contest utility and opportunity align", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "run-server",
+        type: "start_run",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+            allowedServers: ["hq", "remote_1"],
+          },
+        ],
+      }),
+      utilityFamilies: ["remote_contest"],
+      opportunities: [
+        {
+          opportunity: "remote_contest_window",
+          priority: "critical",
+          side: "runner",
+          targetId: "remote_1",
+          evidence: ["test:remote_score_threat"],
+        },
+      ],
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "remote_1",
+      "hq",
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining([
+        "utility_family:remote_contest",
+        "opportunity:remote_contest_window",
+      ]),
+    );
+    expect(report.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    });
+  });
+
+  it("raises central access targets with known agenda payoff context", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "run-server",
+        type: "start_run",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+            allowedServers: ["rd", "hq", "remote_1"],
+          },
+        ],
+      }),
+      utilityFamilies: ["run_access"],
+      opportunities: [
+        {
+          opportunity: "known_agenda_payoff",
+          priority: "critical",
+          side: "runner",
+          targetId: "hq",
+          evidence: ["test:known_agenda"],
+        },
+      ],
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "hq",
+      "rd",
+      "remote_1",
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining([
+        "utility_family:run_access",
+        "opportunity:known_agenda_payoff",
+      ]),
+    );
+  });
+
+  it("lowers risky or unknown remote targets under survival context", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "run-server",
+        type: "start_run",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+            allowedServers: ["remote_1", "hq"],
+          },
+        ],
+      }),
+      utilityFamilies: ["survival"],
+      threats: [
+        {
+          threat: "runner_flatline_risk",
+          severity: "critical",
+          affectedSide: "runner",
+          targetId: "remote_1",
+          evidence: ["test:damage_risk"],
+        },
+      ],
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "hq",
+      "remote_1",
+    ]);
+    expect(report.rankedOptions[1]?.evidence).toEqual(
+      expect.arrayContaining([
+        "utility_family:survival",
+        "threat:runner_flatline_risk",
+      ]),
+    );
+  });
+
+  it("raises scoreline target options for corp score goals", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "corp-target",
+        side: "corp",
+        type: "activated_card_ability",
+        targetRequirements: [
+          {
+            id: "target",
+            kind: "card",
+            side: "corp",
+            zoneScope: ["remote"],
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        target: ["remote_2_asset", "remote_1_agenda"],
+      },
+      utilityFamilies: ["corp_scoreline"],
+    });
+
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "remote_1_agenda",
+      "remote_2_asset",
+    ]);
+    expect(report.rankedOptions[0]?.evidence).toEqual(
+      expect.arrayContaining(["utility_family:corp_scoreline"]),
+    );
+  });
+
   it("ranks side-safe target options from semantic candidate target context", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
