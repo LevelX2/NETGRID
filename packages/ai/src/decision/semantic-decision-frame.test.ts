@@ -75,7 +75,20 @@ describe("SemanticDecisionFrame", () => {
           fullGameState: { opponentHand: ["hidden-definition-id"] },
         },
       }),
-    ).toThrow(/forbidden hidden-info key/);
+    ).toThrow(/forbidden hidden-info marker/);
+  });
+
+  it("rejects forbidden hidden-info string values before serialization", () => {
+    const input = inputFor("runner", [
+      legalAction("runner-1", "gain_credit", "runner"),
+    ]);
+
+    expect(() =>
+      buildSemanticDecisionFrame({
+        input,
+        evidence: ["safe_evidence", "fullGameState:opponent_hand"],
+      }),
+    ).toThrow(/forbidden hidden-info marker/);
   });
 
   it("builds deterministic runner and corp frames from equivalent inputs", () => {

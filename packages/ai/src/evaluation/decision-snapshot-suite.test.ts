@@ -117,6 +117,43 @@ describe("DecisionSnapshotSuite", () => {
     ).toContain("illegal_action");
   });
 
+  it("detects forbidden semantic markers in trace string values", () => {
+    const input = inputFor("runner", [legalAction("gain-1", "gain_credit", "runner")]);
+    const frame = buildSemanticDecisionFrame({ input });
+    const trace: SemanticDecisionTrace = {
+      schemaVersion: "semantic-decision-trace-v1",
+      frameSummary: {
+        side: "runner",
+        stateVersion: 1,
+        legalActionCount: 1,
+        actionCandidateCount: 0,
+        tacticalGoalCount: 0,
+        hiddenInfoPolicy: "player_view_only",
+      },
+      rankedActions: [
+        {
+          actionId: "gain-1",
+          rank: 1,
+          score: 100,
+          components: [],
+          blockers: [],
+          explanation: "deckOrder:bad",
+        },
+      ],
+      rejectedActions: [],
+      noRuntimeEffect: true,
+    };
+
+    const mistakes = classifyDecisionTraceMistakes(frame, trace);
+
+    expect(mistakes.map((mistake) => mistake.mistakeClass)).toContain(
+      "hidden_info_dependency",
+    );
+    expect(mistakes.flatMap((mistake) => mistake.evidence)).toContain(
+      "forbidden_marker_path:snapshot.trace.rankedActions[0].explanation",
+    );
+  });
+
   it("detects target choice unavailability from rejected actions", () => {
     const input = inputFor("runner", [
       legalAction("choice-1", "resolve_choice", "runner"),

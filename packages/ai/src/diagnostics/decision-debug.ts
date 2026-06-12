@@ -1,4 +1,8 @@
 import type { AiDecisionDebug, AiDecisionScoreComponent } from "@netgrid/shared";
+import {
+  containsForbiddenSemanticMarker,
+  redactSemanticString,
+} from "./semantic-redaction";
 
 type AiDecisionDetailSection = NonNullable<
   AiDecisionDebug["detailSections"]
@@ -7,16 +11,6 @@ type AiDecisionDetailSection = NonNullable<
 const DETAIL_SELECTED_EVIDENCE_PREFIXES = [
   "run_only_action_",
   "run_action_spending_cap_",
-] as const;
-
-const FORBIDDEN_DEBUG_MARKERS = [
-  "cardinstances",
-  "privatepayload",
-  "sessiontoken",
-  "reconnecttoken",
-  "jointoken",
-  "tokenhash",
-  "fullgamestate",
 ] as const;
 
 export type SemanticDecisionDebugPlanReference = {
@@ -152,17 +146,9 @@ export function buildSemanticDecisionDebugDiagnostics(
 }
 
 function sideSafeDebugItems(items: readonly string[]): string[] {
-  return items.filter((item) => {
-    const normalized = item.toLowerCase();
-    return !FORBIDDEN_DEBUG_MARKERS.some((marker) =>
-      normalized.includes(marker),
-    );
-  });
+  return items.filter((item) => !containsForbiddenSemanticMarker(item));
 }
 
 function sideSafeDebugValue(value: string): string {
-  const normalized = value.toLowerCase();
-  return FORBIDDEN_DEBUG_MARKERS.some((marker) => normalized.includes(marker))
-    ? "[redacted]"
-    : value;
+  return redactSemanticString(value);
 }

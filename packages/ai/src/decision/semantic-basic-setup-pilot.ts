@@ -1,4 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
+import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import type { SemanticDecisionFrame } from "./semantic-decision-frame";
 import type { SemanticDecisionTrace } from "./semantic-decision-trace";
@@ -95,14 +96,5 @@ function actionAllowedInBasicSetupPilot(
 }
 
 function traceIsHiddenInfoSafe(trace: SemanticDecisionTrace): boolean {
-  const serialized = JSON.stringify(trace);
-  return ![
-    "cardInstances",
-    "privatePayload",
-    "sessionToken",
-    "reconnectToken",
-    "joinToken",
-    "tokenHash",
-    "fullGameState",
-  ].some((marker) => serialized.includes(marker));
+  return !containsForbiddenSemanticMarker(trace);
 }

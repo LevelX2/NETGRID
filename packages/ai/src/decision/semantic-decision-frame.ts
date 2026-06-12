@@ -7,6 +7,7 @@ import type {
 } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { TacticalPlanRuntimeResult } from "../plans/tactical-plan-types";
+import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
 
 export const SEMANTIC_DECISION_FRAME_SCHEMA_VERSION =
   "semantic-decision-frame-v1" as const;
@@ -60,16 +61,6 @@ export type BuildSemanticDecisionFrameParams = {
   };
   evidence?: readonly string[];
 };
-
-const FORBIDDEN_FRAME_KEYS = new Set([
-  "cardInstances",
-  "privatePayload",
-  "sessionToken",
-  "reconnectToken",
-  "joinToken",
-  "tokenHash",
-  "fullGameState",
-]);
 
 export function buildSemanticDecisionFrame(
   params: BuildSemanticDecisionFrameParams,
@@ -184,29 +175,5 @@ function classifyCreditPressure(
 export function assertSemanticDecisionFrameIsSideSafe(
   frame: SemanticDecisionFrame,
 ): void {
-  const forbiddenPath = findForbiddenKeyPath(frame);
-  if (forbiddenPath) {
-    throw new Error(
-      `SemanticDecisionFrame contains forbidden hidden-info key: ${forbiddenPath}`,
-    );
-  }
-}
-
-function findForbiddenKeyPath(value: unknown, path = "frame"): string | undefined {
-  if (value === null || value === undefined) return undefined;
-  if (typeof value !== "object") return undefined;
-  if (Array.isArray(value)) {
-    for (let index = 0; index < value.length; index += 1) {
-      const nestedPath = findForbiddenKeyPath(value[index], `${path}[${index}]`);
-      if (nestedPath) return nestedPath;
-    }
-    return undefined;
-  }
-  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
-    const currentPath = `${path}.${key}`;
-    if (FORBIDDEN_FRAME_KEYS.has(key)) return currentPath;
-    const nestedPath = findForbiddenKeyPath(nested, currentPath);
-    if (nestedPath) return nestedPath;
-  }
-  return undefined;
+  assertSemanticObjectSideSafe(frame, "SemanticDecisionFrame");
 }

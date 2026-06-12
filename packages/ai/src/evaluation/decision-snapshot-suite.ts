@@ -2,6 +2,7 @@ import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame"
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
 import { buildAiOpportunityProjections } from "../decision/opportunity-projection";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { buildTacticalGoalUtilities } from "../decision/tactical-goal-utility";
@@ -19,16 +20,6 @@ export type DecisionSnapshotEvaluation = {
   preferredGoalFamilyMatched: boolean;
   evidence: string[];
 };
-
-const FORBIDDEN_MARKERS = [
-  "cardInstances",
-  "privatePayload",
-  "sessionToken",
-  "reconnectToken",
-  "joinToken",
-  "tokenHash",
-  "fullGameState",
-] as const;
 
 export function evaluateDecisionSnapshot(params: {
   snapshot: DecisionSnapshot;
@@ -101,14 +92,11 @@ export function classifyDecisionTraceMistakes(
       evidence: ["ranked_or_selected_action_not_in_frame_legal_actions"],
     });
   }
-  const serialized = `${JSON.stringify(frame)}\n${JSON.stringify(trace)}`;
-  const hiddenMarker = FORBIDDEN_MARKERS.find((marker) =>
-    serialized.includes(marker),
-  );
-  if (hiddenMarker) {
+  const hiddenMarkerPath = findForbiddenSemanticPath({ frame, trace }, "snapshot");
+  if (hiddenMarkerPath) {
     mistakes.push({
       mistakeClass: "hidden_info_dependency",
-      evidence: [`forbidden_marker:${hiddenMarker}`],
+      evidence: [`forbidden_marker_path:${hiddenMarkerPath}`],
     });
   }
   const threats = buildAiThreatProjections(frame);

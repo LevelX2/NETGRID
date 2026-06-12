@@ -1,18 +1,9 @@
 import type { AiDecision, Side } from "@netgrid/shared";
 import type { SemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
+import { redactSemanticString } from "../diagnostics/semantic-redaction";
 import { classifyDecisionTraceMistakes } from "./decision-snapshot-suite";
 import type { AiMistakeClass } from "./mistake-taxonomy";
-
-const FORBIDDEN_REPORT_MARKERS = [
-  "cardInstances",
-  "privatePayload",
-  "sessionToken",
-  "reconnectToken",
-  "joinToken",
-  "tokenHash",
-  "fullGameState",
-] as const;
 
 export type SemanticShadowRuntimeComparison = {
   stateVersion: number;
@@ -76,8 +67,5 @@ function safeReportEvidence(evidence: readonly string[]): string[] {
 }
 
 function safeReportString(value: string): string {
-  const forbidden = FORBIDDEN_REPORT_MARKERS.some((marker) =>
-    value.includes(marker),
-  );
-  return forbidden ? "[redacted]" : value;
+  return redactSemanticString(value);
 }

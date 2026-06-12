@@ -94,6 +94,35 @@ describe("semanticBasicSetupPilotChoice", () => {
       }),
     ).toBeUndefined();
   });
+
+  it("rejects traces with forbidden hidden-info markers", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
+
+    expect(
+      semanticBasicSetupPilotChoice({
+        frame: frame(["gain-1", "run-1"]),
+        trace: {
+          ...trace("gain-1", 120, "runner.build_economy_base", "economy"),
+          rankedActions: [
+            {
+              ...trace(
+                "gain-1",
+                120,
+                "runner.build_economy_base",
+                "economy",
+              ).rankedActions[0]!,
+              explanation: "secretGripIds:bad",
+            },
+          ],
+        },
+        currentChoice: choice("run-1", "start_run", 70),
+        choices: [
+          choice("gain-1", "gain_credit", 120),
+          choice("run-1", "start_run", 70),
+        ],
+      }),
+    ).toBeUndefined();
+  });
 });
 
 function frame(legalActionIds: string[]): SemanticDecisionFrame {

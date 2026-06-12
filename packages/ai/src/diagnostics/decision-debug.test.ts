@@ -68,6 +68,7 @@ describe("DecisionDebug diagnostics", () => {
       coverageEvidence: ["sessionToken:bad", "coverage_selection:matched"],
       selectedEvidence: [
         "run_only_action_privatePayload:bad",
+        "run_only_action_secretGripIds:bad",
         "run_only_action_adjusted:true",
       ],
       tacticalPlanItems: ["tokenHash:bad", "selected_step_kind:draw_for_answer"],
@@ -79,6 +80,7 @@ describe("DecisionDebug diagnostics", () => {
     expect(serialized).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
     );
+    expect(serialized).not.toMatch(/secretGripIds/i);
     expect(diagnostics.detailItems).toContain("coverage_selection:matched");
     expect(diagnostics.detailItems).toContain("run_only_action_adjusted:true");
     expect(diagnostics.detailSections[1]?.items).toEqual([
@@ -111,7 +113,7 @@ describe("DecisionDebug diagnostics", () => {
         key: "privatePayload_score",
         label: "sessionToken",
         value: 0,
-        reason: "fullGameState:bad",
+        reason: "hiddenRemoteIdentity:bad",
       }),
     ).toEqual({
       key: "[redacted]",
