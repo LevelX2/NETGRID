@@ -763,6 +763,51 @@ describe("benchmark report formatting", () => {
     expect(subclusters.jackout_loop).toBe(1);
     expect(subclusters.late_run_step_stall).toBe(0);
   });
+
+  it("breaks mixed subcluster ties by the latest end-window evidence", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-terminal-tie-subcluster",
+      winner: "action_limit_reached",
+      actions: 4,
+      turns: 2,
+      finalAgendaPoints: { runner: 4, corp: 3 },
+      finalStateHash: "fnv1a:selfplay-action-limit-terminal-tie-subcluster",
+      eventLogLength: 4,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit", {
+          selectedActionId: "reserve-credit-1",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          runnerEconomyTakenToReachRunReserve: true,
+        }),
+        selfplayAction("runner", 2, "gain_credit", {
+          selectedActionId: "reserve-credit-2",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: ["activeFundingNeed:false"],
+          runnerEconomyTakenToReachRunReserve: true,
+        }),
+        selfplayAction("runner", 3, "draw_card", {
+          selectedActionId: "late-draw-1",
+          reasonCode: "runner.semantic.basic_economy_draw",
+        }),
+        selfplayAction("runner", 4, "draw_card", {
+          selectedActionId: "late-draw-2",
+          reasonCode: "runner.semantic.basic_economy_draw",
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const subclusters = summarizeSelfplayActionLimitSubclusters([summary]);
+
+    expect(subclusters.late_draw_without_coverage_or_hand_goal).toBe(1);
+    expect(subclusters.runner_late_gain_credit_real_reserve).toBe(0);
+    expect(subclusters.mixed_unknown).toBe(0);
+  });
 });
 
 function selfplayAction(

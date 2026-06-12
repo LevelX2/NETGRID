@@ -365,13 +365,19 @@ function classifySelfplayActionLimitSubcluster(
   const counts = Object.fromEntries(
     SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
   ) as Record<AiSelfplayActionLimitSubclusterId, number>;
+  const latestIndex = Object.fromEntries(
+    SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, -1]),
+  ) as Record<AiSelfplayActionLimitSubclusterId, number>;
   for (const [index, entry] of window.entries()) {
     const subcluster = classifySelfplayActionLimitSubclusterEntry(
       entry,
       window,
       index,
     );
-    if (subcluster) counts[subcluster] += 1;
+    if (subcluster) {
+      counts[subcluster] += 1;
+      latestIndex[subcluster] = index;
+    }
   }
   const ranked = SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.filter(
     (subcluster) => subcluster !== "mixed_unknown",
@@ -381,13 +387,19 @@ function classifySelfplayActionLimitSubcluster(
       (left, right) =>
         right.count - left.count ||
         left.subcluster.localeCompare(right.subcluster),
-    );
+  );
   const [best, second] = ranked;
   if (!best || best.count <= 0) return "mixed_unknown";
-  // Equal end-window evidence stays mixed; forcing a winner here hides the
-  // exact tie that follow-up packages need to inspect.
   if (second && second.count > 0 && best.count === second.count) {
-    return "mixed_unknown";
+    // In v2 ties prefer the latest matching end-window signal: the terminal
+    // cause is a stronger residual hint than an older equal-count signal.
+    return ranked
+      .filter((entry) => entry.count === best.count)
+      .sort(
+        (left, right) =>
+          latestIndex[right.subcluster] - latestIndex[left.subcluster] ||
+          left.subcluster.localeCompare(right.subcluster),
+      )[0]!.subcluster;
   }
   return best.subcluster;
 }
