@@ -12,6 +12,7 @@
 - P3 abgeschlossen: `scored-agenda-sequence-registry.ts` registriert Priority Requisition, DFR-Install, DFR-Rez und Security-Purge-Target als Choice-Resolver mit eindeutigen IDs. Der Dispatcher ruft nur noch `resolveScoredAgendaSequenceChoice` auf. Registry-/Sequenztests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P4 abgeschlossen: `surface-policy.ts` unterscheidet `actor_private`, `opponent_view`, `public_event`, `replay_public` und `developer_trace`. `surface-sanitizer.ts` bleibt als Kompatibilitäts-Re-Export erhalten. Policy-Tests decken actor-private Erlaubnis sowie Public-/Opponent-/Replay-Blockaden für Hidden-Card-Listen und private Labels ab. Tests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 - P5 abgeschlossen: `scored-agenda-sequence-types.ts` enthält `SequencePayloadPatch`, `SequenceDeveloperTrace`, `SequenceResolution` und `applySequencePayloadPatch`. DFR und Security Purge nutzen den Patch-Helper exemplarisch an repräsentativen Payload-Pfaden. Sequenztests, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
+- P6 abgeschlossen: Data Fort Reclamation definiert `DataFortReclamationStep` und nutzt interne Step-Konstanten für HQ-Auswahl, Install-Batch, optionalen Rez-Batch und Credit-Rückgabe. Die aktuelle Batch-UX bleibt unverändert. DFR-Integrationstest, DFR-Modultest, Engine-Typecheck, Format- und Whitespace-Gates sind grün.
 
 ## Quelle/Vorgabe
 
