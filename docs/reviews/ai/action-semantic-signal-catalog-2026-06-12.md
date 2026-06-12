@@ -12,7 +12,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | covered                      |   539 |
 | deferred                     |    45 |
 | no_signal_reason != none     |    25 |
-| target_profile_gap           |   116 |
+| target_profile_gap           |    84 |
 | structural signal violations |     0 |
 | unknown signals              |     0 |
 
@@ -26,38 +26,38 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 ## Target Profile Gaps
 
-| Card                                           | Side   | Type      | Signals expecting targets                                                                       |
-| ---------------------------------------------- | ------ | --------- | ----------------------------------------------------------------------------------------------- |
-| `onr_proteus_004_fetal-ai`                     | corp   | agenda    | `access.rnd_reveal_requirement`                                                                 |
-| `onr_proteus_005_marked-accounts`              | corp   | agenda    | `access.rnd_reveal_requirement`                                                                 |
-| `onr_proteus_009_viral-breeding-ground`        | corp   | agenda    | `access.runner_program_bounce`, `access.runner_program_disruption`, `score.fort_trash_on_score` |
-| `onr_proteus_013_caryatid`                     | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_017_credit-blocks`                | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_023_galatea`                      | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_028_lesser-arcana`                | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_033_mobile-barricade`             | corp   | ice       | `corp_ice.mobile_position_change`                                                               |
-| `onr_proteus_035_roadblock`                    | corp   | ice       | `corp_ice.random_or_guessing`                                                                   |
-| `onr_proteus_039_sphinx-2006`                  | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_040_sumo-2008`                    | corp   | ice       | `corp_ice.type_choice_or_mode_choice`                                                           |
-| `onr_proteus_044_walking-wall`                 | corp   | ice       | `corp_ice.mobile_position_change`                                                               |
-| `onr_proteus_048_data-sifters`                 | corp   | operation | `condition.node_trashed_last_turn`                                                              |
-| `onr_proteus_049_emergency-rig`                | corp   | operation | `ice.corp_temporary_rez`                                                                        |
-| `onr_proteus_051_rent-to-own-contract`         | corp   | operation | `ice.corp_deferred_rez`, `ice.corp_installment_rez`                                             |
-| `onr_proteus_052_schlaghund-pointers`          | corp   | operation | `condition.run_this_game`                                                                       |
-| `onr_proteus_053_underworld-mole`              | corp   | operation | `condition.resource_installed_last_turn`                                                        |
-| `onr_proteus_054_bel-digmo-antibody`           | corp   | asset     | `access.corp_rnd_net_damage_ambush`, `access.rnd_reveal_requirement`                            |
-| `onr_proteus_055_cybertech-think-tank`         | corp   | asset     | `advance.corp_counter_bank`                                                                     |
-| `onr_proteus_056_department-of-misinformation` | corp   | asset     | `expose.corp_prevention`                                                                        |
-| `onr_proteus_057_doppelganger-antibody`        | corp   | asset     | `access.corp_credit_loss_counter`, `access.rnd_reveal_requirement`                              |
-| `onr_proteus_059_government-contract`          | corp   | asset     | `advance.corp_counter_bank`                                                                     |
-| `onr_proteus_061_ldl-traffic-analyzers`        | corp   | asset     | `advance.corp_counter_bank`                                                                     |
-| `onr_proteus_068_pattel-antibody`              | corp   | asset     | `access.corp_icebreaker_strength_counter`, `access.rnd_reveal_requirement`                      |
-| `onr_proteus_075_stereogram-antibody`          | corp   | asset     | `access.corp_archives_net_damage_ambush`                                                        |
-| `onr_proteus_079_big-frackin-gun`              | runner | program   | `breaker.multi_subroutine_break`                                                                |
-| `onr_proteus_084_crumble`                      | runner | program   | `access.free_trash`, `access.hq_trash_pressure`, `access.trash_untrashable`                     |
-| `onr_proteus_089_garbage-in`                   | runner | program   | `access.free_trash`, `access.rnd_trash_pressure`, `access.trash_untrashable`                    |
-| `onr_proteus_093_redecorator`                  | runner | program   | `breaker.multi_subroutine_break`                                                                |
-| `onr_proteus_104_decoy-signal`                 | runner | event     | `info.expose`, `info.ice_approach_expose`                                                       |
+| Card                                           | Side   | Type     | Signals expecting targets                                                 |
+| ---------------------------------------------- | ------ | -------- | ------------------------------------------------------------------------- |
+| `onr_proteus_009_viral-breeding-ground`        | corp   | agenda   | `access.runner_program_bounce`, `access.runner_program_disruption`        |
+| `onr_proteus_056_department-of-misinformation` | corp   | asset    | `expose.corp_prevention`                                                  |
+| `onr_proteus_079_big-frackin-gun`              | runner | program  | `breaker.multi_subroutine_break`                                          |
+| `onr_proteus_093_redecorator`                  | runner | program  | `breaker.multi_subroutine_break`                                          |
+| `onr_proteus_104_decoy-signal`                 | runner | event    | `info.expose`, `info.ice_approach_expose`                                 |
+| `onr_proteus_105_demolition-run`               | runner | event    | `fort.all_rezzed_ice_trash`, `fort.all_rezzed_ice_trash_tag_risk`         |
+| `onr_proteus_106_disgruntled-ice-technician`   | runner | event    | `ice.trash_rezzed`                                                        |
+| `onr_proteus_107_drone-for-a-day`              | runner | event    | `fort.all_rezzed_ice_trash_tag_risk`                                      |
+| `onr_proteus_110_hijack`                       | runner | event    | `setup.hardware_install`, `setup.install_credit`, `setup.program_install` |
+| `onr_proteus_118_prearranged-drop`             | runner | event    | `access.next_agenda_credit`                                               |
+| `onr_proteus_119_promises-promises`            | runner | event    | `access.next_agenda_bonus`                                                |
+| `onr_proteus_120_reconnaissance`               | runner | event    | `info.expose`, `info.run_recon`                                           |
+| `onr_proteus_121_remote-detonator`             | runner | event    | `fort.all_rezzed_ice_trash`, `fort.all_rezzed_ice_trash_tag_risk`         |
+| `onr_proteus_129_back-door-to-netwatch`        | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_131_bargain-with-viacox`          | runner | resource | `setup.search`                                                            |
+| `onr_proteus_132_bolt-hole`                    | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_133_chiba-bank-account`           | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_136_credit-subversion`            | runner | resource | `access.hq_sabotage_credit_loss`, `hidden.reveals_on_trash`               |
+| `onr_proteus_140_expendable-family-member`     | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_141_get-ready-to-rumble`          | runner | resource | `access.hq_random_discard_retaliation`, `hidden.reveals_on_trash`         |
+| `onr_proteus_142_hq-mole`                      | runner | resource | `access.hq_hidden_multiaccess`, `hidden.reveals_on_trash`                 |
+| `onr_proteus_143_liberated-savings-account`    | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_146_precision-bribery`            | runner | resource | `fort.creation_lock`                                                      |
+| `onr_proteus_147_r-and-d-mole`                 | runner | resource | `access.rnd_hidden_multiaccess`, `hidden.reveals_on_trash`                |
+| `onr_proteus_149_simulacrum`                   | runner | resource | `hidden.reveals_on_trash`, `run.bypass_ap_ice`, `run.encounter_escape`    |
+| `onr_proteus_152_swiss-bank-account`           | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_154_wired-switchboard`            | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_v1_008_boardwalk`                         | runner | program  | `access.hq_random_reveal`, `info.hq_information`                          |
+| `onr_v1_017_deep-thought`                      | runner | program  | `access.rnd_top_card`, `info.rnd_information`                             |
+| `onr_v1_020_dupre`                             | runner | program  | `breaker.scaling_strength`                                                |
 
 ## Row Contract
 

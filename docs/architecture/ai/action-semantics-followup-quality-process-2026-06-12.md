@@ -170,6 +170,28 @@ Done-Gate: `target_profile_gaps` sinkt oder nicht senkbare Kandidaten sind mit r
 
 Commit: `feat(ai): reduce target profile signal gaps`
 
+#### P2 Ergebnis
+
+Umgesetzt:
+
+- TargetProfile-Gaps von 116 auf 84 reduziert.
+- Echte Choice-/Zielprofile ergänzt für:
+  - Proteus ICE mit type/mode choices: Caryatid, Credit Blocks, Galatea, Lesser Arcana, Sphinx 2006, Sumo 2008.
+  - Mobile ICE: Mobile Barricade, Walking Wall.
+  - Temporäre/deferred Rez-Ziele: Emergency Rig, Rent-to-Own Contract.
+  - Access-trash Runner-Karten: Crumble, Garbage In.
+- Signale, die keine echte Ziel-/Moduswahl darstellen, zählen nicht mehr als TargetProfile-pflichtig: R&D-Reveal-Requirements, reine Access-Ambush-Current-Access-Effekte, statische Conditions, Self-Counter-Banks, Score-Fort-Trash und Random/Guessing.
+- Active Hints, Compiled Hints, Inspector Index und Signal-Katalog-Report aktualisiert.
+
+Checks:
+
+- Grün: `node scripts/check-ai-action-semantic-signal-catalog.mjs --write-report`
+- Grün: `node scripts/check-ai-action-semantic-signal-catalog.mjs --check`
+- Grün: `corepack pnpm check:ai`
+- Grün: `corepack pnpm --filter @netgrid/ai typecheck`
+- Zunächst rot wegen generierter JSON-Formatierung, danach grün: `corepack pnpm format:changed -- main`
+- Grün: `git diff --check`
+
 ### P3 Engine-backed ActionSemanticCoverage
 
 Ziel: Coverage misst echte Engine-Situationen zusätzlich zu synthetischen Kandidaten.

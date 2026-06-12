@@ -28,7 +28,7 @@
     "coveredCards": 539,
     "deferredCards": 45,
     "noSignalCards": 25,
-    "targetProfileGapCards": 116,
+    "targetProfileGapCards": 84,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
@@ -53,34 +53,9 @@
       "identity": 2
     },
     "targetProfileGapCardIds": [
-      "onr_proteus_004_fetal-ai",
-      "onr_proteus_005_marked-accounts",
       "onr_proteus_009_viral-breeding-ground",
-      "onr_proteus_013_caryatid",
-      "onr_proteus_017_credit-blocks",
-      "onr_proteus_023_galatea",
-      "onr_proteus_028_lesser-arcana",
-      "onr_proteus_033_mobile-barricade",
-      "onr_proteus_035_roadblock",
-      "onr_proteus_039_sphinx-2006",
-      "onr_proteus_040_sumo-2008",
-      "onr_proteus_044_walking-wall",
-      "onr_proteus_048_data-sifters",
-      "onr_proteus_049_emergency-rig",
-      "onr_proteus_051_rent-to-own-contract",
-      "onr_proteus_052_schlaghund-pointers",
-      "onr_proteus_053_underworld-mole",
-      "onr_proteus_054_bel-digmo-antibody",
-      "onr_proteus_055_cybertech-think-tank",
       "onr_proteus_056_department-of-misinformation",
-      "onr_proteus_057_doppelganger-antibody",
-      "onr_proteus_059_government-contract",
-      "onr_proteus_061_ldl-traffic-analyzers",
-      "onr_proteus_068_pattel-antibody",
-      "onr_proteus_075_stereogram-antibody",
       "onr_proteus_079_big-frackin-gun",
-      "onr_proteus_084_crumble",
-      "onr_proteus_089_garbage-in",
       "onr_proteus_093_redecorator",
       "onr_proteus_104_decoy-signal",
       "onr_proteus_105_demolition-run",
@@ -142,8 +117,6 @@
       "onr_v1_215_security-net-optimization",
       "onr_v1_216_security-purge",
       "onr_v1_219_superior-net-barriers",
-      "onr_v1_272_too-many-doors",
-      "onr_v1_275_vacuum-link",
       "onr_v1_283_audit-of-call-records",
       "onr_v1_292_management-shake-up",
       "onr_v1_294_new-blood",
@@ -153,19 +126,14 @@
       "onr_v1_304_systematic-layoffs",
       "onr_v1_305_team-restructuring",
       "onr_v1_312_chicago-branch",
-      "onr_v1_315_corprunners-shattered-remains",
       "onr_v1_316_cowboy-sysop",
       "onr_v1_317_data-masons",
       "onr_v1_320_encoder-inc",
-      "onr_v1_323_experimental-ai",
       "onr_v1_324_fortress-architects",
-      "onr_v1_328_information-laundering",
-      "onr_v1_334_pacifica-regional-ai",
       "onr_v1_340_setup",
       "onr_v1_341_skalderviken-sa-beta-test-site",
       "onr_v1_345_trap",
       "onr_v1_346_vacant-soulkiller",
-      "onr_v1_347_vapor-ops",
       "onr_v1_348_virus-test-site",
       "onr_v1_357_dieter-esslin",
       "onr_v1_365_paris-city-grid"
@@ -307,7 +275,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -330,7 +298,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.rnd_reveal_requirement"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -341,7 +309,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -358,7 +326,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.rnd_reveal_requirement"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -464,8 +432,7 @@
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
         "access.runner_program_bounce",
-        "access.runner_program_disruption",
-        "score.fort_trash_on_score"
+        "access.runner_program_disruption"
       ],
       "warningCategories": []
     },
@@ -551,9 +518,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice"
@@ -565,7 +532,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_014_chihuahua",
@@ -652,9 +619,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.rez_economy",
@@ -668,7 +635,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_018_datacomb",
@@ -800,9 +767,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice"
@@ -814,7 +781,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_024_gatekeeper",
@@ -916,9 +883,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice"
@@ -930,7 +897,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_029_marionette",
@@ -1037,9 +1004,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.mobile_position_change",
@@ -1084,7 +1051,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1098,7 +1065,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.random_or_guessing"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1174,9 +1141,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice"
@@ -1188,7 +1155,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_040_sumo-2008",
@@ -1198,9 +1165,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice"
@@ -1212,7 +1179,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_041_toughoniumtm-wall",
@@ -1290,9 +1257,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.mobile_position_change",
@@ -1382,7 +1349,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1392,7 +1359,7 @@
       "activeTacticSignals": ["condition.node_trashed_last_turn", "tag.source"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["condition.node_trashed_last_turn"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1403,9 +1370,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "ice.corp_temporary_rez",
         "risk.temporary_rez_liability"
@@ -1454,9 +1421,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "ice.corp_deferred_rez",
         "ice.corp_installment_rez"
@@ -1481,7 +1448,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1496,7 +1463,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["condition.run_this_game"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1507,7 +1474,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1523,9 +1490,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "condition.resource_installed_last_turn"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1536,7 +1501,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1555,10 +1520,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_rnd_net_damage_ambush",
-        "access.rnd_reveal_requirement"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1569,7 +1531,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["advance.corp_counter_bank", "damage.payoff"],
@@ -1580,7 +1542,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1609,7 +1571,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1630,10 +1592,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_credit_loss_counter",
-        "access.rnd_reveal_requirement"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1670,7 +1629,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1686,7 +1645,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1715,7 +1674,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1731,7 +1690,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1880,7 +1839,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1897,10 +1856,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_icebreaker_strength_counter",
-        "access.rnd_reveal_requirement"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1972,7 +1928,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2046,7 +2002,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -2063,9 +2019,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_archives_net_damage_ambush"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2257,9 +2211,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.hq_trash_pressure",
@@ -2376,9 +2330,9 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.rnd_trash_pressure",
@@ -8949,7 +8903,6 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "access.rnd_reveal_requirement",
         "economy.rez_discount",
         "score.free_install_and_rez_ice",
         "score.rnd_install_and_rez",
@@ -10246,7 +10199,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -10259,7 +10212,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.random_or_guessing"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -10311,14 +10264,14 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["corp_ice.random_or_guessing"],
       "activeTacticSignals": ["corp_ice.random_or_guessing"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.random_or_guessing"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11241,7 +11194,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -11257,7 +11210,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11426,7 +11379,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -11442,7 +11395,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11555,7 +11508,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -11572,7 +11525,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11703,7 +11656,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["advance.corp_counter_bank"],
@@ -11714,7 +11667,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11867,10 +11820,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_net_damage_ambush",
-        "access.rnd_reveal_requirement"
-      ],
+      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
       "warningCategories": []
     },
     {
@@ -12009,8 +11959,7 @@
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
         "access.corp_net_damage_ambush",
-        "access.corp_tag_ambush",
-        "access.rnd_reveal_requirement"
+        "access.corp_tag_ambush"
       ],
       "warningCategories": []
     },
@@ -12041,10 +11990,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_brain_damage_ambush",
-        "advance.corp_counter_bank"
-      ],
+      "targetProfileExpectedBySignals": ["access.corp_brain_damage_ambush"],
       "warningCategories": []
     },
     {
@@ -12055,7 +12001,7 @@
       "covered": true,
       "deferred": false,
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -12071,7 +12017,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["advance.corp_counter_bank"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -12103,11 +12049,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_net_damage_ambush",
-        "access.rnd_reveal_requirement",
-        "advance.corp_counter_bank"
-      ],
+      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
       "warningCategories": ["descriptor_gap"]
     },
     {
