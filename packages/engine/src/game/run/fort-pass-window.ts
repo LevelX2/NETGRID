@@ -12,6 +12,7 @@ import type { CardFortRunWindowImplementation } from "../../ability-engine/defin
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildLegalAction } from "../turn/action-builders";
 import { selectedChoiceCardIds } from "./encounter-resolution";
+import { afterPassingLastIceWindowContext } from "./windows/after-passing-last-ice-window";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -62,10 +63,9 @@ export type RunIceSwapChoiceResult = FortPassWindowExecutionResult & {
 export function buildCorpFortPassWindowActions(
   host: FortPassWindowHost,
 ): LegalAction[] {
-  const run = host.state.run;
-  if (!run || run.position.kind !== "server") return [];
-  if (!run.lastPassedIceId) return [];
-  const server = host.servers.mustServer(run.position.serverId);
+  const context = afterPassingLastIceWindowContext(host.state);
+  if (!context) return [];
+  const { run, server, passedIceId } = context;
   const used = new Set(run.fortPassWindowUsedSourceIdsThisRun ?? []);
   const actions: LegalAction[] = [];
   for (const sourceCardId of server.root.slice().sort()) {
@@ -99,7 +99,7 @@ export function buildCorpFortPassWindowActions(
             targetCardDefinitionId: targetDefinition.id,
             serverId: server.id,
             serverLabel: server.label,
-            passedIceId: run.lastPassedIceId,
+            passedIceId,
             fortRunWindowAbility:
               "add_advancement_counters_after_passing_last_ice_on_this_fort",
             advancementCountersAdded: implementation.amount,
