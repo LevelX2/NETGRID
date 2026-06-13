@@ -121,6 +121,7 @@ export type SemanticShadowLeagueReport = {
     topScoreMin: number | null;
     topScoreMax: number | null;
     blockersByKind: Record<string, number>;
+    pilotCutoverReadiness: SemanticShadowLeaguePilotCutoverReadinessMatrix;
   };
   topDisagreementReasons: string[];
   redactionStatus: "passed";
@@ -143,6 +144,38 @@ export type SemanticShadowLeaguePilotScopeBreakdown = {
   eligibleCount: number;
   wouldOverrideCount: number;
   scenarioIds: string[];
+};
+
+export type SemanticShadowLeagueReadinessScope =
+  | AiPlayStrengthPilotScope
+  | "remote_contest_report_only"
+  | "target_choice_shadow_only";
+
+export type SemanticShadowLeaguePilotCutoverReadiness = {
+  scope: SemanticShadowLeagueReadinessScope;
+  candidate: number;
+  allowed: number;
+  wouldOverride: number;
+  actualOverride: number;
+  safeToEnableLocally: boolean;
+  recommendedForDefaultOffPilot: boolean;
+  blockedByInsufficientCorpus: boolean;
+  blockedByTargetChoice: boolean;
+  blockedByDoctrineConflict: boolean;
+  blockedByRisk: boolean;
+  recommendation: "report_only" | "keep_env_gated" | "default_off_candidate";
+  evidence: string[];
+};
+
+export type SemanticShadowLeaguePilotCutoverReadinessMatrix = {
+  scopes: Record<
+    SemanticShadowLeagueReadinessScope,
+    SemanticShadowLeaguePilotCutoverReadiness
+  >;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  evidence: string[];
 };
 
 export function buildSemanticShadowLeagueReport(
@@ -386,6 +419,167 @@ function buildLeagueMetrics(
         ),
       ),
     ),
+    pilotCutoverReadiness: pilotCutoverReadinessMatrix(scenarios),
+  };
+}
+
+function pilotCutoverReadinessMatrix(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+): SemanticShadowLeaguePilotCutoverReadinessMatrix {
+  const breakdown = pilotScopeBreakdown(scenarios);
+  const targetChoiceGapCount = scenarios.filter((scenario) =>
+    scenario.observedMistakes.includes("target_choice_unavailable"),
+  ).length;
+  const doctrineConflictCount = scenarios.filter((scenario) =>
+    scenario.observedMistakes.includes("plan_step_mismatch"),
+  ).length;
+  const riskCount = scenarios.filter((scenario) =>
+    scenario.observedMistakes.some(
+      (mistake) =>
+        mistake === "unsafe_run" ||
+        mistake === "ignored_damage_risk" ||
+        mistake === "ignored_remote_threat",
+    ),
+  ).length;
+  const remoteContestCandidateCount = scenarios.filter(
+    (scenario) => scenario.remoteContestPilotCandidate !== undefined,
+  ).length;
+  return {
+    scopes: {
+      [BASIC_SETUP_PILOT_MODE]: readinessForPilotScope({
+        scope: BASIC_SETUP_PILOT_MODE,
+        candidate: scenarios.length,
+        breakdown: breakdown[BASIC_SETUP_PILOT_MODE],
+        blockedByTargetChoice: false,
+        blockedByDoctrineConflict: doctrineConflictCount > 0,
+        blockedByRisk: false,
+      }),
+      [RUNNER_SAFE_ACCESS_PILOT_MODE]: readinessForPilotScope({
+        scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
+        candidate: scenarios.length,
+        breakdown: breakdown[RUNNER_SAFE_ACCESS_PILOT_MODE],
+        blockedByTargetChoice: false,
+        blockedByDoctrineConflict: false,
+        blockedByRisk: riskCount > 0,
+      }),
+      [CORP_SCORE_WINDOW_PILOT_MODE]: readinessForPilotScope({
+        scope: CORP_SCORE_WINDOW_PILOT_MODE,
+        candidate: scenarios.length,
+        breakdown: breakdown[CORP_SCORE_WINDOW_PILOT_MODE],
+        blockedByTargetChoice: false,
+        blockedByDoctrineConflict: doctrineConflictCount > 0,
+        blockedByRisk: false,
+      }),
+      remote_contest_report_only: readinessForShadowOnlyScope({
+        scope: "remote_contest_report_only",
+        candidate: remoteContestCandidateCount,
+        allowed: remoteContestCandidateCount,
+        blockedByTargetChoice: true,
+        blockedByDoctrineConflict: false,
+        blockedByRisk: riskCount > 0,
+      }),
+      target_choice_shadow_only: readinessForShadowOnlyScope({
+        scope: "target_choice_shadow_only",
+        candidate: targetChoiceGapCount,
+        allowed: 0,
+        blockedByTargetChoice: true,
+        blockedByDoctrineConflict: false,
+        blockedByRisk: false,
+      }),
+    },
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    evidence: [
+      "pilot_cutover_readiness:report_only",
+      "runtime_consumer:none",
+      "productive_use_allowed:false",
+    ],
+  };
+}
+
+function readinessForPilotScope(params: {
+  scope: AiPlayStrengthPilotScope;
+  candidate: number;
+  breakdown: SemanticShadowLeaguePilotScopeBreakdown;
+  blockedByTargetChoice: boolean;
+  blockedByDoctrineConflict: boolean;
+  blockedByRisk: boolean;
+}): SemanticShadowLeaguePilotCutoverReadiness {
+  const blockedByInsufficientCorpus = params.breakdown.eligibleCount < 5;
+  const safeToEnableLocally =
+    params.breakdown.eligibleCount > 0 &&
+    !blockedByInsufficientCorpus &&
+    !params.blockedByTargetChoice &&
+    !params.blockedByDoctrineConflict &&
+    !params.blockedByRisk;
+  const recommendedForDefaultOffPilot =
+    safeToEnableLocally && params.breakdown.wouldOverrideCount > 0;
+  return {
+    scope: params.scope,
+    candidate: params.candidate,
+    allowed: params.breakdown.eligibleCount,
+    wouldOverride: params.breakdown.wouldOverrideCount,
+    actualOverride: 0,
+    safeToEnableLocally,
+    recommendedForDefaultOffPilot,
+    blockedByInsufficientCorpus,
+    blockedByTargetChoice: params.blockedByTargetChoice,
+    blockedByDoctrineConflict: params.blockedByDoctrineConflict,
+    blockedByRisk: params.blockedByRisk,
+    recommendation: recommendedForDefaultOffPilot
+      ? "default_off_candidate"
+      : "keep_env_gated",
+    evidence: [
+      `pilot_readiness_scope:${params.scope}`,
+      `candidate:${params.candidate}`,
+      `allowed:${params.breakdown.eligibleCount}`,
+      `would_override:${params.breakdown.wouldOverrideCount}`,
+      "actual_override:0",
+      `safe_to_enable_locally:${safeToEnableLocally}`,
+      `recommended_for_default_off_pilot:${recommendedForDefaultOffPilot}`,
+      `blocked_by_insufficient_corpus:${blockedByInsufficientCorpus}`,
+      `blocked_by_target_choice:${params.blockedByTargetChoice}`,
+      `blocked_by_doctrine_conflict:${params.blockedByDoctrineConflict}`,
+      `blocked_by_risk:${params.blockedByRisk}`,
+    ],
+  };
+}
+
+function readinessForShadowOnlyScope(params: {
+  scope: "remote_contest_report_only" | "target_choice_shadow_only";
+  candidate: number;
+  allowed: number;
+  blockedByTargetChoice: boolean;
+  blockedByDoctrineConflict: boolean;
+  blockedByRisk: boolean;
+}): SemanticShadowLeaguePilotCutoverReadiness {
+  return {
+    scope: params.scope,
+    candidate: params.candidate,
+    allowed: params.allowed,
+    wouldOverride: 0,
+    actualOverride: 0,
+    safeToEnableLocally: false,
+    recommendedForDefaultOffPilot: false,
+    blockedByInsufficientCorpus: params.candidate < 5,
+    blockedByTargetChoice: params.blockedByTargetChoice,
+    blockedByDoctrineConflict: params.blockedByDoctrineConflict,
+    blockedByRisk: params.blockedByRisk,
+    recommendation: "report_only",
+    evidence: [
+      `pilot_readiness_scope:${params.scope}`,
+      `candidate:${params.candidate}`,
+      `allowed:${params.allowed}`,
+      "would_override:0",
+      "actual_override:0",
+      "safe_to_enable_locally:false",
+      "recommended_for_default_off_pilot:false",
+      `blocked_by_insufficient_corpus:${params.candidate < 5}`,
+      `blocked_by_target_choice:${params.blockedByTargetChoice}`,
+      `blocked_by_doctrine_conflict:${params.blockedByDoctrineConflict}`,
+      `blocked_by_risk:${params.blockedByRisk}`,
+    ],
   };
 }
 

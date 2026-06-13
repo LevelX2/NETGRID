@@ -75,6 +75,72 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(22);
     expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(18);
     expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(3);
+    expect(report.metrics.pilotCutoverReadiness).toMatchObject({
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      noRuntimeEffect: true,
+      scopes: {
+        basic_setup: {
+          candidate: 50,
+          allowed: 22,
+          wouldOverride: 22,
+          actualOverride: 0,
+          safeToEnableLocally: true,
+          recommendedForDefaultOffPilot: true,
+          blockedByDoctrineConflict: false,
+          recommendation: "default_off_candidate",
+        },
+        runner_safe_access: {
+          candidate: 50,
+          allowed: 18,
+          wouldOverride: 18,
+          actualOverride: 0,
+          safeToEnableLocally: true,
+          recommendedForDefaultOffPilot: true,
+          blockedByRisk: false,
+          recommendation: "default_off_candidate",
+        },
+        corp_score_window: {
+          candidate: 50,
+          allowed: 3,
+          wouldOverride: 3,
+          actualOverride: 0,
+          safeToEnableLocally: false,
+          recommendedForDefaultOffPilot: false,
+          blockedByInsufficientCorpus: true,
+          recommendation: "keep_env_gated",
+        },
+        remote_contest_report_only: {
+          candidate: 2,
+          allowed: 2,
+          wouldOverride: 0,
+          actualOverride: 0,
+          safeToEnableLocally: false,
+          recommendedForDefaultOffPilot: false,
+          blockedByInsufficientCorpus: true,
+          blockedByTargetChoice: true,
+          recommendation: "report_only",
+        },
+        target_choice_shadow_only: {
+          candidate: 0,
+          allowed: 0,
+          wouldOverride: 0,
+          actualOverride: 0,
+          safeToEnableLocally: false,
+          recommendedForDefaultOffPilot: false,
+          blockedByInsufficientCorpus: true,
+          blockedByTargetChoice: true,
+          recommendation: "report_only",
+        },
+      },
+    });
+    expect(report.metrics.pilotCutoverReadiness.evidence).toEqual(
+      expect.arrayContaining([
+        "pilot_cutover_readiness:report_only",
+        "runtime_consumer:none",
+        "productive_use_allowed:false",
+      ]),
+    );
     expect(report.metrics.remoteContestPilotCandidateCount).toBe(2);
     expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
       "runner_real_remote_known_agenda_contest",
