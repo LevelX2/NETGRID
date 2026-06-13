@@ -334,12 +334,55 @@ describe("Action semantic invariants", () => {
       ]),
     );
     expect(
-      profiles.every((profile) =>
+      profiles
+        .filter((profile) =>
+          profile.tacticSignals.some(
+            (signal) =>
+              signal.startsWith("tag.") || signal === "access.tag_ambush",
+          ),
+        )
+        .every((profile) =>
         profile.abilitySemantics?.[0]?.strategySupport?.some(
           (support) => support.strategyId === "corp.doctrine.tag_trace_punish",
         ),
       ),
     ).toBe(true);
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp damage ambush worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Setup!", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Vacant Soulkiller", [
+        "access.corp_brain_damage_ambush",
+      ]),
+      corpSemanticProfile("Virus Test Site", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Experimental AI", ["access.corp_program_trash"]),
+      corpSemanticProfile("Corprunner's Shattered Remains", [
+        "access.corp_hardware_trash",
+      ]),
+      corpSemanticProfile("Dedicated Response Team", [
+        "access.corp_meat_damage_ambush",
+      ]),
+      corpSemanticProfile("TRAP!", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Bolter Cluster", ["corp_ice.net_damage"]),
+      corpSemanticProfile("Cinderella", ["corp_ice.program_trash"]),
+      corpSemanticProfile("Code Corpse", ["corp_ice.brain_damage"]),
+      corpSemanticProfile("Wall of Ice", ["corp_ice.end_the_run_tax"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "access.corp_net_damage_ambush",
+        "access.corp_brain_damage_ambush",
+        "access.corp_program_trash",
+        "access.corp_hardware_trash",
+        "corp_ice.net_damage",
+      ]),
+    );
     expect(report.productiveUseAllowed).toBe(false);
   });
 });
@@ -366,8 +409,8 @@ function runnerBreakerSearchProfile(
         targetProfileMatches: [
           {
             targetProfileId: "tp.runner_program_or_stack_search",
-            status: "gap",
-            issues: ["target_choice_gap"],
+            status: "not_available",
+            issues: ["target_context_unavailable"],
             evidence: ["TargetProfile remains diagnostic and side-safe."],
           },
         ],
@@ -398,8 +441,8 @@ function runnerRiskProfile(
         targetProfileMatches: [
           {
             targetProfileId: "tp.runner_self_or_damage_context",
-            status: "gap",
-            issues: ["risk_projection_gap"],
+            status: "not_available",
+            issues: ["card_semantics_unavailable"],
             evidence: ["Damage prevention precision remains diagnostic."],
           },
         ],
@@ -427,7 +470,11 @@ function corpSemanticProfile(
                 signal.startsWith("tag.") || signal === "access.tag_ambush",
             )
               ? "corp.doctrine.tag_trace_punish"
-              : strategyId,
+              : tacticSignals.some((signal) =>
+                    signal.includes("damage") || signal.includes("trash"),
+                  )
+                ? "corp.doctrine.damage_pressure"
+                : strategyId,
             role: "scoreline_support",
             confidence: "medium",
             evidence: `${title} is classified by functional corp scoreline semantics.`,
@@ -436,8 +483,8 @@ function corpSemanticProfile(
         targetProfileMatches: [
           {
             targetProfileId: "tp.corp_visible_scoreline_target",
-            status: "gap",
-            issues: ["target_choice_gap"],
+            status: "not_available",
+            issues: ["target_context_unavailable"],
             evidence: ["Corp target profile remains diagnostic."],
           },
         ],

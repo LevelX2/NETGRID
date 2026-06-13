@@ -120,3 +120,27 @@ Abdeckung:
 - Tag-Quelle, Tag-Payoff und Tag-Snowball werden als getrennte Signale geprüft.
 - Meat-Damage-Payoffs, Resource-Trash und Access-Tag-Ambush bleiben getrennt.
 - `condition.requires_tagged_runner` bleibt Folge-Gate; keine Strategie ohne vollständige Source-/Payoff-Kette.
+
+## AI-MAT4-18 Umsetzung: Corp Damage/Ambush Paket 1
+
+Status: `diagnostic_tests_added`
+
+Scope:
+
+- Setup!
+- Vacant Soulkiller
+- Virus Test Site
+- Experimental AI
+- Corprunner's Shattered Remains
+- Dedicated Response Team
+- TRAP!
+- Bolter Cluster
+- Cinderella
+- Code Corpse
+- Wall of Ice
+
+Abdeckung:
+
+- Net-, Brain- und Meat-Damage-Ambush-Signale bleiben getrennt.
+- Program-/Hardware-Trash und ICE-Damage werden getrennt von generischem Damage-Payoff geprüft.
+- Kein `damage.payoff` allein reicht für Strategie; TargetProfile- und RiskProjection-Gaps bleiben sichtbar.
