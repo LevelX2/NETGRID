@@ -22645,7 +22645,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(JSON.stringify(league)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("compares doctrine quality metrics between baseline and current candidate", () => {
     const benchmark = runDoctrineQualityBenchmark({

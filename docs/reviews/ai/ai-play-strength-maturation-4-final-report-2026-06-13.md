@@ -38,7 +38,7 @@ Keine Änderung an:
 
 ## Verifikation der Paketserie
 
-Die Einzelpakete wurden jeweils mit fokussierten Tests, `@netgrid/ai`-Typecheck und `git diff --check` geprüft. Das vollständige FINAL-GREEN-Gate wurde nach dem Abschlussbericht im Arbeitsbranch grün ausgeführt.
+Die Einzelpakete wurden jeweils mit fokussierten Tests, `@netgrid/ai`-Typecheck und `git diff --check` geprüft. Nach dem konfliktfreien Merge von `main` in den Arbeitsbranch wurde das vollständige FINAL-GREEN-Gate erneut grün ausgeführt. Drei lang laufende Simulation-Smokes erhielten dabei nur erweiterte Testzeitbudgets; die fachlichen Assertions blieben unverändert.
 
 Relevante fokussierte Paketchecks:
 
@@ -51,11 +51,11 @@ Relevante fokussierte Paketchecks:
 
 FINAL-GREEN:
 
-- `corepack pnpm --filter @netgrid/ai test`: 96 Testdateien, 1325 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: 97 Testdateien, 1334 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: 500 Tests.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: 506 Tests.
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: 49 Tests.
-- `corepack pnpm --filter @netgrid/engine test`: 170 Testdateien, 1505 Tests.
+- `corepack pnpm --filter @netgrid/engine test`: 171 Testdateien, 1509 Tests.
 - `corepack pnpm --filter @netgrid/engine typecheck`
 - `corepack pnpm --filter @netgrid/server test`: 6 Testdateien, 127 Tests.
 - `corepack pnpm --filter @netgrid/server typecheck`
