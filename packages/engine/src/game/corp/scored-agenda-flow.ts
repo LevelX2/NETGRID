@@ -4,8 +4,6 @@ import type {
   CardInstanceId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
-import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
 import { startEmployeeEmpowermentStartDrawChoice } from "./scored-agenda/employee-empowerment-sequence";
 import { applyScoredAgendaDirectEffects } from "./scored-agenda/scored-agenda-direct-effect-registry";
 import type {
@@ -69,7 +67,7 @@ export function scoreAgenda(
   });
   const bonusAgendaPoints = directEffectResult.bonusAgendaPoints ?? 0;
   const overadvancedBy = directEffectResult.overadvancedBy ?? 0;
-  applySimpleScoreEffects(host, cardId, definition, scoredAgenda);
+  applySimpleScoreEffects(host, cardId, definition);
   startScoreTimeChoices(host, cardId, definition, instanceBefore, scoredAgenda);
   host.zones.cleanupEmptyRemotes();
   const result: ScoredAgendaFlowResult = {
@@ -90,16 +88,8 @@ function applySimpleScoreEffects(
   host: ScoredAgendaFlowHost,
   cardId: CardInstanceId,
   definition: CardDefinition,
-  scoredAgenda: CardScoredAgendaImplementation | undefined,
 ): void {
-  const legalAction = host.legalAction;
   host.effects.executeOnScore(definition, cardId);
-  if (scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install") {
-    markCorporateRetreatAvailableOnScore(host, cardId, legalAction);
-  }
-  if (scoredAgenda?.kind === "corporate_war_credit_swing") {
-    resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
-  }
 }
 
 function startScoreTimeChoices(

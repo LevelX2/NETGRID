@@ -5,6 +5,8 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
+import { markCorporateRetreatAvailableOnScore } from "./corporate-retreat-sequence";
+import { resolveCorporateWarOnScore } from "./corporate-war-sequence";
 import { applyDirectScoreEconomyEffects } from "./direct-score-economy-effects";
 import { applyOveradvanceScoreEffects } from "./overadvance-score-effects";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
@@ -92,6 +94,27 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           context.scoredAgenda,
           context.legalAction,
         ),
+    },
+    {
+      id: "corporate_retreat_score_effect",
+      kind: "corporate_retreat_disable_on_rez_or_install",
+      mode: "agenda_kind",
+      resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
+        if (
+          scoredAgenda?.kind !== "corporate_retreat_disable_on_rez_or_install"
+        )
+          return;
+        markCorporateRetreatAvailableOnScore(host, cardId, legalAction);
+      },
+    },
+    {
+      id: "corporate_war_score_effect",
+      kind: "corporate_war_credit_swing",
+      mode: "agenda_kind",
+      resolveOnScore: ({ host, definition, legalAction, scoredAgenda }) => {
+        if (scoredAgenda?.kind !== "corporate_war_credit_swing") return;
+        resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
+      },
     },
   ];
 
