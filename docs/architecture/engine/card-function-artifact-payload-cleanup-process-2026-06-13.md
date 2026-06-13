@@ -109,4 +109,4 @@ Stop ohne Rückfrage, wenn:
 - Der Card-Function-Abstraction-Guard ist auf die aktuelle 387er Baseline kalibriert.
 - Die zwei ehemaligen Krumz-Payload-Funde sind durch `recurringTraceCreditPoolSpent` entfallen.
 - `Krumz` und `Startup Immolator` bleiben im Review-Artefakt `slice_done`.
-- Verifikation im Arbeitsbranch: `corepack pnpm check:card-function-abstraction`, JSON-Parse, `corepack pnpm --filter @netgrid/engine test -- src/game/payment/trace-payment.test.ts`, `corepack pnpm --filter @netgrid/engine test -- index-tests/mechanics/assets-nodes-upgrades.test.ts -t "Krumz"`, `corepack pnpm --filter @netgrid/engine typecheck`, `git diff --check`.
+- Verifikation im Arbeitsbranch: `corepack pnpm check:card-function-abstraction`, JSON-Parse, `corepack pnpm --filter @netgrid/engine exec vitest run src/game/payment/trace-payment.test.ts`, `corepack pnpm --filter @netgrid/engine exec vitest run index-tests/mechanics/assets-nodes-upgrades.test.ts -t "Krumz"`, `corepack pnpm --filter @netgrid/engine typecheck`, `git diff --check`.
