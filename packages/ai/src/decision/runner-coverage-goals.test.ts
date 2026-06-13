@@ -68,4 +68,40 @@ describe("runner coverage goal resolution", () => {
       /cardInstances|privatePayload|fullGameState|AIInput|DecisionDebug/i,
     );
   });
+
+  it("connects breaker-search doctrine goals to side-safe search actions", () => {
+    const result = resolveRunnerCoverageGoalForAction(
+      {
+        missingCoverageTypes: ["barrier"],
+        activeCoverageGoalIds: ["runner.doctrine.breaker_search"],
+      },
+      {
+        type: "play_event",
+        label: "Find a program",
+        actionTacticSignals: ["setup.program_search", "breaker_search"],
+      },
+    );
+
+    expect(result.fit).toBe("search_likely_finds");
+    expect(result.matchedGoalIds).toEqual(["runner.doctrine.breaker_search"]);
+    expect(result.sideSafe).toBe(true);
+  });
+
+  it("matches explicit coverage goal ids without relying on card names", () => {
+    const result = resolveRunnerCoverageGoalForAction(
+      {
+        missingCoverageTypes: ["code_gate"],
+        activeCoverageGoalIds: ["runner.doctrine.rnd_pressure_coverage"],
+      },
+      {
+        type: "search_stack",
+        supportedGoalIds: ["runner.doctrine.rnd_pressure_coverage"],
+      },
+    );
+
+    expect(result.fit).toBe("search_likely_finds");
+    expect(result.matchedGoalIds).toEqual([
+      "runner.doctrine.rnd_pressure_coverage",
+    ]);
+  });
 });

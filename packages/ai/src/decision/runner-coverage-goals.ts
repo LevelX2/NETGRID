@@ -5,6 +5,7 @@ export type RunnerCoverageGoalContext = {
   visibleInstallableCoverageCards?: readonly RunnerCoverageCard[];
   sideSafeSearchAvailable?: boolean;
   runnerCredits?: number;
+  activeCoverageGoalIds?: readonly string[];
 };
 
 export type RunnerCoverageCard = {
@@ -20,6 +21,8 @@ export type RunnerCoverageGoalAction = {
   sourceTitle?: string;
   cost?: number;
   targetCoverageTypes?: readonly RunnerCoverageType[];
+  supportedGoalIds?: readonly string[];
+  actionTacticSignals?: readonly string[];
 };
 
 export type RunnerCoverageGoalFit =
@@ -34,6 +37,7 @@ export type RunnerCoverageGoalResolution = {
   fit: RunnerCoverageGoalFit;
   missingCoverageTypes: RunnerCoverageType[];
   resolvedCoverageTypes: RunnerCoverageType[];
+  matchedGoalIds: string[];
   sideSafe: boolean;
   rationale: string;
 };
@@ -44,7 +48,14 @@ export function resolveRunnerCoverageGoalForAction(
 ): RunnerCoverageGoalResolution {
   const missing = uniqueCoverage(context.missingCoverageTypes);
   if (missing.length === 0) {
-    return resolution("unrelated", missing, [], true, "No visible coverage gap.");
+    return resolution(
+      "unrelated",
+      missing,
+      [],
+      [],
+      true,
+      "No visible coverage gap.",
+    );
   }
 
   const visibleCoverage = visibleCoverageForAction(context, action);
@@ -58,6 +69,7 @@ export function resolveRunnerCoverageGoalForAction(
         "install_fixes_coverage",
         missing,
         visibleCoverage,
+        [],
         true,
         "Visible installable coverage card resolves at least one missing ICE type.",
       );
@@ -66,19 +78,24 @@ export function resolveRunnerCoverageGoalForAction(
       "credit_preserves_future_coverage",
       missing,
       visibleCoverage,
+      [],
       true,
       "Coverage install is visible but not currently affordable; preserving credits remains sensible.",
     );
   }
 
   if (isSearchAction(action)) {
+    const matchedGoalIds = matchedCoverageGoalIds(context, action);
     return resolution(
-      context.sideSafeSearchAvailable ? "search_likely_finds" : "draw_may_find",
+      context.sideSafeSearchAvailable || matchedGoalIds.length > 0
+        ? "search_likely_finds"
+        : "draw_may_find",
       missing,
       [],
+      matchedGoalIds,
       true,
-      context.sideSafeSearchAvailable
-        ? "Side-safe search action can plausibly find missing coverage."
+      context.sideSafeSearchAvailable || matchedGoalIds.length > 0
+        ? "Side-safe search action can plausibly find missing coverage goal."
         : "Search-like action exists but lacks a side-safe target guarantee.",
     );
   }
@@ -87,6 +104,7 @@ export function resolveRunnerCoverageGoalForAction(
     return resolution(
       "draw_may_find",
       missing,
+      [],
       [],
       true,
       "Draw may find coverage when no visible installable coverage action is available.",
@@ -98,6 +116,7 @@ export function resolveRunnerCoverageGoalForAction(
       "credit_preserves_future_coverage",
       missing,
       [],
+      [],
       true,
       "Credit action preserves future coverage or install affordability.",
     );
@@ -108,6 +127,7 @@ export function resolveRunnerCoverageGoalForAction(
       "run_ignores_unresolved_coverage",
       missing,
       [],
+      [],
       true,
       "Run action does not address visible unresolved coverage gap.",
     );
@@ -116,6 +136,7 @@ export function resolveRunnerCoverageGoalForAction(
   return resolution(
     "unrelated",
     missing,
+    [],
     [],
     true,
     "Action has no side-safe relationship to visible coverage goal.",
@@ -136,7 +157,30 @@ function visibleCoverageForAction(
   const combined = uniqueCoverage([...actionCoverage, ...cardCoverage]);
   return combined.filter((coverage) =>
     context.missingCoverageTypes.includes(coverage),
+    );
+}
+
+function matchedCoverageGoalIds(
+  context: RunnerCoverageGoalContext,
+  action: RunnerCoverageGoalAction,
+): string[] {
+  const activeGoalIds = new Set(context.activeCoverageGoalIds ?? []);
+  const supportedGoalIds = uniqueStrings(action.supportedGoalIds ?? []);
+  const explicitMatches = supportedGoalIds.filter((goalId) =>
+    activeGoalIds.has(goalId),
   );
+  if (explicitMatches.length > 0) return explicitMatches;
+  if (
+    action.actionTacticSignals?.some((signal) =>
+      /breaker_search|program_search|search\.stack|coverage/i.test(signal),
+    ) &&
+    [...activeGoalIds].some((goalId) => goalId.includes("breaker_search"))
+  ) {
+    return [...activeGoalIds].filter((goalId) =>
+      goalId.includes("breaker_search"),
+    );
+  }
+  return [];
 }
 
 function isSearchAction(action: RunnerCoverageGoalAction): boolean {
@@ -161,6 +205,7 @@ function resolution(
   fit: RunnerCoverageGoalFit,
   missingCoverageTypes: RunnerCoverageType[],
   resolvedCoverageTypes: RunnerCoverageType[],
+  matchedGoalIds: string[],
   sideSafe: boolean,
   rationale: string,
 ): RunnerCoverageGoalResolution {
@@ -168,6 +213,7 @@ function resolution(
     fit,
     missingCoverageTypes,
     resolvedCoverageTypes,
+    matchedGoalIds,
     sideSafe,
     rationale,
   };
@@ -177,4 +223,8 @@ function uniqueCoverage(
   coverageTypes: readonly RunnerCoverageType[],
 ): RunnerCoverageType[] {
   return [...new Set(coverageTypes)].sort();
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values)].sort();
 }
