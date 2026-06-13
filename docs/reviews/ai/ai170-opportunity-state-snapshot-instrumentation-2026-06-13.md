@@ -15,6 +15,7 @@ AI170 ergänzt den Trace-Matrix-Flow um optionale Opportunity-Snapshot-Requests.
 | Fälle | 17 |
 | angeforderte Snapshots | 19 |
 | verfügbare Snapshots | 17 |
+| Alternativen mit SemanticActionSignature | 76 |
 | AI159 TargetContext-missing-Fälle mit Snapshot | 2 |
 | Fälle mit Progress-Alternative | 14 |
 | Redaction safe | 1 |

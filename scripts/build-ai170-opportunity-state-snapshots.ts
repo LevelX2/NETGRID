@@ -1,6 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import {
+  buildSemanticActionSignature,
+  type SemanticActionSignature,
+} from "../packages/ai/src/semantic-action-signature";
 
 type Ai159Mining = {
   cases: Array<{
@@ -41,6 +45,7 @@ type OpportunitySnapshot = {
     selected?: boolean;
     sourceKind?: string;
     sourceDefinitionId?: string;
+    abilityId?: string;
     scoreKeys: string[];
     hardGates: string[];
     targetContextStatus: string;
@@ -49,6 +54,7 @@ type OpportunitySnapshot = {
     whyChosen: string[];
     whyNot: string[];
     economy?: unknown;
+    semanticActionSignature?: SemanticActionSignature;
   }>;
 };
 
@@ -118,6 +124,18 @@ const output = {
     cases: cases.length,
     requestedSnapshots: sum(cases, (entry) => entry.requestedSnapshotCount),
     availableSnapshots: sum(cases, (entry) => entry.availableSnapshotCount),
+    alternativesWithSemanticActionSignature: sum(cases, (entry) =>
+      entry.snapshots.reduce(
+        (count, snapshot) =>
+          count +
+          (snapshot.snapshotAvailable && "snapshot" in snapshot
+            ? snapshot.snapshot.alternatives.filter(
+                (alternative) => alternative.semanticActionSignature !== undefined,
+              ).length
+            : 0),
+        0,
+      ),
+    ),
     ai159TargetContextMissingCasesWithSnapshots: cases.filter(
       (entry) =>
         entry.ai159Category === "opportunity_target_context_missing" &&
@@ -154,6 +172,8 @@ function compactSnapshot(snapshot: OpportunitySnapshot): OpportunitySnapshot {
       ...(alternative.selected !== undefined ? { selected: alternative.selected } : {}),
       ...(alternative.sourceKind ? { sourceKind: alternative.sourceKind } : {}),
       ...(alternative.sourceDefinitionId ? { sourceDefinitionId: alternative.sourceDefinitionId } : {}),
+      ...(alternative.abilityId ? { abilityId: alternative.abilityId } : {}),
+      semanticActionSignature: signatureForAlternative(alternative),
       scoreKeys: alternative.scoreKeys,
       hardGates: alternative.hardGates,
       targetContextStatus: alternative.targetContextStatus,
@@ -164,6 +184,58 @@ function compactSnapshot(snapshot: OpportunitySnapshot): OpportunitySnapshot {
       ...(alternative.economy !== undefined ? { economy: alternative.economy } : {}),
     })),
   };
+}
+
+function signatureForAlternative(
+  alternative: OpportunitySnapshot["alternatives"][number],
+): SemanticActionSignature {
+  return buildSemanticActionSignature({
+    actionType: alternative.actionType,
+    semanticActionType: alternative.semanticActionType,
+    sourceKind: alternative.sourceKind ?? "unknown",
+    ...(alternative.sourceDefinitionId ? { sourceDefinitionId: alternative.sourceDefinitionId } : {}),
+    ...(alternative.abilityId ? { abilityId: alternative.abilityId } : {}),
+    targetIdentity: targetIdentitySeedForAlternative(alternative),
+    costClass: costClassForAlternative(alternative),
+    timingClass: timingClassForAlternative(alternative),
+  });
+}
+
+function targetIdentitySeedForAlternative(
+  alternative: OpportunitySnapshot["alternatives"][number],
+): string {
+  if (alternative.targetContextStatus === "opaque") return "unknown_hidden_blocked";
+  if (alternative.targetContextStatus === "blocked_by_hard_gate") return "blocked_by_hard_gate";
+  if (alternative.actionType === "start_run" || alternative.actionType === "continue_run") {
+    return "server:unknown";
+  }
+  if (alternative.actionType === "resolve_choice") return "choice:unknown";
+  if (
+    alternative.actionType === "gain_credit" ||
+    alternative.actionType === "draw_card" ||
+    alternative.actionType === "end_turn"
+  ) {
+    return "none";
+  }
+  return "unknown_target";
+}
+
+function costClassForAlternative(
+  alternative: OpportunitySnapshot["alternatives"][number],
+): string {
+  const hardGateClass =
+    alternative.hardGates.length > 0
+      ? `hard_gate:${alternative.hardGates.slice().sort().join("+")}`
+      : "hard_gate:none";
+  const economyClass =
+    alternative.economy === undefined ? "economy:not_projected" : "economy:projected";
+  return `${hardGateClass},${economyClass}`;
+}
+
+function timingClassForAlternative(
+  alternative: OpportunitySnapshot["alternatives"][number],
+): string {
+  return `snapshot_context:${alternative.targetContextStatus}`;
 }
 
 function proofSummaryForSnapshot(snapshot: OpportunitySnapshot) {
@@ -215,6 +287,7 @@ AI170 ergänzt den Trace-Matrix-Flow um optionale Opportunity-Snapshot-Requests.
 | Fälle | ${input.aggregate.cases} |
 | angeforderte Snapshots | ${input.aggregate.requestedSnapshots} |
 | verfügbare Snapshots | ${input.aggregate.availableSnapshots} |
+| Alternativen mit SemanticActionSignature | ${input.aggregate.alternativesWithSemanticActionSignature} |
 | AI159 TargetContext-missing-Fälle mit Snapshot | ${input.aggregate.ai159TargetContextMissingCasesWithSnapshots} |
 | Fälle mit Progress-Alternative | ${input.aggregate.casesWithProgressAlternative} |
 | Redaction safe | ${input.redaction.safe ? 1 : 0} |

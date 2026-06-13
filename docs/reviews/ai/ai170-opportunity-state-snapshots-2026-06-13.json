@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai170-opportunity-state-snapshots-v1",
-  "generatedAt": "2026-06-13T07:47:59.008Z",
-  "gitHead": "ddec5b8d",
+  "generatedAt": "2026-06-13T08:10:51.670Z",
+  "gitHead": "89ea35e9",
   "sources": {
     "ai159": "docs/reviews/ai/ai159-opportunity-state-mining-2026-06-12.json",
     "sourceTrace": "docs/reviews/ai/ai170-source-x10-alternatives-2026-06-13.json"
@@ -14,6 +14,7 @@
     "cases": 17,
     "requestedSnapshots": 19,
     "availableSnapshots": 17,
+    "alternativesWithSemanticActionSignature": 76,
     "ai159TargetContextMissingCasesWithSnapshots": 2,
     "casesWithProgressAlternative": 14
   },
@@ -46,6 +47,16 @@
                 "semanticActionType": "run_progress",
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "steal_agenda",
+                  "semanticActionType": "run_progress",
+                  "sourceKind": "visible_card_or_ability",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:steal_agenda|semantic:run_progress|source:visible_card_or_ability|definition:none|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -121,6 +132,16 @@
                 "semanticActionType": "server_protection",
                 "selected": true,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "resolve_choice",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "choice:unknown",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:protection_relevant",
+                  "signatureKey": "action:resolve_choice|semantic:server_protection|source:game_rule|definition:none|ability:none|target:choice:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:protection_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -168,6 +189,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Off-Site Backups",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "play_operation",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Off-Site Backups",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:play_operation|semantic:economy|source:visible_card_or_ability|definition:Off-Site Backups|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -187,6 +219,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_low_credits",
@@ -207,6 +249,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_low_hand",
@@ -228,6 +280,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Wall of Static",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Wall of Static",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Wall of Static|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_install_protection",
@@ -249,6 +312,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_unused_actions",
@@ -310,6 +383,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Corporate War",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "advance_card",
+                  "semanticActionType": "scoreline",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Corporate War",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:advance_card|semantic:scoreline|source:visible_card_or_ability|definition:Corporate War|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_advance_score_line",
@@ -336,6 +420,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_low_credits",
@@ -363,6 +457,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -389,6 +493,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_unused_actions",
@@ -446,6 +560,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_low_credits",
@@ -466,6 +590,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -485,6 +619,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_unused_actions",
@@ -563,6 +707,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_credits",
@@ -588,6 +742,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -615,6 +779,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -644,6 +818,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight_suppressed",
@@ -675,6 +859,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -702,6 +896,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -771,6 +975,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Bodyweight™ Synthetic Blood",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "play_event",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Bodyweight™ Synthetic Blood",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:play_event|semantic:coverage_setup|source:visible_card_or_ability|definition:Bodyweight™ Synthetic Blood|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -796,6 +1011,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Newsgroup Filter",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "activated_card_ability",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Newsgroup Filter",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:activated_card_ability|semantic:economy|source:visible_card_or_ability|definition:Newsgroup Filter|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_credit_cost_penalty",
@@ -821,6 +1047,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight_suppressed",
@@ -852,6 +1088,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -876,6 +1122,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -902,6 +1158,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -969,6 +1235,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_credits",
@@ -994,6 +1270,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -1023,6 +1309,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -1050,6 +1346,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -1080,6 +1386,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -1107,6 +1423,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -1178,6 +1504,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "play_event",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:play_event|semantic:economy|source:visible_card_or_ability|definition:Mantis, Fixer-at-Large|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1201,6 +1538,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -1228,6 +1575,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight_suppressed",
@@ -1258,6 +1615,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1284,6 +1651,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -1311,6 +1688,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -1379,6 +1766,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_credits",
@@ -1405,6 +1802,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "play_event",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:play_event|semantic:economy|source:visible_card_or_ability|definition:Mantis, Fixer-at-Large|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1431,6 +1839,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -1459,6 +1877,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Armored Fridge",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Armored Fridge",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Armored Fridge|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_persistent_install_fit",
@@ -1485,6 +1914,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -1512,6 +1951,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -1579,6 +2028,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "mandatory_draw",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:mandatory_draw|semantic:economy|source:game_rule|definition:none|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1635,6 +2094,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Newsgroup Filter",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "activated_card_ability",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Newsgroup Filter",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:activated_card_ability|semantic:economy|source:visible_card_or_ability|definition:Newsgroup Filter|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_credit_cost_penalty"
@@ -1653,6 +2123,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -1673,6 +2153,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1693,6 +2183,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Tycho Mem Chip",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Tycho Mem Chip",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Tycho Mem Chip|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_persistent_install_fit",
@@ -1712,6 +2213,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -1732,6 +2243,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -1800,6 +2321,17 @@
                 "selected": true,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "BBS Whispering Campaign",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "rez_ice",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "BBS Whispering Campaign",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:rez_ice|semantic:server_protection|source:visible_card_or_ability|definition:BBS Whispering Campaign|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_rez_affordability",
@@ -1823,6 +2355,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:gain_credit|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_low_credits",
@@ -1852,6 +2394,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Efficiency Experts",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "play_operation",
+                  "semanticActionType": "economy",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Efficiency Experts",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:play_operation|semantic:economy|source:visible_card_or_ability|definition:Efficiency Experts|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -1879,6 +2432,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Superior Net Barriers",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "scoreline",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Superior Net Barriers",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_install_score_line",
@@ -1911,6 +2475,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Superior Net Barriers",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "scoreline",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Superior Net Barriers",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_install_score_line",
@@ -1943,6 +2518,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Superior Net Barriers",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "scoreline",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Superior Net Barriers",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "corp_install_score_line",
@@ -2014,6 +2600,16 @@
                 "semanticActionType": "server_protection",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "server:unknown",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -2040,6 +2636,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -2070,6 +2676,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_archives_pressure",
@@ -2101,6 +2717,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_persistent_install_fit",
@@ -2128,6 +2755,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_credit_cost_penalty",
@@ -2154,6 +2792,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_credit_cost_penalty",
@@ -2219,6 +2868,16 @@
                 "semanticActionType": "economy",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_credits",
@@ -2240,6 +2899,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -2260,6 +2929,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "server:unknown",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -2282,6 +2961,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "end_turn",
+                  "semanticActionType": "economy",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "none",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_unused_actions",
@@ -2302,6 +2991,16 @@
                 "semanticActionType": "server_protection",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -2331,6 +3030,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_action_excluded",
@@ -2401,6 +3110,16 @@
                 "semanticActionType": "server_protection",
                 "selected": true,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "server_protection",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "server:unknown",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:scoreline_relevant",
+                  "signatureKey": "action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -2429,6 +3148,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_credit_cost_penalty",
@@ -2454,6 +3184,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "draw_card",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_low_hand",
@@ -2481,6 +3221,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "start_run",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "deck_doctrine_runtime_weight",
@@ -2510,6 +3260,16 @@
                 "semanticActionType": "economy",
                 "selected": false,
                 "sourceKind": "basic_action",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "gain_credit",
+                  "semanticActionType": "economy",
+                  "sourceKind": "basic_action",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
@@ -2537,6 +3297,17 @@
                 "selected": false,
                 "sourceKind": "visible_card_or_ability",
                 "sourceDefinitionId": "Broker",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Broker",
+                  "targetIdentity": "blocked_by_hard_gate",
+                  "costClass": "hard_gate:excluded_by_current_plan,economy:not_projected",
+                  "timingClass": "snapshot_context:blocked_by_hard_gate",
+                  "signatureKey": "action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Broker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "runner_bank_install_commitment",
@@ -2605,6 +3376,16 @@
                 "semanticActionType": "run_progress",
                 "selected": true,
                 "sourceKind": "game_rule",
+                "semanticActionSignature": {
+                  "schemaVersion": "semantic-action-signature-v1",
+                  "actionType": "access_card",
+                  "semanticActionType": "run_progress",
+                  "sourceKind": "game_rule",
+                  "targetIdentity": "unknown_target",
+                  "costClass": "hard_gate:none,economy:not_projected",
+                  "timingClass": "snapshot_context:reachability_relevant",
+                  "signatureKey": "action:access_card|semantic:run_progress|source:game_rule|definition:none|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none"
+                },
                 "scoreKeys": [
                   "semantic_type_priority",
                   "semantic_private_actor_bonus",
