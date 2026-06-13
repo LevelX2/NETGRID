@@ -138,9 +138,17 @@ function addCorpIce(
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
-    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
     state.corp.servers.push(server);
   }
   server.ice.push(cardId);
@@ -167,9 +175,17 @@ function addCorpRoot(
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
-    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
     state.corp.servers.push(server);
   }
   server.root.push(cardId);
@@ -226,7 +242,11 @@ function mustExistingInstance(state: GameState, cardId: CardInstanceId) {
   return instance;
 }
 
-function applySelected(state: GameState, side: "corp" | "runner", actionId: string): GameState {
+function applySelected(
+  state: GameState,
+  side: "corp" | "runner",
+  actionId: string,
+): GameState {
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
@@ -238,8 +258,13 @@ function applySelected(state: GameState, side: "corp" | "runner", actionId: stri
   return result.state;
 }
 
-function remoteServer(state: GameState, serverId: Exclude<ServerId, "new_remote">) {
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+function remoteServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+) {
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) throw new Error(`Missing server ${serverId}`);
   return server;
 }
@@ -281,11 +306,15 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const iceId = addCorpIce(state, WALL, "wall_1", "remote_1");
 
     const actions = getLegalActions(state, "corp").filter(
-      (action) => action.type === "play_operation" && action.payload?.cardId === "emergency_1",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === "emergency_1",
     );
     expect(actions.length).toBeGreaterThan(0);
     expect(actions.some((action) => action.payload?.xValue === 0)).toBe(false);
-    expect(actions.every((action) => Number(action.payload?.xValue) >= 1)).toBe(true);
+    expect(actions.every((action) => Number(action.payload?.xValue) >= 1)).toBe(
+      true,
+    );
 
     const selected = actions.find((action) => action.payload?.xValue === 1);
     expect(selected).toBeDefined();
@@ -322,7 +351,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const iceId = addCorpIce(state, WALL, "wall_2", "remote_1");
 
     const selected = getLegalActions(state, "corp").find(
-      (action) => action.type === "play_operation" && action.payload?.cardId === "rent_1",
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === "rent_1",
     );
     expect(selected?.payload?.targetRezCost).toBeGreaterThan(0);
     state = applySelected(state, "corp", selected!.actionId);
@@ -340,14 +370,22 @@ describe("PRO019 rule-contract baseline utilities", () => {
     payState = apply(
       payState,
       "corp",
-      (action) => action.type === "play_operation" && action.payload?.cardId === "rent_pay",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === "rent_pay",
     );
     const startingTerm = payState.cardInstances[payIce]?.counters?.term ?? 0;
     payState.corp.credits = 2;
     payState = apply(payState, "corp", (action) => action.type === "end_turn");
-    payState = apply(payState, "runner", (action) => action.type === "end_turn");
+    payState = apply(
+      payState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
     expect(payState.corp.credits).toBe(0);
-    expect(payState.cardInstances[payIce]?.counters?.term).toBe(startingTerm - 1);
+    expect(payState.cardInstances[payIce]?.counters?.term).toBe(
+      startingTerm - 1,
+    );
     expect(payState.cardInstances[payIce]?.rezzed).toBe(true);
 
     let growState = corpActionState("pro019-rent-grow");
@@ -357,14 +395,26 @@ describe("PRO019 rule-contract baseline utilities", () => {
       growState,
       "corp",
       (action) =>
-        action.type === "play_operation" && action.payload?.cardId === "rent_grow",
+        action.type === "play_operation" &&
+        action.payload?.cardId === "rent_grow",
     );
-    const growStartingTerm = growState.cardInstances[growIce]?.counters?.term ?? 0;
+    const growStartingTerm =
+      growState.cardInstances[growIce]?.counters?.term ?? 0;
     growState.corp.credits = 1;
-    growState = apply(growState, "corp", (action) => action.type === "end_turn");
-    growState = apply(growState, "runner", (action) => action.type === "end_turn");
+    growState = apply(
+      growState,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
+    growState = apply(
+      growState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
     expect(growState.corp.credits).toBe(1);
-    expect(growState.cardInstances[growIce]?.counters?.term).toBe(growStartingTerm + 1);
+    expect(growState.cardInstances[growIce]?.counters?.term).toBe(
+      growStartingTerm + 1,
+    );
   });
 
   it("offers Herman Revista only at start of run on its fort and reorders ICE privately", () => {
@@ -375,24 +425,35 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.runner.clicks = 4;
     addCorpRoot(state, HERMAN, "herman_1", "remote_1", true);
     const outerIce = addCorpIce(state, WALL, "herman_outer", "remote_1", true);
-    const innerIce = addCorpIce(state, CHIHUAHUA, "herman_inner", "remote_1", true);
+    const innerIce = addCorpIce(
+      state,
+      CHIHUAHUA,
+      "herman_inner",
+      "remote_1",
+      true,
+    );
 
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
-    expect(state.pendingChoice?.options.some((option) => option.id === "herman_herman_1")).toBe(
-      true,
-    );
+    expect(
+      state.pendingChoice?.options.some(
+        (option) => option.id === "herman_herman_1",
+      ),
+    ).toBe(true);
     state = applyChoice(state, "corp", "herman_herman_1");
     expect(state.pendingChoice?.source).toContain("herman_reorder");
-    state = applyChoices(state, "corp", [`card_${innerIce}`, `card_${outerIce}`]);
-    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice).toEqual([
-      innerIce,
-      outerIce,
+    state = applyChoices(state, "corp", [
+      `card_${innerIce}`,
+      `card_${outerIce}`,
     ]);
+    expect(
+      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).toEqual([innerIce, outerIce]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "herman_revista_reorder",
@@ -407,9 +468,12 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const hqRun = apply(
       wrongFort,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    expect(hqRun.pendingChoice?.source ?? "").not.toContain("corp.start_of_run_redirect");
+    expect(hqRun.pendingChoice?.source ?? "").not.toContain(
+      "corp.start_of_run_redirect",
+    );
   });
 
   it("gates Marcel DeSoleil on run timing and top-two-R&D costs", () => {
@@ -423,20 +487,25 @@ describe("PRO019 rule-contract baseline utilities", () => {
     addCorpRd(state, WALL, "marcel_rd_1");
     addCorpRd(state, CHIHUAHUA, "marcel_rd_2");
 
-    expect(getLegalActions(state, "corp").some((action) => action.source === marcelId)).toBe(
-      false,
-    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.source === marcelId,
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    if (state.pendingChoice?.side === "corp") state = applyChoice(state, "corp", "pass");
+    if (state.pendingChoice?.side === "corp")
+      state = applyChoice(state, "corp", "pass");
     state.timingPoint = "run.jack_out_window";
     const selected = mustAction(
       state,
       "corp",
-      (action) => action.type === "activated_card_ability" && action.source === marcelId,
+      (action) =>
+        action.type === "activated_card_ability" && action.source === marcelId,
     );
     const beforeRd = state.corp.rd.length;
     state = applySelected(state, "corp", selected.actionId);
@@ -452,7 +521,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
     shortRd.phase = "runner_action_phase";
     shortRd.timingPoint = "runner_action.main";
     shortRd.runner.clicks = 4;
-    const shortMarcel = addCorpRoot(shortRd, MARCEL, "marcel_short", "remote_1", true);
+    const shortMarcel = addCorpRoot(
+      shortRd,
+      MARCEL,
+      "marcel_short",
+      "remote_1",
+      true,
+    );
     addCorpIce(shortRd, WALL, "marcel_short_wall", "remote_1", true);
     const keptRd = shortRd.corp.rd.slice(0, 1);
     const movedRd = shortRd.corp.rd.slice(1);
@@ -467,11 +542,14 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const shortRun = apply(
       shortRd,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    expect(getLegalActions(shortRun, "corp").some((action) => action.source === shortMarcel)).toBe(
-      false,
-    );
+    expect(
+      getLegalActions(shortRun, "corp").some(
+        (action) => action.source === shortMarcel,
+      ),
+    ).toBe(false);
   });
 
   it("opens Obfuscated Fortress spend declaration and applies run-end shortfall", () => {
@@ -487,7 +565,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     expect(state.pendingChoice?.source).toContain("runner_spend_cap");
     state = applyChoice(state, "runner", "spend_3");
@@ -502,14 +581,22 @@ describe("PRO019 rule-contract baseline utilities", () => {
     let simonState = corpActionState("pro019-simon-install");
     addCorpHq(simonState, SIMON, "simon_install");
     const simonServers = getLegalActions(simonState, "corp")
-      .filter((action) => action.type === "install_card" && action.payload?.cardId === "simon_install")
+      .filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === "simon_install",
+      )
       .map((action) => action.payload?.serverId);
     expect(simonServers).toEqual(["hq", "rd"]);
 
     let pavitState = corpActionState("pro019-pavit-install");
     addCorpHq(pavitState, PAVIT, "pavit_install");
     const pavitServers = getLegalActions(pavitState, "corp")
-      .filter((action) => action.type === "install_card" && action.payload?.cardId === "pavit_install")
+      .filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === "pavit_install",
+      )
       .map((action) => action.payload?.serverId);
     expect(pavitServers).toContain("new_remote");
     expect(pavitServers).not.toContain("hq");
@@ -530,7 +617,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -541,8 +629,16 @@ describe("PRO019 rule-contract baseline utilities", () => {
       zone: "remote_root",
       status: "accessed",
     });
-    expect(queue.filter((entry) => entry.zone === "hq" && entry.status === "skipped")).toHaveLength(1);
-    expect(queue.filter((entry) => entry.zone === "hq" && entry.status === "pending")).toHaveLength(1);
+    expect(
+      queue.filter(
+        (entry) => entry.zone === "hq" && entry.status === "skipped",
+      ),
+    ).toHaveLength(1);
+    expect(
+      queue.filter(
+        (entry) => entry.zone === "hq" && entry.status === "pending",
+      ),
+    ).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "reduce_current_access_queue",
@@ -570,18 +666,23 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.run?.accessedCardId).toBe("simon_rd_root");
     expect(state.run?.breach?.queue).toHaveLength(1);
-    expect(state.run?.breach?.queue.some((entry) => entry.status === "skipped")).toBe(false);
+    expect(
+      state.run?.breach?.queue.some((entry) => entry.status === "skipped"),
+    ).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
     });
     expect(hashState(state)).toMatch(/^fnv1a:/);
-    expect(replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok).toBe(true);
+    expect(
+      replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok,
+    ).toBe(true);
   });
 
   it("offers Pavit only at server approach and replaces fort cards through a redacted HQ choice", () => {
@@ -601,11 +702,27 @@ describe("PRO019 rule-contract baseline utilities", () => {
     };
     beforeServer.phase = "run";
     beforeServer.timingPoint = "run.jack_out_window";
-    expect(getLegalActions(beforeServer, "corp").some((action) => action.payload?.cardId === "pavit_before")).toBe(false);
+    expect(
+      getLegalActions(beforeServer, "corp").some(
+        (action) => action.payload?.cardId === "pavit_before",
+      ),
+    ).toBe(false);
 
     let state = corpActionState("pro019-pavit-choice");
-    const oldIce = addCorpIce(state, CHIHUAHUA, "pavit_old_ice", "remote_1", true);
-    const pavitId = addCorpRoot(state, PAVIT, "pavit_source", "remote_1", false);
+    const oldIce = addCorpIce(
+      state,
+      CHIHUAHUA,
+      "pavit_old_ice",
+      "remote_1",
+      true,
+    );
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_source",
+      "remote_1",
+      false,
+    );
     const newIce = addCorpHq(state, WALL, "pavit_new_ice");
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_new_root");
     addCorpHq(state, CHIHUAHUA, "pavit_extra_ice");
@@ -614,7 +731,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const rezAction = mustAction(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === pavitId,
     );
     state = applySelected(state, "corp", rezAction.actionId);
     expect(state.pendingChoice).toMatchObject({
@@ -627,11 +745,17 @@ describe("PRO019 rule-contract baseline utilities", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "ordered_fort_rebuild_sequence",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(String(newIce));
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      String(newIce),
+    );
     const invalid = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
-      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice").actionId,
+      actionId: mustAction(
+        state,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
@@ -646,13 +770,21 @@ describe("PRO019 rule-contract baseline utilities", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "ordered_fort_rebuild_sequence",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(String(newIce));
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      String(newIce),
+    );
     const server = remoteServer(state, "remote_1");
     expect(server.ice).toEqual([newIce]);
     expect(server.root).toEqual([newRoot]);
     expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
-    expect(state.cardInstances[newIce]?.zone).toMatchObject({ zone: "serverIce", serverId: "remote_1" });
-    expect(state.cardInstances[newRoot]?.zone).toMatchObject({ zone: "serverRoot", serverId: "remote_1" });
+    expect(state.cardInstances[newIce]?.zone).toMatchObject({
+      zone: "serverIce",
+      serverId: "remote_1",
+    });
+    expect(state.cardInstances[newRoot]?.zone).toMatchObject({
+      zone: "serverRoot",
+      serverId: "remote_1",
+    });
     expect(state.cardInstances[newIce]?.rezzed).toBe(false);
     expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
   });
@@ -661,14 +793,21 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const state = corpActionState("pro019-pavit-no-joint-set");
     clearCorpHq(state);
     addCorpIce(state, CHIHUAHUA, "pavit_blocked_old_ice", "remote_1", true);
-    const pavitId = addCorpRoot(state, PAVIT, "pavit_blocked_source", "remote_1", false);
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_blocked_source",
+      "remote_1",
+      false,
+    );
     addCorpHq(state, SIMPLE_ASSET, "pavit_blocked_asset");
     addCorpHq(state, SIMPLE_AGENDA, "pavit_blocked_agenda");
     forceRunAtServer(state, "remote_1");
 
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        (action) =>
+          action.type === "rez_ice" && action.payload?.cardId === pavitId,
       ),
     ).toBe(false);
   });
@@ -676,10 +815,26 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("allows Pavit to replace a fort with a jointly legal ICE and upgrade mix", () => {
     let state = corpActionState("pro019-pavit-joint-ice-upgrade");
     clearCorpHq(state);
-    const oldIce = addCorpIce(state, CHIHUAHUA, "pavit_mix_old_ice", "remote_1", true);
-    const pavitId = addCorpRoot(state, PAVIT, "pavit_mix_source", "remote_1", false);
+    const oldIce = addCorpIce(
+      state,
+      CHIHUAHUA,
+      "pavit_mix_old_ice",
+      "remote_1",
+      true,
+    );
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_mix_source",
+      "remote_1",
+      false,
+    );
     const newIce = addCorpHq(state, WALL, "pavit_mix_new_ice");
-    const newUpgrade = addCorpHq(state, SIMPLE_UPGRADE, "pavit_mix_new_upgrade");
+    const newUpgrade = addCorpHq(
+      state,
+      SIMPLE_UPGRADE,
+      "pavit_mix_new_upgrade",
+    );
     forceRunAtServer(state, "remote_1");
     const replayStart = structuredClone(state);
     const replayStartIndex = state.eventLog.length;
@@ -687,7 +842,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === pavitId,
     );
 
     const server = remoteServer(state, "remote_1");
@@ -695,16 +851,22 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(server.root).toEqual([newUpgrade]);
     expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
     expect(hashState(state)).toMatch(/^fnv1a:/);
-    expect(replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok).toBe(
-      true,
-    );
+    expect(
+      replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok,
+    ).toBe(true);
   });
 
   it("rejects a Pavit choice that is individually plausible but jointly illegal without leaking HQ cards", () => {
     let state = corpActionState("pro019-pavit-invalid-joint-choice");
     clearCorpHq(state);
     addCorpIce(state, CHIHUAHUA, "pavit_invalid_old_ice", "remote_1", true);
-    const pavitId = addCorpRoot(state, PAVIT, "pavit_invalid_source", "remote_1", false);
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_invalid_source",
+      "remote_1",
+      false,
+    );
     addCorpHq(state, WALL, "pavit_invalid_new_ice");
     addCorpHq(state, SIMPLE_UPGRADE, "pavit_invalid_upgrade");
     const assetId = addCorpHq(state, SIMPLE_ASSET, "pavit_invalid_asset");
@@ -714,15 +876,19 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === pavitId,
     );
     const beforeInvalidHash = hashState(state);
     const beforeInvalidEventCount = state.eventLog.length;
     const invalid = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
-      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice")
-        .actionId,
+      actionId: mustAction(
+        state,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
@@ -746,7 +912,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
 
   it("counts Obfuscated Fortress run cap across trace/link payments", () => {
     let state = corpActionState("pro019-obfuscated-trace-cap");
-    const sourceIce = addCorpIce(state, WALL, "obfuscated_trace_source", "remote_1", true);
+    const sourceIce = addCorpIce(
+      state,
+      WALL,
+      "obfuscated_trace_source",
+      "remote_1",
+      true,
+    );
     state.runner.credits = 5;
     state.run = {
       runId: "obfuscated_trace_run",
@@ -801,7 +973,11 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const tooMuch = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
+      actionId: mustAction(
+        state,
+        "runner",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
@@ -826,12 +1002,15 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const replayStartIndex = state.eventLog.length;
 
     const selected = getLegalActions(state, "runner").find(
-      (action) => action.type === "play_event" && action.payload?.cardId === "ice_data_1",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === "ice_data_1",
     );
     expect(selected?.costs[0]?.credits).toBe(3);
     state = applySelected(state, "runner", selected!.actionId);
 
-    expect(state.pendingChoice?.source).toContain("expose_installed_cards_fort_select");
+    expect(state.pendingChoice?.source).toContain(
+      "expose_installed_cards_fort_select",
+    );
     expect(state.pendingChoice?.maxSelections).toBe(1);
     state = applyChoice(state, "runner", "fort_remote_1");
     expect(state.pendingChoice?.source).toContain("single_data_fort:remote_1");
@@ -859,13 +1038,18 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "play_event" && action.payload?.cardId === "ice_data_scope",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === "ice_data_scope",
     );
     const invalid = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice")
-        .actionId,
+      actionId: mustAction(
+        state,
+        "runner",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,

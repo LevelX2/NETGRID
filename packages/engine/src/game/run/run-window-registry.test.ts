@@ -22,10 +22,7 @@ describe("run window registry", () => {
         resolver.window,
       ]).sort(),
     ).toEqual([
-      [
-        "fort_pass_advancement_after_passing_last_ice",
-        "corp_fort_pass_window",
-      ],
+      ["fort_pass_advancement_after_passing_last_ice", "corp_fort_pass_window"],
       ["singapore_city_grid_fort_ice_swap", "corp_root_rez_window"],
       ["start_run_ice_reposition", "corp_root_rez_window"],
     ]);

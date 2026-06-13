@@ -1,6 +1,6 @@
 # Scored Agenda Direct Effects And Run Window Sequences Process
 
-Status: in_progress
+Status: completed
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-06-13 auf Basis des Prüfbefunds zu `engine/scored-agenda-flow-orchestrator-cleanup`.
 
@@ -78,3 +78,21 @@ Final:
 - Public/opponent/replay surfaces laufen über SurfacePolicy.
 - Pavit Bharat nutzt Engine-Legalität und hidden-info-sichere HQ-Auswahl.
 - Keine neue KI-Wirkung, keine Legalität außerhalb der Engine und keine Hidden-Info-Leaks.
+
+## Abschluss 2026-06-13
+
+- `ScoredAgendaFlowHost`/Result/Payload liegen in einem eigenen Host-Modul.
+- Sofortige Score-Effekte laufen über `SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS`; der alte Simple-Effect-Wrapper ist entfernt.
+- Scored-Agenda-Payload-Patches laufen zentral über `applySequencePayloadPatch`.
+- SurfacePolicy unterscheidet Payload-Familien für Scored-Agenda-Sequenzen, Hidden-Zone-Choices, Access Events, Public Reveal, AI Debug und Replay.
+- Run-Window-Action-Builder sind in `RUN_WINDOW_ACTION_RESOLVERS` registriert.
+- Pavit Bharat nutzt für seine öffentliche Runtime-Payload den generischen `ordered_fort_rebuild_sequence`-Vertrag; HQ-Auswahl bleibt hidden-info-sicher.
+- Contract-Tests prüfen DirectEffect-, FlowChoice-, ScoreTime- und RunWindow-Resolver.
+
+Finale Gates:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda/direct-score-effects.test.ts src/game/corp/scored-agenda/sequence-contract.test.ts src/game/corp/scored-agenda/priority-requisition-sequence.test.ts src/game/corp/scored-agenda/ordered-fort-rebuild-sequence.test.ts src/game/view/surface-policy.test.ts src/game/view/surface-sanitizer.test.ts src/game/run/run-rez-window.test.ts src/game/run/fort-pass-window.test.ts src/game/run/run-window-registry.test.ts src/index-tests/proteus/rule-contract-baseline-utilities.test.ts`
+- `corepack pnpm check:ai` mit bestehenden Warnungen, ohne Fehler
+- `corepack pnpm format:changed -- main`
+- `git diff --check`

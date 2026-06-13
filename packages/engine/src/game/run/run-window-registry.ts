@@ -8,9 +8,7 @@ import {
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
-export type RunWindowId =
-  | "corp_root_rez_window"
-  | "corp_fort_pass_window";
+export type RunWindowId = "corp_root_rez_window" | "corp_fort_pass_window";
 
 export type RunWindowActionResolver = {
   id: string;

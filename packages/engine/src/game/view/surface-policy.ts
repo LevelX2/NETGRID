@@ -39,7 +39,9 @@ const EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
  * public definition IDs and explicit public facts, but not hidden-zone card
  * lists, rich objects or actor-private labels.
  */
-export function sanitizePayloadForSurface<TPayload extends Record<string, unknown>>(
+export function sanitizePayloadForSurface<
+  TPayload extends Record<string, unknown>,
+>(
   payload: TPayload,
   policy: { surface: SurfaceKind; family: PayloadFamily },
 ): TPayload {

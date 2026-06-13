@@ -57,8 +57,7 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
       kind: "fixed_bonus_agenda_points_on_score",
       mode: "agenda_kind",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
-        if (scoredAgenda?.kind !== "fixed_bonus_agenda_points_on_score")
-          return;
+        if (scoredAgenda?.kind !== "fixed_bonus_agenda_points_on_score") return;
         host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
         if (legalAction) {
           applySequencePayloadPatch(legalAction, {
