@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-selfplay-trace-matrix-v1",
-  "generatedAt": "2026-06-13T07:39:50.157Z",
-  "gitHead": "5e98e7cc",
+  "generatedAt": "2026-06-13T07:50:19.484Z",
+  "gitHead": "ddec5b8d",
   "config": {
     "pairIds": [
       "a",
@@ -252,7 +252,7 @@
             "runner": 7,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:050e39a2",
+          "finalStateHash": "fnv1a:bce05f18",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -319,7 +319,7 @@
             "runner": 5,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:abe90b92",
+          "finalStateHash": "fnv1a:2390677a",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -386,7 +386,7 @@
             "runner": 5,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:7ce87267",
+          "finalStateHash": "fnv1a:8836cfa3",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -453,7 +453,7 @@
             "runner": 7,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:e609b9b6",
+          "finalStateHash": "fnv1a:3009edb4",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -520,7 +520,7 @@
             "runner": 7,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:18bb5e5e",
+          "finalStateHash": "fnv1a:061ce692",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -587,7 +587,7 @@
             "runner": 2,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:562f8613",
+          "finalStateHash": "fnv1a:e08afd03",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -654,7 +654,7 @@
             "runner": 4,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:890bdb90",
+          "finalStateHash": "fnv1a:fdb5eb02",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -721,7 +721,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:76f1b2ef",
+          "finalStateHash": "fnv1a:84efb0fd",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -788,7 +788,7 @@
             "runner": 0,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:1e22be8c",
+          "finalStateHash": "fnv1a:21fb2d18",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -855,7 +855,7 @@
             "runner": 7,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:6fda9e1b",
+          "finalStateHash": "fnv1a:1fcaef31",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -2713,7 +2713,7 @@
             "runner": 0,
             "corp": 6
           },
-          "finalStateHash": "fnv1a:85c9c3a6",
+          "finalStateHash": "fnv1a:fa201876",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -2780,7 +2780,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:55e79009",
+          "finalStateHash": "fnv1a:8c1fcadb",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -2847,7 +2847,7 @@
             "runner": 0,
             "corp": 9
           },
-          "finalStateHash": "fnv1a:5ca3785e",
+          "finalStateHash": "fnv1a:969966cc",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -2914,7 +2914,7 @@
             "runner": 0,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:ea986a93",
+          "finalStateHash": "fnv1a:4fee845f",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -2981,7 +2981,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:d9e14d19",
+          "finalStateHash": "fnv1a:9025b18b",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -3048,7 +3048,7 @@
             "runner": 3,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:92c5d8b3",
+          "finalStateHash": "fnv1a:29a539a3",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -3115,7 +3115,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:52f712e2",
+          "finalStateHash": "fnv1a:8ced9278",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -3182,7 +3182,7 @@
             "runner": 3,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:146f5cd9",
+          "finalStateHash": "fnv1a:4550f883",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -3249,7 +3249,7 @@
             "runner": 0,
             "corp": 6
           },
-          "finalStateHash": "fnv1a:516e6763",
+          "finalStateHash": "fnv1a:f1779cb7",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -3316,7 +3316,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:49474e3c",
+          "finalStateHash": "fnv1a:04fac8fa",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5178,7 +5178,7 @@
             "runner": 6,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:5ad23c39",
+          "finalStateHash": "fnv1a:df247e89",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5245,7 +5245,7 @@
             "runner": 3,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:6e99f92e",
+          "finalStateHash": "fnv1a:c1dbff60",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5312,7 +5312,7 @@
             "runner": 6,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:b5ad3009",
+          "finalStateHash": "fnv1a:92936791",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5379,7 +5379,7 @@
             "runner": 2,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:f2a128ce",
+          "finalStateHash": "fnv1a:a230c7dc",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5446,7 +5446,7 @@
             "runner": 3,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:139ec589",
+          "finalStateHash": "fnv1a:3d2b520f",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5513,7 +5513,7 @@
             "runner": 3,
             "corp": 4
           },
-          "finalStateHash": "fnv1a:f002b685",
+          "finalStateHash": "fnv1a:953f8875",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5580,7 +5580,7 @@
             "runner": 0,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:fc6d7e0a",
+          "finalStateHash": "fnv1a:6e4ba6a4",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5647,7 +5647,7 @@
             "runner": 2,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:5f3da95d",
+          "finalStateHash": "fnv1a:5ecf9fb9",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5714,7 +5714,7 @@
             "runner": 5,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:46d106ca",
+          "finalStateHash": "fnv1a:99d0447a",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5781,7 +5781,7 @@
             "runner": 7,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:3aa3a9d9",
+          "finalStateHash": "fnv1a:bf33d411",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7648,7 +7648,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:9342d46a",
+          "finalStateHash": "fnv1a:e6508b4e",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7715,7 +7715,7 @@
             "runner": 2,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:08493d84",
+          "finalStateHash": "fnv1a:5ca0fe94",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7775,7 +7775,7 @@
             "runner": 6,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:541ce672",
+          "finalStateHash": "fnv1a:b843c316",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7842,7 +7842,7 @@
             "runner": 6,
             "corp": 3
           },
-          "finalStateHash": "fnv1a:722bfa44",
+          "finalStateHash": "fnv1a:3359f982",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7909,7 +7909,7 @@
             "runner": 3,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:a2c9cec3",
+          "finalStateHash": "fnv1a:fcbd3b5b",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -7976,7 +7976,7 @@
             "runner": 0,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:2abffd02",
+          "finalStateHash": "fnv1a:40795bf2",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -8043,7 +8043,7 @@
             "runner": 7,
             "corp": 1
           },
-          "finalStateHash": "fnv1a:201e8f21",
+          "finalStateHash": "fnv1a:6c46d743",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -8110,7 +8110,7 @@
             "runner": 0,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:fe9b4f12",
+          "finalStateHash": "fnv1a:b9a5c80c",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -8177,7 +8177,7 @@
             "runner": 4,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:0883a7fc",
+          "finalStateHash": "fnv1a:0bf05e3e",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -8244,7 +8244,7 @@
             "runner": 6,
             "corp": 1
           },
-          "finalStateHash": "fnv1a:6f64eb90",
+          "finalStateHash": "fnv1a:5b1d293e",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [

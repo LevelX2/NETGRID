@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai173-runner-coverage-opportunity-solver-v1",
-  "generatedAt": "2026-06-13T07:30:35.580Z",
-  "gitHead": "ac2e1933",
+  "generatedAt": "2026-06-13T07:48:00.625Z",
+  "gitHead": "ddec5b8d",
   "source": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
   "aggregate": {
     "cases": 13,

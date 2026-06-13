@@ -749,7 +749,6 @@ import {
   resolveRunnerLastTurnInstalledResourceTargetId,
   runnerStoleAgendaSubtypeThisTurn,
 } from "./runtime-bootstrap-support";
-
 export function configureCardRuntimeBootstrap() {
   // CardImplementation effect adapters are the mutation boundary for effects that
   // still need host primitives. The adapters may call these functions, but card
@@ -1086,7 +1085,6 @@ export function configureCardRuntimeBootstrap() {
     legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
     return { publicPayload: payload };
   }
-
   function legalFortReplacementHqCardIds(
     state: GameState,
     server: CorpServer,
@@ -1104,7 +1102,6 @@ export function configureCardRuntimeBootstrap() {
       })
       .sort();
   }
-
   function hasLegalFortReplacementHqCombination(
     state: GameState,
     server: CorpServer,
@@ -1127,7 +1124,6 @@ export function configureCardRuntimeBootstrap() {
     };
     return visit(0, []);
   }
-
   function validFortReplacementInstallOrder(
     state: GameState,
     server: CorpServer,
@@ -1144,7 +1140,6 @@ export function configureCardRuntimeBootstrap() {
       return undefined;
     return firstValidFortReplacementInstallPermutation(state, server, selected, []);
   }
-
   function firstValidFortReplacementInstallPermutation(
     state: GameState,
     server: CorpServer,
@@ -1167,7 +1162,6 @@ export function configureCardRuntimeBootstrap() {
     }
     return undefined;
   }
-
   function fortReplacementInstallOrderIsLegal(
     state: GameState,
     server: CorpServer,
@@ -1204,7 +1198,6 @@ export function configureCardRuntimeBootstrap() {
     }
     return true;
   }
-
   function isFortReplacementInstallableCandidateDefinition(
     definition: CardDefinition,
   ): boolean {
@@ -1216,7 +1209,6 @@ export function configureCardRuntimeBootstrap() {
         definition.type === "upgrade")
     );
   }
-
   function openFortHqReplacementChoice(
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -1245,7 +1237,6 @@ export function configureCardRuntimeBootstrap() {
     };
     state.activeSide = "corp";
   }
-
   function resolveFortHqReplacementChoice(
     state: GameState,
     legalAction: LegalAction,
@@ -1271,7 +1262,6 @@ export function configureCardRuntimeBootstrap() {
       sourceDefinitionId as CardDefinitionId,
     );
   }
-
   function revalidateLastRezzedBlackIce(
     state: GameState,
   ): NonNullable<NonNullable<GameState["runnerTurnFlags"]>["lastRezzedBlackIceThisTurn"]> {
@@ -1496,7 +1486,6 @@ export function configureCardRuntimeBootstrap() {
   const cardImplementationRuntimeDeps = createGameCardImplementationRuntimeDeps(
     gameCardImplementationRuntimeDepsHost(),
   );
-
   return {
     cardImplementationEffectAdapters,
     hiddenZoneRuntimeDepsHost,

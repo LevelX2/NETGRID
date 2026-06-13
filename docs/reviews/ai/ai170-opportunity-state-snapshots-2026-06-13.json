@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai170-opportunity-state-snapshots-v1",
-  "generatedAt": "2026-06-13T07:23:43.839Z",
-  "gitHead": "bbef03dd",
+  "generatedAt": "2026-06-13T07:47:59.008Z",
+  "gitHead": "ddec5b8d",
   "sources": {
     "ai159": "docs/reviews/ai/ai159-opportunity-state-mining-2026-06-12.json",
     "sourceTrace": "docs/reviews/ai/ai170-source-x10-alternatives-2026-06-13.json"

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai172-goal-conversion-contract-v1",
-  "generatedAt": "2026-06-13T07:28:29.730Z",
-  "gitHead": "69a541d6",
+  "generatedAt": "2026-06-13T07:48:00.086Z",
+  "gitHead": "ddec5b8d",
   "source": "docs/reviews/ai/ai160-stale-intent-root-cause-review-2026-06-12.md",
   "contracts": [
     {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai175-corp-tempo-opportunity-solver-v1",
-  "generatedAt": "2026-06-13T07:33:29.019Z",
-  "gitHead": "d0ce606b",
+  "generatedAt": "2026-06-13T07:48:01.709Z",
+  "gitHead": "ddec5b8d",
   "source": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
   "aggregate": {
     "cases": 17,

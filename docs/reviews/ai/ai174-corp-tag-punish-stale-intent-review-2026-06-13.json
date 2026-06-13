@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai174-corp-tag-punish-stale-intent-review-v1",
-  "generatedAt": "2026-06-13T07:31:53.076Z",
-  "gitHead": "7798d923",
+  "generatedAt": "2026-06-13T07:48:01.158Z",
+  "gitHead": "ddec5b8d",
   "sources": {
     "ai172": "docs/reviews/ai/ai172-goal-conversion-contract-v1-2026-06-13.json",
     "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json"

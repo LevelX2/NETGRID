@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai177-opportunity-candidate-selection-gate-v1",
-  "generatedAt": "2026-06-13T07:35:28.063Z",
-  "gitHead": "8ee8137c",
+  "generatedAt": "2026-06-13T07:48:02.837Z",
+  "gitHead": "ddec5b8d",
   "gates": [
     "opportunity_state_snapshot_present",
     "stable_same_state_action_id_present",
