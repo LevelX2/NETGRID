@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-13-runner-ai-holovid-remote-trash-commitment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-13
-startedAt:
-completedAt:
+startedAt: 2026-06-13
+completedAt: 2026-06-13
 branch:
 releaseTarget: runner-ai-known-remote-payoff-follow-up
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/known-remote-access-payoff.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - "PASS: corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t \"Holovid|BBS|memory-known|known remote\""
+  - "PASS: corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts -t \"known remote|remote trash|reserve\""
+  - "PASS: corepack pnpm --filter @netgrid/ai typecheck"
 ---
 
 # Runner-KI: Holovid-Remote nur mit echtem Trash-Commitment contesten
@@ -67,4 +72,6 @@ Die Runner-KI soll wiederholte Runs auf ein bekanntes, ungeschütztes Remote-Ass
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-06-13. Die Known-Remote-Payoff-Projektion übernimmt bei sichtbaren bekannten Remote-Root-Karten jetzt auch die sichtbaren Counter aus der `PlayerView`. Dadurch bewertet sie endliche Economy-Pools wie `Holovid Campaign` konsistent mit der späteren Access-Trash-Entscheidung: Wenn der Trash technisch bezahlbar ist, aber wegen Creditreserve und zu geringem Restpool nicht genommen würde, wird der Remote vorab als `trash_unaffordable`/`known_no_current_payoff` eingestuft und der `runner.contest_remote`-Plan bleibt abandoned.
+
+Der neue Regressionstest reproduziert ein bekanntes, ungeschütztes `Holovid Campaign`-Remote mit 8 Bits und 7 Runner-Credits: Die KI declined beim Access den Trash wegen Budget, bewertet den erneuten Remote-Run danach als known-no-payoff, penalisiert den Repeat nach declined Trash und wählt nicht erneut denselben Remote-Run. Bezahlbare BBS-/known-remote-Baselines und dedicated-trash-credit-Fälle bleiben grün.

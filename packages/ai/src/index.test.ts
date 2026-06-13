@@ -68,6 +68,7 @@ import {
   evaluateServerThreat,
   evaluateCorpScoringThreat,
   evaluateRemoteThreat,
+  evaluateRunnerRunTargets,
   evaluateRunnerRig,
   evaluateServerAccessValue,
   evaluateV143TuningGate,
@@ -16112,6 +16113,126 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe(false);
   });
 
+  it("does not repeat a known Holovid remote after declining reserve-breaking trash", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-holovid-no-repeat-after-decline",
+        corpDeck: {
+          id: "ai_runner_holovid_no_repeat_corp",
+          name: "AI Runner Holovid No Repeat Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_326_holovid-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 7;
+    putInstalledCorpHolovidInRemote(state, "remote_1", 8);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const accessInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const accessDecision = chooseRunnerAction(accessInput);
+    expect(
+      accessInput.legalActions.find(
+        (action) => action.actionId === accessDecision.actionId,
+      )?.type,
+    ).toBe("decline_trash");
+    expect(accessDecision.evidence).toContain(
+      "remote_trash_finite_pool_economy:true",
+    );
+    expect(accessDecision.evidence).toContain(
+      "remote_trash_deferred_by_budget:true",
+    );
+
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const repeatInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const remoteRun = repeatInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = repeatInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const hqRun = repeatInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gainCredit = repeatInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !rdRun || !hqRun || !gainCredit)
+      throw new Error("Missing Holovid repeat fixture actions");
+
+    const scopedRepeatInput = {
+      ...repeatInput,
+      legalActions: [remoteRun, rdRun, hqRun, gainCredit],
+    };
+    const remoteRunTarget = evaluateRunnerRunTargets({
+      input: scopedRepeatInput,
+    }).find((evaluation) => evaluation.targetServerId === "remote_1");
+    const repeatCandidate = generateRunnerPlanCandidates(scopedRepeatInput).find(
+      (candidate) =>
+        candidate.kind === "contest_remote" &&
+        candidate.steps.some((step) => step.targetServerId === "remote_1"),
+    );
+    if (!repeatCandidate) throw new Error("Missing repeated Holovid remote run");
+    const repeatScore = evaluateRunnerPlan(scopedRepeatInput, repeatCandidate);
+    const repeatDecision = chooseRunnerAction(scopedRepeatInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const repeatAction = scopedRepeatInput.legalActions.find(
+      (action) => action.actionId === repeatDecision.actionId,
+    );
+    const tacticalDebug =
+      repeatDecision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(repeatScore.reasons).toContain(
+      "known_remote_root_trash_declined_by_reserve",
+    );
+    expect(repeatScore.evidence).toContain(
+      "runner_repeat_remote_after_declined_trash_penalized:true",
+    );
+    expect(remoteRunTarget).toMatchObject({
+      accessPayoff: "trash_unaffordable",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "gain_credits_first",
+    });
+    expect(remoteRunTarget?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_remote_root_high_remaining_finite_pool:false",
+        "trash_decline_reason:reserve_would_break",
+      ]),
+    );
+    expect(
+      repeatAction?.type === "start_run" &&
+        repeatAction.payload?.serverId === "remote_1",
+    ).toBe(false);
+    expect(tacticalDebug).toContain("runner.contest_remote:remote_1");
+    expect(tacticalDebug).toContain("status=abandoned");
+    expect(assertAiInputIsSideSafe(scopedRepeatInput)).toBe(true);
+  });
+
   it("defers an early expensive run-tax region trash when no acute remote threat exists", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -27279,6 +27400,38 @@ function putInstalledCorpBbsInRemote(
     advancementCounters: 0,
   };
   return bbsId;
+}
+
+function putInstalledCorpHolovidInRemote(
+  state: GameState,
+  serverId: `remote_${number}`,
+  bitCount: number,
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) throw new Error(`Missing ${serverId}`);
+  const holovidEntry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === "onr_v1_326_holovid-campaign" &&
+      !state.corp.servers.some((candidate) =>
+        candidate.root.includes(id as CardInstanceId),
+      ),
+  );
+  if (!holovidEntry) throw new Error("Missing Holovid Campaign copy");
+  const holovidId = holovidEntry[0] as CardInstanceId;
+  removeEverywhere(state, holovidId);
+  server.root.push(holovidId);
+  state.cardInstances[holovidId] = {
+    ...state.cardInstances[holovidId]!,
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: true,
+    rezzed: true,
+    counters: { bit: bitCount },
+    advancementCounters: 0,
+  };
+  return holovidId;
 }
 
 function runnerActionPhaseInput(
