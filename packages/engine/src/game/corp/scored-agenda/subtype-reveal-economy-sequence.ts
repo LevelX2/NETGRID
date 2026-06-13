@@ -4,7 +4,7 @@ import type {
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
 

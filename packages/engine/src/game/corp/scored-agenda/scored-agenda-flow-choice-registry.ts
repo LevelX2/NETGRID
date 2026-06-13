@@ -1,4 +1,4 @@
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import {
   isEmployeeEmpowermentStartDrawChoiceSource,
   resolveEmployeeEmpowermentStartDrawChoice,

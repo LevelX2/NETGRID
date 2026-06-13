@@ -7,7 +7,7 @@ import type {
 import type {
   ScoredAgendaFlowHost,
   ScoredAgendaFlowResult,
-} from "../scored-agenda-flow";
+} from "./scored-agenda-flow-host";
 
 export function isEmployeeEmpowermentStartDrawChoiceSource(
   source: string,

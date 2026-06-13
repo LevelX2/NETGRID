@@ -5,7 +5,7 @@ import type {
   ResolvedGameEffect,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 export function applyDirectScoreEconomyEffects(
   host: ScoredAgendaFlowHost,
