@@ -68,6 +68,17 @@ export type SelfplayDecisionSnapshotCandidate = {
   evidence: string[];
 };
 
+export type SelfplayDecisionSnapshotCluster = {
+  clusterId: string;
+  candidateCount: number;
+  mistakeClasses: AiMistakeClass[];
+  selectedActionTypes: string[];
+  detectorIds: AiSelfplayTraceMiningDetectorId[];
+  severityCounts: Record<SelfplayDecisionSnapshotCandidate["severity"], number>;
+  candidateSnapshotIds: string[];
+  evidence: string[];
+};
+
 export type SelfplayDecisionSnapshotMiningReport = {
   schemaVersion: typeof SELFPLAY_DECISION_SNAPSHOT_MINING_SCHEMA_VERSION;
   scope: "selfplay_decision_snapshot_mining_report_only";
@@ -76,7 +87,9 @@ export type SelfplayDecisionSnapshotMiningReport = {
   findingCount: number;
   candidateCount: number;
   blockedCandidateCount: number;
+  clusterCount: number;
   candidatesByMistakeClass: Record<AiMistakeClass, number>;
+  clusters: SelfplayDecisionSnapshotCluster[];
   candidates: SelfplayDecisionSnapshotCandidate[];
   redactionStatus: "passed";
   productiveUseAllowed: false;
@@ -162,7 +175,9 @@ export function buildSelfplayDecisionSnapshotMiningReport(
     blockedCandidateCount: candidates.filter((candidate) =>
       candidate.status.startsWith("blocked_"),
     ).length,
+    clusterCount: clusterCandidates(candidates).length,
     candidatesByMistakeClass: countCandidateMistakeClasses(candidates),
+    clusters: clusterCandidates(candidates),
     candidates,
     redactionStatus: "passed",
     productiveUseAllowed: false,
@@ -175,12 +190,71 @@ export function buildSelfplayDecisionSnapshotMiningReport(
       `source_decision_point_count:${points.length}`,
       `finding_count:${findings.length}`,
       `candidate_count:${candidates.length}`,
+      `cluster_count:${clusterCandidates(candidates).length}`,
       "runtime_consumer:none",
       "productive_use_allowed:false",
     ],
   };
   assertSelfplayDecisionSnapshotMiningReportSideSafe(report);
   return report;
+}
+
+function clusterCandidates(
+  candidates: readonly SelfplayDecisionSnapshotCandidate[],
+): SelfplayDecisionSnapshotCluster[] {
+  const byId = new Map<string, SelfplayDecisionSnapshotCandidate[]>();
+  for (const candidate of candidates) {
+    const key = [
+      candidate.mistakeClasses.join("+") || "unclassified",
+      candidate.selectedActionType,
+    ].join(":");
+    byId.set(key, [...(byId.get(key) ?? []), candidate]);
+  }
+  return [...byId.entries()]
+    .map(([clusterId, clusterCandidates]) => {
+      const detectorIds = sortedUnique(
+        clusterCandidates.flatMap((candidate) => candidate.detectorIds),
+      ) as AiSelfplayTraceMiningDetectorId[];
+      const selectedActionTypes = sortedUnique(
+        clusterCandidates.map((candidate) => candidate.selectedActionType),
+      );
+      const mistakeClasses = sortedUnique(
+        clusterCandidates.flatMap((candidate) => candidate.mistakeClasses),
+      ) as AiMistakeClass[];
+      return {
+        clusterId: safe(clusterId),
+        candidateCount: clusterCandidates.length,
+        mistakeClasses,
+        selectedActionTypes,
+        detectorIds,
+        severityCounts: severityCounts(clusterCandidates),
+        candidateSnapshotIds: clusterCandidates
+          .map((candidate) => candidate.snapshotId)
+          .sort(),
+        evidence: [
+          "selfplay_snapshot_cluster:report_only",
+          `cluster_candidate_count:${clusterCandidates.length}`,
+          `cluster_detector_count:${detectorIds.length}`,
+        ],
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.candidateCount - left.candidateCount ||
+        left.clusterId.localeCompare(right.clusterId),
+    );
+}
+
+function severityCounts(
+  candidates: readonly SelfplayDecisionSnapshotCandidate[],
+): Record<SelfplayDecisionSnapshotCandidate["severity"], number> {
+  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+  for (const candidate of candidates) counts[candidate.severity] += 1;
+  return counts;
+}
+
+function sortedUnique(values: readonly string[]): string[] {
+  return [...new Set(values.map(safe))].sort();
 }
 
 function candidateFromFinding(

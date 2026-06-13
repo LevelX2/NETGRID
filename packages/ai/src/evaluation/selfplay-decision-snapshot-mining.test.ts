@@ -60,6 +60,30 @@ describe("SelfplayDecisionSnapshotMining", () => {
     expect(report.findingCount).toBe(2);
     expect(report.candidateCount).toBe(2);
     expect(report.blockedCandidateCount).toBe(0);
+    expect(report.clusterCount).toBe(2);
+    expect(report.clusters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          candidateCount: 1,
+          mistakeClasses: ["ignored_remote_threat", "unsafe_run"],
+          selectedActionTypes: ["start_run"],
+          detectorIds: ["repeated_known_no_payoff_remote"],
+        }),
+        expect.objectContaining({
+          candidateCount: 1,
+          mistakeClasses: [
+            "ignored_remote_threat",
+            "plan_step_mismatch",
+            "unsafe_run",
+          ],
+          selectedActionTypes: ["start_run"],
+          detectorIds: [
+            "repeated_known_no_payoff_remote",
+            "repeated_no_progress_run",
+          ],
+        }),
+      ]),
+    );
     expect(candidate).toMatchObject({
       kind: "selfplay_decision_snapshot_candidate",
       status: "candidate_snapshot",
@@ -97,6 +121,7 @@ describe("SelfplayDecisionSnapshotMining", () => {
     expect(report.candidatesByMistakeClass.unsafe_run).toBe(2);
     expect(report.candidatesByMistakeClass.ignored_remote_threat).toBe(2);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
+    expect(containsForbiddenSemanticMarker(report.clusters)).toBe(false);
   });
 
   it("keeps findings without redacted action alternatives as blocked candidates", () => {
