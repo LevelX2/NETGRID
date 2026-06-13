@@ -1,6 +1,6 @@
 # AI Play-Strength Maturation III Final Report
 
-Status: `branch_main_synced_final_green_complete_pending_main_merge`
+Status: `complete`
 
 Datum: 2026-06-13
 
@@ -10,7 +10,7 @@ Worktree: `C:\Projekte\NETGRID_AI_PLAY_STRENGTH_MATURATION_3`
 
 ## Ergebnis
 
-AI-MAT3-0 bis AI-MAT3-21 sind sequenziell umgesetzt und jeweils paketbezogen committed. Dieses Dokument ist AI-MAT3-22. FINAL-GREEN ist im Arbeitsbranch abgeschlossen. Der aktuelle lokale `main` wurde anschließend in den Arbeitsbranch integriert und erneut verifiziert. Lokaler Merge nach `main`, Main-Verifikation und Worktree-Cleanup stehen nach diesem Bericht noch aus.
+AI-MAT3-0 bis AI-MAT3-21 sind sequenziell umgesetzt und jeweils paketbezogen committed. Dieses Dokument ist AI-MAT3-22. FINAL-GREEN ist im Arbeitsbranch abgeschlossen. Der aktuelle lokale `main` wurde anschließend in den Arbeitsbranch integriert und erneut verifiziert. Der Arbeitsbranch wurde lokal per Fast-Forward nach `main` integriert und `main` wurde final verifiziert.
 
 ## Paketübersicht
 
@@ -68,9 +68,24 @@ FINAL-GREEN wurde im Arbeitsbranch `codex/ai-play-strength-maturation-3` erfolgr
 
 Während FINAL-GREEN wurde ein erwarteter ShadowLeague-Delta-Testdrift nach dem 54er-Korpusausbau korrigiert und separat committed (`594250dc`).
 
+## Main-Verifikation
+
+Nach lokalem Fast-Forward-Merge nach `main` wurden dieselben Gates im Hauptworkspace `C:\Projekte\NETGRID` erfolgreich ausgeführt:
+
+| Check | Ergebnis |
+| --- | --- |
+| `corepack pnpm --filter @netgrid/ai test` | 91 Testdateien, 1298 Tests grün |
+| `corepack pnpm --filter @netgrid/ai typecheck` | grün |
+| `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts` | 500 Tests grün |
+| `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts` | 49 Tests grün |
+| `corepack pnpm --filter @netgrid/engine test` | 170 Testdateien, 1505 Tests grün |
+| `corepack pnpm --filter @netgrid/engine typecheck` | grün |
+| `corepack pnpm --filter @netgrid/server test` | 6 Testdateien, 127 Tests grün |
+| `corepack pnpm --filter @netgrid/server typecheck` | grün |
+| `corepack pnpm --filter @netgrid/web test` | 33 Testdateien, 417 Tests grün |
+| `corepack pnpm --filter @netgrid/web typecheck` | grün |
+| `git diff --check` | grün |
+
 ## Offene Abschlussarbeiten
 
-1. Arbeitsbranch lokal nach `main` mergen.
-2. Main-Verifikation ausführen.
-3. Worktree entfernen.
-4. Abschlussstatus dieses Reports auf `complete` nachziehen.
+Keine inhaltlichen Maturation-III-Punkte offen. Der Arbeitsworktree kann entfernt werden.
