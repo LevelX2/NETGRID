@@ -2557,6 +2557,10 @@ export type AiSimulationConfig = {
   beliefWorld?: SimulationWorld;
   includeActionAlternativesForFindings?: boolean;
   maxAlternativesPerFinding?: number;
+  opportunitySnapshotRequests?: Array<{
+    seed: string;
+    actionIndices: number[];
+  }>;
 };
 
 export type AiSimulationSummary = {
@@ -11686,8 +11690,15 @@ function retainActionAlternativesForFindingWindows(
   summaries: AiSimulationSummary[],
   findings: { summaryIndex: number; actionIndex: number }[],
   maxAlternativesPerFinding: number,
+  opportunitySnapshotRequests: Array<{ seed: string; actionIndices: number[] }> = [],
 ): void {
   const keep = new Set<string>();
+  const requestedBySeed = new Map(
+    opportunitySnapshotRequests.map((request) => [
+      request.seed,
+      new Set(request.actionIndices.filter((index) => Number.isInteger(index) && index >= 0)),
+    ]),
+  );
   let firstAvailable:
     | {
         summaryIndex: number;
@@ -11729,6 +11740,16 @@ function retainActionAlternativesForFindingWindows(
     );
     for (let index = from; index <= to; index += 1) {
       keep.add(`${finding.summaryIndex}:${index}`);
+    }
+  }
+  for (const [summaryIndex, summary] of summaries.entries()) {
+    const requested = requestedBySeed.get(summary.seed);
+    if (!requested) continue;
+    for (const actionIndex of requested) {
+      // Opportunity snapshots are diagnostic-only: they retain the already
+      // redacted legal-action alternative list at an explicitly requested
+      // decision point without changing the simulated decision.
+      keep.add(`${summaryIndex}:${actionIndex}`);
     }
   }
   for (const [summaryIndex, summary] of summaries.entries()) {
@@ -12748,6 +12769,9 @@ export function runAiSelfplayTraceMining(
       ...(config.includeActionAlternativesForFindings === true
         ? { includeActionAlternativesForFindings: true }
         : {}),
+      ...(config.opportunitySnapshotRequests
+        ? { opportunitySnapshotRequests: config.opportunitySnapshotRequests }
+        : {}),
       ...(config.maxAlternativesPerFinding !== undefined
         ? { maxAlternativesPerFinding: config.maxAlternativesPerFinding }
         : {}),
@@ -12764,6 +12788,7 @@ export function runAiSelfplayTraceMining(
       summaries,
       findings,
       config.maxAlternativesPerFinding ?? 5,
+      config.opportunitySnapshotRequests ?? [],
     );
   } else {
     stripSelfplayActionAlternatives(summaries);

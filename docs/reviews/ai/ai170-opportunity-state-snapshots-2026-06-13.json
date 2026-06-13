@@ -1,0 +1,2636 @@
+{
+  "schemaVersion": "ai170-opportunity-state-snapshots-v1",
+  "generatedAt": "2026-06-13T07:23:43.839Z",
+  "gitHead": "bbef03dd",
+  "sources": {
+    "ai159": "docs/reviews/ai/ai159-opportunity-state-mining-2026-06-12.json",
+    "sourceTrace": "docs/reviews/ai/ai170-source-x10-alternatives-2026-06-13.json"
+  },
+  "redaction": {
+    "safe": true,
+    "forbiddenMarkers": []
+  },
+  "aggregate": {
+    "cases": 17,
+    "requestedSnapshots": 19,
+    "availableSnapshots": 17,
+    "ai159TargetContextMissingCasesWithSnapshots": 2,
+    "casesWithProgressAlternative": 14
+  },
+  "cases": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "steal_agenda",
+            "progressLabel": "progress_steal"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "steal_agenda",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "steal_agenda",
+                "semanticActionType": "run_progress",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "progress_steal",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 1,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "steal_agenda"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 0,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": false,
+          "blocker": "snapshot_missing_at_requested_index"
+        }
+      ]
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "opportunity_target_context_missing",
+      "requestedSnapshotCount": 2,
+      "availableSnapshotCount": 2,
+      "snapshots": [
+        {
+          "requestKind": "preceding_same_side_decision",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "install_card",
+            "progressLabel": "no_progress_stale"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "corp",
+            "stateVersionBefore": 100,
+            "selectedActionType": "resolve_choice",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "resolve_choice",
+                "semanticActionType": "server_protection",
+                "selected": true,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "protection_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 1,
+            "progressAlternatives": 0,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "resolve_choice"
+            ]
+          }
+        },
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 101,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 101,
+            "side": "corp",
+            "stateVersionBefore": 101,
+            "selectedActionType": "play_operation",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "play_operation",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Off-Site Backups",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_low_credits",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Wall of Static",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_install_protection",
+                  "corp_install_remote_context",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_server_protected",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 5,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "play_operation",
+              "gain_credit",
+              "draw_card",
+              "install_card",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "ai159Category": "opportunity_target_context_missing",
+      "requestedSnapshotCount": 2,
+      "availableSnapshotCount": 2,
+      "snapshots": [
+        {
+          "requestKind": "preceding_same_side_decision",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "corp",
+            "actionType": "advance_card",
+            "progressLabel": "no_progress_stale"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "corp",
+            "stateVersionBefore": 100,
+            "selectedActionType": "advance_card",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "advance_card",
+                "semanticActionType": "scoreline",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Corporate War",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_advance_score_line",
+                  "deck_doctrine_runtime_weight",
+                  "corp_advance_remote_context",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_server_protected",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:8560",
+                  "finalSelectionScore:8810",
+                  "selectedPlan:corp.create_score_window"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_low_credits",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6125",
+                  "finalSelectionScore:6125"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5325",
+                  "finalSelectionScore:5325"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-375",
+                  "finalSelectionScore:-375"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 4,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 3,
+            "topActionTypes": [
+              "advance_card",
+              "gain_credit",
+              "draw_card",
+              "end_turn"
+            ]
+          }
+        },
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 101,
+            "side": "corp",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 101,
+            "side": "corp",
+            "stateVersionBefore": 101,
+            "selectedActionType": "gain_credit",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_low_credits",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 3,
+            "progressAlternatives": 0,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "gain_credit",
+              "draw_card",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 0,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "corp",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": false,
+          "blocker": "snapshot_missing_at_requested_index"
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "gain_credit",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_credits",
+                  "runner_hand_funding_target",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:6935",
+                  "finalSelectionScore:7185",
+                  "selectedPlan:runner.build_credit_base"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_hq_pressure",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5285",
+                  "finalSelectionScore:5285"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_remote_root_threat",
+                  "runner_visible_ice_path_cost",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:4855",
+                  "finalSelectionScore:4855"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-475",
+                  "finalSelectionScore:-475"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "runner_archives_pressure",
+                  "runner_free_server_path",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "semantic_excluded:archives_known_no_agenda"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:archives_known_no_agenda",
+                  "known_non_agenda:3"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 3,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "gain_credit",
+              "draw_card",
+              "start_run",
+              "start_run",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "play_event",
+            "progressLabel": "progress_coverage_install"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "play_event",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "play_event",
+                "semanticActionType": "coverage_setup",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Bodyweight™ Synthetic Blood",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "runner_coverage_answer_fit",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_plausible",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:6155",
+                  "finalSelectionScore:6405",
+                  "selectedPlan:runner.obtain_breaker_coverage"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "activated_card_ability",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Newsgroup Filter",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6200",
+                  "finalSelectionScore:6200"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_remote_root_threat",
+                  "runner_free_server_path",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5975",
+                  "finalSelectionScore:5975"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "lower_plan_fit",
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5425",
+                  "finalSelectionScore:5425"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-475",
+                  "finalSelectionScore:-475"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 4,
+            "topActionTypes": [
+              "play_event",
+              "activated_card_ability",
+              "start_run",
+              "draw_card",
+              "gain_credit"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 101,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 101,
+            "side": "runner",
+            "stateVersionBefore": 101,
+            "selectedActionType": "gain_credit",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_credits",
+                  "runner_hand_funding_target",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:7025",
+                  "finalSelectionScore:7275",
+                  "selectedPlan:runner.build_credit_base"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_remote_root_threat",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5995",
+                  "finalSelectionScore:5995"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_hq_pressure",
+                  "runner_visible_ice_path_cost",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:4145",
+                  "finalSelectionScore:4145"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-475",
+                  "finalSelectionScore:-475"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_rnd_pressure",
+                  "runner_rnd_unknown_top",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "semantic_excluded:known_ice_path_no_access"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:known_ice_path_no_access",
+                  "server:rd;known_ice:1;can_reach_access:false;reason:known_path_unpayable;unpayable:ice_unaffordable;break_cost:4;credits_after:-2"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 3,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "gain_credit",
+              "start_run",
+              "draw_card",
+              "start_run",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "continue_run",
+            "progressLabel": "progress_reachability_improved"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "play_event",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "play_event",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:6120",
+                  "finalSelectionScore:6370",
+                  "selectedPlan:runner.develop_hand_card"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_remote_root_threat",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5625",
+                  "finalSelectionScore:5625"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5425",
+                  "finalSelectionScore:5425"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-475",
+                  "finalSelectionScore:-475"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "runner_archives_pressure",
+                  "runner_free_server_path",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "semantic_excluded:archives_known_no_agenda"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:archives_known_no_agenda",
+                  "known_non_agenda:3"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 2,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "play_event",
+              "draw_card",
+              "start_run",
+              "gain_credit",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "gain_credit",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_credits",
+                  "runner_hand_funding_target",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:6625",
+                  "finalSelectionScore:6875",
+                  "selectedPlan:runner.build_credit_base"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "play_event",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Mantis, Fixer-at-Large",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6120",
+                  "finalSelectionScore:6120"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Armored Fridge",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_persistent_install_fit",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5565",
+                  "finalSelectionScore:5565"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:-475",
+                  "finalSelectionScore:-475"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "runner_archives_pressure",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "semantic_excluded:archives_known_no_agenda"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:archives_known_no_agenda",
+                  "known_non_agenda:5"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "gain_credit",
+              "play_event",
+              "draw_card",
+              "install_card",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "corp",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "corp",
+            "stateVersionBefore": 100,
+            "selectedActionType": "mandatory_draw",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "mandatory_draw",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 1,
+            "progressAlternatives": 0,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "mandatory_draw"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "activated_card_ability",
+            "progressLabel": "progress_coverage_install"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "activated_card_ability",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "activated_card_ability",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Newsgroup Filter",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Tycho Mem Chip",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_persistent_install_fit",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "runner_archives_pressure",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "semantic_excluded:archives_known_no_agenda"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:archives_known_no_agenda",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:archives_known_no_agenda",
+                  "known_non_agenda:4"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 1,
+            "topActionTypes": [
+              "activated_card_ability",
+              "draw_card",
+              "gain_credit",
+              "install_card",
+              "end_turn"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "corp",
+            "actionType": "rez_ice",
+            "progressLabel": "progress_server_protected"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "corp",
+            "stateVersionBefore": 100,
+            "selectedActionType": "rez_ice",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "rez_ice",
+                "semanticActionType": "server_protection",
+                "selected": true,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "BBS Whispering Campaign",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_rez_affordability",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_server_protected",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:7950",
+                  "finalSelectionScore:8200",
+                  "selectedPlan:corp.rez_defense"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "gain_credit",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_low_credits",
+                  "corp_remote_instability_credit_reserve",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_plausible",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6375",
+                  "finalSelectionScore:6375"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "play_operation",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Efficiency Experts",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6225",
+                  "finalSelectionScore:6225"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "install_card",
+                "semanticActionType": "scoreline",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Superior Net Barriers",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_install_score_line",
+                  "deck_doctrine_runtime_weight",
+                  "corp_install_protection",
+                  "corp_install_economy",
+                  "corp_install_remote_context",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_server_protected",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5575",
+                  "finalSelectionScore:5575"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "install_card",
+                "semanticActionType": "scoreline",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Superior Net Barriers",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_install_score_line",
+                  "deck_doctrine_runtime_weight",
+                  "corp_install_protection",
+                  "corp_install_economy",
+                  "corp_install_remote_context",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_server_protected",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5575",
+                  "finalSelectionScore:5575"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "install_card",
+                "semanticActionType": "scoreline",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Superior Net Barriers",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "corp_install_score_line",
+                  "deck_doctrine_runtime_weight",
+                  "corp_install_protection",
+                  "corp_install_economy",
+                  "corp_install_remote_context",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_server_protected",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5575",
+                  "finalSelectionScore:5575"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 4,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "rez_ice",
+              "gain_credit",
+              "play_operation",
+              "install_card",
+              "install_card"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "start_run",
+            "progressLabel": "progress_reachability_improved"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "start_run",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_remote_root_threat",
+                  "runner_visible_ice_path_cost",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:7655",
+                  "finalSelectionScore:7905",
+                  "selectedPlan:runner.contest_remote"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_rnd_pressure",
+                  "runner_rnd_unknown_top",
+                  "runner_visible_ice_path_cost",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:7285",
+                  "finalSelectionScore:7285"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_archives_pressure",
+                  "runner_archives_hidden_cards",
+                  "runner_free_server_path",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6425",
+                  "finalSelectionScore:6425"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_persistent_install_fit",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6248",
+                  "finalSelectionScore:6248"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6225",
+                  "finalSelectionScore:6225"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6225",
+                  "finalSelectionScore:6225"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 3,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "start_run",
+              "start_run",
+              "start_run",
+              "install_card",
+              "install_card"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 104,
+            "side": "runner",
+            "actionType": "gain_credit",
+            "progressLabel": "progress_economy_converted"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 104,
+            "side": "runner",
+            "stateVersionBefore": 104,
+            "selectedActionType": "gain_credit",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_credits",
+                  "runner_hand_funding_target",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_hq_pressure",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "end_turn",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_unused_actions",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "no_progress_stale",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_score_below_selected"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_remote_root_threat",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "semantic_excluded:known_ice_path_no_access"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:known_ice_path_no_access",
+                  "server:remote_1;known_ice:1;can_reach_access:false;reason:known_path_unpayable;unpayable:ice_unaffordable;break_cost:2;credits_after:-2"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "runner_rnd_pressure",
+                  "runner_rnd_unknown_top",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [
+                  "semantic_action_excluded",
+                  "deck_doctrine_runtime_weight_suppressed",
+                  "semantic_excluded:known_ice_path_no_access"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "semantic_excluded:known_ice_path_no_access",
+                "whyChosen": [],
+                "whyNot": [
+                  "semantic_excluded:known_ice_path_no_access",
+                  "server:rd;known_ice:1;can_reach_access:false;reason:known_path_unpayable;unpayable:ice_unaffordable;break_cost:2;credits_after:-2"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 3,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 2,
+            "topActionTypes": [
+              "gain_credit",
+              "draw_card",
+              "start_run",
+              "end_turn",
+              "start_run"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 101,
+            "side": "runner",
+            "actionType": "start_run",
+            "progressLabel": "progress_reachability_improved"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 101,
+            "side": "runner",
+            "stateVersionBefore": 101,
+            "selectedActionType": "start_run",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "start_run",
+                "semanticActionType": "server_protection",
+                "selected": true,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_rnd_pressure",
+                  "runner_rnd_unknown_top",
+                  "runner_visible_ice_path_cost",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "selected_by_plan_mapping"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "scoreline_relevant",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "whyChosen": [
+                  "selected_by_plan_mapping",
+                  "rawSemanticScore:7285",
+                  "finalSelectionScore:7535",
+                  "selectedPlan:runner.opportunistic_central_run"
+                ],
+                "whyNot": []
+              },
+              {
+                "rank": 2,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Bartmoss Memorial Icebreaker",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:6225",
+                  "finalSelectionScore:6225"
+                ]
+              },
+              {
+                "rank": 3,
+                "actionType": "draw_card",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_low_hand",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5875",
+                  "finalSelectionScore:5875"
+                ]
+              },
+              {
+                "rank": 4,
+                "actionType": "start_run",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "deck_doctrine_runtime_weight",
+                  "runner_hq_pressure",
+                  "runner_run_target_semantic_guidance",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "progress_reachability_improved",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5685",
+                  "finalSelectionScore:5685"
+                ]
+              },
+              {
+                "rank": 5,
+                "actionType": "gain_credit",
+                "semanticActionType": "economy",
+                "selected": false,
+                "sourceKind": "basic_action",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5425",
+                  "finalSelectionScore:5425"
+                ]
+              },
+              {
+                "rank": 6,
+                "actionType": "install_card",
+                "semanticActionType": "coverage_setup",
+                "selected": false,
+                "sourceKind": "visible_card_or_ability",
+                "sourceDefinitionId": "Broker",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "runner_bank_install_commitment",
+                  "runner_persistent_install_fit",
+                  "runner_install_economy",
+                  "semantic_credit_cost_penalty",
+                  "plan_selection_adjustment"
+                ],
+                "hardGates": [
+                  "excluded_by_current_plan"
+                ],
+                "targetContextStatus": "blocked_by_hard_gate",
+                "expectedProgressLabel": "no_progress_stale",
+                "blockedReason": "plan_mismatch",
+                "whyChosen": [],
+                "whyNot": [
+                  "plan_mismatch",
+                  "excluded_by_current_plan",
+                  "rawSemanticScore:5328",
+                  "finalSelectionScore:5328"
+                ]
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 6,
+            "progressAlternatives": 2,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 5,
+            "topActionTypes": [
+              "start_run",
+              "install_card",
+              "draw_card",
+              "start_run",
+              "gain_credit"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "ai159Category": "no_opportunity_state_found",
+      "requestedSnapshotCount": 1,
+      "availableSnapshotCount": 1,
+      "snapshots": [
+        {
+          "requestKind": "first_progress_action",
+          "requestedAction": {
+            "actionIndex": 100,
+            "side": "runner",
+            "actionType": "access_card",
+            "progressLabel": "progress_access"
+          },
+          "snapshotAvailable": true,
+          "snapshot": {
+            "actionIndex": 100,
+            "side": "runner",
+            "stateVersionBefore": 100,
+            "selectedActionType": "access_card",
+            "alternatives": [
+              {
+                "rank": 1,
+                "actionType": "access_card",
+                "semanticActionType": "run_progress",
+                "selected": true,
+                "sourceKind": "game_rule",
+                "scoreKeys": [
+                  "semantic_type_priority",
+                  "semantic_private_actor_bonus",
+                  "semantic_credit_cost_penalty"
+                ],
+                "hardGates": [],
+                "targetContextStatus": "reachability_relevant",
+                "expectedProgressLabel": "progress_access",
+                "whyChosen": [
+                  "semantic_runtime_actual"
+                ],
+                "whyNot": []
+              }
+            ]
+          },
+          "proofSummary": {
+            "legalActionCount": 1,
+            "progressAlternatives": 1,
+            "targetContextComplete": true,
+            "hardGateBlockedAlternatives": 0,
+            "topActionTypes": [
+              "access_card"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
