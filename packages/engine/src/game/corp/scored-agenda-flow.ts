@@ -6,11 +6,11 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
-  ResolvedGameEffect,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
 import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
+import { applyDirectScoreEconomyEffects } from "./scored-agenda/direct-score-economy-effects";
 import {
   isEmployeeEmpowermentStartDrawChoiceSource,
   resolveEmployeeEmpowermentStartDrawChoice,
@@ -269,40 +269,13 @@ function applySimpleScoreEffects(
   scoredAgenda: CardScoredAgendaImplementation | undefined,
 ): void {
   const legalAction = host.legalAction;
-  if (scoredAgenda?.kind === "gain_credits_on_score") {
-    host.credits.gainCredits(scoredAgenda.recipient, scoredAgenda.amount);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        onScoreGainCredits: scoredAgenda.amount,
-        gainedCredits: scoredAgenda.amount,
-        corpCreditsAfter: host.state.corp.credits,
-      };
-      appendScoreCreditEffect(legalAction, {
-        effectId: `${definition.id}.score.gain_credits`,
-        kind: "gain_credits",
-        amount: scoredAgenda.amount,
-        definition,
-      });
-    }
-  }
-  if (scoredAgenda?.kind === "add_counters_on_score") {
-    host.counters.addCardCounter(
-      cardId,
-      scoredAgenda.counterType,
-      scoredAgenda.amount,
-    );
-    if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        counterType: scoredAgenda.counterType,
-        addedCounterAmount: scoredAgenda.amount,
-        remainingCounters: host.counters.cardCounter(
-          cardId,
-          scoredAgenda.counterType,
-        ),
-      };
-  }
+  applyDirectScoreEconomyEffects(
+    host,
+    cardId,
+    definition,
+    scoredAgenda,
+    legalAction,
+  );
   host.effects.executeOnScore(definition, cardId);
   if (scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install") {
     markCorporateRetreatAvailableOnScore(host, cardId, legalAction);
@@ -310,31 +283,6 @@ function applySimpleScoreEffects(
   if (scoredAgenda?.kind === "corporate_war_credit_swing") {
     resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
   }
-}
-
-function appendScoreCreditEffect(
-  legalAction: LegalAction,
-  effect: {
-    effectId: string;
-    kind: Extract<ResolvedGameEffect["kind"], "gain_credits" | "lose_credits">;
-    amount: number;
-    definition: CardDefinition;
-  },
-): void {
-  const resolvedEffect: ResolvedGameEffect = {
-    effectId: effect.effectId,
-    kind: effect.kind,
-    visibility: "public",
-    side: "corp",
-    amount: effect.amount,
-    reason: "card_resolver",
-    sourceDefinitionId: effect.definition.id,
-    sourceTitle: effect.definition.title,
-  };
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    resolvedEffect,
-  ];
 }
 
 function startScoreTimeChoices(
