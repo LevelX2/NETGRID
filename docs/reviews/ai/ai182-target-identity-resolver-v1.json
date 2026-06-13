@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai182-target-identity-resolver-v1",
-  "generatedAt": "2026-06-13T08:18:54.220Z",
-  "gitHead": "e076f11e",
+  "generatedAt": "2026-06-13T08:32:31.689Z",
+  "gitHead": "8505827d",
   "sources": {
     "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
     "ai177": "docs/reviews/ai/ai177-opportunity-candidate-selection-gate.json"

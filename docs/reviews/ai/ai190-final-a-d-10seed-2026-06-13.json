@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-selfplay-trace-matrix-v1",
-  "generatedAt": "2026-06-13T08:26:50.011Z",
-  "gitHead": "43f35dfb",
+  "generatedAt": "2026-06-13T08:34:18.012Z",
+  "gitHead": "8505827d",
   "config": {
     "pairIds": [
       "a",
@@ -30,11 +30,11 @@
   "aggregate": {
     "games": 40,
     "decisions": 5178,
-    "findings": 1755,
+    "findings": 1754,
     "findingsBySeverity": {
       "critical": 0,
       "high": 11,
-      "medium": 1276,
+      "medium": 1275,
       "low": 468
     },
     "findingsByDetector": {
@@ -43,7 +43,7 @@
       "hidden_info_marker": 0,
       "no_legal_action_failure": 0,
       "action_limit_reached": 23,
-      "repeated_no_progress_run": 56,
+      "repeated_no_progress_run": 57,
       "repeated_known_no_payoff_remote": 0,
       "repeated_low_value_archives": 1,
       "recovery_low_value_loop": 14,
@@ -53,7 +53,7 @@
       "duplicate_low_delta_install": 3,
       "overdraw_without_urgency": 0,
       "plan_step_action_mismatch": 1181,
-      "semantic_override_suspicious": 911,
+      "semantic_override_suspicious": 912,
       "corp_never_scores_long_game": 11,
       "runner_never_accesses_long_game": 0
     },
@@ -5059,11 +5059,11 @@
       "aggregate": {
         "games": 10,
         "decisions": 1577,
-        "findings": 564,
+        "findings": 563,
         "findingsBySeverity": {
           "critical": 0,
           "high": 5,
-          "medium": 374,
+          "medium": 373,
           "low": 185
         },
         "findingsByDetector": {
@@ -5072,7 +5072,7 @@
           "hidden_info_marker": 0,
           "no_legal_action_failure": 0,
           "action_limit_reached": 9,
-          "repeated_no_progress_run": 21,
+          "repeated_no_progress_run": 22,
           "repeated_known_no_payoff_remote": 0,
           "repeated_low_value_archives": 0,
           "recovery_low_value_loop": 1,
@@ -5082,7 +5082,7 @@
           "duplicate_low_delta_install": 0,
           "overdraw_without_urgency": 0,
           "plan_step_action_mismatch": 341,
-          "semantic_override_suspicious": 328,
+          "semantic_override_suspicious": 329,
           "corp_never_scores_long_game": 5,
           "runner_never_accesses_long_game": 0
         },
@@ -5312,41 +5312,41 @@
             "runner": 6,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:92936791",
+          "finalStateHash": "fnv1a:498066ea",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
-            "continue_run",
-            "draw_card",
-            "draw_card",
-            "end_turn",
             "mandatory_draw",
             "install_card",
             "play_operation",
             "advance_card",
             "end_turn",
-            "gain_credit"
-          ],
-          "last40ActionTypes": [
+            "start_run",
             "break_subroutine",
             "continue_run",
-            "end_turn",
-            "mandatory_draw",
+            "draw_card",
+            "start_run"
+          ],
+          "last40ActionTypes": [
             "advance_card",
             "advance_card",
             "score_agenda",
             "install_card",
             "end_turn",
-            "gain_credit",
-            "draw_card",
-            "draw_card",
+            "play_event",
+            "play_event",
+            "start_run",
+            "decline_rez",
+            "continue_run",
+            "break_subroutine",
+            "continue_run",
             "draw_card",
             "end_turn",
             "mandatory_draw",
             "install_card",
+            "install_card",
             "rez_ice",
             "play_operation",
-            "install_card",
             "end_turn",
             "resolve_choice",
             "start_run",
@@ -5354,11 +5354,7 @@
             "continue_run",
             "break_subroutine",
             "continue_run",
-            "continue_run",
-            "access_card",
-            "start_run",
-            "break_subroutine",
-            "continue_run",
+            "draw_card",
             "draw_card",
             "draw_card",
             "end_turn",
@@ -5367,7 +5363,11 @@
             "play_operation",
             "advance_card",
             "end_turn",
-            "gain_credit"
+            "start_run",
+            "break_subroutine",
+            "continue_run",
+            "draw_card",
+            "start_run"
           ]
         },
         {
@@ -5647,7 +5647,7 @@
             "runner": 2,
             "corp": 0
           },
-          "finalStateHash": "fnv1a:5ecf9fb9",
+          "finalStateHash": "fnv1a:eae989a1",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
@@ -5655,12 +5655,12 @@
             "access_card",
             "trash_accessed_card",
             "start_run",
-            "access_card",
-            "decline_trash",
+            "rez_ice",
+            "continue_run",
             "start_run",
-            "access_card",
-            "decline_trash",
-            "end_turn"
+            "end_turn",
+            "mandatory_draw",
+            "advance_card"
           ],
           "last40ActionTypes": [
             "end_turn",
@@ -5697,12 +5697,12 @@
             "access_card",
             "trash_accessed_card",
             "start_run",
-            "access_card",
-            "decline_trash",
+            "rez_ice",
+            "continue_run",
             "start_run",
-            "access_card",
-            "decline_trash",
-            "end_turn"
+            "end_turn",
+            "mandatory_draw",
+            "advance_card"
           ]
         },
         {
@@ -5944,34 +5944,36 @@
         {
           "matchId": "selfplay:ai-v143-tuning-008",
           "seed": "ai-v143-tuning-008",
-          "actionIndex": 148,
+          "actionIndex": 159,
           "side": "corp",
-          "selectedActionType": "end_turn",
-          "planKind": "end_turn",
+          "selectedActionType": "advance_card",
+          "planKind": "corp.create_score_window",
           "detectorIds": [
+            "action_limit_reached",
+            "semantic_override_suspicious",
             "corp_never_scores_long_game"
           ],
           "severity": "high",
-          "shortReason": "Long selfplay game ended without a Corp score.",
+          "shortReason": "Long selfplay game ended without a Corp score. | Selfplay game reached the configured action limit before a result. | Semantic runtime selected a different actual action than the legacy debug winner.",
           "relevantDebugFacts": [
-            "action_semantic_candidate:turn_flow.end_turn",
-            "action_semantic_projection:projected",
-            "action_type:end_turn",
+            "action_semantic_candidate:score.advance_card",
+            "action_semantic_projection:partial_projected",
+            "action_type:advance_card",
+            "agenda_development_risk:remote_rez_floor_met",
             "corp_empty_remote_count:0",
-            "credit_cost:0",
-            "legacy_reference_action_type:end_turn",
-            "legacy_reference_reason:corp.end_turn",
-            "own_clicks:0",
-            "own_credits:12",
-            "own_tags:0",
-            "planKind:end_turn",
-            "scope_family:end_turn"
+            "corp_remote_protection:protected",
+            "corp_remote_target:existing_remote",
+            "credit_cost:1",
+            "credits_after_action:12",
+            "doctrine_goal:doctrine_archetype:asset_remote",
+            "doctrine_goal:doctrine_archetype:glacier",
+            "doctrine_goal:doctrine_goal_trace:decision_debug"
           ],
           "replaySafeReference": {
             "seed": "ai-v143-tuning-008",
-            "stateVersion": 148,
-            "fromActionIndex": 146,
-            "toActionIndex": 149
+            "stateVersion": 159,
+            "fromActionIndex": 157,
+            "toActionIndex": 160
           }
         },
         {

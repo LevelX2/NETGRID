@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai185-stale-punish-intent-decomposition-v1",
-  "generatedAt": "2026-06-13T08:21:59.645Z",
-  "gitHead": "7f97dcda",
+  "generatedAt": "2026-06-13T08:32:33.363Z",
+  "gitHead": "8505827d",
   "sources": {
     "ai174": "docs/reviews/ai/ai174-corp-tag-punish-stale-intent-review-2026-06-13.json"
   },

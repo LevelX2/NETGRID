@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai183-candidate-gate-v2",
-  "generatedAt": "2026-06-13T08:20:12.984Z",
-  "gitHead": "926fb6cc",
+  "generatedAt": "2026-06-13T08:32:32.255Z",
+  "gitHead": "8505827d",
   "sources": {
     "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
     "ai173": "docs/reviews/ai/ai173-runner-coverage-opportunity-solver-2026-06-13.json",

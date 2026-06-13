@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai184-playeraction-replay-probe-v1",
-  "generatedAt": "2026-06-13T08:20:57.163Z",
-  "gitHead": "399235b1",
+  "generatedAt": "2026-06-13T08:32:32.803Z",
+  "gitHead": "8505827d",
   "sources": {
     "ai183": "docs/reviews/ai/ai183-candidate-gate-v2.json"
   },

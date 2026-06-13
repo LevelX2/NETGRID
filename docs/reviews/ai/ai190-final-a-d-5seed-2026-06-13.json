@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-selfplay-trace-matrix-v1",
-  "generatedAt": "2026-06-13T08:26:04.141Z",
-  "gitHead": "43f35dfb",
+  "generatedAt": "2026-06-13T08:33:32.442Z",
+  "gitHead": "8505827d",
   "config": {
     "pairIds": [
       "a",
@@ -25,11 +25,11 @@
   "aggregate": {
     "games": 20,
     "decisions": 2492,
-    "findings": 835,
+    "findings": 836,
     "findingsBySeverity": {
       "critical": 0,
       "high": 4,
-      "medium": 591,
+      "medium": 592,
       "low": 240
     },
     "findingsByDetector": {
@@ -38,7 +38,7 @@
       "hidden_info_marker": 0,
       "no_legal_action_failure": 0,
       "action_limit_reached": 11,
-      "repeated_no_progress_run": 33,
+      "repeated_no_progress_run": 35,
       "repeated_known_no_payoff_remote": 0,
       "repeated_low_value_archives": 0,
       "recovery_low_value_loop": 4,
@@ -4382,11 +4382,11 @@
       "aggregate": {
         "games": 5,
         "decisions": 800,
-        "findings": 293,
+        "findings": 294,
         "findingsBySeverity": {
           "critical": 0,
           "high": 3,
-          "medium": 174,
+          "medium": 175,
           "low": 116
         },
         "findingsByDetector": {
@@ -4395,7 +4395,7 @@
           "hidden_info_marker": 0,
           "no_legal_action_failure": 0,
           "action_limit_reached": 5,
-          "repeated_no_progress_run": 13,
+          "repeated_no_progress_run": 15,
           "repeated_known_no_payoff_remote": 0,
           "repeated_low_value_archives": 0,
           "recovery_low_value_loop": 1,
@@ -4634,41 +4634,41 @@
             "runner": 6,
             "corp": 2
           },
-          "finalStateHash": "fnv1a:92936791",
+          "finalStateHash": "fnv1a:498066ea",
           "replayOk": true,
           "replayErrors": [],
           "lastActionTypes": [
-            "continue_run",
-            "draw_card",
-            "draw_card",
-            "end_turn",
             "mandatory_draw",
             "install_card",
             "play_operation",
             "advance_card",
             "end_turn",
-            "gain_credit"
-          ],
-          "last40ActionTypes": [
+            "start_run",
             "break_subroutine",
             "continue_run",
-            "end_turn",
-            "mandatory_draw",
+            "draw_card",
+            "start_run"
+          ],
+          "last40ActionTypes": [
             "advance_card",
             "advance_card",
             "score_agenda",
             "install_card",
             "end_turn",
-            "gain_credit",
-            "draw_card",
-            "draw_card",
+            "play_event",
+            "play_event",
+            "start_run",
+            "decline_rez",
+            "continue_run",
+            "break_subroutine",
+            "continue_run",
             "draw_card",
             "end_turn",
             "mandatory_draw",
             "install_card",
+            "install_card",
             "rez_ice",
             "play_operation",
-            "install_card",
             "end_turn",
             "resolve_choice",
             "start_run",
@@ -4676,11 +4676,7 @@
             "continue_run",
             "break_subroutine",
             "continue_run",
-            "continue_run",
-            "access_card",
-            "start_run",
-            "break_subroutine",
-            "continue_run",
+            "draw_card",
             "draw_card",
             "draw_card",
             "end_turn",
@@ -4689,7 +4685,11 @@
             "play_operation",
             "advance_card",
             "end_turn",
-            "gain_credit"
+            "start_run",
+            "break_subroutine",
+            "continue_run",
+            "draw_card",
+            "start_run"
           ]
         },
         {

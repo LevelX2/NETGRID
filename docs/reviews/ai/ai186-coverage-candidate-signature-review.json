@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai186-coverage-candidate-signature-review-v1",
-  "generatedAt": "2026-06-13T08:22:54.545Z",
-  "gitHead": "e2a189d2",
+  "generatedAt": "2026-06-13T08:32:33.920Z",
+  "gitHead": "8505827d",
   "sources": {
     "ai173": "docs/reviews/ai/ai173-runner-coverage-opportunity-solver-2026-06-13.json",
     "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json"
