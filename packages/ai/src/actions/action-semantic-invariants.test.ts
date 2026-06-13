@@ -209,6 +209,35 @@ describe("Action semantic invariants", () => {
     ).toHaveLength(expectedReadinessAreas.length);
   });
 
+  it("keeps proteus random and bad-publicity readiness diagnostic", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-proteus-random-bad-publicity-readiness-2026-06-13.md",
+      ),
+      "utf8",
+    );
+
+    for (const card of [
+      "AI Board Member",
+      "Charity Takeover",
+      "Scaldan",
+      "Frame-Up",
+      "Faked Hit",
+      "Poisoned Water Supply",
+      "Back Door to Netwatch",
+      "Roadblock",
+    ]) {
+      expect(report).toContain(card);
+    }
+    expect(report).toContain("needs_random_model");
+    expect(report).toContain("needs_bad_publicity_model");
+    expect(report).toContain("ready_for_semantic_annotation");
+    expect(report).toContain("productiveUseAllowed: false");
+    expect(report).toContain("runtimeConsumerStatus: none");
+    expect(report).toContain("proteus_ai_supported: false");
+  });
+
   it("covers runner breaker-search worklist package one as diagnostic semantics", () => {
     const profiles: ActionCardSemanticProfile[] = [
       runnerBreakerSearchProfile("Self-Modifying Code", [
