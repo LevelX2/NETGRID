@@ -12,20 +12,11 @@ import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-
 import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
 import { applyDirectScoreEconomyEffects } from "./scored-agenda/direct-score-economy-effects";
 import {
-  isEmployeeEmpowermentStartDrawChoiceSource,
-  resolveEmployeeEmpowermentStartDrawChoice,
   startEmployeeEmpowermentStartDrawChoice,
 } from "./scored-agenda/employee-empowerment-sequence";
-import {
-  isScoredIceMarkModifierChoiceSource,
-  resolveScoredRezzedIceMarkModifierChoice,
-} from "./scored-agenda/ice-transmutation-sequence";
 import { applyOveradvanceScoreEffects } from "./scored-agenda/overadvance-score-effects";
+import { resolveScoredAgendaFlowChoice } from "./scored-agenda/scored-agenda-flow-choice-registry";
 import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-score-time-registry";
-import {
-  isScoredSubtypeRevealChoiceSource,
-  resolveScoredSubtypeRevealChoice,
-} from "./scored-agenda/subtype-reveal-economy-sequence";
 
 export { startEmployeeEmpowermentStartDrawChoice };
 
@@ -251,29 +242,7 @@ function startScoreTimeChoices(
 export function handleScoredAgendaFlowChoice(
   host: ScoredAgendaFlowHost,
 ): ScoredAgendaFlowResult {
-  const source = host.state.pendingChoice?.source ?? "";
-  if (isScoredSubtypeRevealChoiceSource(source)) {
-    resolveScoredSubtypeRevealChoice(host);
-    const result: ScoredAgendaFlowResult = {
-      handled: true,
-      stateChanged: true,
-    };
-    if (host.legalAction?.payload)
-      result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
-    return result;
-  }
-  if (isScoredIceMarkModifierChoiceSource(source)) {
-    resolveScoredRezzedIceMarkModifierChoice(host);
-    const result: ScoredAgendaFlowResult = {
-      handled: true,
-      stateChanged: true,
-    };
-    if (host.legalAction?.payload)
-      result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
-    return result;
-  }
-  if (isEmployeeEmpowermentStartDrawChoiceSource(source)) {
-    resolveEmployeeEmpowermentStartDrawChoice(host);
+  if (resolveScoredAgendaFlowChoice(host)) {
     const result: ScoredAgendaFlowResult = {
       handled: true,
       stateChanged: true,

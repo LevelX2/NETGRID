@@ -15,6 +15,7 @@ import {
   findScoredAgendaScoreTimeResolver,
   SCORED_AGENDA_SCORE_TIME_RESOLVERS,
 } from "./scored-agenda-score-time-registry";
+import { SCORED_AGENDA_FLOW_CHOICE_RESOLVERS } from "./scored-agenda-flow-choice-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
   applySequenceResolution,
@@ -123,6 +124,30 @@ describe("scored agenda sequence contract matrix", () => {
     for (const candidate of cases) {
       const matchingIds = SCORED_AGENDA_CHOICE_RESOLVERS.filter((resolver) =>
         resolver.matches(candidate.source),
+      ).map((resolver) => resolver.id);
+      expect(matchingIds).toEqual([candidate.resolverId]);
+    }
+  });
+
+  it("routes each registered scored-agenda flow choice source to exactly one resolver", () => {
+    const cases: readonly { source: string; resolverId: string }[] = [
+      {
+        source: "v162.scored_subtype_reveal:agenda_1:wall:2:8",
+        resolverId: "subtype_reveal_flow_choice",
+      },
+      {
+        source: "v1920.ice_transmutation:transmutation_agenda:8",
+        resolverId: "ice_transmutation_flow_choice",
+      },
+      {
+        source: "v1912.employee_empowerment_start_draw:employee:8",
+        resolverId: "employee_empowerment_start_draw_flow_choice",
+      },
+    ];
+
+    for (const candidate of cases) {
+      const matchingIds = SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.filter(
+        (resolver) => resolver.matches(candidate.source),
       ).map((resolver) => resolver.id);
       expect(matchingIds).toEqual([candidate.resolverId]);
     }
