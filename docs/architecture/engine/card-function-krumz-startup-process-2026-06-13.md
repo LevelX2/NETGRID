@@ -2,7 +2,9 @@
 
 ## Status
 
-In Umsetzung auf Branch `codex/card-function-krumz-startup` im Worktree `C:\Projekte\NETGRID_CARD_FUNCTION_KRUMZ_STARTUP`.
+Abgeschlossen und lokal nach `main` integriert.
+
+Der Arbeitsbranch `codex/card-function-krumz-startup` wurde nach Abschluss gemerged; der Worktree `C:\Projekte\NETGRID_CARD_FUNCTION_KRUMZ_STARTUP` wurde entfernt. Der nachgelagerte Guard-Stand wird im Folgeprozess `docs/architecture/engine/card-function-artifact-payload-cleanup-process-2026-06-13.md` erneut kalibriert.
 
 ## Quelle/Vorgabe
 
@@ -160,3 +162,10 @@ Stop ohne Rückfrage, wenn:
 - P5 hat final verifiziert und lokal nach `main` integriert.
 - Arbeits-Worktree ist entfernt.
 - Siren, Bizarre Encryption Scheme und Pirate Broadcast bleiben als spätere Folgeprozesse sichtbar, aber nicht vermischt.
+
+## Abschlussstand 2026-06-13
+
+- Krumz ist als generischer `recurring_trace_credit_pool` modelliert.
+- Startup Immolator ist als generische `trash_fully_broken_passed_ice`-Ability mit `abilityUsedSourceIdsByLimitKey` umgesetzt.
+- Review-JSON und Review-Markdown führen beide Slices als `slice_done`.
+- Siren, Bizarre Encryption Scheme und Pirate Broadcast bleiben bewusst spätere separate Prozesse.

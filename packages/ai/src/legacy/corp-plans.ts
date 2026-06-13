@@ -385,6 +385,7 @@ type CorpAdvancementCounterTargetAssessment = {
   targetClass: CorpAdvancementCounterTargetClass;
   windowValue: number;
   weakTargetPenalty: number;
+  evidence: string[];
 };
 
 type CorpAdvancementCounterPlacementAssessment = {
@@ -6734,6 +6735,7 @@ function corpAdvancementCounterPlacementAssessment(
     ...selectedTargetAssessments.flatMap((target) => [
       `advancement_target_class:${target.targetClass}`,
       `advancement_target_witness:${target.witness}`,
+      ...target.evidence,
     ]),
     ...(dominatedByBasicAdvance
       ? [
@@ -6844,10 +6846,12 @@ function corpAdvancementTargetAssessment(
   );
   const protectedBonus = Math.min(server?.ice.length ?? 0, 2) * 12;
   const text = normalizedRulesTextForDefinition(definitionId);
-  const hasOveradvancePayoff =
-    /additional agenda point|agenda point for every|agenda point for each|overadvance_bonus|overadvance/.test(
-      text,
-    );
+  const overadvanceThreshold = corpAgendaOveradvanceThresholdAssessment(
+    definitionId,
+    text,
+    requirement,
+    counters,
+  );
   if (type === "agenda" || isAgendaDefinition(definitionId)) {
     const contest = evaluateRunnerContestCapacity(
       input,
@@ -6857,9 +6861,7 @@ function corpAdvancementTargetAssessment(
     const contestValue =
       contest.capacity === "low" ? 35 : contest.capacity === "high" ? -25 : 0;
     const targetClass: CorpAdvancementCounterTargetClass =
-      hasOveradvancePayoff &&
-      typeof requirement === "number" &&
-      counters + 1 > requirement
+      overadvanceThreshold?.hitsThreshold === true
         ? "agenda_overadvance_threshold"
         : remaining === 0
           ? "agenda_score_now"
@@ -6894,6 +6896,7 @@ function corpAdvancementTargetAssessment(
       targetClass,
       windowValue,
       weakTargetPenalty: witness === "none" ? 45 : 0,
+      evidence: overadvanceThreshold?.evidence ?? [],
     };
   }
   const ambush = corpAdvancementAmbushTargetClass(text);
@@ -6906,6 +6909,7 @@ function corpAdvancementTargetAssessment(
       targetClass: ambush,
       windowValue: 90,
       weakTargetPenalty: 0,
+      evidence: [],
     };
   }
   if (corpAdvancementLooksLikeTransferSource(text)) {
@@ -6921,6 +6925,7 @@ function corpAdvancementTargetAssessment(
       targetClass,
       windowValue: hasTransferDestination ? 55 : 0,
       weakTargetPenalty: hasTransferDestination ? 20 : 90,
+      evidence: [],
     };
   }
   const creditCashout = corpAdvancementCreditCashoutValue(text);
@@ -6937,6 +6942,7 @@ function corpAdvancementTargetAssessment(
       targetClass: "counter_cashout_credit",
       windowValue: corpAdvancementCashoutScalesPerCounter(text) ? 45 : 15,
       weakTargetPenalty: 15,
+      evidence: [],
     };
   }
   if (corpAdvancementLooksLikeActionCashout(text)) {
@@ -6948,6 +6954,7 @@ function corpAdvancementTargetAssessment(
       targetClass: "counter_cashout_action",
       windowValue: 15,
       weakTargetPenalty: 30,
+      evidence: [],
     };
   }
   if (
@@ -6961,6 +6968,7 @@ function corpAdvancementTargetAssessment(
       targetClass: "counter_bank_only",
       windowValue: 0,
       weakTargetPenalty: 90,
+      evidence: [],
     };
   }
   return {
@@ -6973,7 +6981,84 @@ function corpAdvancementTargetAssessment(
       : "unknown_advanceable",
     windowValue: 0,
     weakTargetPenalty: 100,
+    evidence: [],
   };
+}
+
+function corpAgendaOveradvanceThresholdAssessment(
+  definitionId: string,
+  text: string,
+  requirement: number | undefined,
+  counters: number,
+):
+  | {
+      thresholdSize: number;
+      currentOver: number;
+      afterActionOver: number;
+      hitsThreshold: boolean;
+      nextThresholdDistance: number;
+      evidence: string[];
+    }
+  | undefined {
+  const thresholdSize = corpAgendaOveradvanceThresholdSize(definitionId, text);
+  if (!thresholdSize || typeof requirement !== "number") return undefined;
+  const currentOver = Math.max(0, counters - requirement);
+  const afterActionOver = Math.max(0, counters + 1 - requirement);
+  const hitsThreshold =
+    afterActionOver > currentOver &&
+    afterActionOver > 0 &&
+    afterActionOver % thresholdSize === 0;
+  const nextThresholdDistance = hitsThreshold
+    ? 0
+    : thresholdSize - (afterActionOver % thresholdSize || thresholdSize);
+  return {
+    thresholdSize,
+    currentOver,
+    afterActionOver,
+    hitsThreshold,
+    nextThresholdDistance,
+    evidence: [
+      `overadvance_threshold_size:${thresholdSize}`,
+      `overadvance_current_over:${currentOver}`,
+      `overadvance_after_action_over:${afterActionOver}`,
+      `overadvance_hits_threshold:${hitsThreshold}`,
+      `overadvance_next_threshold_distance:${nextThresholdDistance}`,
+    ],
+  };
+}
+
+function corpAgendaOveradvanceThresholdSize(
+  definitionId: string,
+  text: string,
+): number | undefined {
+  if (
+    definitionId === "onr_v1_214_project-babylon" ||
+    definitionId === "onr_proteus_008_project-zurich"
+  ) {
+    return 2;
+  }
+  if (definitionId === "onr_proteus_007_project-venice") return 3;
+  const overMatch =
+    /for every (one|two|three|four|\d+) advancement counters? over/.exec(text);
+  if (overMatch?.[1]) return corpNumberWordToNumber(overMatch[1]);
+  const additionalAgendaPointMatch =
+    /additional agenda point for every (one|two|three|four|\d+) advancement counters? over/.exec(
+      text,
+    );
+  if (additionalAgendaPointMatch?.[1])
+    return corpNumberWordToNumber(additionalAgendaPointMatch[1]);
+  return undefined;
+}
+
+function corpNumberWordToNumber(value: string): number | undefined {
+  if (/^\d+$/.test(value)) return Number.parseInt(value, 10);
+  const byWord: Record<string, number> = {
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+  };
+  return byWord[value];
 }
 
 function corpHasTransferDestination(

@@ -25,6 +25,7 @@ import {
 import { buildLegalAction } from "../turn/action-builders";
 import { type FortPassWindowHost } from "./fort-pass-window";
 import { buildRegisteredRunWindowActions } from "./run-window-registry";
+import { runIsAtServerAfterPassingLastIce } from "./windows/after-passing-last-ice-window";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -247,12 +248,7 @@ function rootRezLifecycleIsSolvable(
   )
     return true;
   const run = host.state.run;
-  if (
-    !run ||
-    run.attackedServerId !== server.id ||
-    run.position.kind !== "server"
-  )
-    return false;
+  if (!run || !runIsAtServerAfterPassingLastIce(run, server)) return false;
   return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 

@@ -10,16 +10,19 @@ export type SurfaceKind =
 export type PayloadFamily =
   | "scored_agenda_sequence"
   | "hidden_zone_choice"
+  | "run_window_sequence"
   | "access_event"
   | "public_reveal"
   | "ai_debug"
-  | "replay_public";
+  | "replay_public"
+  | "developer_trace";
 
 export type PublicSurfacePayloadValue = string | number | boolean;
 export type PublicSurfacePayload = Record<string, PublicSurfacePayloadValue>;
 
 const HIDDEN_CARD_LIST_FIELD_PATTERNS = [
   /(?:hidden|private|unselected).*cardIds$/i,
+  /(?:replacement|selected).*cardIds$/i,
   /(?:hq|rd|hand|stack|grip).*cardIds$/i,
 ];
 
@@ -142,6 +145,7 @@ export function assertNoActorPrivateLabels(
 function primitiveOnlyPayloadFamily(family: PayloadFamily): boolean {
   return (
     family === "scored_agenda_sequence" ||
+    family === "run_window_sequence" ||
     family === "public_reveal" ||
     family === "replay_public"
   );

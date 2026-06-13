@@ -845,7 +845,7 @@ export function corpTracePaymentPublicPayload(
         }
       : {}),
     ...(receipt.corpTraceBitsSpent > 0
-      ? { krumzBitsSpent: receipt.corpTraceBitsSpent }
+      ? { recurringTraceCreditPoolSpent: receipt.corpTraceBitsSpent }
       : {}),
     ...(receipt.corpTraceCountersSpent > 0
       ? {
