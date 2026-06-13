@@ -27,6 +27,7 @@ describe("scored agenda score-time registry", () => {
 
     expect(resolverModes).toMatchObject({
       data_fort_reclamation_score_start: "delegated_host_choice",
+      corporate_downsizing_score_start: "delegated_host_choice",
       ice_transmutation_score_start: "choice_start",
       priority_requisition_score_start: "delegated_host_choice",
       security_purge_score_start: "immediate_effect",
@@ -50,6 +51,11 @@ describe("scored agenda score-time registry", () => {
         kind: "reveal_installed_ice_subtype_for_credits",
       } as never)?.id,
     ).toBe("subtype_reveal_economy_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      } as never)?.id,
+    ).toBe("corporate_downsizing_score_start");
     expect(findScoredAgendaScoreTimeResolver(undefined)).toBeUndefined();
   });
 });

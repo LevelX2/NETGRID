@@ -32,6 +32,7 @@ describe("scored agenda sequence contract matrix", () => {
     expect(
       SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id).sort(),
     ).toEqual([
+      "corporate_downsizing_score_start",
       "data_fort_reclamation_score_start",
       "ice_transmutation_score_start",
       "priority_requisition_score_start",
@@ -66,6 +67,10 @@ describe("scored agenda sequence contract matrix", () => {
       {
         kind: "reveal_installed_ice_subtype_for_credits",
         id: "subtype_reveal_economy_score_start",
+      },
+      {
+        kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+        id: "corporate_downsizing_score_start",
       },
     ] as const;
 

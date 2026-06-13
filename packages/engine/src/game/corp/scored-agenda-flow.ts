@@ -383,14 +383,6 @@ function startScoreTimeChoices(
       securityNetOptimizationServerId: selectedServerId,
     };
   }
-  if (
-    scoredAgenda?.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits"
-  ) {
-    host.choices.startCorporateDownsizing(
-      cardId,
-      scoredAgenda.creditPerAgendaPoint,
-    );
-  }
 }
 
 export function handleScoredAgendaFlowChoice(

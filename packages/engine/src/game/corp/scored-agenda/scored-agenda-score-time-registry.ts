@@ -63,6 +63,21 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
         );
       },
     },
+    {
+      id: "corporate_downsizing_score_start",
+      kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      mode: "delegated_host_choice",
+      resolveOnScore: ({ host, cardId, scoredAgenda }) => {
+        if (
+          scoredAgenda.kind !== "shuffle_selected_hq_agendas_into_rd_gain_credits"
+        )
+          throw new Error("Corporate-Downsizing-Score-Time-Vertrag ungueltig.");
+        host.choices.startCorporateDownsizing(
+          cardId,
+          scoredAgenda.creditPerAgendaPoint,
+        );
+      },
+    },
   ];
 
 export function findScoredAgendaScoreTimeResolver(
