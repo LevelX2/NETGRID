@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "ai177-opportunity-candidate-selection-gate-v1",
+  "generatedAt": "2026-06-13T07:35:28.063Z",
+  "gitHead": "8ee8137c",
+  "gates": [
+    "opportunity_state_snapshot_present",
+    "stable_same_state_action_id_present",
+    "target_context_complete_or_irrelevant",
+    "cost_timing_hard_gates_clear",
+    "progress_delta_better",
+    "intent_contract_matches",
+    "redaction_safe",
+    "repeated_or_extremely_clear_fixture"
+  ],
+  "aggregate": {
+    "evaluatedCandidates": 3,
+    "passedCandidates": 0,
+    "blockedCandidates": 3
+  },
+  "candidates": [
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "opportunity_state_snapshot_present": true,
+        "stable_same_state_action_id_present": false,
+        "target_context_complete_or_irrelevant": true,
+        "cost_timing_hard_gates_clear": true,
+        "progress_delta_better": true,
+        "intent_contract_matches": true,
+        "redaction_safe": true,
+        "repeated_or_extremely_clear_fixture": false
+      },
+      "failed": [
+        "stable_same_state_action_id_present",
+        "repeated_or_extremely_clear_fixture"
+      ],
+      "gateStatus": "blocked",
+      "removalCondition": "capture stable redacted actionId plus target identity for the same-state legal alternative"
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "opportunity_state_snapshot_present": true,
+        "stable_same_state_action_id_present": false,
+        "target_context_complete_or_irrelevant": true,
+        "cost_timing_hard_gates_clear": true,
+        "progress_delta_better": true,
+        "intent_contract_matches": true,
+        "redaction_safe": true,
+        "repeated_or_extremely_clear_fixture": true
+      },
+      "failed": [
+        "stable_same_state_action_id_present"
+      ],
+      "gateStatus": "blocked",
+      "removalCondition": "capture stable redacted actionId plus target identity for the same-state legal alternative"
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "opportunity_state_snapshot_present": true,
+        "stable_same_state_action_id_present": false,
+        "target_context_complete_or_irrelevant": true,
+        "cost_timing_hard_gates_clear": true,
+        "progress_delta_better": true,
+        "intent_contract_matches": true,
+        "redaction_safe": true,
+        "repeated_or_extremely_clear_fixture": true
+      },
+      "failed": [
+        "stable_same_state_action_id_present"
+      ],
+      "gateStatus": "blocked",
+      "removalCondition": "capture stable redacted actionId plus target identity for the same-state legal alternative"
+    }
+  ]
+}
