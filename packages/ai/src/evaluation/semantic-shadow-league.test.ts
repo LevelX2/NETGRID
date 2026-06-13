@@ -142,6 +142,19 @@ describe("SemanticShadowLeague", () => {
         "productive_use_allowed:false",
       ]),
     );
+    expect(report.metrics.doctrineGoalActionFit).toMatchObject({
+      doctrineGoalsProduced: expect.any(Number),
+      goalsWithAtLeastOneFit: expect.any(Number),
+      goalsOnlyBlocked: expect.any(Number),
+      goalsNoCandidate: expect.any(Number),
+      topFitByFamily: expect.any(Object),
+    });
+    expect(report.metrics.doctrineGoalActionFit.doctrineGoalsProduced).toBeGreaterThan(
+      0,
+    );
+    expect(
+      report.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
+    ).toBeGreaterThan(0);
     expect(report.metrics.remoteContestPilotCandidateCount).toBe(3);
     expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
       "runner_real_remote_known_agenda_contest",

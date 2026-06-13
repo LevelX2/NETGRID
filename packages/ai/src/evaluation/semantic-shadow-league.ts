@@ -20,6 +20,10 @@ import { classifyDecisionTraceMistakes } from "./decision-snapshot-suite";
 import type { ShadowLeagueFollowupCandidate } from "./decision-snapshot";
 import type { AiMistakeClass } from "./mistake-taxonomy";
 import type { RealEngineDecisionCorpusSample } from "./real-engine-decision-corpus";
+import {
+  buildDoctrineGoalActionFitReport,
+  type DoctrineGoalActionFitReport,
+} from "./doctrine-goal-action-fit";
 
 export const SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION =
   "semantic-shadow-league-v1" as const;
@@ -123,6 +127,14 @@ export type SemanticShadowLeagueReport = {
     topScoreMax: number | null;
     blockersByKind: Record<string, number>;
     pilotCutoverReadiness: SemanticShadowLeaguePilotCutoverReadinessMatrix;
+    doctrineGoalActionFit: Pick<
+      DoctrineGoalActionFitReport,
+      | "doctrineGoalsProduced"
+      | "goalsWithAtLeastOneFit"
+      | "goalsOnlyBlocked"
+      | "goalsNoCandidate"
+      | "topFitByFamily"
+    >;
   };
   topDisagreementReasons: string[];
   followupCandidates: ShadowLeagueFollowupCandidate[];
@@ -229,7 +241,7 @@ export function buildSemanticShadowLeagueReport(
       runner: scenarios.filter((scenario) => scenario.side === "runner").length,
       corp: scenarios.filter((scenario) => scenario.side === "corp").length,
     },
-    metrics: buildLeagueMetrics(scenarios),
+    metrics: buildLeagueMetrics(scenarios, samples),
     topDisagreementReasons: topDisagreementReasons(scenarios),
     followupCandidates: buildFollowupCandidates(scenarios),
     redactionStatus: "passed",
@@ -463,6 +475,7 @@ function buildScenarioReport(
 
 function buildLeagueMetrics(
   scenarios: readonly SemanticShadowLeagueScenarioReport[],
+  samples: readonly RealEngineDecisionCorpusSample[],
 ): SemanticShadowLeagueReport["metrics"] {
   const compared = scenarios.filter((scenario) => scenario.agreementCompared);
   const agreementCount = compared.filter((scenario) => scenario.agreement).length;
@@ -489,6 +502,13 @@ function buildLeagueMetrics(
   const scoreGaps = scenarios
     .map((scenario) => scenario.pilotEligibility.scoreGap)
     .filter((scoreGap): scoreGap is number => scoreGap !== null);
+  const doctrineGoalActionFit = buildDoctrineGoalActionFitReport(
+    samples.map((sample) => ({
+      scenarioId: sample.scenarioId,
+      ...(sample.deckDoctrine ? { diagnostic: sample.deckDoctrine } : {}),
+      actionCandidates: sample.frame.actionCandidates,
+    })),
+  );
   return {
     agreementComparedCount: compared.length,
     agreementCount,
@@ -550,6 +570,13 @@ function buildLeagueMetrics(
       ),
     ),
     pilotCutoverReadiness: pilotCutoverReadinessMatrix(scenarios),
+    doctrineGoalActionFit: {
+      doctrineGoalsProduced: doctrineGoalActionFit.doctrineGoalsProduced,
+      goalsWithAtLeastOneFit: doctrineGoalActionFit.goalsWithAtLeastOneFit,
+      goalsOnlyBlocked: doctrineGoalActionFit.goalsOnlyBlocked,
+      goalsNoCandidate: doctrineGoalActionFit.goalsNoCandidate,
+      topFitByFamily: doctrineGoalActionFit.topFitByFamily,
+    },
   };
 }
 
