@@ -11,10 +11,10 @@ import {
   encounterSpecialWindowHost,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
-  resolveStartupImmolatorTrashIce,
+  resolveFullyBrokenPassedIceTrash,
   resolveTooManyDoorsSecretSpendChoice,
   resolveVacuumLinkRewindSubroutine,
-  startupImmolatorPostPassActions,
+  fullyBrokenPassedIceTrashPostPassActions,
 } from "./encounter-special-windows";
 
 function instance(
@@ -117,7 +117,7 @@ function makeState(): GameState {
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       fullyBrokenIceIds: ["ice_current" as CardInstanceId],
-      startupImmolatorPendingPassedIceId: "ice_current" as CardInstanceId,
+      fullyBrokenPassedIceTrashPendingId: "ice_current" as CardInstanceId,
     },
   } as unknown as GameState;
 }
@@ -297,7 +297,7 @@ describe("encounter special windows boundary", () => {
       },
     });
 
-    const actions = startupImmolatorPostPassActions(host);
+    const actions = fullyBrokenPassedIceTrashPostPassActions(host);
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
@@ -310,12 +310,13 @@ describe("encounter special windows boundary", () => {
         cardId: "startup_1",
         targetIceId: "ice_current",
         targetIceDefinitionId: "onr_v1_272_too-many-doors",
-        v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+        runnerUtilityAbility: "trash_fully_broken_passed_ice",
+        abilityKind: "trash_fully_broken_passed_ice",
         rezCostPaid: 3,
       },
     });
 
-    const result = resolveStartupImmolatorTrashIce(host, actions[0]!);
+    const result = resolveFullyBrokenPassedIceTrash(host, actions[0]!);
 
     expect(result).toMatchObject({
       handled: true,
@@ -330,16 +331,18 @@ describe("encounter special windows boundary", () => {
     expect(runnerTrashed).toEqual(["startup_1"]);
     expect(state.runner.rig.programs).not.toContain("startup_1");
     expect(state.runner.heap).toContain("startup_1");
-    expect(state.run?.startupImmolatorPendingPassedIceId).toBeUndefined();
-    expect(state.runnerTurnFlags?.startupImmolatorUsedSourceIdsThisTurn).toEqual([
-      "startup_1",
-    ]);
+    expect(state.run?.fullyBrokenPassedIceTrashPendingId).toBeUndefined();
+    expect(
+      state.runnerTurnFlags?.abilityUsedSourceIdsByLimitKey?.[
+        "trash_fully_broken_passed_ice:once_per_turn_per_source"
+      ],
+    ).toEqual(["startup_1"]);
     expect(actions[0]!.payload).toMatchObject({
       sourceDefinitionId: "onr_v1_068_startup-immolator",
       trashedCount: 1,
       trashedCardDefinitionId: "onr_v1_272_too-many-doors",
       runnerCreditsAfter: 3,
-      startupImmolatorExhausted: true,
+      sourceAbilityExhausted: true,
     });
   });
 

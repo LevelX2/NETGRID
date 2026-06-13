@@ -460,7 +460,8 @@ describe("PublicContext golden payload gate", () => {
           v1921DieRoll: 4,
           v1921RunnerProgramAbility: "ai_boon",
           v1921RunnerResourceAbility: "quest_for_cattekin",
-          v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+          runnerUtilityAbility: "trash_fully_broken_passed_ice",
+          sourceAbilityExhausted: true,
         },
       }),
     );
@@ -488,7 +489,8 @@ describe("PublicContext golden payload gate", () => {
       v1921DieRoll: 4,
       v1921RunnerProgramAbility: "ai_boon",
       v1921RunnerResourceAbility: "quest_for_cattekin",
-      v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+      runnerUtilityAbility: "trash_fully_broken_passed_ice",
+      sourceAbilityExhausted: true,
       zoneLabel: "Rig",
     });
   });

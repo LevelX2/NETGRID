@@ -4,7 +4,8 @@ import type {
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
 
@@ -45,13 +46,12 @@ export function startScoredSubtypeRevealChoiceOrResolve(
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
     scoredSubtypeRevealChoiceOpened: true,
     scoredSubtypeRevealSubtype: subtype,
     scoredSubtypeRevealCandidateCount: hiddenCandidates.length,
-  };
+  });
 }
 
 export function resolveScoredSubtypeRevealChoice(
@@ -178,8 +178,7 @@ function resolveScoredSubtypeReveal(
   const publicRevealDefinitionIds = countedIds.map(
     (iceId) => host.cards.definitionFor(iceId).id,
   );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
     hiddenZoneBarrier: true,
     hiddenZoneAction: scoredSubtypeRevealHiddenZoneAction(subtype),
@@ -192,7 +191,7 @@ function resolveScoredSubtypeReveal(
     gainedCredits,
     corpCreditsAfter: host.state.corp.credits,
     publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
-  };
+  });
 }
 
 function requireLegalAction(host: ScoredAgendaFlowHost): LegalAction {

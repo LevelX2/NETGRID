@@ -398,7 +398,7 @@ import {
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
-  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
@@ -580,7 +580,6 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
@@ -933,8 +932,8 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     isV099OrLater,
     isVersionAtLeast,
     isVisibleVirusCounterCardForRunner,
-    krumzTraceBitCardIds,
-    krumzTraceBitTotal,
+    recurringTraceCreditPoolSourceIds,
+    recurringTraceCreditPoolTotal,
     leavePlayCleanupImplementationsForCard,
     legalActionHostComposition,
     mainActionHostComposition,
@@ -1255,12 +1254,12 @@ function swapCorpHqAndRdTop(state: GameState): void {
   };
 }
 
-function spendKrumzTraceBits(state: GameState, amount: number): number {
+function spendRecurringTraceCreditPool(state: GameState, amount: number): number {
   if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Krumz-Bit-Ausgabe ist ungueltig.");
+    throw new Error("Recurring-Trace-Credit-Ausgabe ist ungueltig.");
   let remaining = amount;
   let spent = 0;
-  for (const cardId of krumzTraceBitCardIds(state)) {
+  for (const cardId of recurringTraceCreditPoolSourceIds(state)) {
     if (remaining <= 0) break;
     const current = cardCounter(state, cardId, "bit");
     const spend = Math.min(current, remaining);
@@ -1268,7 +1267,8 @@ function spendKrumzTraceBits(state: GameState, amount: number): number {
     remaining -= spend;
     spent += spend;
   }
-  if (remaining > 0) throw new Error("Krumz hat nicht genug Bits.");
+  if (remaining > 0)
+    throw new Error("Der Recurring-Trace-Credit-Pool reicht nicht aus.");
   return spent;
 }
 
@@ -1276,6 +1276,6 @@ function spendKrumzTraceBits(state: GameState, amount: number): number {
     serverDifficultyIncreaseFromFaitAccompli,
     serverDifficultyReductionFromUpgrades,
     swapCorpHqAndRdTop,
-    spendKrumzTraceBits
+    spendRecurringTraceCreditPool
   };
 }

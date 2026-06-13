@@ -712,7 +712,7 @@ function testHost(
     counters: {
       cardCounter: () => 0,
       hackerTrackerCounterTotal: () => 0,
-      krumzTraceBitTotal: () => 0,
+      recurringTraceCreditPoolTotal: () => 0,
     },
     fort: {
       fortTraceBitPoolSource: () => undefined,

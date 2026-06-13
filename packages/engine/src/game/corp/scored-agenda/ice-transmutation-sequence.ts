@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import { cardImplementationPrimitivePayload } from "../../../ability-engine/card-implementation-primitives";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 const SCORED_ICE_MARK_CHOICE_SOURCE =

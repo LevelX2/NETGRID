@@ -7,7 +7,8 @@ import type {
 import type {
   ScoredAgendaFlowHost,
   ScoredAgendaFlowResult,
-} from "../scored-agenda-flow";
+} from "./scored-agenda-flow-host";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 export function isEmployeeEmpowermentStartDrawChoiceSource(
   source: string,
@@ -89,14 +90,13 @@ export function resolveEmployeeEmpowermentStartDrawChoice(
   const rdBefore = host.state.corp.rd.length;
   if (useDraw) host.draw.drawCorpCard();
   const drawnCount = useDraw ? rdBefore - host.state.corp.rd.length : 0;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     choiceVisibility: "public",
     sourceDefinitionId: host.constants.employeeEmpowermentId,
     cardDefinitionId: host.constants.employeeEmpowermentId,
     employeeEmpowermentStartDrawDecision: useDraw ? "draw" : "skip",
     ...(useDraw ? { drawnCards: drawnCount, drawnCount } : {}),
-  };
+  });
   if (useDraw) {
     host.effects.appendEmployeeEmpowermentDrawEffect(
       sourceCardId as CardInstanceId,

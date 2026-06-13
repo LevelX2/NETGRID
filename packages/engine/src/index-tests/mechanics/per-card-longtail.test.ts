@@ -3895,8 +3895,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1922RunnerProgramAbility ===
-          "startup_immolator_trash_ice",
+        action.payload?.runnerUtilityAbility ===
+          "trash_fully_broken_passed_ice",
     );
     expect(startupAction.payload?.targetIceId).toBe(iceId);
     expect(startupAction.costs[0]?.credits).toBe(3);
@@ -3917,17 +3917,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.v1922RunnerProgramAbility ===
-            "startup_immolator_trash_ice",
+          action.payload?.runnerUtilityAbility ===
+            "trash_fully_broken_passed_ice",
       ),
     ).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+      runnerUtilityAbility: "trash_fully_broken_passed_ice",
+      abilityKind: "trash_fully_broken_passed_ice",
       rezCostPaid: 3,
       trashedCardDefinitionId: "simple_barrier_ice",
       trashedCount: 1,
-      startupImmolatorExhausted: true,
+      sourceAbilityExhausted: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,

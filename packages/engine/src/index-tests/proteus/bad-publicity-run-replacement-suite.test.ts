@@ -375,9 +375,6 @@ function executeRunScopedBlackOpsRezHook(
         isFortTraceBitPoolSource: () => false,
         fortTraceBitPoolCapacityForCard: () => 0,
       },
-      constants: {
-        KRUMZ_TRACE_ASSET_CARD_ID: "onr_v1_312_chicago-branch" as CardDefinitionId,
-      },
     },
     cardId,
     true,

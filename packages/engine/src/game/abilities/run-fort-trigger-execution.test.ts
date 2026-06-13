@@ -228,8 +228,8 @@ function testHost(
       resolveFullyBrokenPassedIceDerezAndEndRun:
         overrides.resolveFullyBrokenPassedIceDerezAndEndRun ??
         (() => undefined),
-      resolveStartupImmolatorTrashIce:
-        overrides.resolveStartupImmolatorTrashIce ?? (() => undefined),
+      resolveFullyBrokenPassedIceTrash:
+        overrides.resolveFullyBrokenPassedIceTrash ?? (() => undefined),
       resolveFortPassAdvancementWindow:
         overrides.resolveFortPassAdvancementWindow ?? (() => undefined),
       resolveStartRunIceRepositionWindow:

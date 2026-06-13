@@ -378,7 +378,6 @@ function testHost(): DamageCoreHost {
           shellTradersStartTurnResolvedSourceIds: [],
           bodyweightDataCrecheExtraRunPending: false,
           bodyweightDataCrecheExtraRunUsedThisTurn: false,
-          startupImmolatorUsedSourceIdsThisTurn: [],
         };
         return state.runnerTurnFlags;
       },
