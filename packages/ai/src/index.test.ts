@@ -8170,7 +8170,68 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("window_value:");
     expect(debugText).toContain("net_advancement_value:");
     expect(debugText).toContain("advancement_witness:score_now");
+    expect(debugText).toContain("advancement_target_class:agenda_score_now");
+    expect(debugText).toContain(
+      "advancement_target_class:counter_transfer_source",
+    );
+    expect(debugText).toContain(
+      "advancement_target_witness:transfer_destination_visible",
+    );
   });
+
+  it.each([
+    ["onr_v1_214_project-babylon", 4, "agenda_overadvance_threshold"],
+    ["onr_v1_328_information-laundering", 0, "counter_cashout_credit"],
+    ["onr_v1_346_vacant-soulkiller", 0, "access_brain_damage_ambush"],
+    ["onr_v1_348_virus-test-site", 0, "access_net_damage_ambush"],
+    ["onr_v1_323_experimental-ai", 0, "access_program_trash_ambush"],
+    [
+      "onr_v1_315_corprunners-shattered-remains",
+      0,
+      "access_hardware_trash_ambush",
+    ],
+  ])(
+    "classifies %s as %s for advancement counter placement",
+    (definitionId, advancementCounters, expectedTargetClass) => {
+      const input = corpAdvancementDominanceInput(
+        `ai-advancement-target-class-${definitionId}`,
+        (state) => {
+          addCorpRootToServerForTest(state, "remote_1", "simple_agenda", 2);
+          addCorpRootToServerForTest(
+            state,
+            "remote_2",
+            definitionId,
+            advancementCounters,
+          );
+        },
+      );
+      const teamRestructuring = teamRestructuringAction(input);
+      const agendaAdvance = advanceActionForDefinition(input, "simple_agenda");
+      const targetAdvance = advanceActionForDefinition(input, definitionId);
+
+      expect(teamRestructuring).toBeDefined();
+      expect(agendaAdvance).toBeDefined();
+      expect(targetAdvance).toBeDefined();
+      if (!teamRestructuring || !agendaAdvance || !targetAdvance)
+        throw new Error(
+          `Missing target-class fixture actions for ${definitionId}`,
+        );
+
+      const decision = chooseCorpAction({
+        ...input,
+        legalActions: [teamRestructuring, agendaAdvance, targetAdvance],
+      });
+      const debugText = JSON.stringify(decision.decisionDebug);
+
+      expect(decision.actionId).toBe(teamRestructuring.actionId);
+      expect(debugText).toContain(
+        `advancement_target_class:${expectedTargetClass}`,
+      );
+      expect(debugText).toContain(
+        "advancement_counter_placement_incremental_second_counter:true",
+      );
+    },
+  );
 
   it("does not let Team Restructuring win automatically with two weak counter banks", () => {
     const input = corpAdvancementDominanceInput(

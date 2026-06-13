@@ -10124,15 +10124,38 @@ type CorpAdvancementCounterWitness =
   | "score_now"
   | "score_next_action"
   | "overadvance_threshold"
-  | "cashout_next_turn"
+  | "access_net_damage_ambush"
+  | "access_brain_damage_ambush"
+  | "access_program_trash_ambush"
+  | "access_hardware_trash_ambush"
+  | "counter_cashout_credit"
+  | "counter_cashout_action"
+  | "counter_bank_only"
   | "transfer_destination_visible"
   | "none";
+
+type CorpAdvancementCounterTargetClass =
+  | "agenda_score_now"
+  | "agenda_score_next_action"
+  | "agenda_overadvance_threshold"
+  | "access_net_damage_ambush"
+  | "access_brain_damage_ambush"
+  | "access_program_trash_ambush"
+  | "access_hardware_trash_ambush"
+  | "counter_cashout_credit"
+  | "counter_cashout_action"
+  | "counter_bank_only"
+  | "counter_transfer_source"
+  | "counter_transfer_destination"
+  | "low_value_decoy"
+  | "unknown_advanceable";
 
 type CorpAdvancementCounterTargetAssessment = {
   card: VisibleCard;
   server: AiDecisionInput["playerView"]["servers"][number];
   value: number;
   witness: CorpAdvancementCounterWitness;
+  targetClass: CorpAdvancementCounterTargetClass;
   windowValue: number;
   weakTargetPenalty: number;
 };
@@ -10201,9 +10224,8 @@ function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
   );
   const compressionValue =
     selectedTargets >= 2
-      ? selectedTargetAssessments.some(
-          (target) =>
-            target.witness !== "none" && target.witness !== "cashout_next_turn",
+      ? selectedTargetAssessments.some((target) =>
+          corpAdvancementCounterWitnessHasWindowValue(target.witness),
         )
         ? 150
         : 20
@@ -10245,6 +10267,10 @@ function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     `weak_target_penalty:${weakTargetPenalty}`,
     `net_advancement_value:${netAdvancementValue}`,
     `advancement_witness:${bestWitness}`,
+    ...selectedTargetAssessments.flatMap((target) => [
+      `advancement_target_class:${target.targetClass}`,
+      `advancement_target_witness:${target.witness}`,
+    ]),
     ...(dominatedByBasicAdvance
       ? [
           "advancement_counter_placement_dominated_by_basic_advance",
@@ -10307,7 +10333,7 @@ function normalizedRulesTextForDefinition(definitionId: string): string {
 function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
   input: AiDecisionInput,
 ): CorpAdvancementCounterTargetAssessment[] {
-  return input.legalActions
+  const locatedTargets = input.legalActions
     .filter(
       (action) => action.side === "corp" && action.type === "advance_card",
     )
@@ -10316,11 +10342,27 @@ function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
     .map((card) => {
       const located = findVisibleCorpServerCard(input, card.instanceId);
       if (!located) return undefined;
-      return semanticRuntimeCorpAdvancementTargetAssessment(
+      return located;
+    })
+    .filter(
+      (
+        located,
+      ): located is {
+        card: VisibleCard;
+        server: AiDecisionInput["playerView"]["servers"][number];
+      } => Boolean(located),
+    );
+  return locatedTargets
+    .map((located) =>
+      semanticRuntimeCorpAdvancementTargetAssessment(
         located.card,
         located.server,
-      );
-    })
+        semanticRuntimeCorpHasTransferDestination(
+          located.card.instanceId,
+          locatedTargets,
+        ),
+      ),
+    )
     .filter((target): target is CorpAdvancementCounterTargetAssessment =>
       Boolean(target),
     );
@@ -10329,6 +10371,7 @@ function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
 function semanticRuntimeCorpAdvancementTargetAssessment(
   card: VisibleCard,
   server: AiDecisionInput["playerView"]["servers"][number],
+  hasTransferDestination: boolean,
 ): CorpAdvancementCounterTargetAssessment | undefined {
   const definitionId = card.definitionId;
   if (!definitionId) return undefined;
@@ -10345,15 +10388,38 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       ? Math.max(0, requirement - counters - 1)
       : 99;
   const protectedBonus = Math.min(server.ice.length, 2) * 12;
+  const text = normalizedRulesTextForDefinition(definitionId);
+  const hasOveradvancePayoff =
+    /additional agenda point|agenda point for every|agenda point for each|overadvance_bonus|overadvance/.test(
+      text,
+    );
   if (type === "agenda") {
-    const witness =
-      remaining === 0
-        ? "score_now"
-        : remaining <= 1
-          ? "score_next_action"
-          : "none";
+    const targetClass: CorpAdvancementCounterTargetClass =
+      hasOveradvancePayoff &&
+      typeof requirement === "number" &&
+      counters + 1 > requirement
+        ? "agenda_overadvance_threshold"
+        : remaining === 0
+          ? "agenda_score_now"
+          : remaining <= 1
+            ? "agenda_score_next_action"
+            : "unknown_advanceable";
+    const witness: CorpAdvancementCounterWitness =
+      targetClass === "agenda_overadvance_threshold"
+        ? "overadvance_threshold"
+        : targetClass === "agenda_score_now"
+          ? "score_now"
+          : targetClass === "agenda_score_next_action"
+            ? "score_next_action"
+            : "none";
     const windowValue =
-      witness === "score_now" ? 260 : witness === "score_next_action" ? 140 : 0;
+      witness === "score_now"
+        ? 260
+        : witness === "score_next_action"
+          ? 140
+          : witness === "overadvance_threshold"
+            ? 120
+            : 0;
     return {
       card,
       server,
@@ -10362,35 +10428,76 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
         (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) +
         protectedBonus,
       witness,
+      targetClass,
       windowValue,
       weakTargetPenalty: witness === "none" ? 80 : 0,
     };
   }
-  const text = normalizedRulesTextForDefinition(definitionId);
-  if (/access|trash|damage|net damage|brain damage|meat damage/.test(text)) {
+  const ambush = corpAdvancementAmbushTargetClass(text);
+  if (ambush) {
     return {
       card,
       server,
-      value: 120 + protectedBonus,
-      witness: "overadvance_threshold",
+      value: 135 + protectedBonus,
+      witness: ambush,
+      targetClass: ambush,
       windowValue: 120,
       weakTargetPenalty: 0,
     };
   }
+  if (corpAdvancementLooksLikeTransferSource(text)) {
+    const targetClass: CorpAdvancementCounterTargetClass =
+      hasTransferDestination ? "counter_transfer_source" : "counter_bank_only";
+    return {
+      card,
+      server,
+      value: (hasTransferDestination ? 75 : 30) + protectedBonus,
+      witness: hasTransferDestination
+        ? "transfer_destination_visible"
+        : "counter_bank_only",
+      targetClass,
+      windowValue: hasTransferDestination ? 70 : 0,
+      weakTargetPenalty: hasTransferDestination ? 25 : 130,
+    };
+  }
+  const creditCashout = corpAdvancementCreditCashoutValue(text);
+  if (creditCashout > 0) {
+    return {
+      card,
+      server,
+      value:
+        55 +
+        protectedBonus +
+        creditCashout * 12 +
+        (corpAdvancementCashoutScalesPerCounter(text) ? 45 : 0),
+      witness: "counter_cashout_credit",
+      targetClass: "counter_cashout_credit",
+      windowValue: corpAdvancementCashoutScalesPerCounter(text) ? 65 : 25,
+      weakTargetPenalty: 20,
+    };
+  }
+  if (corpAdvancementLooksLikeActionCashout(text)) {
+    return {
+      card,
+      server,
+      value: 55 + protectedBonus,
+      witness: "counter_cashout_action",
+      targetClass: "counter_cashout_action",
+      windowValue: 25,
+      weakTargetPenalty: 35,
+    };
+  }
   if (
-    /advancement counter|advance .* before|can be advanced|counter.*credit|gain \d/.test(
-      text,
-    )
+    /advancement counter|advance .* before|can be advanced|counter/.test(text)
   ) {
     return {
       card,
       server,
-      value: 45 + protectedBonus,
-      witness: /gain \d|gain 1|gain \[1\]/.test(text)
-        ? "cashout_next_turn"
-        : "none",
-      windowValue: /gain \d|gain 1|gain \[1\]/.test(text) ? 20 : 0,
-      weakTargetPenalty: 110,
+      value: 35 + protectedBonus,
+      witness: "counter_bank_only",
+      targetClass: "counter_bank_only",
+      windowValue: 0,
+      weakTargetPenalty: 125,
     };
   }
   return {
@@ -10398,20 +10505,124 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
     server,
     value: 0,
     witness: "none",
+    targetClass: /access|trash|damage/.test(text)
+      ? "low_value_decoy"
+      : "unknown_advanceable",
     windowValue: 0,
     weakTargetPenalty: 140,
   };
+}
+
+function semanticRuntimeCorpHasTransferDestination(
+  sourceCardId: string,
+  targets: readonly {
+    card: VisibleCard;
+    server: AiDecisionInput["playerView"]["servers"][number];
+  }[],
+): boolean {
+  return targets.some(
+    (target) =>
+      target.card.instanceId !== sourceCardId &&
+      semanticRuntimeCorpLooksLikeTransferDestination(target.card),
+  );
+}
+
+function semanticRuntimeCorpLooksLikeTransferDestination(
+  card: VisibleCard,
+): boolean {
+  const definitionId = card.definitionId;
+  if (!definitionId) return false;
+  const runtime = RUNTIME_CARDS[definitionId];
+  const demo = DEMO_CARDS_BY_ID[definitionId];
+  const type = card.type ?? runtime?.type ?? demo?.type;
+  if (type === "agenda") return true;
+  const text = normalizedRulesTextForDefinition(definitionId);
+  if (corpAdvancementLooksLikeTransferSource(text)) return false;
+  return Boolean(
+    corpAdvancementAmbushTargetClass(text) ||
+    (corpAdvancementCreditCashoutValue(text) >= 4 &&
+      corpAdvancementCashoutScalesPerCounter(text)) ||
+    corpAdvancementLooksLikeActionCashout(text),
+  );
+}
+
+function corpAdvancementAmbushTargetClass(
+  text: string,
+):
+  | Extract<
+      CorpAdvancementCounterTargetClass,
+      | "access_net_damage_ambush"
+      | "access_brain_damage_ambush"
+      | "access_program_trash_ambush"
+      | "access_hardware_trash_ambush"
+    >
+  | undefined {
+  if (/net damage/.test(text)) return "access_net_damage_ambush";
+  if (/brain damage|core-damage|core damage/.test(text))
+    return "access_brain_damage_ambush";
+  if (/program/.test(text) && /trash|destroy/.test(text))
+    return "access_program_trash_ambush";
+  if (/hardware/.test(text) && /trash|destroy/.test(text))
+    return "access_hardware_trash_ambush";
+  return undefined;
+}
+
+function corpAdvancementLooksLikeTransferSource(text: string): boolean {
+  return /move any number of advancement counters|move .*advancement counters.*another installed card/.test(
+    text,
+  );
+}
+
+function corpAdvancementCreditCashoutValue(text: string): number {
+  const match =
+    /\bgain\s+\[?(\d+)\]?\s+(?:credits?\s+)?(?:for each|per|for every)?/.exec(
+      text,
+    );
+  return match?.[1] ? Number.parseInt(match[1], 10) : 0;
+}
+
+function corpAdvancementCashoutScalesPerCounter(text: string): boolean {
+  return /for each advancement counter|per advancement counter|for every advancement counter/.test(
+    text,
+  );
+}
+
+function corpAdvancementLooksLikeActionCashout(text: string): boolean {
+  return /advancement counter.*:\s*|counter.*action|spend .*advancement counter|remove .*advancement counter/.test(
+    text,
+  );
+}
+
+function corpAdvancementCounterWitnessHasWindowValue(
+  witness: CorpAdvancementCounterWitness,
+): boolean {
+  return (
+    witness === "score_now" ||
+    witness === "score_next_action" ||
+    witness === "overadvance_threshold" ||
+    witness === "access_net_damage_ambush" ||
+    witness === "access_brain_damage_ambush" ||
+    witness === "access_program_trash_ambush" ||
+    witness === "access_hardware_trash_ambush" ||
+    witness === "transfer_destination_visible"
+  );
 }
 
 function bestCorpAdvancementCounterWitness(
   targets: readonly CorpAdvancementCounterTargetAssessment[],
 ): CorpAdvancementCounterWitness {
   const rank: Record<CorpAdvancementCounterWitness, number> = {
-    score_now: 6,
-    score_next_action: 5,
-    overadvance_threshold: 4,
-    transfer_destination_visible: 3,
-    cashout_next_turn: 2,
+    score_now: 11,
+    score_next_action: 10,
+    overadvance_threshold: 9,
+    access_brain_damage_ambush: 8,
+    access_net_damage_ambush: 7,
+    access_program_trash_ambush: 6,
+    access_hardware_trash_ambush: 6,
+    transfer_destination_visible: 5,
+    counter_cashout_credit: 4,
+    counter_cashout_action: 3,
+    counter_bank_only: 2,
     none: 1,
   };
   return (
