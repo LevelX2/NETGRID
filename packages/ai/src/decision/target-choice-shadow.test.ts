@@ -33,6 +33,15 @@ describe("TargetChoiceShadow", () => {
     expect(report.selectionOutput).toEqual({
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
+      wouldSelect: {
+        requirementId: "discard_choice",
+        optionId: "gain",
+        confidence: "medium",
+        evidence: expect.arrayContaining([
+          "target_choice_would_select:dry_run",
+          "option_kind:choice_option",
+        ]),
+      },
     });
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");
@@ -210,10 +219,22 @@ describe("TargetChoiceShadow", () => {
         "opportunity:remote_contest_window",
       ]),
     );
-    expect(report.selectionOutput).toEqual({
+    expect(report.selectionOutput).toMatchObject({
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
+      wouldSelect: {
+        requirementId: "server",
+        optionId: "remote_1",
+        confidence: "high",
+      },
     });
+    expect(report.selectionOutput.wouldSelect?.evidence).toEqual(
+      expect.arrayContaining([
+        "target_choice_would_select:dry_run",
+        "option_kind:target_option",
+        "opportunity:remote_contest_window",
+      ]),
+    );
     expect(report.scorecard).toMatchObject({
       coverageStatus: "covered",
       contextSignalCounts: {
@@ -430,6 +451,27 @@ describe("TargetChoiceShadow", () => {
       engineOnlyBlockedCount: 1,
       noSideSafeOptionsBlockedCount: 0,
       topOption: undefined,
+    });
+    expect(report.selectionOutput.wouldSelect).toBeUndefined();
+  });
+
+  it("does not emit wouldSelect for ambiguous top options", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "ambiguous",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["left", "right"],
+          },
+        ],
+      }),
+    });
+
+    expect(report.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
     });
   });
 

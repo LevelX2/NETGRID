@@ -71,6 +71,12 @@ export type TargetChoiceShadowReport = {
   selectionOutput: {
     selectedChoicesCreated: false;
     selectedTargetsCreated: false;
+    wouldSelect?: {
+      requirementId: string;
+      optionId: string;
+      confidence: "low" | "medium" | "high";
+      evidence: string[];
+    };
   };
   productiveUseAllowed: false;
   runtimeConsumerStatus: "none";
@@ -112,6 +118,7 @@ export function buildTargetChoiceShadowReport(
     selectionOutput: {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
+      ...targetChoiceWouldSelect(rankedOptions, blocked),
     },
     productiveUseAllowed: false,
     runtimeConsumerStatus: "none",
@@ -123,10 +130,50 @@ export function buildTargetChoiceShadowReport(
       `scorecard_coverage_status:${scorecard.coverageStatus}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
+      ...(targetChoiceWouldSelect(rankedOptions, blocked).wouldSelect
+        ? ["would_select:dry_run"]
+        : []),
     ],
   };
   assertTargetChoiceShadowReportSideSafe(report);
   return report;
+}
+
+function targetChoiceWouldSelect(
+  rankedOptions: readonly TargetChoiceShadowOption[],
+  blocked: readonly TargetChoiceShadowBlockedRequirement[],
+): Pick<TargetChoiceShadowReport["selectionOutput"], "wouldSelect"> {
+  if (blocked.some((requirement) => requirement.reason === "engine_only_target")) {
+    return {};
+  }
+  if (
+    blocked.some((requirement) =>
+      requirement.evidence.some((entry) => entry.includes("hidden_info")),
+    )
+  ) {
+    return {};
+  }
+  const [top, second] = rankedOptions;
+  if (!top) return {};
+  const dryRunReadyKind =
+    top.kind === "choice_option" || hasNonZeroContextScore(top);
+  if (!dryRunReadyKind) return {};
+  const gap = second ? top.score - second.score : 100;
+  if (gap < 20) return {};
+  return {
+    wouldSelect: {
+      requirementId: top.requirementId,
+      optionId: top.optionId,
+      confidence: gap >= 40 ? "high" : gap >= 20 ? "medium" : "low",
+      evidence: [
+        "target_choice_would_select:dry_run",
+        `top_score:${top.score}`,
+        `score_gap:${gap}`,
+        `option_kind:${top.kind}`,
+        ...top.evidence.slice(0, 6),
+      ],
+    },
+  };
 }
 
 function choiceOptions(
