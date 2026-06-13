@@ -1,5 +1,3 @@
-export const KRUMZ_TRACE_ASSET_CARD_ID = "onr_v1_330_krumz";
-
 export const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
   "onr_v1_316_cowboy-sysop";
 

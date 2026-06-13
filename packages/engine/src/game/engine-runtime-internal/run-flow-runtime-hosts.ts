@@ -389,7 +389,7 @@ import {
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
-  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
@@ -567,7 +567,6 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  KRUMZ_TRACE_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
 import {
   ABLATIVE_COUNTER_HARDWARE_CARD_ID,

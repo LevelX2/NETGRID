@@ -188,7 +188,7 @@ function makeHost(
     },
     hasInstalledMicrotechTrodeSet: () => false,
     hackerTrackerCounterTotal: () => 0,
-    krumzTraceBitTotal: () => 0,
+    recurringTraceCreditPoolTotal: () => 0,
     openDamageResolutionWindow: () => false,
     openEventModificationWindow: () => false,
     openReplacementWindow: () => false,
@@ -334,7 +334,7 @@ describe("encounter printed effects boundary", () => {
     const result = startTraceFromPrintedSubroutine(
       makeHost(state, legalAction, {
         hackerTrackerCounterTotal: () => 1,
-        krumzTraceBitTotal: () => 1,
+        recurringTraceCreditPoolTotal: () => 1,
         rabbitTraceLimitReductionForIceTrace: () => 2,
       }),
       {

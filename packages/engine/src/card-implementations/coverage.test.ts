@@ -563,7 +563,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toMatchObject({ kind: "disinfectant_avoid_virus_counter" });
     expect(
       cardImplementationForDefinitionId("onr_v1_330_krumz")?.corpUtility,
-    ).toMatchObject({ kind: "krumz_trace_bit" });
+    ).toMatchObject({
+      kind: "recurring_trace_credit_pool",
+      amount: 1,
+      counterType: "bit",
+      spendWindow: "trace",
+      refresh: "start_of_corp_turn_after_use",
+    });
   });
 
   it("migrates P3.52 fort ICE-control windows into CardImplementation coverage", () => {

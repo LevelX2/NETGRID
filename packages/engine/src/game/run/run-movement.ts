@@ -16,7 +16,7 @@ import {
 } from "./encounter-special-windows";
 import {
   clearFullyBrokenPassedIcePostPassMarker,
-  clearStartupImmolatorPostPassMarker,
+  clearFullyBrokenPassedIceTrashPostPassMarker,
   consumeForcedJackOutAfterEncounter,
   handlePostPassProgramTrashChoices,
   passedIceFollowupMarkersForCurrentIce,
@@ -475,7 +475,7 @@ export function continueFromMovement(
     ).choiceOpened
   )
     return { handled: true, postPassChoiceOpened: true, stateChanged: true };
-  clearStartupImmolatorPostPassMarker(host.encounter.encounterResolutionHost());
+  clearFullyBrokenPassedIceTrashPostPassMarker(host.encounter.encounterResolutionHost());
   clearFullyBrokenPassedIcePostPassMarker(
     host.encounter.encounterResolutionHost(),
   );

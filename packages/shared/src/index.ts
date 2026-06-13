@@ -1141,7 +1141,7 @@ export type RunState = {
     Record<CardInstanceId, CardInstanceId>
   >;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
-  startupImmolatorPendingPassedIceId?: CardInstanceId;
+  fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
   mysteryBoxUsedSourceIdsThisRun?: CardInstanceId[];
@@ -1438,7 +1438,6 @@ export type GameState = {
     shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
     bodyweightDataCrecheExtraRunPending?: boolean;
     bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
-    startupImmolatorUsedSourceIdsThisTurn?: CardInstanceId[];
     delayedEndTurnEffects?: Array<{
       sourceCardInstanceId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;

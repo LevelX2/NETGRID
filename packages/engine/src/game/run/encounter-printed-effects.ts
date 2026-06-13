@@ -43,7 +43,7 @@ export type EncounterPrintedEffectHost = {
     finishRun: (successful: boolean) => void;
     hasInstalledMicrotechTrodeSet: () => boolean;
     hackerTrackerCounterTotal: () => number;
-    krumzTraceBitTotal: () => number;
+    recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
       event: ImminentEvent,
       legalAction: LegalAction,
@@ -279,7 +279,7 @@ export function startTraceFromPrintedSubroutine(
     state.corp.credits +
     encounterTemporaryTraceCredits +
     host.callbacks.hackerTrackerCounterTotal() +
-    host.callbacks.krumzTraceBitTotal() +
+    host.callbacks.recurringTraceCreditPoolTotal() +
     fortTraceBits;
   const rabbitTraceLimitReduction =
     host.callbacks.rabbitTraceLimitReductionForIceTrace();
