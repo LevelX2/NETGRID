@@ -104,4 +104,31 @@ describe("runner coverage goal resolution", () => {
       "runner.doctrine.rnd_pressure_coverage",
     ]);
   });
+
+  it("maps runner breaker-search worklist actions to coverage goals", () => {
+    for (const sourceTitle of [
+      "Self-Modifying Code",
+      "Mystery Box",
+      "The Short Circuit",
+      "Mantis, Fixer-at-Large",
+      "Temple Microcode Outlet",
+      "Test Spin",
+    ]) {
+      const result = resolveRunnerCoverageGoalForAction(
+        {
+          missingCoverageTypes: ["barrier"],
+          activeCoverageGoalIds: ["runner.doctrine.breaker_search"],
+        },
+        {
+          type: "play_event",
+          sourceTitle,
+          actionTacticSignals: ["coverage.search_program", "breaker_search"],
+        },
+      );
+
+      expect(result.fit).toBe("search_likely_finds");
+      expect(result.matchedGoalIds).toEqual(["runner.doctrine.breaker_search"]);
+      expect(result.sideSafe).toBe(true);
+    }
+  });
 });

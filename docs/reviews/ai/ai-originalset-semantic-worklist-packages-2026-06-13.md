@@ -31,3 +31,24 @@ Die Originalset-Arbeitsliste wird nicht als breites Hint- oder Runtime-Paket for
 ## Schlussfolgerung
 
 Die nächsten Originalset-Arbeiten sollen über diese Paketkandidaten einzeln umgesetzt werden. Der wichtigste erste Schnitt ist `ORIG-AI-3`, weil RunnerCoverageGoal und Doctrine-Search bereits in AI-MAT3 vorbereitet wurden und direkte Regressionstests möglich sind.
+
+## AI-MAT4-14 Umsetzung: Runner Breaker/Search Paket 1
+
+Status: `diagnostic_tests_added`
+
+Scope:
+
+- Self-Modifying Code
+- Mystery Box
+- The Short Circuit
+- Mantis, Fixer-at-Large
+- Temple Microcode Outlet
+- Test Spin
+
+Abdeckung:
+
+- Such-/Installationssignale werden als funktionale Coverage-Signale geprüft.
+- `runner.doctrine.breaker_search` wird ohne Hidden-Deckdaten auf side-safe Search-Actions gemappt.
+- TargetChoice-/TargetProfile-Lücken bleiben als diagnostische Gaps sichtbar.
+- Temporäre und zufällige Such-/Installationswirkung bleibt RiskProjection-/TargetProfile-Folgearbeit.
+- Keine produktive Karten-Sonderlogik, keine Runtime-Aktivierung.

@@ -208,4 +208,73 @@ describe("Action semantic invariants", () => {
       ),
     ).toHaveLength(expectedReadinessAreas.length);
   });
+
+  it("covers runner breaker-search worklist package one as diagnostic semantics", () => {
+    const profiles: ActionCardSemanticProfile[] = [
+      runnerBreakerSearchProfile("Self-Modifying Code", [
+        "coverage.search_program",
+        "target_profile.program_from_stack_gap",
+      ]),
+      runnerBreakerSearchProfile("Mystery Box", [
+        "coverage.search_program",
+        "risk.random_outcome",
+      ]),
+      runnerBreakerSearchProfile("The Short Circuit", [
+        "coverage.install_breaker",
+        "risk.temporary_program",
+      ]),
+      runnerBreakerSearchProfile("Mantis, Fixer-at-Large", [
+        "coverage.search_program",
+        "target_profile.runner_program",
+      ]),
+      runnerBreakerSearchProfile("Temple Microcode Outlet", [
+        "coverage.install_breaker",
+        "target_profile.program_install",
+      ]),
+      runnerBreakerSearchProfile("Test Spin", [
+        "coverage.search_program",
+        "risk.random_outcome",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noEffectFlags).toEqual(
+      expect.arrayContaining(["no_runtime_scoring", "no_action_selection"]),
+    );
+  });
 });
+
+function runnerBreakerSearchProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.coverage_search`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.breaker_search",
+            role: "coverage_enabler",
+            confidence: "medium",
+            evidence: `${title} is classified by functional search/install coverage semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_program_or_stack_search",
+            status: "gap",
+            issues: ["target_choice_gap"],
+            evidence: ["TargetProfile remains diagnostic and side-safe."],
+          },
+        ],
+      },
+    ],
+  };
+}
