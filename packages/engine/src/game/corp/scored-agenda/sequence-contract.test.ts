@@ -1,4 +1,5 @@
 import type { ChoiceRequest, LegalAction } from "@netgrid/shared";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   isHqToNewRemoteInstallRezChoiceSource,
@@ -98,6 +99,47 @@ describe("scored agenda sequence contract matrix", () => {
         choiceResolverIds.has(resolver.id),
       ),
     ).toBe(false);
+  });
+
+  it("keeps scored-agenda flow choice resolver ids unique and separated", () => {
+    const flowResolverIds = SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.map(
+      (resolver) => resolver.id,
+    );
+    const installRezResolverIds = new Set(
+      SCORED_AGENDA_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+    );
+    const scoreTimeResolverIds = new Set(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id),
+    );
+
+    expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
+    expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
+      false,
+    );
+    expect(flowResolverIds.some((id) => scoreTimeResolverIds.has(id))).toBe(
+      false,
+    );
+  });
+
+  it("keeps migrated score-time kinds out of the scored-agenda orchestrator", () => {
+    const flowSource = readFileSync(
+      new URL("../scored-agenda-flow.ts", import.meta.url),
+      "utf8",
+    );
+    const migratedKinds = [
+      "choose_fort_ice_strength_bonus",
+      "reveal_installed_ice_subtype_for_credits",
+      "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      "gain_credits_on_score",
+      "add_counters_on_score",
+      "project_babylon_bonus_points",
+      "overadvance_start_of_corp_turn_credits",
+      "overadvance_start_of_corp_turn_actions",
+    ];
+
+    for (const kind of migratedKinds) {
+      expect(flowSource).not.toContain(kind);
+    }
   });
 
   it("routes each registered choice source to exactly one resolver", () => {
