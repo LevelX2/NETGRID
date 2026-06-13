@@ -63,15 +63,19 @@ Advancement-Ziele werden nicht mehr nur grob über Kartentyp und Textregex bewer
 Ziel: Scope, Invarianten, Nicht-Ziele und Paketfolge versionieren.
 
 Kernartefakt:
+
 - `docs/architecture/ai/ai-advancement-witness-classifier-process-2026-06-13.md`
 
 Checks:
+
 - `git diff --check`
 
 Done-Gate:
+
 - Prozessartefakt ist versioniert.
 
 Commit:
+
 - `docs: plan advancement witness classifier`
 
 ### AI-ADV-WITNESS-1B Classifier
@@ -79,6 +83,7 @@ Commit:
 Ziel: Zielklassifizierung im vorhandenen Comparator präzisieren.
 
 Arbeit:
+
 - `targetClass` in beide Assessment-Typen aufnehmen.
 - Ambush-Witnesses von Overadvance trennen.
 - Cashout-Erkennung für `Gain [n]` und `per advancement counter` robuster machen.
@@ -86,18 +91,22 @@ Arbeit:
 - Evidence um `advancement_target_class:*` ergänzen.
 
 Kernartefakte:
+
 - `packages/ai/src/index.ts`
 - `packages/ai/src/legacy/corp-plans.ts`
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Done-Gate:
+
 - Typecheck grün.
 - Vorhandene Advancement-Regressionen bleiben grün.
 
 Commit:
+
 - `fix(ai): classify advancement target witnesses`
 
 ### AI-ADV-WITNESS-1C Regressionen
@@ -105,6 +114,7 @@ Commit:
 Ziel: Die in der Rückmeldung genannten Zielklassen testbar absichern.
 
 Akzeptanzfälle:
+
 - `Project Babylon` -> `agenda_overadvance_threshold`.
 - `Information Laundering` -> `counter_cashout_credit`.
 - `Vapor Ops` ohne wertvolles Ziel -> schwache Bank/Cashout-Quelle.
@@ -115,18 +125,22 @@ Akzeptanzfälle:
 - `Corprunner's Shattered Remains` -> `access_hardware_trash_ambush`.
 
 Kernartefakt:
+
 - `packages/ai/src/index.test.ts`
 
 Checks:
+
 - Fokussierter Vitest-Lauf für Advancement-Witness-Tests.
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm format:changed`
 - `git diff --check`
 
 Done-Gate:
+
 - Alle neuen und bestehenden `@netgrid/ai`-Tests grün.
 
 Commit:
+
 - `test(ai): cover advancement witness classes`
 
 ### AI-ADV-WITNESS-1D Integration
@@ -134,12 +148,14 @@ Commit:
 Ziel: Arbeitsbranch sauber nach lokalem `main` integrieren.
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm format:changed`
 - `git diff --check`
 
 Done-Gate:
+
 - Arbeitsbranch ist sauber.
 - Lokaler `main` enthält die Paketcommits.
 - Worktree ist entfernt.
