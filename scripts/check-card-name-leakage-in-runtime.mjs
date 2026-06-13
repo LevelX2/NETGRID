@@ -387,11 +387,11 @@ const abstractionPlan = [
       "Install-Condition, Purge-Replacement und Corp-Trash-Aktion sind generisch über CardImplementation umgesetzt; verbleibende Namen gehören zum Purge-State-/Bootstrap-Rest.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Startup Immolator",
     currentNames: [
-      "startup_immolator_trash_fully_broken_ice",
-      "startupImmolatorUsedSourceIdsThisTurn",
+      "trash_fully_broken_passed_ice",
+      "abilityUsedSourceIdsByLimitKey",
     ],
     targetKind: "trash_fully_broken_passed_ice",
     targetState: ["runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]"],
@@ -401,12 +401,12 @@ const abstractionPlan = [
       limit: "once_per_turn_per_source",
     },
     notes:
-      "Kann nach Ability-Use-Ledger auf dieselbe Limit-Infrastruktur wie Preying Mantis wechseln.",
+      "Post-Pass-ICE-Trash und Nutzungslimit sind generisch über CardImplementation und abilityUsedSourceIdsByLimitKey umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Krumz",
-    currentNames: ["krumz_trace_bit", "spendKrumzTraceBits"],
+    currentNames: ["recurring_trace_credit_pool", "spendRecurringTraceCreditPool"],
     targetKind: "recurring_trace_credit_pool",
     targetState: ["recurringCreditPools[]"],
     params: {
@@ -415,7 +415,7 @@ const abstractionPlan = [
       refresh: "start_of_corp_turn_after_use",
     },
     notes:
-      "Soll mit vorhandenen Trace-Credit- und Recurring-Credit-Pfaden zusammengeführt werden.",
+      "Trace-only Recurring-Credit-Pool und Start-of-Corp-Turn-Refresh sind generisch über CardImplementation umgesetzt.",
   },
   {
     priority: "deferred_refactor_required",
@@ -672,7 +672,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice und die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Krumz` und `Startup Immolator`; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`- und `Startup Immolator`-Slices sind umgesetzt. `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");
@@ -710,7 +710,7 @@ const report = {
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
-    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt und Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz und Startup Immolator sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",
