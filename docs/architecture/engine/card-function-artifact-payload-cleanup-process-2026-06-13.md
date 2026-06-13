@@ -2,7 +2,7 @@
 
 ## Status
 
-In Umsetzung auf Branch `codex/card-function-artifact-payload-cleanup` im Worktree `C:\Projekte\NETGRID_CARD_FUNCTION_ARTIFACT_PAYLOAD_CLEANUP`.
+Abschlussbereit im Arbeitsbranch `codex/card-function-artifact-payload-cleanup`; lokale Integration nach `main` erfolgt im finalen P3-Schritt.
 
 ## Quelle/Vorgabe
 
@@ -102,3 +102,11 @@ Stop ohne Rückfrage, wenn:
 - P3 hat final verifiziert und lokal nach `main` integriert.
 - Arbeits-Worktree ist entfernt.
 - Siren, Bizarre Encryption Scheme und Pirate Broadcast bleiben spätere separate Folgeprozesse.
+
+## Abschlussstand im Arbeitsbranch 2026-06-13
+
+- Der abgeschlossene Krumz-/Startup-Prozess ist im Prozessartefakt nicht mehr als `In Umsetzung`, sondern als abgeschlossen und lokal integriert dokumentiert.
+- Der Card-Function-Abstraction-Guard ist auf die aktuelle 387er Baseline kalibriert.
+- Die zwei ehemaligen Krumz-Payload-Funde sind durch `recurringTraceCreditPoolSpent` entfallen.
+- `Krumz` und `Startup Immolator` bleiben im Review-Artefakt `slice_done`.
+- Verifikation im Arbeitsbranch: `corepack pnpm check:card-function-abstraction`, JSON-Parse, `corepack pnpm --filter @netgrid/engine test -- src/game/payment/trace-payment.test.ts`, `corepack pnpm --filter @netgrid/engine test -- index-tests/mechanics/assets-nodes-upgrades.test.ts -t "Krumz"`, `corepack pnpm --filter @netgrid/engine typecheck`, `git diff --check`.

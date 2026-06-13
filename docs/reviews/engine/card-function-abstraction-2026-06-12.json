@@ -26,9 +26,9 @@
   "summary": {
     "functional_kind_uses_card_name": 29,
     "false_positive": 33,
-    "test_only_card_name": 78,
+    "test_only_card_name": 77,
     "allowed_catalog_reference": 43,
-    "runtime_state_field_uses_card_name": 175,
+    "runtime_state_field_uses_card_name": 174,
     "mechanics_constant_controls_behavior_by_card_id": 31
   },
   "derivedCatalogGuard": {
@@ -8573,28 +8573,6 @@
       "category": "runtime_state_field_uses_card_name",
       "targetAbstraction": "secret_guess_run_effect",
       "snippet": "source: `p3_58.social_engineering_guess:${sourceCardId}:${host.state.stateVersion + 1}`,"
-    },
-    {
-      "path": "packages/engine/src/game/payment/trace-payment.test.ts",
-      "line": 82,
-      "column": 7,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "krumzBitsSpent: 1,"
-    },
-    {
-      "path": "packages/engine/src/game/payment/trace-payment.ts",
-      "line": 848,
-      "column": 11,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "? { krumzBitsSpent: receipt.corpTraceBitsSpent }"
     },
     {
       "path": "packages/engine/src/game/play/corp-operation-resolution.ts",

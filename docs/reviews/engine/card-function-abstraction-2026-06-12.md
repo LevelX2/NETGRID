@@ -16,9 +16,9 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | --- | ---: |
 | functional_kind_uses_card_name | 29 |
 | false_positive | 33 |
-| test_only_card_name | 78 |
+| test_only_card_name | 77 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 175 |
+| runtime_state_field_uses_card_name | 174 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 
 ## Problemstellen
@@ -173,7 +173,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:738` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:769` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:771` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/payment/trace-payment.ts:848` Krumz / `krumz` -> `recurring_trace_credit_pool`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:433` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:543` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:553` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
