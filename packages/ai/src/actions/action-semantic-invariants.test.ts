@@ -245,6 +245,38 @@ describe("Action semantic invariants", () => {
       expect.arrayContaining(["no_runtime_scoring", "no_action_selection"]),
     );
   });
+
+  it("covers runner survival risk worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      runnerRiskProfile("Arasaka Owns You", ["risk.self_brain_damage"]),
+      runnerRiskProfile("Emergency Self-Construct", ["survival.flatline_prevention"]),
+      runnerRiskProfile("Force Shield", ["survival.damage_prevention"]),
+      runnerRiskProfile("Shield", ["survival.damage_prevention"]),
+      runnerRiskProfile("Armored Fridge", ["survival.damage_prevention"]),
+      runnerRiskProfile("Trauma Team", ["survival.flatline_prevention"]),
+      runnerRiskProfile("Lifesaver Nanosurgeons", [
+        "survival.flatline_prevention",
+      ]),
+      runnerRiskProfile("Preying Mantis", ["risk.random_damage"]),
+      runnerRiskProfile("Quest for Cattekin", ["risk.action_loss"]),
+      runnerRiskProfile("Lucidrine Booster Drug", [
+        "risk.random_damage",
+        "risk.action_loss",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "risk.self_brain_damage",
+        "survival.flatline_prevention",
+        "risk.random_damage",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerBreakerSearchProfile(
@@ -272,6 +304,38 @@ function runnerBreakerSearchProfile(
             status: "gap",
             issues: ["target_choice_gap"],
             evidence: ["TargetProfile remains diagnostic and side-safe."],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function runnerRiskProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.survival_risk`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.survival",
+            role: "risk_control",
+            confidence: "medium",
+            evidence: `${title} is classified by functional survival and risk semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_self_or_damage_context",
+            status: "gap",
+            issues: ["risk_projection_gap"],
+            evidence: ["Damage prevention precision remains diagnostic."],
           },
         ],
       },

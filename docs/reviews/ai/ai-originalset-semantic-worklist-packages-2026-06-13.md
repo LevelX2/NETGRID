@@ -52,3 +52,26 @@ Abdeckung:
 - TargetChoice-/TargetProfile-Lücken bleiben als diagnostische Gaps sichtbar.
 - Temporäre und zufällige Such-/Installationswirkung bleibt RiskProjection-/TargetProfile-Folgearbeit.
 - Keine produktive Karten-Sonderlogik, keine Runtime-Aktivierung.
+
+## AI-MAT4-15 Umsetzung: Runner Survival/Risk Paket 1
+
+Status: `diagnostic_tests_added`
+
+Scope:
+
+- Arasaka Owns You
+- Emergency Self-Construct
+- Force Shield
+- Shield
+- Armored Fridge
+- Trauma Team
+- Lifesaver Nanosurgeons
+- Preying Mantis
+- Quest for Cattekin
+- Lucidrine Booster Drug
+
+Abdeckung:
+
+- Survival-Signale, Flatline-Prävention und Damage-Prevention werden getrennt geprüft.
+- `risk.self_brain_damage`, `risk.action_loss` und `risk.random_damage` bleiben explizite RiskProjection-Flächen.
+- Damage-Prevention-Type-Precision bleibt diagnostisch; keine Runtime- oder Engine-Freigabe.
