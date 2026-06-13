@@ -182,6 +182,7 @@ import {
   type SimulationRng,
 } from "./simulation/simulation-rng";
 import {
+  DOCTRINE_QUALITY_METRIC_NAMES,
   averageNumber,
   diffDoctrineMetrics,
   sumDoctrineMetrics,
@@ -36028,17 +36029,6 @@ function repeatedLowValueCentralRunTags(
   return tags;
 }
 
-const DOCTRINE_QUALITY_METRICS: AiDoctrineQualityMetricName[] = [
-  "nakedAgendaInstalls",
-  "agendaFloodExposure",
-  "scoreWindowMissed",
-  "remoteOverbuild",
-  "economyStall",
-  "repeatedLowValueCentralRun",
-  "rigStall",
-  "assetTrashNeglect",
-];
-
 function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
   return {
     nakedAgendaInstalls: countTag(tags, "naked_agenda_install"),
@@ -36059,16 +36049,13 @@ function emptyDoctrineCaseExamples(): Record<
   AiDoctrineQualityMetricName,
   AiDoctrineQualityCaseExample[]
 > {
-  return {
-    nakedAgendaInstalls: [],
-    agendaFloodExposure: [],
-    scoreWindowMissed: [],
-    remoteOverbuild: [],
-    economyStall: [],
-    repeatedLowValueCentralRun: [],
-    rigStall: [],
-    assetTrashNeglect: [],
-  };
+  return DOCTRINE_QUALITY_METRIC_NAMES.reduce(
+    (examples, metric) => ({
+      ...examples,
+      [metric]: [],
+    }),
+    {} as Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>,
+  );
 }
 
 function doctrineMetricForQualityTag(
