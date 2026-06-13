@@ -2,13 +2,15 @@
 
 ## Status
 
-branch_packages_complete_pending_final_green
+complete
 
 ## GitHub / Local Sync
 
 AI-MAT2 startete nach der gemeldeten lokalen `main`-Bereinigung als zweite Härtungsserie auf Branch `codex/ai-play-strength-maturation-2` im Worktree `C:\Projekte\NETGRID_AI_PLAY_STRENGTH_MATURATION_2`.
 
 AI-MAT2-0 hat den lokalen Stand, den sichtbaren Report-Drift und den Env-/Corpus-Status synchronisiert. Diese Serie pusht nichts nach GitHub und öffnet keinen PR; Remote-Sichtbarkeit bleibt bis zu einem expliziten Push ein separater Schritt.
+
+FINAL-GREEN wurde nach den Paketcommits abgeschlossen, der Arbeitsbranch wurde lokal nach `main` integriert, und der Arbeitsworktree wurde entfernt. Der finale lokale Integrationsstand war `7e16c165`; `main` war nach der Integration sauber und lokal `ahead 61`. Es wurde kein Push und kein Pull Request ausgeführt.
 
 ## Umgesetzte Pakete
 
@@ -94,10 +96,21 @@ Alle Paketchecks AI-MAT2-0 bis AI-MAT2-22 wurden vor den jeweiligen Paketcommits
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
+Nach dem finalen Main-Abgleich und der lokalen Integration wurden zusätzlich grün ausgeführt:
+
+- `corepack pnpm --filter @netgrid/ai test`: 87 Testdateien, 1286 Tests grün.
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: 499 Tests grün auf integriertem Branchstand.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: 49 Tests grün.
+- `corepack pnpm --filter @netgrid/engine test`: 170 Testdateien, 1499 Tests grün auf integriertem Branchstand.
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/server test`: 6 Testdateien, 127 Tests grün.
+- `corepack pnpm --filter @netgrid/server typecheck`
+- `corepack pnpm --filter @netgrid/web test`: 33 Testdateien, 417 Tests grün.
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `git diff --check`
+
 ## Offene nächste Schritte
 
-1. FINAL-GREEN im Arbeitsbranch ausführen.
-2. Bei grünem FINAL-GREEN lokal nach `main` integrieren.
-3. Nach Main-Integration die AI-Suite auf `main` erneut ausführen.
-4. Worktree entfernen, wenn `main` sauber ist.
-5. GitHub-Push/PR nur auf ausdrücklichen Wunsch nachziehen.
+1. Maturation-III als Folgeprozess ausführen: Status-/Calibration-Klärung, Pilot-Readiness-Matrix, ShadowLeague-Followups, weitere `index.ts`-Schnitte, TargetChoice-/Doctrine-Coverage, lokale Default-Kandidatenberichte und interne Exportgrenzen.
+2. GitHub-Push/PR nur auf ausdrücklichen Wunsch nachziehen.
