@@ -5,6 +5,7 @@ import type {
   ResolvedGameEffect,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 export function applyDirectScoreEconomyEffects(
@@ -17,12 +18,11 @@ export function applyDirectScoreEconomyEffects(
   if (scoredAgenda?.kind === "gain_credits_on_score") {
     host.credits.gainCredits(scoredAgenda.recipient, scoredAgenda.amount);
     if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         onScoreGainCredits: scoredAgenda.amount,
         gainedCredits: scoredAgenda.amount,
         corpCreditsAfter: host.state.corp.credits,
-      };
+      });
       appendScoreCreditEffect(legalAction, {
         effectId: `${definition.id}.score.gain_credits`,
         kind: "gain_credits",
@@ -38,15 +38,14 @@ export function applyDirectScoreEconomyEffects(
       scoredAgenda.amount,
     );
     if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         counterType: scoredAgenda.counterType,
         addedCounterAmount: scoredAgenda.amount,
         remainingCounters: host.counters.cardCounter(
           cardId,
           scoredAgenda.counterType,
         ),
-      };
+      });
   }
 }
 

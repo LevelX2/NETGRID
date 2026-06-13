@@ -5,6 +5,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 export type OveradvanceScoreEffectResult = {
@@ -30,11 +31,10 @@ export function applyOveradvanceScoreEffects(
     );
     host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         projectBabylonOveradvance: overadvancedBy,
         projectBabylonBonusAgendaPoints: bonusAgendaPoints,
-      };
+      });
     }
   }
   if (host.cards.isOveradvanceAgendaDefinition(definition.id)) {
@@ -42,12 +42,11 @@ export function applyOveradvanceScoreEffects(
     bonusAgendaPoints = Math.floor(overadvancedBy / 2);
     host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         v1919AgendaDifficulty: requiredDifficulty,
         v1919Overadvance: overadvancedBy,
         v1919BonusAgendaPoints: bonusAgendaPoints,
-      };
+      });
     }
   }
   if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_credits") {
@@ -57,11 +56,10 @@ export function applyOveradvanceScoreEffects(
       scoredAgenda.creditPerGroup;
     host.counters.setCardCounter(cardId, "mark", recurringCredits);
     if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         overadvanceRecurringCredits: recurringCredits,
         projectZurichOveradvance: overadvancedBy,
-      };
+      });
     }
   }
   if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_actions") {
@@ -72,12 +70,11 @@ export function applyOveradvanceScoreEffects(
     const recurringActions = actionGroups * scoredAgenda.actionPerGroup;
     host.counters.setCardCounter(cardId, "mark", recurringActions);
     if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+      applySequencePayloadPatch(legalAction, {
         overadvanceRecurringActions: recurringActions,
         overadvanceActionGroups: actionGroups,
         projectVeniceOveradvance: overadvancedBy,
-      };
+      });
     }
   }
   return { bonusAgendaPoints, overadvancedBy };

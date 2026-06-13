@@ -9,6 +9,7 @@ import { markCorporateRetreatAvailableOnScore } from "./corporate-retreat-sequen
 import { resolveCorporateWarOnScore } from "./corporate-war-sequence";
 import { applyDirectScoreEconomyEffects } from "./direct-score-economy-effects";
 import { applyOveradvanceScoreEffects } from "./overadvance-score-effects";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 export type ScoredAgendaDirectEffectContext = {
@@ -60,11 +61,10 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           return;
         host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
         if (legalAction) {
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
+          applySequencePayloadPatch(legalAction, {
             fixedBonusAgendaPoints: scoredAgenda.amount,
             bonusAgendaPoints: scoredAgenda.amount,
-          };
+          });
         }
         return { bonusAgendaPoints: scoredAgenda.amount };
       },

@@ -5,6 +5,7 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 export function resolveSecurityNetOptimizationOnScore(
   host: ScoredAgendaFlowHost,
@@ -26,10 +27,9 @@ export function resolveSecurityNetOptimizationOnScore(
     ...host.cards.mustInstance(cardId),
     selectedServerId: selectedServerId as Exclude<ServerId, "new_remote">,
   };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     securityNetOptimizationActive: true,
     selectedServerId,
     securityNetOptimizationServerId: selectedServerId,
-  };
+  });
 }

@@ -1,4 +1,5 @@
 import type {
+  CardDefinition,
   CardInstance,
   CardInstanceId,
 } from "@netgrid/shared";
