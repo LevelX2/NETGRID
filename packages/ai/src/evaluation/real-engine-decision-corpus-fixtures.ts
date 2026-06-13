@@ -25,6 +25,8 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_low_credits",
   "runner_real_safe_hq_access",
   "runner_real_safe_rd_access",
+  "runner_real_target_choice_hq_remote_mix",
+  "runner_real_target_choice_discard_choice",
   "runner_real_remote_score_threat",
   "runner_real_damage_buffer_needed",
   "runner_real_tag_cleanup",
@@ -49,6 +51,8 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_rd_multiaccess_payoff",
   "corp_real_score_agenda_window",
   "corp_real_advance_score_window",
+  "corp_real_target_choice_multi_score_payload",
+  "corp_real_target_choice_multi_advance_payload",
   "corp_real_low_rez_reserve",
   "corp_real_rez_value_window",
   "corp_real_do_not_rez_when_broke",
@@ -89,6 +93,14 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
   }),
+  runner_real_target_choice_hq_remote_mix: expectation(["start_run"], {
+    forbiddenMistakes: ["target_choice_unavailable"],
+    notes: ["target-choice corpus keeps central and remote run payloads visible"],
+  }),
+  runner_real_target_choice_discard_choice: expectation(["resolve_choice"], {
+    forbiddenMistakes: ["target_choice_unavailable"],
+    notes: ["target-choice corpus covers real Engine choice requirements"],
+  }),
   runner_real_remote_score_threat: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
     notes: ["remote contest remains report-only until a productive scope exists"],
@@ -114,6 +126,12 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   }),
   corp_real_advance_score_window: expectation(["advance_card"], {
     forbiddenMistakes: ["missed_score_window"],
+  }),
+  corp_real_target_choice_multi_score_payload: expectation(["score_agenda"], {
+    forbiddenMistakes: ["target_choice_unavailable", "missed_score_window"],
+  }),
+  corp_real_target_choice_multi_advance_payload: expectation(["advance_card"], {
+    forbiddenMistakes: ["target_choice_unavailable", "missed_score_window"],
   }),
   corp_real_low_rez_reserve: expectation(["gain_credit", "draw_card"], {
     forbiddenMistakes: ["bad_rez_spend"],
@@ -172,6 +190,23 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture.withRunnerCredits(7);
       },
       [],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "runner_real_target_choice_hq_remote_mix",
+      "real-runner-target-choice-mix",
+      (fixture) => {
+        fixture.withRunnerCredits(9).withCorpRemoteAgenda("remote_1", 2, {
+          faceup: true,
+          rezzed: false,
+        });
+      },
+      ["fixture:target_choice_hq_remote_mix"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerDiscardChoiceScenario(
+      "runner_real_target_choice_discard_choice",
+      "real-runner-target-choice-discard",
       "onr_origin_runner_ai_snapshot_v1",
     ),
     runnerScenario(
@@ -403,6 +438,30 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 2);
       },
       ["fixture:advance_to_score_window"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_target_choice_multi_score_payload",
+      "real-corp-target-choice-multi-score",
+      (fixture) => {
+        fixture
+          .withCorpCredits(10)
+          .withCorpRemoteAgenda("remote_1", 3)
+          .withCorpRemoteAgenda("remote_2", 3);
+      },
+      ["fixture:target_choice_multi_score_payload"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "corp_real_target_choice_multi_advance_payload",
+      "real-corp-target-choice-multi-advance",
+      (fixture) => {
+        fixture
+          .withCorpCredits(10)
+          .withCorpRemoteAgenda("remote_1", 2)
+          .withCorpRemoteAgenda("remote_2", 2);
+      },
+      ["fixture:target_choice_multi_advance_payload"],
       "onr_origin_corp_ai_snapshot_v1",
     ),
     corpScenario(
@@ -662,6 +721,33 @@ function corpRezScenario(
     state,
   )
     .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`])
+    .withDeckDoctrine(deckSnapshotId)
+    .build();
+}
+
+function runnerDiscardChoiceScenario(
+  scenarioId: string,
+  seed: string,
+  deckSnapshotId?: string,
+): RealEngineDecisionCorpusScenario {
+  let state = toRunnerTurn(createGameAfterSetup({ seed, agendaPointsToWin: 7 }));
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(5)
+    .withRunnerGripSize(5);
+  state = apply(state, "runner", (action) => action.type === "draw_card");
+  state = apply(state, "runner", (action) => action.type === "end_turn");
+  if (
+    state.pendingChoice?.source !== "discard_phase" ||
+    state.pendingChoice.side !== "runner"
+  ) {
+    throw new Error("Missing runner discard choice after draw/end-turn fixture");
+  }
+  return RealEngineDecisionCorpusScenarioBuilder.fromState(
+    scenarioId,
+    "runner",
+    state,
+  )
+    .addEvidence(["fixture:target_choice_discard_choice"])
     .withDeckDoctrine(deckSnapshotId)
     .build();
 }

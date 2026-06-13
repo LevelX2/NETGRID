@@ -46,7 +46,7 @@ describe("RealEngineDecisionCorpus", () => {
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
     expect(samples.length).toBe(scenarios.length);
-    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBe(50);
+    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBe(54);
     expect(samples.filter((sample) => sample.legalActionCount === 0)).toEqual(
       [],
     );
@@ -86,6 +86,12 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       actionTypesFor(scenarios, "corp_real_advance_score_window"),
     ).toContain("advance_card");
+    expect(
+      actionTypesFor(scenarios, "corp_real_target_choice_multi_score_payload"),
+    ).toContain("score_agenda");
+    expect(
+      actionTypesFor(scenarios, "corp_real_target_choice_multi_advance_payload"),
+    ).toContain("advance_card");
     expect(actionTypesFor(scenarios, "corp_real_rez_value_window")).toContain(
       "rez_ice",
     );
@@ -101,6 +107,12 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       actionTypesFor(scenarios, "runner_real_remote_known_agenda_contest"),
     ).toContain("start_run");
+    expect(
+      actionTypesFor(scenarios, "runner_real_target_choice_hq_remote_mix"),
+    ).toContain("start_run");
+    expect(
+      actionTypesFor(scenarios, "runner_real_target_choice_discard_choice"),
+    ).toContain("resolve_choice");
     expect(
       actionTypesFor(scenarios, "corp_real_score_now_vs_gain_credit"),
     ).toContain("score_agenda");
@@ -200,6 +212,62 @@ describe("RealEngineDecisionCorpus", () => {
       expect(report.runtimeConsumerStatus).toBe("none");
       expect(containsForbiddenSemanticMarker(report)).toBe(false);
     }
+  });
+
+  it("covers expanded target-choice corpus scenarios with real Engine reports", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+    const discardScenario = scenarioFor(
+      scenarios,
+      "runner_real_target_choice_discard_choice",
+    );
+    const discardAction = actionOfType(discardScenario, "resolve_choice");
+    const discardReport = buildTargetChoiceShadowReport({
+      action: discardAction,
+      candidate: candidateFor(samples, discardScenario, discardAction),
+    });
+
+    expect(discardReport.scorecard).toMatchObject({
+      coverageStatus: "covered",
+      choiceOptionCount: discardAction.choiceRequirements?.[0]?.optionIds.length,
+      targetOptionCount: 0,
+    });
+    expect(discardReport.selectionOutput).toEqual({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+    });
+
+    let corpPayloadReportCount = 0;
+    for (const scenarioId of [
+      "corp_real_target_choice_multi_score_payload",
+      "corp_real_target_choice_multi_advance_payload",
+    ] as const) {
+      const scenario = scenarioFor(scenarios, scenarioId);
+      const sample = sampleFor(samples, scenarioId);
+      const reports = scenario.input.legalActions
+        .filter(
+          (action) =>
+            action.type === "score_agenda" || action.type === "advance_card",
+        )
+        .map((action) =>
+          buildTargetChoiceShadowReport({
+            action,
+            candidate: candidateFor(samples, scenario, action),
+          }),
+        );
+      corpPayloadReportCount += reports.length;
+
+      expect(reports.length).toBeGreaterThanOrEqual(1);
+      expect(reports.every((report) => report.scorecard.targetOptionCount > 0))
+        .toBe(true);
+      expect(
+        reports.every(
+          (report) => report.selectionOutput.selectedTargetsCreated === false,
+        ),
+      ).toBe(true);
+      expect(containsForbiddenSemanticMarker({ sample, reports })).toBe(false);
+    }
+    expect(corpPayloadReportCount).toBeGreaterThanOrEqual(2);
   });
 
   it("keeps scenario fixture mutations behind the real engine fixture builder", () => {
@@ -319,6 +387,34 @@ function actionTypesFor(
   return scenarioFor(scenarios, scenarioId).input.legalActions.map(
     (action) => action.type,
   );
+}
+
+function actionOfType(
+  scenario: RealEngineDecisionCorpusScenario,
+  actionType: LegalAction["type"],
+): LegalAction {
+  const action = scenario.input.legalActions.find(
+    (candidate) => candidate.type === actionType,
+  );
+  if (!action) {
+    throw new Error(`Missing ${actionType} in ${scenario.scenarioId}`);
+  }
+  return action;
+}
+
+function candidateFor(
+  samples: readonly RealEngineDecisionCorpusSample[],
+  scenario: RealEngineDecisionCorpusScenario,
+  action: LegalAction,
+): RealEngineDecisionCorpusSample["frame"]["actionCandidates"][number] {
+  const sample = sampleFor(samples, scenario.scenarioId);
+  const candidate = sample.frame.actionCandidates.find(
+    (frameCandidate) => frameCandidate.actionId === action.actionId,
+  );
+  if (!candidate) {
+    throw new Error(`Missing candidate ${scenario.scenarioId}:${action.actionId}`);
+  }
+  return candidate;
 }
 
 function traceActionIds(sample: RealEngineDecisionCorpusSample): string[] {

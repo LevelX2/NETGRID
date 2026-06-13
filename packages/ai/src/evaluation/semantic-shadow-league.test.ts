@@ -48,42 +48,42 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.topScoreMin).not.toBeNull();
     expect(report.metrics.topScoreMax).not.toBeNull();
     expect(report.metrics.mistakesByClass.hidden_info_dependency).toBe(0);
-    expect(report.metrics.pilotEligibleCount).toBe(43);
-    expect(report.metrics.scopeCandidateCount).toBe(150);
-    expect(report.metrics.scopeAllowedCount).toBe(43);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(43);
+    expect(report.metrics.pilotEligibleCount).toBe(45);
+    expect(report.metrics.scopeCandidateCount).toBe(162);
+    expect(report.metrics.scopeAllowedCount).toBe(45);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(45);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(18.872);
+    expect(report.metrics.averageScoreGap).toBe(19.32);
     expect(report.metrics.blockedByReason).toMatchObject({
-      basic_setup_action_type_blocked: 27,
-      corp_score_window_wrong_side: 25,
-      runner_safe_access_wrong_side: 25,
+      basic_setup_action_type_blocked: 30,
+      corp_score_window_wrong_side: 27,
+      runner_safe_access_wrong_side: 27,
     });
-    expect(report.metrics.pilotEligibilityRate).toBe(0.86);
+    expect(report.metrics.pilotEligibilityRate).toBe(0.833);
     expect(report.metrics.pilotEligibilityBySide.runner).toEqual({
-      scenarioCount: 25,
+      scenarioCount: 27,
       eligibleCount: 22,
       wouldOverrideCount: 22,
-      eligibleRate: 0.88,
+      eligibleRate: 0.815,
     });
     expect(report.metrics.pilotEligibilityBySide.corp).toEqual({
-      scenarioCount: 25,
-      eligibleCount: 21,
-      wouldOverrideCount: 21,
-      eligibleRate: 0.84,
+      scenarioCount: 27,
+      eligibleCount: 23,
+      wouldOverrideCount: 23,
+      eligibleRate: 0.852,
     });
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(22);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(23);
     expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(18);
-    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(3);
+    expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(4);
     expect(report.metrics.pilotCutoverReadiness).toMatchObject({
       productiveUseAllowed: false,
       runtimeConsumerStatus: "none",
       noRuntimeEffect: true,
       scopes: {
         basic_setup: {
-          candidate: 50,
-          allowed: 22,
-          wouldOverride: 22,
+          candidate: 54,
+          allowed: 23,
+          wouldOverride: 23,
           actualOverride: 0,
           safeToEnableLocally: true,
           recommendedForDefaultOffPilot: true,
@@ -91,7 +91,7 @@ describe("SemanticShadowLeague", () => {
           recommendation: "default_off_candidate",
         },
         runner_safe_access: {
-          candidate: 50,
+          candidate: 54,
           allowed: 18,
           wouldOverride: 18,
           actualOverride: 0,
@@ -101,9 +101,9 @@ describe("SemanticShadowLeague", () => {
           recommendation: "default_off_candidate",
         },
         corp_score_window: {
-          candidate: 50,
-          allowed: 3,
-          wouldOverride: 3,
+          candidate: 54,
+          allowed: 4,
+          wouldOverride: 4,
           actualOverride: 0,
           safeToEnableLocally: false,
           recommendedForDefaultOffPilot: false,
@@ -111,8 +111,8 @@ describe("SemanticShadowLeague", () => {
           recommendation: "keep_env_gated",
         },
         remote_contest_report_only: {
-          candidate: 2,
-          allowed: 2,
+          candidate: 3,
+          allowed: 3,
           wouldOverride: 0,
           actualOverride: 0,
           safeToEnableLocally: false,
@@ -141,20 +141,22 @@ describe("SemanticShadowLeague", () => {
         "productive_use_allowed:false",
       ]),
     );
-    expect(report.metrics.remoteContestPilotCandidateCount).toBe(2);
+    expect(report.metrics.remoteContestPilotCandidateCount).toBe(3);
     expect(report.metrics.remoteContestPilotCandidateScenarioIds).toEqual([
       "runner_real_remote_known_agenda_contest",
       "runner_real_remote_score_threat",
+      "runner_real_target_choice_hq_remote_mix",
     ]);
     expect(report.topDisagreementReasons).toEqual([
       "corp_real_advance_not_score_yet:expected=advance_card:observed=gain_credit",
       "corp_real_advance_score_window:expected=advance_card:observed=gain_credit",
+      "corp_real_target_choice_multi_advance_payload:expected=advance_card:observed=gain_credit",
       "runner_real_damage_buffer_needed:expected=draw_card:observed=start_run",
       "runner_real_draw_before_damage_risk:expected=draw_card:observed=start_run",
       "runner_real_tag_cleanup:expected=remove_tag:observed=start_run",
       "runner_real_tagged_remove_before_run:expected=remove_tag:observed=start_run",
     ]);
-    expect(report.followupCandidates).toHaveLength(7);
+    expect(report.followupCandidates).toHaveLength(8);
     expect(report.followupCandidates).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
