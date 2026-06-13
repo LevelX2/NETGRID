@@ -142,6 +142,11 @@ import {
 } from "./diagnostics/debug-format";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
+  scrubEvidence,
+  semanticRuntimeChoiceWithEvidence,
+  semanticRuntimeConfidence,
+} from "./runtime/semantic-runtime-score-components";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -3568,30 +3573,6 @@ function runnerRunOnlyActionAdjustedSemanticChoice(
   }
 
   return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
-}
-
-function semanticRuntimeChoiceWithEvidence(
-  choice: SemanticRuntimeChoice,
-  options: {
-    evidence: string[];
-    minimumScore?: number;
-    reasonCode?: string;
-    explanation?: string;
-  },
-): SemanticRuntimeChoice {
-  const score = roundScore(
-    options.minimumScore !== undefined
-      ? Math.max(choice.score, options.minimumScore)
-      : choice.score,
-  );
-  return {
-    ...choice,
-    score,
-    reasonCode: options.reasonCode ?? choice.reasonCode,
-    explanation: options.explanation ?? choice.explanation,
-    evidence: scrubEvidence([...options.evidence, ...choice.evidence]),
-    confidence: semanticRuntimeConfidence(choice.scopeId, score),
-  };
 }
 
 function replaceSemanticRuntimeChoice(
@@ -11518,15 +11499,6 @@ function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
   );
 }
 
-function semanticRuntimeConfidence(scopeId: string, score: number): number {
-  if (scopeId === "choice_resolution" || scopeId === "mandatory_draw")
-    return 0.95;
-  if (score >= 9000) return 0.86;
-  if (score >= 7000) return 0.76;
-  if (score >= 5000) return 0.66;
-  return 0.51;
-}
-
 function semanticRuntimeExplanation(side: Side, scopeId: string): string {
   return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
 }
@@ -19281,14 +19253,6 @@ function scoreCorpOperation(
 
 function publicRoleEvidence(roles: string[]): string[] {
   return roles.slice(0, 2).map((role) => `role:${role}`);
-}
-
-function scrubEvidence(evidence: string[]): string[] {
-  return evidence.filter(
-    (entry) =>
-      !FORBIDDEN_AI_INPUT_FIELDS.some((needle) => entry.includes(needle)) &&
-      !entry.includes("_1"),
-  );
 }
 
 const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
