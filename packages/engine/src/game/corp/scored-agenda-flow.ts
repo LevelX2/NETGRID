@@ -25,7 +25,6 @@ import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-scor
 import {
   isScoredSubtypeRevealChoiceSource,
   resolveScoredSubtypeRevealChoice,
-  startScoredSubtypeRevealChoiceOrResolve,
 } from "./scored-agenda/subtype-reveal-economy-sequence";
 
 export { startEmployeeEmpowermentStartDrawChoice };
@@ -360,15 +359,6 @@ function startScoreTimeChoices(
     })
   )
     return;
-  if (scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits") {
-    startScoredSubtypeRevealChoiceOrResolve(
-      host,
-      cardId,
-      legalAction,
-      scoredAgenda.subtype,
-      scoredAgenda.creditPerRevealedOrRezzed,
-    );
-  }
   if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
     const selectedServerId =
       typeof legalAction.payload?.selectedServerId === "string"

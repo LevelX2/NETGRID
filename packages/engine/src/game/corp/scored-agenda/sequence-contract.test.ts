@@ -36,6 +36,7 @@ describe("scored agenda sequence contract matrix", () => {
       "ice_transmutation_score_start",
       "priority_requisition_score_start",
       "security_purge_score_start",
+      "subtype_reveal_economy_score_start",
     ]);
     expect(
       new Set(SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.mode)),
@@ -61,6 +62,10 @@ describe("scored agenda sequence contract matrix", () => {
       {
         kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
         id: "security_purge_score_start",
+      },
+      {
+        kind: "reveal_installed_ice_subtype_for_credits",
+        id: "subtype_reveal_economy_score_start",
       },
     ] as const;
 

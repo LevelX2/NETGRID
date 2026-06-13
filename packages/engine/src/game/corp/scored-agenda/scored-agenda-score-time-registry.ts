@@ -4,6 +4,7 @@ import type {
   ScoredAgendaScoreTimeContext,
   ScoredAgendaScoreTimeResolver,
 } from "./scored-agenda-score-time-types";
+import { startScoredSubtypeRevealChoiceOrResolve } from "./subtype-reveal-economy-sequence";
 
 export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeResolver[] =
   [
@@ -44,6 +45,22 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       mode: "immediate_effect",
       resolveOnScore: ({ host, cardId }) => {
         host.choices.resolveSecurityPurge(cardId);
+      },
+    },
+    {
+      id: "subtype_reveal_economy_score_start",
+      kind: "reveal_installed_ice_subtype_for_credits",
+      mode: "choice_start",
+      resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
+        if (scoredAgenda.kind !== "reveal_installed_ice_subtype_for_credits")
+          throw new Error("Subtype-Reveal-Score-Time-Vertrag ungueltig.");
+        startScoredSubtypeRevealChoiceOrResolve(
+          host,
+          cardId,
+          legalAction,
+          scoredAgenda.subtype,
+          scoredAgenda.creditPerRevealedOrRezzed,
+        );
       },
     },
   ];
