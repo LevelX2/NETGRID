@@ -239,7 +239,12 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "startup_immolator_trash_fully_broken_ice";
+      kind: "trash_fully_broken_passed_ice";
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      cost: "target_rez_cost";
+      trashSourceOnResolve: true;
+      limit: "once_per_turn_per_source";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

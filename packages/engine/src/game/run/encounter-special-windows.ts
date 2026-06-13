@@ -12,7 +12,6 @@ import {
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID } from "../../mechanics/longtail-card-effects";
 import { buildLegalAction } from "../turn/action-builders";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -54,7 +53,7 @@ export type VacuumLinkRepositionResult = EncounterSpecialWindowResult & {
   runnerJacksOut?: boolean;
 };
 
-export type StartupImmolatorWindowResult = EncounterSpecialWindowResult & {
+export type FullyBrokenPassedIceTrashWindowResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
   iceId?: CardInstanceId;
   paymentAmount?: number;
@@ -368,23 +367,25 @@ export function applyRioDeJaneiroCityGridPassedIceTrigger(
   return { handled: true, stateChanged: true };
 }
 
-export function startupImmolatorPostPassActions(
+export function fullyBrokenPassedIceTrashPostPassActions(
   host: EncounterSpecialWindowHost,
 ): LegalAction[] {
   const state = host.state;
   const run = state.run;
-  const targetIceId = run?.startupImmolatorPendingPassedIceId;
+  const targetIceId = run?.fullyBrokenPassedIceTrashPendingId;
   if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
   const used = new Set(
-    ensureRunnerTurnFlags(state).startupImmolatorUsedSourceIdsThisTurn ?? [],
+    ensureRunnerTurnFlags(state).abilityUsedSourceIdsByLimitKey?.[
+      fullyBrokenPassedIceTrashLimitKey()
+    ] ?? [],
   );
   const rezCost = quoteIceRezCost(host, targetIceId);
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
-    .filter((cardId) => isStartupImmolatorSource(state, cardId))
+    .filter((cardId) => fullyBrokenPassedIceTrashImplementationForCard(state, cardId))
     .filter((cardId) => !used.has(cardId))
     .sort()
     .map((sourceCardId) =>
@@ -399,7 +400,8 @@ export function startupImmolatorPostPassActions(
           cardId: sourceCardId,
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
-          v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+          runnerUtilityAbility: "trash_fully_broken_passed_ice",
+          abilityKind: "trash_fully_broken_passed_ice",
           rezCostPaid: rezCost,
         },
       ),
@@ -525,37 +527,38 @@ export function resolveFullyBrokenPassedIceDerezAndEndRun(
   };
 }
 
-export function resolveStartupImmolatorTrashIce(
+export function resolveFullyBrokenPassedIceTrash(
   host: EncounterSpecialWindowHost,
   legalAction: LegalAction,
-): StartupImmolatorWindowResult {
+): FullyBrokenPassedIceTrashWindowResult {
   const state = host.state;
   if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Startup Immolator nutzen.");
+    throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Startup Immolator ist nur nach dem Passieren von ICE legal.");
+    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   const targetIceId = String(legalAction.payload?.targetIceId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId as CardInstanceId))
-    throw new Error("Startup Immolator ist nicht installiert.");
-  if (!isStartupImmolatorSource(state, sourceCardId as CardInstanceId))
-    throw new Error("Die Startup-Immolator-Faehigkeit passt nicht zur Karte.");
+    throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
+  if (!fullyBrokenPassedIceTrashImplementationForCard(state, sourceCardId as CardInstanceId))
+    throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
   const flags = ensureRunnerTurnFlags(state);
-  const used = flags.startupImmolatorUsedSourceIdsThisTurn ?? [];
+  const limitKey = fullyBrokenPassedIceTrashLimitKey();
+  const used = flags.abilityUsedSourceIdsByLimitKey?.[limitKey] ?? [];
   if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error("Startup Immolator wurde in diesem Zug bereits genutzt.");
+    throw new Error("Die Post-Pass-Faehigkeit wurde in diesem Zug bereits genutzt.");
   if (
     !targetIceId ||
-    run.startupImmolatorPendingPassedIceId !== targetIceId ||
+    run.fullyBrokenPassedIceTrashPendingId !== targetIceId ||
     !run.fullyBrokenIceIds?.includes(targetIceId as CardInstanceId) ||
     !rezzedInstalledIceIds(state).includes(targetIceId as CardInstanceId)
   )
-    throw new Error("Das Startup-Immolator-Ziel ist nicht legal.");
+    throw new Error("Das Post-Pass-ICE-Ziel ist nicht legal.");
   const rezCost = quoteIceRezCost(host, targetIceId as CardInstanceId);
   const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
   if (!Number.isInteger(paid) || paid !== rezCost)
-    throw new Error("Startup Immolator muss exakt die Rez-Kosten zahlen.");
+    throw new Error("Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.");
   spendCredits(host, "runner", rezCost);
   const targetDefinitionId = definitionFor(
     state,
@@ -570,26 +573,27 @@ export function resolveStartupImmolatorTrashIce(
     sourceCardId as CardInstanceId,
     legalAction,
   );
-  flags.startupImmolatorUsedSourceIdsThisTurn = [
-    ...used,
-    sourceCardId as CardInstanceId,
-  ];
+  flags.abilityUsedSourceIdsByLimitKey = {
+    ...(flags.abilityUsedSourceIdsByLimitKey ?? {}),
+    [limitKey]: [...used, sourceCardId as CardInstanceId].sort(),
+  };
   const {
-    startupImmolatorPendingPassedIceId: _startupPending,
-    ...runWithoutStartupPending
+    fullyBrokenPassedIceTrashPendingId: _fullyBrokenPassedIceTrashPending,
+    ...runWithoutFullyBrokenPassedIceTrashPending
   } = run;
-  void _startupPending;
-  if (state.run) state.run = runWithoutStartupPending;
+  void _fullyBrokenPassedIceTrashPending;
+  if (state.run) state.run = runWithoutFullyBrokenPassedIceTrashPending;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+    runnerUtilityAbility: "trash_fully_broken_passed_ice",
+    abilityKind: "trash_fully_broken_passed_ice",
     sourceDefinitionId: definitionFor(state, sourceCardId as CardInstanceId).id,
     targetIceDefinitionId: targetDefinitionId,
     rezCostPaid: rezCost,
     trashedCount: 1,
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
-    startupImmolatorExhausted: true,
+    sourceAbilityExhausted: true,
   };
   return {
     handled: true,
@@ -692,16 +696,30 @@ function selectedChoiceIds(
   return raw.filter((value): value is string => typeof value === "string");
 }
 
-function isStartupImmolatorSource(
+function fullyBrokenPassedIceTrashImplementationForCard(
   state: GameState,
   cardId: CardInstanceId,
-): boolean {
-  const definition = definitionFor(state, cardId);
-  return (
-    cardImplementationForDefinitionId(definition.id)?.runnerUtilityLongtail
-      ?.kind === "startup_immolator_trash_fully_broken_ice" ||
-    definition.id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID
-  );
+):
+  | {
+      kind: "trash_fully_broken_passed_ice";
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      cost: "target_rez_cost";
+      trashSourceOnResolve: true;
+      limit: "once_per_turn_per_source";
+      visibility: "public";
+    }
+  | undefined {
+  const implementation = cardImplementationForDefinitionId(
+    definitionFor(state, cardId).id,
+  )?.runnerUtilityLongtail;
+  return implementation?.kind === "trash_fully_broken_passed_ice"
+    ? implementation
+    : undefined;
+}
+
+function fullyBrokenPassedIceTrashLimitKey(): string {
+  return "trash_fully_broken_passed_ice:once_per_turn_per_source";
 }
 
 function fullyBrokenPassedIceDerezImplementationForCard(

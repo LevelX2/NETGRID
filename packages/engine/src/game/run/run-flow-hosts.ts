@@ -80,7 +80,7 @@ import {
 import {
   encounterSpecialWindowHost,
   fullyBrokenPassedIcePostPassActions,
-  startupImmolatorPostPassActions,
+  fullyBrokenPassedIceTrashPostPassActions,
   type EncounterSpecialWindowHost,
 } from "./encounter-special-windows";
 import {
@@ -638,7 +638,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ...fullyBrokenPassedIcePostPassActions(
             encounterSpecialWindowHostForState(state),
           ),
-          ...startupImmolatorPostPassActions(
+          ...fullyBrokenPassedIceTrashPostPassActions(
             encounterSpecialWindowHostForState(state),
           ),
         ],

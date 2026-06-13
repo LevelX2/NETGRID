@@ -382,7 +382,7 @@ import {
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
-  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
@@ -807,8 +807,8 @@ export function createTriggerAbilityRuntimeHosts(
             encounterSpecialWindowHostForState(state),
             legalAction,
           ),
-        resolveStartupImmolatorTrashIce: (legalAction) =>
-          resolveStartupImmolatorTrashIceInRunModule(
+        resolveFullyBrokenPassedIceTrash: (legalAction) =>
+          resolveFullyBrokenPassedIceTrashInRunModule(
             encounterSpecialWindowHostForState(state),
             legalAction,
           ),

@@ -472,7 +472,7 @@ export function passedIceFollowupMarkersForCurrentIce(
   viral15PendingPassedIceId?: CardInstanceId;
   passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
-  startupImmolatorPendingPassedIceId?: CardInstanceId;
+  fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
 } {
   const run = mustRun(host.state);
   const passedIceId = run.encounteredIceId;
@@ -492,7 +492,7 @@ export function passedIceFollowupMarkersForCurrentIce(
     run.fullyBrokenIceIds?.includes(passedIceId)
       ? {
           fullyBrokenPassedIcePendingId: passedIceId,
-          startupImmolatorPendingPassedIceId: passedIceId,
+          fullyBrokenPassedIceTrashPendingId: passedIceId,
         }
       : {}),
   };
@@ -755,17 +755,17 @@ export function handlePostPassProgramTrashChoices(
   return { handled: false };
 }
 
-export function clearStartupImmolatorPostPassMarker(
+export function clearFullyBrokenPassedIceTrashPostPassMarker(
   host: EncounterResolutionHost,
 ): void {
   const run = host.state.run;
-  if (!run?.startupImmolatorPendingPassedIceId) return;
+  if (!run?.fullyBrokenPassedIceTrashPendingId) return;
   const {
-    startupImmolatorPendingPassedIceId: _startupPending,
-    ...runWithoutStartupPending
+    fullyBrokenPassedIceTrashPendingId: _fullyBrokenPassedIceTrashPending,
+    ...runWithoutFullyBrokenPassedIceTrashPending
   } = run;
-  void _startupPending;
-  host.state.run = runWithoutStartupPending;
+  void _fullyBrokenPassedIceTrashPending;
+  host.state.run = runWithoutFullyBrokenPassedIceTrashPending;
 }
 
 export function clearFullyBrokenPassedIcePostPassMarker(
