@@ -31,6 +31,7 @@ describe("scored agenda score-time registry", () => {
       ice_transmutation_score_start: "choice_start",
       priority_requisition_score_start: "delegated_host_choice",
       security_purge_score_start: "immediate_effect",
+      security_net_optimization_score_start: "immediate_effect",
       subtype_reveal_economy_score_start: "choice_start",
     });
   });
@@ -56,6 +57,11 @@ describe("scored agenda score-time registry", () => {
         kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
       } as never)?.id,
     ).toBe("corporate_downsizing_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "choose_fort_ice_strength_bonus",
+      } as never)?.id,
+    ).toBe("security_net_optimization_score_start");
     expect(findScoredAgendaScoreTimeResolver(undefined)).toBeUndefined();
   });
 });

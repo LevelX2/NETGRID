@@ -36,6 +36,7 @@ describe("scored agenda sequence contract matrix", () => {
       "data_fort_reclamation_score_start",
       "ice_transmutation_score_start",
       "priority_requisition_score_start",
+      "security_net_optimization_score_start",
       "security_purge_score_start",
       "subtype_reveal_economy_score_start",
     ]);
@@ -71,6 +72,10 @@ describe("scored agenda sequence contract matrix", () => {
       {
         kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
         id: "corporate_downsizing_score_start",
+      },
+      {
+        kind: "choose_fort_ice_strength_bonus",
+        id: "security_net_optimization_score_start",
       },
     ] as const;
 

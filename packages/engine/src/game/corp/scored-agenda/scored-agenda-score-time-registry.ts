@@ -1,5 +1,6 @@
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import { startScoredRezzedIceMarkModifierChoice } from "./ice-transmutation-sequence";
+import { resolveSecurityNetOptimizationOnScore } from "./security-net-optimization-sequence";
 import type {
   ScoredAgendaScoreTimeContext,
   ScoredAgendaScoreTimeResolver,
@@ -75,6 +76,19 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
         host.choices.startCorporateDownsizing(
           cardId,
           scoredAgenda.creditPerAgendaPoint,
+        );
+      },
+    },
+    {
+      id: "security_net_optimization_score_start",
+      kind: "choose_fort_ice_strength_bonus",
+      mode: "immediate_effect",
+      resolveOnScore: ({ host, cardId, instanceBefore, legalAction }) => {
+        resolveSecurityNetOptimizationOnScore(
+          host,
+          cardId,
+          instanceBefore,
+          legalAction,
         );
       },
     },

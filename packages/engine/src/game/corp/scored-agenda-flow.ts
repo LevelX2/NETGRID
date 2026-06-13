@@ -7,7 +7,6 @@ import type {
   LegalAction,
   PlayerAction,
   ResolvedGameEffect,
-  ServerId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
@@ -359,30 +358,6 @@ function startScoreTimeChoices(
     })
   )
     return;
-  if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
-    const selectedServerId =
-      typeof legalAction.payload?.selectedServerId === "string"
-        ? String(legalAction.payload.selectedServerId)
-        : instanceBefore.zone.side === "corp" &&
-            instanceBefore.zone.zone === "serverRoot"
-          ? instanceBefore.zone.serverId
-          : undefined;
-    if (!selectedServerId || selectedServerId === "new_remote")
-      throw new Error(
-        "Security Net Optimization braucht ein gueltiges Remote.",
-      );
-    host.zones.mustServer(selectedServerId as Exclude<ServerId, "new_remote">);
-    host.state.cardInstances[cardId] = {
-      ...host.cards.mustInstance(cardId),
-      selectedServerId: selectedServerId as Exclude<ServerId, "new_remote">,
-    };
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      securityNetOptimizationActive: true,
-      selectedServerId,
-      securityNetOptimizationServerId: selectedServerId,
-    };
-  }
 }
 
 export function handleScoredAgendaFlowChoice(
