@@ -8233,6 +8233,134 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     },
   );
 
+  it.each([
+    [
+      "Project Babylon difficulty + 1",
+      "onr_v1_214_project-babylon",
+      3,
+      "2",
+      "1",
+      "false",
+      "1",
+      false,
+    ],
+    [
+      "Project Babylon difficulty + 2",
+      "onr_v1_214_project-babylon",
+      4,
+      "2",
+      "2",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Babylon difficulty + 3",
+      "onr_v1_214_project-babylon",
+      5,
+      "2",
+      "3",
+      "false",
+      "1",
+      false,
+    ],
+    [
+      "Project Babylon difficulty + 4",
+      "onr_v1_214_project-babylon",
+      6,
+      "2",
+      "4",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Venice three over difficulty",
+      "onr_proteus_007_project-venice",
+      6,
+      "3",
+      "3",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Zurich two over difficulty",
+      "onr_proteus_008_project-zurich",
+      4,
+      "2",
+      "2",
+      "true",
+      "0",
+      true,
+    ],
+  ])(
+    "classifies exact overadvance threshold for %s",
+    (
+      _caseName,
+      definitionId,
+      advancementCounters,
+      thresholdSize,
+      afterActionOver,
+      hitsThreshold,
+      nextThresholdDistance,
+      expectsThresholdClass,
+    ) => {
+      const input = corpAdvancementDominanceInput(
+        `ai-exact-overadvance-${definitionId}-${advancementCounters}`,
+        (state) => {
+          addCorpRootToServerForTest(state, "remote_1", "simple_agenda", 2);
+          addCorpRootToServerForTest(
+            state,
+            "remote_2",
+            definitionId,
+            advancementCounters,
+          );
+        },
+      );
+      const teamRestructuring = teamRestructuringAction(input);
+      const agendaAdvance = advanceActionForDefinition(input, "simple_agenda");
+      const targetAdvance = advanceActionForDefinition(input, definitionId);
+
+      expect(teamRestructuring).toBeDefined();
+      expect(agendaAdvance).toBeDefined();
+      expect(targetAdvance).toBeDefined();
+      if (!teamRestructuring || !agendaAdvance || !targetAdvance)
+        throw new Error(
+          `Missing exact-overadvance fixture actions for ${definitionId}`,
+        );
+
+      const decision = chooseCorpAction({
+        ...input,
+        legalActions: [teamRestructuring, agendaAdvance, targetAdvance],
+      });
+      const debugText = JSON.stringify(decision.decisionDebug);
+
+      expect(decision.actionId).toBe(teamRestructuring.actionId);
+      expect(debugText).toContain(
+        `overadvance_threshold_size:${thresholdSize}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_after_action_over:${afterActionOver}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_hits_threshold:${hitsThreshold}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_next_threshold_distance:${nextThresholdDistance}`,
+      );
+      if (expectsThresholdClass) {
+        expect(debugText).toContain(
+          "advancement_target_class:agenda_overadvance_threshold",
+        );
+      } else {
+        expect(debugText).not.toContain(
+          "advancement_target_class:agenda_overadvance_threshold",
+        );
+      }
+    },
+  );
+
   it("does not let Team Restructuring win automatically with two weak counter banks", () => {
     const input = corpAdvancementDominanceInput(
       "ai-advancement-net-value-two-weak-vapors",
