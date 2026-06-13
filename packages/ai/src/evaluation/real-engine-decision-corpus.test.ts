@@ -15,7 +15,9 @@ import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import {
   REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
+  SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS,
   buildRealEngineDecisionCorpusScenarios,
+  buildSelfplayPromotedRealEngineCorpusScenarios,
 } from "./real-engine-decision-corpus-fixtures";
 import {
   buildRealEngineDecisionCorpus,
@@ -368,6 +370,26 @@ describe("RealEngineDecisionCorpus", () => {
     );
 
     expect(source).not.toMatch(/\bstate\.(?:runner|corp|cardInstances)\b[^\n;]*=/);
+  });
+
+  it("promotes selfplay findings into a separate real Engine corpus slice", () => {
+    const scenarios = buildSelfplayPromotedRealEngineCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+
+    expect(scenarios.map((scenario) => scenario.scenarioId)).toEqual(
+      SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS,
+    );
+    expect(samples).toHaveLength(5);
+    expect(samples.every((sample) => sample.legalActionCount > 0)).toBe(true);
+    expect(samples.every((sample) => sample.trace.noRuntimeEffect)).toBe(true);
+    expect(
+      samples.every((sample) =>
+        sample.frame.evidence.some((entry) =>
+          entry.startsWith("selfplay_promotion:"),
+        ),
+      ),
+    ).toBe(true);
+    expect(containsForbiddenSemanticMarker(samples)).toBe(false);
   });
 
   it("validates play-strength pilot scopes against real Engine corpus samples", () => {

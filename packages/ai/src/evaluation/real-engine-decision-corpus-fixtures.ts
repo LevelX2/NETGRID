@@ -671,6 +671,62 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
   ];
 }
 
+export const SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS = [
+  "selfplay_promoted_runner_remote_no_payoff_pivot",
+  "selfplay_promoted_runner_safe_central_access",
+  "selfplay_promoted_runner_damage_buffer",
+  "selfplay_promoted_corp_score_window",
+  "selfplay_promoted_corp_rez_decline",
+] as const;
+
+export function buildSelfplayPromotedRealEngineCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
+  return [
+    runnerScenario(
+      "selfplay_promoted_runner_remote_no_payoff_pivot",
+      "selfplay-promoted-runner-remote-no-payoff",
+      (fixture) => {
+        fixture.withRunnerCredits(5).ensureServer("remote_3");
+      },
+      ["selfplay_promotion:repeated_known_no_payoff_remote"],
+      "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+    ),
+    runnerScenario(
+      "selfplay_promoted_runner_safe_central_access",
+      "selfplay-promoted-runner-safe-central",
+      (fixture) => {
+        fixture.withRunnerCredits(8);
+      },
+      ["selfplay_promotion:missed_safe_access"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    runnerScenario(
+      "selfplay_promoted_runner_damage_buffer",
+      "selfplay-promoted-runner-damage-buffer",
+      (fixture) => {
+        fixture.withRunnerCredits(4).withRunnerGripSize(1);
+      },
+      ["selfplay_promotion:ignored_damage_risk"],
+      "onr_origin_runner_ai_snapshot_v1",
+    ),
+    corpScenario(
+      "selfplay_promoted_corp_score_window",
+      "selfplay-promoted-corp-score-window",
+      (fixture) => {
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 3);
+      },
+      ["selfplay_promotion:missed_score_window"],
+      "onr_origin_corp_ai_snapshot_v1",
+    ),
+    corpRezScenario(
+      "selfplay_promoted_corp_rez_decline",
+      "selfplay-promoted-corp-rez-decline",
+      0,
+      "onr_origin_corp_ai_snapshot_v1",
+      ["selfplay_promotion:bad_rez_spend"],
+    ),
+  ];
+}
+
 function runnerScenario(
   scenarioId: string,
   seed: string,
@@ -704,6 +760,7 @@ function corpRezScenario(
   seed: string,
   corpCredits: number,
   deckSnapshotId?: string,
+  evidence: readonly string[] = [],
 ): RealEngineDecisionCorpusScenario {
   let state = toRunnerTurn(
     createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
@@ -720,7 +777,7 @@ function corpRezScenario(
     "corp",
     state,
   )
-    .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`])
+    .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`, ...evidence])
     .withDeckDoctrine(deckSnapshotId)
     .build();
 }
