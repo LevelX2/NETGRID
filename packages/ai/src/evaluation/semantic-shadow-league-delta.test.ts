@@ -78,6 +78,12 @@ describe("SemanticShadowLeagueDelta", () => {
     expect(delta.topDisagreementReasonDelta.unchangedReasons).toEqual(
       current.topDisagreementReasons.slice(1).sort(),
     );
+    expect(delta.followupCandidateCountDelta).toMatchObject({
+      baseline: current.followupCandidates.length - 1,
+      current: current.followupCandidates.length,
+      delta: 1,
+      direction: "regressed",
+    });
     expect(delta.evidence).toEqual(
       expect.arrayContaining([
         "semantic_shadow_league_delta:report_only",
@@ -145,6 +151,7 @@ function syntheticBaselineBeforeCurrentGrowth(
       },
     },
     topDisagreementReasons: current.topDisagreementReasons.slice(1),
+    followupCandidates: current.followupCandidates.slice(1),
     evidence: [
       ...current.evidence,
       `synthetic_baseline_removed:${firstBasicSetupScenarioId}`,

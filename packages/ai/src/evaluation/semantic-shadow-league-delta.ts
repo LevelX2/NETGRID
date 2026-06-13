@@ -61,6 +61,7 @@ export type SemanticShadowLeagueDeltaReport = {
     SemanticShadowLeagueScopeBreakdownDelta
   >;
   topDisagreementReasonDelta: SemanticShadowLeagueTopDisagreementReasonDelta;
+  followupCandidateCountDelta: SemanticShadowLeagueMetricDelta;
   redactionStatus: "passed";
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
@@ -118,6 +119,11 @@ export function buildSemanticShadowLeagueDeltaReport({
     topDisagreementReasonDelta: buildTopDisagreementReasonDelta(
       baseline.topDisagreementReasons,
       current.topDisagreementReasons,
+    ),
+    followupCandidateCountDelta: buildLowerIsBetterDelta(
+      "followupCandidateCount",
+      baseline.followupCandidates.length,
+      current.followupCandidates.length,
     ),
     redactionStatus: "passed",
     productiveUseAllowed: false,

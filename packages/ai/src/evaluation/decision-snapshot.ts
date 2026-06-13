@@ -15,3 +15,15 @@ export type DecisionSnapshot = {
     preferredGoalFamilies?: TacticalGoalUtilityFamily[];
   };
 };
+
+export type ShadowLeagueFollowupCandidate = {
+  scenarioId: string;
+  issueClass:
+    | "expectation_mismatch"
+    | "forbidden_mistake"
+    | "pilot_blocked"
+    | "target_choice_gap"
+    | "doctrine_goal_conflict";
+  suggestedPackage: string;
+  evidence: string[];
+};

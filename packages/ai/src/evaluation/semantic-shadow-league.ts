@@ -17,6 +17,7 @@ import {
   redactSemanticString,
 } from "../diagnostics/semantic-redaction";
 import { classifyDecisionTraceMistakes } from "./decision-snapshot-suite";
+import type { ShadowLeagueFollowupCandidate } from "./decision-snapshot";
 import type { AiMistakeClass } from "./mistake-taxonomy";
 import type { RealEngineDecisionCorpusSample } from "./real-engine-decision-corpus";
 
@@ -124,6 +125,7 @@ export type SemanticShadowLeagueReport = {
     pilotCutoverReadiness: SemanticShadowLeaguePilotCutoverReadinessMatrix;
   };
   topDisagreementReasons: string[];
+  followupCandidates: ShadowLeagueFollowupCandidate[];
   redactionStatus: "passed";
   scenarios: SemanticShadowLeagueScenarioReport[];
   productiveUseAllowed: false;
@@ -203,6 +205,7 @@ export function buildSemanticShadowLeagueReport(
     },
     metrics: buildLeagueMetrics(scenarios),
     topDisagreementReasons: topDisagreementReasons(scenarios),
+    followupCandidates: buildFollowupCandidates(scenarios),
     redactionStatus: "passed",
     scenarios,
     productiveUseAllowed: false,
@@ -806,6 +809,79 @@ function topDisagreementReasons(
       ),
     )
     .sort();
+}
+
+function buildFollowupCandidates(
+  scenarios: readonly SemanticShadowLeagueScenarioReport[],
+): ShadowLeagueFollowupCandidate[] {
+  return scenarios
+    .flatMap((scenario) => followupCandidatesForScenario(scenario))
+    .sort(
+      (left, right) =>
+        left.scenarioId.localeCompare(right.scenarioId) ||
+        left.issueClass.localeCompare(right.issueClass),
+    );
+}
+
+function followupCandidatesForScenario(
+  scenario: SemanticShadowLeagueScenarioReport,
+): ShadowLeagueFollowupCandidate[] {
+  const candidates: ShadowLeagueFollowupCandidate[] = [];
+  if (scenario.agreementCompared && scenario.agreement === false) {
+    candidates.push(followupCandidate(scenario, "expectation_mismatch"));
+  }
+  if ((scenario.forbiddenMistakeViolations?.length ?? 0) > 0) {
+    candidates.push(followupCandidate(scenario, "forbidden_mistake"));
+  }
+  const expectedScopes = scenario.expectedPilotEligibleScopes ?? [];
+  if (
+    expectedScopes.length > 0 &&
+    expectedScopes.some((scope) => !scenario.pilotEligibility.scopes.includes(scope))
+  ) {
+    candidates.push(followupCandidate(scenario, "pilot_blocked"));
+  }
+  if (scenario.observedMistakes.includes("target_choice_unavailable")) {
+    candidates.push(followupCandidate(scenario, "target_choice_gap"));
+  }
+  if (scenario.observedMistakes.includes("plan_step_mismatch")) {
+    candidates.push(followupCandidate(scenario, "doctrine_goal_conflict"));
+  }
+  return candidates;
+}
+
+function followupCandidate(
+  scenario: SemanticShadowLeagueScenarioReport,
+  issueClass: ShadowLeagueFollowupCandidate["issueClass"],
+): ShadowLeagueFollowupCandidate {
+  return {
+    scenarioId: scenario.scenarioId,
+    issueClass,
+    suggestedPackage: suggestedPackageForIssue(issueClass),
+    evidence: [
+      `scenario:${scenario.scenarioId}`,
+      `issue_class:${issueClass}`,
+      ...(scenario.topActionType ? [`top_action_type:${scenario.topActionType}`] : []),
+      ...(scenario.topGoalId ? [`top_goal:${scenario.topGoalId}`] : []),
+      ...scenario.observedMistakes.map((mistake) => `observed_mistake:${mistake}`),
+    ].map(safe),
+  };
+}
+
+function suggestedPackageForIssue(
+  issueClass: ShadowLeagueFollowupCandidate["issueClass"],
+): string {
+  switch (issueClass) {
+    case "expectation_mismatch":
+      return "shadow-league-expectation-review";
+    case "forbidden_mistake":
+      return "forbidden-mistake-regression";
+    case "pilot_blocked":
+      return "pilot-scope-readiness-gap";
+    case "target_choice_gap":
+      return "target-choice-shadow-coverage";
+    case "doctrine_goal_conflict":
+      return "doctrine-goal-coverage";
+  }
 }
 
 function countMistakes(

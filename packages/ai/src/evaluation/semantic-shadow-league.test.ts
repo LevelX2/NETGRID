@@ -154,6 +154,26 @@ describe("SemanticShadowLeague", () => {
       "runner_real_tag_cleanup:expected=remove_tag:observed=start_run",
       "runner_real_tagged_remove_before_run:expected=remove_tag:observed=start_run",
     ]);
+    expect(report.followupCandidates).toHaveLength(7);
+    expect(report.followupCandidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scenarioId: "corp_real_advance_score_window",
+          issueClass: "forbidden_mistake",
+          suggestedPackage: "forbidden-mistake-regression",
+          evidence: expect.arrayContaining([
+            "scenario:corp_real_advance_score_window",
+            "issue_class:forbidden_mistake",
+            "observed_mistake:missed_score_window",
+          ]),
+        }),
+        expect.objectContaining({
+          scenarioId: "runner_real_tag_cleanup",
+          issueClass: "expectation_mismatch",
+          suggestedPackage: "shadow-league-expectation-review",
+        }),
+      ]),
+    );
     expect(report.redactionStatus).toBe("passed");
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
