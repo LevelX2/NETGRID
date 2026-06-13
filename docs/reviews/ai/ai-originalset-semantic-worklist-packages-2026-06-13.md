@@ -75,3 +75,25 @@ Abdeckung:
 - Survival-Signale, Flatline-Prävention und Damage-Prevention werden getrennt geprüft.
 - `risk.self_brain_damage`, `risk.action_loss` und `risk.random_damage` bleiben explizite RiskProjection-Flächen.
 - Damage-Prevention-Type-Precision bleibt diagnostisch; keine Runtime- oder Engine-Freigabe.
+
+## AI-MAT4-16 Umsetzung: Corp Score/Advance Paket 1
+
+Status: `diagnostic_tests_added`
+
+Scope:
+
+- Project Consultants
+- Management Shake-Up
+- Systematic Layoffs
+- Team Restructuring
+- Falsified-Transactions Expert
+- Chicago Branch
+- Vapor Ops
+- Project Babylon
+- Project Venice
+
+Abdeckung:
+
+- `advance.counter_placement`, `advance.counter_transfer`, `advance.overadvance_support` und `advance.counter_cashout` werden getrennt als funktionale Signale geprüft.
+- Corp-Scoreline-Doctrine-Links bleiben diagnostisch und erzeugen keine Scoring-Neugewichtung.
+- TargetProfile-Gaps bleiben sichtbar; keine produktive Karten-Sonderlogik.

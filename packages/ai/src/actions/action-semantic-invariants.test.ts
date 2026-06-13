@@ -277,6 +277,36 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers corp score advance worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Project Consultants", ["advance.counter_placement"]),
+      corpSemanticProfile("Management Shake-Up", ["advance.counter_transfer"]),
+      corpSemanticProfile("Systematic Layoffs", ["advance.counter_cashout"]),
+      corpSemanticProfile("Team Restructuring", ["advance.counter_transfer"]),
+      corpSemanticProfile("Falsified-Transactions Expert", [
+        "advance.counter_cashout",
+      ]),
+      corpSemanticProfile("Chicago Branch", ["advance.overadvance_support"]),
+      corpSemanticProfile("Vapor Ops", ["corp_scoreline.doctrine_link"]),
+      corpSemanticProfile("Project Babylon", ["advance.overadvance_support"]),
+      corpSemanticProfile("Project Venice", ["advance.overadvance_support"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "advance.counter_placement",
+        "advance.counter_transfer",
+        "advance.overadvance_support",
+        "advance.counter_cashout",
+        "corp_scoreline.doctrine_link",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerBreakerSearchProfile(
@@ -336,6 +366,38 @@ function runnerRiskProfile(
             status: "gap",
             issues: ["risk_projection_gap"],
             evidence: ["Damage prevention precision remains diagnostic."],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpSemanticProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_semantic`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "corp.doctrine.remote_scoring_scoreline",
+            role: "scoreline_support",
+            confidence: "medium",
+            evidence: `${title} is classified by functional corp scoreline semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_visible_scoreline_target",
+            status: "gap",
+            issues: ["target_choice_gap"],
+            evidence: ["Corp target profile remains diagnostic."],
           },
         ],
       },
