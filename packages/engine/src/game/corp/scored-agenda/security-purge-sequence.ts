@@ -13,6 +13,7 @@ import type {
 } from "./scored-agenda-sequence-host";
 import {
   applySequencePayloadPatch,
+  applySequenceResolution,
   corpSequenceContextPayload,
 } from "./scored-agenda-sequence-types";
 
@@ -110,33 +111,33 @@ export function resolveSecurityPurgeAgendaPurge(
     host.zones.moveCardToArchivesFaceup(cardId);
     trashedIds.push(cardId);
   }
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    ...basePayload,
-    ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
-    ...corpSequenceContextPayload({
-      step: SECURITY_PURGE_STEPS.trashNonIce,
-      revealedIceCount: 0,
-      pendingTrashCount: 0,
-      installedIceCount: 0,
-      trashedCount: trashedIds.length,
-      securityPurgeTargetChoiceOpened: false,
-      trashedDefinitionIds: trashedIds
-        .map((id) => host.cards.definitionFor(id).id)
-        .join(","),
-    }),
-  };
-  return {
-    handled: true,
+  return applySequenceResolution(host.legalAction, {
+    result: {
+      handled: true,
+      installedCardIds: [],
+      trashedCardIds: trashedIds,
+      shownCardDefinitionIds: revealedIds.map(
+        (id) => host.cards.definitionFor(id).id,
+      ),
+      shownCount: revealedIds.length,
+    },
     stateChanged: true,
-    installedCardIds: [],
-    trashedCardIds: trashedIds,
-    shownCardDefinitionIds: revealedIds.map(
-      (id) => host.cards.definitionFor(id).id,
-    ),
-    shownCount: revealedIds.length,
-    resolvedPayload: host.legalAction.payload ?? {},
-  };
+    payloadPatch: {
+      ...basePayload,
+      ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
+      ...corpSequenceContextPayload({
+        step: SECURITY_PURGE_STEPS.trashNonIce,
+        revealedIceCount: 0,
+        pendingTrashCount: 0,
+        installedIceCount: 0,
+        trashedCount: trashedIds.length,
+        securityPurgeTargetChoiceOpened: false,
+        trashedDefinitionIds: trashedIds
+          .map((id) => host.cards.definitionFor(id).id)
+          .join(","),
+      }),
+    },
+  });
 }
 
 export function resolveSecurityPurgeInstallTargetChoice(
@@ -202,42 +203,42 @@ export function resolveSecurityPurgeInstallTargetChoice(
     trashedIds.push(cardId);
   }
   delete host.state.pendingChoice;
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    ...securityPurgeBasePayload(host, agendaId, revealedIds),
-    ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
-    ...corpSequenceContextPayload({
-      step: SECURITY_PURGE_STEPS.installAndRezIce,
-      revealedIceCount: installedIce.length,
-      pendingTrashCount: 0,
-      installedIceCount: installedIce.length,
-      trashedCount: trashedIds.length,
-      securityPurgeTargetChoiceOpened: false,
-      securityPurgeTargetChoiceResolved: true,
-      installedIceDefinitionIds: installedIce
-        .map((entry) => host.cards.definitionFor(entry.cardId).id)
-        .join(","),
-      installedIceServerLabels: installedIce
-        .map((entry) => entry.server.label)
-        .join(","),
-      trashedDefinitionIds: trashedIds
-        .map((id) => host.cards.definitionFor(id).id)
-        .join(","),
-    }),
-  };
-  return {
-    handled: true,
+  return applySequenceResolution(host.legalAction, {
+    result: {
+      handled: true,
+      deletePendingChoice: true,
+      installedCardIds: installedIce.map((entry) => entry.cardId),
+      rezzedCardIds: installedIce.map((entry) => entry.cardId),
+      trashedCardIds: trashedIds,
+      shownCardDefinitionIds: revealedIds.map(
+        (id) => host.cards.definitionFor(id).id,
+      ),
+      shownCount: revealedIds.length,
+    },
     stateChanged: true,
-    deletePendingChoice: true,
-    installedCardIds: installedIce.map((entry) => entry.cardId),
-    rezzedCardIds: installedIce.map((entry) => entry.cardId),
-    trashedCardIds: trashedIds,
-    shownCardDefinitionIds: revealedIds.map(
-      (id) => host.cards.definitionFor(id).id,
-    ),
-    shownCount: revealedIds.length,
-    resolvedPayload: host.legalAction.payload ?? {},
-  };
+    payloadPatch: {
+      ...securityPurgeBasePayload(host, agendaId, revealedIds),
+      ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
+      ...corpSequenceContextPayload({
+        step: SECURITY_PURGE_STEPS.installAndRezIce,
+        revealedIceCount: installedIce.length,
+        pendingTrashCount: 0,
+        installedIceCount: installedIce.length,
+        trashedCount: trashedIds.length,
+        securityPurgeTargetChoiceOpened: false,
+        securityPurgeTargetChoiceResolved: true,
+        installedIceDefinitionIds: installedIce
+          .map((entry) => host.cards.definitionFor(entry.cardId).id)
+          .join(","),
+        installedIceServerLabels: installedIce
+          .map((entry) => entry.server.label)
+          .join(","),
+        trashedDefinitionIds: trashedIds
+          .map((id) => host.cards.definitionFor(id).id)
+          .join(","),
+      }),
+    },
+  });
 }
 
 function securityPurgeBasePayload(
