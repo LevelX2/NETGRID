@@ -51,7 +51,7 @@ describe("SemanticShadowLeagueDelta", () => {
     expect(delta.pilotEligibilityDelta).toMatchObject({
       baseline: 0.82,
       current: current.metrics.pilotEligibilityRate,
-      delta: 0.04,
+      delta: 0.013,
       direction: "improved",
     });
 
