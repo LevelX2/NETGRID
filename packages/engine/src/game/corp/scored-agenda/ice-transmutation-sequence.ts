@@ -7,6 +7,7 @@ import type {
 import { cardImplementationPrimitivePayload } from "../../../ability-engine/card-implementation-primitives";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 const SCORED_ICE_MARK_CHOICE_SOURCE =
   "card_implementation_primitive.select_rezzed_ice_mark_modifier";
@@ -45,13 +46,12 @@ export function startScoredRezzedIceMarkModifierChoice(
     abilityKey: scoredAgenda.abilityKey,
   });
   if (targets.length === 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
+    applySequencePayloadPatch(legalAction, {
       ...primitivePayload,
       agendaAbility: "v1920_ice_transmutation",
       scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
       iceTransmutationSkippedReason: "no_rezzed_ice",
-    };
+    });
     return;
   }
   host.state.pendingChoice = {
@@ -75,8 +75,7 @@ export function startScoredRezzedIceMarkModifierChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "public",
   };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     ...primitivePayload,
     agendaAbility: "v1920_ice_transmutation_choice",
     cardImplementationTargetKind: scoredAgenda.target,
@@ -87,7 +86,7 @@ export function startScoredRezzedIceMarkModifierChoice(
     cardImplementationDuplicateEachPrintedSubroutinePerCounter:
       scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
     eligibleIceCount: targets.length,
-  };
+  });
 }
 
 export function resolveScoredRezzedIceMarkModifierChoice(
@@ -142,8 +141,7 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     targetIceId,
     scoredAgenda.counterType,
   );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  applySequencePayloadPatch(legalAction, {
     ...cardImplementationPrimitivePayload({
       sourceCardId: agendaId as CardInstanceId,
       sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId)
@@ -167,7 +165,7 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     duplicatedSubroutineCount:
       (host.cards.definitionFor(targetIceId).subroutines?.length ?? 0) *
       markCount,
-  };
+  });
 }
 
 function rezzedInstalledIceMarkModifierTargetIds(

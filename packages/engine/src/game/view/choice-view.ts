@@ -10,6 +10,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { definitionFor, visibleOwnCard } from "./card-view";
+import { sanitizeChoiceViewForSurface } from "./surface-policy";
 
 export function visibleChoice(
   state: GameState,
@@ -20,31 +21,34 @@ export function visibleChoice(
   const cardSearchPresentation =
     choice.cardSearchPresentation ??
     cardSearchPresentationForChoice(choice, stackSearchResolution);
-  return {
-    choiceId: choice.choiceId,
-    side: choice.side,
-    source: choice.source,
-    prompt: choice.prompt,
-    kind: choice.kind,
-    options: choice.options.map((option) => {
-      const card = visibleChoiceCardForOption(state, choice, option);
-      const value = visibleChoiceOptionValue(state, choice, option);
-      return {
-        id: option.id,
-        label: option.label,
-        ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
-        ...(option.selectable === false ? { selectable: false } : {}),
-        ...(value !== undefined ? { value } : {}),
-        ...(card ? { card } : {}),
-      };
-    }),
-    minSelections: choice.minSelections,
-    maxSelections: choice.maxSelections,
-    stateVersion: choice.stateVersion,
-    visibility: choice.visibility,
-    ...(stackSearchResolution ? { stackSearchResolution } : {}),
-    ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
-  };
+  return sanitizeChoiceViewForSurface(
+    {
+      choiceId: choice.choiceId,
+      side: choice.side,
+      source: choice.source,
+      prompt: choice.prompt,
+      kind: choice.kind,
+      options: choice.options.map((option) => {
+        const card = visibleChoiceCardForOption(state, choice, option);
+        const value = visibleChoiceOptionValue(state, choice, option);
+        return {
+          id: option.id,
+          label: option.label,
+          ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+          ...(option.selectable === false ? { selectable: false } : {}),
+          ...(value !== undefined ? { value } : {}),
+          ...(card ? { card } : {}),
+        };
+      }),
+      minSelections: choice.minSelections,
+      maxSelections: choice.maxSelections,
+      stateVersion: choice.stateVersion,
+      visibility: choice.visibility,
+      ...(stackSearchResolution ? { stackSearchResolution } : {}),
+      ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
+    },
+    "actor_private",
+  );
 }
 
 function visibleChoiceOptionValue(
@@ -110,8 +114,12 @@ function isRunnerStackArrangeChoice(choice: ChoiceRequest): boolean {
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v098.arrange_stack_top2") ||
       choice.source.startsWith("v1911.arrange_stack_top2") ||
-      choice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
-      choice.source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest"))
+      choice.source.startsWith(
+        "v1922.runner_stack_top5_choose_one_arrange_rest",
+      ) ||
+      choice.source.startsWith(
+        "p3_37.runner_stack_top5_choose_one_arrange_rest",
+      ))
   );
 }
 
@@ -229,9 +237,8 @@ export function visibleChoiceCardForOption(
   const isPriorityRequisitionChoice = choice.source.startsWith(
     "v162.priority_requisition",
   );
-  const isP333PrivateLookChoice = choice.source.startsWith(
-    "p3_33.private_look",
-  );
+  const isP333PrivateLookChoice =
+    choice.source.startsWith("p3_33.private_look");
   if (
     !cardSearchPresentation &&
     !isStackChoice &&

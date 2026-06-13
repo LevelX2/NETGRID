@@ -21,6 +21,7 @@ import type {
 } from "./scored-agenda-sequence-host";
 import {
   applySequencePayloadPatch,
+  applySequenceResolution,
   corpSequenceContextPayload,
 } from "./scored-agenda-sequence-types";
 
@@ -123,18 +124,19 @@ export function startDataFortReclamationChoice(
       return hiddenCardChoiceOption({ cardId, label: definition.title });
     });
   if (options.length === 0) {
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      ...primitivePayload,
-      ...corpSequenceContextPayload({
-        step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-        v1922CorpAgendaAbility: "data_fort_reclamation",
-        sourceAgendaId: agendaId,
-        dataFortReclamationChoiceOpened: false,
-        dataFortReclamationCandidateCount: 0,
-      }),
-    };
-    return { handled: true, resolvedPayload: host.legalAction.payload ?? {} };
+    return applySequenceResolution(host.legalAction, {
+      result: { handled: true },
+      payloadPatch: {
+        ...primitivePayload,
+        ...corpSequenceContextPayload({
+          step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
+          v1922CorpAgendaAbility: "data_fort_reclamation",
+          sourceAgendaId: agendaId,
+          dataFortReclamationChoiceOpened: false,
+          dataFortReclamationCandidateCount: 0,
+        }),
+      },
+    });
   }
   host.state.pendingChoice = {
     choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_${host.state.stateVersion + 1}`,
@@ -148,27 +150,31 @@ export function startDataFortReclamationChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
-  applySequencePayloadPatch(host.legalAction, {
-    ...primitivePayload,
-    ...corpSequenceContextPayload({
-      step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-      v1922CorpAgendaAbility: "data_fort_reclamation",
-      sourceAgendaId: agendaId,
-      cardImplementationSourceZone: sequence.sourceZone,
-      cardImplementationTargetServer: sequence.targetServer,
-      cardImplementationAllowedCards: sequence.allowedCards,
-      cardImplementationMaxCards: sequence.maxCards,
-      cardImplementationTemporaryCreditBudget: sequence.temporaryCredits.amount,
-      dataFortReclamationChoiceOpened: true,
-      dataFortReclamationCandidateCount: options.length,
-      dataFortReclamationMaxSelections: Math.min(
-        sequence.maxCards,
-        options.length,
-      ),
-    }),
-    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
+  return applySequenceResolution(host.legalAction, {
+    result: { handled: true },
+    stateChanged: true,
+    payloadPatch: {
+      ...primitivePayload,
+      ...corpSequenceContextPayload({
+        step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
+        v1922CorpAgendaAbility: "data_fort_reclamation",
+        sourceAgendaId: agendaId,
+        cardImplementationSourceZone: sequence.sourceZone,
+        cardImplementationTargetServer: sequence.targetServer,
+        cardImplementationAllowedCards: sequence.allowedCards,
+        cardImplementationMaxCards: sequence.maxCards,
+        cardImplementationTemporaryCreditBudget:
+          sequence.temporaryCredits.amount,
+        dataFortReclamationChoiceOpened: true,
+        dataFortReclamationCandidateCount: options.length,
+        dataFortReclamationMaxSelections: Math.min(
+          sequence.maxCards,
+          options.length,
+        ),
+      }),
+      ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
+    },
   });
-  return { handled: true, stateChanged: true };
 }
 
 /**

@@ -1,0 +1,494 @@
+{
+  "schemaVersion": "ai159-opportunity-state-mining-v1",
+  "generatedAt": "2026-06-13T06:07:40.850Z",
+  "gitHead": "0f889848",
+  "source": {
+    "sameStateProbe": "docs/reviews/ai/ai149-same-state-challenger-probe-2026-06-12.json",
+    "progressLabels": "docs/reviews/ai/ai132-progress-delta-labeler-2026-06-12.json"
+  },
+  "redaction": {
+    "safe": true,
+    "forbiddenMarkers": []
+  },
+  "aggregate": {
+    "cases": 17,
+    "categoryCounts": {
+      "no_opportunity_state_found": 15,
+      "opportunity_target_context_missing": 2
+    },
+    "opportunitySameStateBetter": 0,
+    "opportunityTargetContextMissing": 2,
+    "noOpportunityStateFound": 15
+  },
+  "cases": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "advance_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 152,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "steal_agenda",
+        "progressLabel": "progress_steal"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "historicalChallenger": {
+        "actionIndex": 154,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "decline_rez",
+        "progressLabel": "no_progress_plausible"
+      },
+      "historicalChallenger": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "firstProgressAction": {
+        "actionIndex": 101,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "install_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "opportunity_target_context_missing",
+      "blocker": "no_earlier_legal_action_snapshot_in_failure_corpus"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "resolve_choice",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 141,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "firstProgressAction": {
+        "actionIndex": 101,
+        "side": "corp",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": {
+        "actionIndex": 100,
+        "side": "corp",
+        "actionType": "advance_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "opportunity_target_context_missing",
+      "blocker": "no_earlier_legal_action_snapshot_in_failure_corpus"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "pump_breaker",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "historicalChallenger": {
+        "actionIndex": 158,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "corp",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "historicalChallenger": {
+        "actionIndex": 144,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "historicalChallenger": {
+        "actionIndex": 148,
+        "side": "runner",
+        "actionType": "install_card",
+        "progressLabel": "progress_coverage_install"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "play_event",
+        "progressLabel": "progress_coverage_install"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 143,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "firstProgressAction": {
+        "actionIndex": 101,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "advance_card",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 151,
+        "side": "runner",
+        "actionType": "steal_agenda",
+        "progressLabel": "progress_steal"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "continue_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "resolve_choice",
+        "progressLabel": "no_progress_plausible"
+      },
+      "historicalChallenger": {
+        "actionIndex": 155,
+        "side": "runner",
+        "actionType": "trash_accessed_card",
+        "progressLabel": "progress_trash"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "activated_card_ability",
+        "progressLabel": "progress_coverage_install"
+      },
+      "historicalChallenger": {
+        "actionIndex": 156,
+        "side": "runner",
+        "actionType": "steal_agenda",
+        "progressLabel": "progress_steal"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "corp",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "mandatory_draw",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "activated_card_ability",
+        "progressLabel": "progress_coverage_install"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "activated_card_ability",
+        "progressLabel": "progress_coverage_install"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_plausible"
+      },
+      "historicalChallenger": {
+        "actionIndex": 157,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "corp",
+        "actionType": "rez_ice",
+        "progressLabel": "progress_server_protected"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "break_subroutine",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "historicalChallenger": {
+        "actionIndex": 150,
+        "side": "corp",
+        "actionType": "score_agenda",
+        "progressLabel": "progress_score"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "start_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 150,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "firstProgressAction": {
+        "actionIndex": 104,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "progress_economy_converted"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "corp",
+        "actionType": "end_turn",
+        "progressLabel": "no_progress_stale"
+      },
+      "historicalChallenger": {
+        "actionIndex": 142,
+        "side": "corp",
+        "actionType": "score_agenda",
+        "progressLabel": "progress_score"
+      },
+      "firstProgressAction": {
+        "actionIndex": 101,
+        "side": "runner",
+        "actionType": "start_run",
+        "progressLabel": "progress_reachability_improved"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "terminalLegacy": {
+        "actionIndex": 159,
+        "side": "runner",
+        "actionType": "gain_credit",
+        "progressLabel": "no_progress_plausible"
+      },
+      "historicalChallenger": {
+        "actionIndex": 142,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "firstProgressAction": {
+        "actionIndex": 100,
+        "side": "runner",
+        "actionType": "access_card",
+        "progressLabel": "progress_access"
+      },
+      "precedingSameSideDecision": null,
+      "legalActionSnapshotAvailable": false,
+      "sameStateProgressAlternativeFound": false,
+      "category": "no_opportunity_state_found",
+      "blocker": "no_progress_action_in_endwindow"
+    }
+  ]
+}

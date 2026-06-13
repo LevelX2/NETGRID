@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  sanitizeChoiceViewForSurface,
   sanitizeEventPayloadForSurface,
   sanitizeForSurface,
 } from "./surface-policy";
@@ -74,5 +75,27 @@ describe("surface policy", () => {
         "public_event",
       ),
     ).toThrow(/hidden card data/i);
+  });
+
+  it("rejects actor-private choice labels on public-like choice surfaces", () => {
+    const choice = {
+      choiceId: "choice_1",
+      side: "corp",
+      source: "test",
+      prompt: "Test",
+      kind: "select_option",
+      options: [{ id: "secret", label: "Secret HQ card" }],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+    } as NonNullable<import("@netgrid/shared").PlayerView["pendingChoice"]>;
+
+    expect(() => sanitizeChoiceViewForSurface(choice, "opponent_view")).toThrow(
+      /actor-private labels/i,
+    );
+    expect(sanitizeChoiceViewForSurface(choice, "actor_private")).toEqual(
+      choice,
+    );
   });
 });

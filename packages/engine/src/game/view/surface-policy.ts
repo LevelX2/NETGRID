@@ -1,3 +1,5 @@
+import type { PlayerView } from "@netgrid/shared";
+
 export type SurfaceKind =
   | "actor_private"
   | "opponent_view"
@@ -58,6 +60,35 @@ export function sanitizeEventPayloadForSurface(
     });
   }
   return { ...payload };
+}
+
+export function sanitizeChoiceViewForSurface<
+  TChoice extends NonNullable<PlayerView["pendingChoice"]>,
+>(choice: TChoice, surfaceKind: SurfaceKind): TChoice {
+  if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace") {
+    assertNoHiddenCardLists(
+      choice as unknown as Record<string, unknown>,
+      surfaceKind,
+    );
+    assertNoActorPrivateLabels(
+      choice as unknown as Record<string, unknown>,
+      surfaceKind,
+    );
+    for (const option of choice.options) {
+      assertNoHiddenCardLists(
+        option as unknown as Record<string, unknown>,
+        surfaceKind,
+      );
+      assertNoActorPrivateLabels(
+        option as unknown as Record<string, unknown>,
+        surfaceKind,
+      );
+    }
+  }
+  return {
+    ...choice,
+    options: choice.options.map((option) => ({ ...option })),
+  };
 }
 
 export function assertNoHiddenCardLists(

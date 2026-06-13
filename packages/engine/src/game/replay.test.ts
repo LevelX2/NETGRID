@@ -57,7 +57,11 @@ describe("game replay facade", () => {
           return {
             ok: true,
             state,
-            event: replayEvent(`arch_58_host_result_${calls.length}`, action, state),
+            event: replayEvent(
+              `arch_58_host_result_${calls.length}`,
+              action,
+              state,
+            ),
             publicEvents: [],
             stateHash: hashState(state),
           };
@@ -112,6 +116,23 @@ describe("game replay facade", () => {
     expect(replay.errors).toEqual([
       "Replay failed at arch_58_failed_action: ERR_UNKNOWN_ACTION",
     ]);
+  });
+
+  it("rejects replay public payloads with hidden card lists before applying actions", () => {
+    const initial = createGame({
+      seed: "arch-58-replay-hidden-payload",
+      setupMode: "completed",
+    });
+    const action = replayAction(initial, "corp", "arch_58_action_1");
+    const event = {
+      ...replayEvent("arch_58_hidden_payload", action, initial),
+      publicPayload: { actor: "corp", hqCardIds: "secret_card" },
+    } as GameEvent;
+
+    const replay = replayGameEvents(initial, [event]);
+
+    expect(replay.ok).toBe(false);
+    expect(replay.errors[0]).toContain("unsafe replay public payload");
   });
 });
 

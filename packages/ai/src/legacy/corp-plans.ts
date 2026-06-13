@@ -347,6 +347,23 @@ type CorpAdvancementCounterPlacementProfile = {
   effectOnly: boolean;
 };
 
+type CorpAdvancementCounterWitness =
+  | "score_now"
+  | "score_next_action"
+  | "overadvance_threshold"
+  | "cashout_next_turn"
+  | "transfer_destination_visible"
+  | "none";
+
+type CorpAdvancementCounterTargetAssessment = {
+  card: VisibleCard;
+  serverId: string;
+  value: number;
+  witness: CorpAdvancementCounterWitness;
+  windowValue: number;
+  weakTargetPenalty: number;
+};
+
 type CorpAdvancementCounterPlacementAssessment = {
   dominatedByBasicAdvance: boolean;
   selectedTargets: number;
@@ -354,6 +371,13 @@ type CorpAdvancementCounterPlacementAssessment = {
   basicAdvanceEquivalentAvailable: boolean;
   primaryCountersAdded: number;
   secondCounterValue: number;
+  bestBasicEquivalent: "advance_card" | "gain_credit" | "draw_card";
+  cardSpendPenalty: number;
+  compressionValue: number;
+  windowValue: number;
+  weakTargetPenalty: number;
+  netAdvancementValue: number;
+  advancementWitness: CorpAdvancementCounterWitness;
   scoreModifier: number;
   evidence: string[];
 };
@@ -6613,20 +6637,58 @@ function corpAdvancementCounterPlacementAssessment(
     profile.maxTargets,
     meaningfulTargets.length,
   );
+  const selectedTargetAssessments = meaningfulTargets.slice(0, selectedTargets);
   const basicAdvanceEquivalentAvailable = meaningfulTargets.length > 0;
+  const bestBasicEquivalent: "advance_card" | "gain_credit" | "draw_card" =
+    basicAdvanceEquivalentAvailable
+      ? "advance_card"
+      : input.legalActions.some((candidate) => candidate.type === "gain_credit")
+        ? "gain_credit"
+        : "draw_card";
   const secondCounterValue =
     selectedTargets >= 2 ? (meaningfulTargets[1]?.value ?? 0) : 0;
+  const advancementWitness = bestCorpAdvancementCounterWitness(
+    selectedTargetAssessments,
+  );
+  const boardDeltaValue = selectedTargetAssessments.reduce(
+    (sum, target) => sum + target.value,
+    0,
+  );
+  const windowValue = selectedTargetAssessments.reduce(
+    (sum, target) => sum + target.windowValue,
+    0,
+  );
+  const weakTargetPenalty = selectedTargetAssessments.reduce(
+    (sum, target) => sum + target.weakTargetPenalty,
+    0,
+  );
+  const compressionValue =
+    selectedTargets >= 2
+      ? selectedTargetAssessments.some(
+          (target) =>
+            target.witness !== "none" && target.witness !== "cashout_next_turn",
+        )
+        ? 80
+        : 10
+      : 0;
+  const cardSpendPenalty = 90 + actionCreditCost(action) * 20;
+  const netAdvancementValue =
+    boardDeltaValue +
+    windowValue +
+    compressionValue -
+    cardSpendPenalty -
+    weakTargetPenalty;
   const dominatedByBasicAdvance =
     profile.effectOnly &&
     profile.counterPerTarget === 1 &&
     profile.distinctTargets &&
-    selectedTargets <= 1 &&
-    basicAdvanceEquivalentAvailable;
+    basicAdvanceEquivalentAvailable &&
+    (selectedTargets <= 1 || netAdvancementValue <= 0);
   const scoreModifier = dominatedByBasicAdvance
     ? -260
-    : secondCounterValue > 0
-      ? Math.min(130, 55 + secondCounterValue)
-      : -45;
+    : netAdvancementValue > 0
+      ? Math.min(130, Math.round(netAdvancementValue / 2))
+      : Math.max(-180, Math.round(netAdvancementValue / 2));
   const sourceDefinitionId =
     sourceCardForAction(input, action)?.definitionId ?? "unknown";
   const evidence = [
@@ -6640,6 +6702,13 @@ function corpAdvancementCounterPlacementAssessment(
     `dominated_by_basic_advance:${dominatedByBasicAdvance}`,
     `card_spend_without_incremental_counter_value:${dominatedByBasicAdvance}`,
     `advancement_second_counter_value:${secondCounterValue}`,
+    `best_basic_equivalent:${bestBasicEquivalent}`,
+    `card_spend_penalty:${cardSpendPenalty}`,
+    `compression_value:${compressionValue}`,
+    `window_value:${windowValue}`,
+    `weak_target_penalty:${weakTargetPenalty}`,
+    `net_advancement_value:${netAdvancementValue}`,
+    `advancement_witness:${advancementWitness}`,
     ...(dominatedByBasicAdvance
       ? [
           "advancement_counter_placement_dominated_by_basic_advance",
@@ -6656,6 +6725,13 @@ function corpAdvancementCounterPlacementAssessment(
     basicAdvanceEquivalentAvailable,
     primaryCountersAdded: profile.counterPerTarget,
     secondCounterValue,
+    bestBasicEquivalent,
+    cardSpendPenalty,
+    compressionValue,
+    windowValue,
+    weakTargetPenalty,
+    netAdvancementValue,
+    advancementWitness,
     scoreModifier,
     evidence,
   };
@@ -6689,7 +6765,7 @@ function corpAdvancementCounterPlacementProfileForAction(
 function corpBasicAdvanceEquivalentTargets(
   input: AiDecisionInput,
   context: CorpEvaluationContext,
-): Array<{ card: VisibleCard; serverId: string; value: number }> {
+): CorpAdvancementCounterTargetAssessment[] {
   return input.legalActions
     .filter(
       (action) => action.side === "corp" && action.type === "advance_card",
@@ -6703,19 +6779,19 @@ function corpBasicAdvanceEquivalentTargets(
         serverId: string;
       } => Boolean(located),
     )
-    .map((located) => ({
-      ...located,
-      value: corpAdvancementTargetValue(input, located, context),
-    }));
+    .map((located) => corpAdvancementTargetAssessment(input, located, context))
+    .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+      Boolean(target),
+    );
 }
 
-function corpAdvancementTargetValue(
+function corpAdvancementTargetAssessment(
   input: AiDecisionInput,
   located: { card: VisibleCard; serverId: string },
   context: CorpEvaluationContext,
-): number {
+): CorpAdvancementCounterTargetAssessment | undefined {
   const definitionId = located.card.definitionId;
-  if (!definitionId) return 0;
+  if (!definitionId) return undefined;
   const runtime = RUNTIME_CARDS[definitionId];
   const demo = DEMO_CARDS_BY_ID[definitionId];
   const type = located.card.type ?? runtime?.type ?? demo?.type;
@@ -6740,22 +6816,79 @@ function corpAdvancementTargetValue(
     );
     const contestValue =
       contest.capacity === "low" ? 35 : contest.capacity === "high" ? -25 : 0;
-    return (
-      140 +
-      (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) +
-      protectedBonus +
-      contestValue
-    );
+    const witness =
+      remaining === 0
+        ? "score_now"
+        : remaining <= 1
+          ? "score_next_action"
+          : "none";
+    const windowValue =
+      witness === "score_now" ? 180 : witness === "score_next_action" ? 90 : 0;
+    return {
+      card: located.card,
+      serverId: located.serverId,
+      value:
+        140 +
+        (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) +
+        protectedBonus +
+        contestValue,
+      witness,
+      windowValue,
+      weakTargetPenalty: witness === "none" ? 45 : 0,
+    };
   }
   const text = normalizedRulesTextForDefinition(definitionId);
+  if (/access|trash|damage|net damage|brain damage|meat damage/.test(text)) {
+    return {
+      card: located.card,
+      serverId: located.serverId,
+      value: 120 + protectedBonus,
+      witness: "overadvance_threshold",
+      windowValue: 90,
+      weakTargetPenalty: 0,
+    };
+  }
   if (
     /advancement counter|advance .* before|can be advanced|counter.*credit|gain \d/.test(
       text,
     )
   ) {
-    return 45 + protectedBonus;
+    const cashout = /gain \d|gain 1|gain \[1\]/.test(text);
+    return {
+      card: located.card,
+      serverId: located.serverId,
+      value: 45 + protectedBonus,
+      witness: cashout ? "cashout_next_turn" : "none",
+      windowValue: cashout ? 10 : 0,
+      weakTargetPenalty: 80,
+    };
   }
-  return 0;
+  return {
+    card: located.card,
+    serverId: located.serverId,
+    value: 0,
+    witness: "none",
+    windowValue: 0,
+    weakTargetPenalty: 100,
+  };
+}
+
+function bestCorpAdvancementCounterWitness(
+  targets: readonly CorpAdvancementCounterTargetAssessment[],
+): CorpAdvancementCounterWitness {
+  const rank: Record<CorpAdvancementCounterWitness, number> = {
+    score_now: 6,
+    score_next_action: 5,
+    overadvance_threshold: 4,
+    transfer_destination_visible: 3,
+    cashout_next_turn: 2,
+    none: 1,
+  };
+  return (
+    targets
+      .map((target) => target.witness)
+      .sort((left, right) => rank[right] - rank[left])[0] ?? "none"
+  );
 }
 
 function normalizedRulesTextForDefinition(definitionId: string): string {
@@ -8065,8 +8198,8 @@ function actionPriority(
     return (
       92 +
       boundedScoreHorizonActionBonus(input, action, context) +
-      (placement && placement.secondCounterValue > 0
-        ? 90 + Math.min(120, placement.secondCounterValue * 2)
+      (placement
+        ? Math.max(-120, Math.min(160, placement.netAdvancementValue))
         : 0) +
       corpUnsafeScoreConversionActionBonus(input, action, context) +
       corpScoreTerminalActionPriorityBonus(input, action, context)

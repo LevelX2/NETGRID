@@ -8,6 +8,7 @@ import type {
 } from "@netgrid/shared";
 import { isReplayCompatibilityActionPayload } from "../compatibility/payload-compatibility";
 import { hashState } from "./hash";
+import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
 
 export type ReplayHost = {
   actions: {
@@ -25,7 +26,8 @@ export function replayEvents(
   initialState: GameState,
   eventLog: GameEvent[],
 ): ReplayResult {
-  if (!defaultReplayHost) throw new Error("Replay-Host ist nicht initialisiert.");
+  if (!defaultReplayHost)
+    throw new Error("Replay-Host ist nicht initialisiert.");
   return buildReplayEvents(defaultReplayHost, initialState, eventLog);
 }
 
@@ -48,6 +50,16 @@ export function buildReplayEvents(
   const errors: string[] = [];
   for (const event of eventLog) {
     if (event.type === "game_created") continue;
+    try {
+      sanitizeEventPayloadForSurface(event.publicPayload, "replay_public");
+    } catch (error) {
+      errors.push(
+        `Event ${event.eventId} has unsafe replay public payload: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      continue;
+    }
     const actionPayload =
       event.privatePayload?.[event.publicPayload.actor as Side]?.action;
     if (!isReplayCompatibilityActionPayload(actionPayload)) {

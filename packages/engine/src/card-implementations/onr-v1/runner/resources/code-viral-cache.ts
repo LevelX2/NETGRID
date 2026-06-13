@@ -15,4 +15,11 @@ export const codeViralCacheImplementation: CardImplementationDefinition = {
     kind: "purge_replacement_with_runner_virus_counter_cleanup",
     visibility: "hidden_info_barrier",
   },
+  corpTrashInstalledRunnerSource: {
+    kind: "corp_trash_installed_runner_resource",
+    timing: "corp_main",
+    cost: { clicks: 1, credits: 5 },
+    target: "source",
+    visibility: "public",
+  },
 };
