@@ -10,7 +10,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
     {
       id: "data_fort_reclamation_score_start",
       kind: "score_install_hq_cards_into_new_remote_then_rez",
-      startsChoice: true,
+      mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
         host.choices.startDataFortReclamation(cardId);
       },
@@ -18,7 +18,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
     {
       id: "ice_transmutation_score_start",
       kind: "select_rezzed_ice_mark_modifier",
-      startsChoice: true,
+      mode: "choice_start",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
         if (scoredAgenda.kind !== "select_rezzed_ice_mark_modifier")
           throw new Error("Ice-Transmutation-Score-Time-Vertrag ungueltig.");
@@ -33,7 +33,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
     {
       id: "priority_requisition_score_start",
       kind: "score_rez_installed_ice_at_no_cost",
-      startsChoice: true,
+      mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
         host.choices.startPriorityRequisition(cardId);
       },
@@ -41,7 +41,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
     {
       id: "security_purge_score_start",
       kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
-      startsChoice: false,
+      mode: "immediate_effect",
       resolveOnScore: ({ host, cardId }) => {
         host.choices.resolveSecurityPurge(cardId);
       },

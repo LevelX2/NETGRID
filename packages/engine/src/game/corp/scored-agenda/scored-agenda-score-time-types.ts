@@ -19,6 +19,6 @@ export type ScoredAgendaScoreTimeContext = {
 export type ScoredAgendaScoreTimeResolver = {
   id: string;
   kind: CardScoredAgendaImplementation["kind"];
-  startsChoice: boolean;
+  mode: "choice_start" | "immediate_effect" | "delegated_host_choice";
   resolveOnScore: (context: ScoredAgendaScoreTimeContext) => void;
 };

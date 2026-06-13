@@ -17,6 +17,22 @@ describe("scored agenda score-time registry", () => {
     expect(new Set(kinds).size).toBe(kinds.length);
   });
 
+  it("classifies score-time resolvers by explicit mode", () => {
+    const resolverModes = Object.fromEntries(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => [
+        resolver.id,
+        resolver.mode,
+      ]),
+    );
+
+    expect(resolverModes).toMatchObject({
+      data_fort_reclamation_score_start: "delegated_host_choice",
+      ice_transmutation_score_start: "choice_start",
+      priority_requisition_score_start: "delegated_host_choice",
+      security_purge_score_start: "immediate_effect",
+    });
+  });
+
   it("matches score-time resolvers by scored agenda kind", () => {
     expect(
       findScoredAgendaScoreTimeResolver({
