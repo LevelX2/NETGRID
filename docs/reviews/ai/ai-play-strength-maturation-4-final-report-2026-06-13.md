@@ -51,11 +51,11 @@ Relevante fokussierte Paketchecks:
 
 FINAL-GREEN:
 
-- `corepack pnpm --filter @netgrid/ai test`: 97 Testdateien, 1334 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: 97 Testdateien, 1340 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: 506 Tests.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: 512 Tests.
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: 49 Tests.
-- `corepack pnpm --filter @netgrid/engine test`: 171 Testdateien, 1509 Tests.
+- `corepack pnpm --filter @netgrid/engine test`: 172 Testdateien, 1514 Tests.
 - `corepack pnpm --filter @netgrid/engine typecheck`
 - `corepack pnpm --filter @netgrid/server test`: 6 Testdateien, 127 Tests.
 - `corepack pnpm --filter @netgrid/server typecheck`

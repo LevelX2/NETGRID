@@ -87,12 +87,7 @@ import {
   nextRandom,
   recordStateRandomMarkers,
 } from "../state/draw-random";
-import {
-  credits,
-  spendClick,
-  spendClicks,
-  spendCredits,
-} from "../state/economy-mutation";
+import { credits, spendClick, spendClicks, spendCredits } from "../state/economy-mutation";
 import {
   addCardCounter,
   cardCounter,
