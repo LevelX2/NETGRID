@@ -625,7 +625,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement_choice",
+      hiddenZoneAction: "ordered_fort_rebuild_sequence",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(String(newIce));
     const invalid = applyAction(state, {
@@ -642,6 +642,11 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(invalid.ok).toBe(false);
 
     state = applyChoices(state, "corp", [`card_${newIce}`, `card_${newRoot}`]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "ordered_fort_rebuild_sequence",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(String(newIce));
     const server = remoteServer(state, "remote_1");
     expect(server.ice).toEqual([newIce]);
     expect(server.root).toEqual([newRoot]);

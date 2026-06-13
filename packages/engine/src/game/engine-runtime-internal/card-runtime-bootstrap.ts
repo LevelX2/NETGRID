@@ -319,6 +319,7 @@ import {
   handleScoredAgendaActivatedAbilityAction,
   type ScoredAgendaAbilityHost,
 } from "../corp/scored-agenda-abilities";
+import { orderedFortRebuildPublicPayload } from "../corp/scored-agenda/ordered-fort-rebuild-sequence";
 import {
   buildCorpTraceDamageAbilityActionsForCard,
   handleCorpTraceDamageActivatedAbility,
@@ -1001,11 +1002,18 @@ export function configureCardRuntimeBootstrap() {
         legalCandidates,
       );
       const payload = {
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement_choice",
+        ...orderedFortRebuildPublicPayload({
+          sourceDefinitionId,
+          targetServerId: server.id,
+          removedCardCount: removedCount,
+          replacementCardCount: 0,
+          installedIceCount: 0,
+          installedRootCount: 0,
+        }),
         sourceDefinitionId,
         serverId: server.id,
         serverLabel: server.label,
+        orderedFortRebuildChoiceOpened: true,
         replacementCount: removedCount,
         hqCandidateCount: legalCandidates.length,
       };
@@ -1063,14 +1071,18 @@ export function configureCardRuntimeBootstrap() {
       }
     }
     const payload = {
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement",
-      sourceDefinitionId,
+      ...orderedFortRebuildPublicPayload({
+        sourceDefinitionId,
+        targetServerId: server.id,
+        removedCardCount: removedCount,
+        replacementCardCount: selected.length,
+        installedIceCount: server.ice.length,
+        installedRootCount: server.root.length,
+      }),
       serverId: server.id,
+      orderedFortRebuildChoiceOpened: false,
       uninstalledCardsCount: removedCount,
       installedCardsCount: selected.length,
-      installedIceCount: server.ice.length,
-      installedRootCount: server.root.length,
     };
     legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
     return { publicPayload: payload };
