@@ -24,7 +24,7 @@ export type CorpMainActionGenerationHost = {
     mustInstance: HostFn<any>;
     isUniqueCard: HostFn<boolean>;
     hasInstalledUniqueCardDefinition: HostFn<boolean>;
-    cardImplementationForDefinitionId: HostFn<unknown>;
+    cardImplementationForDefinitionId: HostFn<any>;
     rezzedCorpRootCardIds: HostFn<string[]>;
     corpInstalledCardIds: HostFn<string[]>;
     visibleVirusCounterTargetIds: HostFn<string[]>;
@@ -96,7 +96,6 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    CODE_VIRAL_CACHE_ID: string;
     HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: ReadonlySet<string>;
     HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: ReadonlySet<string>;
     CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
@@ -210,7 +209,6 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const CODE_VIRAL_CACHE_ID = host.constants.CODE_VIRAL_CACHE_ID;
   const HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS =
     host.constants.HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS;
   const HIDDEN_ZONE_REORDER_ASSET_CARD_IDS =
@@ -409,37 +407,54 @@ export function buildCorpMainActions(
       );
     }
   }
-  if (state.corp.credits >= 5) {
-    for (const id of state.runner.rig.resources.slice().sort()) {
-      if (definitionFor(state, id).id !== CODE_VIRAL_CACHE_ID) continue;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "trigger_ability",
-          "Code Viral Cache trashen",
-          id,
-          [{ clicks: 1, credits: 5 }],
-          {
-            cardId: id,
-            corpAbility: "trash_code_viral_cache",
-            sourceDefinitionId: CODE_VIRAL_CACHE_ID,
-            trashCostPaid: 5,
-          },
-          {
-            targetRequirements: [
-              {
-                id: "codeViralCache",
-                kind: "card",
-                side: "runner",
-                zoneScope: ["runner.rig.resources"],
-                visibility: "public",
-              },
-            ],
-          },
-        ),
-      );
+  for (const id of state.runner.rig.resources.slice().sort()) {
+    if (isConcealedRunnerResource(state, id)) continue;
+    const definition = definitionFor(state, id);
+    const corpTrashAbility =
+      cardImplementationForDefinitionId(definition.id)
+        ?.corpTrashInstalledRunnerSource;
+    if (
+      !corpTrashAbility ||
+      corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
+      corpTrashAbility.timing !== "corp_main" ||
+      corpTrashAbility.target !== "source" ||
+      state.corp.credits < corpTrashAbility.cost.credits
+    ) {
+      continue;
     }
+    actions.push(
+      action(
+        state,
+        "corp",
+        "trigger_ability",
+        `${definition.title} trashen`,
+        id,
+        [
+          {
+            clicks: corpTrashAbility.cost.clicks,
+            credits: corpTrashAbility.cost.credits,
+          },
+        ],
+        {
+          cardId: id,
+          corpAbility: "trash_installed_runner_resource_source",
+          abilityKind: "corp_trash_installed_runner_resource",
+          sourceDefinitionId: definition.id,
+          trashCostPaid: corpTrashAbility.cost.credits,
+        },
+        {
+          targetRequirements: [
+            {
+              id: "runnerResourceSource",
+              kind: "card",
+              side: "runner",
+              zoneScope: ["runner.rig.resources"],
+              visibility: "public",
+            },
+          ],
+        },
+      ),
+    );
   }
   actions.push(...buildCorpTrashNewDataFortCreationLockActions(state));
   const newDataFortCreationLocked = corpNewDataFortCreationLocked(state);

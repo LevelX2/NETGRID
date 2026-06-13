@@ -74,9 +74,6 @@ export type TriggerAbilityExecutionHost = {
       legalAction: LegalAction,
     ) => HiddenZoneTriggerExecutionResult;
   };
-  constants: {
-    CODE_VIRAL_CACHE_ID: string;
-  };
 };
 
 export type TriggerAbilityExecutionResult = {
@@ -113,25 +110,43 @@ export function handleTriggerAbilityExecution(
   }
   if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
+  if (
+    legalAction.payload?.corpAbility ===
+    "trash_installed_runner_resource_source"
+  ) {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Code Viral Cache trashen.");
+      throw new Error("Nur die Korp darf diese Runner-Resource trashen.");
+    if (
+      legalAction.payload?.abilityKind !==
+      "corp_trash_installed_runner_resource"
+    )
+      throw new Error("Die Corp-Trash-Ability ist ungueltig.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
     if (!state.runner.rig.resources.includes(sourceCardId))
-      throw new Error("Code Viral Cache ist nicht installiert.");
+      throw new Error("Die Runner-Resource ist nicht installiert.");
+    const definition = host.cards.definitionFor(state, sourceCardId);
+    if (definition.type !== "resource")
+      throw new Error("Die Corp-Trash-Ability passt nicht zu diesem Ziel.");
+    const corpTrashAbility =
+      host.cards.cardImplementationForDefinitionId?.(definition.id)
+        ?.corpTrashInstalledRunnerSource;
     if (
-      host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.CODE_VIRAL_CACHE_ID
+      !corpTrashAbility ||
+      corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
+      corpTrashAbility.timing !== "corp_main" ||
+      corpTrashAbility.target !== "source"
     )
-      throw new Error("Die Code-Viral-Cache-Faehigkeit passt nicht zur Karte.");
+      throw new Error("Die Runner-Resource deklariert keine Corp-Trash-Ability.");
     host.actions.spendClick(state, "corp");
-    host.credits.spend(state, "corp", 5);
+    host.credits.spend(state, "corp", corpTrashAbility.cost.credits);
     host.runner.trashInstalledCardToHeap(state, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      trashedCardDefinitionId: host.constants.CODE_VIRAL_CACHE_ID,
+      sourceDefinitionId: definition.id,
+      trashCostPaid: corpTrashAbility.cost.credits,
+      trashedCardDefinitionId: definition.id,
       corpCreditsAfter: state.corp.credits,
     };
     return handled(legalAction);
