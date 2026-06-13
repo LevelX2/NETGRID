@@ -1,4 +1,9 @@
-import type { CardDefinition, CardInstance, CardInstanceId, LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstance,
+  CardInstanceId,
+  LegalAction,
+} from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
 

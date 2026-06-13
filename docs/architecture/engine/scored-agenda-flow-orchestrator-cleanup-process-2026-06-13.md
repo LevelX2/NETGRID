@@ -1,6 +1,6 @@
 # Scored Agenda Flow Orchestrator Cleanup Process
 
-Status: in_progress
+Status: completed
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-06-13 auf Basis des Prüfbefunds zu Commit `39c6d6cf070e12e46180c98523775228e8b5e8e6`.
 
@@ -78,3 +78,7 @@ Final:
 - `SurfacePolicy` ist an echten öffentlichen/opponent/replayfähigen Sichtgrenzen sichtbar.
 - Alle Paket- und Finalchecks sind grün oder bekannte, nicht verursachte Warnungen sind dokumentiert.
 - Der Arbeitsbranch ist lokal nach `main` integriert und der Prozess-Worktree entfernt.
+
+## Abschlussstand
+
+P0 bis P10 sind umgesetzt. Im finalen Testblock wurde ein verursachter TypeScript-Fehler durch den fehlenden `ServerId`-Import in `scored-agenda-flow.ts` behoben. Danach waren Engine-Typecheck, die gezielte Scored-Agenda-/View-/Replay-Testmatrix, Formatcheck und `git diff --check` grün. `check:ai` meldete keine Fehler; die bestehenden AI-Warnungen bleiben unverändert außerhalb dieses Engine-Refactor-Scopes.

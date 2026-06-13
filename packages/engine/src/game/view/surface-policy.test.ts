@@ -91,9 +91,9 @@ describe("surface policy", () => {
       visibility: "hidden_info_barrier",
     } as NonNullable<import("@netgrid/shared").PlayerView["pendingChoice"]>;
 
-    expect(() =>
-      sanitizeChoiceViewForSurface(choice, "opponent_view"),
-    ).toThrow(/actor-private labels/i);
+    expect(() => sanitizeChoiceViewForSurface(choice, "opponent_view")).toThrow(
+      /actor-private labels/i,
+    );
     expect(sanitizeChoiceViewForSurface(choice, "actor_private")).toEqual(
       choice,
     );

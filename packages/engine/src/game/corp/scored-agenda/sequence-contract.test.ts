@@ -43,7 +43,9 @@ describe("scored agenda sequence contract matrix", () => {
       "subtype_reveal_economy_score_start",
     ]);
     expect(
-      new Set(SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.mode)),
+      new Set(
+        SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.mode),
+      ),
     ).toEqual(
       new Set(["choice_start", "delegated_host_choice", "immediate_effect"]),
     );

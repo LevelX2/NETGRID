@@ -57,7 +57,11 @@ describe("game replay facade", () => {
           return {
             ok: true,
             state,
-            event: replayEvent(`arch_58_host_result_${calls.length}`, action, state),
+            event: replayEvent(
+              `arch_58_host_result_${calls.length}`,
+              action,
+              state,
+            ),
             publicEvents: [],
             stateHash: hashState(state),
           };

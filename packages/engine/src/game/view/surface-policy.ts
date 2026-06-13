@@ -85,7 +85,10 @@ export function sanitizeChoiceViewForSurface<
       );
     }
   }
-  return { ...choice, options: choice.options.map((option) => ({ ...option })) };
+  return {
+    ...choice,
+    options: choice.options.map((option) => ({ ...option })),
+  };
 }
 
 export function assertNoHiddenCardLists(

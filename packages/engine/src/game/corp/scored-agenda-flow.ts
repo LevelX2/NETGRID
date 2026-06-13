@@ -6,14 +6,13 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
+  ServerId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
 import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
 import { applyDirectScoreEconomyEffects } from "./scored-agenda/direct-score-economy-effects";
-import {
-  startEmployeeEmpowermentStartDrawChoice,
-} from "./scored-agenda/employee-empowerment-sequence";
+import { startEmployeeEmpowermentStartDrawChoice } from "./scored-agenda/employee-empowerment-sequence";
 import { applyOveradvanceScoreEffects } from "./scored-agenda/overadvance-score-effects";
 import { resolveScoredAgendaFlowChoice } from "./scored-agenda/scored-agenda-flow-choice-registry";
 import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-score-time-registry";

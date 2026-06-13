@@ -26,7 +26,8 @@ export function replayEvents(
   initialState: GameState,
   eventLog: GameEvent[],
 ): ReplayResult {
-  if (!defaultReplayHost) throw new Error("Replay-Host ist nicht initialisiert.");
+  if (!defaultReplayHost)
+    throw new Error("Replay-Host ist nicht initialisiert.");
   return buildReplayEvents(defaultReplayHost, initialState, eventLog);
 }
 

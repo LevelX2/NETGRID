@@ -1,4 +1,9 @@
-import type { CardInstance, CardInstanceId, LegalAction, ServerId } from "@netgrid/shared";
+import type {
+  CardInstance,
+  CardInstanceId,
+  LegalAction,
+  ServerId,
+} from "@netgrid/shared";
 import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
 
 export function resolveSecurityNetOptimizationOnScore(
