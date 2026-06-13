@@ -1,12 +1,30 @@
-import type {
-  AiDoctrineQualityCaseAnalysis,
-} from "../index";
 import { DOCTRINE_QUALITY_METRIC_NAMES } from "../simulation/simulation-metric-aggregation";
+
+export type DoctrineQualityCaseAnalysisReportInput = {
+  version: string;
+  maxExamplesPerMetric: number;
+  totals: Record<(typeof DOCTRINE_QUALITY_METRIC_NAMES)[number], number>;
+  examples: Record<
+    (typeof DOCTRINE_QUALITY_METRIC_NAMES)[number],
+    {
+      metric?: string;
+      seed: string;
+      actionIndex: number;
+      stateVersionBefore?: number;
+      side: string;
+      actionType: string;
+      reasonCode: string;
+      targetServerId?: string;
+      qualityTags: string[];
+    }[]
+  >;
+  redactionSafe: boolean;
+};
 
 // Pure report formatting only. Simulation, randomness, and action selection stay
 // in their dedicated runtime and harness modules.
 export function formatDoctrineQualityCaseAnalysisReport(
-  analysis: AiDoctrineQualityCaseAnalysis,
+  analysis: DoctrineQualityCaseAnalysisReportInput,
   title = "AI Deck Doctrine Quality Case Analysis",
 ): string {
   const lines = [
