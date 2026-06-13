@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "ai176-endgame-opportunity-scorecard-v3",
+  "generatedAt": "2026-06-13T07:34:30.740Z",
+  "gitHead": "3e9785c0",
+  "sources": [
+    "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+    "docs/reviews/ai/ai172-goal-conversion-contract-v1-2026-06-13.json",
+    "docs/reviews/ai/ai173-runner-coverage-opportunity-solver-2026-06-13.json",
+    "docs/reviews/ai/ai174-corp-tag-punish-stale-intent-review-2026-06-13.json",
+    "docs/reviews/ai/ai175-corp-tempo-opportunity-solver-2026-06-13.json"
+  ],
+  "metrics": [
+    {
+      "id": "opportunity_snapshot_available_rate",
+      "numerator": 17,
+      "denominator": 19,
+      "value": 0.8947,
+      "note": "AI170 requested snapshot coverage."
+    },
+    {
+      "id": "same_state_better_rate",
+      "numerator": 0,
+      "denominator": 17,
+      "value": 0,
+      "note": "No Runtime-eligible same-state better candidate has passed the gate yet."
+    },
+    {
+      "id": "target_context_missing_rate",
+      "numerator": 2,
+      "denominator": 17,
+      "value": 0.1176,
+      "note": "AI159 target-context-missing cases before AI170 instrumentation."
+    },
+    {
+      "id": "stale_intent_rate",
+      "numerator": 27,
+      "denominator": 122,
+      "value": 0.2213,
+      "note": "AI151/AI172 stale intents against intent-memory records."
+    },
+    {
+      "id": "stale_punish_intent_rate",
+      "numerator": 20,
+      "denominator": 27,
+      "value": 0.7407,
+      "note": "Share of stale intents in corp tag/punish."
+    },
+    {
+      "id": "coverage_path_solved_rate",
+      "numerator": 1,
+      "denominator": 13,
+      "value": 0.0769,
+      "note": "Coverage solver shadow candidates before AI177 gate."
+    },
+    {
+      "id": "corp_tempo_conversion_solved_rate",
+      "numerator": 2,
+      "denominator": 17,
+      "value": 0.1176,
+      "note": "Corp tempo solver shadow candidates before AI177 gate."
+    },
+    {
+      "id": "lookahead_candidate_rate",
+      "numerator": 7,
+      "denominator": 10,
+      "value": 0.7,
+      "note": "AI165 static lookahead proxy wins."
+    },
+    {
+      "id": "runtime_cutover_eligibility_count",
+      "numerator": 0,
+      "denominator": 1,
+      "value": 0,
+      "note": "AI177/AI178 have not yet approved a Runtime candidate."
+    },
+    {
+      "id": "action_limit_rate_x5",
+      "numerator": 11,
+      "denominator": 20,
+      "value": 0.55,
+      "note": "Baseline x5 action-limit rate."
+    },
+    {
+      "id": "action_limit_rate_x10",
+      "numerator": 23,
+      "denominator": 40,
+      "value": 0.575,
+      "note": "Current x10 action-limit rate with snapshot instrumentation."
+    }
+  ],
+  "conclusion": {
+    "runtimeCutoverEligible": false,
+    "gateReason": "candidate_gate_not_yet_run_and_same_state_better_rate_zero"
+  }
+}
