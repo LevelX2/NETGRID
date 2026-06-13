@@ -20,6 +20,7 @@ import {
   isScoredIceMarkModifierChoiceSource,
   resolveScoredRezzedIceMarkModifierChoice,
 } from "./scored-agenda/ice-transmutation-sequence";
+import { applyOveradvanceScoreEffects } from "./scored-agenda/overadvance-score-effects";
 import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-score-time-registry";
 import {
   isScoredSubtypeRevealChoiceSource,
@@ -162,41 +163,17 @@ export function scoreAgenda(
     host.flags.markScoredBlackOpsAgendaThisTurn();
   }
   const scoredAgenda = host.cards.scoredAgendaForDefinition(definition);
-  let bonusAgendaPoints = 0;
-  let overadvancedBy = 0;
-  if (scoredAgenda?.kind === "project_babylon_bonus_points") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    bonusAgendaPoints = Math.floor(
-      overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
-    );
-    host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        projectBabylonOveradvance: overadvancedBy,
-        projectBabylonBonusAgendaPoints: bonusAgendaPoints,
-      };
-    }
-  }
-  if (host.cards.isOveradvanceAgendaDefinition(definition.id)) {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    bonusAgendaPoints = Math.floor(overadvancedBy / 2);
-    host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919AgendaDifficulty: requiredDifficulty,
-        v1919Overadvance: overadvancedBy,
-        v1919BonusAgendaPoints: bonusAgendaPoints,
-      };
-    }
-  }
+  const overadvanceResult = applyOveradvanceScoreEffects(
+    host,
+    cardId,
+    definition,
+    instanceBefore,
+    requiredDifficulty,
+    scoredAgenda,
+    legalAction,
+  );
+  let bonusAgendaPoints = overadvanceResult.bonusAgendaPoints;
+  const overadvancedBy = overadvanceResult.overadvancedBy;
   if (scoredAgenda?.kind === "fixed_bonus_agenda_points_on_score") {
     bonusAgendaPoints += scoredAgenda.amount;
     host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
@@ -205,43 +182,6 @@ export function scoreAgenda(
         ...(legalAction.payload ?? {}),
         fixedBonusAgendaPoints: scoredAgenda.amount,
         bonusAgendaPoints,
-      };
-    }
-  }
-  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_credits") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    const recurringCredits =
-      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
-      scoredAgenda.creditPerGroup;
-    host.counters.setCardCounter(cardId, "mark", recurringCredits);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        overadvanceRecurringCredits: recurringCredits,
-        projectZurichOveradvance: overadvancedBy,
-      };
-    }
-  }
-  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_actions") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    const recurringActions =
-      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
-      scoredAgenda.actionPerGroup;
-    host.counters.setCardCounter(cardId, "mark", recurringActions);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        overadvanceRecurringActions: recurringActions,
-        overadvanceActionGroups: Math.floor(
-          overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
-        ),
-        projectVeniceOveradvance: overadvancedBy,
       };
     }
   }
