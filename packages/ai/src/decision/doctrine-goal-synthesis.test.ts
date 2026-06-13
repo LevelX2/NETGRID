@@ -185,6 +185,46 @@ describe("doctrine goal synthesis", () => {
       "economy",
       "damage_pressure",
     ]);
+    expect(
+      goals.find((goal) => goal.goalId === "corp.doctrine.hq_defense"),
+    ).toEqual(
+      expect.objectContaining({
+        evidence: expect.arrayContaining(["central_server:hq"]),
+      }),
+    );
+    expect(
+      goals.find((goal) => goal.goalId === "corp.doctrine.rnd_defense"),
+    ).toEqual(
+      expect.objectContaining({
+        evidence: expect.arrayContaining(["central_server:rd"]),
+      }),
+    );
+  });
+
+  it("differentiates partial corp central defense gaps for HQ and R&D", () => {
+    const goals = synthesizeDoctrineTacticalGoals(
+      diagnostic("corp", "partial", false, [
+        strategy("corp.central_stabilize", "partial", [
+          "weak_hq_defense",
+          "weak_rnd_defense",
+        ]),
+      ]),
+    );
+
+    expect(goals.map((goal) => goal.goalId)).toEqual([
+      "corp.doctrine.hq_defense_setup",
+      "corp.doctrine.rnd_defense_setup",
+    ]);
+    expect(goals.map((goal) => goal.family)).toEqual([
+      "corp_ice_defense",
+      "corp_ice_defense",
+    ]);
+    expect(goals[0]?.evidence).toEqual(
+      expect.arrayContaining(["central_server:hq"]),
+    );
+    expect(goals[1]?.evidence).toEqual(
+      expect.arrayContaining(["central_server:rd"]),
+    );
   });
 
   it("does not turn partial corp doctrine into scoreline or ambush payoff goals", () => {

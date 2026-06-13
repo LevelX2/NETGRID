@@ -333,15 +333,64 @@ function corpCentralDefenseGoals(
         "doctrine_v2:corp.central_stabilize",
         "doctrine_status:complete",
         "doctrine_goal:hq_defense",
+        "central_server:hq",
       ]),
       goal("corp.doctrine.rnd_defense", "corp_ice_defense", 768, "medium", [
         "doctrine_v2:corp.central_stabilize",
         "doctrine_status:complete",
         "doctrine_goal:rnd_defense",
+        "central_server:rd",
       ]),
     ];
   }
+  if (strategy.status === "partial") {
+    return partialCorpCentralDefenseGoals(strategy);
+  }
   return corpPartialSetupGoal(strategy, "corp.doctrine.central_defense_setup");
+}
+
+function partialCorpCentralDefenseGoals(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): TacticalGoalLike[] {
+  const needsHq = hasCentralDefenseGap(strategy, "hq");
+  const needsRnd = hasCentralDefenseGap(strategy, "rnd");
+  if (!needsHq && !needsRnd) {
+    return corpPartialSetupGoal(strategy, "corp.doctrine.central_defense_setup");
+  }
+  return [
+    ...(needsHq
+      ? [
+          goal(
+            "corp.doctrine.hq_defense_setup",
+            "corp_ice_defense",
+            668,
+            "medium",
+            [
+              "doctrine_v2:corp.central_stabilize",
+              "doctrine_status:partial",
+              "doctrine_gap:hq_defense_setup",
+              "central_server:hq",
+            ],
+          ),
+        ]
+      : []),
+    ...(needsRnd
+      ? [
+          goal(
+            "corp.doctrine.rnd_defense_setup",
+            "corp_ice_defense",
+            666,
+            "medium",
+            [
+              "doctrine_v2:corp.central_stabilize",
+              "doctrine_status:partial",
+              "doctrine_gap:rnd_defense_setup",
+              "central_server:rd",
+            ],
+          ),
+        ]
+      : []),
+  ];
 }
 
 function corpRemoteAmbushGoals(
@@ -398,6 +447,17 @@ function hasCoverageGap(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
     "weak_sentry_coverage",
     "weak_breaker_coverage",
   ]);
+}
+
+function hasCentralDefenseGap(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+  central: "hq" | "rnd",
+): boolean {
+  return strategy.supportGaps.some((gap) => {
+    const normalized = gap.toLowerCase();
+    if (central === "hq") return normalized.includes("hq");
+    return normalized.includes("rnd") || normalized.includes("rd");
+  });
 }
 
 function hasAnyGap(
