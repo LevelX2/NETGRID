@@ -248,8 +248,7 @@ function rootRezLifecycleIsSolvable(
   )
     return true;
   const run = host.state.run;
-  if (!run || !runIsAtServerAfterPassingLastIce(run, server))
-    return false;
+  if (!run || !runIsAtServerAfterPassingLastIce(run, server)) return false;
   return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 

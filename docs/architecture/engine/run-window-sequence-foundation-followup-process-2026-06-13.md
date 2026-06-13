@@ -1,6 +1,6 @@
 # Run Window Sequence Foundation Follow-up Process
 
-Status: in_progress
+Status: completed
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-06-13 auf Basis des Statusberichts zu Paketcommit `f3d11ce5a409d984b78c38f6d066f56ed9e74492`.
 
@@ -72,3 +72,13 @@ Final:
 - Pavit Bharat hat Regressionen für falsche/stale Choice, No-Partial-Mutation und Public-Payload-Redaction.
 - Contract-Tests decken RunWindow-/OnRez-Resolver oder Sequenzverträge explizit ab.
 - Der abgeschlossene Arbeitsbranch ist lokal nach `main` integriert und der Worktree entfernt.
+
+## Abschluss 2026-06-13
+
+- `run_window_sequence` und `developer_trace` sind als Payload-Familien ergänzt.
+- Replacement-/Selected-CardId-Listen werden auf public-like Surfaces geblockt.
+- `packages/engine/src/game/run/windows/after-passing-last-ice-window.ts` kapselt das bestehende After-Last-ICE-Timingmodell.
+- Fort-Pass und Pavit-On-Rez-Solvability nutzen den Timinghelper.
+- Pavit Bharat revalidiert das Timing beim Choice-Resolve und hat Regressionen für stale Choice, No-Partial-Mutation und Hidden-Info-Leaks.
+- `orderedFortRebuildPublicPayload(...)` nutzt die `run_window_sequence`-Surface-Familie.
+- RunWindow-/OnRez-Verträge sind in der Run-Window-Registry-Testmatrix explizit geprüft.

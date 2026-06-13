@@ -111,8 +111,8 @@ describe("surface policy", () => {
       ),
     ).toEqual({
       knownHqDefinitionIds: ["agenda_def"],
-        label: "Access",
-      });
+      label: "Access",
+    });
 
     expect(
       sanitizePayloadForSurface(

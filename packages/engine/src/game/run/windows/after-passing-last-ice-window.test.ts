@@ -6,12 +6,14 @@ import {
   runIsAtServerAfterPassingLastIce,
 } from "./after-passing-last-ice-window";
 
-function stateAtServer(input: {
-  position?: NonNullable<GameState["run"]>["position"];
-  lastPassedIceId?: CardInstanceId;
-  serverIce?: CardInstanceId[];
-  attackedServerId?: "remote_1" | "remote_2";
-} = {}): GameState {
+function stateAtServer(
+  input: {
+    position?: NonNullable<GameState["run"]>["position"];
+    lastPassedIceId?: CardInstanceId;
+    serverIce?: CardInstanceId[];
+    attackedServerId?: "remote_1" | "remote_2";
+  } = {},
+): GameState {
   const attackedServerId = input.attackedServerId ?? "remote_1";
   return {
     matchId: "match_1",
@@ -31,7 +33,8 @@ function stateAtServer(input: {
           id: "remote_1",
           label: "Remote 1",
           kind: "remote",
-          ice: input.serverIce ?? (["ice_outer", "ice_inner"] as CardInstanceId[]),
+          ice:
+            input.serverIce ?? (["ice_outer", "ice_inner"] as CardInstanceId[]),
           root: [],
         },
       ],
@@ -78,7 +81,9 @@ describe("after passing last ice window", () => {
   it("stays closed before server position, on wrong server, or with stale passed ice", () => {
     expect(
       isAfterPassingLastIceWindowOpen(
-        stateAtServer({ position: { kind: "ice", serverId: "remote_1", iceIndex: 0 } }),
+        stateAtServer({
+          position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        }),
       ),
     ).toBe(false);
     expect(

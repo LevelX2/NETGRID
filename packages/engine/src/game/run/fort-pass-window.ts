@@ -24,7 +24,9 @@ export type FortPassWindowHost = {
     publicInstalledCorpCardIdentityKnown: (cardId: CardInstanceId) => boolean;
   };
   servers: {
-    mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
+    mustServer: (
+      serverId: Exclude<ServerId, "new_remote"> | string,
+    ) => CorpServer;
   };
   payment: {
     spendCorpCredits: (amount: number) => void;
@@ -175,7 +177,9 @@ export function buildStartRunIceRepositionActions(
   return server.ice
     .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
     .filter(({ sourceCardId }) => !used.has(sourceCardId))
-    .filter(({ sourceCardId }) => isStartRunIceRepositionSource(host, sourceCardId))
+    .filter(({ sourceCardId }) =>
+      isStartRunIceRepositionSource(host, sourceCardId),
+    )
     .flatMap(({ sourceCardId, sourceIceIndex }) => {
       const implementation = fortRunWindowImplementationForCard(
         host,
@@ -223,25 +227,34 @@ export function resolveFortPassAdvancementWindow(
     throw new Error("Das Fort-Pass-Fenster ist nicht offen.");
   const run = mustRun(host.state);
   if (run.position.kind !== "server" || !run.lastPassedIceId)
-    throw new Error("Runner hat nicht gerade das letzte ICE dieses Forts passiert.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as CardInstanceId;
+    throw new Error(
+      "Runner hat nicht gerade das letzte ICE dieses Forts passiert.",
+    );
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const targetCardId = String(
+    legalAction.payload?.targetCardId ?? "",
+  ) as CardInstanceId;
   const serverId = String(legalAction.payload?.serverId ?? "");
   if (serverId !== run.position.serverId)
     throw new Error("Das Fort-Pass-Fenster gehoert zu einem anderen Fort.");
   if (String(legalAction.payload?.passedIceId ?? "") !== run.lastPassedIceId)
-    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
+    throw new Error(
+      "Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.",
+    );
   const server = host.servers.mustServer(run.position.serverId);
   if (!server.root.includes(sourceCardId))
     throw new Error("Die Fort-Pass-Quelle liegt nicht in diesem Fort.");
   if (!server.root.includes(targetCardId))
     throw new Error("Das Advancement-Ziel liegt nicht in diesem Fort.");
   const source = host.cards.cardInstanceFor(sourceCardId);
-  if (!source.rezzed)
-    throw new Error("Die Fort-Pass-Quelle ist nicht rezzed.");
+  if (!source.rezzed) throw new Error("Die Fort-Pass-Quelle ist nicht rezzed.");
   const used = run.fortPassWindowUsedSourceIdsThisRun ?? [];
   if (used.includes(sourceCardId))
-    throw new Error("Diese Fort-Pass-Quelle wurde in diesem Run bereits genutzt.");
+    throw new Error(
+      "Diese Fort-Pass-Quelle wurde in diesem Run bereits genutzt.",
+    );
   const implementation = fortRunWindowImplementationForCard(
     host,
     sourceCardId,
@@ -250,7 +263,9 @@ export function resolveFortPassAdvancementWindow(
   if (!implementation)
     throw new Error("Die Fort-Pass-Quelle hat keine passende Ability.");
   if (!isInstalledCorpCardAdvanceable(host, targetCardId))
-    throw new Error("Das Fort-Pass-Ziel kann keine Advancement-Counter erhalten.");
+    throw new Error(
+      "Das Fort-Pass-Ziel kann keine Advancement-Counter erhalten.",
+    );
   const cost = Math.max(0, Math.floor(implementation.cost.amount));
   if (creditCostForAction(legalAction) !== cost)
     throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
@@ -259,7 +274,10 @@ export function resolveFortPassAdvancementWindow(
   host.cards.cardInstanceFor(targetCardId).advancementCounters += amount;
   run.fortPassWindowUsedSourceIdsThisRun = [...used, sourceCardId];
   run.rootRezWindowPassedKeys = Array.from(
-    new Set([...(run.rootRezWindowPassedKeys ?? []), corpRunRootRezWindowKey(run)]),
+    new Set([
+      ...(run.rootRezWindowPassedKeys ?? []),
+      corpRunRootRezWindowKey(run),
+    ]),
   ).sort();
   host.state.activeSide = "runner";
   legalAction.payload = {
@@ -268,8 +286,8 @@ export function resolveFortPassAdvancementWindow(
     targetCardDefinitionId: host.cards.definitionFor(targetCardId).id,
     advancementCountersAdded: amount,
     addedCounterAmount: amount,
-    advancementCountersAfter: host.cards.cardInstanceFor(targetCardId)
-      .advancementCounters,
+    advancementCountersAfter:
+      host.cards.cardInstanceFor(targetCardId).advancementCounters,
     corpCreditsAfter: host.state.corp.credits,
   };
   return {
@@ -305,7 +323,9 @@ export function resolveStartRunIceRepositionWindow(
   const server = host.servers.mustServer(serverId);
   if (run.position.iceIndex !== outermostIceIndex(server))
     throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   const sourceIceIndex = Number(legalAction.payload?.sourceIceIndex ?? -1);
   const targetIceIndex = Number(legalAction.payload?.targetIceIndex ?? -1);
   if (
@@ -322,7 +342,9 @@ export function resolveStartRunIceRepositionWindow(
   )
     throw new Error("Die ICE-Zielposition ist nicht legal.");
   if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.");
+    throw new Error(
+      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
+    );
   const implementation = fortRunWindowImplementationForCard(
     host,
     sourceCardId,
@@ -352,7 +374,11 @@ export function resolveStartRunIceRepositionWindow(
     newApproachIndex,
     "Server hat kein ICE.",
   );
-  run.position = { kind: "ice", serverId: server.id, iceIndex: newApproachIndex };
+  run.position = {
+    kind: "ice",
+    serverId: server.id,
+    iceIndex: newApproachIndex,
+  };
   run.approachedIceId = approachedIceId;
   delete run.encounteredIceId;
   run.iceRepositionUsedSourceIdsThisRun = [
@@ -406,12 +432,16 @@ export function startSingaporeCityGridSwapChoice(
     host.state.timingPoint !== "run.jack_out_window"
   )
     throw new Error("Singapore City Grid ist nur waehrend eines Runs legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
     ServerId,
     "new_remote"
   >;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
+  const targetIceId = String(
+    legalAction.payload?.targetIceId ?? "",
+  ) as CardInstanceId;
   const iceIndex = Number(legalAction.payload?.iceIndex ?? -1);
   if (serverId !== run.attackedServerId)
     throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
@@ -437,7 +467,8 @@ export function startSingaporeCityGridSwapChoice(
     .sort();
   if (hqIceIds.length === 0)
     throw new Error("In HQ liegt kein ICE fuer Singapore City Grid.");
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   host.state.pendingChoice = {
     choiceId: `v1918_singapore_city_grid_${host.state.stateVersion + 1}`,
     side: "corp",
@@ -500,7 +531,9 @@ export function resolveSingaporeCityGridSwapChoice(
     );
   const server = host.servers.mustServer(serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Remote.");
+    throw new Error(
+      "Singapore City Grid ist nicht mehr im angegriffenen Remote.",
+    );
   if (
     !isFortIceSwapSource(host, sourceCardId) ||
     !host.cards.cardInstanceFor(sourceCardId).rezzed
