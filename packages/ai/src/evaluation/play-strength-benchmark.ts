@@ -42,6 +42,10 @@ export type PlayStrengthCalibrationProfileDiff = {
   baselineReference: string;
   baselineReportPath: string;
   baselineScenarioCount: number;
+  baselineReportScenarioCount: number;
+  calibrationSourceScenarioCount: number;
+  lockedCorpusScenarioCount: number;
+  benchmarkSampleCount: number;
   createdFromBenchmark: SemanticShadowCalibrationBenchmarkMetadata;
   lockedAgainstCorpus: SemanticShadowCalibrationCorpusLock;
   sampleCount: number;
@@ -123,6 +127,11 @@ export function comparePlayStrengthCalibrationProfiles(
     baselineReference: candidateProfile.baselineReference,
     baselineReportPath: candidateProfile.baselineReportPath,
     baselineScenarioCount: candidateProfile.baselineScenarioCount,
+    baselineReportScenarioCount: candidateProfile.baselineReportScenarioCount,
+    calibrationSourceScenarioCount:
+      candidateProfile.calibrationSourceScenarioCount,
+    lockedCorpusScenarioCount: candidateProfile.lockedCorpusScenarioCount,
+    benchmarkSampleCount: candidateProfile.benchmarkSampleCount,
     createdFromBenchmark: candidateProfile.createdFromBenchmark,
     lockedAgainstCorpus: candidateProfile.lockedAgainstCorpus,
     sampleCount: samples.length,
@@ -140,9 +149,12 @@ export function comparePlayStrengthCalibrationProfiles(
       `baseline_reference:${candidateProfile.baselineReference}`,
       `baseline_report_path:${candidateProfile.baselineReportPath}`,
       `baseline_scenario_count:${candidateProfile.baselineScenarioCount}`,
+      `baseline_report_scenario_count:${candidateProfile.baselineReportScenarioCount}`,
+      `calibration_source_scenario_count:${candidateProfile.calibrationSourceScenarioCount}`,
       `created_from_benchmark:${candidateProfile.createdFromBenchmark.benchmarkId}`,
+      `benchmark_sample_count:${candidateProfile.benchmarkSampleCount}`,
       `locked_against_corpus:${candidateProfile.lockedAgainstCorpus.corpusId}`,
-      `locked_corpus_scenario_count:${candidateProfile.lockedAgainstCorpus.scenarioCount}`,
+      `locked_corpus_scenario_count:${candidateProfile.lockedCorpusScenarioCount}`,
       "runtime_weight_change:false",
     ].map(redactSemanticString),
   };

@@ -40,6 +40,13 @@ describe("SemanticShadowCalibration", () => {
         "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
       );
       expect(profile.baselineScenarioCount).toBe(18);
+      expect(profile.baselineReportScenarioCount).toBe(18);
+      expect(profile.calibrationSourceScenarioCount).toBe(18);
+      expect(profile.lockedCorpusScenarioCount).toBe(50);
+      expect(profile.benchmarkSampleCount).toBe(50);
+      expect(profile.calibrationSourceScenarioCount).not.toBe(
+        profile.lockedCorpusScenarioCount,
+      );
       expect(profile.createdFromBenchmark).toMatchObject({
         benchmarkId: "play-strength-calibration-baseline-2026-06-12",
         source: "play_strength_benchmark",
@@ -67,7 +74,10 @@ describe("SemanticShadowCalibration", () => {
           "baseline_reference:ai-shadow-league-baseline-2026-06-12",
           "baseline_report_path:docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
           "baseline_scenario_count:18",
+          "baseline_report_scenario_count:18",
+          "calibration_source_scenario_count:18",
           "created_from_benchmark:play-strength-calibration-baseline-2026-06-12",
+          "benchmark_sample_count:50",
           "locked_against_corpus:real-engine-decision-corpus-v2-2026-06-13",
           "locked_corpus_scenario_count:50",
         ]),
@@ -120,7 +130,10 @@ describe("SemanticShadowCalibration", () => {
           sample.frame.legalActionIds.includes(action.actionId),
         ),
       ).toBe(true);
-      return JSON.stringify(scoreMap(calibrated)) !== JSON.stringify(scoreMap(baseline));
+      return (
+        JSON.stringify(scoreMap(calibrated)) !==
+        JSON.stringify(scoreMap(baseline))
+      );
     });
 
     expect(changedScoreSamples.length).toBeGreaterThan(0);
