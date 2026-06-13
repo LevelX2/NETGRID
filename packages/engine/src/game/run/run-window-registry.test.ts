@@ -17,7 +17,17 @@ describe("run window registry", () => {
 
   it("keeps resolver windows explicit", () => {
     expect(
-      new Set(RUN_WINDOW_ACTION_RESOLVERS.map((resolver) => resolver.window)),
-    ).toEqual(new Set(["corp_fort_pass_window", "corp_root_rez_window"]));
+      RUN_WINDOW_ACTION_RESOLVERS.map((resolver) => [
+        resolver.id,
+        resolver.window,
+      ]).sort(),
+    ).toEqual([
+      [
+        "fort_pass_advancement_after_passing_last_ice",
+        "corp_fort_pass_window",
+      ],
+      ["singapore_city_grid_fort_ice_swap", "corp_root_rez_window"],
+      ["start_run_ice_reposition", "corp_root_rez_window"],
+    ]);
   });
 });

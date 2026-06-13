@@ -116,6 +116,11 @@ describe("scored agenda sequence contract matrix", () => {
     );
 
     expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
+    expect(flowResolverIds.sort()).toEqual([
+      "employee_empowerment_start_draw_flow_choice",
+      "ice_transmutation_flow_choice",
+      "subtype_reveal_flow_choice",
+    ]);
     expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
       false,
     );
@@ -128,6 +133,11 @@ describe("scored agenda sequence contract matrix", () => {
     const directResolverIds = SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS.map(
       (resolver) => resolver.id,
     );
+    const reservedResolverIds = new Set([
+      ...SCORED_AGENDA_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+      ...SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+      ...SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id),
+    ]);
 
     expect(new Set(directResolverIds).size).toBe(directResolverIds.length);
     expect(directResolverIds.sort()).toEqual([
@@ -138,6 +148,9 @@ describe("scored agenda sequence contract matrix", () => {
       "gain_credits_on_score_effect",
       "overadvance_score_effects",
     ]);
+    expect(directResolverIds.some((id) => reservedResolverIds.has(id))).toBe(
+      false,
+    );
   });
 
   it("keeps migrated score-time kinds out of the scored-agenda orchestrator", () => {
