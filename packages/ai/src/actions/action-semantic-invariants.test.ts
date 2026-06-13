@@ -307,6 +307,41 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers corp tag punish worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Closed Accounts", ["tag.payoff.economy_denial"]),
+      corpSemanticProfile("Scorched Earth", ["tag.payoff.meat_damage"]),
+      corpSemanticProfile("Punitive Counterstrike", ["tag.payoff.meat_damage"]),
+      corpSemanticProfile("Urban Renewal", ["tag.payoff.damage_clock"]),
+      corpSemanticProfile("Netwatch Operations Office", ["tag.source.trace"]),
+      corpSemanticProfile("Private Cybernet Police", ["tag.source.resource"]),
+      corpSemanticProfile("City Surveillance", ["tag.source.snowball"]),
+      corpSemanticProfile("Data Raven", ["access.tag_ambush"]),
+      corpSemanticProfile("TRAP!", ["access.tag_ambush"]),
+      corpSemanticProfile("Solo Squad", ["tag.payoff.runner_resource_trash"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "tag.source.trace",
+        "tag.source.snowball",
+        "tag.payoff.meat_damage",
+        "access.tag_ambush",
+      ]),
+    );
+    expect(
+      profiles.every((profile) =>
+        profile.abilitySemantics?.[0]?.strategySupport?.some(
+          (support) => support.strategyId === "corp.doctrine.tag_trace_punish",
+        ),
+      ),
+    ).toBe(true);
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerBreakerSearchProfile(
@@ -376,6 +411,7 @@ function runnerRiskProfile(
 function corpSemanticProfile(
   title: string,
   tacticSignals: string[],
+  strategyId = "corp.doctrine.remote_scoring_scoreline",
 ): ActionCardSemanticProfile {
   return {
     cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
@@ -386,7 +422,12 @@ function corpSemanticProfile(
         tacticSignals,
         strategySupport: [
           {
-            strategyId: "corp.doctrine.remote_scoring_scoreline",
+            strategyId: tacticSignals.some(
+              (signal) =>
+                signal.startsWith("tag.") || signal === "access.tag_ambush",
+            )
+              ? "corp.doctrine.tag_trace_punish"
+              : strategyId,
             role: "scoreline_support",
             confidence: "medium",
             evidence: `${title} is classified by functional corp scoreline semantics.`,

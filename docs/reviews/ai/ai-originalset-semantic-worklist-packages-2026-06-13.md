@@ -97,3 +97,26 @@ Abdeckung:
 - `advance.counter_placement`, `advance.counter_transfer`, `advance.overadvance_support` und `advance.counter_cashout` werden getrennt als funktionale Signale geprüft.
 - Corp-Scoreline-Doctrine-Links bleiben diagnostisch und erzeugen keine Scoring-Neugewichtung.
 - TargetProfile-Gaps bleiben sichtbar; keine produktive Karten-Sonderlogik.
+
+## AI-MAT4-17 Umsetzung: Corp Tag/Punish Paket 1
+
+Status: `diagnostic_tests_added`
+
+Scope:
+
+- Closed Accounts
+- Scorched Earth
+- Punitive Counterstrike
+- Urban Renewal
+- Netwatch Operations Office
+- Private Cybernet Police
+- City Surveillance
+- Data Raven
+- TRAP!
+- Solo Squad
+
+Abdeckung:
+
+- Tag-Quelle, Tag-Payoff und Tag-Snowball werden als getrennte Signale geprüft.
+- Meat-Damage-Payoffs, Resource-Trash und Access-Tag-Ambush bleiben getrennt.
+- `condition.requires_tagged_runner` bleibt Folge-Gate; keine Strategie ohne vollständige Source-/Payoff-Kette.
