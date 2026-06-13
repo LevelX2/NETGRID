@@ -10,7 +10,7 @@ Geprüfte Rückmeldung vom 2026-06-13 zum Card-Function-Abstraction-Stand nach d
 
 Die Rückmeldung ist im Kern plausibel, aber der lokale Stand zeigt eine wichtige Präzisierung:
 
-- Review-Markdown und Review-JSON stehen lokal bereits auf der 386er-Baseline.
+- Review-Markdown und Review-JSON standen beim Prozesseinstieg lokal bereits auf der 386er-Baseline; der aktuelle Generator kalibriert den Stand nach zwischenzeitlichen Engine-Strukturänderungen auf 389 Known-Findings.
 - `Krumz` und `Startup Immolator` sind in Review-Markdown und JSON bereits `slice_done`.
 - Die Completion-Note erwähnt Krumz und Startup Immolator bereits.
 - Das vorherige Prozessartefakt `docs/architecture/engine/card-function-krumz-startup-process-2026-06-13.md` steht noch auf `In Umsetzung`, obwohl der Prozess integriert ist.
@@ -53,10 +53,10 @@ Die Vorgabe ist für automatische Umsetzung präzise genug.
 ### P1 - Artefaktkonsistenz und Vorprozessstatus
 
 - Ziel: Review-/JSON-Stand prüfen und den abgeschlossenen Krumz-/Startup-Prozessstatus nachziehen.
-- Arbeit: Guard ausführen; nur bei Drift Review-Markdown/JSON regenerieren; altes Prozessartefakt auf abgeschlossen/lokal integriert setzen.
+- Arbeit: Guard ausführen; bei Drift Review-Markdown/JSON regenerieren; altes Prozessartefakt auf abgeschlossen/lokal integriert setzen.
 - Kernartefakte: `docs/reviews/engine/card-function-abstraction-2026-06-12.md`, `docs/reviews/engine/card-function-abstraction-2026-06-12.json`, `docs/architecture/engine/card-function-krumz-startup-process-2026-06-13.md`.
 - Checks: `corepack pnpm check:card-function-abstraction`, JSON parsebar, `git diff --check`.
-- Done-Gate: Krumz und Startup Immolator sind weiter `slice_done`; Vorprozessartefakt steht nicht mehr auf `In Umsetzung`.
+- Done-Gate: Krumz und Startup Immolator sind weiter `slice_done`; Vorprozessartefakt steht nicht mehr auf `In Umsetzung`; die neue Known-Finding-Zahl ist durch den aktuellen Generator belegt.
 - Commit: `docs: close krumz startup process artifact`
 
 ### P2 - Krumz-Public-Payload neutralisieren
