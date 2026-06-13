@@ -37,6 +37,28 @@ describe("TargetChoiceShadow", () => {
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");
     expect(report.noRuntimeEffect).toBe(true);
+    expect(report.scorecard).toMatchObject({
+      version: "target-choice-shadow-scorecard-v2",
+      coverageStatus: "covered",
+      optionCount: 3,
+      choiceOptionCount: 3,
+      targetOptionCount: 0,
+      blockedRequirementCount: 0,
+      productiveUseAllowed: false,
+      noRuntimeEffect: true,
+    });
+    expect(report.scorecard.topOption).toEqual({
+      requirementId: "discard_choice",
+      optionId: "gain",
+      kind: "choice_option",
+      score: 124,
+    });
+    expect(report.evidence).toEqual(
+      expect.arrayContaining([
+        "scorecard_version:target-choice-shadow-scorecard-v2",
+        "scorecard_coverage_status:covered",
+      ]),
+    );
   });
 
   it("ranks side-safe server target options deterministically", () => {
@@ -87,6 +109,17 @@ describe("TargetChoiceShadow", () => {
     expect(report.selectionOutput).toEqual({
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
+    });
+    expect(report.scorecard).toMatchObject({
+      coverageStatus: "covered",
+      contextSignalCounts: {
+        contextScoredOptions: 0,
+        preferredOptions: 0,
+        avoidedOptions: 0,
+        utilityLinkedOptions: 0,
+        opportunityLinkedOptions: 0,
+        threatLinkedOptions: 0,
+      },
     });
   });
 
@@ -180,6 +213,17 @@ describe("TargetChoiceShadow", () => {
     expect(report.selectionOutput).toEqual({
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
+    });
+    expect(report.scorecard).toMatchObject({
+      coverageStatus: "covered",
+      contextSignalCounts: {
+        contextScoredOptions: 1,
+        preferredOptions: 0,
+        avoidedOptions: 0,
+        utilityLinkedOptions: 1,
+        opportunityLinkedOptions: 1,
+        threatLinkedOptions: 0,
+      },
     });
   });
 
@@ -379,6 +423,14 @@ describe("TargetChoiceShadow", () => {
         reason: "engine_only_target",
       }),
     ]);
+    expect(report.scorecard).toMatchObject({
+      coverageStatus: "blocked",
+      optionCount: 0,
+      blockedRequirementCount: 1,
+      engineOnlyBlockedCount: 1,
+      noSideSafeOptionsBlockedCount: 0,
+      topOption: undefined,
+    });
   });
 
   it("ranks activated card ability legal targets without materializing selected targets", () => {
@@ -495,6 +547,7 @@ describe("TargetChoiceShadow", () => {
       "[redacted]",
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
+    expect(containsForbiddenSemanticMarker(report.scorecard)).toBe(false);
   });
 });
 

@@ -29,6 +29,36 @@ export type TargetChoiceShadowBlockedRequirement = {
   evidence: string[];
 };
 
+export type TargetChoiceShadowScorecardV2 = {
+  version: "target-choice-shadow-scorecard-v2";
+  coverageStatus: "covered" | "partial" | "blocked" | "empty";
+  optionCount: number;
+  choiceOptionCount: number;
+  targetOptionCount: number;
+  blockedRequirementCount: number;
+  engineOnlyBlockedCount: number;
+  noSideSafeOptionsBlockedCount: number;
+  topOption:
+    | {
+        requirementId: string;
+        optionId: string;
+        kind: TargetChoiceShadowOptionKind;
+        score: number;
+      }
+    | undefined;
+  contextSignalCounts: {
+    contextScoredOptions: number;
+    preferredOptions: number;
+    avoidedOptions: number;
+    utilityLinkedOptions: number;
+    opportunityLinkedOptions: number;
+    threatLinkedOptions: number;
+  };
+  productiveUseAllowed: false;
+  noRuntimeEffect: true;
+  evidence: string[];
+};
+
 export type TargetChoiceShadowReport = {
   schemaVersion: typeof TARGET_CHOICE_SHADOW_SCHEMA_VERSION;
   scope: "target_choice_shadow_report_only";
@@ -37,6 +67,7 @@ export type TargetChoiceShadowReport = {
   side: LegalAction["side"];
   rankedOptions: TargetChoiceShadowOption[];
   blockedRequirements: TargetChoiceShadowBlockedRequirement[];
+  scorecard: TargetChoiceShadowScorecardV2;
   selectionOutput: {
     selectedChoicesCreated: false;
     selectedTargetsCreated: false;
@@ -67,6 +98,8 @@ export function buildTargetChoiceShadowReport(
     ...choiceOptions(params.action, preferred, avoid),
     ...targetOptions(params, preferred, avoid),
   ]);
+  const blocked = blockedRequirements(params);
+  const scorecard = buildTargetChoiceShadowScorecardV2(rankedOptions, blocked);
   const report: TargetChoiceShadowReport = {
     schemaVersion: TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
     scope: "target_choice_shadow_report_only",
@@ -74,7 +107,8 @@ export function buildTargetChoiceShadowReport(
     actionType: params.action.type,
     side: params.action.side,
     rankedOptions,
-    blockedRequirements: blockedRequirements(params),
+    blockedRequirements: blocked,
+    scorecard,
     selectionOutput: {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
@@ -85,6 +119,8 @@ export function buildTargetChoiceShadowReport(
     evidence: [
       "target_choice_shadow:report_only",
       `ranked_option_count:${rankedOptions.length}`,
+      `scorecard_version:${scorecard.version}`,
+      `scorecard_coverage_status:${scorecard.coverageStatus}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
     ],
@@ -234,6 +270,98 @@ function blockedRequirements(
       left.requirementId.localeCompare(right.requirementId) ||
       left.reason.localeCompare(right.reason),
   );
+}
+
+function buildTargetChoiceShadowScorecardV2(
+  rankedOptions: readonly TargetChoiceShadowOption[],
+  blocked: readonly TargetChoiceShadowBlockedRequirement[],
+): TargetChoiceShadowScorecardV2 {
+  const topOption = rankedOptions[0];
+  const scorecard: TargetChoiceShadowScorecardV2 = {
+    version: "target-choice-shadow-scorecard-v2",
+    coverageStatus: targetChoiceCoverageStatus(rankedOptions, blocked),
+    optionCount: rankedOptions.length,
+    choiceOptionCount: rankedOptions.filter(
+      (option) => option.kind === "choice_option",
+    ).length,
+    targetOptionCount: rankedOptions.filter(
+      (option) => option.kind === "target_option",
+    ).length,
+    blockedRequirementCount: blocked.length,
+    engineOnlyBlockedCount: blocked.filter(
+      (requirement) => requirement.reason === "engine_only_target",
+    ).length,
+    noSideSafeOptionsBlockedCount: blocked.filter(
+      (requirement) => requirement.reason === "no_side_safe_options",
+    ).length,
+    topOption: topOption
+      ? {
+          requirementId: topOption.requirementId,
+          optionId: topOption.optionId,
+          kind: topOption.kind,
+          score: topOption.score,
+        }
+      : undefined,
+    contextSignalCounts: {
+      contextScoredOptions: rankedOptions.filter((option) =>
+        hasNonZeroContextScore(option),
+      ).length,
+      preferredOptions: optionsWithEvidence(rankedOptions, "preferred:true"),
+      avoidedOptions: optionsWithEvidence(rankedOptions, "avoid:true"),
+      utilityLinkedOptions: optionsWithEvidencePrefix(
+        rankedOptions,
+        "utility_family:",
+      ),
+      opportunityLinkedOptions: optionsWithEvidencePrefix(
+        rankedOptions,
+        "opportunity:",
+      ),
+      threatLinkedOptions: optionsWithEvidencePrefix(rankedOptions, "threat:"),
+    },
+    productiveUseAllowed: false,
+    noRuntimeEffect: true,
+    evidence: [
+      "target_choice_shadow_scorecard:report_only",
+      `coverage_status:${targetChoiceCoverageStatus(rankedOptions, blocked)}`,
+      `option_count:${rankedOptions.length}`,
+      `blocked_requirement_count:${blocked.length}`,
+    ],
+  };
+  return scorecard;
+}
+
+function targetChoiceCoverageStatus(
+  rankedOptions: readonly TargetChoiceShadowOption[],
+  blocked: readonly TargetChoiceShadowBlockedRequirement[],
+): TargetChoiceShadowScorecardV2["coverageStatus"] {
+  if (rankedOptions.length > 0 && blocked.length === 0) return "covered";
+  if (rankedOptions.length > 0) return "partial";
+  if (blocked.length > 0) return "blocked";
+  return "empty";
+}
+
+function hasNonZeroContextScore(option: TargetChoiceShadowOption): boolean {
+  return option.evidence.some(
+    (entry) =>
+      entry.startsWith("context_score_delta:") &&
+      entry !== "context_score_delta:0",
+  );
+}
+
+function optionsWithEvidence(
+  options: readonly TargetChoiceShadowOption[],
+  evidence: string,
+): number {
+  return options.filter((option) => option.evidence.includes(evidence)).length;
+}
+
+function optionsWithEvidencePrefix(
+  options: readonly TargetChoiceShadowOption[],
+  prefix: string,
+): number {
+  return options.filter((option) =>
+    option.evidence.some((entry) => entry.startsWith(prefix)),
+  ).length;
 }
 
 function targetShapeBonus(optionId: string): number {
