@@ -223,6 +223,14 @@ export type CardHiddenReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardCorpTrashInstalledRunnerSourceImplementation = {
+  kind: "corp_trash_installed_runner_resource";
+  timing: "corp_main";
+  cost: { clicks: 1; credits: number };
+  target: "source";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type CardRunnerUtilityLongtailImplementation =
   | {
       kind: "replace_installed_program_trash_with_host_on_source";

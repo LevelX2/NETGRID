@@ -17,6 +17,25 @@ describe("scored agenda score-time registry", () => {
     expect(new Set(kinds).size).toBe(kinds.length);
   });
 
+  it("classifies score-time resolvers by explicit mode", () => {
+    const resolverModes = Object.fromEntries(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => [
+        resolver.id,
+        resolver.mode,
+      ]),
+    );
+
+    expect(resolverModes).toMatchObject({
+      data_fort_reclamation_score_start: "delegated_host_choice",
+      corporate_downsizing_score_start: "delegated_host_choice",
+      ice_transmutation_score_start: "choice_start",
+      priority_requisition_score_start: "delegated_host_choice",
+      security_purge_score_start: "immediate_effect",
+      security_net_optimization_score_start: "immediate_effect",
+      subtype_reveal_economy_score_start: "choice_start",
+    });
+  });
+
   it("matches score-time resolvers by scored agenda kind", () => {
     expect(
       findScoredAgendaScoreTimeResolver({
@@ -28,6 +47,21 @@ describe("scored agenda score-time registry", () => {
         kind: "score_install_hq_cards_into_new_remote_then_rez",
       } as never)?.id,
     ).toBe("data_fort_reclamation_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "reveal_installed_ice_subtype_for_credits",
+      } as never)?.id,
+    ).toBe("subtype_reveal_economy_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      } as never)?.id,
+    ).toBe("corporate_downsizing_score_start");
+    expect(
+      findScoredAgendaScoreTimeResolver({
+        kind: "choose_fort_ice_strength_bonus",
+      } as never)?.id,
+    ).toBe("security_net_optimization_score_start");
     expect(findScoredAgendaScoreTimeResolver(undefined)).toBeUndefined();
   });
 });

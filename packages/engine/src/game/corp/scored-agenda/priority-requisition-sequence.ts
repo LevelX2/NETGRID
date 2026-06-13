@@ -67,12 +67,14 @@ export function startPriorityRequisitionChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    priorityRequisitionChoiceOpened: true,
-    priorityRequisitionCandidateCount: candidates.length,
-  };
-  return { handled: true, stateChanged: true };
+  return applySequenceResolution(host.legalAction, {
+    result: { handled: true },
+    stateChanged: true,
+    payloadPatch: {
+      priorityRequisitionChoiceOpened: true,
+      priorityRequisitionCandidateCount: candidates.length,
+    },
+  });
 }
 
 export function resolvePriorityRequisitionChoice(
@@ -100,17 +102,14 @@ export function resolvePriorityRequisitionChoice(
   );
   if (selectedOptionIds.length === 1 && selectedOptionIds[0] === "skip") {
     delete host.state.pendingChoice;
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      priorityRequisitionFreeRez: false,
-      priorityRequisitionDeclined: true,
-    };
-    return {
-      handled: true,
+    return applySequenceResolution(host.legalAction, {
+      result: { handled: true, deletePendingChoice: true },
       stateChanged: true,
-      deletePendingChoice: true,
-      resolvedPayload: host.legalAction.payload ?? {},
-    };
+      payloadPatch: {
+        priorityRequisitionFreeRez: false,
+        priorityRequisitionDeclined: true,
+      },
+    });
   }
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (selectedIds.length > 1)
@@ -118,17 +117,14 @@ export function resolvePriorityRequisitionChoice(
   const targetId = selectedIds[0];
   if (!targetId) {
     delete host.state.pendingChoice;
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      priorityRequisitionFreeRez: false,
-      priorityRequisitionDeclined: true,
-    };
-    return {
-      handled: true,
+    return applySequenceResolution(host.legalAction, {
+      result: { handled: true, deletePendingChoice: true },
       stateChanged: true,
-      deletePendingChoice: true,
-      resolvedPayload: host.legalAction.payload ?? {},
-    };
+      payloadPatch: {
+        priorityRequisitionFreeRez: false,
+        priorityRequisitionDeclined: true,
+      },
+    });
   }
   const optionValues = new Set(
     choice.options
@@ -147,22 +143,22 @@ export function resolvePriorityRequisitionChoice(
     rezzed: true,
   };
   delete host.state.pendingChoice;
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    ...hiddenZoneChoicePayload("v162_priority_requisition_free_rez"),
-    priorityRequisitionFreeRez: true,
-    priorityRequisitionTarget: targetId,
-    priorityRequisitionTargetDefinitionId:
-      host.cards.definitionFor(targetId).id,
-    rezCostPaid: 0,
-  };
-  return {
-    handled: true,
+  return applySequenceResolution(host.legalAction, {
+    result: {
+      handled: true,
+      deletePendingChoice: true,
+      rezzedCardIds: [targetId],
+    },
     stateChanged: true,
-    deletePendingChoice: true,
-    rezzedCardIds: [targetId],
-    resolvedPayload: host.legalAction.payload ?? {},
-  };
+    payloadPatch: {
+      ...hiddenZoneChoicePayload("v162_priority_requisition_free_rez"),
+      priorityRequisitionFreeRez: true,
+      priorityRequisitionTarget: targetId,
+      priorityRequisitionTargetDefinitionId:
+        host.cards.definitionFor(targetId).id,
+      rezCostPaid: 0,
+    },
+  });
 }
 
 function priorityRequisitionCandidates(

@@ -37,7 +37,7 @@ describe("trigger ability execution", () => {
     expect(JSON.stringify(state)).toBe(before);
   });
 
-  it("trashes Code Viral Cache through the trigger branch without payload changes", () => {
+  it("trashes an installed runner resource through a declared corp source ability", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-code-viral-cache",
       setupMode: "completed",
@@ -53,14 +53,14 @@ describe("trigger ability execution", () => {
     state.corp.credits = 6;
     const trashed: CardInstanceId[] = [];
     const action = triggerAction(state, "corp", {
-      corpAbility: "trash_code_viral_cache",
+      corpAbility: "trash_installed_runner_resource_source",
+      abilityKind: "corp_trash_installed_runner_resource",
       cardId: sourceCardId,
     });
 
     expect(
       handleTriggerAbilityExecution(
         testHost(state, {
-          codeViralCacheId: "code_viral_cache_definition",
           trashRunnerInstalledCardToHeap: (cardId) => trashed.push(cardId),
         }),
         action,
@@ -71,9 +71,12 @@ describe("trigger ability execution", () => {
     expect(state.corp.credits).toBe(1);
     expect(trashed).toEqual([sourceCardId]);
     expect(action.payload).toMatchObject({
-      corpAbility: "trash_code_viral_cache",
+      corpAbility: "trash_installed_runner_resource_source",
+      abilityKind: "corp_trash_installed_runner_resource",
       cardId: sourceCardId,
       trashedCardDefinitionId: "code_viral_cache_definition",
+      sourceDefinitionId: "code_viral_cache_definition",
+      trashCostPaid: 5,
       corpCreditsAfter: 1,
     });
   });
@@ -147,8 +150,8 @@ function triggerAction(
 }
 
 type TestHostOptions = {
-  codeViralCacheId?: string;
   remainingReplacementKind?: string;
+  corpTrashInstalledRunnerSource?: false;
   trashRunnerInstalledCardToHeap?: (cardId: CardInstanceId) => void;
   handleCounterUtilityTriggerExecution?: (legalAction: LegalAction) => {
     handled: boolean;
@@ -185,6 +188,19 @@ function testHost(
         definitionFor(stateToRead, cardId),
       remainingReplacementLongtailKindForCard: () =>
         options.remainingReplacementKind,
+      cardImplementationForDefinitionId: () => ({
+        ...(options.corpTrashInstalledRunnerSource === false
+          ? {}
+          : {
+              corpTrashInstalledRunnerSource: {
+                kind: "corp_trash_installed_runner_resource",
+                timing: "corp_main",
+                cost: { clicks: 1, credits: 5 },
+                target: "source",
+                visibility: "public",
+              },
+            }),
+      }),
     },
     credits: {
       spend: (stateToMutate, side, amount) => {
@@ -238,9 +254,6 @@ function testHost(
       handleHiddenZoneTriggerExecution:
         options.handleHiddenZoneTriggerExecution ??
         (() => ({ handled: false })),
-    },
-    constants: {
-      CODE_VIRAL_CACHE_ID: options.codeViralCacheId ?? "code_viral_cache",
     },
   };
 }

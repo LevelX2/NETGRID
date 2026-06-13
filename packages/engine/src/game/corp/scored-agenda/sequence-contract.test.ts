@@ -1,4 +1,5 @@
 import type { ChoiceRequest, LegalAction } from "@netgrid/shared";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   isHqToNewRemoteInstallRezChoiceSource,
@@ -15,6 +16,7 @@ import {
   findScoredAgendaScoreTimeResolver,
   SCORED_AGENDA_SCORE_TIME_RESOLVERS,
 } from "./scored-agenda-score-time-registry";
+import { SCORED_AGENDA_FLOW_CHOICE_RESOLVERS } from "./scored-agenda-flow-choice-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
   applySequenceResolution,
@@ -32,11 +34,21 @@ describe("scored agenda sequence contract matrix", () => {
     expect(
       SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id).sort(),
     ).toEqual([
+      "corporate_downsizing_score_start",
       "data_fort_reclamation_score_start",
       "ice_transmutation_score_start",
       "priority_requisition_score_start",
+      "security_net_optimization_score_start",
       "security_purge_score_start",
+      "subtype_reveal_economy_score_start",
     ]);
+    expect(
+      new Set(
+        SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.mode),
+      ),
+    ).toEqual(
+      new Set(["choice_start", "delegated_host_choice", "immediate_effect"]),
+    );
   });
 
   it("maps registered score-time kinds to the expected start resolvers", () => {
@@ -56,6 +68,18 @@ describe("scored agenda sequence contract matrix", () => {
       {
         kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
         id: "security_purge_score_start",
+      },
+      {
+        kind: "reveal_installed_ice_subtype_for_credits",
+        id: "subtype_reveal_economy_score_start",
+      },
+      {
+        kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+        id: "corporate_downsizing_score_start",
+      },
+      {
+        kind: "choose_fort_ice_strength_bonus",
+        id: "security_net_optimization_score_start",
       },
     ] as const;
 
@@ -77,6 +101,47 @@ describe("scored agenda sequence contract matrix", () => {
         choiceResolverIds.has(resolver.id),
       ),
     ).toBe(false);
+  });
+
+  it("keeps scored-agenda flow choice resolver ids unique and separated", () => {
+    const flowResolverIds = SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.map(
+      (resolver) => resolver.id,
+    );
+    const installRezResolverIds = new Set(
+      SCORED_AGENDA_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+    );
+    const scoreTimeResolverIds = new Set(
+      SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id),
+    );
+
+    expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
+    expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
+      false,
+    );
+    expect(flowResolverIds.some((id) => scoreTimeResolverIds.has(id))).toBe(
+      false,
+    );
+  });
+
+  it("keeps migrated score-time kinds out of the scored-agenda orchestrator", () => {
+    const flowSource = readFileSync(
+      new URL("../scored-agenda-flow.ts", import.meta.url),
+      "utf8",
+    );
+    const migratedKinds = [
+      "choose_fort_ice_strength_bonus",
+      "reveal_installed_ice_subtype_for_credits",
+      "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      "gain_credits_on_score",
+      "add_counters_on_score",
+      "project_babylon_bonus_points",
+      "overadvance_start_of_corp_turn_credits",
+      "overadvance_start_of_corp_turn_actions",
+    ];
+
+    for (const kind of migratedKinds) {
+      expect(flowSource).not.toContain(kind);
+    }
   });
 
   it("routes each registered choice source to exactly one resolver", () => {
@@ -103,6 +168,30 @@ describe("scored agenda sequence contract matrix", () => {
     for (const candidate of cases) {
       const matchingIds = SCORED_AGENDA_CHOICE_RESOLVERS.filter((resolver) =>
         resolver.matches(candidate.source),
+      ).map((resolver) => resolver.id);
+      expect(matchingIds).toEqual([candidate.resolverId]);
+    }
+  });
+
+  it("routes each registered scored-agenda flow choice source to exactly one resolver", () => {
+    const cases: readonly { source: string; resolverId: string }[] = [
+      {
+        source: "v162.scored_subtype_reveal:agenda_1:wall:2:8",
+        resolverId: "subtype_reveal_flow_choice",
+      },
+      {
+        source: "v1920.ice_transmutation:transmutation_agenda:8",
+        resolverId: "ice_transmutation_flow_choice",
+      },
+      {
+        source: "v1912.employee_empowerment_start_draw:employee:8",
+        resolverId: "employee_empowerment_start_draw_flow_choice",
+      },
+    ];
+
+    for (const candidate of cases) {
+      const matchingIds = SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.filter(
+        (resolver) => resolver.matches(candidate.source),
       ).map((resolver) => resolver.id);
       expect(matchingIds).toEqual([candidate.resolverId]);
     }

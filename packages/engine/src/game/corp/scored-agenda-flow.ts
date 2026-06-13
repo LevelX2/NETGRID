@@ -6,27 +6,16 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
-  ResolvedGameEffect,
   ServerId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
 import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
-import {
-  isEmployeeEmpowermentStartDrawChoiceSource,
-  resolveEmployeeEmpowermentStartDrawChoice,
-  startEmployeeEmpowermentStartDrawChoice,
-} from "./scored-agenda/employee-empowerment-sequence";
-import {
-  isScoredIceMarkModifierChoiceSource,
-  resolveScoredRezzedIceMarkModifierChoice,
-} from "./scored-agenda/ice-transmutation-sequence";
+import { applyDirectScoreEconomyEffects } from "./scored-agenda/direct-score-economy-effects";
+import { startEmployeeEmpowermentStartDrawChoice } from "./scored-agenda/employee-empowerment-sequence";
+import { applyOveradvanceScoreEffects } from "./scored-agenda/overadvance-score-effects";
+import { resolveScoredAgendaFlowChoice } from "./scored-agenda/scored-agenda-flow-choice-registry";
 import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-score-time-registry";
-import {
-  isScoredSubtypeRevealChoiceSource,
-  resolveScoredSubtypeRevealChoice,
-  startScoredSubtypeRevealChoiceOrResolve,
-} from "./scored-agenda/subtype-reveal-economy-sequence";
 
 export { startEmployeeEmpowermentStartDrawChoice };
 
@@ -164,41 +153,17 @@ export function scoreAgenda(
     host.flags.markScoredBlackOpsAgendaThisTurn();
   }
   const scoredAgenda = host.cards.scoredAgendaForDefinition(definition);
-  let bonusAgendaPoints = 0;
-  let overadvancedBy = 0;
-  if (scoredAgenda?.kind === "project_babylon_bonus_points") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    bonusAgendaPoints = Math.floor(
-      overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
-    );
-    host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        projectBabylonOveradvance: overadvancedBy,
-        projectBabylonBonusAgendaPoints: bonusAgendaPoints,
-      };
-    }
-  }
-  if (host.cards.isOveradvanceAgendaDefinition(definition.id)) {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    bonusAgendaPoints = Math.floor(overadvancedBy / 2);
-    host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919AgendaDifficulty: requiredDifficulty,
-        v1919Overadvance: overadvancedBy,
-        v1919BonusAgendaPoints: bonusAgendaPoints,
-      };
-    }
-  }
+  const overadvanceResult = applyOveradvanceScoreEffects(
+    host,
+    cardId,
+    definition,
+    instanceBefore,
+    requiredDifficulty,
+    scoredAgenda,
+    legalAction,
+  );
+  let bonusAgendaPoints = overadvanceResult.bonusAgendaPoints;
+  const overadvancedBy = overadvanceResult.overadvancedBy;
   if (scoredAgenda?.kind === "fixed_bonus_agenda_points_on_score") {
     bonusAgendaPoints += scoredAgenda.amount;
     host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
@@ -207,43 +172,6 @@ export function scoreAgenda(
         ...(legalAction.payload ?? {}),
         fixedBonusAgendaPoints: scoredAgenda.amount,
         bonusAgendaPoints,
-      };
-    }
-  }
-  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_credits") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    const recurringCredits =
-      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
-      scoredAgenda.creditPerGroup;
-    host.counters.setCardCounter(cardId, "mark", recurringCredits);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        overadvanceRecurringCredits: recurringCredits,
-        projectZurichOveradvance: overadvancedBy,
-      };
-    }
-  }
-  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_actions") {
-    overadvancedBy = Math.max(
-      0,
-      instanceBefore.advancementCounters - requiredDifficulty,
-    );
-    const recurringActions =
-      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
-      scoredAgenda.actionPerGroup;
-    host.counters.setCardCounter(cardId, "mark", recurringActions);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        overadvanceRecurringActions: recurringActions,
-        overadvanceActionGroups: Math.floor(
-          overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
-        ),
-        projectVeniceOveradvance: overadvancedBy,
       };
     }
   }
@@ -271,40 +199,13 @@ function applySimpleScoreEffects(
   scoredAgenda: CardScoredAgendaImplementation | undefined,
 ): void {
   const legalAction = host.legalAction;
-  if (scoredAgenda?.kind === "gain_credits_on_score") {
-    host.credits.gainCredits(scoredAgenda.recipient, scoredAgenda.amount);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        onScoreGainCredits: scoredAgenda.amount,
-        gainedCredits: scoredAgenda.amount,
-        corpCreditsAfter: host.state.corp.credits,
-      };
-      appendScoreCreditEffect(legalAction, {
-        effectId: `${definition.id}.score.gain_credits`,
-        kind: "gain_credits",
-        amount: scoredAgenda.amount,
-        definition,
-      });
-    }
-  }
-  if (scoredAgenda?.kind === "add_counters_on_score") {
-    host.counters.addCardCounter(
-      cardId,
-      scoredAgenda.counterType,
-      scoredAgenda.amount,
-    );
-    if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        counterType: scoredAgenda.counterType,
-        addedCounterAmount: scoredAgenda.amount,
-        remainingCounters: host.counters.cardCounter(
-          cardId,
-          scoredAgenda.counterType,
-        ),
-      };
-  }
+  applyDirectScoreEconomyEffects(
+    host,
+    cardId,
+    definition,
+    scoredAgenda,
+    legalAction,
+  );
   host.effects.executeOnScore(definition, cardId);
   if (scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install") {
     markCorporateRetreatAvailableOnScore(host, cardId, legalAction);
@@ -312,31 +213,6 @@ function applySimpleScoreEffects(
   if (scoredAgenda?.kind === "corporate_war_credit_swing") {
     resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
   }
-}
-
-function appendScoreCreditEffect(
-  legalAction: LegalAction,
-  effect: {
-    effectId: string;
-    kind: Extract<ResolvedGameEffect["kind"], "gain_credits" | "lose_credits">;
-    amount: number;
-    definition: CardDefinition;
-  },
-): void {
-  const resolvedEffect: ResolvedGameEffect = {
-    effectId: effect.effectId,
-    kind: effect.kind,
-    visibility: "public",
-    side: "corp",
-    amount: effect.amount,
-    reason: "card_resolver",
-    sourceDefinitionId: effect.definition.id,
-    sourceTitle: effect.definition.title,
-  };
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    resolvedEffect,
-  ];
 }
 
 function startScoreTimeChoices(
@@ -360,75 +236,12 @@ function startScoreTimeChoices(
     })
   )
     return;
-  if (scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits") {
-    startScoredSubtypeRevealChoiceOrResolve(
-      host,
-      cardId,
-      legalAction,
-      scoredAgenda.subtype,
-      scoredAgenda.creditPerRevealedOrRezzed,
-    );
-  }
-  if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
-    const selectedServerId =
-      typeof legalAction.payload?.selectedServerId === "string"
-        ? String(legalAction.payload.selectedServerId)
-        : instanceBefore.zone.side === "corp" &&
-            instanceBefore.zone.zone === "serverRoot"
-          ? instanceBefore.zone.serverId
-          : undefined;
-    if (!selectedServerId || selectedServerId === "new_remote")
-      throw new Error(
-        "Security Net Optimization braucht ein gueltiges Remote.",
-      );
-    host.zones.mustServer(selectedServerId as Exclude<ServerId, "new_remote">);
-    host.state.cardInstances[cardId] = {
-      ...host.cards.mustInstance(cardId),
-      selectedServerId: selectedServerId as Exclude<ServerId, "new_remote">,
-    };
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      securityNetOptimizationActive: true,
-      selectedServerId,
-      securityNetOptimizationServerId: selectedServerId,
-    };
-  }
-  if (
-    scoredAgenda?.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits"
-  ) {
-    host.choices.startCorporateDownsizing(
-      cardId,
-      scoredAgenda.creditPerAgendaPoint,
-    );
-  }
 }
 
 export function handleScoredAgendaFlowChoice(
   host: ScoredAgendaFlowHost,
 ): ScoredAgendaFlowResult {
-  const source = host.state.pendingChoice?.source ?? "";
-  if (isScoredSubtypeRevealChoiceSource(source)) {
-    resolveScoredSubtypeRevealChoice(host);
-    const result: ScoredAgendaFlowResult = {
-      handled: true,
-      stateChanged: true,
-    };
-    if (host.legalAction?.payload)
-      result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
-    return result;
-  }
-  if (isScoredIceMarkModifierChoiceSource(source)) {
-    resolveScoredRezzedIceMarkModifierChoice(host);
-    const result: ScoredAgendaFlowResult = {
-      handled: true,
-      stateChanged: true,
-    };
-    if (host.legalAction?.payload)
-      result.resolvedPayload = host.legalAction.payload as ScoredAgendaPayload;
-    return result;
-  }
-  if (isEmployeeEmpowermentStartDrawChoiceSource(source)) {
-    resolveEmployeeEmpowermentStartDrawChoice(host);
+  if (resolveScoredAgendaFlowChoice(host)) {
     const result: ScoredAgendaFlowResult = {
       handled: true,
       stateChanged: true,

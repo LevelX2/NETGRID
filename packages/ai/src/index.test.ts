@@ -8164,6 +8164,62 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       "advancement_counter_placement_incremental_second_counter:true",
     );
     expect(debugText).toContain("dominated_by_basic_advance:false");
+    expect(debugText).toContain("best_basic_equivalent:advance_card");
+    expect(debugText).toContain("card_spend_penalty:");
+    expect(debugText).toContain("compression_value:");
+    expect(debugText).toContain("window_value:");
+    expect(debugText).toContain("net_advancement_value:");
+    expect(debugText).toContain("advancement_witness:score_now");
+  });
+
+  it("does not let Team Restructuring win automatically with two weak counter banks", () => {
+    const input = corpAdvancementDominanceInput(
+      "ai-advancement-net-value-two-weak-vapors",
+      (state) => {
+        addCorpRootToServerForTest(
+          state,
+          "remote_1",
+          "onr_v1_347_vapor-ops",
+          0,
+        );
+        addCorpRootToServerForTest(
+          state,
+          "remote_2",
+          "onr_v1_347_vapor-ops",
+          0,
+        );
+      },
+    );
+    const teamRestructuring = teamRestructuringAction(input);
+    const vaporAdvances = advanceActionsForDefinition(
+      input,
+      "onr_v1_347_vapor-ops",
+    );
+
+    expect(teamRestructuring).toBeDefined();
+    expect(vaporAdvances.length).toBeGreaterThanOrEqual(2);
+    if (!teamRestructuring || vaporAdvances.length < 2)
+      throw new Error("Missing weak counter bank fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [teamRestructuring, ...vaporAdvances.slice(0, 2)],
+    });
+    const operationAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === teamRestructuring.actionId,
+      );
+    const bestVaporAlternative =
+      decision.decisionDebug?.actionAlternatives?.find((alternative) =>
+        vaporAdvances.some(
+          (action) => action.actionId === alternative.actionId,
+        ),
+      );
+
+    expect(decision.actionId).not.toBe(teamRestructuring.actionId);
+    expect(operationAlternative?.priority ?? 0).toBeLessThan(
+      bestVaporAlternative?.priority ?? 0,
+    );
   });
 
   it("converts legal Corp score windows before economy, draw, remote build, or further advances", () => {
@@ -26787,7 +26843,14 @@ function advanceActionForDefinition(
   input: AiDecisionInput,
   definitionId: string,
 ): LegalAction | undefined {
-  return input.legalActions.find(
+  return advanceActionsForDefinition(input, definitionId)[0];
+}
+
+function advanceActionsForDefinition(
+  input: AiDecisionInput,
+  definitionId: string,
+): LegalAction[] {
+  return input.legalActions.filter(
     (action) =>
       action.type === "advance_card" &&
       sourceDefinitionFromInput(input, action) === definitionId,
