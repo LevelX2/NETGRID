@@ -1049,8 +1049,9 @@ export function publicContextForAction(
     context.accessTrashCostSourceTitles =
       legalAction.payload.accessTrashCostSourceTitles;
   if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string")
-    context.v1922RunnerProgramAbility =
-      legalAction.payload.v1922RunnerProgramAbility;
+    if (typeof legalAction.payload.v1922RunnerProgramAbility === "string")
+      context.v1922RunnerProgramAbility =
+        legalAction.payload.v1922RunnerProgramAbility;
   if (typeof legalAction.payload?.runnerHardwareAbility === "string")
     context.runnerHardwareAbility = legalAction.payload.runnerHardwareAbility;
   if (typeof legalAction.payload?.printedDamageAmount === "number")
@@ -1527,9 +1528,17 @@ export function publicContextForAction(
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
   }
-  if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string") {
-    context.v1922RunnerProgramAbility =
-      legalAction.payload.v1922RunnerProgramAbility;
+  if (
+    typeof legalAction.payload?.v1922RunnerProgramAbility === "string" ||
+    legalAction.payload?.runnerUtilityAbility === "trash_fully_broken_passed_ice"
+  ) {
+    if (typeof legalAction.payload?.runnerUtilityAbility === "string")
+      context.runnerUtilityAbility = legalAction.payload.runnerUtilityAbility;
+    if (typeof legalAction.payload?.abilityKind === "string")
+      context.abilityKind = legalAction.payload.abilityKind;
+    if (typeof legalAction.payload.v1922RunnerProgramAbility === "string")
+      context.v1922RunnerProgramAbility =
+        legalAction.payload.v1922RunnerProgramAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")
@@ -1543,8 +1552,8 @@ export function publicContextForAction(
         legalAction.payload.trashedCardDefinitionId;
     if (typeof legalAction.payload.targetIceDefinitionId === "string")
       context.targetIceDefinitionId = legalAction.payload.targetIceDefinitionId;
-    if (legalAction.payload.startupImmolatorExhausted === true)
-      context.startupImmolatorExhausted = true;
+    if (legalAction.payload.sourceAbilityExhausted === true)
+      context.sourceAbilityExhausted = true;
     if (typeof legalAction.payload.futureActionDebtAdded === "number")
       context.futureActionDebtAdded = legalAction.payload.futureActionDebtAdded;
     if (typeof legalAction.payload.futureActionDebtPending === "number")

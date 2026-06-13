@@ -46,9 +46,6 @@ export const NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID =
 
 export const SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID = "onr_v1_067_speed-trap";
 
-export const STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID =
-  "onr_v1_068_startup-immolator";
-
 export const ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID =
   "onr_v1_119_arasaka-portable-prototype";
 

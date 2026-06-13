@@ -9,8 +9,10 @@ export const krumzImplementation: CardImplementationDefinition = {
     on_rez: [addHostedCredits(1)],
   },
   corpUtility: {
-    kind: "krumz_trace_bit",
+    kind: "recurring_trace_credit_pool",
     amount: 1,
+    counterType: "bit",
+    spendWindow: "trace",
     refresh: "start_of_corp_turn_after_use",
     visibility: "public",
   },

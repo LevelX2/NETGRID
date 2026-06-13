@@ -45,6 +45,10 @@ const maxActions = args.maxActions ?? 160;
 const maxFindings = args.maxFindings ?? 50;
 const includeActionAlternatives = args.includeActionAlternatives ?? false;
 const maxAlternativesPerFinding = args.maxAlternativesPerFinding ?? 5;
+const opportunitySnapshotSource = args.opportunitySnapshotSource;
+const opportunitySnapshotRequestsByPair = opportunitySnapshotSource
+  ? readOpportunitySnapshotRequests(opportunitySnapshotSource)
+  : new Map<string, Array<{ seed: string; actionIndices: number[] }>>();
 
 const pairs = [
   ...pairIds.map((id) => readPair(id)),
@@ -63,6 +67,8 @@ const matrix = pairs.map(({ pair }) => {
     maxFindings,
     includeActionAlternativesForFindings: includeActionAlternatives,
     maxAlternativesPerFinding,
+    opportunitySnapshotRequests:
+      opportunitySnapshotRequestsByPair.get(pair.id.toUpperCase()) ?? [],
   });
   return {
     pair,
@@ -136,6 +142,7 @@ const output = {
     maxFindings,
     includeActionAlternatives,
     maxAlternativesPerFinding,
+    ...(opportunitySnapshotSource ? { opportunitySnapshotSource } : {}),
   },
   aggregate: combineAggregates(matrix.map((entry) => entry.aggregate)),
   diagnostics: {
@@ -163,6 +170,7 @@ function parseArgs(argv: string[]): {
   maxFindings?: number;
   includeActionAlternatives?: boolean;
   maxAlternativesPerFinding?: number;
+  opportunitySnapshotSource?: string;
 } {
   let out: string | undefined;
   let pairs: PairId[] | undefined;
@@ -173,6 +181,7 @@ function parseArgs(argv: string[]): {
   let maxFindingsArg: number | undefined;
   let includeActionAlternatives = false;
   let maxAlternativesPerFinding: number | undefined;
+  let opportunitySnapshotSource: string | undefined;
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     const next = argv[index + 1];
@@ -227,6 +236,11 @@ function parseArgs(argv: string[]): {
       index += 1;
       continue;
     }
+    if (arg === "--opportunity-snapshot-source" && next) {
+      opportunitySnapshotSource = next;
+      index += 1;
+      continue;
+    }
   }
   if (!out) {
     throw new Error("Missing required --out <path> argument.");
@@ -243,6 +257,7 @@ function parseArgs(argv: string[]): {
     ...(Number.isFinite(maxAlternativesPerFinding)
       ? { maxAlternativesPerFinding }
       : {}),
+    ...(opportunitySnapshotSource ? { opportunitySnapshotSource } : {}),
   };
 }
 
@@ -277,6 +292,43 @@ function readPairFile(path: string): TracePairFile[] {
   ) as TracePairFile | TracePairSetFile;
   if ("pairs" in parsed) return parsed.pairs;
   return [parsed];
+}
+
+function readOpportunitySnapshotRequests(
+  path: string,
+): Map<string, Array<{ seed: string; actionIndices: number[] }>> {
+  const parsed = JSON.parse(readFileSync(resolve(repoRoot, path), "utf8")) as {
+    cases?: Array<{
+      caseId: string;
+      precedingSameSideDecision?: { actionIndex?: number } | null;
+      firstProgressAction?: { actionIndex?: number } | null;
+    }>;
+  };
+  const requests = new Map<string, Map<string, Set<number>>>();
+  for (const entry of parsed.cases ?? []) {
+    const match = entry.caseId.match(/^([A-D])-([A-Za-z0-9_.:-]+)$/);
+    if (!match) continue;
+    const [, pairId, seed] = match;
+    const indices = [
+      entry.precedingSameSideDecision?.actionIndex,
+      entry.firstProgressAction?.actionIndex,
+    ].filter((value): value is number => Number.isInteger(value) && value >= 0);
+    if (indices.length === 0) continue;
+    const pairRequests = requests.get(pairId) ?? new Map<string, Set<number>>();
+    const seedRequests = pairRequests.get(seed) ?? new Set<number>();
+    for (const index of indices) seedRequests.add(index);
+    pairRequests.set(seed, seedRequests);
+    requests.set(pairId, pairRequests);
+  }
+  return new Map(
+    [...requests.entries()].map(([pairId, seedRequests]) => [
+      pairId,
+      [...seedRequests.entries()].map(([seed, actionIndices]) => ({
+        seed,
+        actionIndices: [...actionIndices].sort((left, right) => left - right),
+      })),
+    ]),
+  );
 }
 
 function benchmarkDeckFromAnySnapshot(

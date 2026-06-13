@@ -1,0 +1,293 @@
+{
+  "schemaVersion": "ai175-corp-tempo-opportunity-solver-v1",
+  "generatedAt": "2026-06-13T07:48:01.709Z",
+  "gitHead": "ddec5b8d",
+  "source": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+  "aggregate": {
+    "cases": 17,
+    "cutoverCandidates": 2,
+    "noGoCases": 15,
+    "pathCounts": {
+      "opaque_ability": 2,
+      "opaque_or_basic": 2,
+      "scoreline": 12,
+      "economy": 1
+    }
+  },
+  "cases": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "classes": [
+        "opaque_ability"
+      ],
+      "primaryPath": "opaque_ability",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_no_tempo_path"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "snapshotCount": 0,
+      "classes": [],
+      "primaryPath": "opaque_or_basic",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_missing_snapshot"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 2,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "cutover_candidate"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "snapshotCount": 2,
+      "classes": [
+        "economy",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": true,
+      "protectionLegal": false,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "cutover_candidate"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "snapshotCount": 0,
+      "classes": [],
+      "primaryPath": "opaque_or_basic",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_missing_snapshot"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "install_protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy"
+      ],
+      "primaryPath": "economy",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_no_tempo_path"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "install_protection",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "classes": [
+        "economy",
+        "install_protection",
+        "scoreline"
+      ],
+      "primaryPath": "scoreline",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "cutover": "no_go_hard_gate_or_target_context"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "classes": [
+        "opaque_ability"
+      ],
+      "primaryPath": "opaque_ability",
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "cutover": "no_go_no_tempo_path"
+    }
+  ]
+}

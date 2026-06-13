@@ -204,7 +204,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         traceBidChoice: () => ({}) as never,
         addHackerTrackerTraceCounters: () => 0,
         hackerTrackerCounterTotal: () => 0,
-        krumzTraceBitTotal: () => 0,
+        recurringTraceCreditPoolTotal: () => 0,
         rabbitTraceLimitReductionForIceTrace: () => 0,
         resolveTraceHardwareWreckerSuccess: () => ({}),
         resolveTraceTrashRunnerResourceSuccess: () => ({}),

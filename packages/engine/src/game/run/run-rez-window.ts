@@ -23,12 +23,8 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
-import {
-  buildCorpFortPassWindowActions,
-  buildSingaporeCityGridRunActions,
-  buildStartRunIceRepositionActions,
-  type FortPassWindowHost,
-} from "./fort-pass-window";
+import { type FortPassWindowHost } from "./fort-pass-window";
+import { buildRegisteredRunWindowActions } from "./run-window-registry";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -60,14 +56,18 @@ export type RunRezWindowHost = {
     runnerInstalledProgramIds: () => CardInstanceId[];
   };
   servers: {
-    mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
+    mustServer: (
+      serverId: Exclude<ServerId, "new_remote"> | string,
+    ) => CorpServer;
     publicServerLabel: (
       serverId: Exclude<ServerId, "new_remote">,
     ) => string | undefined;
   };
   fortPass: FortPassWindowHost;
   choices: {
-    selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
+    selectedChoiceIds: (
+      selectedChoices: PlayerAction["selectedChoices"],
+    ) => string[];
   };
   callbacks: {
     canReplaceFortCardsFromHq: (
@@ -168,7 +168,13 @@ export function buildCorpApproachActions(
     }
   }
   actions.push(
-    buildLegalAction(host.state, "corp", "decline_rez", "Nicht rezzen", "game_rule"),
+    buildLegalAction(
+      host.state,
+      "corp",
+      "decline_rez",
+      "Nicht rezzen",
+      "game_rule",
+    ),
   );
   return [...actions, ...buildCorpRunRootRezActions(host)];
 }
@@ -215,8 +221,14 @@ export function buildCorpRunRootRezActions(
       ),
     );
   }
-  actions.push(...buildSingaporeCityGridRunActions(host.fortPass, run, server));
-  actions.push(...buildStartRunIceRepositionActions(host.fortPass, run, server));
+  actions.push(
+    ...buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_root_rez_window",
+    ),
+  );
   return actions;
 }
 
@@ -226,13 +238,20 @@ function rootRezLifecycleIsSolvable(
   definition: CardDefinition,
   server: CorpServer,
 ): boolean {
-  const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_rez;
+  const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle
+    ?.on_rez;
   if (
-    !lifecycle?.some((effect) => effect.kind === "replace_source_fort_cards_from_hq")
+    !lifecycle?.some(
+      (effect) => effect.kind === "replace_source_fort_cards_from_hq",
+    )
   )
     return true;
   const run = host.state.run;
-  if (!run || run.attackedServerId !== server.id || run.position.kind !== "server")
+  if (
+    !run ||
+    run.attackedServerId !== server.id ||
+    run.position.kind !== "server"
+  )
     return false;
   return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
@@ -240,13 +259,19 @@ function rootRezLifecycleIsSolvable(
 export function buildCorpRunRootRezWindowActions(
   host: RunRezWindowHost,
 ): LegalAction[] {
+  const run = host.state.run;
+  if (!run) return [];
+  const server = host.servers.mustServer(run.attackedServerId);
   const actions = [
     ...buildCorpRunRootRezActions(host),
-    ...buildCorpFortPassWindowActions(host.fortPass),
+    ...buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_fort_pass_window",
+    ),
   ];
   if (actions.length === 0 || !isCorpRunRootRezWindowOpen(host)) return [];
-  const run = mustRun(host.state);
-  const server = host.servers.mustServer(run.attackedServerId);
   return [
     ...actions,
     buildLegalAction(
@@ -277,9 +302,15 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
   if (!run) return false;
   if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
     return false;
+  const server = host.servers.mustServer(run.attackedServerId);
   return (
     buildCorpRunRootRezActions(host).length > 0 ||
-    buildCorpFortPassWindowActions(host.fortPass).length > 0
+    buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_fort_pass_window",
+    ).length > 0
   );
 }
 
@@ -326,7 +357,11 @@ export function handleRunRootRezPostRez(
   rezzedCardId: CardInstanceId,
   legalAction?: LegalAction,
 ): RootRezContinuationResult {
-  const speedTrap = startSpeedTrapRezInterruptChoice(host, rezzedCardId, legalAction);
+  const speedTrap = startSpeedTrapRezInterruptChoice(
+    host,
+    rezzedCardId,
+    legalAction,
+  );
   if (speedTrap.handled) return speedTrap;
   const rootEffect = resolveCorpRootRezEffect(host, rezzedCardId, legalAction);
   if (rootEffect.handled) return rootEffect;
@@ -352,9 +387,8 @@ export function resolveCorpRootRezEffect(
   if (!resolver) return { handled: false, rezzedCardId: cardId };
   resolver.resolve(host.state);
   if (isAcmeSavingsAndLoanDefinition(definition.id)) {
-    const acmeLongtail = remainingReplacementLongtailImplementationForDefinition(
-      definition.id,
-    );
+    const acmeLongtail =
+      remainingReplacementLongtailImplementationForDefinition(definition.id);
     const gainedCredits =
       acmeLongtail?.kind === "acme_savings_and_loan_debt"
         ? acmeLongtail.gainCreditsOnRez
@@ -402,7 +436,8 @@ export function startSpeedTrapRezInterruptChoice(
       .root.includes(rezzedCardInstanceId)
   )
     return { handled: false };
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   run.speedTrapPendingRezCardId = rezzedCardInstanceId;
   run.speedTrapPendingRezTimingPoint = host.state.timingPoint;
   run.speedTrapPendingRezActiveSide = host.state.activeSide;
@@ -467,7 +502,9 @@ export function resolveSpeedTrapRezInterruptChoice(
   const [, speedTrapId, rezzedCardId] = choice.source.split(":");
   if (
     !speedTrapId ||
-    !host.cards.runnerInstalledProgramIds().includes(speedTrapId as CardInstanceId)
+    !host.cards
+      .runnerInstalledProgramIds()
+      .includes(speedTrapId as CardInstanceId)
   )
     throw new Error("Speed Trap ist nicht mehr installiert.");
   const speedTrapCardId = speedTrapId as CardInstanceId;
@@ -497,7 +534,8 @@ export function resolveSpeedTrapRezInterruptChoice(
     throw new Error("Speed Trap reagiert nur auf Nodes oder Upgrades.");
   if (!host.cards.cardInstanceFor(rezzedCardInstanceId).rezzed)
     throw new Error("Das Speed-Trap-Rezziel ist nicht gerezzt.");
-  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const selectedId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const useSpeedTrap = selectedId === "jack_out";
   const pass = selectedId === "pass";
   if (!useSpeedTrap && !pass)
@@ -571,7 +609,9 @@ function variableIceRezActions(
   if (variableRez.kind === "x_strength") {
     const maxX = Math.min(
       variableRez.maxValue,
-      Math.floor(availableAdditionalCredits / variableRez.additionalCostPerValue),
+      Math.floor(
+        availableAdditionalCredits / variableRez.additionalCostPerValue,
+      ),
     );
     return Array.from(
       { length: Math.max(0, maxX - variableRez.minValue + 1) },
@@ -615,35 +655,39 @@ function variableIceRezActions(
     const maxSubroutineCount = Math.floor(
       availableAdditionalCredits / variableRez.additionalCostPerSubroutine,
     );
-    return Array.from({ length: maxSubroutineCount + 1 }, (_, subroutineCount) => {
-      const additionalCost =
-        subroutineCount * variableRez.additionalCostPerSubroutine;
-      const totalCost = baseRezCost + additionalCost;
-      return buildLegalAction(
-        host.state,
-        "corp",
-        "rez_ice",
-        `${definition.title} mit ${subroutineCount} ETR-Subroutinen rezzen`,
-        iceId,
-        [{ credits: totalCost }],
-        {
-          cardId: iceId,
-          variableRezKind: variableRez.kind,
-          baseRezCost,
-          variableRezAdditionalCost: additionalCost,
-          variableRezValue: subroutineCount,
-          rezCostPaid: totalCost,
-          effectiveSubroutineCountAfterRez: subroutineCount,
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-              }
-            : {}),
-        },
-      );
-    });
+    return Array.from(
+      { length: maxSubroutineCount + 1 },
+      (_, subroutineCount) => {
+        const additionalCost =
+          subroutineCount * variableRez.additionalCostPerSubroutine;
+        const totalCost = baseRezCost + additionalCost;
+        return buildLegalAction(
+          host.state,
+          "corp",
+          "rez_ice",
+          `${definition.title} mit ${subroutineCount} ETR-Subroutinen rezzen`,
+          iceId,
+          [{ credits: totalCost }],
+          {
+            cardId: iceId,
+            variableRezKind: variableRez.kind,
+            baseRezCost,
+            variableRezAdditionalCost: additionalCost,
+            variableRezValue: subroutineCount,
+            rezCostPaid: totalCost,
+            effectiveSubroutineCountAfterRez: subroutineCount,
+            ...(rezCostReductionSourceDefinitionIds.length > 0
+              ? {
+                  rezCostReductionSourceDefinitionIds:
+                    rezCostReductionSourceDefinitionIds.join(","),
+                  rezCostReductionAmount:
+                    (definition.rezCost ?? 0) - baseRezCost,
+                }
+              : {}),
+          },
+        );
+      },
+    );
   }
   const subtypeVariants = [
     {
@@ -697,8 +741,9 @@ function variableRezForDefinition(
 }
 
 function stableSubtypeList(subtypes: readonly string[]): string[] {
-  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
-    .sort();
+  return [
+    ...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype))),
+  ].sort();
 }
 
 function normalizeSubtypeLabel(subtype: string): string {
@@ -763,7 +808,10 @@ function installedSpeedTrapIds(host: RunRezWindowHost): CardInstanceId[] {
 function runEncounterInterventionsForDefinition(
   definitionId: string,
 ): readonly CardRunEncounterInterventionImplementation[] {
-  return cardImplementationForDefinitionId(definitionId)?.runEncounterInterventions ?? [];
+  return (
+    cardImplementationForDefinitionId(definitionId)
+      ?.runEncounterInterventions ?? []
+  );
 }
 
 function hasRunEncounterInterventionKind(

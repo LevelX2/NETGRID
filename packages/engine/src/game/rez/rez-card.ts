@@ -82,9 +82,6 @@ export type RezCardHost = {
     isFortTraceBitPoolSource: (cardId: CardInstanceId) => boolean;
     fortTraceBitPoolCapacityForCard: (cardId: CardInstanceId) => number;
   };
-  constants: {
-    KRUMZ_TRACE_ASSET_CARD_ID: CardDefinitionId;
-  };
 };
 
 export function rezCard(
@@ -207,12 +204,6 @@ export function rezCard(
         runnerCreditsAfter: state.runner.credits,
       };
     }
-  }
-  if (
-    definition.id === host.constants.KRUMZ_TRACE_ASSET_CARD_ID &&
-    !host.cards.hasCardImplementationForDefinition(definition.id)
-  ) {
-    host.counters.setCardCounter(cardId, "bit", 1);
   }
   if (host.fort.isFortTraceBitPoolSource(cardId)) {
     const capacity = host.fort.fortTraceBitPoolCapacityForCard(cardId);

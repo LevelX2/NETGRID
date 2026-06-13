@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "ai174-corp-tag-punish-stale-intent-review-v1",
+  "generatedAt": "2026-06-13T07:48:01.158Z",
+  "gitHead": "ddec5b8d",
+  "sources": {
+    "ai172": "docs/reviews/ai/ai172-goal-conversion-contract-v1-2026-06-13.json",
+    "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json"
+  },
+  "aggregate": {
+    "cases": 20,
+    "classCounts": {
+      "missing_tag": 6,
+      "missing_payoff": 12,
+      "scoreline_should_replace": 2
+    }
+  },
+  "cases": [
+    {
+      "caseId": "B-ai-v143-tuning-005",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 20,
+      "lastConversionAttempt": "runner/end_turn@159",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "subcluster": "continue_chain_to_access",
+      "staleCount": 12,
+      "lastConversionAttempt": "runner/gain_credit@159",
+      "snapshotAlternatives": 1,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 11,
+      "lastConversionAttempt": "runner/gain_credit@159",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-006",
+      "subcluster": "corp_late_gain_credit_no_safe_alternative",
+      "staleCount": 11,
+      "lastConversionAttempt": "runner/gain_credit@159",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "subcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "staleCount": 10,
+      "lastConversionAttempt": "runner/resolve_choice@156",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 10,
+      "lastConversionAttempt": "runner/end_turn@156",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 10,
+      "lastConversionAttempt": "corp/decline_rez@153",
+      "snapshotAlternatives": 1,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "subcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "staleCount": 9,
+      "lastConversionAttempt": "corp/decline_rez@158",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "subcluster": "run_microstep_required",
+      "staleCount": 9,
+      "lastConversionAttempt": "runner/end_turn@159",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": true,
+      "classification": "scoreline_should_replace"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "subcluster": "continue_chain_to_access",
+      "staleCount": 8,
+      "lastConversionAttempt": "corp/decline_rez@150",
+      "snapshotAlternatives": 1,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 8,
+      "lastConversionAttempt": "corp/decline_rez@159",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "subcluster": "continue_chain_to_access",
+      "staleCount": 8,
+      "lastConversionAttempt": "corp/decline_rez@158",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 8,
+      "lastConversionAttempt": "runner/end_turn@156",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-004",
+      "subcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "staleCount": 8,
+      "lastConversionAttempt": "runner/end_turn@155",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 8,
+      "lastConversionAttempt": "runner/resolve_choice@159",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-002",
+      "subcluster": "continue_chain_to_access",
+      "staleCount": 7,
+      "lastConversionAttempt": "runner/end_turn@141",
+      "snapshotAlternatives": 0,
+      "taggedWindowEvidence": false,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_tag"
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "subcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "staleCount": 6,
+      "lastConversionAttempt": "runner/end_turn@158",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "subcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "staleCount": 4,
+      "lastConversionAttempt": "runner/gain_credit@150",
+      "snapshotAlternatives": 7,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": true,
+      "classification": "scoreline_should_replace"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "subcluster": "runner_late_gain_credit_real_reserve",
+      "staleCount": 4,
+      "lastConversionAttempt": "runner/gain_credit@151",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "subcluster": "continue_chain_to_access",
+      "staleCount": 4,
+      "lastConversionAttempt": "corp/install_card@127",
+      "snapshotAlternatives": 6,
+      "taggedWindowEvidence": true,
+      "punishPayoffEvidence": false,
+      "scorelineReplacementEvidence": false,
+      "classification": "missing_payoff"
+    }
+  ]
+}

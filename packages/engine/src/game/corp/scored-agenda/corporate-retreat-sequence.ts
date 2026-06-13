@@ -1,5 +1,6 @@
 import type { CardInstanceId, LegalAction } from "@netgrid/shared";
-import type { ScoredAgendaFlowHost } from "../scored-agenda-flow";
+import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
+import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 export function markCorporateRetreatAvailableOnScore(
   host: ScoredAgendaFlowHost,
@@ -8,9 +9,8 @@ export function markCorporateRetreatAvailableOnScore(
 ): void {
   host.counters.setCardCounter(cardId, "mark", 1);
   if (legalAction)
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
+    applySequencePayloadPatch(legalAction, {
       agendaAbility: "v1922_corporate_retreat",
       corporateRetreatAvailable: true,
-    };
+    });
 }

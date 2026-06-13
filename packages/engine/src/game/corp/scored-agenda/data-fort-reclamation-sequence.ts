@@ -230,8 +230,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
   validateImmediateRootRezBudget(host, selectedCards, temporaryCreditAmount);
   if (selectedCards.length === 0) {
     delete host.state.pendingChoice;
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
+    const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
       ...primitivePayload,
       ...hiddenZoneChoicePayload(
         "v1922_data_fort_reclamation_install_sequence",
@@ -252,7 +251,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
         dataFortReclamationRezChoiceOpened: false,
         dataFortReclamationRezCandidateCount: 0,
       }),
-    };
+    });
     return {
       handled: true,
       stateChanged: true,
@@ -261,7 +260,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
       installedCardIds: [],
       temporaryCreditsGranted: temporaryCreditAmount,
       temporaryCreditsReturned: temporaryCreditAmount,
-      resolvedPayload: host.legalAction.payload ?? {},
+      resolvedPayload,
     };
   }
 
@@ -325,8 +324,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
     isDataFortReclamationRezCandidate(host, cardId, server.id),
   );
   delete host.state.pendingChoice;
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
+  const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_install_sequence"),
     ...corpSequenceContextPayload({
@@ -350,7 +348,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
         ? { temporaryCreditsReturned: temporaryCreditsRemaining }
         : {}),
     }),
-  };
+  });
   if (rezCandidates.length > 0) {
     host.state.pendingChoice = {
       choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_rez_${host.state.stateVersion + 1}`,
@@ -380,7 +378,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
     ...(rezCandidates.length === 0
       ? { temporaryCreditsReturned: temporaryCreditsRemaining }
       : {}),
-    resolvedPayload: host.legalAction.payload ?? {},
+    resolvedPayload,
   };
 }
 
@@ -530,8 +528,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     }
   }
   delete host.state.pendingChoice;
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
+  const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
     ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_rez_sequence"),
     ...corpSequenceContextPayload({
@@ -549,7 +546,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
       corpCreditsSpent,
       corpCreditsAfter: host.state.corp.credits,
     }),
-  };
+  });
   return {
     handled: true,
     stateChanged: true,
@@ -557,7 +554,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     rezzedCardIds: selectedIds,
     temporaryCreditsGranted: temporaryCreditAmount,
     temporaryCreditsReturned: temporaryCreditsRemaining,
-    resolvedPayload: host.legalAction.payload ?? {},
+    resolvedPayload,
   };
 }
 

@@ -16,6 +16,7 @@ import {
   findScoredAgendaScoreTimeResolver,
   SCORED_AGENDA_SCORE_TIME_RESOLVERS,
 } from "./scored-agenda-score-time-registry";
+import { SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS } from "./scored-agenda-direct-effect-registry";
 import { SCORED_AGENDA_FLOW_CHOICE_RESOLVERS } from "./scored-agenda-flow-choice-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
@@ -115,10 +116,39 @@ describe("scored agenda sequence contract matrix", () => {
     );
 
     expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
+    expect(flowResolverIds.sort()).toEqual([
+      "employee_empowerment_start_draw_flow_choice",
+      "ice_transmutation_flow_choice",
+      "subtype_reveal_flow_choice",
+    ]);
     expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
       false,
     );
     expect(flowResolverIds.some((id) => scoreTimeResolverIds.has(id))).toBe(
+      false,
+    );
+  });
+
+  it("keeps scored-agenda direct effect resolver ids unique", () => {
+    const directResolverIds = SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS.map(
+      (resolver) => resolver.id,
+    );
+    const reservedResolverIds = new Set([
+      ...SCORED_AGENDA_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+      ...SCORED_AGENDA_FLOW_CHOICE_RESOLVERS.map((resolver) => resolver.id),
+      ...SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id),
+    ]);
+
+    expect(new Set(directResolverIds).size).toBe(directResolverIds.length);
+    expect(directResolverIds.sort()).toEqual([
+      "add_counters_on_score_effect",
+      "corporate_retreat_score_effect",
+      "corporate_war_score_effect",
+      "fixed_bonus_agenda_points_score_effect",
+      "gain_credits_on_score_effect",
+      "overadvance_score_effects",
+    ]);
+    expect(directResolverIds.some((id) => reservedResolverIds.has(id))).toBe(
       false,
     );
   });

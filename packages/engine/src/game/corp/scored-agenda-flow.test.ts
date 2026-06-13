@@ -15,8 +15,8 @@ import {
   handleScoredAgendaFlowChoice,
   scoreAgenda,
   startEmployeeEmpowermentStartDrawChoice,
-  type ScoredAgendaFlowHost,
 } from "./scored-agenda-flow";
+import type { ScoredAgendaFlowHost } from "./scored-agenda/scored-agenda-flow-host";
 
 function definition(
   id: string,

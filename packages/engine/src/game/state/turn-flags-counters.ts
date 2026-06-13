@@ -117,7 +117,6 @@ export function ensureRunnerTurnFlags(
     shellTradersStartTurnResolvedSourceIds: [],
     bodyweightDataCrecheExtraRunPending: false,
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
-    startupImmolatorUsedSourceIdsThisTurn: [],
   });
   flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
   flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
@@ -151,7 +150,6 @@ export function ensureRunnerTurnFlags(
   flags.shellTradersStartTurnResolvedSourceIds ??= [];
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
-  flags.startupImmolatorUsedSourceIdsThisTurn ??= [];
   flags.delayedEndTurnEffects ??= [];
   flags.corpRezzedIceThisTurn ??= 0;
   return flags;

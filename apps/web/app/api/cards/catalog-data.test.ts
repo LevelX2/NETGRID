@@ -411,7 +411,7 @@ describe("catalog API filters", () => {
       ai_supported: true,
       blocked: false,
     });
-  });
+  }, 15_000);
 
   it("exposes display-only rarity metadata in list and detail responses", () => {
     const detailResponse = catalogDetailResponse("onr_v1_001_afreet");

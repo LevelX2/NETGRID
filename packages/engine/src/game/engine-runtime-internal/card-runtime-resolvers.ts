@@ -393,7 +393,7 @@ import {
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
-  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
@@ -575,7 +575,6 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
@@ -923,8 +922,8 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     isV099OrLater,
     isVersionAtLeast,
     isVisibleVirusCounterCardForRunner,
-    krumzTraceBitCardIds,
-    krumzTraceBitTotal,
+    recurringTraceCreditPoolSourceIds,
+    recurringTraceCreditPoolTotal,
     leavePlayCleanupImplementationsForCard,
     legalActionHostComposition,
     mainActionHostComposition,
@@ -1107,7 +1106,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     spendCorpAgendaPointCost,
     spendEncounterTemporaryTraceCredits,
     spendHackerTrackerCounters,
-    spendKrumzTraceBits,
+    spendRecurringTraceCreditPool,
     spendRunnerAccessTrashCredits,
     spendRunnerInstallCredits,
     spendRunnerTagRemovalCredits,

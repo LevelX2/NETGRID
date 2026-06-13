@@ -29,7 +29,7 @@ export type RunFortTriggerExecutionHost = {
     resolveFullyBrokenPassedIceDerezAndEndRun: (
       legalAction: LegalAction,
     ) => void;
-    resolveStartupImmolatorTrashIce: (legalAction: LegalAction) => void;
+    resolveFullyBrokenPassedIceTrash: (legalAction: LegalAction) => void;
     resolveFortPassAdvancementWindow: (legalAction: LegalAction) => void;
     resolveStartRunIceRepositionWindow: (legalAction: LegalAction) => void;
     resolveApproachIceExposeAbility: (legalAction: LegalAction) => void;
@@ -64,10 +64,10 @@ export function handleRunFortTriggerExecution(
     return handled(legalAction);
   }
   if (
-    legalAction.payload?.v1922RunnerProgramAbility ===
-    "startup_immolator_trash_ice"
+    legalAction.payload?.runnerUtilityAbility ===
+    "trash_fully_broken_passed_ice"
   ) {
-    host.run.resolveStartupImmolatorTrashIce(legalAction);
+    host.run.resolveFullyBrokenPassedIceTrash(legalAction);
     return handled(legalAction);
   }
   if (

@@ -1,0 +1,238 @@
+{
+  "schemaVersion": "ai171-opportunity-replay-fixtures-v1",
+  "generatedAt": "2026-06-13T07:47:59.557Z",
+  "gitHead": "ddec5b8d",
+  "redaction": {
+    "safe": true,
+    "forbiddenMarkers": []
+  },
+  "aggregate": {
+    "fixtures": 3,
+    "targetContextMissingFixtures": 2,
+    "fixturesWithProgressAlternative": 2
+  },
+  "fixtures": [
+    {
+      "fixtureId": "A-ai-v143-tuning-009:preceding_same_side_decision:100",
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "source": {
+        "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+        "snapshotRequestKind": "preceding_same_side_decision"
+      },
+      "replaySafeReference": {
+        "seed": "ai-v143-tuning-009",
+        "stateVersion": 100,
+        "actionIndex": 100,
+        "side": "corp"
+      },
+      "playerViewRef": {
+        "side": "corp",
+        "stateVersion": 100,
+        "surface": "redacted_player_view_reference"
+      },
+      "legalActionCandidates": [
+        {
+          "rank": 1,
+          "actionType": "resolve_choice",
+          "semanticActionType": "server_protection",
+          "selected": true,
+          "sourceKind": "game_rule",
+          "targetContextStatus": "protection_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "clear",
+          "blocker": null
+        }
+      ],
+      "decisionFacts": {
+        "selectedActionType": "resolve_choice",
+        "requestedActionType": "install_card",
+        "requestedProgressLabel": "no_progress_stale",
+        "progressAlternatives": 0,
+        "targetContextComplete": true
+      },
+      "expectedShadowClassification": "opportunity_fixture_no_progress_alternative"
+    },
+    {
+      "fixtureId": "B-ai-v143-tuning-001:preceding_same_side_decision:100",
+      "caseId": "B-ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "source": {
+        "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+        "snapshotRequestKind": "preceding_same_side_decision"
+      },
+      "replaySafeReference": {
+        "seed": "ai-v143-tuning-001",
+        "stateVersion": 100,
+        "actionIndex": 100,
+        "side": "corp"
+      },
+      "playerViewRef": {
+        "side": "corp",
+        "stateVersion": 100,
+        "surface": "redacted_player_view_reference"
+      },
+      "legalActionCandidates": [
+        {
+          "rank": 1,
+          "actionType": "advance_card",
+          "semanticActionType": "scoreline",
+          "selected": true,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_server_protected",
+          "costTimingProfile": "cost_visible+timing_relevant",
+          "hardGateSummary": "clear",
+          "blocker": null
+        },
+        {
+          "rank": 2,
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "selected": false,
+          "sourceKind": "basic_action",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 3,
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "selected": false,
+          "sourceKind": "basic_action",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 4,
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "selected": false,
+          "sourceKind": "game_rule",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        }
+      ],
+      "decisionFacts": {
+        "selectedActionType": "advance_card",
+        "requestedActionType": "advance_card",
+        "requestedProgressLabel": "no_progress_stale",
+        "progressAlternatives": 1,
+        "targetContextComplete": true
+      },
+      "expectedShadowClassification": "opportunity_fixture_with_progress_alternative"
+    },
+    {
+      "fixtureId": "C-ai-v143-tuning-008:first_progress_action:100",
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "source": {
+        "ai170": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+        "snapshotRequestKind": "first_progress_action"
+      },
+      "replaySafeReference": {
+        "seed": "ai-v143-tuning-008",
+        "stateVersion": 100,
+        "actionIndex": 100,
+        "side": "corp"
+      },
+      "playerViewRef": {
+        "side": "corp",
+        "stateVersion": 100,
+        "surface": "redacted_player_view_reference"
+      },
+      "legalActionCandidates": [
+        {
+          "rank": 1,
+          "actionType": "rez_ice",
+          "semanticActionType": "server_protection",
+          "selected": true,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_server_protected",
+          "costTimingProfile": "cost_visible+timing_relevant",
+          "hardGateSummary": "clear",
+          "blocker": null
+        },
+        {
+          "rank": 2,
+          "actionType": "gain_credit",
+          "semanticActionType": "server_protection",
+          "selected": false,
+          "sourceKind": "basic_action",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_plausible",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 3,
+          "actionType": "play_operation",
+          "semanticActionType": "economy",
+          "selected": false,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "costTimingProfile": "cost_visible+timing_not_explicit",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 4,
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "selected": false,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "costTimingProfile": "cost_visible+timing_relevant",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 5,
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "selected": false,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "costTimingProfile": "cost_visible+timing_relevant",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        },
+        {
+          "rank": 6,
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "selected": false,
+          "sourceKind": "visible_card_or_ability",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "costTimingProfile": "cost_visible+timing_relevant",
+          "hardGateSummary": "blocked_or_guarded",
+          "blocker": "plan_mismatch"
+        }
+      ],
+      "decisionFacts": {
+        "selectedActionType": "rez_ice",
+        "requestedActionType": "rez_ice",
+        "requestedProgressLabel": "progress_server_protected",
+        "progressAlternatives": 4,
+        "targetContextComplete": true
+      },
+      "expectedShadowClassification": "opportunity_fixture_with_progress_alternative"
+    }
+  ]
+}
