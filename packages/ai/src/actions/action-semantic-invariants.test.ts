@@ -238,6 +238,37 @@ describe("Action semantic invariants", () => {
     expect(report).toContain("proteus_ai_supported: false");
   });
 
+  it("keeps proteus hidden resource ambush readiness diagnostic", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-proteus-hidden-resource-ambush-readiness-2026-06-13.md",
+      ),
+      "utf8",
+    );
+
+    for (const card of [
+      "Airport Locker",
+      "HQ Mole",
+      "R&D Mole",
+      "Simulacrum",
+      "Death from Above",
+      "Mercenary Subcontract",
+      "Doppelganger Antibody",
+      "Pattel Antibody",
+      "Stereogram Antibody",
+      "Bel-Digmo Antibody",
+    ]) {
+      expect(report).toContain(card);
+    }
+    expect(report).toContain("hidden_resource_constraints");
+    expect(report).toContain("target_choice_gaps");
+    expect(report).toContain("access_ambush_precision");
+    expect(report).toContain("virus_counter_risk");
+    expect(report).toContain("productiveUseAllowed: false");
+    expect(report).toContain("proteus_ai_supported: false");
+  });
+
   it("covers runner breaker-search worklist package one as diagnostic semantics", () => {
     const profiles: ActionCardSemanticProfile[] = [
       runnerBreakerSearchProfile("Self-Modifying Code", [
