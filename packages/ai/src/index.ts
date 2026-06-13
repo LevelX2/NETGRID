@@ -39,7 +39,6 @@ import {
 } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
-  beliefDebugSummary,
   reconstructBeliefState,
   type CorpOpponentModel,
   type RndTopFreshnessMemory,
@@ -134,6 +133,7 @@ import {
   semanticRuntimeDebugRankedAlternatives,
   type SemanticRuntimeDebugPlanContext,
 } from "./diagnostics/semantic-runtime-debug";
+import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
 import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
@@ -193,7 +193,6 @@ import {
   CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
-  type AiDeckDoctrineProfile,
   type AiDecision,
   type AiDecisionActionAlternative,
   type AiDecisionDebug,
@@ -13612,24 +13611,7 @@ function decisionFromChoices(
   const consideredActionIds = input.legalActions
     .map((action) => action.actionId)
     .sort();
-  const beliefSummary = beliefDebugSummary(reconstructBeliefState(input));
-  const opponentModel =
-    input.side === "runner"
-      ? toRecord(beliefSummary.runnerOpponentModel)
-      : toRecord(beliefSummary.corpOpponentModel);
-  const decisionDebug = {
-    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-    aiLevel: 1,
-    memoryVersion: String(beliefSummary.memoryVersion ?? ""),
-    facts: toStringArray(beliefSummary.facts),
-    hypotheses: toStringArray(beliefSummary.hypotheses),
-    uncertainty: toStringArray(beliefSummary.uncertainty),
-    invalidations: toStringArray(beliefSummary.invalidations),
-    ...(input.ownDeckDoctrine
-      ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine) }
-      : {}),
-    ...(opponentModel ? { opponentModel } : {}),
-  } satisfies AiDecisionDebug;
+  const decisionDebug = buildLegacyBaselineDecisionDebug(input);
   const choice = choices
     .filter((candidate) => candidate.action && candidate.score > 200)
     .sort(
@@ -36206,29 +36188,6 @@ function minDefined(values: number[]): number {
 
 function roundScore(value: number): number {
   return Math.round(value * 100) / 100;
-}
-
-function toStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string");
-}
-
-function toRecord(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    return undefined;
-  return value as Record<string, unknown>;
-}
-
-function deckDoctrineDebug(
-  profile: AiDeckDoctrineProfile,
-): NonNullable<AiDecisionDebug["ownDeckDoctrine"]> {
-  return {
-    schemaVersion: profile.schemaVersion,
-    side: profile.side,
-    confidence: profile.confidence,
-    archetypeTags: profile.archetypeTags.slice(0, 4),
-    riskFlags: profile.riskFlags.slice(0, 6),
-  };
 }
 
 function confidence(score: number): number {
