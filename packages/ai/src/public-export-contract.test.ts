@@ -51,6 +51,11 @@ describe("AI public export contract", () => {
       "buildSemanticShadowLeagueDeltaReport",
       "buildSelfplayDecisionSnapshotMiningReport",
       "buildSemanticShadowLeagueReport",
+      "buildTargetChoiceShadowCandidateCoverageReport",
+      "buildDoctrineGoalCoverageReport",
+      "buildLocalDefaultPilotPolicy",
+      "evaluateRemoteContestCandidate",
+      "buildTargetChoiceShadowReport",
     ];
 
     for (const exportName of internalExports) {
@@ -68,6 +73,11 @@ describe("AI public export contract", () => {
       "./evaluation/semantic-shadow-league-delta",
       "./evaluation/selfplay-decision-snapshot-mining",
       "./evaluation/semantic-shadow-league",
+      "./evaluation/target-choice-shadow-coverage",
+      "./evaluation/doctrine-goal-coverage",
+      "./decision/pilot/local-default-pilot-policy",
+      "./decision/pilot/remote-contest-candidate",
+      "./decision/target-choice-shadow",
     ];
 
     for (const modulePath of forbiddenPublicModules) {
