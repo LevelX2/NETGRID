@@ -270,6 +270,97 @@ describe("RealEngineDecisionCorpus", () => {
     expect(corpPayloadReportCount).toBeGreaterThanOrEqual(2);
   });
 
+  it("covers target choice wouldSelect dry-runs with real Engine target and choice actions", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+    const serverScenario = scenarioFor(
+      scenarios,
+      "runner_real_target_choice_hq_remote_mix",
+    );
+    const serverAction = serverScenario.input.legalActions.find(
+      (action) => action.payload?.serverId === "remote_1",
+    );
+    if (!serverAction) throw new Error("Missing remote_1 run action");
+    const serverReport = buildTargetChoiceShadowReport({
+      action: serverAction,
+      candidate: candidateFor(samples, serverScenario, serverAction),
+      utilityFamilies: ["remote_contest"],
+      opportunities: [
+        {
+          opportunity: "remote_contest_window",
+          priority: "critical",
+          side: "runner",
+          targetId: "remote_1",
+          evidence: ["test:real_engine_remote_target"],
+        },
+      ],
+    });
+
+    expect(serverReport.selectionOutput).toMatchObject({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+      wouldSelect: {
+        requirementId: "payload.serverId",
+        optionId: "remote_1",
+        confidence: "high",
+      },
+    });
+
+    const discardScenario = scenarioFor(
+      scenarios,
+      "runner_real_target_choice_discard_choice",
+    );
+    const discardAction = actionOfType(discardScenario, "resolve_choice");
+    const preferredOption = discardAction.choiceRequirements?.[0]?.optionIds[0];
+    if (!preferredOption) throw new Error("Missing discard option");
+    const choiceReport = buildTargetChoiceShadowReport({
+      action: discardAction,
+      candidate: candidateFor(samples, discardScenario, discardAction),
+      preferredOptionIds: [preferredOption],
+    });
+
+    expect(choiceReport.selectionOutput).toMatchObject({
+      selectedChoicesCreated: false,
+      selectedTargetsCreated: false,
+      wouldSelect: {
+        optionId: preferredOption,
+        confidence: "medium",
+      },
+    });
+
+    const { payload: _payload, ...serverActionWithoutPayload } = serverAction;
+    const engineOnlyReport = buildTargetChoiceShadowReport({
+      action: {
+        ...serverActionWithoutPayload,
+        actionId: "engine-only-target",
+        targetRequirements: [
+          {
+            id: "secret",
+            kind: "card",
+            visibility: "engine_only",
+          },
+        ],
+      },
+    });
+    expect(engineOnlyReport.selectionOutput.wouldSelect).toBeUndefined();
+
+    const tieReport = buildTargetChoiceShadowReport({
+      action: {
+        ...discardAction,
+        actionId: "multi-target-tie",
+        choiceRequirements: [
+          {
+            choiceId: "tie",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["left", "right"],
+          },
+        ],
+      },
+    });
+    expect(tieReport.selectionOutput.wouldSelect).toBeUndefined();
+  });
+
   it("keeps scenario fixture mutations behind the real engine fixture builder", () => {
     const source = readFileSync(
       new URL("./real-engine-decision-corpus-fixtures.ts", import.meta.url),
