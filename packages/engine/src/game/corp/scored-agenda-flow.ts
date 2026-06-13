@@ -6,9 +6,8 @@ import type {
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import { markCorporateRetreatAvailableOnScore } from "./scored-agenda/corporate-retreat-sequence";
 import { resolveCorporateWarOnScore } from "./scored-agenda/corporate-war-sequence";
-import { applyDirectScoreEconomyEffects } from "./scored-agenda/direct-score-economy-effects";
 import { startEmployeeEmpowermentStartDrawChoice } from "./scored-agenda/employee-empowerment-sequence";
-import { applyOveradvanceScoreEffects } from "./scored-agenda/overadvance-score-effects";
+import { applyScoredAgendaDirectEffects } from "./scored-agenda/scored-agenda-direct-effect-registry";
 import type {
   ScoredAgendaFlowHost,
   ScoredAgendaFlowResult,
@@ -59,7 +58,7 @@ export function scoreAgenda(
     host.flags.markScoredBlackOpsAgendaThisTurn();
   }
   const scoredAgenda = host.cards.scoredAgendaForDefinition(definition);
-  const overadvanceResult = applyOveradvanceScoreEffects(
+  const directEffectResult = applyScoredAgendaDirectEffects({
     host,
     cardId,
     definition,
@@ -67,20 +66,9 @@ export function scoreAgenda(
     requiredDifficulty,
     scoredAgenda,
     legalAction,
-  );
-  let bonusAgendaPoints = overadvanceResult.bonusAgendaPoints;
-  const overadvancedBy = overadvanceResult.overadvancedBy;
-  if (scoredAgenda?.kind === "fixed_bonus_agenda_points_on_score") {
-    bonusAgendaPoints += scoredAgenda.amount;
-    host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        fixedBonusAgendaPoints: scoredAgenda.amount,
-        bonusAgendaPoints,
-      };
-    }
-  }
+  });
+  const bonusAgendaPoints = directEffectResult.bonusAgendaPoints ?? 0;
+  const overadvancedBy = directEffectResult.overadvancedBy ?? 0;
   applySimpleScoreEffects(host, cardId, definition, scoredAgenda);
   startScoreTimeChoices(host, cardId, definition, instanceBefore, scoredAgenda);
   host.zones.cleanupEmptyRemotes();
@@ -105,13 +93,6 @@ function applySimpleScoreEffects(
   scoredAgenda: CardScoredAgendaImplementation | undefined,
 ): void {
   const legalAction = host.legalAction;
-  applyDirectScoreEconomyEffects(
-    host,
-    cardId,
-    definition,
-    scoredAgenda,
-    legalAction,
-  );
   host.effects.executeOnScore(definition, cardId);
   if (scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install") {
     markCorporateRetreatAvailableOnScore(host, cardId, legalAction);

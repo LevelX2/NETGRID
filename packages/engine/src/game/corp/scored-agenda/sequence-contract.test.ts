@@ -130,6 +130,12 @@ describe("scored agenda sequence contract matrix", () => {
     );
 
     expect(new Set(directResolverIds).size).toBe(directResolverIds.length);
+    expect(directResolverIds.sort()).toEqual([
+      "add_counters_on_score_effect",
+      "fixed_bonus_agenda_points_score_effect",
+      "gain_credits_on_score_effect",
+      "overadvance_score_effects",
+    ]);
   });
 
   it("keeps migrated score-time kinds out of the scored-agenda orchestrator", () => {
