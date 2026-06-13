@@ -24,11 +24,9 @@ import {
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
 import {
-  buildCorpFortPassWindowActions,
-  buildSingaporeCityGridRunActions,
-  buildStartRunIceRepositionActions,
   type FortPassWindowHost,
 } from "./fort-pass-window";
+import { buildRegisteredRunWindowActions } from "./run-window-registry";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -215,8 +213,14 @@ export function buildCorpRunRootRezActions(
       ),
     );
   }
-  actions.push(...buildSingaporeCityGridRunActions(host.fortPass, run, server));
-  actions.push(...buildStartRunIceRepositionActions(host.fortPass, run, server));
+  actions.push(
+    ...buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_root_rez_window",
+    ),
+  );
   return actions;
 }
 
@@ -240,13 +244,19 @@ function rootRezLifecycleIsSolvable(
 export function buildCorpRunRootRezWindowActions(
   host: RunRezWindowHost,
 ): LegalAction[] {
+  const run = host.state.run;
+  if (!run) return [];
+  const server = host.servers.mustServer(run.attackedServerId);
   const actions = [
     ...buildCorpRunRootRezActions(host),
-    ...buildCorpFortPassWindowActions(host.fortPass),
+    ...buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_fort_pass_window",
+    ),
   ];
   if (actions.length === 0 || !isCorpRunRootRezWindowOpen(host)) return [];
-  const run = mustRun(host.state);
-  const server = host.servers.mustServer(run.attackedServerId);
   return [
     ...actions,
     buildLegalAction(
@@ -277,9 +287,15 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
   if (!run) return false;
   if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
     return false;
+  const server = host.servers.mustServer(run.attackedServerId);
   return (
     buildCorpRunRootRezActions(host).length > 0 ||
-    buildCorpFortPassWindowActions(host.fortPass).length > 0
+    buildRegisteredRunWindowActions(
+      host.fortPass,
+      run,
+      server,
+      "corp_fort_pass_window",
+    ).length > 0
   );
 }
 
