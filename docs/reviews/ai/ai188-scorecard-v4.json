@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "ai188-scorecard-v4",
+  "generatedAt": "2026-06-13T08:24:09.517Z",
+  "gitHead": "9d796f79",
+  "sources": [
+    "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+    "docs/reviews/ai/ai182-target-identity-resolver-v1.json",
+    "docs/reviews/ai/ai183-candidate-gate-v2.json",
+    "docs/reviews/ai/ai184-playeraction-replay-probe.json",
+    "docs/reviews/ai/ai185-stale-punish-intent-decomposition.json",
+    "docs/reviews/ai/ai186-coverage-candidate-signature-review.json"
+  ],
+  "metrics": [
+    {
+      "id": "semantic_action_signature_rate",
+      "numerator": 76,
+      "denominator": 76,
+      "value": 1,
+      "note": "Share of Opportunity alternatives carrying a deterministic signature."
+    },
+    {
+      "id": "target_identity_complete_rate",
+      "numerator": 16,
+      "denominator": 76,
+      "value": 0.2105,
+      "note": "Share of alternatives with complete or irrelevant side-safe TargetIdentity."
+    },
+    {
+      "id": "candidate_gate_pass_rate",
+      "numerator": 0,
+      "denominator": 3,
+      "value": 0,
+      "note": "AI183 gate v2 pass rate."
+    },
+    {
+      "id": "playeraction_replay_probe_pass_rate",
+      "numerator": 0,
+      "denominator": 3,
+      "value": 0,
+      "note": "Share of candidates with successful PlayerAction replay probe."
+    },
+    {
+      "id": "coverage_candidate_signature_pass_rate",
+      "numerator": 0,
+      "denominator": 13,
+      "value": 0,
+      "note": "Coverage candidates passing signature plus TargetIdentity review."
+    },
+    {
+      "id": "runtime_cutover_candidate_count",
+      "numerator": 0,
+      "denominator": 1,
+      "value": 0,
+      "note": "Count-like gate for any runtime-cutover candidate in this block."
+    }
+  ],
+  "stalePunishRootCauseDistribution": {
+    "missing_tag_window": 6,
+    "missing_punish_payoff": 11,
+    "scoreline_should_replace": 2,
+    "protection_should_replace": 1
+  },
+  "conclusion": {
+    "runtimeCutoverEligible": false,
+    "currentBlocker": "candidate_path_target_identity_and_playeraction_replay_missing"
+  }
+}
