@@ -4,6 +4,7 @@ import {
   RUNNER_SAFE_ACCESS_PILOT_MODE,
   type AiPlayStrengthPilotScope,
 } from "./pilot-scope-common";
+import type { SemanticShadowLeagueLocalDefaultDryRunReport } from "../../evaluation/semantic-shadow-league";
 
 export type LocalDefaultPilotPolicyStatus =
   | "default_off_candidate"
@@ -79,4 +80,27 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
       "default_enabled_scope_count:0",
     ],
   };
+}
+
+export function defaultActiveScopes(): [] {
+  return [];
+}
+
+export function recommendedLocalDefaultScopes(
+  reports: readonly SemanticShadowLeagueLocalDefaultDryRunReport[],
+): AiPlayStrengthPilotScope[] {
+  return reports
+    .filter(
+      (report) =>
+        report.recommendation === "local_default_dry_run_candidate" &&
+        report.badOverrideRisk === 0 &&
+        report.productiveUseAllowed === false &&
+        report.runtimeConsumerStatus === "none",
+    )
+    .map((report) => report.scope)
+    .sort();
+}
+
+export function localDefaultPolicyEnvOverrideRequired(): true {
+  return true;
 }
