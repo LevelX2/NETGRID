@@ -105,6 +105,27 @@ Stop ohne Rückfrage, wenn:
 - Done-Gate: Implementierungsvertrag ist dokumentiert.
 - Commit: `docs: specify generic corp trash source contract`
 
+Inspektionsergebnis:
+
+- `packages/engine/src/game/turn/corp-main-actions.ts` erzeugt die Corp-Trigger-Aktion aktuell über `definitionFor(state, id).id === CODE_VIRAL_CACHE_ID`.
+- Die Payload nutzt `corpAbility: "trash_code_viral_cache"`, `sourceDefinitionId: CODE_VIRAL_CACHE_ID`, `trashCostPaid: 5` und das TargetRequirement `id: "codeViralCache"`.
+- `packages/engine/src/game/abilities/trigger-ability-execution.ts` führt denselben Pfad über `legalAction.payload?.corpAbility === "trash_code_viral_cache"` aus, prüft die Card-ID erneut gegen `CODE_VIRAL_CACHE_ID`, zahlt 1 Klick und 5 Credits und trasht die Runner-Resource.
+- Die relevanten Tests liegen in `trigger-ability-execution.test.ts`, `corp-main-actions.test.ts` und im integrierten Damage-/Replacement-Smoke.
+
+P3-Vertrag:
+
+- `CardImplementationDefinition` erhält ein deklaratives Feld `corpTrashInstalledRunnerSource`.
+- Der erste konkrete Kind lautet `corp_trash_installed_runner_resource` mit `timing: "corp_main"`, `cost: { clicks: 1, credits: 5 }`, `target: "source"` und `visibility: "public"`.
+- Code Viral Cache deklariert diese Ability zusätzlich zu Install-Capability und Purge-Replacement.
+- `corp-main-actions.ts` sucht installierte Runner-Resources mit dieser Ability, prüft die Kosten und erzeugt eine generische TriggerAction:
+  - `corpAbility: "trash_installed_runner_resource_source"`
+  - `abilityKind: "corp_trash_installed_runner_resource"`
+  - `sourceDefinitionId: definition.id`
+  - `trashCostPaid: 5`
+  - TargetRequirement-ID generisch, z. B. `runnerResourceSource`.
+- `trigger-ability-execution.ts` revalidiert Side, Zone, deklarierte Ability-Kind, Kosten und Ziel generisch und setzt `trashedCardDefinitionId` aus der Definition des Ziel-CardInstance.
+- Die Action-Label darf weiter den Kartentitel aus der Definition verwenden, weil das Anzeige-Text und kein funktionaler Branch ist.
+
 ### P3 - Generischer Corp-Trash-Restpfad
 
 - Ziel: Card-ID-Zweig für CVC Corp-Trash entfernen.
