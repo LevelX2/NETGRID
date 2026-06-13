@@ -1,0 +1,641 @@
+{
+  "schemaVersion": "ai173-runner-coverage-opportunity-solver-v1",
+  "generatedAt": "2026-06-13T07:30:35.580Z",
+  "gitHead": "ac2e1933",
+  "source": "docs/reviews/ai/ai170-opportunity-state-snapshots-2026-06-13.json",
+  "aggregate": {
+    "cases": 13,
+    "cutoverCandidates": 1,
+    "noGoCases": 12,
+    "pathCounts": {
+      "no_solution_visible": 3,
+      "visible_installable_solution": 5,
+      "draw_solution": 5
+    }
+  },
+  "cases": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": false,
+      "creditNeeded": false,
+      "noSolutionVisible": true,
+      "path": "no_solution_visible",
+      "cutover": "no_go_no_progress_path",
+      "topActions": [
+        {
+          "actionType": "steal_agenda",
+          "semanticActionType": "run_progress",
+          "targetContextStatus": "reachability_relevant",
+          "expectedProgressLabel": "progress_steal",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 2,
+      "visibleInstallableSolution": true,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "visible_installable_solution",
+      "cutover": "cutover_candidate",
+      "topActions": [
+        {
+          "actionType": "resolve_choice",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "protection_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "play_operation",
+          "semanticActionType": "economy",
+          "targetContextStatus": "reachability_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_server_protected",
+          "blocked": false
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "draw_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "draw_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "play_event",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_plausible",
+          "blocked": false
+        },
+        {
+          "actionType": "activated_card_ability",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "draw_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "draw_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "play_event",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": true,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "visible_installable_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "play_event",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": false,
+      "creditNeeded": false,
+      "noSolutionVisible": true,
+      "path": "no_solution_visible",
+      "cutover": "no_go_no_progress_path",
+      "topActions": [
+        {
+          "actionType": "mandatory_draw",
+          "semanticActionType": "economy",
+          "targetContextStatus": "reachability_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": true,
+      "searchSolution": false,
+      "drawSolution": false,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "visible_installable_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "rez_ice",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_server_protected",
+          "blocked": false
+        },
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_plausible",
+          "blocked": true
+        },
+        {
+          "actionType": "play_operation",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "scoreline",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_server_protected",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": true,
+      "searchSolution": false,
+      "drawSolution": false,
+      "creditNeeded": false,
+      "noSolutionVisible": false,
+      "path": "visible_installable_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": false
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "draw_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "reachability_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": false
+        },
+        {
+          "actionType": "end_turn",
+          "semanticActionType": "economy",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": false
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": true,
+      "searchSolution": false,
+      "drawSolution": true,
+      "creditNeeded": true,
+      "noSolutionVisible": false,
+      "path": "visible_installable_solution",
+      "cutover": "no_go_hard_gate_or_target_context",
+      "topActions": [
+        {
+          "actionType": "start_run",
+          "semanticActionType": "server_protection",
+          "targetContextStatus": "scoreline_relevant",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": false
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "draw_card",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "start_run",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "progress_reachability_improved",
+          "blocked": true
+        },
+        {
+          "actionType": "gain_credit",
+          "semanticActionType": "economy",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        },
+        {
+          "actionType": "install_card",
+          "semanticActionType": "coverage_setup",
+          "targetContextStatus": "blocked_by_hard_gate",
+          "expectedProgressLabel": "no_progress_stale",
+          "blocked": true
+        }
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "snapshotCount": 1,
+      "visibleInstallableSolution": false,
+      "searchSolution": false,
+      "drawSolution": false,
+      "creditNeeded": false,
+      "noSolutionVisible": true,
+      "path": "no_solution_visible",
+      "cutover": "no_go_no_progress_path",
+      "topActions": [
+        {
+          "actionType": "access_card",
+          "semanticActionType": "run_progress",
+          "targetContextStatus": "reachability_relevant",
+          "expectedProgressLabel": "progress_access",
+          "blocked": false
+        }
+      ]
+    }
+  ]
+}
