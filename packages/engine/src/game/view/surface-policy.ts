@@ -7,6 +7,14 @@ export type SurfaceKind =
   | "replay_public"
   | "developer_trace";
 
+export type PayloadFamily =
+  | "scored_agenda_sequence"
+  | "hidden_zone_choice"
+  | "access_event"
+  | "public_reveal"
+  | "ai_debug"
+  | "replay_public";
+
 export type PublicSurfacePayloadValue = string | number | boolean;
 export type PublicSurfacePayload = Record<string, PublicSurfacePayloadValue>;
 
@@ -31,58 +39,67 @@ const EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
  * public definition IDs and explicit public facts, but not hidden-zone card
  * lists, rich objects or actor-private labels.
  */
+export function sanitizePayloadForSurface<TPayload extends Record<string, unknown>>(
+  payload: TPayload,
+  policy: { surface: SurfaceKind; family: PayloadFamily },
+): TPayload {
+  if (primitiveOnlyPayloadFamily(policy.family)) {
+    assertPrimitivePayload(payload, policy.surface);
+  }
+  if (
+    policy.surface !== "actor_private" &&
+    policy.surface !== "developer_trace"
+  ) {
+    assertNoHiddenCardLists(payload, policy.surface);
+    assertNoActorPrivateLabels(payload, policy.surface, {
+      rejectGenericLabel: policy.family !== "access_event",
+    });
+  }
+  return { ...payload };
+}
+
 export function sanitizeForSurface(
   payload: PublicSurfacePayload,
   surfaceKind: SurfaceKind,
 ): PublicSurfacePayload {
-  assertPrimitivePayload(payload, surfaceKind);
-  if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace") {
-    assertNoHiddenCardLists(payload, surfaceKind);
-    assertNoActorPrivateLabels(payload, surfaceKind);
-  }
-  return { ...payload };
+  return sanitizePayloadForSurface(payload, {
+    surface: surfaceKind,
+    family: "public_reveal",
+  });
 }
 
 export function sanitizeCardImplementationSurfacePayload(
   payload: PublicSurfacePayload,
 ): PublicSurfacePayload {
-  return sanitizeForSurface(payload, "public_event");
+  return sanitizePayloadForSurface(payload, {
+    surface: "public_event",
+    family: "scored_agenda_sequence",
+  });
 }
 
 export function sanitizeEventPayloadForSurface(
   payload: Record<string, unknown>,
   surfaceKind: SurfaceKind,
 ): Record<string, unknown> {
-  if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace") {
-    assertNoHiddenCardLists(payload, surfaceKind);
-    assertNoActorPrivateLabels(payload, surfaceKind, {
-      rejectGenericLabel: false,
-    });
-  }
-  return { ...payload };
+  return sanitizePayloadForSurface(payload, {
+    surface: surfaceKind,
+    family: "access_event",
+  });
 }
 
 export function sanitizeChoiceViewForSurface<
   TChoice extends NonNullable<PlayerView["pendingChoice"]>,
 >(choice: TChoice, surfaceKind: SurfaceKind): TChoice {
   if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace") {
-    assertNoHiddenCardLists(
-      choice as unknown as Record<string, unknown>,
-      surfaceKind,
-    );
-    assertNoActorPrivateLabels(
-      choice as unknown as Record<string, unknown>,
-      surfaceKind,
-    );
+    sanitizePayloadForSurface(choice as unknown as Record<string, unknown>, {
+      surface: surfaceKind,
+      family: "hidden_zone_choice",
+    });
     for (const option of choice.options) {
-      assertNoHiddenCardLists(
-        option as unknown as Record<string, unknown>,
-        surfaceKind,
-      );
-      assertNoActorPrivateLabels(
-        option as unknown as Record<string, unknown>,
-        surfaceKind,
-      );
+      sanitizePayloadForSurface(option as unknown as Record<string, unknown>, {
+        surface: surfaceKind,
+        family: "hidden_zone_choice",
+      });
     }
   }
   return {
@@ -120,8 +137,16 @@ export function assertNoActorPrivateLabels(
   }
 }
 
+function primitiveOnlyPayloadFamily(family: PayloadFamily): boolean {
+  return (
+    family === "scored_agenda_sequence" ||
+    family === "public_reveal" ||
+    family === "replay_public"
+  );
+}
+
 function assertPrimitivePayload(
-  payload: PublicSurfacePayload,
+  payload: Record<string, unknown>,
   surfaceKind: SurfaceKind,
 ): void {
   for (const [key, value] of Object.entries(payload)) {

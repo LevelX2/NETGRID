@@ -3,6 +3,7 @@ import {
   sanitizeChoiceViewForSurface,
   sanitizeEventPayloadForSurface,
   sanitizeForSurface,
+  sanitizePayloadForSurface,
 } from "./surface-policy";
 
 describe("surface policy", () => {
@@ -75,6 +76,43 @@ describe("surface policy", () => {
         "public_event",
       ),
     ).toThrow(/hidden card data/i);
+  });
+
+  it("applies payload-family specific primitive contracts", () => {
+    expect(
+      sanitizePayloadForSurface(
+        {
+          revealedCount: 1,
+          publicRevealDefinitionIds: "ice_wall",
+        },
+        { surface: "public_event", family: "scored_agenda_sequence" },
+      ),
+    ).toEqual({
+      revealedCount: 1,
+      publicRevealDefinitionIds: "ice_wall",
+    });
+
+    expect(() =>
+      sanitizePayloadForSurface(
+        {
+          publicRevealDefinitionIds: ["ice_wall"],
+        },
+        { surface: "public_event", family: "scored_agenda_sequence" },
+      ),
+    ).toThrow(/unsupported value/);
+
+    expect(
+      sanitizePayloadForSurface(
+        {
+          knownHqDefinitionIds: ["agenda_def"],
+          label: "Access",
+        },
+        { surface: "public_event", family: "access_event" },
+      ),
+    ).toEqual({
+      knownHqDefinitionIds: ["agenda_def"],
+      label: "Access",
+    });
   });
 
   it("rejects actor-private choice labels on public-like choice surfaces", () => {
