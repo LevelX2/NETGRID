@@ -1,6 +1,6 @@
 # AI Play-Strength Maturation III Final Report
 
-Status: `branch_final_green_complete_pending_main_merge`
+Status: `branch_main_synced_final_green_complete_pending_main_merge`
 
 Datum: 2026-06-13
 
@@ -10,7 +10,7 @@ Worktree: `C:\Projekte\NETGRID_AI_PLAY_STRENGTH_MATURATION_3`
 
 ## Ergebnis
 
-AI-MAT3-0 bis AI-MAT3-21 sind sequenziell umgesetzt und jeweils paketbezogen committed. Dieses Dokument ist AI-MAT3-22. FINAL-GREEN ist im Arbeitsbranch abgeschlossen. Lokaler Merge nach `main`, Main-Verifikation und Worktree-Cleanup stehen nach diesem Bericht noch aus.
+AI-MAT3-0 bis AI-MAT3-21 sind sequenziell umgesetzt und jeweils paketbezogen committed. Dieses Dokument ist AI-MAT3-22. FINAL-GREEN ist im Arbeitsbranch abgeschlossen. Der aktuelle lokale `main` wurde anschließend in den Arbeitsbranch integriert und erneut verifiziert. Lokaler Merge nach `main`, Main-Verifikation und Worktree-Cleanup stehen nach diesem Bericht noch aus.
 
 ## Paketübersicht
 
@@ -54,11 +54,11 @@ FINAL-GREEN wurde im Arbeitsbranch `codex/ai-play-strength-maturation-3` erfolgr
 
 | Check | Ergebnis |
 | --- | --- |
-| `corepack pnpm --filter @netgrid/ai test` | 91 Testdateien, 1297 Tests grün |
+| `corepack pnpm --filter @netgrid/ai test` | 91 Testdateien, 1298 Tests grün nach Main-Sync |
 | `corepack pnpm --filter @netgrid/ai typecheck` | grün |
-| `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts` | 499 Tests grün |
+| `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts` | 500 Tests grün nach Main-Sync |
 | `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts` | 49 Tests grün |
-| `corepack pnpm --filter @netgrid/engine test` | 170 Testdateien, 1499 Tests grün |
+| `corepack pnpm --filter @netgrid/engine test` | 170 Testdateien, 1505 Tests grün nach Main-Sync |
 | `corepack pnpm --filter @netgrid/engine typecheck` | grün |
 | `corepack pnpm --filter @netgrid/server test` | 6 Testdateien, 127 Tests grün |
 | `corepack pnpm --filter @netgrid/server typecheck` | grün |
@@ -70,8 +70,7 @@ Während FINAL-GREEN wurde ein erwarteter ShadowLeague-Delta-Testdrift nach dem 
 
 ## Offene Abschlussarbeiten
 
-1. Aktuellen `main` in den Arbeitsbranch integrieren, falls nötig.
-2. Arbeitsbranch lokal nach `main` mergen.
-3. Main-Verifikation ausführen.
-4. Worktree entfernen.
-5. Abschlussstatus dieses Reports auf `complete` nachziehen.
+1. Arbeitsbranch lokal nach `main` mergen.
+2. Main-Verifikation ausführen.
+3. Worktree entfernen.
+4. Abschlussstatus dieses Reports auf `complete` nachziehen.
