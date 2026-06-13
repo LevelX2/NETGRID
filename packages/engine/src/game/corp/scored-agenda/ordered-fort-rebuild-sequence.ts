@@ -1,5 +1,5 @@
 import type { ServerId } from "@netgrid/shared";
-import { sanitizeCardImplementationSurfacePayload } from "../../view/surface-policy";
+import { sanitizePayloadForSurface } from "../../view/surface-policy";
 import type { SequencePayloadPatch } from "./scored-agenda-sequence-types";
 
 export type OrderedFortRebuildStep =
@@ -70,15 +70,18 @@ export type OrderedFortRebuildPublicPayloadInput = {
 export function orderedFortRebuildPublicPayload(
   input: OrderedFortRebuildPublicPayloadInput,
 ): SequencePayloadPatch {
-  return sanitizeCardImplementationSurfacePayload({
-    sequenceKind: ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT.kind,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "ordered_fort_rebuild_sequence",
-    sourceDefinitionId: input.sourceDefinitionId,
-    targetServerId: input.targetServerId,
-    removedCardCount: input.removedCardCount,
-    replacementCardCount: input.replacementCardCount,
-    installedIceCount: input.installedIceCount,
-    installedRootCount: input.installedRootCount,
-  });
+  return sanitizePayloadForSurface(
+    {
+      sequenceKind: ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT.kind,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "ordered_fort_rebuild_sequence",
+      sourceDefinitionId: input.sourceDefinitionId,
+      targetServerId: input.targetServerId,
+      removedCardCount: input.removedCardCount,
+      replacementCardCount: input.replacementCardCount,
+      installedIceCount: input.installedIceCount,
+      installedRootCount: input.installedRootCount,
+    },
+    { surface: "public_event", family: "run_window_sequence" },
+  );
 }

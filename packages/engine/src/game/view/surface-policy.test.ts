@@ -113,6 +113,54 @@ describe("surface policy", () => {
       knownHqDefinitionIds: ["agenda_def"],
       label: "Access",
     });
+
+    expect(
+      sanitizePayloadForSurface(
+        {
+          sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+          targetServerId: "remote_1",
+          removedCardCount: 2,
+          replacementCardCount: 2,
+        },
+        { surface: "public_event", family: "run_window_sequence" },
+      ),
+    ).toEqual({
+      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
+      targetServerId: "remote_1",
+      removedCardCount: 2,
+      replacementCardCount: 2,
+    });
+
+    expect(() =>
+      sanitizePayloadForSurface(
+        {
+          replacementCardIds: ["secret_card"],
+        },
+        { surface: "public_event", family: "run_window_sequence" },
+      ),
+    ).toThrow(/unsupported value/i);
+
+    expect(() =>
+      sanitizePayloadForSurface(
+        {
+          replacementCardIds: "secret_card",
+        },
+        { surface: "public_event", family: "run_window_sequence" },
+      ),
+    ).toThrow(/hidden card data/i);
+
+    expect(
+      sanitizePayloadForSurface(
+        {
+          hiddenHqCardIds: "corp_card_1",
+          actorPrivateLabel: "debug",
+        },
+        { surface: "developer_trace", family: "developer_trace" },
+      ),
+    ).toEqual({
+      hiddenHqCardIds: "corp_card_1",
+      actorPrivateLabel: "debug",
+    });
   });
 
   it("rejects actor-private choice labels on public-like choice surfaces", () => {

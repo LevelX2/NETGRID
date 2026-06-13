@@ -273,11 +273,13 @@ function forceRunAtServer(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
 ): void {
+  const server = remoteServer(state, serverId);
   state.run = {
     runId: `${state.matchId}_${serverId}_forced_run`,
     attackedServerId: serverId,
     phase: "movement",
     position: { kind: "server", serverId },
+    ...(server.ice[0] ? { lastPassedIceId: server.ice[0] } : {}),
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     successful: false,
@@ -764,6 +766,9 @@ describe("PRO019 rule-contract baseline utilities", () => {
       idempotencyKey: "pavit-invalid-duplicate",
     });
     expect(invalid.ok).toBe(false);
+    expect(hashState(invalid.state)).toBe(hashState(state));
+    expect(remoteServer(invalid.state, "remote_1").ice).toEqual([oldIce]);
+    expect(remoteServer(invalid.state, "remote_1").root).toEqual([pavitId]);
 
     state = applyChoices(state, "corp", [`card_${newIce}`, `card_${newRoot}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -787,6 +792,71 @@ describe("PRO019 rule-contract baseline utilities", () => {
     });
     expect(state.cardInstances[newIce]?.rezzed).toBe(false);
     expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
+  });
+
+  it("rejects stale Pavit replacement choices without mutating the fort", () => {
+    let state = corpActionState("pro019-pavit-stale-choice");
+    clearCorpHq(state);
+    const oldIce = addCorpIce(
+      state,
+      CHIHUAHUA,
+      "pavit_stale_old_ice",
+      "remote_1",
+      true,
+    );
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_stale_source",
+      "remote_1",
+      false,
+    );
+    const newIce = addCorpHq(state, WALL, "pavit_stale_new_ice");
+    const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_stale_new_root");
+    addCorpHq(state, CHIHUAHUA, "pavit_stale_extra_ice");
+    forceRunAtServer(state, "remote_1");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+    );
+    state.run = {
+      ...state.run!,
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      approachedIceId: oldIce,
+    };
+    const beforeStaleHash = hashState(state);
+    const beforeStaleEventCount = state.eventLog.length;
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: mustAction(
+        state,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${newIce}`, `card_${newRoot}`],
+      },
+      idempotencyKey: "pavit-stale-choice",
+    });
+
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale Pavit choice rejection.");
+    expect(stale.error.message).not.toContain(String(newIce));
+    expect(stale.error.message).not.toContain(String(newRoot));
+    expect(hashState(stale.state)).toBe(beforeStaleHash);
+    expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
+    expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
+    expect(remoteServer(stale.state, "remote_1").root).toEqual([pavitId]);
+    expect(stale.state.corp.hq).toEqual(
+      expect.arrayContaining([newIce, newRoot]),
+    );
   });
 
   it("does not offer Pavit when only individually plausible HQ cards form no legal set", () => {
