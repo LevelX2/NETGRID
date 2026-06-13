@@ -1,5 +1,4 @@
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
 } from "@netgrid/shared";
@@ -67,7 +66,7 @@ export function scoreAgenda(
   });
   const bonusAgendaPoints = directEffectResult.bonusAgendaPoints ?? 0;
   const overadvancedBy = directEffectResult.overadvancedBy ?? 0;
-  applySimpleScoreEffects(host, cardId, definition);
+  host.effects.executeOnScore(definition, cardId);
   startScoreTimeChoices(host, cardId, definition, instanceBefore, scoredAgenda);
   host.zones.cleanupEmptyRemotes();
   const result: ScoredAgendaFlowResult = {
@@ -82,14 +81,6 @@ export function scoreAgenda(
   if (legalAction?.payload)
     result.resolvedPayload = legalAction.payload as ScoredAgendaPayload;
   return result;
-}
-
-function applySimpleScoreEffects(
-  host: ScoredAgendaFlowHost,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-): void {
-  host.effects.executeOnScore(definition, cardId);
 }
 
 function startScoreTimeChoices(
