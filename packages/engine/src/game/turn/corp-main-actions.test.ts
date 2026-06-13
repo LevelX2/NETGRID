@@ -256,7 +256,6 @@ function testCorpMainHost(
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
     constants: {
-      CODE_VIRAL_CACHE_ID: "code_viral_cache",
       HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: new Set(),
       HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: new Set(),
       CORP_HQ_SHUFFLE_DRAW_CARD_ID: "corp_hq_shuffle_draw",

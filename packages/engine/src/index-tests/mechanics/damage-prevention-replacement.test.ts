@@ -676,7 +676,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.corpAbility === "trash_code_viral_cache",
+        action.payload?.corpAbility ===
+          "trash_installed_runner_resource_source",
     );
     expect(
       state.runner.rig.resources.some(

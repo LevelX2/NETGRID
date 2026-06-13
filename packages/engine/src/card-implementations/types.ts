@@ -4,6 +4,7 @@ import type {
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
   CardCorpUtilityImplementation,
+  CardCorpTrashInstalledRunnerSourceImplementation,
   CardDamagePreventionSourceImplementation,
   CardFortRunWindowImplementation,
   CardFortCapacityModifierImplementation,
@@ -100,6 +101,7 @@ export type CardImplementationDefinition = {
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;
+  corpTrashInstalledRunnerSource?: CardCorpTrashInstalledRunnerSourceImplementation;
   hiddenReplacementLongtail?: CardHiddenReplacementLongtailImplementation;
   runnerUtilityLongtail?: CardRunnerUtilityLongtailImplementation;
   runnerEventLongtail?: CardRunnerEventLongtailImplementation;
