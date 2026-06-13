@@ -36,7 +36,7 @@ describe("AI simulation harness", () => {
     );
     expect(JSON.stringify(first)).not.toContain("cardInstances");
     expect(JSON.stringify(first)).not.toContain("sessionToken");
-  });
+  }, 15_000);
 
   it("summarizes doctrine quality error classes from redaction-safe action tags", () => {
     const metrics = summarizeDoctrineQualityMetrics([

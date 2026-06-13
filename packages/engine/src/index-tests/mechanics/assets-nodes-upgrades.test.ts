@@ -987,7 +987,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       traceStep: "corp_bid",
       corpBid: 1,
       corpCreditBid: 0,
-      krumzBitsSpent: 1,
+      recurringTraceCreditPoolSpent: 1,
     });
 
     state = applyChoice(state, "runner", "bid_0");

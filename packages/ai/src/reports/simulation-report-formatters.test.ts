@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatDoctrineQualityCaseAnalysisReport } from "./simulation-report-formatters";
-import type { AiDoctrineQualityCaseAnalysis } from "../index";
+import {
+  formatDoctrineQualityCaseAnalysisReport,
+  type DoctrineQualityCaseAnalysisReportInput,
+} from "./simulation-report-formatters";
 
-function emptyAnalysis(): AiDoctrineQualityCaseAnalysis {
+function emptyAnalysis(): DoctrineQualityCaseAnalysisReportInput {
   return {
     version: "ai-deck-doctrine-case-analysis-v1",
     maxExamplesPerMetric: 2,

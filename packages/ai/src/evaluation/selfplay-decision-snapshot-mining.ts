@@ -79,6 +79,20 @@ export type SelfplayDecisionSnapshotCluster = {
   evidence: string[];
 };
 
+export type SelfplayDecisionSnapshotPromotionCategory =
+  | "promote_to_real_engine_corpus"
+  | "promote_to_snapshot_suite"
+  | "defer_missing_engine_state"
+  | "defer_target_choice_gap"
+  | "defer_doctrine_gap";
+
+export type SelfplayDecisionSnapshotPromotionQueueEntry = {
+  snapshotId: string;
+  category: SelfplayDecisionSnapshotPromotionCategory;
+  scenarioHint: string;
+  evidence: string[];
+};
+
 export type SelfplayDecisionSnapshotMiningReport = {
   schemaVersion: typeof SELFPLAY_DECISION_SNAPSHOT_MINING_SCHEMA_VERSION;
   scope: "selfplay_decision_snapshot_mining_report_only";
@@ -90,6 +104,7 @@ export type SelfplayDecisionSnapshotMiningReport = {
   clusterCount: number;
   candidatesByMistakeClass: Record<AiMistakeClass, number>;
   clusters: SelfplayDecisionSnapshotCluster[];
+  promotionQueue: SelfplayDecisionSnapshotPromotionQueueEntry[];
   candidates: SelfplayDecisionSnapshotCandidate[];
   redactionStatus: "passed";
   productiveUseAllowed: false;
@@ -178,6 +193,7 @@ export function buildSelfplayDecisionSnapshotMiningReport(
     clusterCount: clusterCandidates(candidates).length,
     candidatesByMistakeClass: countCandidateMistakeClasses(candidates),
     clusters: clusterCandidates(candidates),
+    promotionQueue: buildPromotionQueue(candidates),
     candidates,
     redactionStatus: "passed",
     productiveUseAllowed: false,
@@ -191,12 +207,64 @@ export function buildSelfplayDecisionSnapshotMiningReport(
       `finding_count:${findings.length}`,
       `candidate_count:${candidates.length}`,
       `cluster_count:${clusterCandidates(candidates).length}`,
+      `promotion_queue_count:${buildPromotionQueue(candidates).length}`,
       "runtime_consumer:none",
       "productive_use_allowed:false",
     ],
   };
   assertSelfplayDecisionSnapshotMiningReportSideSafe(report);
   return report;
+}
+
+function buildPromotionQueue(
+  candidates: readonly SelfplayDecisionSnapshotCandidate[],
+): SelfplayDecisionSnapshotPromotionQueueEntry[] {
+  return candidates
+    .map((candidate) => {
+      const category = promotionCategory(candidate);
+      return {
+        snapshotId: candidate.snapshotId,
+        category,
+        scenarioHint: safe(
+          `${candidate.side}_${candidate.selectedActionType}_${candidate.mistakeClasses.join("_") || "unclassified"}`,
+        ),
+        evidence: [
+          "selfplay_promotion_queue:report_only",
+          `category:${category}`,
+          `candidate_status:${candidate.status}`,
+          `selected_action_type:${candidate.selectedActionType}`,
+          ...candidate.mistakeClasses.map((mistake) => `mistake:${mistake}`),
+        ],
+      };
+    })
+    .sort(
+      (left, right) =>
+        left.category.localeCompare(right.category) ||
+        left.snapshotId.localeCompare(right.snapshotId),
+    );
+}
+
+function promotionCategory(
+  candidate: SelfplayDecisionSnapshotCandidate,
+): SelfplayDecisionSnapshotPromotionCategory {
+  if (candidate.status !== "candidate_snapshot") return "defer_missing_engine_state";
+  if (candidate.mistakeClasses.includes("target_choice_unavailable")) {
+    return "defer_target_choice_gap";
+  }
+  if (candidate.mistakeClasses.includes("plan_step_mismatch")) {
+    return "defer_doctrine_gap";
+  }
+  if (
+    candidate.mistakeClasses.some(
+      (mistake) =>
+        mistake === "ignored_remote_threat" ||
+        mistake === "missed_safe_access" ||
+        mistake === "missed_score_window",
+    )
+  ) {
+    return "promote_to_real_engine_corpus";
+  }
+  return "promote_to_snapshot_suite";
 }
 
 function clusterCandidates(

@@ -87,12 +87,7 @@ import {
   nextRandom,
   recordStateRandomMarkers,
 } from "../state/draw-random";
-import {
-  credits,
-  spendClick,
-  spendClicks,
-  spendCredits,
-} from "../state/economy-mutation";
+import { credits, spendClick, spendClicks, spendCredits } from "../state/economy-mutation";
 import {
   addCardCounter,
   cardCounter,
@@ -320,6 +315,7 @@ import {
   type ScoredAgendaAbilityHost,
 } from "../corp/scored-agenda-abilities";
 import { orderedFortRebuildPublicPayload } from "../corp/scored-agenda/ordered-fort-rebuild-sequence";
+import { runIsAtServerAfterPassingLastIce } from "../run/windows/after-passing-last-ice-window";
 import {
   buildCorpTraceDamageAbilityActionsForCard,
   handleCorpTraceDamageActivatedAbility,
@@ -978,7 +974,10 @@ export function configureCardRuntimeBootstrap() {
     const server = mustServer(state, source.zone.serverId);
     if (server.kind !== "remote")
       throw new Error("Fort-Ersatz darf nur in einem Remote ausloesen.");
-    if (state.run?.attackedServerId !== server.id || state.run.position.kind !== "server")
+    if (
+      !state.run ||
+      !runIsAtServerAfterPassingLastIce(state.run, server)
+    )
       throw new Error("Fort-Ersatz darf nur nach der letzten ICE dieses Forts ausloesen.");
     const removedIce = server.ice.slice();
     const removedRoot = server.root.slice();

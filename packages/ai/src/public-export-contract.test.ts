@@ -56,6 +56,13 @@ describe("AI public export contract", () => {
       "buildLocalDefaultPilotPolicy",
       "evaluateRemoteContestCandidate",
       "buildTargetChoiceShadowReport",
+      "buildTargetChoiceSelectedChoicesReadinessReport",
+      "buildDoctrineGoalActionFitReport",
+      "buildSelfplayDecisionSnapshotPromotionQueue",
+      "buildSelfplayPromotedRealEngineCorpusScenarios",
+      "recommendedLocalDefaultScopes",
+      "buildRuntimeScoreBreakdown",
+      "aggregateDoctrineMetricSums",
     ];
 
     for (const exportName of internalExports) {
@@ -74,10 +81,14 @@ describe("AI public export contract", () => {
       "./evaluation/selfplay-decision-snapshot-mining",
       "./evaluation/semantic-shadow-league",
       "./evaluation/target-choice-shadow-coverage",
+      "./evaluation/target-choice-shadow-readiness",
+      "./evaluation/doctrine-goal-action-fit",
       "./evaluation/doctrine-goal-coverage",
       "./decision/pilot/local-default-pilot-policy",
       "./decision/pilot/remote-contest-candidate",
       "./decision/target-choice-shadow",
+      "./runtime/semantic-runtime-score-components",
+      "./simulation/simulation-metric-aggregation",
     ];
 
     for (const modulePath of forbiddenPublicModules) {

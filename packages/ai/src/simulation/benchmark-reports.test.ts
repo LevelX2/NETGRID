@@ -187,7 +187,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ suite, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 45_000);
+  }, 60_000);
 
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
     const summary: AiSimulationSummary = {

@@ -142,6 +142,11 @@ import {
 } from "./diagnostics/debug-format";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
+  scrubEvidence,
+  semanticRuntimeChoiceWithEvidence,
+  semanticRuntimeConfidence,
+} from "./runtime/semantic-runtime-score-components";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -176,6 +181,12 @@ import {
   createSimulationRng,
   type SimulationRng,
 } from "./simulation/simulation-rng";
+import {
+  DOCTRINE_QUALITY_METRIC_NAMES,
+  averageNumber,
+  diffDoctrineMetrics,
+  sumDoctrineMetrics,
+} from "./simulation/simulation-metric-aggregation";
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
@@ -3572,30 +3583,6 @@ function runnerRunOnlyActionAdjustedSemanticChoice(
   }
 
   return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
-}
-
-function semanticRuntimeChoiceWithEvidence(
-  choice: SemanticRuntimeChoice,
-  options: {
-    evidence: string[];
-    minimumScore?: number;
-    reasonCode?: string;
-    explanation?: string;
-  },
-): SemanticRuntimeChoice {
-  const score = roundScore(
-    options.minimumScore !== undefined
-      ? Math.max(choice.score, options.minimumScore)
-      : choice.score,
-  );
-  return {
-    ...choice,
-    score,
-    reasonCode: options.reasonCode ?? choice.reasonCode,
-    explanation: options.explanation ?? choice.explanation,
-    evidence: scrubEvidence([...options.evidence, ...choice.evidence]),
-    confidence: semanticRuntimeConfidence(choice.scopeId, score),
-  };
 }
 
 function replaceSemanticRuntimeChoice(
@@ -10162,6 +10149,7 @@ type CorpAdvancementCounterTargetAssessment = {
   targetClass: CorpAdvancementCounterTargetClass;
   windowValue: number;
   weakTargetPenalty: number;
+  evidence: string[];
 };
 
 type CorpAdvancementCounterPlacementAssessment = {
@@ -10274,6 +10262,7 @@ function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     ...selectedTargetAssessments.flatMap((target) => [
       `advancement_target_class:${target.targetClass}`,
       `advancement_target_witness:${target.witness}`,
+      ...target.evidence,
     ]),
     ...(dominatedByBasicAdvance
       ? [
@@ -10393,15 +10382,15 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       : 99;
   const protectedBonus = Math.min(server.ice.length, 2) * 12;
   const text = normalizedRulesTextForDefinition(definitionId);
-  const hasOveradvancePayoff =
-    /additional agenda point|agenda point for every|agenda point for each|overadvance_bonus|overadvance/.test(
-      text,
-    );
+  const overadvanceThreshold = corpAgendaOveradvanceThresholdAssessment(
+    definitionId,
+    text,
+    requirement,
+    counters,
+  );
   if (type === "agenda") {
     const targetClass: CorpAdvancementCounterTargetClass =
-      hasOveradvancePayoff &&
-      typeof requirement === "number" &&
-      counters + 1 > requirement
+      overadvanceThreshold?.hitsThreshold === true
         ? "agenda_overadvance_threshold"
         : remaining === 0
           ? "agenda_score_now"
@@ -10435,6 +10424,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass,
       windowValue,
       weakTargetPenalty: witness === "none" ? 80 : 0,
+      evidence: overadvanceThreshold?.evidence ?? [],
     };
   }
   const ambush = corpAdvancementAmbushTargetClass(text);
@@ -10447,6 +10437,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass: ambush,
       windowValue: 120,
       weakTargetPenalty: 0,
+      evidence: [],
     };
   }
   if (corpAdvancementLooksLikeTransferSource(text)) {
@@ -10462,6 +10453,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass,
       windowValue: hasTransferDestination ? 70 : 0,
       weakTargetPenalty: hasTransferDestination ? 25 : 130,
+      evidence: [],
     };
   }
   const creditCashout = corpAdvancementCreditCashoutValue(text);
@@ -10478,6 +10470,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass: "counter_cashout_credit",
       windowValue: corpAdvancementCashoutScalesPerCounter(text) ? 65 : 25,
       weakTargetPenalty: 20,
+      evidence: [],
     };
   }
   if (corpAdvancementLooksLikeActionCashout(text)) {
@@ -10489,6 +10482,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass: "counter_cashout_action",
       windowValue: 25,
       weakTargetPenalty: 35,
+      evidence: [],
     };
   }
   if (
@@ -10502,6 +10496,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       targetClass: "counter_bank_only",
       windowValue: 0,
       weakTargetPenalty: 125,
+      evidence: [],
     };
   }
   return {
@@ -10514,7 +10509,84 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       : "unknown_advanceable",
     windowValue: 0,
     weakTargetPenalty: 140,
+    evidence: [],
   };
+}
+
+function corpAgendaOveradvanceThresholdAssessment(
+  definitionId: string,
+  text: string,
+  requirement: number | undefined,
+  counters: number,
+):
+  | {
+      thresholdSize: number;
+      currentOver: number;
+      afterActionOver: number;
+      hitsThreshold: boolean;
+      nextThresholdDistance: number;
+      evidence: string[];
+    }
+  | undefined {
+  const thresholdSize = corpAgendaOveradvanceThresholdSize(definitionId, text);
+  if (!thresholdSize || typeof requirement !== "number") return undefined;
+  const currentOver = Math.max(0, counters - requirement);
+  const afterActionOver = Math.max(0, counters + 1 - requirement);
+  const hitsThreshold =
+    afterActionOver > currentOver &&
+    afterActionOver > 0 &&
+    afterActionOver % thresholdSize === 0;
+  const nextThresholdDistance = hitsThreshold
+    ? 0
+    : thresholdSize - (afterActionOver % thresholdSize || thresholdSize);
+  return {
+    thresholdSize,
+    currentOver,
+    afterActionOver,
+    hitsThreshold,
+    nextThresholdDistance,
+    evidence: [
+      `overadvance_threshold_size:${thresholdSize}`,
+      `overadvance_current_over:${currentOver}`,
+      `overadvance_after_action_over:${afterActionOver}`,
+      `overadvance_hits_threshold:${hitsThreshold}`,
+      `overadvance_next_threshold_distance:${nextThresholdDistance}`,
+    ],
+  };
+}
+
+function corpAgendaOveradvanceThresholdSize(
+  definitionId: string,
+  text: string,
+): number | undefined {
+  if (
+    definitionId === "onr_v1_214_project-babylon" ||
+    definitionId === "onr_proteus_008_project-zurich"
+  ) {
+    return 2;
+  }
+  if (definitionId === "onr_proteus_007_project-venice") return 3;
+  const overMatch =
+    /for every (one|two|three|four|\d+) advancement counters? over/.exec(text);
+  if (overMatch?.[1]) return corpNumberWordToNumber(overMatch[1]);
+  const additionalAgendaPointMatch =
+    /additional agenda point for every (one|two|three|four|\d+) advancement counters? over/.exec(
+      text,
+    );
+  if (additionalAgendaPointMatch?.[1])
+    return corpNumberWordToNumber(additionalAgendaPointMatch[1]);
+  return undefined;
+}
+
+function corpNumberWordToNumber(value: string): number | undefined {
+  if (/^\d+$/.test(value)) return Number.parseInt(value, 10);
+  const byWord: Record<string, number> = {
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+  };
+  return byWord[value];
 }
 
 function semanticRuntimeCorpHasTransferDestination(
@@ -11733,15 +11805,6 @@ function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
   );
 }
 
-function semanticRuntimeConfidence(scopeId: string, score: number): number {
-  if (scopeId === "choice_resolution" || scopeId === "mandatory_draw")
-    return 0.95;
-  if (score >= 9000) return 0.86;
-  if (score >= 7000) return 0.76;
-  if (score >= 5000) return 0.66;
-  return 0.51;
-}
-
 function semanticRuntimeExplanation(side: Side, scopeId: string): string {
   return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
 }
@@ -11901,13 +11964,20 @@ function retainActionAlternativesForFindingWindows(
   summaries: AiSimulationSummary[],
   findings: { summaryIndex: number; actionIndex: number }[],
   maxAlternativesPerFinding: number,
-  opportunitySnapshotRequests: Array<{ seed: string; actionIndices: number[] }> = [],
+  opportunitySnapshotRequests: Array<{
+    seed: string;
+    actionIndices: number[];
+  }> = [],
 ): void {
   const keep = new Set<string>();
   const requestedBySeed = new Map(
     opportunitySnapshotRequests.map((request) => [
       request.seed,
-      new Set(request.actionIndices.filter((index) => Number.isInteger(index) && index >= 0)),
+      new Set(
+        request.actionIndices.filter(
+          (index) => Number.isInteger(index) && index >= 0,
+        ),
+      ),
     ]),
   );
   let firstAvailable:
@@ -19517,14 +19587,6 @@ function scoreCorpOperation(
 
 function publicRoleEvidence(roles: string[]): string[] {
   return roles.slice(0, 2).map((role) => `role:${role}`);
-}
-
-function scrubEvidence(evidence: string[]): string[] {
-  return evidence.filter(
-    (entry) =>
-      !FORBIDDEN_AI_INPUT_FIELDS.some((needle) => entry.includes(needle)) &&
-      !entry.includes("_1"),
-  );
 }
 
 const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
@@ -30600,11 +30662,6 @@ function summarizeAdvancedRemoteThreatMetrics(
   };
 }
 
-function averageNumber(values: number[]): number {
-  if (values.length === 0) return 0;
-  return round(values.reduce((sum, value) => sum + value, 0) / values.length);
-}
-
 function medianNumber(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = values.slice().sort((left, right) => left - right);
@@ -36300,17 +36357,6 @@ function repeatedLowValueCentralRunTags(
   return tags;
 }
 
-const DOCTRINE_QUALITY_METRICS: AiDoctrineQualityMetricName[] = [
-  "nakedAgendaInstalls",
-  "agendaFloodExposure",
-  "scoreWindowMissed",
-  "remoteOverbuild",
-  "economyStall",
-  "repeatedLowValueCentralRun",
-  "rigStall",
-  "assetTrashNeglect",
-];
-
 function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
   return {
     nakedAgendaInstalls: countTag(tags, "naked_agenda_install"),
@@ -36331,16 +36377,13 @@ function emptyDoctrineCaseExamples(): Record<
   AiDoctrineQualityMetricName,
   AiDoctrineQualityCaseExample[]
 > {
-  return {
-    nakedAgendaInstalls: [],
-    agendaFloodExposure: [],
-    scoreWindowMissed: [],
-    remoteOverbuild: [],
-    economyStall: [],
-    repeatedLowValueCentralRun: [],
-    rigStall: [],
-    assetTrashNeglect: [],
-  };
+  return DOCTRINE_QUALITY_METRIC_NAMES.reduce(
+    (examples, metric) => ({
+      ...examples,
+      [metric]: [],
+    }),
+    {} as Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>,
+  );
 }
 
 function doctrineMetricForQualityTag(
@@ -36423,58 +36466,6 @@ function isRedactionSafeCaseAnalysis(
   return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
     serialized.includes(needle),
   );
-}
-
-function sumDoctrineMetrics(
-  metrics: AiDoctrineQualityMetrics[],
-): AiDoctrineQualityMetrics {
-  return metrics.reduce(
-    (sum, entry) => ({
-      nakedAgendaInstalls: sum.nakedAgendaInstalls + entry.nakedAgendaInstalls,
-      agendaFloodExposure: sum.agendaFloodExposure + entry.agendaFloodExposure,
-      scoreWindowMissed: sum.scoreWindowMissed + entry.scoreWindowMissed,
-      remoteOverbuild: sum.remoteOverbuild + entry.remoteOverbuild,
-      economyStall: sum.economyStall + entry.economyStall,
-      repeatedLowValueCentralRun:
-        sum.repeatedLowValueCentralRun + entry.repeatedLowValueCentralRun,
-      rigStall: sum.rigStall + entry.rigStall,
-      assetTrashNeglect: sum.assetTrashNeglect + entry.assetTrashNeglect,
-    }),
-    emptyDoctrineMetrics(),
-  );
-}
-
-function diffDoctrineMetrics(
-  candidate: AiDoctrineQualityMetrics,
-  baseline: AiDoctrineQualityMetrics,
-): AiDoctrineQualityDelta {
-  return {
-    nakedAgendaInstalls:
-      candidate.nakedAgendaInstalls - baseline.nakedAgendaInstalls,
-    agendaFloodExposure:
-      candidate.agendaFloodExposure - baseline.agendaFloodExposure,
-    scoreWindowMissed: candidate.scoreWindowMissed - baseline.scoreWindowMissed,
-    remoteOverbuild: candidate.remoteOverbuild - baseline.remoteOverbuild,
-    economyStall: candidate.economyStall - baseline.economyStall,
-    repeatedLowValueCentralRun:
-      candidate.repeatedLowValueCentralRun -
-      baseline.repeatedLowValueCentralRun,
-    rigStall: candidate.rigStall - baseline.rigStall,
-    assetTrashNeglect: candidate.assetTrashNeglect - baseline.assetTrashNeglect,
-  };
-}
-
-function emptyDoctrineMetrics(): AiDoctrineQualityMetrics {
-  return {
-    nakedAgendaInstalls: 0,
-    agendaFloodExposure: 0,
-    scoreWindowMissed: 0,
-    remoteOverbuild: 0,
-    economyStall: 0,
-    repeatedLowValueCentralRun: 0,
-    rigStall: 0,
-    assetTrashNeglect: 0,
-  };
 }
 
 function countTag(tags: string[], tag: string): number {

@@ -208,4 +208,347 @@ describe("Action semantic invariants", () => {
       ),
     ).toHaveLength(expectedReadinessAreas.length);
   });
+
+  it("keeps proteus random and bad-publicity readiness diagnostic", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-proteus-random-bad-publicity-readiness-2026-06-13.md",
+      ),
+      "utf8",
+    );
+
+    for (const card of [
+      "AI Board Member",
+      "Charity Takeover",
+      "Scaldan",
+      "Frame-Up",
+      "Faked Hit",
+      "Poisoned Water Supply",
+      "Back Door to Netwatch",
+      "Roadblock",
+    ]) {
+      expect(report).toContain(card);
+    }
+    expect(report).toContain("needs_random_model");
+    expect(report).toContain("needs_bad_publicity_model");
+    expect(report).toContain("ready_for_semantic_annotation");
+    expect(report).toContain("productiveUseAllowed: false");
+    expect(report).toContain("runtimeConsumerStatus: none");
+    expect(report).toContain("proteus_ai_supported: false");
+  });
+
+  it("keeps proteus hidden resource ambush readiness diagnostic", () => {
+    const report = readFileSync(
+      path.join(
+        repoRoot,
+        "docs/reviews/ai/ai-proteus-hidden-resource-ambush-readiness-2026-06-13.md",
+      ),
+      "utf8",
+    );
+
+    for (const card of [
+      "Airport Locker",
+      "HQ Mole",
+      "R&D Mole",
+      "Simulacrum",
+      "Death from Above",
+      "Mercenary Subcontract",
+      "Doppelganger Antibody",
+      "Pattel Antibody",
+      "Stereogram Antibody",
+      "Bel-Digmo Antibody",
+    ]) {
+      expect(report).toContain(card);
+    }
+    expect(report).toContain("hidden_resource_constraints");
+    expect(report).toContain("target_choice_gaps");
+    expect(report).toContain("access_ambush_precision");
+    expect(report).toContain("virus_counter_risk");
+    expect(report).toContain("productiveUseAllowed: false");
+    expect(report).toContain("proteus_ai_supported: false");
+  });
+
+  it("covers runner breaker-search worklist package one as diagnostic semantics", () => {
+    const profiles: ActionCardSemanticProfile[] = [
+      runnerBreakerSearchProfile("Self-Modifying Code", [
+        "coverage.search_program",
+        "target_profile.program_from_stack_gap",
+      ]),
+      runnerBreakerSearchProfile("Mystery Box", [
+        "coverage.search_program",
+        "risk.random_outcome",
+      ]),
+      runnerBreakerSearchProfile("The Short Circuit", [
+        "coverage.install_breaker",
+        "risk.temporary_program",
+      ]),
+      runnerBreakerSearchProfile("Mantis, Fixer-at-Large", [
+        "coverage.search_program",
+        "target_profile.runner_program",
+      ]),
+      runnerBreakerSearchProfile("Temple Microcode Outlet", [
+        "coverage.install_breaker",
+        "target_profile.program_install",
+      ]),
+      runnerBreakerSearchProfile("Test Spin", [
+        "coverage.search_program",
+        "risk.random_outcome",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noEffectFlags).toEqual(
+      expect.arrayContaining(["no_runtime_scoring", "no_action_selection"]),
+    );
+  });
+
+  it("covers runner survival risk worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      runnerRiskProfile("Arasaka Owns You", ["risk.self_brain_damage"]),
+      runnerRiskProfile("Emergency Self-Construct", ["survival.flatline_prevention"]),
+      runnerRiskProfile("Force Shield", ["survival.damage_prevention"]),
+      runnerRiskProfile("Shield", ["survival.damage_prevention"]),
+      runnerRiskProfile("Armored Fridge", ["survival.damage_prevention"]),
+      runnerRiskProfile("Trauma Team", ["survival.flatline_prevention"]),
+      runnerRiskProfile("Lifesaver Nanosurgeons", [
+        "survival.flatline_prevention",
+      ]),
+      runnerRiskProfile("Preying Mantis", ["risk.random_damage"]),
+      runnerRiskProfile("Quest for Cattekin", ["risk.action_loss"]),
+      runnerRiskProfile("Lucidrine Booster Drug", [
+        "risk.random_damage",
+        "risk.action_loss",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "risk.self_brain_damage",
+        "survival.flatline_prevention",
+        "risk.random_damage",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp score advance worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Project Consultants", ["advance.counter_placement"]),
+      corpSemanticProfile("Management Shake-Up", ["advance.counter_transfer"]),
+      corpSemanticProfile("Systematic Layoffs", ["advance.counter_cashout"]),
+      corpSemanticProfile("Team Restructuring", ["advance.counter_transfer"]),
+      corpSemanticProfile("Falsified-Transactions Expert", [
+        "advance.counter_cashout",
+      ]),
+      corpSemanticProfile("Chicago Branch", ["advance.overadvance_support"]),
+      corpSemanticProfile("Vapor Ops", ["corp_scoreline.doctrine_link"]),
+      corpSemanticProfile("Project Babylon", ["advance.overadvance_support"]),
+      corpSemanticProfile("Project Venice", ["advance.overadvance_support"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "advance.counter_placement",
+        "advance.counter_transfer",
+        "advance.overadvance_support",
+        "advance.counter_cashout",
+        "corp_scoreline.doctrine_link",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp tag punish worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Closed Accounts", ["tag.payoff.economy_denial"]),
+      corpSemanticProfile("Scorched Earth", ["tag.payoff.meat_damage"]),
+      corpSemanticProfile("Punitive Counterstrike", ["tag.payoff.meat_damage"]),
+      corpSemanticProfile("Urban Renewal", ["tag.payoff.damage_clock"]),
+      corpSemanticProfile("Netwatch Operations Office", ["tag.source.trace"]),
+      corpSemanticProfile("Private Cybernet Police", ["tag.source.resource"]),
+      corpSemanticProfile("City Surveillance", ["tag.source.snowball"]),
+      corpSemanticProfile("Data Raven", ["access.tag_ambush"]),
+      corpSemanticProfile("TRAP!", ["access.tag_ambush"]),
+      corpSemanticProfile("Solo Squad", ["tag.payoff.runner_resource_trash"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "tag.source.trace",
+        "tag.source.snowball",
+        "tag.payoff.meat_damage",
+        "access.tag_ambush",
+      ]),
+    );
+    expect(
+      profiles
+        .filter((profile) =>
+          profile.tacticSignals.some(
+            (signal) =>
+              signal.startsWith("tag.") || signal === "access.tag_ambush",
+          ),
+        )
+        .every((profile) =>
+        profile.abilitySemantics?.[0]?.strategySupport?.some(
+          (support) => support.strategyId === "corp.doctrine.tag_trace_punish",
+        ),
+      ),
+    ).toBe(true);
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp damage ambush worklist package one as diagnostic semantics", () => {
+    const profiles = [
+      corpSemanticProfile("Setup!", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Vacant Soulkiller", [
+        "access.corp_brain_damage_ambush",
+      ]),
+      corpSemanticProfile("Virus Test Site", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Experimental AI", ["access.corp_program_trash"]),
+      corpSemanticProfile("Corprunner's Shattered Remains", [
+        "access.corp_hardware_trash",
+      ]),
+      corpSemanticProfile("Dedicated Response Team", [
+        "access.corp_meat_damage_ambush",
+      ]),
+      corpSemanticProfile("TRAP!", ["access.corp_net_damage_ambush"]),
+      corpSemanticProfile("Bolter Cluster", ["corp_ice.net_damage"]),
+      corpSemanticProfile("Cinderella", ["corp_ice.program_trash"]),
+      corpSemanticProfile("Code Corpse", ["corp_ice.brain_damage"]),
+      corpSemanticProfile("Wall of Ice", ["corp_ice.end_the_run_tax"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "access.corp_net_damage_ambush",
+        "access.corp_brain_damage_ambush",
+        "access.corp_program_trash",
+        "access.corp_hardware_trash",
+        "corp_ice.net_damage",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
+
+function runnerBreakerSearchProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.coverage_search`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.breaker_search",
+            role: "coverage_enabler",
+            confidence: "medium",
+            evidence: `${title} is classified by functional search/install coverage semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_program_or_stack_search",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: ["TargetProfile remains diagnostic and side-safe."],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function runnerRiskProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.survival_risk`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.survival",
+            role: "risk_control",
+            confidence: "medium",
+            evidence: `${title} is classified by functional survival and risk semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_self_or_damage_context",
+            status: "not_available",
+            issues: ["card_semantics_unavailable"],
+            evidence: ["Damage prevention precision remains diagnostic."],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpSemanticProfile(
+  title: string,
+  tacticSignals: string[],
+  strategyId = "corp.doctrine.remote_scoring_scoreline",
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_semantic`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: tacticSignals.some(
+              (signal) =>
+                signal.startsWith("tag.") || signal === "access.tag_ambush",
+            )
+              ? "corp.doctrine.tag_trace_punish"
+              : tacticSignals.some((signal) =>
+                    signal.includes("damage") || signal.includes("trash"),
+                  )
+                ? "corp.doctrine.damage_pressure"
+                : strategyId,
+            role: "scoreline_support",
+            confidence: "medium",
+            evidence: `${title} is classified by functional corp scoreline semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_visible_scoreline_target",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: ["Corp target profile remains diagnostic."],
+          },
+        ],
+      },
+    ],
+  };
+}

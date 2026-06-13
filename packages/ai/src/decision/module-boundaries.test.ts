@@ -11,6 +11,7 @@ type ImportReference = {
 
 const decisionDir = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.resolve(decisionDir, "..");
+const repoRoot = path.resolve(srcDir, "..", "..", "..");
 
 describe("AI module boundaries", () => {
   it("keeps decision modules independent from evaluation and runtime implementation", () => {
@@ -101,17 +102,16 @@ describe("AI module boundaries", () => {
 
   it("keeps evaluation modules away from runtime action choosers", () => {
     const violations = productionFiles("evaluation").flatMap((file) =>
-      importsFrom(file)
-        .filter((reference) =>
-          reference.importSource.startsWith("../runtime/choose-ai-action"),
-        )
-        .map((reference) =>
+      importsFrom(file).flatMap((reference) => {
+        if (!isRuntimeChooserImport(file, reference)) return [];
+        return [
           violation(
             file,
             reference,
             "evaluation modules must not import runtime action choosers",
           ),
-        ),
+        ];
+      }),
     );
 
     expect(violations).toEqual([]);
@@ -192,10 +192,73 @@ describe("AI module boundaries", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("keeps reports modules away from action choosers", () => {
+    const violations = productionFiles("reports").flatMap((file) =>
+      importsFrom(file).flatMap((reference) => {
+        if (
+          isRuntimeChooserImport(file, reference) ||
+          reference.importSource.startsWith("../index") ||
+          reference.importSource.startsWith("../legacy")
+        ) {
+          return [
+            violation(
+              file,
+              reference,
+              "reports modules must not import action choosers",
+            ),
+          ];
+        }
+        return [];
+      }),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps diagnostics modules from mutating selected choice payloads", () => {
+    const violations = productionFiles("diagnostics").flatMap((file) => {
+      const content = readFileSync(file, "utf8");
+      const selectionMutationReferences = content.matchAll(
+        /\bselected(?:Choices|Targets)\s*[:=]/g,
+      );
+      return [...selectionMutationReferences].map((match) => {
+        const line = lineForIndex(content, match.index ?? 0);
+        return `${relativeFile(file)}:${line} writes selected choice or target payloads`;
+      });
+    });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps AI worklists and review docs from adding runtime imports", () => {
+    const docsRoot = path.join(repoRoot, "docs");
+    const docFiles = collectTextFiles(docsRoot, [".md"]).filter((file) =>
+      relativeRepoFile(file).startsWith("docs/reviews/ai/"),
+    );
+    const violations = docFiles.flatMap((file) => {
+      const content = readFileSync(file, "utf8");
+      const runtimeImportReferences = content.matchAll(
+        /^\s*(?:import|export)\s+[\s\S]*?\sfrom\s+["'][^"']*runtime[^"']*["']/gm,
+      );
+      return [...runtimeImportReferences].map((match) => {
+        const line = lineForIndex(content, match.index ?? 0);
+        return `${relativeRepoFile(file)}:${line} declares a runtime import`;
+      });
+    });
+
+    expect(violations).toEqual([]);
+  });
 });
 
 function productionFiles(
-  area: "actions" | "decision" | "diagnostics" | "evaluation" | "runtime",
+  area:
+    | "actions"
+    | "decision"
+    | "diagnostics"
+    | "evaluation"
+    | "reports"
+    | "runtime",
 ): string[] {
   const root = path.join(srcDir, area);
   return collectSourceFiles(root).filter((file) => !file.endsWith(".test.ts"));
@@ -208,6 +271,19 @@ function collectSourceFiles(directory: string): string[] {
       return collectSourceFiles(entryPath);
     }
     if (!entry.isFile() || !entry.name.endsWith(".ts")) {
+      return [];
+    }
+    return [entryPath];
+  });
+}
+
+function collectTextFiles(directory: string, extensions: readonly string[]): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return collectTextFiles(entryPath, extensions);
+    }
+    if (!entry.isFile() || !extensions.includes(path.extname(entry.name))) {
       return [];
     }
     return [entryPath];
@@ -271,6 +347,10 @@ function relativeFile(file: string): string {
   return path.relative(srcDir, file).replaceAll(path.sep, "/");
 }
 
+function relativeRepoFile(file: string): string {
+  return path.relative(repoRoot, file).replaceAll(path.sep, "/");
+}
+
 function resolvesToSrcArea(
   file: string,
   importSource: string,
@@ -284,4 +364,17 @@ function resolvesToSrcArea(
 
 function resolvedImportBasename(file: string, importSource: string): string {
   return path.basename(path.resolve(path.dirname(file), importSource));
+}
+
+function isRuntimeChooserImport(
+  file: string,
+  reference: ImportReference,
+): boolean {
+  if (!resolvesToSrcArea(file, reference.importSource, "runtime")) return false;
+  const basename = resolvedImportBasename(file, reference.importSource);
+  return (
+    basename === "choose-ai-action" ||
+    basename === "semantic-runtime" ||
+    basename === "semantic-runtime-score-components"
+  );
 }

@@ -68,6 +68,7 @@ import {
   evaluateServerThreat,
   evaluateCorpScoringThreat,
   evaluateRemoteThreat,
+  evaluateRunnerRunTargets,
   evaluateRunnerRig,
   evaluateServerAccessValue,
   evaluateV143TuningGate,
@@ -8233,6 +8234,134 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     },
   );
 
+  it.each([
+    [
+      "Project Babylon difficulty + 1",
+      "onr_v1_214_project-babylon",
+      3,
+      "2",
+      "1",
+      "false",
+      "1",
+      false,
+    ],
+    [
+      "Project Babylon difficulty + 2",
+      "onr_v1_214_project-babylon",
+      4,
+      "2",
+      "2",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Babylon difficulty + 3",
+      "onr_v1_214_project-babylon",
+      5,
+      "2",
+      "3",
+      "false",
+      "1",
+      false,
+    ],
+    [
+      "Project Babylon difficulty + 4",
+      "onr_v1_214_project-babylon",
+      6,
+      "2",
+      "4",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Venice three over difficulty",
+      "onr_proteus_007_project-venice",
+      6,
+      "3",
+      "3",
+      "true",
+      "0",
+      true,
+    ],
+    [
+      "Project Zurich two over difficulty",
+      "onr_proteus_008_project-zurich",
+      4,
+      "2",
+      "2",
+      "true",
+      "0",
+      true,
+    ],
+  ])(
+    "classifies exact overadvance threshold for %s",
+    (
+      _caseName,
+      definitionId,
+      advancementCounters,
+      thresholdSize,
+      afterActionOver,
+      hitsThreshold,
+      nextThresholdDistance,
+      expectsThresholdClass,
+    ) => {
+      const input = corpAdvancementDominanceInput(
+        `ai-exact-overadvance-${definitionId}-${advancementCounters}`,
+        (state) => {
+          addCorpRootToServerForTest(state, "remote_1", "simple_agenda", 2);
+          addCorpRootToServerForTest(
+            state,
+            "remote_2",
+            definitionId,
+            advancementCounters,
+          );
+        },
+      );
+      const teamRestructuring = teamRestructuringAction(input);
+      const agendaAdvance = advanceActionForDefinition(input, "simple_agenda");
+      const targetAdvance = advanceActionForDefinition(input, definitionId);
+
+      expect(teamRestructuring).toBeDefined();
+      expect(agendaAdvance).toBeDefined();
+      expect(targetAdvance).toBeDefined();
+      if (!teamRestructuring || !agendaAdvance || !targetAdvance)
+        throw new Error(
+          `Missing exact-overadvance fixture actions for ${definitionId}`,
+        );
+
+      const decision = chooseCorpAction({
+        ...input,
+        legalActions: [teamRestructuring, agendaAdvance, targetAdvance],
+      });
+      const debugText = JSON.stringify(decision.decisionDebug);
+
+      expect(decision.actionId).toBe(teamRestructuring.actionId);
+      expect(debugText).toContain(
+        `overadvance_threshold_size:${thresholdSize}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_after_action_over:${afterActionOver}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_hits_threshold:${hitsThreshold}`,
+      );
+      expect(debugText).toContain(
+        `overadvance_next_threshold_distance:${nextThresholdDistance}`,
+      );
+      if (expectsThresholdClass) {
+        expect(debugText).toContain(
+          "advancement_target_class:agenda_overadvance_threshold",
+        );
+      } else {
+        expect(debugText).not.toContain(
+          "advancement_target_class:agenda_overadvance_threshold",
+        );
+      }
+    },
+  );
+
   it("does not let Team Restructuring win automatically with two weak counter banks", () => {
     const input = corpAdvancementDominanceInput(
       "ai-advancement-net-value-two-weak-vapors",
@@ -15984,6 +16113,126 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe(false);
   });
 
+  it("does not repeat a known Holovid remote after declining reserve-breaking trash", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-holovid-no-repeat-after-decline",
+        corpDeck: {
+          id: "ai_runner_holovid_no_repeat_corp",
+          name: "AI Runner Holovid No Repeat Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_326_holovid-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 7;
+    putInstalledCorpHolovidInRemote(state, "remote_1", 8);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const accessInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const accessDecision = chooseRunnerAction(accessInput);
+    expect(
+      accessInput.legalActions.find(
+        (action) => action.actionId === accessDecision.actionId,
+      )?.type,
+    ).toBe("decline_trash");
+    expect(accessDecision.evidence).toContain(
+      "remote_trash_finite_pool_economy:true",
+    );
+    expect(accessDecision.evidence).toContain(
+      "remote_trash_deferred_by_budget:true",
+    );
+
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const repeatInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const remoteRun = repeatInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = repeatInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const hqRun = repeatInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gainCredit = repeatInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !rdRun || !hqRun || !gainCredit)
+      throw new Error("Missing Holovid repeat fixture actions");
+
+    const scopedRepeatInput = {
+      ...repeatInput,
+      legalActions: [remoteRun, rdRun, hqRun, gainCredit],
+    };
+    const remoteRunTarget = evaluateRunnerRunTargets({
+      input: scopedRepeatInput,
+    }).find((evaluation) => evaluation.targetServerId === "remote_1");
+    const repeatCandidate = generateRunnerPlanCandidates(scopedRepeatInput).find(
+      (candidate) =>
+        candidate.kind === "contest_remote" &&
+        candidate.steps.some((step) => step.targetServerId === "remote_1"),
+    );
+    if (!repeatCandidate) throw new Error("Missing repeated Holovid remote run");
+    const repeatScore = evaluateRunnerPlan(scopedRepeatInput, repeatCandidate);
+    const repeatDecision = chooseRunnerAction(scopedRepeatInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const repeatAction = scopedRepeatInput.legalActions.find(
+      (action) => action.actionId === repeatDecision.actionId,
+    );
+    const tacticalDebug =
+      repeatDecision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(repeatScore.reasons).toContain(
+      "known_remote_root_trash_declined_by_reserve",
+    );
+    expect(repeatScore.evidence).toContain(
+      "runner_repeat_remote_after_declined_trash_penalized:true",
+    );
+    expect(remoteRunTarget).toMatchObject({
+      accessPayoff: "trash_unaffordable",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "gain_credits_first",
+    });
+    expect(remoteRunTarget?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_remote_root_high_remaining_finite_pool:false",
+        "trash_decline_reason:reserve_would_break",
+      ]),
+    );
+    expect(
+      repeatAction?.type === "start_run" &&
+        repeatAction.payload?.serverId === "remote_1",
+    ).toBe(false);
+    expect(tacticalDebug).toContain("runner.contest_remote:remote_1");
+    expect(tacticalDebug).toContain("status=abandoned");
+    expect(assertAiInputIsSideSafe(scopedRepeatInput)).toBe(true);
+  });
+
   it("defers an early expensive run-tax region trash when no acute remote threat exists", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -22645,7 +22894,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(JSON.stringify(league)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("compares doctrine quality metrics between baseline and current candidate", () => {
     const benchmark = runDoctrineQualityBenchmark({
@@ -27151,6 +27400,38 @@ function putInstalledCorpBbsInRemote(
     advancementCounters: 0,
   };
   return bbsId;
+}
+
+function putInstalledCorpHolovidInRemote(
+  state: GameState,
+  serverId: `remote_${number}`,
+  bitCount: number,
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) throw new Error(`Missing ${serverId}`);
+  const holovidEntry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === "onr_v1_326_holovid-campaign" &&
+      !state.corp.servers.some((candidate) =>
+        candidate.root.includes(id as CardInstanceId),
+      ),
+  );
+  if (!holovidEntry) throw new Error("Missing Holovid Campaign copy");
+  const holovidId = holovidEntry[0] as CardInstanceId;
+  removeEverywhere(state, holovidId);
+  server.root.push(holovidId);
+  state.cardInstances[holovidId] = {
+    ...state.cardInstances[holovidId]!,
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: true,
+    rezzed: true,
+    counters: { bit: bitCount },
+    advancementCounters: 0,
+  };
+  return holovidId;
 }
 
 function runnerActionPhaseInput(

@@ -48,12 +48,76 @@ describe("SemanticShadowLeagueDelta", () => {
       delta: -2,
       direction: "improved",
     });
+    expect(delta.mistakeDelta).toBe(delta.mistakeCountDelta);
     expect(delta.pilotEligibilityDelta).toMatchObject({
       baseline: 0.82,
       current: current.metrics.pilotEligibilityRate,
       delta: 0.013,
       direction: "improved",
     });
+    expect(delta.pilotReadinessDelta.basic_setup).toMatchObject({
+      baselineCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.basic_setup.candidate - 1,
+      currentCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.basic_setup.candidate,
+      candidateDelta: 1,
+      allowedDelta: 1,
+      wouldOverrideDelta: 1,
+      recommendationChanged: true,
+    });
+    expect(delta.targetChoiceCoverageDelta).toMatchObject({
+      baselineCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.target_choice_shadow_only
+          .candidate,
+      currentCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.target_choice_shadow_only
+          .candidate,
+      candidateDelta: 0,
+      recommendationChanged: false,
+    });
+    expect(delta.remoteContestReadinessDelta).toMatchObject({
+      baselineCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.remote_contest_report_only
+          .candidate,
+      currentCandidate:
+        current.metrics.pilotCutoverReadiness.scopes.remote_contest_report_only
+          .candidate,
+      candidateDelta: 0,
+      recommendationChanged: false,
+    });
+    expect(delta.doctrineFitDelta.doctrineGoalsProducedDelta).toMatchObject({
+      baseline:
+        current.metrics.doctrineGoalActionFit.doctrineGoalsProduced - 1,
+      current: current.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
+      delta: 1,
+      direction: "improved",
+    });
+    expect(delta.doctrineFitDelta.goalsWithAtLeastOneFitDelta).toMatchObject({
+      baseline:
+        current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit - 1,
+      current: current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
+      delta: 1,
+      direction: "improved",
+    });
+    expect(delta.doctrineFitDelta.goalsOnlyBlockedDelta).toMatchObject({
+      baseline: current.metrics.doctrineGoalActionFit.goalsOnlyBlocked + 1,
+      current: current.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
+      delta: -1,
+      direction: "improved",
+    });
+    expect(delta.doctrineFitDelta.goalsNoCandidateDelta).toMatchObject({
+      baseline: current.metrics.doctrineGoalActionFit.goalsNoCandidate + 1,
+      current: current.metrics.doctrineGoalActionFit.goalsNoCandidate,
+      delta: -1,
+      direction: "improved",
+    });
+    const currentDoctrineFamilies = Object.keys(
+      current.metrics.doctrineGoalActionFit.topFitByFamily,
+    ).sort();
+    expect(currentDoctrineFamilies[0]).toBeDefined();
+    expect(delta.doctrineFitDelta.addedTopFitFamilies).toEqual([
+      currentDoctrineFamilies[0],
+    ]);
 
     expect(delta.scopeBreakdownDelta.basic_setup).toMatchObject({
       baselineEligibleCount: current.metrics.scopeBreakdown.basic_setup.eligibleCount - 1,
@@ -127,6 +191,17 @@ function syntheticBaselineBeforeCurrentGrowth(
 ): SemanticShadowLeagueReport {
   const [firstBasicSetupScenarioId, ...remainingBasicSetupScenarioIds] =
     current.metrics.scopeBreakdown.basic_setup.scenarioIds;
+  const [firstDoctrineFamily, ...remainingDoctrineFamilies] = Object.keys(
+    current.metrics.doctrineGoalActionFit.topFitByFamily,
+  ).sort();
+  const baselineTopFitByFamily: SemanticShadowLeagueReport["metrics"]["doctrineGoalActionFit"]["topFitByFamily"] =
+    {};
+  for (const family of remainingDoctrineFamilies) {
+    const topFit = current.metrics.doctrineGoalActionFit.topFitByFamily[family];
+    if (topFit) baselineTopFitByFamily[family] = topFit;
+  }
+  const currentBasicReadiness =
+    current.metrics.pilotCutoverReadiness.scopes.basic_setup;
 
   return {
     ...current,
@@ -139,6 +214,32 @@ function syntheticBaselineBeforeCurrentGrowth(
           : roundMetric(current.metrics.agreementRate - 0.1),
       mistakeCount: current.metrics.mistakeCount + 2,
       pilotEligibilityRate: 0.82,
+      pilotCutoverReadiness: {
+        ...current.metrics.pilotCutoverReadiness,
+        scopes: {
+          ...current.metrics.pilotCutoverReadiness.scopes,
+          basic_setup: {
+            ...currentBasicReadiness,
+            candidate: currentBasicReadiness.candidate - 1,
+            allowed: currentBasicReadiness.allowed - 1,
+            wouldOverride: currentBasicReadiness.wouldOverride - 1,
+            recommendedForDefaultOffPilot:
+              !currentBasicReadiness.recommendedForDefaultOffPilot,
+          },
+        },
+      },
+      doctrineGoalActionFit: {
+        ...current.metrics.doctrineGoalActionFit,
+        doctrineGoalsProduced:
+          current.metrics.doctrineGoalActionFit.doctrineGoalsProduced - 1,
+        goalsWithAtLeastOneFit:
+          current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit - 1,
+        goalsOnlyBlocked:
+          current.metrics.doctrineGoalActionFit.goalsOnlyBlocked + 1,
+        goalsNoCandidate:
+          current.metrics.doctrineGoalActionFit.goalsNoCandidate + 1,
+        topFitByFamily: baselineTopFitByFamily,
+      },
       scopeBreakdown: {
         ...current.metrics.scopeBreakdown,
         basic_setup: {
@@ -155,6 +256,7 @@ function syntheticBaselineBeforeCurrentGrowth(
     evidence: [
       ...current.evidence,
       `synthetic_baseline_removed:${firstBasicSetupScenarioId}`,
+      `synthetic_baseline_removed_doctrine_family:${firstDoctrineFamily}`,
     ],
   };
 }

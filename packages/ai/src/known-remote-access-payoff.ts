@@ -1,6 +1,7 @@
 import {
   DEMO_CARDS_BY_ID,
   type AiDecisionInput,
+  type VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard, RUNTIME_CARDS } from "./ai-hints";
 import {
@@ -50,6 +51,7 @@ type KnownRemoteRoot = {
   definitionId: string;
   positionKey: string;
   source: "player_view" | "position_memory";
+  visibleCard?: VisibleCard;
 };
 
 export function evaluateKnownRemoteAccessPayoff(
@@ -162,6 +164,7 @@ export function evaluateKnownRemoteAccessPayoff(
       cheapestTrashRoot.type,
       cheapestTrashCost,
       creditsAfterPath,
+      cheapestTrashRoot.visibleCard,
     );
     return {
       payoff: trashProjection.payoff,
@@ -237,6 +240,7 @@ function knownRemoteRoots(
       definitionId: card.definitionId,
       positionKey,
       source: "player_view",
+      visibleCard: card,
     });
   });
   for (const entry of knownRemoteRootMemory(beliefState, serverId)) {
@@ -298,6 +302,7 @@ function projectKnownRemoteTrashCommitment(
   rootType: string,
   trashCost: number,
   creditsAfterPath: number,
+  visibleCard: VisibleCard | undefined,
 ): {
   payoff: KnownRemoteAccessPayoffKind;
   accessDecision: KnownRemoteAccessDecision;
@@ -323,7 +328,11 @@ function projectKnownRemoteTrashCommitment(
     : Math.max(0, trashCost - support.dedicatedCredits);
   const creditsAfterTrash = creditsAfterPath - generalTrashCost;
   const technicallyAffordable = creditsAfterPath >= generalTrashCost;
-  const targetProfile = knownRemoteTrashTargetProfile(definitionId);
+  const targetProfile = knownRemoteTrashTargetProfile(
+    definitionId,
+    trashCost,
+    visibleCard,
+  );
   const preservesReserve = technicallyAffordable &&
     creditsAfterTrash >= desiredCreditReserve;
   if (!technicallyAffordable) {
@@ -341,7 +350,7 @@ function projectKnownRemoteTrashCommitment(
         "remote_known_no_current_payoff",
         "remote_root_trash_unaffordable",
       ],
-      evidence: [...targetProfile.evidence, ...support.evidence],
+      evidence: [...support.evidence, ...targetProfile.evidence],
       targetValue: targetProfile.value,
       generalTrashCost,
       desiredCreditReserve,
@@ -366,7 +375,7 @@ function projectKnownRemoteTrashCommitment(
         "remote_known_no_current_payoff",
         "remote_root_trash_reserve_would_break",
       ],
-      evidence: [...targetProfile.evidence, ...support.evidence],
+      evidence: [...support.evidence, ...targetProfile.evidence],
       targetValue: targetProfile.value,
       generalTrashCost,
       desiredCreditReserve,
@@ -390,7 +399,7 @@ function projectKnownRemoteTrashCommitment(
         ? ["known_remote_trash_reserve_break_allowed_by_target_value"]
         : []),
     ],
-    evidence: [...targetProfile.evidence, ...support.evidence],
+    evidence: [...support.evidence, ...targetProfile.evidence],
     targetValue: targetProfile.value,
     generalTrashCost,
     desiredCreditReserve,
@@ -464,7 +473,11 @@ function trashSupportEffectMatchesRoot(
   return normalized === "node" && rootType === "asset";
 }
 
-function knownRemoteTrashTargetProfile(definitionId: string): {
+function knownRemoteTrashTargetProfile(
+  definitionId: string,
+  trashCost: number,
+  visibleCard: VisibleCard | undefined,
+): {
   value: number;
   reserveBreakAllowed: boolean;
   evidence: string[];
@@ -475,6 +488,16 @@ function knownRemoteTrashTargetProfile(definitionId: string): {
     (value): value is number => typeof value === "number",
   );
   const value = values.length > 0 ? Math.max(...values) : 0;
+  const corpValueRemaining = knownRemoteVisibleCorpValueRemaining(visibleCard);
+  const finitePoolEconomy = knownRemoteLooksLikeFinitePoolEconomy(
+    hint,
+    roles,
+    visibleCard,
+  );
+  const highRemainingFinitePool =
+    finitePoolEconomy &&
+    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
+    trashCost > 0;
   const highImpactRole = roles.some((role) =>
     [
       "economy",
@@ -488,16 +511,50 @@ function knownRemoteTrashTargetProfile(definitionId: string): {
       "ambush",
     ].some((token) => role.includes(token)),
   );
-  const reserveBreakAllowed = highImpactRole && value >= 2;
+  const reserveBreakAllowed =
+    highImpactRole &&
+    value >= 2 &&
+    (!finitePoolEconomy || highRemainingFinitePool);
   return {
     value,
     reserveBreakAllowed,
     evidence: [
       `known_remote_root_value:${value}`,
       `known_remote_root_high_impact_role:${highImpactRole}`,
+      `known_remote_root_finite_pool_economy:${finitePoolEconomy}`,
+      `known_remote_root_corp_value_remaining:${corpValueRemaining}`,
+      `known_remote_root_high_remaining_finite_pool:${highRemainingFinitePool}`,
       ...roles.slice(0, 6).map((role) => `known_remote_root_role:${role}`),
     ],
   };
+}
+
+function knownRemoteVisibleCorpValueRemaining(
+  visibleCard: VisibleCard | undefined,
+): number {
+  if (!visibleCard) return 0;
+  return Math.max(
+    0,
+    visibleCard.counters?.bit ?? 0,
+    visibleCard.counters?.recurring_credit ?? 0,
+  );
+}
+
+function knownRemoteLooksLikeFinitePoolEconomy(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+  roles: readonly string[],
+  visibleCard: VisibleCard | undefined,
+): boolean {
+  if (knownRemoteVisibleCorpValueRemaining(visibleCard) <= 0) return false;
+  return (
+    roles.some((role) => role.includes("campaign") || role.includes("economy")) ||
+    (hint?.effects ?? []).some(
+      (effect) =>
+        effect.kind === "economy" &&
+        effect.scope === "corp" &&
+        effect.finite === true,
+    )
+  );
 }
 
 function knownRemoteTrashCreditReserve(input: AiDecisionInput): number {

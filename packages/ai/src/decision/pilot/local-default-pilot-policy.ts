@@ -18,6 +18,17 @@ export type LocalDefaultPilotPolicyScope = {
   evidence: string[];
 };
 
+export type LocalDefaultPilotDryRunPolicyInput = {
+  scope: AiPlayStrengthPilotScope;
+  recommendation:
+    | "local_default_dry_run_candidate"
+    | "keep_env_gated"
+    | "do_not_default";
+  badOverrideRisk: number;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+};
+
 export type LocalDefaultPilotPolicy = {
   version: "ai-play-strength-local-default-pilot-policy-v1";
   scope: "local_default_pilot_policy_report_only";
@@ -79,4 +90,27 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
       "default_enabled_scope_count:0",
     ],
   };
+}
+
+export function defaultActiveScopes(): [] {
+  return [];
+}
+
+export function recommendedLocalDefaultScopes(
+  reports: readonly LocalDefaultPilotDryRunPolicyInput[],
+): AiPlayStrengthPilotScope[] {
+  return reports
+    .filter(
+      (report) =>
+        report.recommendation === "local_default_dry_run_candidate" &&
+        report.badOverrideRisk === 0 &&
+        report.productiveUseAllowed === false &&
+        report.runtimeConsumerStatus === "none",
+    )
+    .map((report) => report.scope)
+    .sort();
+}
+
+export function localDefaultPolicyEnvOverrideRequired(): true {
+  return true;
 }

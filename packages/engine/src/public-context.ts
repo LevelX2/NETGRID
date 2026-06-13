@@ -564,7 +564,7 @@ export function publicContextForAction(
       "parisCityGridPoolSpent",
       "parisCityGridPoolRemaining",
       "parisCityGridPoolServerId",
-      "krumzBitsSpent",
+      "recurringTraceCreditPoolSpent",
       "hackerTrackerCountersSpent",
       "hackerTrackerCountersAdded",
       "temporaryTraceCreditsSpent",

@@ -79,7 +79,7 @@ describe("trace payment pools", () => {
       parisCityGridPoolSpent: 2,
       parisCityGridPoolRemaining: 0,
       parisCityGridPoolServerId: "remote_1",
-      krumzBitsSpent: 1,
+      recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
       traceHostedCreditBoost: 1,
     });
