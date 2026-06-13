@@ -6673,7 +6673,11 @@ function corpAdvancementCounterPlacementAssessment(
       : 0;
   const cardSpendPenalty = 90 + actionCreditCost(action) * 20;
   const netAdvancementValue =
-    boardDeltaValue + windowValue + compressionValue - cardSpendPenalty - weakTargetPenalty;
+    boardDeltaValue +
+    windowValue +
+    compressionValue -
+    cardSpendPenalty -
+    weakTargetPenalty;
   const dominatedByBasicAdvance =
     profile.effectOnly &&
     profile.counterPerTarget === 1 &&
@@ -6775,12 +6779,9 @@ function corpBasicAdvanceEquivalentTargets(
         serverId: string;
       } => Boolean(located),
     )
-    .map((located) =>
-      corpAdvancementTargetAssessment(input, located, context),
-    )
-    .filter(
-      (target): target is CorpAdvancementCounterTargetAssessment =>
-        Boolean(target),
+    .map((located) => corpAdvancementTargetAssessment(input, located, context))
+    .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+      Boolean(target),
     );
 }
 
@@ -6883,9 +6884,11 @@ function bestCorpAdvancementCounterWitness(
     cashout_next_turn: 2,
     none: 1,
   };
-  return targets
-    .map((target) => target.witness)
-    .sort((left, right) => rank[right] - rank[left])[0] ?? "none";
+  return (
+    targets
+      .map((target) => target.witness)
+      .sort((left, right) => rank[right] - rank[left])[0] ?? "none"
+  );
 }
 
 function normalizedRulesTextForDefinition(definitionId: string): string {
@@ -8195,7 +8198,9 @@ function actionPriority(
     return (
       92 +
       boundedScoreHorizonActionBonus(input, action, context) +
-      (placement ? Math.max(-120, Math.min(160, placement.netAdvancementValue)) : 0) +
+      (placement
+        ? Math.max(-120, Math.min(160, placement.netAdvancementValue))
+        : 0) +
       corpUnsafeScoreConversionActionBonus(input, action, context) +
       corpScoreTerminalActionPriorityBonus(input, action, context)
     );

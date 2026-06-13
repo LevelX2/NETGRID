@@ -4639,7 +4639,12 @@ function semanticRuntimeActionAlternatives(
         ...planScoreBreakdown,
       ],
       ...(selected
-        ? { whyChosen: semanticRuntimeDebugActionWhyChosen(choice, planSelection) }
+        ? {
+            whyChosen: semanticRuntimeDebugActionWhyChosen(
+              choice,
+              planSelection,
+            ),
+          }
         : {
             whyNot: choice.exclusion
               ? [
@@ -10205,7 +10210,11 @@ function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
       : 0;
   const cardSpendPenalty = 180 + actionCreditCost(action) * 40;
   const netAdvancementValue =
-    boardDeltaValue + windowValue + compressionValue - cardSpendPenalty - weakTargetPenalty;
+    boardDeltaValue +
+    windowValue +
+    compressionValue -
+    cardSpendPenalty -
+    weakTargetPenalty;
   const dominatedByBasicAdvance =
     profile.effectOnly &&
     profile.counterPerTarget === 1 &&
@@ -10312,9 +10321,8 @@ function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
         located.server,
       );
     })
-    .filter(
-      (target): target is CorpAdvancementCounterTargetAssessment =>
-        Boolean(target),
+    .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+      Boolean(target),
     );
 }
 
@@ -10406,9 +10414,11 @@ function bestCorpAdvancementCounterWitness(
     cashout_next_turn: 2,
     none: 1,
   };
-  return targets
-    .map((target) => target.witness)
-    .sort((left, right) => rank[right] - rank[left])[0] ?? "none";
+  return (
+    targets
+      .map((target) => target.witness)
+      .sort((left, right) => rank[right] - rank[left])[0] ?? "none"
+  );
 }
 
 function semanticRuntimeCorpPassiveScoreLinePenalty(

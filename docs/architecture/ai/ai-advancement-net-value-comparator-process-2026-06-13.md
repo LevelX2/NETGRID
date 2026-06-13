@@ -64,19 +64,24 @@ Die Corp-KI bewertet `Team Restructuring` und gleichartige Placement-Aktionen ü
 Ziel: Umsetzungsscope, Nicht-Ziele, Invarianten und Paketfolge versionieren.
 
 Arbeit:
+
 - Dieses Dokument anlegen.
 - Worktree und Branch prüfen.
 
 Kernartefakte:
+
 - `docs/architecture/ai/ai-advancement-net-value-comparator-process-2026-06-13.md`
 
 Checks:
+
 - `git diff --check`
 
 Done-Gate:
+
 - Prozessartefakt ist versioniert und benennt Folgepakete.
 
 Commit:
+
 - `docs: plan advancement net value comparator`
 
 ### AI-ADV-NET-1B Net-Value Comparator
@@ -84,25 +89,30 @@ Commit:
 Ziel: Die vorhandene Placement-Bewertung um einen Nettovergleich erweitern.
 
 Arbeit:
+
 - `best_basic_equivalent`, `card_spend_penalty`, `compression_value`, `window_value` und `net_advancement_value` berechnen.
 - Schwache zweite Ziele bestrafen, wenn kein Witness existiert.
 - Witness-Typen mindestens unterscheiden: `score_now`, `score_next_action`, `overadvance_threshold`, `cashout_next_turn`, `transfer_destination_visible`, `none`.
 - Semantischen Runtime-Pfad und Legacy-Corp-Planpfad konsistent halten.
 
 Kernartefakte:
+
 - `packages/ai/src/index.ts`
 - `packages/ai/src/legacy/corp-plans.ts`
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Done-Gate:
+
 - Typecheck grün.
 - Debug-Evidence enthält die neuen Net-Value-Felder.
 - Dominierte Ein-Ziel-Aktion bleibt unter Basic Advance.
 
 Commit:
+
 - `fix(ai): compare advancement operations by net value`
 
 ### AI-ADV-NET-1C Regressionen
@@ -110,23 +120,28 @@ Commit:
 Ziel: Die Folgefälle aus der Review-Rückmeldung abdecken.
 
 Arbeit:
+
 - `Team Restructuring` auf zwei schwache Counter-Banks gewinnt nicht automatisch.
 - `Team Restructuring` auf Agenda plus echtem Score-/Window-Ziel kann gewinnen.
 - Debug-Ausgabe enthält `best_basic_equivalent`, `card_spend_penalty`, `compression_value`, `window_value` und `net_advancement_value`.
 
 Kernartefakte:
+
 - `packages/ai/src/index.test.ts`
 
 Checks:
+
 - Fokussierter Vitest-Lauf für neue Fixtures.
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm format:changed`
 - `git diff --check`
 
 Done-Gate:
+
 - Alle neuen und bestehenden `@netgrid/ai`-Tests grün.
 
 Commit:
+
 - `test(ai): cover advancement net value comparator`
 
 ### AI-ADV-NET-1D Integration
@@ -134,6 +149,7 @@ Commit:
 Ziel: Arbeitsbranch sauber nach lokalem `main` integrieren.
 
 Arbeit:
+
 - Arbeitsbranch sauber prüfen.
 - Lokales `main` in Arbeitsbranch integrieren, falls nötig.
 - Finale Checks wiederholen.
@@ -141,12 +157,14 @@ Arbeit:
 - Worktree entfernen.
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm format:changed`
 - `git diff --check`
 
 Done-Gate:
+
 - `main` enthält alle Paketcommits.
 - Arbeits-Worktree entfernt.
 - Keine fremden untracked Dateien verändert.
