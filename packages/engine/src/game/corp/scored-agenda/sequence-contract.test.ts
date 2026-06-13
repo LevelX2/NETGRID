@@ -16,6 +16,7 @@ import {
   findScoredAgendaScoreTimeResolver,
   SCORED_AGENDA_SCORE_TIME_RESOLVERS,
 } from "./scored-agenda-score-time-registry";
+import { SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS } from "./scored-agenda-direct-effect-registry";
 import { SCORED_AGENDA_FLOW_CHOICE_RESOLVERS } from "./scored-agenda-flow-choice-registry";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 import {
@@ -121,6 +122,14 @@ describe("scored agenda sequence contract matrix", () => {
     expect(flowResolverIds.some((id) => scoreTimeResolverIds.has(id))).toBe(
       false,
     );
+  });
+
+  it("keeps scored-agenda direct effect resolver ids unique", () => {
+    const directResolverIds = SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS.map(
+      (resolver) => resolver.id,
+    );
+
+    expect(new Set(directResolverIds).size).toBe(directResolverIds.length);
   });
 
   it("keeps migrated score-time kinds out of the scored-agenda orchestrator", () => {
