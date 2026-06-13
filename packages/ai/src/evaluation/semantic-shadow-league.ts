@@ -180,6 +180,32 @@ export type SemanticShadowLeaguePilotCutoverReadinessMatrix = {
   evidence: string[];
 };
 
+export type SemanticShadowLeagueLocalDefaultDryRunScope =
+  AiPlayStrengthPilotScope;
+
+export type SemanticShadowLeagueLocalDefaultDryRunReport = {
+  scope: SemanticShadowLeagueLocalDefaultDryRunScope;
+  scenarioCount: number;
+  eligible: number;
+  wouldOverride: number;
+  badOverrideRisk: number;
+  blockedReasons: Record<string, number>;
+  knownNoGoCases: string[];
+  recommendation:
+    | "local_default_dry_run_candidate"
+    | "keep_env_gated"
+    | "do_not_default";
+  centralOnlyCases?: number;
+  riskBlockedCases?: number;
+  evidenceOnlyBlockedCases?: number;
+  structuredAlignmentCases?: number;
+  falsePositiveCandidates?: number;
+  productiveUseAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  evidence: string[];
+};
+
 export function buildSemanticShadowLeagueReport(
   samples: readonly RealEngineDecisionCorpusSample[],
   expectations?: readonly SemanticShadowLeagueExpectation[],
@@ -235,6 +261,107 @@ export function playStrengthShadowLeagueExpectationsFromSamples(
         ]
       : [],
   );
+}
+
+export function buildLocalDefaultPilotDryRunReport(
+  report: SemanticShadowLeagueReport,
+  scope: SemanticShadowLeagueLocalDefaultDryRunScope,
+): SemanticShadowLeagueLocalDefaultDryRunReport {
+  const scopedScenarios = report.scenarios.filter((scenario) =>
+    scenario.pilotEligibility.scopes.includes(scope),
+  );
+  const wouldOverrideScenarios = scopedScenarios.filter(
+    (scenario) => scenario.pilotEligibility.wouldOverride,
+  );
+  const blockedReasons = countStrings(
+    report.scenarios.flatMap((scenario) =>
+      Object.entries(scenario.pilotEligibility.blockedByReason).flatMap(
+        ([reason, count]) =>
+          reason.startsWith(scope)
+            ? Array.from({ length: count }, () => reason)
+            : [],
+      ),
+    ),
+  );
+  const riskMistakes: readonly AiMistakeClass[] = [
+    "unsafe_run",
+    "ignored_damage_risk",
+    "ignored_remote_threat",
+    "missed_score_window",
+    "target_choice_unavailable",
+  ];
+  const badOverrideRiskScenarios = wouldOverrideScenarios.filter((scenario) =>
+    scenario.observedMistakes.some((mistake) => riskMistakes.includes(mistake)),
+  );
+  const readiness = report.metrics.pilotCutoverReadiness.scopes[scope];
+  const recommendation =
+    scope === CORP_SCORE_WINDOW_PILOT_MODE
+      ? "keep_env_gated"
+      : badOverrideRiskScenarios.length === 0 &&
+          readiness.recommendation === "default_off_candidate"
+        ? "local_default_dry_run_candidate"
+        : "do_not_default";
+  const base: SemanticShadowLeagueLocalDefaultDryRunReport = {
+    scope,
+    scenarioCount: report.scenarioCount,
+    eligible: scopedScenarios.length,
+    wouldOverride: wouldOverrideScenarios.length,
+    badOverrideRisk: badOverrideRiskScenarios.length,
+    blockedReasons,
+    knownNoGoCases: badOverrideRiskScenarios
+      .map((scenario) => scenario.scenarioId)
+      .sort(),
+    recommendation,
+    productiveUseAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    evidence: [
+      `local_default_dry_run_scope:${scope}`,
+      `scenario_count:${report.scenarioCount}`,
+      `eligible:${scopedScenarios.length}`,
+      `would_override:${wouldOverrideScenarios.length}`,
+      `bad_override_risk:${badOverrideRiskScenarios.length}`,
+      `recommendation:${recommendation}`,
+      "productive_use_allowed:false",
+      "runtime_consumer:none",
+    ],
+  };
+  if (scope !== RUNNER_SAFE_ACCESS_PILOT_MODE) return base;
+  const runnerScenarios = report.scenarios.filter(
+    (scenario) => scenario.side === "runner",
+  );
+  const centralOnlyCases = scopedScenarios.filter(
+    (scenario) =>
+      scenario.topActionType === "start_run" &&
+      !String(scenario.topActionId ?? "").includes("remote"),
+  ).length;
+  const riskBlockedCases = runnerScenarios.filter((scenario) =>
+    Object.keys(scenario.pilotEligibility.blockedByReason).some((reason) =>
+      reason.includes("risk"),
+    ),
+  ).length;
+  const evidenceOnlyBlockedCases = runnerScenarios.filter((scenario) =>
+    Object.keys(scenario.pilotEligibility.blockedByReason).some((reason) =>
+      reason.includes("structured_alignment_required"),
+    ),
+  ).length;
+  const structuredAlignmentCases = scopedScenarios.length;
+  return {
+    ...base,
+    centralOnlyCases,
+    riskBlockedCases,
+    evidenceOnlyBlockedCases,
+    structuredAlignmentCases,
+    falsePositiveCandidates: badOverrideRiskScenarios.length,
+    evidence: [
+      ...base.evidence,
+      `central_only_cases:${centralOnlyCases}`,
+      `risk_blocked_cases:${riskBlockedCases}`,
+      `evidence_only_blocked_cases:${evidenceOnlyBlockedCases}`,
+      `structured_alignment_cases:${structuredAlignmentCases}`,
+      `false_positive_candidates:${badOverrideRiskScenarios.length}`,
+    ],
+  };
 }
 
 function buildScenarioReport(

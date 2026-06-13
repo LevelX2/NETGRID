@@ -6,6 +6,7 @@ import {
 } from "./real-engine-decision-corpus-fixtures";
 import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";
 import {
+  buildLocalDefaultPilotDryRunReport,
   buildSemanticShadowLeagueReport,
   SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION,
   playStrengthShadowLeagueExpectationsFromSamples,
@@ -318,6 +319,92 @@ describe("SemanticShadowLeague", () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it("reports basic setup as a local default dry-run candidate without runtime effect", () => {
+    const report = buildSemanticShadowLeagueReport(
+      buildRealEngineDecisionCorpus(buildRealEngineDecisionCorpusScenarios()),
+    );
+
+    const dryRun = buildLocalDefaultPilotDryRunReport(report, "basic_setup");
+
+    expect(dryRun).toMatchObject({
+      scope: "basic_setup",
+      scenarioCount: 54,
+      eligible: 23,
+      wouldOverride: 23,
+      badOverrideRisk: 1,
+      knownNoGoCases: ["corp_real_advance_score_window"],
+      recommendation: "do_not_default",
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      noRuntimeEffect: true,
+    });
+    expect(dryRun.blockedReasons.basic_setup_action_type_blocked).toBe(30);
+    expect(dryRun.evidence).toEqual(
+      expect.arrayContaining([
+        "local_default_dry_run_scope:basic_setup",
+        "recommendation:do_not_default",
+        "productive_use_allowed:false",
+      ]),
+    );
+  });
+
+  it("reports runner safe access dry-run structure metrics", () => {
+    const report = buildSemanticShadowLeagueReport(
+      buildRealEngineDecisionCorpus(buildRealEngineDecisionCorpusScenarios()),
+    );
+
+    const dryRun = buildLocalDefaultPilotDryRunReport(
+      report,
+      "runner_safe_access",
+    );
+
+    expect(dryRun).toMatchObject({
+      scope: "runner_safe_access",
+      scenarioCount: 54,
+      eligible: 18,
+      wouldOverride: 18,
+      badOverrideRisk: 0,
+      knownNoGoCases: [],
+      recommendation: "local_default_dry_run_candidate",
+      centralOnlyCases: expect.any(Number),
+      riskBlockedCases: expect.any(Number),
+      evidenceOnlyBlockedCases: expect.any(Number),
+      structuredAlignmentCases: 18,
+      falsePositiveCandidates: 0,
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      noRuntimeEffect: true,
+    });
+    expect(dryRun.centralOnlyCases).toBeGreaterThan(0);
+    expect(dryRun.blockedReasons.runner_safe_access_wrong_side).toBe(27);
+  });
+
+  it("keeps corp score window env-gated in the local default dry-run", () => {
+    const report = buildSemanticShadowLeagueReport(
+      buildRealEngineDecisionCorpus(buildRealEngineDecisionCorpusScenarios()),
+    );
+
+    const dryRun = buildLocalDefaultPilotDryRunReport(
+      report,
+      "corp_score_window",
+    );
+
+    expect(dryRun).toMatchObject({
+      scope: "corp_score_window",
+      scenarioCount: 54,
+      eligible: 4,
+      wouldOverride: 4,
+      recommendation: "keep_env_gated",
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      noRuntimeEffect: true,
+    });
+    expect(dryRun.blockedReasons.corp_score_window_wrong_side).toBe(27);
+    expect(dryRun.evidence).toEqual(
+      expect.arrayContaining(["recommendation:keep_env_gated"]),
+    );
   });
 });
 
