@@ -116,8 +116,10 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "krumz_trace_bit";
+      kind: "recurring_trace_credit_pool";
       amount: 1;
+      counterType: Extract<CounterType, "bit">;
+      spendWindow: "trace";
       refresh: "start_of_corp_turn_after_use";
       visibility: Extract<EventVisibilityClass, "public">;
     }

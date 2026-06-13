@@ -580,7 +580,6 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
@@ -917,8 +916,8 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     isV099OrLater,
     isVersionAtLeast,
     isVisibleVirusCounterCardForRunner,
-    krumzTraceBitCardIds,
-    krumzTraceBitTotal,
+    recurringTraceCreditPoolSourceIds,
+    recurringTraceCreditPoolTotal,
     leavePlayCleanupImplementationsForCard,
     legalActionHostComposition,
     mainActionHostComposition,
@@ -1103,7 +1102,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     spendCorpAgendaPointCost,
     spendEncounterTemporaryTraceCredits,
     spendHackerTrackerCounters,
-    spendKrumzTraceBits,
+    spendRecurringTraceCreditPool,
     spendRunnerAccessTrashCredits,
     spendRunnerInstallCredits,
     spendRunnerTagRemovalCredits,
@@ -2359,20 +2358,23 @@ function applyCorpStartOfTurnEffects(
   );
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
+    const recurringTracePool = corpUtilityImplementationForCard(state, cardId);
     if (
-      (definitionId === KRUMZ_TRACE_ASSET_CARD_ID ||
-        hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
-      cardCounter(state, cardId, "bit") <= 0
+      recurringTracePool?.kind === "recurring_trace_credit_pool" &&
+      recurringTracePool.counterType === "bit" &&
+      recurringTracePool.spendWindow === "trace" &&
+      recurringTracePool.refresh === "start_of_corp_turn_after_use" &&
+      cardCounter(state, cardId, recurringTracePool.counterType) < recurringTracePool.amount
     ) {
-      setCardCounter(state, cardId, "bit", 1);
+      setCardCounter(state, cardId, recurringTracePool.counterType, recurringTracePool.amount);
       effects?.push(
         automaticCounterChangeEffect(
-          `corp.start.krumz.${cardId}`,
+          `corp.start.recurring_trace_credit_pool.${cardId}`,
           "corp",
           definitionId,
-          "bit",
-          1,
-          1,
+          recurringTracePool.counterType,
+          recurringTracePool.amount,
+          recurringTracePool.amount,
         ),
       );
     }

@@ -229,7 +229,7 @@ export type RunFlowHost = {
     calculateRunnerLink: (state: GameState) => number;
     addHackerTrackerTraceCounters: (state: GameState) => number;
     hackerTrackerCounterTotal: (state: GameState) => number;
-    krumzTraceBitTotal: (state: GameState) => number;
+    recurringTraceCreditPoolTotal: (state: GameState) => number;
     rabbitTraceLimitReductionForIceTrace: (state: GameState) => number;
     resolveTraceHardwareWreckerSuccess: (
       state: GameState,
@@ -980,7 +980,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       hasInstalledMicrotechTrodeSet: () =>
         host.callbacks.hasInstalledMicrotechTrodeSet(state),
       hackerTrackerCounterTotal: () => host.trace.hackerTrackerCounterTotal(state),
-      krumzTraceBitTotal: () => host.trace.krumzTraceBitTotal(state),
+      recurringTraceCreditPoolTotal: () => host.trace.recurringTraceCreditPoolTotal(state),
       openEventModificationWindow: (event, action) =>
         host.damage.openEventModificationWindow(state, event, action),
       openReplacementWindow: (event, action) =>

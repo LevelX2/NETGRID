@@ -366,10 +366,6 @@ function testHost(
       fortTraceBitPoolCapacityForCard: (cardId) =>
         options.parisCapacity?.get(cardId) ?? 0,
     },
-    constants: {
-      KRUMZ_TRACE_ASSET_CARD_ID:
-        "onr_proteus_103_krumz" as CardDefinitionId,
-    },
   };
 }
 

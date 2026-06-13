@@ -210,7 +210,7 @@ describe("engine runtime internal domains", () => {
     expect(typeof createAccessFlowRuntimeHosts({}).accessFlowHost).toBe(
       "function",
     );
-    expect(typeof createStateCorpRuntimeResolvers({}).spendKrumzTraceBits).toBe(
+    expect(typeof createStateCorpRuntimeResolvers({}).spendRecurringTraceCreditPool).toBe(
       "function",
     );
     expect(typeof createStateRuntimeResolvers({}).executeEffectCommands).toBe(

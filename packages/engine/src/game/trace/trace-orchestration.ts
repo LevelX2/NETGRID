@@ -97,7 +97,7 @@ export type TraceOrchestrationHost = {
   counters: {
     cardCounter: (cardId: CardInstanceId, counterType: string) => number;
     hackerTrackerCounterTotal: () => number;
-    krumzTraceBitTotal: () => number;
+    recurringTraceCreditPoolTotal: () => number;
   };
   fort: {
     fortTraceBitPoolSource: () =>
@@ -161,7 +161,7 @@ export function startTraceFromOperation(
   const corpBidMax =
     state.corp.credits +
     host.counters.hackerTrackerCounterTotal() +
-    host.counters.krumzTraceBitTotal() +
+    host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
       : 0);

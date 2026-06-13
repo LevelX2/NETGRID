@@ -546,9 +546,9 @@ export function swapCorpHqAndRdTop(...args: any[]): any {
   );
 }
 
-export function spendKrumzTraceBits(...args: any[]): any {
+export function spendRecurringTraceCreditPool(...args: any[]): any {
   return (
-    runtimeDelegates.stateCorpRuntimeResolvers.spendKrumzTraceBits as any
+    runtimeDelegates.stateCorpRuntimeResolvers.spendRecurringTraceCreditPool as any
   )(...args);
 }
 

@@ -575,7 +575,6 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
@@ -927,8 +926,8 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     isV099OrLater,
     isVersionAtLeast,
     isVisibleVirusCounterCardForRunner,
-    krumzTraceBitCardIds,
-    krumzTraceBitTotal,
+    recurringTraceCreditPoolSourceIds,
+    recurringTraceCreditPoolTotal,
     leavePlayCleanupImplementationsForCard,
     legalActionHostComposition,
     mainActionHostComposition,
@@ -1122,7 +1121,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     spendCorpAgendaPointCost,
     spendEncounterTemporaryTraceCredits,
     spendHackerTrackerCounters,
-    spendKrumzTraceBits,
+    spendRecurringTraceCreditPool,
     spendRunnerAccessTrashCredits,
     spendRunnerInstallCredits,
     spendRunnerTagRemovalCredits,
