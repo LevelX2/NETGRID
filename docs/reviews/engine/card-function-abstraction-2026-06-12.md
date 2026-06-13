@@ -368,7 +368,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die Guard-Nachpflege, der `Quest for Cattekin`-Slice und der `Code Viral Cache`-Install-/Purge-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Krumz` und `Startup Immolator`; der separate Code-Viral-Cache-Corp-Trash-Restpfad, `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben eigene Folgeprozesse.
+Die Guard-Nachpflege, der `Quest for Cattekin`-Slice und der `Code Viral Cache`-Install-/Purge-Slice sind umgesetzt. Die nächsten kleineren Refactor-Slices sind `Krumz`, `Startup Immolator` und der Code-Viral-Cache-Corp-Trash-Restpfad; `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
