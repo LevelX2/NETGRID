@@ -10,6 +10,7 @@ import {
 } from "../diagnostics/semantic-redaction";
 import type {
   SemanticShadowLeaguePilotScopeBreakdown,
+  SemanticShadowLeagueReadinessScope,
   SemanticShadowLeagueReport,
 } from "./semantic-shadow-league";
 
@@ -45,6 +46,33 @@ export type SemanticShadowLeagueTopDisagreementReasonDelta = {
   evidence: string[];
 };
 
+export type SemanticShadowLeagueReadinessDelta = {
+  baselineCandidate: number;
+  currentCandidate: number;
+  candidateDelta: number;
+  baselineAllowed: number;
+  currentAllowed: number;
+  allowedDelta: number;
+  baselineWouldOverride: number;
+  currentWouldOverride: number;
+  wouldOverrideDelta: number;
+  baselineRecommended: boolean;
+  currentRecommended: boolean;
+  recommendationChanged: boolean;
+  evidence: string[];
+};
+
+export type SemanticShadowLeagueDoctrineFitDelta = {
+  doctrineGoalsProducedDelta: SemanticShadowLeagueMetricDelta;
+  goalsWithAtLeastOneFitDelta: SemanticShadowLeagueMetricDelta;
+  goalsOnlyBlockedDelta: SemanticShadowLeagueMetricDelta;
+  goalsNoCandidateDelta: SemanticShadowLeagueMetricDelta;
+  addedTopFitFamilies: string[];
+  removedTopFitFamilies: string[];
+  unchangedTopFitFamilies: string[];
+  evidence: string[];
+};
+
 export type SemanticShadowLeagueDeltaReport = {
   schemaVersion: typeof SEMANTIC_SHADOW_LEAGUE_DELTA_SCHEMA_VERSION;
   scope: "semantic_shadow_league_delta_report_only";
@@ -55,7 +83,15 @@ export type SemanticShadowLeagueDeltaReport = {
   scenarioCountDelta: number;
   agreementRateDelta: SemanticShadowLeagueMetricDelta;
   mistakeCountDelta: SemanticShadowLeagueMetricDelta;
+  mistakeDelta: SemanticShadowLeagueMetricDelta;
   pilotEligibilityDelta: SemanticShadowLeagueMetricDelta;
+  pilotReadinessDelta: Record<
+    AiPlayStrengthPilotScope,
+    SemanticShadowLeagueReadinessDelta
+  >;
+  targetChoiceCoverageDelta: SemanticShadowLeagueReadinessDelta;
+  doctrineFitDelta: SemanticShadowLeagueDoctrineFitDelta;
+  remoteContestReadinessDelta: SemanticShadowLeagueReadinessDelta;
   scopeBreakdownDelta: Record<
     AiPlayStrengthPilotScope,
     SemanticShadowLeagueScopeBreakdownDelta
@@ -89,6 +125,11 @@ export function buildSemanticShadowLeagueDeltaReport({
   baselineReference = "baseline",
   currentReference = "current",
 }: BuildSemanticShadowLeagueDeltaReportInput): SemanticShadowLeagueDeltaReport {
+  const mistakeCountDelta = buildLowerIsBetterDelta(
+    "mistakeCount",
+    baseline.metrics.mistakeCount,
+    current.metrics.mistakeCount,
+  );
   const report: SemanticShadowLeagueDeltaReport = {
     schemaVersion: SEMANTIC_SHADOW_LEAGUE_DELTA_SCHEMA_VERSION,
     scope: "semantic_shadow_league_delta_report_only",
@@ -102,15 +143,24 @@ export function buildSemanticShadowLeagueDeltaReport({
       baseline.metrics.agreementRate,
       current.metrics.agreementRate,
     ),
-    mistakeCountDelta: buildLowerIsBetterDelta(
-      "mistakeCount",
-      baseline.metrics.mistakeCount,
-      current.metrics.mistakeCount,
-    ),
+    mistakeCountDelta,
+    mistakeDelta: mistakeCountDelta,
     pilotEligibilityDelta: buildHigherIsBetterDelta(
       "pilotEligibilityRate",
       baseline.metrics.pilotEligibilityRate,
       current.metrics.pilotEligibilityRate,
+    ),
+    pilotReadinessDelta: buildPilotReadinessDelta(baseline, current),
+    targetChoiceCoverageDelta: buildReadinessDelta(
+      "target_choice_shadow_only",
+      baseline,
+      current,
+    ),
+    doctrineFitDelta: buildDoctrineFitDelta(baseline, current),
+    remoteContestReadinessDelta: buildReadinessDelta(
+      "remote_contest_report_only",
+      baseline,
+      current,
     ),
     scopeBreakdownDelta: buildScopeBreakdownDelta(
       baseline.metrics.scopeBreakdown,
@@ -211,6 +261,115 @@ function buildScopeBreakdownDelta(
       buildSingleScopeDelta(scope, baseline[scope], current[scope]),
     ]),
   ) as Record<AiPlayStrengthPilotScope, SemanticShadowLeagueScopeBreakdownDelta>;
+}
+
+function buildPilotReadinessDelta(
+  baseline: SemanticShadowLeagueReport,
+  current: SemanticShadowLeagueReport,
+): Record<AiPlayStrengthPilotScope, SemanticShadowLeagueReadinessDelta> {
+  return Object.fromEntries(
+    PILOT_SCOPES.map((scope) => [
+      scope,
+      buildReadinessDelta(scope, baseline, current),
+    ]),
+  ) as Record<AiPlayStrengthPilotScope, SemanticShadowLeagueReadinessDelta>;
+}
+
+function buildReadinessDelta(
+  scope: SemanticShadowLeagueReadinessScope,
+  baseline: SemanticShadowLeagueReport,
+  current: SemanticShadowLeagueReport,
+): SemanticShadowLeagueReadinessDelta {
+  const baselineReadiness =
+    baseline.metrics.pilotCutoverReadiness.scopes[scope];
+  const currentReadiness = current.metrics.pilotCutoverReadiness.scopes[scope];
+  const candidateDelta = currentReadiness.candidate - baselineReadiness.candidate;
+  const allowedDelta = currentReadiness.allowed - baselineReadiness.allowed;
+  const wouldOverrideDelta =
+    currentReadiness.wouldOverride - baselineReadiness.wouldOverride;
+  const recommendationChanged =
+    baselineReadiness.recommendedForDefaultOffPilot !==
+    currentReadiness.recommendedForDefaultOffPilot;
+
+  return {
+    baselineCandidate: baselineReadiness.candidate,
+    currentCandidate: currentReadiness.candidate,
+    candidateDelta,
+    baselineAllowed: baselineReadiness.allowed,
+    currentAllowed: currentReadiness.allowed,
+    allowedDelta,
+    baselineWouldOverride: baselineReadiness.wouldOverride,
+    currentWouldOverride: currentReadiness.wouldOverride,
+    wouldOverrideDelta,
+    baselineRecommended: baselineReadiness.recommendedForDefaultOffPilot,
+    currentRecommended: currentReadiness.recommendedForDefaultOffPilot,
+    recommendationChanged,
+    evidence: [
+      `readiness_scope:${safe(scope)}`,
+      `candidate_delta:${candidateDelta}`,
+      `allowed_delta:${allowedDelta}`,
+      `would_override_delta:${wouldOverrideDelta}`,
+      `recommendation_changed:${recommendationChanged}`,
+    ],
+  };
+}
+
+function buildDoctrineFitDelta(
+  baseline: SemanticShadowLeagueReport,
+  current: SemanticShadowLeagueReport,
+): SemanticShadowLeagueDoctrineFitDelta {
+  const baselineFamilies = Object.keys(
+    baseline.metrics.doctrineGoalActionFit.topFitByFamily,
+  )
+    .map(safe)
+    .sort();
+  const currentFamilies = Object.keys(
+    current.metrics.doctrineGoalActionFit.topFitByFamily,
+  )
+    .map(safe)
+    .sort();
+  const baselineFamilySet = new Set(baselineFamilies);
+  const currentFamilySet = new Set(currentFamilies);
+  const addedTopFitFamilies = currentFamilies.filter(
+    (family) => !baselineFamilySet.has(family),
+  );
+  const removedTopFitFamilies = baselineFamilies.filter(
+    (family) => !currentFamilySet.has(family),
+  );
+  const unchangedTopFitFamilies = currentFamilies.filter((family) =>
+    baselineFamilySet.has(family),
+  );
+
+  return {
+    doctrineGoalsProducedDelta: buildHigherIsBetterDelta(
+      "doctrineGoalsProduced",
+      baseline.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
+      current.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
+    ),
+    goalsWithAtLeastOneFitDelta: buildHigherIsBetterDelta(
+      "goalsWithAtLeastOneFit",
+      baseline.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
+      current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
+    ),
+    goalsOnlyBlockedDelta: buildLowerIsBetterDelta(
+      "goalsOnlyBlocked",
+      baseline.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
+      current.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
+    ),
+    goalsNoCandidateDelta: buildLowerIsBetterDelta(
+      "goalsNoCandidate",
+      baseline.metrics.doctrineGoalActionFit.goalsNoCandidate,
+      current.metrics.doctrineGoalActionFit.goalsNoCandidate,
+    ),
+    addedTopFitFamilies,
+    removedTopFitFamilies,
+    unchangedTopFitFamilies,
+    evidence: [
+      `doctrine_fit_added_family_count:${addedTopFitFamilies.length}`,
+      `doctrine_fit_removed_family_count:${removedTopFitFamilies.length}`,
+      `doctrine_fit_unchanged_family_count:${unchangedTopFitFamilies.length}`,
+    ],
+  };
 }
 
 function buildSingleScopeDelta(
