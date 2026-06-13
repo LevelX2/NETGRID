@@ -61,6 +61,16 @@ describe("SelfplayDecisionSnapshotMining", () => {
     expect(report.candidateCount).toBe(2);
     expect(report.blockedCandidateCount).toBe(0);
     expect(report.clusterCount).toBe(2);
+    expect(report.promotionQueue).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          category: "promote_to_real_engine_corpus",
+        }),
+        expect.objectContaining({
+          category: "defer_doctrine_gap",
+        }),
+      ]),
+    );
     expect(report.clusters).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -147,6 +157,11 @@ describe("SelfplayDecisionSnapshotMining", () => {
       mistakeClasses: ["economy_starvation"],
       executableDecisionSnapshotAvailable: false,
     });
+    expect(report.promotionQueue).toEqual([
+      expect.objectContaining({
+        category: "defer_missing_engine_state",
+      }),
+    ]);
     expect(report.candidates[0]?.candidateSnapshot.legalActionCandidates).toEqual(
       [],
     );
