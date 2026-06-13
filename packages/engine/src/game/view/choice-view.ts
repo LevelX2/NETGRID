@@ -10,6 +10,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { definitionFor, visibleOwnCard } from "./card-view";
+import { sanitizeChoiceViewForSurface } from "./surface-policy";
 
 export function visibleChoice(
   state: GameState,
@@ -20,7 +21,7 @@ export function visibleChoice(
   const cardSearchPresentation =
     choice.cardSearchPresentation ??
     cardSearchPresentationForChoice(choice, stackSearchResolution);
-  return {
+  return sanitizeChoiceViewForSurface({
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
@@ -44,7 +45,7 @@ export function visibleChoice(
     visibility: choice.visibility,
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
     ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
-  };
+  }, "actor_private");
 }
 
 function visibleChoiceOptionValue(
