@@ -8,6 +8,7 @@ import {
   CORP_SCORE_WINDOW_PILOT_MODE,
   PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
+  buildLocalDefaultPilotPolicy,
   buildPilotScopeDecisionMatrix,
   parsePilotScopes,
   pilotScopeAllowsAction,
@@ -63,6 +64,29 @@ describe("pilot-scope-registry", () => {
       BASIC_SETUP_PILOT_MODE,
       CORP_SCORE_WINDOW_PILOT_MODE,
     ]);
+  });
+
+  it("keeps the prepared local default policy default-off", () => {
+    const policy = buildLocalDefaultPilotPolicy();
+
+    expect(policy).toMatchObject({
+      version: "ai-play-strength-local-default-pilot-policy-v1",
+      scope: "local_default_pilot_policy_report_only",
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      noRuntimeEffect: true,
+      defaultEnabledScopes: [],
+    });
+    expect(policy.scopes.map((scope) => scope.scope)).toEqual(
+      ALL_PLAY_STRENGTH_PILOT_SCOPES,
+    );
+    expect(policy.scopes.every((scope) => scope.enabledByDefault === false))
+      .toBe(true);
+    expect(policy.scopes.every((scope) => scope.envGateRequired === true))
+      .toBe(true);
+    expect(
+      policy.scopes.find((scope) => scope.scope === CORP_SCORE_WINDOW_PILOT_MODE),
+    ).toEqual(expect.objectContaining({ status: "keep_env_gated" }));
   });
 
   it("uses only NETGRID_AI_PLAY_STRENGTH_PILOT as the runtime env contract", () => {

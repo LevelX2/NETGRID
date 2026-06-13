@@ -18,6 +18,11 @@ import {
   type RankedAction,
 } from "./pilot-scope-common";
 import { runnerSafeAccessDecision } from "./runner-safe-access-pilot";
+export {
+  buildLocalDefaultPilotPolicy,
+  type LocalDefaultPilotPolicy,
+  type LocalDefaultPilotPolicyScope,
+} from "./local-default-pilot-policy";
 
 export {
   AI_PLAY_STRENGTH_PILOT_ENV,
