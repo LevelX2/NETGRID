@@ -20,9 +20,23 @@ export type RemoteContestCandidateEvaluation = {
   scoreGapThreshold: number;
   candidateStatus: RemoteContestCandidateStatus;
   blockedReason?: string;
+  readiness: RemoteContestReadinessV3;
   productiveUseAllowed: false;
   runtimeConsumerStatus: "none";
   evidence: string[];
+};
+
+export type RemoteContestReadinessV3 = {
+  version: "remote-contest-readiness-v3";
+  activationStatus: "report_only";
+  localDefaultCandidate: false;
+  structuredTarget: boolean;
+  scoreThreat: boolean;
+  runNow: boolean;
+  reachablePath: boolean;
+  riskClear: boolean;
+  scoreGapPasses: boolean;
+  blockers: string[];
 };
 
 export function evaluateRemoteContestCandidate(params: {
@@ -51,6 +65,13 @@ export function evaluateRemoteContestCandidate(params: {
     scoreGap,
     threshold,
   });
+  const readiness = remoteContestReadinessV3({
+    runTarget,
+    alignment,
+    scoreGap,
+    threshold,
+    blockedReason,
+  });
 
   return {
     actionId: params.top.actionId,
@@ -65,10 +86,13 @@ export function evaluateRemoteContestCandidate(params: {
     scoreGapThreshold: threshold,
     candidateStatus: blockedReason ? "blocked" : "eligible",
     ...(blockedReason ? { blockedReason } : {}),
+    readiness,
     productiveUseAllowed: false,
     runtimeConsumerStatus: "none",
     evidence: [
       "remote_contest_candidate:report_only",
+      "remote_contest_readiness_v3:report_only",
+      "remote_contest_local_default_candidate:false",
       "productive_use_allowed:false",
       "runtime_consumer:none",
       `score_gap:${scoreGap}`,
@@ -88,6 +112,7 @@ export function evaluateRemoteContestCandidate(params: {
       blockedReason
         ? `remote_contest_candidate_blocked:${blockedReason}`
         : "remote_contest_candidate_status:eligible",
+      ...readiness.blockers.map((blocker) => `readiness_blocker:${blocker}`),
     ],
   };
 }
@@ -131,6 +156,45 @@ function remoteContestBlockedReason(input: {
   }
   if (input.scoreGap < input.threshold) return "remote_contest_score_gap_below_threshold";
   return undefined;
+}
+
+function remoteContestReadinessV3(input: {
+  runTarget: RunnerRunTarget | undefined;
+  alignment: ReturnType<typeof alignRunTargetAction> | undefined;
+  scoreGap: number;
+  threshold: number;
+  blockedReason: string | undefined;
+}): RemoteContestReadinessV3 {
+  const structuredTarget =
+    input.alignment?.aligned === true && input.alignment.source !== "evidence";
+  const scoreThreat = input.runTarget?.scoreThreat === true;
+  const runNow = input.runTarget?.recommendation === "run_now";
+  const reachablePath = input.runTarget?.pathPassability === "reachable";
+  const riskClear =
+    input.runTarget !== undefined &&
+    !input.runTarget.riskyUniversalCoverage &&
+    input.runTarget.creditsAfterRun >= 0;
+  const scoreGapPasses = input.scoreGap >= input.threshold;
+  return {
+    version: "remote-contest-readiness-v3",
+    activationStatus: "report_only",
+    localDefaultCandidate: false,
+    structuredTarget,
+    scoreThreat,
+    runNow,
+    reachablePath,
+    riskClear,
+    scoreGapPasses,
+    blockers: [
+      ...(structuredTarget ? [] : ["structured_target_missing"]),
+      ...(scoreThreat ? [] : ["score_threat_missing"]),
+      ...(runNow ? [] : ["run_now_recommendation_missing"]),
+      ...(reachablePath ? [] : ["reachable_path_missing"]),
+      ...(riskClear ? [] : ["risk_clear_missing"]),
+      ...(scoreGapPasses ? [] : ["score_gap_below_threshold"]),
+      ...(input.blockedReason ? [input.blockedReason] : []),
+    ],
+  };
 }
 
 function rankedActionHasUtilityFamily(
