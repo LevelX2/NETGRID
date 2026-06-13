@@ -182,6 +182,11 @@ import {
   type SimulationRng,
 } from "./simulation/simulation-rng";
 import {
+  averageNumber,
+  diffDoctrineMetrics,
+  sumDoctrineMetrics,
+} from "./simulation/simulation-metric-aggregation";
+import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
@@ -30328,11 +30333,6 @@ function summarizeAdvancedRemoteThreatMetrics(
   };
 }
 
-function averageNumber(values: number[]): number {
-  if (values.length === 0) return 0;
-  return round(values.reduce((sum, value) => sum + value, 0) / values.length);
-}
-
 function medianNumber(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = values.slice().sort((left, right) => left - right);
@@ -36151,58 +36151,6 @@ function isRedactionSafeCaseAnalysis(
   return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
     serialized.includes(needle),
   );
-}
-
-function sumDoctrineMetrics(
-  metrics: AiDoctrineQualityMetrics[],
-): AiDoctrineQualityMetrics {
-  return metrics.reduce(
-    (sum, entry) => ({
-      nakedAgendaInstalls: sum.nakedAgendaInstalls + entry.nakedAgendaInstalls,
-      agendaFloodExposure: sum.agendaFloodExposure + entry.agendaFloodExposure,
-      scoreWindowMissed: sum.scoreWindowMissed + entry.scoreWindowMissed,
-      remoteOverbuild: sum.remoteOverbuild + entry.remoteOverbuild,
-      economyStall: sum.economyStall + entry.economyStall,
-      repeatedLowValueCentralRun:
-        sum.repeatedLowValueCentralRun + entry.repeatedLowValueCentralRun,
-      rigStall: sum.rigStall + entry.rigStall,
-      assetTrashNeglect: sum.assetTrashNeglect + entry.assetTrashNeglect,
-    }),
-    emptyDoctrineMetrics(),
-  );
-}
-
-function diffDoctrineMetrics(
-  candidate: AiDoctrineQualityMetrics,
-  baseline: AiDoctrineQualityMetrics,
-): AiDoctrineQualityDelta {
-  return {
-    nakedAgendaInstalls:
-      candidate.nakedAgendaInstalls - baseline.nakedAgendaInstalls,
-    agendaFloodExposure:
-      candidate.agendaFloodExposure - baseline.agendaFloodExposure,
-    scoreWindowMissed: candidate.scoreWindowMissed - baseline.scoreWindowMissed,
-    remoteOverbuild: candidate.remoteOverbuild - baseline.remoteOverbuild,
-    economyStall: candidate.economyStall - baseline.economyStall,
-    repeatedLowValueCentralRun:
-      candidate.repeatedLowValueCentralRun -
-      baseline.repeatedLowValueCentralRun,
-    rigStall: candidate.rigStall - baseline.rigStall,
-    assetTrashNeglect: candidate.assetTrashNeglect - baseline.assetTrashNeglect,
-  };
-}
-
-function emptyDoctrineMetrics(): AiDoctrineQualityMetrics {
-  return {
-    nakedAgendaInstalls: 0,
-    agendaFloodExposure: 0,
-    scoreWindowMissed: 0,
-    remoteOverbuild: 0,
-    economyStall: 0,
-    repeatedLowValueCentralRun: 0,
-    rigStall: 0,
-    assetTrashNeglect: 0,
-  };
 }
 
 function countTag(tags: string[], tag: string): number {

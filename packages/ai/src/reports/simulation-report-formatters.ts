@@ -1,18 +1,7 @@
 import type {
   AiDoctrineQualityCaseAnalysis,
-  AiDoctrineQualityMetricName,
 } from "../index";
-
-const DOCTRINE_QUALITY_METRICS: AiDoctrineQualityMetricName[] = [
-  "nakedAgendaInstalls",
-  "agendaFloodExposure",
-  "scoreWindowMissed",
-  "remoteOverbuild",
-  "economyStall",
-  "repeatedLowValueCentralRun",
-  "rigStall",
-  "assetTrashNeglect",
-];
+import { DOCTRINE_QUALITY_METRIC_NAMES } from "../simulation/simulation-metric-aggregation";
 
 // Pure report formatting only. Simulation, randomness, and action selection stay
 // in their dedicated runtime and harness modules.
@@ -31,7 +20,7 @@ export function formatDoctrineQualityCaseAnalysisReport(
     "",
     "| Metric | Count | Examples |",
     "| --- | ---: | ---: |",
-    ...DOCTRINE_QUALITY_METRICS.map(
+    ...DOCTRINE_QUALITY_METRIC_NAMES.map(
       (metric) =>
         `| ${metric} | ${analysis.totals[metric]} | ${analysis.examples[metric].length} |`,
     ),
@@ -39,7 +28,7 @@ export function formatDoctrineQualityCaseAnalysisReport(
     "## Examples",
     "",
   ];
-  for (const metric of DOCTRINE_QUALITY_METRICS) {
+  for (const metric of DOCTRINE_QUALITY_METRIC_NAMES) {
     lines.push(`### ${metric}`, "");
     const examples = analysis.examples[metric];
     if (examples.length === 0) {
