@@ -546,13 +546,15 @@ export function actionButtonLabel(action: LegalAction): string {
 export function contextualCardActionLabel(action: LegalAction): string {
   switch (action.type) {
     case "gain_credit":
-      return scoredAgendaAbilityContextLabel(action) ?? installedCardAbilityContextLabel(action) ?? actionButtonLabel(action);
+      return scoredAgendaAbilityContextLabel(action) ?? installedCardAbilityContextLabel(action) ?? cardContextFallbackLabel(action);
     case "activated_card_ability":
-      return stripActionSourcePrefix(action.label || actionButtonLabel(action));
+      return cardContextFallbackLabel(action);
     case "install_card":
       return installContextLabel(action);
     case "play_event":
       return playEventContextLabel(action);
+    case "start_run":
+      return cardContextFallbackLabel(action);
     case "play_operation":
       return "Spielen";
     case "advance_card":
@@ -562,9 +564,9 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "rez_ice":
       return "Rezzen";
     case "pump_breaker":
-      return pumpBreakerActionLabel(action);
+      return stripTrailingActionSourceParenthetical(pumpBreakerActionLabel(action));
     case "break_subroutine":
-      return breakSubroutineActionLabel(action);
+      return stripTrailingActionSourceParenthetical(breakSubroutineActionLabel(action));
     case "trash_accessed_card":
     case "trash_resource":
       return "Trashen";
@@ -573,7 +575,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "trigger_ability":
       return triggerAbilityActionLabel(action, true);
     default:
-      return actionButtonLabel(action);
+      return cardContextFallbackLabel(action);
   }
 }
 
@@ -595,7 +597,7 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (isApproachIceExposeAction(action)) {
     return approachIceExposeActionLabel(action);
   }
-  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+  return resourceAbilityContextLabel(action) ?? (compact ? cardContextFallbackLabel(action) : normalizeVisibleTerms(action.label));
 }
 
 function approachIceExposeActionLabel(action: LegalAction): string {
@@ -661,6 +663,14 @@ function scoredAgendaAbilityContextLabel(action: LegalAction): string | null {
 function stripActionSourcePrefix(label: string): string {
   const stripped = /^[^:]+:\s*(.+)$/.exec(label.trim())?.[1] ?? label;
   return normalizeVisibleTerms(stripped);
+}
+
+function cardContextFallbackLabel(action: LegalAction): string {
+  return stripActionSourcePrefix(action.label || actionButtonLabel(action));
+}
+
+function stripTrailingActionSourceParenthetical(label: string): string {
+  return normalizeVisibleTerms(label.replace(/\s+\([^)]*\)\s*$/u, "").trim());
 }
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {

@@ -1687,6 +1687,44 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }))).toBe("Scoren");
   });
 
+  it("drops the card-name prefix for card-context run actions", () => {
+    const wilsonRun = legalAction(
+      "runner",
+      "start_run",
+      "wilson_1",
+      "Wilson, Weeflerunner Apprentice: Run auf R&D",
+      {
+        cardId: "wilson_1",
+        serverId: "rd",
+        runOnlyAction: true,
+      },
+    );
+
+    expect(actionButtonLabel(wilsonRun)).toBe("Wilson, Weeflerunner Apprentice: Run auf R&D");
+    expect(actionMatchesContext(wilsonRun, { kind: "card", id: "wilson_1", label: "Wilson, Weeflerunner Apprentice" })).toBe(true);
+    expect(contextualCardActionLabel(wilsonRun)).toBe("Run auf R&D");
+  });
+
+  it("drops generic card-name prefixes from card-context action labels", () => {
+    const genericAbility = legalAction(
+      "runner",
+      "trigger_ability",
+      "resource_1",
+      "Helpful Resource: Bezahlte Fähigkeit ausführen",
+      { cardId: "resource_1" },
+    );
+    const genericCredit = legalAction(
+      "runner",
+      "gain_credit",
+      "resource_1",
+      "Helpful Resource: 2 Credits nehmen",
+      { cardId: "resource_1" },
+    );
+
+    expect(contextualCardActionLabel(genericAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(contextualCardActionLabel(genericCredit)).toBe("2 Credits nehmen");
+  });
+
   it("names Corp install destinations in card context actions", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
@@ -1767,11 +1805,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([pump, breakAction]);
     expect(actionMatchesContext(pump, { kind: "card", id: "breaker_1", label: "Simple Decoder" })).toBe(true);
     expect(actionButtonLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
-    expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(contextualCardActionLabel(pump)).toBe("Stärke +1");
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen");
     expect(actionButtonLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen");
     expect(actionButtonLabel(paidPump)).toBe("Stärke +1 (Simple Decoder)");
     expect(actionButtonLabel(multiCostBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(actionCostChips(multiCostBreakAction)).toEqual([
