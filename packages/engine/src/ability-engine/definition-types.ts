@@ -159,10 +159,10 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "siren_start_run_redirect";
-      cost: { kind: "credit"; amount: number };
-      timing: "start_of_run";
-      target: "source_fort";
+      kind: "start_run_redirect_to_source_fort";
+      cost: { credits: number };
+      timing: "run_start";
+      redirectTarget: "source_fort";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

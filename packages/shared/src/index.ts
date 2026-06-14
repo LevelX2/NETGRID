@@ -1203,11 +1203,14 @@ export type RunState = {
     pendingServerIds: Exclude<ServerId, "new_remote">[];
     successfulServerIds: Exclude<ServerId, "new_remote">[];
   };
-  sirenStartRunRedirect?: {
+  runStartInterventions?: Array<{
+    kind: "start_run_redirect_to_source_fort";
     originalServerId: Exclude<ServerId, "new_remote">;
-    sourceCardInstanceIds: CardInstanceId[];
-    sourceDefinitionIds: CardDefinitionId[];
-  };
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    targetServerId: Exclude<ServerId, "new_remote">;
+    costCredits: number;
+  }>;
 };
 
 export type AccessQueueEntry = {

@@ -418,9 +418,12 @@ const abstractionPlan = [
       "Trace-only Recurring-Credit-Pool und Start-of-Corp-Turn-Refresh sind generisch über CardImplementation umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Siren",
-    currentNames: ["siren_start_run_redirect"],
+    currentNames: [
+      "start_run_redirect_to_source_fort",
+      "runStartInterventions",
+    ],
     targetKind: "start_run_redirect_to_source_fort",
     targetState: ["runStartInterventions[]"],
     params: {
@@ -428,7 +431,7 @@ const abstractionPlan = [
       triggerWindow: "run_start",
     },
     notes:
-      "Run-Redirect braucht side-sichere Serverbindung und darf keine Hidden-Info über Zielauswahl leaken.",
+      "Run-Redirect ist generisch über CardImplementation und runStartInterventions umgesetzt; Ziel-Fort, Kosten und Quelle werden beim Choice-Resolve erneut geprüft.",
   },
   {
     priority: "deferred_refactor_required",
@@ -672,7 +675,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`- und `Startup Immolator`-Slices sind umgesetzt. `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`- und `Siren`-Slices sind umgesetzt. `Pirate Broadcast` und `Bizarre Encryption Scheme` bleiben wegen Run-/Access-State eigene größere Prozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");
@@ -710,7 +713,7 @@ const report = {
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
-    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz und Startup Immolator sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz, Startup Immolator und Siren sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",

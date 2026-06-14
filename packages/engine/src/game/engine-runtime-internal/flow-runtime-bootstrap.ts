@@ -760,7 +760,9 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
     serverId: Exclude<ServerId, "new_remote">,
     kind: Extract<
       CardCorpUtilityImplementation["kind"],
-      "fort_start_reorder_ice" | "fort_start_runner_spend_cap" | "siren_start_run_redirect"
+      | "fort_start_reorder_ice"
+      | "fort_start_runner_spend_cap"
+      | "start_run_redirect_to_source_fort"
     >,
     options: { rezzedOnly?: boolean; unrezzedOnly?: boolean } = {},
   ): CardInstanceId[] {
@@ -784,12 +786,57 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       .slice()
       .sort((left, right) => left.id.localeCompare(right.id))
       .flatMap((server) =>
-        server.id === originalServerId
+        server.id === originalServerId ||
+        !canRunnerBeRedirectedToFort(state, server.id)
           ? []
-          : utilityInstalledOnFort(state, server.id, "siren_start_run_redirect", {
-              rezzedOnly: true,
-            }),
+          : utilityInstalledOnFort(
+              state,
+              server.id,
+              "start_run_redirect_to_source_fort",
+              {
+                rezzedOnly: true,
+              },
+            ),
       );
+  }
+
+  function canRunnerBeRedirectedToFort(
+    state: GameState,
+    serverId: Exclude<ServerId, "new_remote">,
+  ): boolean {
+    if (
+      isActivityGatedFortRunBlocked(
+        fortRunSideFamiliesHostForState(state),
+        serverId,
+      )
+    )
+      return false;
+    const upgradeRunStartTax = runStartTaxForServerUpgrades(state, serverId);
+    const newsgroupRunTax = newsgroupTauntingRunStartTax(state);
+    const runStartTaxCredits =
+      upgradeRunStartTax.amount + newsgroupRunTax.amount;
+    return (
+      runStartTaxCredits === 0 ||
+      availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+        runStartTaxCredits
+    );
+  }
+
+  function startRunRedirectCostCredits(
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ): number {
+    const utility = corpUtilityImplementationForCard(state, sourceCardId);
+    if (
+      utility?.kind !== "start_run_redirect_to_source_fort" ||
+      utility.timing !== "run_start" ||
+      utility.redirectTarget !== "source_fort"
+    )
+      throw new Error("Die Run-Redirect-Quelle ist nicht legal.");
+    const credits = Math.max(0, Math.floor(utility.cost.credits));
+    if (!Number.isInteger(credits))
+      throw new Error("Die Run-Redirect-Kosten sind ungueltig.");
+    return credits;
   }
 
   function openStartOfRunFortUtilityWindow(
@@ -804,8 +851,12 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
     );
     if (!run || state.pendingChoice) return false;
     const originalServerId = run.attackedServerId;
-    const redirectSourceIds =
-      availableCredits >= 1 ? startOfRunRedirectSourceIds(state, originalServerId) : [];
+    const redirectSourceIds = startOfRunRedirectSourceIds(
+      state,
+      originalServerId,
+    ).filter(
+      (cardId) => startRunRedirectCostCredits(state, cardId) <= availableCredits,
+    );
     const reorderSourceIds = utilityInstalledOnFort(
       state,
       originalServerId,
@@ -840,13 +891,14 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       openRunnerRunSpendCapChoice(state, rezzedSpendCapSourceIds[0]!, legalAction);
       return true;
     }
-    run.sirenStartRunRedirect = {
+    run.runStartInterventions = redirectSourceIds.map((cardId) => ({
+      kind: "start_run_redirect_to_source_fort",
       originalServerId,
-      sourceCardInstanceIds: redirectSourceIds,
-      sourceDefinitionIds: redirectSourceIds
-        .map((cardId) => definitionFor(state, cardId).id)
-        .sort(),
-    };
+      sourceCardInstanceId: cardId,
+      sourceDefinitionId: definitionFor(state, cardId).id,
+      targetServerId: mustInstance(state.cardInstances, cardId).zone.serverId,
+      costCredits: startRunRedirectCostCredits(state, cardId),
+    }));
     state.pendingChoice = {
       choiceId: `corp_start_of_run_redirect_${state.stateVersion + 1}`,
       side: "corp",
@@ -896,7 +948,10 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
         startOfRunRedirectWindowOpened: true,
         originalServerId,
         redirectSourceDefinitionIds:
-          run.sirenStartRunRedirect.sourceDefinitionIds.join(","),
+          run.runStartInterventions
+            .map((intervention) => intervention.sourceDefinitionId)
+            .sort()
+            .join(","),
       };
     }
     return true;

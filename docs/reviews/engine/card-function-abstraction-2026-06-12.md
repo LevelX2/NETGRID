@@ -14,11 +14,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 29 |
+| functional_kind_uses_card_name | 27 |
 | false_positive | 33 |
 | test_only_card_name | 77 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 174 |
+| runtime_state_field_uses_card_name | 166 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 
 ## Problemstellen
@@ -27,7 +27,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:104` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:108` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:114` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:162` Siren / `siren` -> `start_run_redirect_to_source_fort`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:204` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:208` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:212` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
@@ -46,7 +45,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/fortress-respecification.ts:8` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts:8` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/proteus/corp/assets/siren.ts:15` Siren / `siren` -> `start_run_redirect_to_source_fort`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:160` Pirate Broadcast / `pirate_broadcast` -> `multi_server_success_sequence`
@@ -84,8 +82,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/activated-card-runtime-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/apply-action-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts:622` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:663` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:745` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:658` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:740` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-delegates.ts:231` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-delegates.ts:233` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -108,18 +106,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:663` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:745` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:763` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:789` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:843` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:899` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:1205` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:815` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:1260` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/lookup-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/pending-choice-runtime-hosts.ts:254` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/pending-choice-runtime-hosts.ts:369` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/pending-choice-runtime-hosts.ts:478` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/pending-choice-runtime-hosts.ts:495` Siren / `siren` -> `start_run_redirect_to_source_fort`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts:661` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts:743` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
@@ -250,10 +241,9 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1155` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1199` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1206` Siren / `siren` -> `start_run_redirect_to_source_fort`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1364` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1410` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1469` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1367` Bizarre Encryption Scheme / `bizarreEncryption` -> `runDurationEffects.access_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1413` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1472` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
@@ -269,13 +259,13 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | slice_done | Code Viral Cache | `purge_replacement_with_runner_virus_counter_cleanup` | `replacementEffects[]` |
 | slice_done | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
 | slice_done | Krumz | `recurring_trace_credit_pool` | `recurringCreditPools[]` |
-| deferred_refactor_required | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
+| slice_done | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
 | deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
 
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`- und `Startup Immolator`-Slices sind umgesetzt. `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.
+Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`- und `Siren`-Slices sind umgesetzt. `Pirate Broadcast` und `Bizarre Encryption Scheme` bleiben wegen Run-/Access-State eigene größere Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
