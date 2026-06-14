@@ -7849,11 +7849,27 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
+    expect(state.run?.runDurationEffects).toEqual([
+      expect.objectContaining({
+        kind: "delayed_agenda_access_replacement",
+        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+        serverId: "remote_1",
+        replacementWindow: "agenda_access",
+        delayUntil: "runner_next_turn_start",
+      }),
+    ]);
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).not.toContain(agendaId);
-    expect(state.bizarreEncryptionDelayedAgendas).toEqual([
-      { agendaId, serverId: "remote_1" },
+    expect(state.delayedAccessEffects).toEqual([
+      {
+        kind: "delayed_agenda_access_replacement",
+        agendaId,
+        serverId: "remote_1",
+        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+        sourceCardInstanceId: expect.any(String),
+        resolveAt: "runner_start_turn",
+      },
     ]);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -7870,7 +7886,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       );
     }
     expect(state.runner.scoreArea).toContain(agendaId);
-    expect(state.bizarreEncryptionDelayedAgendas).toBeUndefined();
+    expect(state.delayedAccessEffects).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

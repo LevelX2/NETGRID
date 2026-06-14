@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const bizarreEncryptionSchemeImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
   hiddenReplacementLongtail: {
-    kind: "bizarre_encryption_scheme_access_replacement",
+    kind: "delayed_agenda_access_replacement",
     visibility: "hidden_info_barrier",
   },
 };

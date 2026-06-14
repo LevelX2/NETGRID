@@ -2204,7 +2204,7 @@ function startRunnerTurn(
     clearAbilityUsageSourceIds();
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
-  resolveBizarreEncryptionDelayedAgendas(state, effects);
+  resolveDelayedAccessEffects(state, effects);
   refreshRecurringCredits(state, "runner", effects);
   untapRunnerCardsAtTurnStart(state);
   applyRunnerStartTurnActionEconomyEffects(state, effects);
@@ -2265,15 +2265,21 @@ function untapRunnerCardsAtTurnStart(state: GameState): void {
   }
 }
 
-function resolveBizarreEncryptionDelayedAgendas(
+function resolveDelayedAccessEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
-  const delayed = state.bizarreEncryptionDelayedAgendas ?? [];
+  const delayed = state.delayedAccessEffects ?? [];
   if (delayed.length === 0) return;
-  const remaining: NonNullable<GameState["bizarreEncryptionDelayedAgendas"]> =
-    [];
+  const remaining: NonNullable<GameState["delayedAccessEffects"]> = [];
   for (const entry of delayed) {
+    if (
+      entry.kind !== "delayed_agenda_access_replacement" ||
+      entry.resolveAt !== "runner_start_turn"
+    ) {
+      remaining.push(entry);
+      continue;
+    }
     const instance = state.cardInstances[entry.agendaId];
     const server = state.corp.servers.find(
       (candidate) => candidate.id === entry.serverId,
@@ -2302,15 +2308,15 @@ function resolveBizarreEncryptionDelayedAgendas(
     };
     effects?.push(
       automaticStealAgendaEffect(
-        `runner.start.bizarre_encryption.${entry.agendaId}`,
+        `runner.start.delayed_agenda_access.${entry.agendaId}`,
         definition.id,
-        BIZARRE_ENCRYPTION_SCHEME_ID,
+        entry.sourceDefinitionId,
         agendaPointsForScoredCard(state, entry.agendaId),
       ),
     );
   }
-  if (remaining.length > 0) state.bizarreEncryptionDelayedAgendas = remaining;
-  else delete state.bizarreEncryptionDelayedAgendas;
+  if (remaining.length > 0) state.delayedAccessEffects = remaining;
+  else delete state.delayedAccessEffects;
 }
 
 function applyCorpStartOfTurnEffects(
@@ -3176,7 +3182,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     returnCorpTemporaryInstallRezCredits,
     applyInstalledIceCounterLifecycle,
     untapRunnerCardsAtTurnStart,
-    resolveBizarreEncryptionDelayedAgendas,
+    resolveDelayedAccessEffects,
     applyCorpStartOfTurnEffects,
     applyPurgeableRunnerVirusCorpStartEffects,
     openCorpStartTurnRestrictedActionOffers,

@@ -100,6 +100,7 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       cardInstanceFor: () => fake.cardInstances[CARD_ID] as CardInstance,
       cardHasSubtype: () => false,
       accessEffectsForDefinition: () => [],
+      hiddenReplacementLongtailKindForDefinition: () => undefined,
     },
     servers: {
       mustServer: (_state, serverId) => {
@@ -203,7 +204,6 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       experimentalAi: "experimental",
       vacantSoulkiller: "soulkiller",
       virusTestSite: "virus",
-      bizarreEncryptionScheme: "bizarre",
       chimera: "chimera",
     },
   } as AccessFlowCompositionHost;

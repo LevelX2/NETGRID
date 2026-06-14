@@ -217,7 +217,7 @@ export type CardHiddenReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "bizarre_encryption_scheme_access_replacement";
+      kind: "delayed_agenda_access_replacement";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {

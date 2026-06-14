@@ -1152,7 +1152,14 @@ export type RunState = {
   >;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   runStrengthBoostUsedSourceIds?: CardInstanceId[];
-  bizarreEncryptionSchemeActive?: boolean;
+  runDurationEffects?: Array<{
+    kind: "delayed_agenda_access_replacement";
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    serverId: Exclude<ServerId, "new_remote">;
+    replacementWindow: "agenda_access";
+    delayUntil: "runner_next_turn_start";
+  }>;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   accessStealCostModifierSnapshotsByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, AccessStealCostModifierSnapshot[]>
@@ -1364,9 +1371,13 @@ export type GameState = {
     sourceCardId: CardInstanceId;
     hiddenAmount: number;
   };
-  bizarreEncryptionDelayedAgendas?: Array<{
+  delayedAccessEffects?: Array<{
+    kind: "delayed_agenda_access_replacement";
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    resolveAt: "runner_start_turn";
   }>;
   acmeSavingsAndLoanObligations?: number;
   corpTemporaryInstallRezCredits?: {

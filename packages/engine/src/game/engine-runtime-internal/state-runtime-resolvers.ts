@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -979,7 +979,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     resolveAcmeSavingsAndLoanEndOfCorpTurn,
     resolveAgendaCounterOperation,
     resolveAnonymousTipDerezBlackIceChoice,
-    resolveBizarreEncryptionDelayedAgendas,
+    resolveDelayedAccessEffects,
     resolveBlinkBreakSubroutineAction,
     resolveCardImplementationAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
