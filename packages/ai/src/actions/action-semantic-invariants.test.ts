@@ -481,6 +481,53 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers runner economy commitment worklist package as diagnostic semantics", () => {
+    const profiles = [
+      runnerEconomyCommitmentProfile("Broker", ["economy.burst_credit"]),
+      runnerEconomyCommitmentProfile("Rigged Investments", [
+        "economy.commitment_bank",
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Short-Term Contract", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Top Runners' Conference", [
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Loan from Chiba", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Databroker", ["economy.deferred_credit"]),
+      runnerEconomyCommitmentProfile("Organ Donor", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Score!", ["economy.burst_credit"]),
+      runnerEconomyCommitmentProfile("Livewire's Contacts", [
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Score! / burst-credit preps", [
+        "commitment.run_breaking",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "economy.burst_credit",
+        "economy.deferred_credit",
+        "economy.commitment_bank",
+        "risk.loss_condition",
+        "commitment.run_breaking",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerAccessPayoffProfile(
@@ -509,6 +556,40 @@ function runnerAccessPayoffProfile(
             issues: ["target_context_unavailable"],
             evidence: [
               "Access payoff remains diagnostic until side-safe target profile coverage exists.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function runnerEconomyCommitmentProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.runner_economy_commitment`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.economy_engine",
+            role: "economy_commitment",
+            confidence: "medium",
+            evidence: `${title} is classified by functional economy commitment semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_economy_commitment",
+            status: "not_available",
+            issues: ["card_semantics_unavailable"],
+            evidence: [
+              "Commitment bank and loss-condition precision remains diagnostic.",
             ],
           },
         ],
