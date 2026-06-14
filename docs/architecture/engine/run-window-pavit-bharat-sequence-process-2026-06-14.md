@@ -1,6 +1,6 @@
 # Run Window Pavit Bharat Sequence Process
 
-Status: implementation_preflight
+Status: complete
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-06-14 auf Basis des Textfile-Status `engine/run-window-pavit-bharat-sequence`.
 
@@ -52,3 +52,23 @@ Der aktuelle `main`-Stand hatte bereits wesentliche Vorarbeiten aus `run-window-
 - Fokussierte RunWindow-/Pavit-Tests grün.
 - `git diff --check` und `format:changed -- main` grün.
 - Finaler Paketlauf verifiziert, lokal nach `main` integriert, Worktree entfernt und Wissensbasis aktualisiert.
+
+## Abschlussnachweis 2026-06-14
+
+Der Paketlauf P1 bis P10 ist umgesetzt. `run-rez-window.ts` bleibt Orchestrator und exportiert die ausgelagerten Host-/Result-Typen nur noch weiter. Registry und Registry-Test liegen unter `packages/engine/src/game/run/windows/`. Das After-Last-ICE-Modell verlangt den echten `run.jack_out_window`-Timingpunkt. Pavit Bharat revalidiert Source-Fort, Run-Position, Timingpunkt und HQ-Auswahl im Engine-Pfad; die öffentliche Sequenzpayload-Erweiterung läuft über `applyRunWindowPayloadPatch(...)` und die SurfacePolicy-Familie `run_window_sequence`.
+
+Pavit bleibt ein eng begrenzter On-Rez-Vertical-Slice ohne KI-Wirkung, ohne neue LegalAction-Erzeugung außerhalb der Engine und ohne neue Hidden-Info-Fläche. HQ-Karten-IDs aus der Replacement-Auswahl bleiben Choice-/Actor-private Daten und erscheinen nicht in Runner-View, öffentlichen Payloads, gegnerischen Views, Replay-Payloads oder AI-Inputs.
+
+Verifiziert wurden:
+
+- `corepack pnpm install --frozen-lockfile`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/windows/after-passing-last-ice-window.test.ts src/game/run/windows/run-window-registry.test.ts`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/rule-contract-baseline-utilities.test.ts -t "Pavit"`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/run-rez-window.test.ts src/game/run/fort-pass-window.test.ts`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm format:changed -- main`
+- `git diff --check`
+
+Ein unrelated lokaler Testzeitbudget-Edit in `packages/engine/src/index.test.ts` wurde vor der Integration unverändert in `stash@{0}` gesichert und gehört nicht zu diesem Paket.
