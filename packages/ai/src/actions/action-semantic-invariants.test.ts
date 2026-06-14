@@ -445,7 +445,77 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers runner access payoff worklist package as diagnostic semantics", () => {
+    const profiles = [
+      runnerAccessPayoffProfile("R&D Interface", ["access.rnd_multiaccess"]),
+      runnerAccessPayoffProfile("HQ Interface", ["access.hq_multiaccess"]),
+      runnerAccessPayoffProfile("Executive Wiretaps", [
+        "access.hq_multiaccess",
+        "access.central_payoff",
+      ]),
+      runnerAccessPayoffProfile("Custodial Position", [
+        "access.central_payoff",
+      ]),
+      runnerAccessPayoffProfile("Rush Hour", ["run.structure_only"]),
+      runnerAccessPayoffProfile("All-Hands", ["run.structure_only"]),
+      runnerAccessPayoffProfile("Kilroy Was Here", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Romp through HQ", ["access.hq_multiaccess"]),
+      runnerAccessPayoffProfile("Crumble", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Garbage In", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Highlighter", ["access.rnd_multiaccess"]),
+      runnerAccessPayoffProfile("Vienna 22", ["access.central_payoff"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "access.hq_multiaccess",
+        "access.rnd_multiaccess",
+        "access.free_trash",
+        "access.central_payoff",
+        "run.structure_only",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
+
+function runnerAccessPayoffProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.runner_access_payoff`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.central_pressure",
+            role: "access_payoff",
+            confidence: "medium",
+            evidence: `${title} is classified by functional access payoff semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_central_or_accessed_card",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Access payoff remains diagnostic until side-safe target profile coverage exists.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
 
 function runnerBreakerSearchProfile(
   title: string,
