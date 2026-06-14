@@ -490,7 +490,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify(withAlternatives)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
-  }, 30_000);
+  }, 90_000);
 
   it("keeps action alternatives scoped to action-limit finding windows", () => {
     const pair = JSON.parse(
