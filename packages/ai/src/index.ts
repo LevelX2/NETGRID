@@ -277,6 +277,12 @@ export {
   buildLegalActionWitness,
   legalActionWitnessIsRedactionSafe,
 } from "./legalaction-witness";
+export {
+  buildTargetRef,
+  targetRefFromIdentity,
+  targetRefIsCompleteOrIrrelevant,
+  targetRefIsRedactionSafe,
+} from "./target-ref";
 export type {
   BuildLegalActionWitnessInput,
   LegalActionWitness,
@@ -288,6 +294,12 @@ export type {
   LegalActionWitnessTargetRef,
   LegalActionWitnessTimingProfile,
 } from "./legalaction-witness";
+export type {
+  TargetRef,
+  TargetRefInput,
+  TargetRefKind,
+  TargetRefRedactionPolicy,
+} from "./target-ref";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,

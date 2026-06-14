@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai201-legalaction-witness-contract-v1",
-  "generatedAt": "2026-06-14T15:47:12.568Z",
-  "gitHead": "cb894d8a",
+  "generatedAt": "2026-06-14T15:54:44.807Z",
+  "gitHead": "c926d2fb",
   "aggregate": {
     "samples": 3,
     "redactionSafe": true,
@@ -24,10 +24,17 @@
         "redactionPolicy": "public"
       },
       "targetRef": {
+        "schemaVersion": "target-ref-v1",
         "kind": "none",
         "ref": "none",
+        "identity": "none",
         "playerActionTargetRequired": false,
-        "redactionPolicy": "public"
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "target_ref_none"
+        ]
       },
       "costProfile": {
         "clickCost": 1,
@@ -60,10 +67,17 @@
         "redactionPolicy": "public"
       },
       "targetRef": {
+        "schemaVersion": "target-ref-v1",
         "kind": "server",
         "ref": "server:rd",
+        "identity": "server:rd",
         "playerActionTargetRequired": true,
-        "redactionPolicy": "public"
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "side_safe_server_target"
+        ]
       },
       "costProfile": {
         "clickCost": 0,
@@ -96,10 +110,18 @@
         "redactionPolicy": "hidden_blocked"
       },
       "targetRef": {
+        "schemaVersion": "target-ref-v1",
         "kind": "hidden_blocked",
         "ref": "hidden_blocked",
+        "identity": "hidden_blocked",
         "playerActionTargetRequired": true,
-        "redactionPolicy": "hidden_blocked"
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "hidden_blocked",
+        "blocker": "hidden_target_blocked",
+        "evidence": [
+          "hidden_target_blocked"
+        ]
       },
       "costProfile": {
         "clickCost": 0,

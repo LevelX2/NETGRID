@@ -1,9 +1,12 @@
 import type { LegalAction, Side } from "@netgrid/shared";
+import {
+  buildTargetRef,
+  type TargetRef,
+  type TargetRefRedactionPolicy,
+} from "./target-ref";
 
 export type LegalActionWitnessRedactionPolicy =
-  | "public"
-  | "actor_private"
-  | "hidden_blocked";
+  TargetRefRedactionPolicy;
 
 export type LegalActionWitnessSourceRef =
   | { kind: "basic_action"; ref: "basic_action"; redactionPolicy: "public" }
@@ -22,19 +25,7 @@ export type LegalActionWitnessAbilityRef = {
   redactionPolicy: LegalActionWitnessRedactionPolicy;
 };
 
-export type LegalActionWitnessTargetRef = {
-  kind:
-    | "none"
-    | "server"
-    | "choice"
-    | "ownInstalled"
-    | "abilitySource"
-    | "hidden_blocked"
-    | "unknown_unprojected";
-  ref: string;
-  playerActionTargetRequired: boolean;
-  redactionPolicy: LegalActionWitnessRedactionPolicy;
-};
+export type LegalActionWitnessTargetRef = TargetRef;
 
 export type LegalActionWitnessChoiceRef = {
   kind: "choice";
@@ -141,10 +132,7 @@ export function buildLegalActionWitness(
     ...redactedBase,
     sourceRef: { kind: "hidden_blocked", ref: "hidden_blocked", redactionPolicy: "hidden_blocked" },
     targetRef: {
-      kind: "hidden_blocked",
-      ref: "hidden_blocked",
-      playerActionTargetRequired: true,
-      redactionPolicy: "hidden_blocked",
+      ...buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_info_marker_detected" }),
     },
     redactionPolicy: "hidden_blocked",
     blockers: [...new Set([...witness.blockers, "hidden_info_marker_detected"])].sort(),
@@ -193,50 +181,43 @@ function targetRefForAction(
   const serverId = stringPayload(action, "serverId");
   if (serverId) {
     return {
-      kind: "server",
-      ref: `server:${safeId(serverId)}`,
-      playerActionTargetRequired: true,
-      redactionPolicy: "public",
+      ...buildTargetRef({ kind: "server", serverId }),
     };
   }
   const selectedTarget = firstRecordValue(selectedTargets);
   if (selectedTarget) {
     if (HIDDEN_INFO_PATTERNS.test(selectedTarget)) {
       return {
-        kind: "hidden_blocked",
-        ref: "hidden_blocked",
-        playerActionTargetRequired: true,
-        redactionPolicy: "hidden_blocked",
+        ...buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_target_blocked" }),
       };
     }
     return {
-      kind: "ownInstalled",
-      ref: `ownInstalled:actorKnownRef:${stableHash(selectedTarget)}`,
-      playerActionTargetRequired: true,
-      redactionPolicy: "actor_private",
+      ...buildTargetRef({
+        kind: "ownInstalled",
+        actorSafeRef: `actorKnownRef:${stableHash(selectedTarget)}`,
+      }),
     };
   }
   if (action.choiceRequirements && action.choiceRequirements.length > 0) {
     return {
-      kind: "choice",
-      ref: `choice:${safeId(action.choiceRequirements[0]?.choiceId ?? "unknown")}:unknown`,
-      playerActionTargetRequired: true,
-      redactionPolicy: "actor_private",
+      ...buildTargetRef({
+        kind: "choice",
+        choiceId: action.choiceRequirements[0]?.choiceId ?? "unknown",
+        optionId: "unknown",
+      }),
     };
   }
   if (action.targetRequirements.length === 0) {
     return {
-      kind: "none",
-      ref: "none",
-      playerActionTargetRequired: false,
-      redactionPolicy: "public",
+      ...buildTargetRef({ kind: "none" }),
     };
   }
   return {
-    kind: "unknown_unprojected",
-    ref: "unknown_unprojected",
-    playerActionTargetRequired: true,
-    redactionPolicy: action.visibility === "public" ? "public" : "actor_private",
+    ...buildTargetRef({
+      kind: "unknown_unprojected",
+      blocker: "target_ref_unknown_unprojected",
+      evidence: [`visibility:${action.visibility}`],
+    }),
   };
 }
 
