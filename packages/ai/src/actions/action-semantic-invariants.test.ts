@@ -528,6 +528,59 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers corp remote economy asset worklist package as diagnostic semantics", () => {
+    const profiles = [
+      corpRemoteEconomyAssetProfile("Holovid Campaign", [
+        "economy.campaign_drip",
+        "access.remote_trash_commitment",
+      ]),
+      corpRemoteEconomyAssetProfile("BBS Whispering Campaign", [
+        "economy.campaign_drip",
+        "corp_asset.economy_value",
+      ]),
+      corpRemoteEconomyAssetProfile("Braindance Campaign", [
+        "economy.finite_pool",
+      ]),
+      corpRemoteEconomyAssetProfile("Investment Firm", [
+        "economy.finite_pool",
+        "counter.bank",
+      ]),
+      corpRemoteEconomyAssetProfile("Rockerboy Promotion", [
+        "economy.campaign_drip",
+      ]),
+      corpRemoteEconomyAssetProfile("Department of Truth Enhancement", [
+        "corp_asset.economy_value",
+      ]),
+      corpRemoteEconomyAssetProfile("Information Laundering", [
+        "counter.bank",
+        "counter.cashout",
+      ]),
+      corpRemoteEconomyAssetProfile("Vapor Ops", ["corp_asset.economy_value"]),
+      corpRemoteEconomyAssetProfile("South African Mining Corp", [
+        "economy.finite_pool",
+      ]),
+      corpRemoteEconomyAssetProfile("ACME Savings and Loan", [
+        "counter.bank",
+        "counter.cashout",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "economy.finite_pool",
+        "economy.campaign_drip",
+        "counter.bank",
+        "counter.cashout",
+        "access.remote_trash_commitment",
+        "corp_asset.economy_value",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerAccessPayoffProfile(
@@ -590,6 +643,40 @@ function runnerEconomyCommitmentProfile(
             issues: ["card_semantics_unavailable"],
             evidence: [
               "Commitment bank and loss-condition precision remains diagnostic.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpRemoteEconomyAssetProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_remote_economy_asset`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "corp.doctrine.asset_economy",
+            role: "remote_economy_asset",
+            confidence: "medium",
+            evidence: `${title} is classified by functional remote economy asset semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_remote_asset_economy",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Remote trash commitment and counter-state precision remains diagnostic.",
             ],
           },
         ],
