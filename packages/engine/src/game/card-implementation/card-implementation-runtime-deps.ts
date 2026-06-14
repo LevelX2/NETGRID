@@ -68,6 +68,7 @@ type CardImplementationStartRunOptions = Pick<
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"
   | "damagePreventionPool"
+  | "activeSequence"
 >;
 
 export type GameCardImplementationRuntimeDepsHost = {
@@ -417,8 +418,8 @@ function startRunForCardImplementation(
             },
           }
         : {}),
-      ...(options.pirateBroadcast
-        ? { pirateBroadcast: options.pirateBroadcast }
+      ...(options.activeSequence
+        ? { activeSequence: options.activeSequence }
         : {}),
       ...(options.runTraceLinkBonus !== undefined && sourceDefinitionId
         ? {
@@ -482,11 +483,11 @@ function startRunForCardImplementation(
     ...(options.damagePreventionPool !== undefined
       ? { damagePreventionPool: options.damagePreventionPool }
       : {}),
-    ...(options.pirateBroadcast
+    ...(options.activeSequence
       ? {
-          pirateBroadcastSequenceActive: true,
-          pirateBroadcastPendingServerCount:
-            options.pirateBroadcast.pendingServerIds.length,
+          multiServerSuccessSequenceActive: true,
+          multiServerSuccessSequencePendingServerCount:
+            options.activeSequence.pendingServerIds.length,
         }
       : {}),
   };

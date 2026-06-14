@@ -344,9 +344,14 @@ const abstractionPlan = [
       "Zweiter vertikaler Slice: Start-of-turn-Random-Table und persistenter Runner-Action-Modifikator sind generisch umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Pirate Broadcast",
-    currentNames: ["pirateBroadcastPending", "pirateBroadcastRun"],
+    currentNames: [
+      "multi_server_success_sequence",
+      "pendingSequences",
+      "activeSequence",
+      "multiServerSuccessSequenceRun",
+    ],
     targetKind: "multi_server_success_sequence",
     targetState: ["runnerTurnFlags.pendingSequences[]"],
     params: {
@@ -354,7 +359,8 @@ const abstractionPlan = [
       advanceOnSuccessfulRun: true,
       failOnUnsuccessfulRun: true,
     },
-    notes: "Größerer Sequenz-State; nicht in denselben Slice ziehen.",
+    notes:
+      "Mehrstufiger Run-Sequenz-State ist generisch ueber pendingSequences[], activeSequence und neutrale Sequenz-Payloads umgesetzt.",
   },
   {
     priority: "slice_done",
@@ -675,7 +681,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`-, `Siren`- und `Bizarre Encryption Scheme`-Slices sind umgesetzt. `Pirate Broadcast` bleibt wegen mehrstufigem Run-Sequenz-State ein eigener groesserer Prozess.",
+    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`-, `Siren`-, `Bizarre Encryption Scheme`- und `Pirate Broadcast`-Slices sind umgesetzt. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben eigene Prozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");
@@ -713,7 +719,7 @@ const report = {
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
-    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz, Startup Immolator, Siren und Bizarre Encryption Scheme sind abgeschlossen. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz, Startup Immolator, Siren, Bizarre Encryption Scheme und Pirate Broadcast sind abgeschlossen. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",

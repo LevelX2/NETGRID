@@ -13,6 +13,7 @@ import type {
   DamageType,
   GameEndReason,
   GameState,
+  MultiServerSuccessSequenceState,
   ResolvedGameEffect,
   ServerId,
   Side,
@@ -300,7 +301,7 @@ export type CardEffectMakeRunOptions = {
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
   badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
-  pirateBroadcast?: NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"];
+  activeSequence?: MultiServerSuccessSequenceState;
 };
 
 export type CardEffectMakeRunResult = {
@@ -1355,7 +1356,9 @@ export function executeCardImplementationEffects(
           throw new Error("make_run_each_data_fort_sequence requires a startRun context.");
         const serverIds = dataFortServerIds(state);
         if (serverIds.length === 0) {
-          mergePublicPayload(publicPayload, { pirateBroadcastNoDataForts: true });
+          mergePublicPayload(publicPayload, {
+            multiServerSuccessSequenceNoDataForts: true,
+          });
           return;
         }
         const [firstServerId, ...pendingServerIds] = serverIds;
@@ -1363,21 +1366,32 @@ export function executeCardImplementationEffects(
           stoleAgendaThisTurn: false,
           stoleAgendaLastTurn: false,
         });
-        const sequence = {
+        const sequence: MultiServerSuccessSequenceState = {
+          kind: "multi_server_success_sequence",
+          sequence: "run_each_data_fort",
           sourceCardId: context.sourceCardId,
           sourceDefinitionId: context.sourceDefinitionId ?? "card_implementation",
-          sourceTitle: context.sourceTitle ?? "Pirate Broadcast",
+          sourceTitle: context.sourceTitle ?? "Sequenzquelle",
           pendingServerIds,
           successfulServerIds: [],
+          onAllSuccessful: effect.onAllSuccessful,
+          onAnyUnsuccessful: effect.onAnyUnsuccessful,
+          advanceOnSuccessfulRun: true,
+          failOnUnsuccessfulRun: true,
         };
-        flags.pirateBroadcastPending = sequence;
+        flags.pendingSequences = [
+          ...(flags.pendingSequences ?? []).filter(
+            (pending) => pending.kind !== sequence.kind,
+          ),
+          sequence,
+        ];
         const runResult = context.startRun(firstServerId!, {
-          pirateBroadcast: sequence,
+          activeSequence: sequence,
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
         mergePublicPayload(publicPayload, {
-          pirateBroadcastSequenceStarted: true,
-          pirateBroadcastServerCount: serverIds.length,
+          multiServerSuccessSequenceStarted: true,
+          multiServerSuccessSequenceServerCount: serverIds.length,
         });
         return;
       }

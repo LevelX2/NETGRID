@@ -966,6 +966,20 @@ export type AccessStealCostModifierSnapshot = {
   visibility: EventVisibilityClass;
 };
 
+export type MultiServerSuccessSequenceState = {
+  kind: "multi_server_success_sequence";
+  sequence: "run_each_data_fort";
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceTitle: string;
+  pendingServerIds: Exclude<ServerId, "new_remote">[];
+  successfulServerIds: Exclude<ServerId, "new_remote">[];
+  onAllSuccessful: "gain_runner_event_agenda_point";
+  onAnyUnsuccessful: "forgo_next_action";
+  advanceOnSuccessfulRun: true;
+  failOnUnsuccessfulRun: true;
+};
+
 export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
@@ -1203,13 +1217,7 @@ export type RunState = {
     amount: 1;
     cardId?: CardInstanceId;
   };
-  pirateBroadcast?: {
-    sourceCardId: CardInstanceId;
-    sourceDefinitionId: CardDefinitionId;
-    sourceTitle: string;
-    pendingServerIds: Exclude<ServerId, "new_remote">[];
-    successfulServerIds: Exclude<ServerId, "new_remote">[];
-  };
+  activeSequence?: MultiServerSuccessSequenceState;
   runStartInterventions?: Array<{
     kind: "start_run_redirect_to_source_fort";
     originalServerId: Exclude<ServerId, "new_remote">;
@@ -1421,13 +1429,7 @@ export type GameState = {
     promisesPromisesNextAgendaAccess?: boolean;
     promisesPromisesSourceDefinitionId?: CardDefinitionId;
     promisesPromisesSourceTitle?: string;
-    pirateBroadcastPending?: {
-      sourceCardId: CardInstanceId;
-      sourceDefinitionId: CardDefinitionId;
-      sourceTitle: string;
-      pendingServerIds: Exclude<ServerId, "new_remote">[];
-      successfulServerIds: Exclude<ServerId, "new_remote">[];
-    };
+    pendingSequences?: MultiServerSuccessSequenceState[];
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;

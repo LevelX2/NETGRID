@@ -81,20 +81,28 @@ describe("runner main action generation", () => {
     );
   });
 
-  it("forces only the next Pirate Broadcast data-fort run while the sequence is pending", () => {
+  it("forces only the next data-fort run while a multi-server success sequence is pending", () => {
     const state = minimalRunnerMainState("pro013-pirate-forced-run");
     state.runner.clicks = 4;
     state.runner.credits = 5;
     state.runner.tags = 1;
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {}),
-      pirateBroadcastPending: {
-        sourceCardId: "pirate_1",
-        sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
-        sourceTitle: "Pirate Broadcast",
-        pendingServerIds: ["rd", "archives"],
-        successfulServerIds: ["hq"],
-      },
+      pendingSequences: [
+        {
+          kind: "multi_server_success_sequence",
+          sequence: "run_each_data_fort",
+          sourceCardId: "pirate_1",
+          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: ["rd", "archives"],
+          successfulServerIds: ["hq"],
+          onAllSuccessful: "gain_runner_event_agenda_point",
+          onAnyUnsuccessful: "forgo_next_action",
+          advanceOnSuccessfulRun: true,
+          failOnUnsuccessfulRun: true,
+        },
+      ],
     } as NonNullable<GameState["runnerTurnFlags"]>;
 
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
@@ -105,24 +113,32 @@ describe("runner main action generation", () => {
       payload: {
         serverId: "rd",
         bonusRunNoClick: true,
-        pirateBroadcastRun: true,
+        multiServerSuccessSequenceRun: true,
         bonusRunSource: "onr_proteus_116_pirate-broadcast",
       },
     });
     expect(actions[0]?.actionId).toBe("runner.start_run.rd");
   });
 
-  it("offers only a deterministic Pirate Broadcast sequence-failure action when the next data fort cannot be run", () => {
+  it("offers only a deterministic sequence-failure action when the next data fort cannot be run", () => {
     const state = minimalRunnerMainState("pro013-pirate-forced-run-blocked");
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {}),
-      pirateBroadcastPending: {
-        sourceCardId: "pirate_1",
-        sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
-        sourceTitle: "Pirate Broadcast",
-        pendingServerIds: ["remote_99"],
-        successfulServerIds: ["hq"],
-      },
+      pendingSequences: [
+        {
+          kind: "multi_server_success_sequence",
+          sequence: "run_each_data_fort",
+          sourceCardId: "pirate_1",
+          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: ["remote_99"],
+          successfulServerIds: ["hq"],
+          onAllSuccessful: "gain_runner_event_agenda_point",
+          onAnyUnsuccessful: "forgo_next_action",
+          advanceOnSuccessfulRun: true,
+          failOnUnsuccessfulRun: true,
+        },
+      ],
     } as NonNullable<GameState["runnerTurnFlags"]>;
 
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
@@ -131,8 +147,8 @@ describe("runner main action generation", () => {
     expect(actions[0]).toMatchObject({
       type: "trigger_ability",
       payload: {
-        runnerAbility: "pirate_broadcast_sequence_failed",
-        pirateBroadcastSequenceFailed: true,
+        runnerAbility: "multi_server_success_sequence_failed",
+        multiServerSuccessSequenceFailed: true,
         actionDebtAdded: 1,
       },
     });

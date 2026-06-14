@@ -15,11 +15,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | Kategorie | Anzahl |
 | --- | ---: |
 | functional_kind_uses_card_name | 25 |
-| false_positive | 33 |
-| test_only_card_name | 74 |
+| test_only_card_name | 59 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 152 |
+| runtime_state_field_uses_card_name | 87 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
+| false_positive | 26 |
 
 ## Problemstellen
 
@@ -45,18 +45,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:160` Pirate Broadcast / `pirate_broadcast` -> `multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:166` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:168` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:173` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/trigger-ability-execution.ts:174` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:420` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:421` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:421` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:485` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:487` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:488` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/card-implementation/card-implementation-runtime-deps.ts:489` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - functional_kind_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:12` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:41` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:48` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
@@ -155,79 +143,26 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:553` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:757` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:759` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:48` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:241` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:242` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-core-execution.ts:242` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:322` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:385` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:533` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:543` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:547` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:565` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:573` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:574` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:580` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:591` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/run-end-cleanup.ts:592` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:53` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:54` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:55` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:57` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:61` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:65` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:68` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:96` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:104` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:105` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:106` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/run/start-run-action-execution.ts:106` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:186` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/corp-main-actions.ts:731` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/main-action-hosts.ts:252` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/main-action-hosts.ts:252` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:61` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:229` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:229` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:301` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:301` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:302` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:303` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:304` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:304` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:306` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:307` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:320` Pirate Broadcast / `pirate_broadcast` -> `multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:321` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:322` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:330` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:62` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:230` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:230` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1122` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1151` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1152` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1153` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1218` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1219` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1236` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1237` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1244` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1245` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1291` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1292` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1294` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1300` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1314` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1334` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1335` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1336` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1342` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1346` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1321` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1341` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1342` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
+- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1343` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:7` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:117` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1206` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1424` Pirate Broadcast / `pirateBroadcast` -> `pendingSequences.multi_server_success_sequence`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1483` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
+- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1485` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
@@ -238,7 +173,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | --- | --- | --- | --- |
 | slice_now | Preying Mantis | `optional_extra_action_with_delayed_damage` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]`, `runnerTurnFlags.delayedEndTurnEffects[]` |
 | slice_done | Quest for Cattekin | `start_turn_random_effect_table` | `runnerTurnFlags.persistentModifiers[]` |
-| deferred_refactor_required | Pirate Broadcast | `multi_server_success_sequence` | `runnerTurnFlags.pendingSequences[]` |
+| slice_done | Pirate Broadcast | `multi_server_success_sequence` | `runnerTurnFlags.pendingSequences[]` |
 | slice_done | Bizarre Encryption Scheme | `delayed_agenda_access_replacement` | `runDurationEffects[]`, `delayedAccessEffects[]` |
 | slice_done | Code Viral Cache | `purge_replacement_with_runner_virus_counter_cleanup` | `replacementEffects[]` |
 | slice_done | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
@@ -249,7 +184,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 ## Nächste Umsetzung
 
 Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.
-Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`-, `Siren`- und `Bizarre Encryption Scheme`-Slices sind umgesetzt. `Pirate Broadcast` bleibt wegen mehrstufigem Run-Sequenz-State ein eigener groesserer Prozess.
+Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`-, `Siren`-, `Bizarre Encryption Scheme`- und `Pirate Broadcast`-Slices sind umgesetzt. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben eigene Prozesse.
 
 ## Automatisch abgeleiteter Guard
 
