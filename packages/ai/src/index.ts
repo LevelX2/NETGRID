@@ -285,6 +285,7 @@ export {
 } from "./target-ref";
 export { buildWitnessOpportunityProjection } from "./witness-opportunity-projection";
 export { buildPlayerActionFromWitness } from "./playeraction-dry-run-builder";
+export { evaluateStalePunishGoalSwitchShadow } from "./stale-punish-goal-switch-shadow";
 export type {
   BuildLegalActionWitnessInput,
   LegalActionWitness,
@@ -308,6 +309,11 @@ export type {
   WitnessOpportunityProjectionStatus,
 } from "./witness-opportunity-projection";
 export type { PlayerActionWitnessBuildInput } from "./playeraction-dry-run-builder";
+export type {
+  StalePunishGoalSwitchInput,
+  StalePunishGoalSwitchShadow,
+  StalePunishRootCause,
+} from "./stale-punish-goal-switch-shadow";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
