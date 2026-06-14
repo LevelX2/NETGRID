@@ -581,6 +581,42 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers corp ice tax worklist package as diagnostic semantics", () => {
+    const profiles = [
+      corpIceTaxProfile("Data Masons", ["ice_tax"]),
+      corpIceTaxProfile("Encoder Inc.", ["rez_discount"]),
+      corpIceTaxProfile("Skälderviken SA Beta Test Site", [
+        "subroutine_support",
+        "constraint.only_model",
+      ]),
+      corpIceTaxProfile("Jerusalem City Grid", ["rez_discount"]),
+      corpIceTaxProfile("Crystal Palace Station Grid", ["break_cost_tax"]),
+      corpIceTaxProfile("Tesseract Fort Construction", [
+        "subroutine_support",
+        "target_profile.required",
+      ]),
+      corpIceTaxProfile("Ball and Chain", ["run_tax"]),
+      corpIceTaxProfile("Virizz", ["break_cost_tax"]),
+      corpIceTaxProfile("Newsgroup Taunting", ["run_tax"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "ice_tax",
+        "rez_discount",
+        "subroutine_support",
+        "break_cost_tax",
+        "run_tax",
+        "constraint.only_model",
+        "target_profile.required",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
 
 function runnerAccessPayoffProfile(
@@ -677,6 +713,40 @@ function corpRemoteEconomyAssetProfile(
             issues: ["target_context_unavailable"],
             evidence: [
               "Remote trash commitment and counter-state precision remains diagnostic.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpIceTaxProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_ice_tax`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "corp.doctrine.ice_tax",
+            role: "ice_tax_support",
+            confidence: "medium",
+            evidence: `${title} is classified by functional ICE tax and rez-economy semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_ice_tax_or_grid_context",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Constraint-only effects stay separate from target profile matches.",
             ],
           },
         ],
