@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
+import type { LegalAction } from "@netgrid/shared";
 
 import { projectAccessDecision } from "./access-decision-projection";
+import {
+  buildTargetChoiceShadowReport,
+  targetChoiceWouldSelectForAccessDecisionProjection,
+} from "./target-choice-shadow";
 
 describe("access decision projection", () => {
   it("projects agenda steal consistently", () => {
@@ -91,4 +96,80 @@ describe("access decision projection", () => {
       "access_decision_projection_source:plan_memory",
     );
   });
+
+  it("uses target-choice wouldSelect as dry-run evidence without materializing selections", () => {
+    const targetChoiceReport = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "access-trash-choice",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["trash", "decline"],
+          },
+        ],
+      }),
+      preferredOptionIds: ["trash"],
+    });
+    const targetChoiceWouldSelect =
+      targetChoiceWouldSelectForAccessDecisionProjection(targetChoiceReport);
+
+    expect(targetChoiceWouldSelect).toBeDefined();
+    if (!targetChoiceWouldSelect) {
+      throw new Error("expected target-choice wouldSelect dry-run");
+    }
+    const projection = projectAccessDecision({
+      source: "access_window",
+      serverId: "remote_1",
+      knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      target: "asset",
+      intendedAccessAction: "trash",
+      targetChoiceWouldSelect,
+    });
+
+    expect(projection.projections).toEqual([
+      "asset_trash",
+      "target_choice_would_select",
+    ]);
+    expect(projection.targetChoiceWouldSelect).toEqual(
+      expect.objectContaining({
+        requirementId: "access-trash-choice",
+        optionId: "trash",
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+      }),
+    );
+    expect(projection.evidence).toEqual(
+      expect.arrayContaining([
+        "access_decision_projection_target_choice_would_select:dry_run",
+        "access_decision_projection_target_choice_requirement:access-trash-choice",
+        "access_decision_projection_target_choice_option:trash",
+        "access_decision_projection_target_choice_selected_choices_created:false",
+        "access_decision_projection_target_choice_selected_targets_created:false",
+        "access_decision_projection_target_choice_evidence:target_choice_access_decision_projection:dry_run",
+      ]),
+    );
+    expect(projection).not.toHaveProperty("selectedChoices");
+    expect(projection).not.toHaveProperty("selectedTargets");
+  });
 });
+
+function action(options: {
+  choiceRequirements?: LegalAction["choiceRequirements"];
+}): LegalAction {
+  return {
+    actionId: "resolve-access-choice",
+    side: "runner",
+    type: "resolve_choice",
+    label: "Resolve access choice",
+    source: "game_rule",
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    ...(options.choiceRequirements
+      ? { choiceRequirements: options.choiceRequirements }
+      : {}),
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 1,
+  };
+}
