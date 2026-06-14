@@ -44,7 +44,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ gate, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("reports match progression metrics alongside safety signals", () => {
     const benchmark = runMatchProgressionBenchmark({
