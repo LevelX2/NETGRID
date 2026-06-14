@@ -66,9 +66,18 @@ Verifiziert wurden:
 - `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/rule-contract-baseline-utilities.test.ts -t "Pavit"`
 - `corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/run-rez-window.test.ts src/game/run/fort-pass-window.test.ts`
 - `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "randomizes single HQ access across all current HQ cards" --reporter=verbose`
 - `corepack pnpm --filter @netgrid/engine test`
-- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/shared test`
+- `corepack pnpm --filter @netgrid/catalog test`
+- `corepack pnpm --filter @netgrid/decks test`
+- `corepack pnpm --filter @netgrid/server test`
+- `corepack pnpm --filter @netgrid/web test`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/playeraction-dry-run-builder.test.ts src/public-export-contract.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm check:ai`
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests`
 - `corepack pnpm format:changed -- main`
 - `git diff --check`
 
-Ein unrelated lokaler Testzeitbudget-Edit in `packages/engine/src/index.test.ts` wurde vor der Integration unverändert in `stash@{0}` gesichert und gehört nicht zu diesem Paket.
+Der vorherige stumme Root-Testabbruch kam aus dem langsamen Engine-HQ-Replay-Audit unter der globalen 5s-Vitest-Grenze. Der Paketstand setzt deshalb für `@netgrid/engine` ein kleines explizites Testbudget in `packages/engine/vitest.config.ts`; Testlogik und Assertions bleiben unverändert.
