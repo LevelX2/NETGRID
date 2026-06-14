@@ -1,6 +1,6 @@
 # AI Play-Strength Maturation 5 Final Report
 
-Status: `completed_pending_final_green`
+Status: `completed_final_green`
 
 Datum: 2026-06-13
 
@@ -88,10 +88,15 @@ SemanticShadowLeagueDelta enthält eine Dashboard-Summary. Der neue Formatter er
 
 Paketweise wurden die jeweils relevanten fokussierten Vitest-Läufe, `@netgrid/ai typecheck` und `git diff --check` ausgeführt. Längere bestehende Simulations-/Delta-/Index-Tests wurden bei Bedarf mit explizit erhöhtem `--testTimeout` erneut ausgeführt und bestanden.
 
-Der finale Full-Green-Gate nach diesem Bericht bleibt:
+Finaler Full-Green-Gate nach MAT5:
 
 ```bash
-corepack pnpm --filter @netgrid/ai test
+corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=120000
+# Ergebnis: 106 Test Files passed, 1394 Tests passed
+
 corepack pnpm --filter @netgrid/ai typecheck
+# Ergebnis: passed
+
 git diff --check
+# Ergebnis: passed
 ```
