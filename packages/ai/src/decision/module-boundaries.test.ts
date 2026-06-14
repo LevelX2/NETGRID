@@ -216,6 +216,51 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("guards reports, evaluation and runtime import boundaries", () => {
+    const reportViolations = productionFiles("reports").flatMap((file) =>
+      importsFrom(file).flatMap((reference) => {
+        const importsRuntimeChooser =
+          resolvesToSrcArea(file, reference.importSource, "runtime") &&
+          resolvedImportBasename(file, reference.importSource) ===
+            "choose-ai-action";
+        const importsLegacy = resolvesToSrcArea(
+          file,
+          reference.importSource,
+          "legacy",
+        );
+        if (!importsRuntimeChooser && !importsLegacy) return [];
+        return [
+          violation(
+            file,
+            reference,
+            "reports must not import runtime/choose-ai-action or legacy",
+          ),
+        ];
+      }),
+    );
+    const evaluationViolations = productionFiles("evaluation").flatMap((file) =>
+      importsFrom(file)
+        .filter((reference) =>
+          resolvesToSrcEntry(file, reference.importSource, "index"),
+        )
+        .map((reference) =>
+          violation(file, reference, "evaluation must not import index.ts"),
+        ),
+    );
+    const runtimeViolations = productionFiles("runtime").flatMap((file) =>
+      importsFrom(file)
+        .filter((reference) =>
+          resolvesToSrcArea(file, reference.importSource, "evaluation"),
+        )
+        .map((reference) =>
+          violation(file, reference, "runtime must not import evaluation"),
+        ),
+    );
+
+    expect([...reportViolations, ...evaluationViolations, ...runtimeViolations])
+      .toEqual([]);
+  });
+
   it("keeps diagnostics modules from mutating selected choice payloads", () => {
     const violations = productionFiles("diagnostics").flatMap((file) => {
       const content = readFileSync(file, "utf8");
@@ -364,6 +409,19 @@ function resolvesToSrcArea(
 
 function resolvedImportBasename(file: string, importSource: string): string {
   return path.basename(path.resolve(path.dirname(file), importSource));
+}
+
+function resolvesToSrcEntry(
+  file: string,
+  importSource: string,
+  entryBaseName: string,
+): boolean {
+  if (!importSource.startsWith(".")) return false;
+  const resolved = path.resolve(path.dirname(file), importSource);
+  return (
+    resolved === path.join(srcDir, entryBaseName) ||
+    resolved === path.join(srcDir, `${entryBaseName}.ts`)
+  );
 }
 
 function isRuntimeChooserImport(

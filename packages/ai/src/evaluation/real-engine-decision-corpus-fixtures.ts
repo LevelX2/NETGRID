@@ -16,6 +16,7 @@ import type {
   RealEngineDecisionCorpusLeagueExpectation,
   RealEngineDecisionCorpusScenario,
 } from "./real-engine-decision-corpus";
+import type { TargetChoiceFollowupCandidateKind } from "./target-choice-shadow-readiness";
 import {
   RealEngineFixtureBuilder,
   type RealEngineFixtureMutator,
@@ -77,6 +78,14 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_asset_economy_install",
   "corp_real_fast_advance_support_shadow_only",
 ] as const;
+
+export const REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS = [
+  "engine_only_target",
+  "hidden_info_blocked",
+  "missing_side_safe_options",
+  "scorecard_unclear",
+  "tie_without_preference",
+] as const satisfies readonly TargetChoiceFollowupCandidateKind[];
 
 const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   runner_real_low_credits: expectation(["gain_credit", "draw_card"], {

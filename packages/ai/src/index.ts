@@ -135,6 +135,7 @@ import {
 } from "./diagnostics/semantic-runtime-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
+import { projectAccessDecision } from "./decision/access-decision-projection";
 import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
   formatDebugFieldValue,
@@ -35192,6 +35193,32 @@ function runnerRemoteTrashAccessContext(
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
     affordableRelevant && action.type === "trash_accessed_card";
+  const accessDecisionProjection = projectAccessDecision({
+    source: "access_window",
+    serverId: accessServerId ?? "unknown",
+    ...(accessed.definitionId
+      ? { knownRootDefinitionId: accessed.definitionId }
+      : {}),
+    target:
+      targetType === "asset_node"
+        ? "asset"
+        : targetType === "upgrade"
+          ? "upgrade"
+          : "unknown",
+    intendedAccessAction:
+      action.type === "steal_agenda"
+        ? "steal"
+        : action.type === "trash_accessed_card"
+        ? "trash"
+        : action.type === "decline_trash"
+          ? "decline"
+          : "access_only",
+    trashCost,
+    generalTrashCost: generalCreditCost,
+    dedicatedTrashCredits,
+    reserveWouldBreak: deferredByBudget,
+    finitePoolValueRemaining: corpValueRemaining,
+  });
   return {
     trashable,
     relevant,
@@ -35249,6 +35276,7 @@ function runnerRemoteTrashAccessContext(
       `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
       `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
       `remote_trash_corp_value_remaining:${corpValueRemaining}`,
+      ...accessDecisionProjection.evidence,
     ],
     ...(accessServerId ? { accessServerId } : {}),
     ...(trashable ? { targetType } : {}),

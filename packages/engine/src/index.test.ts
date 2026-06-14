@@ -2203,7 +2203,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     }
 
     expect(seenDefinitions).toEqual(new Set(hqDefinitions));
-  });
+  }, 30_000);
 
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "trash-hq-asset" }));

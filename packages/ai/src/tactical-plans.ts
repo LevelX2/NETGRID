@@ -29,6 +29,7 @@ import {
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
+import { declinedTrashOutcomePlanEvidence } from "./memory/remote-access-outcome";
 import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import type {
@@ -1532,6 +1533,9 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     const serverId = actionServerId(action);
     if (!serverId) continue;
     const payoff = noPayoffByActionId.get(action.actionId);
+    const noPlanBonusEvidence = declinedTrashOutcomePlanEvidence(
+      payoff?.evidence ?? [],
+    );
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
@@ -1555,6 +1559,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
               : {}),
             evidence: [
               "known remote root has no current access payoff",
+              ...noPlanBonusEvidence,
               ...(payoff?.evidence ?? []),
             ],
           },
@@ -1570,6 +1575,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         evidence: [
           `known_no_payoff_remote_run_action:${action.actionId}`,
           ...(payoff?.reasons ?? []),
+          ...noPlanBonusEvidence,
           ...(payoff?.evidence ?? []),
         ],
         scoreBreakdown: [

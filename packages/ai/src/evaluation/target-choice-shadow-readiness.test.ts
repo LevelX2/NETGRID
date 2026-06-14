@@ -1,7 +1,10 @@
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { buildTargetChoiceShadowReport } from "../decision/target-choice-shadow";
+import {
+  buildTargetChoiceShadowReport,
+  type TargetChoiceShadowReport,
+} from "../decision/target-choice-shadow";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import { buildTargetChoiceSelectedChoicesReadinessReport } from "./target-choice-shadow-readiness";
 
@@ -65,6 +68,102 @@ describe("TargetChoice selectedChoices readiness", () => {
     expect(report.categoryCounts.ready_for_local_dry_run).toBe(1);
     expect(report.categoryCounts.ready_for_shadow_only).toBe(1);
     expect(report.categoryCounts.blocked_engine_only).toBe(1);
+    expect(containsForbiddenSemanticMarker(report)).toBe(false);
+  });
+
+  it("emits concrete followup candidates for unclear target-choice dry-runs", () => {
+    const tie = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "tie",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+            allowedServers: ["hq", "rd"],
+          },
+        ],
+      }),
+    });
+    const missingSideSafeOptions = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "missing-side-safe",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+    });
+    const engineOnly = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "engine-only",
+        targetRequirements: [
+          {
+            id: "secret",
+            kind: "card",
+            visibility: "engine_only",
+          },
+        ],
+      }),
+    });
+    const hiddenInfoBlocked: TargetChoiceShadowReport = {
+      ...missingSideSafeOptions,
+      actionId: "hidden-info",
+      blockedRequirements: [
+        {
+          requirementId: "server",
+          kind: "server",
+          reason: "no_side_safe_options",
+          evidence: ["hidden_info_blocked"],
+        },
+      ],
+      scorecard: {
+        ...missingSideSafeOptions.scorecard,
+        noSideSafeOptionsBlockedCount: 0,
+        blockedRequirementCount: 1,
+      },
+    };
+    const scorecardUnclear = buildTargetChoiceShadowReport({
+      action: action({ actionId: "unclear" }),
+    });
+
+    const report = buildTargetChoiceSelectedChoicesReadinessReport([
+      {
+        scenarioId: "followups",
+        reports: [
+          tie,
+          missingSideSafeOptions,
+          engineOnly,
+          hiddenInfoBlocked,
+          scorecardUnclear,
+        ],
+      },
+    ]);
+
+    expect(report.followupCandidates.map((candidate) => candidate.kind)).toEqual([
+      "engine_only_target",
+      "hidden_info_blocked",
+      "missing_side_safe_options",
+      "tie_without_preference",
+      "scorecard_unclear",
+    ]);
+    expect(report.evidence).toEqual(
+      expect.arrayContaining(["followup_candidate_count:5"]),
+    );
+    expect(report.followupCandidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          candidateId: "followups:tie:tie_without_preference",
+          evidence: expect.arrayContaining([
+            "target_choice_followup:tie_without_preference",
+            "productive_use_allowed:false",
+          ]),
+        }),
+      ]),
+    );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 });

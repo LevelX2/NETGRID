@@ -90,6 +90,36 @@ describe("remote-contest-candidate", () => {
       structuredAlignment: true,
     });
   });
+
+  it("keeps eligible remote contest candidates report-only", () => {
+    const candidate = evaluateRemoteContestCandidate({
+      frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+      top: rankedAction("run-remote"),
+      topActionType: "start_run",
+      scoreGap: 30,
+      scoreGapThreshold: 20,
+    });
+
+    expect(candidate).toBeDefined();
+    if (!candidate) {
+      throw new Error("expected remote contest candidate");
+    }
+    expect(candidate).toMatchObject({
+      candidateStatus: "eligible",
+      productiveUseAllowed: false,
+      runtimeConsumerStatus: "none",
+      readiness: {
+        activationStatus: "report_only",
+        localDefaultCandidate: false,
+      },
+    });
+    expect(candidate.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_contest_candidate:report_only",
+        "remote_contest_local_default_candidate:false",
+      ]),
+    );
+  });
 });
 
 function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {

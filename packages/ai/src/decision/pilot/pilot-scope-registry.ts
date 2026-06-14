@@ -18,7 +18,12 @@ import {
   type RankedAction,
 } from "./pilot-scope-common";
 import { runnerSafeAccessDecision } from "./runner-safe-access-pilot";
+import {
+  AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
+  localDefaultPilotScopes,
+} from "./local-default-pilot-policy";
 export {
+  AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
   buildLocalDefaultPilotPolicy,
   type LocalDefaultPilotPolicy,
   type LocalDefaultPilotPolicyScope,
@@ -66,13 +71,11 @@ export function parsePilotScopes(env: string | undefined): AiPlayStrengthPilotSc
 }
 
 export function semanticBasicSetupPilotEnabled(): boolean {
-  return parsePilotScopes(process.env[AI_PLAY_STRENGTH_PILOT_ENV]).includes(
-    BASIC_SETUP_PILOT_MODE,
-  );
+  return pilotScopesFromEnv().includes(BASIC_SETUP_PILOT_MODE);
 }
 
 export function semanticPlayStrengthPilotEnabled(): boolean {
-  return parsePilotScopes(process.env[AI_PLAY_STRENGTH_PILOT_ENV]).length > 0;
+  return pilotScopesFromEnv().length > 0;
 }
 
 export function semanticPilotChoice(params: {
@@ -81,7 +84,7 @@ export function semanticPilotChoice(params: {
   currentChoice: SemanticRuntimeChoice;
   choices: readonly SemanticRuntimeChoice[];
 }): SemanticBasicSetupPilotResult | undefined {
-  const scopes = parsePilotScopes(process.env[AI_PLAY_STRENGTH_PILOT_ENV]);
+  const scopes = pilotScopesFromEnv();
   if (scopes.length === 0) return undefined;
   const top = params.trace.rankedActions[0];
   if (!top) return undefined;
@@ -245,6 +248,16 @@ function explanationForScope(
 
 function isPilotScope(value: string): value is AiPlayStrengthPilotScope {
   return ALL_PLAY_STRENGTH_PILOT_SCOPES.some((scope) => scope === value);
+}
+
+function pilotScopesFromEnv(): AiPlayStrengthPilotScope[] {
+  const explicitPilotEnv = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+  const explicitScopes = parsePilotScopes(explicitPilotEnv);
+  if (explicitPilotEnv?.trim()) return explicitScopes;
+  return localDefaultPilotScopes({
+    explicitPilotEnv,
+    localDefaultEnv: process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV],
+  });
 }
 
 function appendPilotScopes(

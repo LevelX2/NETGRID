@@ -49,15 +49,35 @@ describe("semantic runtime score components", () => {
     expect(adjusted.evidence).toEqual(["safe:evidence", "base_evidence"]);
   });
 
-  it("scrubs forbidden evidence fields and unstable local suffixes", () => {
+  it("scrubs forbidden evidence fields without dropping side-safe ids", () => {
     expect(
       scrubEvidence([
         "safe:entry",
+        "remote_1:known_payoff",
+        "server_1:central",
+        "scenario_1:fixture",
         "cardInstances:hidden",
-        "server_1:unstable",
-        "joinToken:hidden",
+        "privatePayload:hidden",
+        "deckOrder:hidden",
+        "sessionToken:hidden",
       ]),
-    ).toEqual(["safe:entry"]);
+    ).toEqual([
+      "safe:entry",
+      "remote_1:known_payoff",
+      "server_1:central",
+      "scenario_1:fixture",
+    ]);
+  });
+
+  it("uses central semantic redaction for runtime evidence", () => {
+    expect(
+      scrubEvidence([
+        "privatePayload:hidden",
+        "cardInstances:hidden",
+        "deckOrder:hidden",
+        "sessionToken:hidden",
+      ]),
+    ).toEqual([]);
   });
 });
 
