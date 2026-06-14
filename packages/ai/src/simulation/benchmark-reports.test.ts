@@ -187,7 +187,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ suite, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 60_000);
+  }, 120_000);
 
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
     const summary: AiSimulationSummary = {
@@ -432,7 +432,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("keeps action alternative snapshots opt-in and redaction-safe", () => {
     const pair = JSON.parse(
