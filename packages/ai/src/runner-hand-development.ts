@@ -161,6 +161,7 @@ type CardContext = {
 type PersistentFunctionalProfile = {
   functionalCoverage: string[];
   primaryGroups: string[];
+  nonAdditiveUtilityFamilies: string[];
   breakerCoverage: BreakerCoverageKind[];
   riskyBreaker: boolean;
   damagePrevention: boolean;
@@ -169,6 +170,7 @@ type PersistentFunctionalProfile = {
   bankTool: boolean;
   accessSupport: boolean;
   searchSupport: boolean;
+  actionGatedUtility: boolean;
   absoluteNonStackable: boolean;
 };
 
@@ -338,6 +340,7 @@ function signalsForCard(
     ...(hint?.roles ?? []),
   ]);
   const planRoles = sortedUnique([...(hint?.planRoles ?? [])]);
+  const hintSignals = hint ? structuredHintSignals(hint) : [];
   const candidateSignals = sortedUnique(
     candidates.flatMap((candidate) => [
       candidate.semanticActionType,
@@ -359,6 +362,7 @@ function signalsForCard(
     definition?.text,
     ...roles,
     ...planRoles,
+    ...hintSignals,
     ...candidateSignals,
   ]
     .filter((entry): entry is string => typeof entry === "string")
@@ -542,6 +546,7 @@ function evaluateRunnerPersistentInstall(
   const duplicateRole = duplicateRoleForPersistentInstall({
     params,
     profile,
+    installedProfiles,
     capabilityDelta,
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
@@ -812,11 +817,15 @@ function persistentFunctionalProfileForCard(
   const bankTool = looksLikeBankTool(text);
   const accessSupport = looksLikeAccessPayoff(text);
   const searchSupport = looksLikeDrawOrSearch(text);
+  const nonAdditiveUtilityFamilies =
+    nonAdditiveUtilityFamiliesForPersistentCard(card, text);
+  const actionGatedUtility = nonAdditiveUtilityFamilies.length > 0;
   const absoluteNonStackable =
     /\bbase link\b|base_link|link strength|gain .*link|\+\d+\s+link/.test(text) &&
     !/counter|temporary|recurring|stored/.test(text);
   const functionalCoverage = sortedUnique([
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
+    ...nonAdditiveUtilityFamilies,
     ...(memorySupport ? ["memory"] : []),
     ...(damagePrevention ? ["damage_prevention"] : []),
     ...(handSizeSupport ? ["hand_size"] : []),
@@ -831,6 +840,7 @@ function persistentFunctionalProfileForCard(
   return {
     functionalCoverage,
     primaryGroups,
+    nonAdditiveUtilityFamilies,
     breakerCoverage,
     riskyBreaker,
     damagePrevention,
@@ -839,8 +849,69 @@ function persistentFunctionalProfileForCard(
     bankTool,
     accessSupport,
     searchSupport,
+    actionGatedUtility,
     absoluteNonStackable,
   };
+}
+
+function structuredHintSignals(hint: {
+  effects?: readonly Record<string, unknown>[];
+  targetProfiles?: readonly Record<string, unknown>[];
+  lineSupport?: readonly string[];
+}): string[] {
+  return sortedUnique([
+    ...(hint.effects ?? []).flatMap((effect) =>
+      [
+        effect.kind,
+        effect.timing,
+        effect.scope,
+        effect.resource,
+        effect.target,
+      ].filter((value): value is string => typeof value === "string"),
+    ),
+    ...(hint.targetProfiles ?? []).flatMap((profile) =>
+      [
+        profile.kind,
+        profile.timing,
+        profile.targetType,
+        profile.purpose,
+        profile.hiddenInfoPolicy,
+        ...(Array.isArray(profile.preferences) ? profile.preferences : []),
+        ...(Array.isArray(profile.avoid) ? profile.avoid : []),
+      ].filter((value): value is string => typeof value === "string"),
+    ),
+    ...(hint.lineSupport ?? []),
+  ]);
+}
+
+function nonAdditiveUtilityFamiliesForPersistentCard(
+  card: VisibleCard,
+  text: string,
+): string[] {
+  if (card.type !== "resource") return [];
+  const families = new Set<string>();
+  const recovery =
+    /trash_recovery|setup\.recovery|setup\.top_trash_recovery|search_trash|top card from your trash|trash into your hand|heap recovery/.test(
+      text,
+    );
+  const programSearch =
+    /program_search|setup\.program_search|search your stack for a program|program cards/.test(
+      text,
+    );
+  const stackSearch =
+    /stack_search|search_stack|setup\.stack_filter|setup\.card_search|setup\.prep_resource_search|setup\.hardware_search|top (?:four|five) cards of your stack/.test(
+      text,
+    );
+  const hiddenZoneSearch =
+    /hidden_zone_tool|hidden\.runner_resource|resource\.hidden/.test(text) &&
+    /search|recovery|stack|trash/.test(text);
+
+  if (recovery) families.add("non_additive_utility:recovery");
+  if (programSearch) families.add("non_additive_utility:program_search");
+  if (stackSearch) families.add("non_additive_utility:stack_search");
+  if (hiddenZoneSearch) families.add("non_additive_utility:hidden_zone_search");
+  if (families.size > 0) families.add("non_additive_utility:action_gated_search");
+  return [...families].sort();
 }
 
 function breakerCoverageForPersistentCard(
@@ -865,6 +936,12 @@ function persistentCoverageAlreadyPresent(
   coverage: string,
   existingFunctionalCoverage: readonly string[],
 ): boolean {
+  if (
+    coverage.startsWith("non_additive_utility:") &&
+    existingFunctionalCoverage.includes("non_additive_utility:action_gated_search")
+  ) {
+    return true;
+  }
   if (!coverage.startsWith("breaker:")) {
     return existingFunctionalCoverage.includes(coverage);
   }
@@ -878,6 +955,7 @@ function persistentProfilesOverlap(
   candidate: PersistentFunctionalProfile,
   installed: PersistentFunctionalProfile,
 ): boolean {
+  if (nonAdditiveUtilityProfilesOverlap(candidate, installed)) return true;
   if (
     candidate.breakerCoverage.length > 0 &&
     installed.breakerCoverage.length > 0 &&
@@ -887,6 +965,24 @@ function persistentProfilesOverlap(
   }
   return candidate.primaryGroups.some((group) =>
     installed.primaryGroups.includes(group),
+  );
+}
+
+function nonAdditiveUtilityProfilesOverlap(
+  candidate: PersistentFunctionalProfile,
+  installed: PersistentFunctionalProfile,
+): boolean {
+  return candidate.nonAdditiveUtilityFamilies.some((family) =>
+    installed.nonAdditiveUtilityFamilies.includes(family),
+  );
+}
+
+function hasInstalledNonAdditiveUtilityOverlap(
+  candidate: PersistentFunctionalProfile,
+  installedProfiles: readonly PersistentFunctionalProfile[],
+): boolean {
+  return installedProfiles.some((installed) =>
+    nonAdditiveUtilityProfilesOverlap(candidate, installed),
   );
 }
 
@@ -906,6 +1002,9 @@ function stackabilityClassForPersistentInstall(
   installedSameFunctionalGroupCount: number,
 ): RunnerPersistentInstallStackabilityClass {
   if (profile.absoluteNonStackable) return "absolute_non_stackable";
+  if (hasInstalledNonAdditiveUtilityOverlap(profile, installedProfiles)) {
+    return "absolute_non_stackable";
+  }
   if (persistentInstallReducesRisk(profile, installedProfiles)) {
     return "risk_mitigation";
   }
@@ -944,6 +1043,14 @@ function capabilityDeltaForPersistentInstall(params: {
     params.installedSameFunctionalGroupCount > 0
   ) {
     return "none";
+  }
+  if (
+    hasInstalledNonAdditiveUtilityOverlap(
+      params.profile,
+      params.installedProfiles,
+    )
+  ) {
+    return "backup_only";
   }
   if (
     persistentInstallReducesRisk(params.profile, params.installedProfiles)
@@ -985,6 +1092,7 @@ function capabilityDeltaForPersistentInstall(params: {
 function duplicateRoleForPersistentInstall(params: {
   params: EvaluateRunnerHandDevelopmentParams;
   profile: PersistentFunctionalProfile;
+  installedProfiles: readonly PersistentFunctionalProfile[];
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;
   installedSameDefinitionCount: number;
   installedSameFunctionalGroupCount: number;
@@ -995,6 +1103,14 @@ function duplicateRoleForPersistentInstall(params: {
     params.installedSameFunctionalGroupCount === 0
   ) {
     return "none";
+  }
+  if (
+    hasInstalledNonAdditiveUtilityOverlap(
+      params.profile,
+      params.installedProfiles,
+    )
+  ) {
+    return "redundant_duplicate";
   }
   if (
     params.capabilityDelta === "risk_reduction" ||
@@ -1180,6 +1296,15 @@ function handBufferPenaltyForPersistentInstall(params: {
   duplicateRole: RunnerPersistentInstallDuplicateRole;
 }): number {
   if (params.profile.damagePrevention || params.profile.handSizeSupport) return 0;
+  if (
+    params.duplicateRole === "redundant_duplicate" &&
+    params.profile.actionGatedUtility
+  ) {
+    if (params.handAfterInstall <= 0) return -1000;
+    if (params.handAfterInstall <= 2) return -780;
+    if (params.handAfterInstall <= 3) return -520;
+    return -240;
+  }
   const riskyContext =
     runnerHasRiskyInstalledBreaker(params.params.input) ||
     (params.profile.riskyBreaker && params.duplicateRole !== "none");
@@ -1226,6 +1351,7 @@ function persistentInstallEvidence(params: {
   return [
     `persistent_install_role:${params.role}`,
     `persistent_functional_coverage:${params.profile.functionalCoverage.join("|") || "none"}`,
+    `non_additive_utility_families:${params.profile.nonAdditiveUtilityFamilies.join("|") || "none"}`,
     `new_functional_coverage:${params.newFunctionalCoverage.join("|") || "none"}`,
     `stackability_class:${params.stackabilityClass}`,
     `capability_delta:${params.capabilityDelta}`,
@@ -1245,6 +1371,13 @@ function persistentInstallEvidence(params: {
     `final_install_fit:${params.finalInstallFit}`,
     ...(params.duplicateRole === "redundant_duplicate"
       ? ["why_duplicate_install_deferred:low_marginal_utility"]
+      : []),
+    ...(params.duplicateRole === "redundant_duplicate" &&
+    params.profile.actionGatedUtility
+      ? [
+          "non_additive_utility_duplicate",
+          "action_gated_utility_already_installed",
+        ]
       : []),
     ...(params.duplicateRole !== "none" &&
     params.duplicateRole !== "redundant_duplicate"
