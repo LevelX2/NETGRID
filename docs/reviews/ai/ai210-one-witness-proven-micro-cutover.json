@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "ai210-one-witness-proven-micro-cutover",
+  "generatedAt": "2026-06-14T16:18:56.424Z",
+  "gitHead": "901fdc5a",
+  "sources": {
+    "ai204": "docs/reviews/ai/ai204-candidate-gate-v3-witness.json",
+    "ai205": "docs/reviews/ai/ai205-playeraction-builder-from-witness.json",
+    "ai206": "docs/reviews/ai/ai206-replay-probe-v3.json",
+    "ai208": "docs/reviews/ai/ai208-coverage-witness-review.json",
+    "ai209": "docs/reviews/ai/ai209-corp-tempo-witness-review.json"
+  },
+  "aggregate": {
+    "evaluatedCandidates": 103,
+    "gatePassedCandidates": 0,
+    "playerActionsBuilt": 0,
+    "replayPassedCandidates": 0,
+    "coverageWitnessBuildableCases": 0,
+    "corpTempoWitnessBuildableCases": 0,
+    "eligibleMicroCutoverCandidates": 0,
+    "runtimeFlaggedCandidateCount": 0,
+    "runtimeEffects": 0
+  },
+  "decision": {
+    "status": "no_go",
+    "reason": "witness_targetref_playeraction_replay_chain_incomplete",
+    "runtimeChanged": false,
+    "defaultOffRuntimeFlagImplemented": false,
+    "defaultOffRuntimeFlagRequiredBeforeAnyCutover": true
+  },
+  "safetyBoundaries": [
+    "no LegalAction generation",
+    "no hidden-info expansion",
+    "no PlayerAction outside LegalActions-derived Witness evidence",
+    "no generic Credit/Draw/Run/Corp economy punishment",
+    "no runtime cutover without Witness, TargetRef, PlayerAction build and Replay pass"
+  ],
+  "removalConditions": [
+    "At least one Candidate Gate v3 entry passes with a real LegalActionWitness.",
+    "TargetRef is complete or irrelevant for that same candidate.",
+    "buildPlayerActionFromWitness builds the PlayerAction from the Witness.",
+    "Replay Probe v3 applies the PlayerAction and passes deterministic StateHash checks.",
+    "A tight default-off runtime flag names exactly that candidate family and fixture scope."
+  ],
+  "eligibleCandidates": []
+}
