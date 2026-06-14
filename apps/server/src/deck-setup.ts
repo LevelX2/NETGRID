@@ -8,7 +8,7 @@ import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type Dec
 import type { ApiMatchCardPool } from "@netgrid/shared";
 
 export type SeriesPlayerSlot = "player_a" | "player_b";
-export type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
+export type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
 export type MatchCardPool = ApiMatchCardPool;
 
 export type ParticipantDeckPairInput = {
@@ -76,9 +76,10 @@ export function resolveParticipantDeckSetup(
     ...(input.runnerDeckSnapshot ? { runnerDeckSnapshot: input.runnerDeckSnapshot } : {}),
     ...(input.corpDeckSnapshot ? { corpDeckSnapshot: input.corpDeckSnapshot } : {})
   };
+  const participantAInput = input.participantADecks ?? legacyPair;
   const setup: ResolvedParticipantDeckSetup = {
-    player_a: resolveParticipantPair(deckInputForPlayer("player_a", input.participantADecks ?? legacyPair, options.seed, options.aiPlayer, policy), options.cardPool),
-    player_b: resolveParticipantPair(deckInputForPlayer("player_b", input.participantBDecks ?? legacyPair, options.seed, options.aiPlayer, policy), options.cardPool)
+    player_a: resolveParticipantPair(deckInputForPlayer("player_a", participantAInput, participantAInput, options.seed, options.aiPlayer, policy), options.cardPool),
+    player_b: resolveParticipantPair(deckInputForPlayer("player_b", input.participantBDecks ?? legacyPair, participantAInput, options.seed, options.aiPlayer, policy), options.cardPool)
   };
   if (options.aiPlayer && !participantPairUsesAiSupportedCards(setup[options.aiPlayer])) throw new Error("ai_deck_snapshot_not_supported");
   return setup;
@@ -125,12 +126,14 @@ function resolveParticipantPair(input: ParticipantDeckPairInput, cardPool: Match
 function deckInputForPlayer(
   player: SeriesPlayerSlot,
   selected: ParticipantDeckPairInput,
+  participantAInput: ParticipantDeckPairInput,
   seed: string,
   aiPlayer: SeriesPlayerSlot | undefined,
   policy: AiDeckPolicy
 ): ParticipantDeckPairInput {
   if (player !== aiPlayer) return selected;
   if (policy === "fixed") return {};
+  if (policy === "same_as_participant_a") return participantAInput;
   if (policy === "seeded_random") {
     return {
       runnerDeckSnapshotId: deterministicSnapshotId("runner", seed, `${player}:runner`),

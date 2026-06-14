@@ -57,7 +57,7 @@ describe("match start local settings storage", () => {
         playerClockMode: "player_clock",
         playerClockMinutes: 99,
         playerClockGraceSeconds: 30,
-        aiDeckPolicy: "seeded_random",
+        aiDeckPolicy: "same_as_participant_a",
         countdownSeconds: 7,
         selectedRunnerLocalDeckId: 42,
         selectedCorpLocalDeckId: "corp_local_ok",
@@ -72,7 +72,7 @@ describe("match start local settings storage", () => {
       matchCardPool: "originalset",
       playerClockMode: "player_clock",
       playerClockGraceSeconds: 30,
-      aiDeckPolicy: "seeded_random",
+      aiDeckPolicy: "same_as_participant_a",
       selectedCorpLocalDeckId: "corp_local_ok"
     });
   });

@@ -1438,7 +1438,7 @@ function deckPairFromBody(value: unknown): ParticipantDeckPairInput | undefined 
 }
 
 function aiDeckPolicyFromValue(value: unknown): AiDeckPolicy | undefined {
-  return value === "fixed" || value === "selected" || value === "seeded_random" ? value : undefined;
+  return value === "fixed" || value === "selected" || value === "seeded_random" || value === "same_as_participant_a" ? value : undefined;
 }
 
 function deckErrorMessage(error: unknown): string {

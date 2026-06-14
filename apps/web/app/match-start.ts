@@ -6,6 +6,7 @@ export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
 export type MatchCardPoolSelection = "originalset" | "originalset_proteus";
+export type AiDeckPolicySelection = "selected" | "fixed" | "seeded_random" | "same_as_participant_a";
 
 export type DerivedMatchStart = {
   requestedPlayMode: PlayMode;
@@ -99,7 +100,7 @@ export function matchStartSummary(input: {
   matchCardPool?: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
-  aiDeckPolicy?: "selected" | "fixed" | "seeded_random";
+  aiDeckPolicy?: AiDeckPolicySelection;
   testSetupMode?: boolean;
 }): string[] {
   const playMode = playModeCardLabel(input.playMode).title;
@@ -125,10 +126,16 @@ export function matchStartSummary(input: {
           ? "KI-Decks: Standard"
           : input.aiDeckPolicy === "seeded_random"
             ? "KI-Decks: deterministisch zufällig"
-            : "KI-Decks: ausgewählt"
+            : input.aiDeckPolicy === "same_as_participant_a"
+              ? "KI-Decks: wie Teilnehmer A"
+              : "KI-Decks: ausgewählt"
         : input.aiDeckPolicy === "seeded_random"
           ? "Simulationsdecks: deterministisch zufällig"
-          : "Simulationsdecks: ausgewählt";
+          : input.aiDeckPolicy === "fixed"
+            ? "Simulationsdecks: Standard"
+            : input.aiDeckPolicy === "same_as_participant_a"
+              ? "Simulationsdecks: wie erste Auswahl"
+              : "Simulationsdecks: ausgewählt";
   return [playMode, side, format, cardPool, deckPolicy];
 }
 
