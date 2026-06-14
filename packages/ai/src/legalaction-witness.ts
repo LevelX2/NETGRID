@@ -77,7 +77,11 @@ export function buildLegalActionWitness(
   input: BuildLegalActionWitnessInput,
 ): LegalActionWitness {
   const sourceRef = sourceRefForAction(input.legalAction);
-  const targetRef = targetRefForAction(input.legalAction, input.selectedTargets);
+  const targetRef = targetRefForAction(
+    input.legalAction,
+    input.selectedTargets,
+    input.selectedChoices,
+  );
   const choiceRef = choiceRefForAction(input.legalAction);
   const abilityRef = abilityRefForAction(input.legalAction, sourceRef);
   const redactionPolicy = combineRedactionPolicies([
@@ -177,6 +181,7 @@ function abilityRefForAction(
 function targetRefForAction(
   action: LegalAction,
   selectedTargets: Readonly<Record<string, string>> | undefined,
+  selectedChoices: Readonly<Record<string, unknown>> | undefined,
 ): LegalActionWitnessTargetRef {
   const serverId = stringPayload(action, "serverId");
   if (serverId) {
@@ -199,11 +204,12 @@ function targetRefForAction(
     };
   }
   if (action.choiceRequirements && action.choiceRequirements.length > 0) {
+    const selection = selectedChoiceForAction(action, selectedChoices);
     return {
       ...buildTargetRef({
         kind: "choice",
-        choiceId: action.choiceRequirements[0]?.choiceId ?? "unknown",
-        optionId: "unknown",
+        choiceId: selection.choiceId,
+        optionId: selection.optionId,
       }),
     };
   }
@@ -232,6 +238,21 @@ function choiceRefForAction(action: LegalAction): LegalActionWitnessChoiceRef | 
   };
 }
 
+function selectedChoiceForAction(
+  action: LegalAction,
+  selectedChoices: Readonly<Record<string, unknown>> | undefined,
+): { choiceId: string; optionId: string } {
+  const requirement = action.choiceRequirements?.[0];
+  const choiceId =
+    stringRecordValue(selectedChoices, "choiceId") ?? requirement?.choiceId ?? "unknown";
+  const selectedOptionIds = selectedChoices?.selectedOptionIds;
+  const optionId =
+    Array.isArray(selectedOptionIds) && typeof selectedOptionIds[0] === "string"
+      ? selectedOptionIds[0]
+      : "unknown";
+  return { choiceId, optionId };
+}
+
 function costProfileForAction(action: LegalAction): LegalActionWitnessCostProfile {
   let clickCost = 0;
   let creditCost = 0;
@@ -250,6 +271,14 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
 function firstRecordValue(record: Readonly<Record<string, string>> | undefined): string | undefined {
   if (!record) return undefined;
   return Object.values(record)[0];
+}
+
+function stringRecordValue(
+  record: Readonly<Record<string, unknown>> | undefined,
+  key: string,
+): string | undefined {
+  const value = record?.[key];
+  return typeof value === "string" ? value : undefined;
 }
 
 function combineRedactionPolicies(

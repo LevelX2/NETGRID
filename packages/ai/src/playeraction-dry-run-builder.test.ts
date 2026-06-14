@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { buildCandidatePathBinding } from "./candidate-path-binding";
+import { buildLegalActionWitness } from "./legalaction-witness";
 import { buildSemanticActionSignature } from "./semantic-action-signature";
 import { resolveCandidateTargetIdentity } from "./target-identity-resolver";
-import { buildPlayerActionFromCandidateBinding } from "./playeraction-dry-run-builder";
+import {
+  buildPlayerActionFromCandidateBinding,
+  buildPlayerActionFromWitness,
+} from "./playeraction-dry-run-builder";
+import type { LegalAction } from "@netgrid/shared";
 
 describe("playeraction dry-run builder", () => {
   it("builds a no-target basic action when a real actionId is present", () => {
@@ -138,3 +143,101 @@ describe("playeraction dry-run builder", () => {
     expect(result.blockers).toContain("action_id_redacted");
   });
 });
+
+describe("player action builder from LegalActionWitness", () => {
+  it("builds no-target basic actions", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("gain_credit", { targetRequirements: [] }),
+        stateVersion: 17,
+      }),
+      legalActionIds: ["test.gain_credit"],
+    });
+
+    expect(result.status).toBe("built");
+    expect(result.playerAction).toMatchObject({
+      actionId: "test.gain_credit",
+      clientKnownStateVersion: 17,
+      side: "runner",
+    });
+    expect(result.playerAction?.selectedTargets).toBeUndefined();
+  });
+
+  it("builds server runs", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("start_run", {
+          payload: { serverId: "hq" },
+          targetRequirements: [{ id: "server", kind: "server", allowedServers: ["hq"] }],
+        }),
+        stateVersion: 20,
+      }),
+    });
+
+    expect(result.status).toBe("built");
+    expect(result.playerAction?.selectedTargets).toEqual({ serverId: "hq" });
+  });
+
+  it("builds choice options", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("resolve_choice", {
+          choiceRequirements: [
+            {
+              choiceId: "choice_1",
+              minSelections: 1,
+              maxSelections: 1,
+              optionIds: ["option_a"],
+            },
+          ],
+          targetRequirements: [],
+        }),
+        stateVersion: 21,
+        selectedChoices: { choiceId: "choice_1", selectedOptionIds: ["option_a"] },
+      }),
+    });
+
+    expect(result.status).toBe("built");
+    expect(result.playerAction?.selectedChoices).toEqual({
+      choiceId: "choice_1",
+      selectedOptionIds: ["option_a"],
+    });
+  });
+
+  it("blocks hidden targets and missing legal action membership", () => {
+    const result = buildPlayerActionFromWitness({
+      witness: buildLegalActionWitness({
+        legalAction: action("trigger_ability", {
+          source: "cardInstances.runner.stack.0",
+          targetRequirements: [{ id: "target", kind: "card", visibility: "engine_only" }],
+        }),
+        stateVersion: 22,
+        selectedTargets: { target: "cardInstances.runner.stack.0" },
+      }),
+      legalActionIds: ["other"],
+    });
+
+    expect(result.status).toBe("blocked");
+    expect(result.blockers).toContain("action_not_in_legal_actions");
+    expect(result.blockers).toContain("witness_hidden_blocked");
+  });
+});
+
+function action(
+  type: LegalAction["type"],
+  overrides: Partial<LegalAction> = {},
+): LegalAction {
+  return {
+    actionId: `test.${type}`,
+    side: "runner",
+    type,
+    label: type,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 1,
+    ...overrides,
+  };
+}

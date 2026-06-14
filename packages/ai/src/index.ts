@@ -284,6 +284,7 @@ export {
   targetRefIsRedactionSafe,
 } from "./target-ref";
 export { buildWitnessOpportunityProjection } from "./witness-opportunity-projection";
+export { buildPlayerActionFromWitness } from "./playeraction-dry-run-builder";
 export type {
   BuildLegalActionWitnessInput,
   LegalActionWitness,
@@ -306,6 +307,7 @@ export type {
   WitnessOpportunityProjection,
   WitnessOpportunityProjectionStatus,
 } from "./witness-opportunity-projection";
+export type { PlayerActionWitnessBuildInput } from "./playeraction-dry-run-builder";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
