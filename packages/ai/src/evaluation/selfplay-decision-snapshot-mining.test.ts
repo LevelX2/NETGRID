@@ -6,6 +6,7 @@ import {
   buildSelfplayDecisionSnapshotMiningReport,
   SELFPLAY_DECISION_SNAPSHOT_MINING_SCHEMA_VERSION,
 } from "./selfplay-decision-snapshot-mining";
+import { formatSelfplayPromotionActivityCandidates } from "../reports/selfplay-promotion-activity-formatters";
 
 describe("SelfplayDecisionSnapshotMining", () => {
   it("mines suspicious selfplay decisions into diagnostic snapshot candidates", () => {
@@ -132,6 +133,27 @@ describe("SelfplayDecisionSnapshotMining", () => {
     expect(report.candidatesByMistakeClass.ignored_remote_threat).toBe(2);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
     expect(containsForbiddenSemanticMarker(report.clusters)).toBe(false);
+
+    const activityCandidates = formatSelfplayPromotionActivityCandidates(
+      report.promotionQueue,
+    );
+    expect(activityCandidates).toHaveLength(report.promotionQueue.length);
+    expect(activityCandidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fileName: expect.stringMatching(/^docs\/activities\/inbox\//),
+          writeAllowed: false,
+          markdown: expect.stringContaining(
+            "Dieser Formatter schreibt keine Dateien.",
+          ),
+          evidence: expect.arrayContaining([
+            "selfplay_promotion_activity_candidate:report_only",
+            "write_allowed:false",
+          ]),
+        }),
+      ]),
+    );
+    expect(containsForbiddenSemanticMarker(activityCandidates)).toBe(false);
   });
 
   it("keeps findings without redacted action alternatives as blocked candidates", () => {

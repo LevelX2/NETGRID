@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
   buildLocalDefaultPilotPolicy,
   defaultActiveScopes,
   localDefaultPolicyEnvOverrideRequired,
+  localDefaultPilotScopes,
   recommendedLocalDefaultScopes,
 } from "./local-default-pilot-policy";
 import type { SemanticShadowLeagueLocalDefaultDryRunReport } from "../../evaluation/semantic-shadow-league";
@@ -34,6 +36,63 @@ describe("local default pilot policy", () => {
       "runner_safe_access",
     ]);
     expect(defaultActiveScopes()).toEqual([]);
+  });
+
+  it("allows only basic setup as an explicit local default env when pilot env is unset", () => {
+    expect(AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV).toBe(
+      "NETGRID_AI_PLAY_STRENGTH_LOCAL_DEFAULT",
+    );
+    expect(
+      localDefaultPilotScopes({
+        explicitPilotEnv: undefined,
+        localDefaultEnv: "basic_setup",
+      }),
+    ).toEqual(["basic_setup"]);
+    expect(
+      localDefaultPilotScopes({
+        explicitPilotEnv: "runner_safe_access",
+        localDefaultEnv: "basic_setup",
+      }),
+    ).toEqual([]);
+    expect(
+      localDefaultPilotScopes({
+        explicitPilotEnv: undefined,
+        localDefaultEnv: "runner_safe_access",
+      }),
+    ).toEqual([]);
+    expect(
+      localDefaultPilotScopes({
+        explicitPilotEnv: undefined,
+        localDefaultEnv: undefined,
+      }),
+    ).toEqual([]);
+  });
+
+  it("keeps runner safe access visible as explicit-env only policy", () => {
+    const policy = buildLocalDefaultPilotPolicy();
+    const runnerSafeAccess = policy.scopes.find(
+      (scope) => scope.scope === "runner_safe_access",
+    );
+
+    expect(runnerSafeAccess).toEqual(
+      expect.objectContaining({
+        status: "default_off_candidate",
+        enabledByDefault: false,
+        envGateRequired: true,
+        nextStep: "keep_runner_safe_access_explicit_env",
+        corpusReadiness: "structured_but_requires_explicit_env",
+        falsePositiveRisk: "medium",
+        hiddenInfoRisk: "low",
+      }),
+    );
+    expect(runnerSafeAccess?.evidence).toEqual(
+      expect.arrayContaining([
+        "decision:runner_safe_access:keep_explicit_env",
+        "decision_record:ai-runner-safe-access-explicit-env-record-2026-06-13",
+        "structured_alignment:present",
+        "risk_blocks:present",
+      ]),
+    );
   });
 });
 

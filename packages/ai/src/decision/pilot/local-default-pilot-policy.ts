@@ -5,15 +5,30 @@ import {
   type AiPlayStrengthPilotScope,
 } from "./pilot-scope-common";
 
+export const AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV =
+  "NETGRID_AI_PLAY_STRENGTH_LOCAL_DEFAULT";
+
 export type LocalDefaultPilotPolicyStatus =
   | "default_off_candidate"
   | "keep_env_gated";
+
+export type LocalDefaultPilotNextStep =
+  | "candidate_basic_setup_local_default_env"
+  | "keep_runner_safe_access_explicit_env"
+  | "keep_corp_score_window_env_gated";
 
 export type LocalDefaultPilotPolicyScope = {
   scope: AiPlayStrengthPilotScope;
   status: LocalDefaultPilotPolicyStatus;
   enabledByDefault: false;
   envGateRequired: true;
+  nextStep: LocalDefaultPilotNextStep;
+  corpusReadiness:
+    | "sufficient_for_local_candidate"
+    | "structured_but_requires_explicit_env"
+    | "insufficient_for_default";
+  falsePositiveRisk: "low" | "medium" | "high";
+  hiddenInfoRisk: "low" | "medium" | "high";
   rationale: string;
   evidence: string[];
 };
@@ -54,9 +69,18 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
         status: "default_off_candidate",
         enabledByDefault: false,
         envGateRequired: true,
-        rationale: "Basic setup is a local default-off candidate only.",
+        nextStep: "candidate_basic_setup_local_default_env",
+        corpusReadiness: "sufficient_for_local_candidate",
+        falsePositiveRisk: "low",
+        hiddenInfoRisk: "low",
+        rationale:
+          "Basic setup is a default-off candidate for an explicit local default env, not a global runtime default.",
         evidence: [
           "assessment:basic_setup:default_off_candidate",
+          "decision:basic_setup:candidate_local_default_env",
+          "corpus_readiness:sufficient_for_local_candidate",
+          "false_positive_risk:low",
+          "hidden_info_risk:low",
           "enabled_by_default:false",
         ],
       },
@@ -65,9 +89,20 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
         status: "default_off_candidate",
         enabledByDefault: false,
         envGateRequired: true,
-        rationale: "Runner safe access is a local default-off candidate only.",
+        nextStep: "keep_runner_safe_access_explicit_env",
+        corpusReadiness: "structured_but_requires_explicit_env",
+        falsePositiveRisk: "medium",
+        hiddenInfoRisk: "low",
+        rationale:
+          "Runner safe access has structured alignment and risk blocks, but remains explicit-env while access-window behavior matures.",
         evidence: [
           "assessment:runner_safe_access:default_off_candidate",
+          "decision:runner_safe_access:keep_explicit_env",
+          "decision_record:ai-runner-safe-access-explicit-env-record-2026-06-13",
+          "structured_alignment:present",
+          "risk_blocks:present",
+          "false_positive_risk:medium",
+          "hidden_info_risk:low",
           "enabled_by_default:false",
         ],
       },
@@ -76,9 +111,17 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
         status: "keep_env_gated",
         enabledByDefault: false,
         envGateRequired: true,
+        nextStep: "keep_corp_score_window_env_gated",
+        corpusReadiness: "insufficient_for_default",
+        falsePositiveRisk: "high",
+        hiddenInfoRisk: "low",
         rationale: "Corp score window remains env-gated pending broader corpus.",
         evidence: [
           "assessment:corp_score_window:keep_env_gated",
+          "decision:corp_score_window:keep_env_gated",
+          "corpus_readiness:insufficient_for_default",
+          "false_positive_risk:high",
+          "hidden_info_risk:low",
           "enabled_by_default:false",
         ],
       },
@@ -94,6 +137,15 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
 
 export function defaultActiveScopes(): [] {
   return [];
+}
+
+export function localDefaultPilotScopes(params: {
+  explicitPilotEnv: string | undefined;
+  localDefaultEnv: string | undefined;
+}): AiPlayStrengthPilotScope[] {
+  if (params.explicitPilotEnv?.trim()) return [];
+  if (params.localDefaultEnv?.trim() !== BASIC_SETUP_PILOT_MODE) return [];
+  return [BASIC_SETUP_PILOT_MODE];
 }
 
 export function recommendedLocalDefaultScopes(

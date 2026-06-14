@@ -5523,8 +5523,9 @@ select {
 }
 
 .corpHqServer {
-  flex: 0 1 auto;
-  width: fit-content;
+  flex: 1 1 760px;
+  width: auto;
+  min-width: 0;
   max-width: 100%;
 }
 
@@ -5537,6 +5538,7 @@ select {
 
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
+  min-width: 0;
   width: 100%;
 }
 
@@ -5597,14 +5599,16 @@ select {
   flex-wrap: nowrap;
   align-items: flex-start;
   gap: 6px;
+  min-width: 0;
   width: 100%;
   max-width: 100%;
 }
 
 .corpHqHandPanel {
-  flex: 1 1 680px;
+  box-sizing: border-box;
+  flex: 1 1 0;
   min-width: 0;
-  max-width: min(74vw, 820px);
+  max-width: 100%;
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
   border-radius: 6px;

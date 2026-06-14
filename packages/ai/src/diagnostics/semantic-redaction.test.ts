@@ -32,8 +32,20 @@ describe("semantic-redaction", () => {
     expect(redactSemanticString("PRIvatePAYload_bad_reason")).toBe(
       "[redacted]",
     );
+    expect(redactSemanticString("cardInstances:runner_grip")).toBe(
+      "[redacted]",
+    );
+    expect(redactSemanticString("deckOrder:top_card")).toBe("[redacted]");
+    expect(redactSemanticString("sessionToken:abc")).toBe("[redacted]");
     expect(redactSemanticString("runtime_action_legal:true")).toBe(
       "runtime_action_legal:true",
+    );
+    expect(redactSemanticString("remote_1:known_payoff")).toBe(
+      "remote_1:known_payoff",
+    );
+    expect(redactSemanticString("server_1:central")).toBe("server_1:central");
+    expect(redactSemanticString("scenario_1:fixture")).toBe(
+      "scenario_1:fixture",
     );
   });
 

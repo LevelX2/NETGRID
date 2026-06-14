@@ -390,7 +390,7 @@ type GameMode = ApiClientGameMode;
 type MatchFormat = ApiMatchFormat;
 type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
-type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
+type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
 type AiPacingMode = ApiAiPacingMode;
 type AiTraceStartMode = "off" | "detailed";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
@@ -3134,6 +3134,7 @@ export default function Page() {
   }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
   const playerClockDetailControlsDisabled = matchStartSettingsLoaded ? playerClockMode === "none" : false;
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
+  const aiDeckPolicyUsesPrimaryDeckSlots = aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
   const joinTokenTrimmed = joinToken.trim();
@@ -3141,7 +3142,7 @@ export default function Page() {
   const canSubmitJoin = joinMatchIdTrimmed.length > 0 && (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
   const visibleDeckMetadataEntries =
     gameMode === "ai_vs_ai"
-      ? aiDeckPolicy === "selected"
+      ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             { label: "Runner-KI", metadata: participantARunnerMetadata },
             { label: "Korp-KI", metadata: participantACorpMetadata }
@@ -5352,7 +5353,7 @@ export default function Page() {
                   </label>
                 ) : null}
                 </div>
-                {gameMode !== "ai_vs_ai" || aiDeckPolicy === "selected" ? (
+                {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
                   <div className="deckSlotGrid">
                     <DeckSlotSelect
                       label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
@@ -5499,6 +5500,7 @@ export default function Page() {
                         KI-Decks
                         <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
                           <option value="selected">Explizit gewählte KI-Decks</option>
+                          <option value="same_as_participant_a">Gleiche Decks wie Teilnehmer A</option>
                           <option value="fixed">Feste Standard-Decks</option>
                           <option value="seeded_random">Deterministisch zufällig</option>
                         </select>

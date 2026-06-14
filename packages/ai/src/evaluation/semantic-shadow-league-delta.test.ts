@@ -148,6 +148,15 @@ describe("SemanticShadowLeagueDelta", () => {
       delta: 1,
       direction: "regressed",
     });
+    expect(delta.dashboardSummary).toMatchObject({
+      scenarioCountDelta: 1,
+      agreementDirection: "improved",
+      mistakeDirection: "improved",
+      followupDirection: "regressed",
+      evidence: expect.arrayContaining([
+        "shadow_league_delta_dashboard_summary:report_only",
+      ]),
+    });
     expect(delta.evidence).toEqual(
       expect.arrayContaining([
         "semantic_shadow_league_delta:report_only",

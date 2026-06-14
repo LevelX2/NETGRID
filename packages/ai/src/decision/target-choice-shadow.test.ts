@@ -5,6 +5,7 @@ import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redacti
 import {
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
   buildTargetChoiceShadowReport,
+  targetChoiceWouldSelectForAccessDecisionProjection,
 } from "./target-choice-shadow";
 
 describe("TargetChoiceShadow", () => {
@@ -43,6 +44,19 @@ describe("TargetChoiceShadow", () => {
         ]),
       },
     });
+    expect(targetChoiceWouldSelectForAccessDecisionProjection(report)).toEqual(
+      expect.objectContaining({
+        requirementId: "discard_choice",
+        optionId: "gain",
+        confidence: "medium",
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+        evidence: expect.arrayContaining([
+          "target_choice_access_decision_projection:dry_run",
+          "target_choice_would_select:dry_run",
+        ]),
+      }),
+    );
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.runtimeConsumerStatus).toBe("none");
     expect(report.noRuntimeEffect).toBe(true);
@@ -234,6 +248,18 @@ describe("TargetChoiceShadow", () => {
         "option_kind:target_option",
         "opportunity:remote_contest_window",
       ]),
+    );
+    expect(targetChoiceWouldSelectForAccessDecisionProjection(report)).toEqual(
+      expect.objectContaining({
+        requirementId: "server",
+        optionId: "remote_1",
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+        evidence: expect.arrayContaining([
+          "target_choice_access_decision_projection_selected_choices_created:false",
+          "target_choice_access_decision_projection_selected_targets_created:false",
+        ]),
+      }),
     );
     expect(report.scorecard).toMatchObject({
       coverageStatus: "covered",

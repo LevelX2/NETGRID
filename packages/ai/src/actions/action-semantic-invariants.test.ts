@@ -445,7 +445,315 @@ describe("Action semantic invariants", () => {
     );
     expect(report.productiveUseAllowed).toBe(false);
   });
+
+  it("covers runner access payoff worklist package as diagnostic semantics", () => {
+    const profiles = [
+      runnerAccessPayoffProfile("R&D Interface", ["access.rnd_multiaccess"]),
+      runnerAccessPayoffProfile("HQ Interface", ["access.hq_multiaccess"]),
+      runnerAccessPayoffProfile("Executive Wiretaps", [
+        "access.hq_multiaccess",
+        "access.central_payoff",
+      ]),
+      runnerAccessPayoffProfile("Custodial Position", [
+        "access.central_payoff",
+      ]),
+      runnerAccessPayoffProfile("Rush Hour", ["run.structure_only"]),
+      runnerAccessPayoffProfile("All-Hands", ["run.structure_only"]),
+      runnerAccessPayoffProfile("Kilroy Was Here", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Romp through HQ", ["access.hq_multiaccess"]),
+      runnerAccessPayoffProfile("Crumble", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Garbage In", ["access.free_trash"]),
+      runnerAccessPayoffProfile("Highlighter", ["access.rnd_multiaccess"]),
+      runnerAccessPayoffProfile("Vienna 22", ["access.central_payoff"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "access.hq_multiaccess",
+        "access.rnd_multiaccess",
+        "access.free_trash",
+        "access.central_payoff",
+        "run.structure_only",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers runner economy commitment worklist package as diagnostic semantics", () => {
+    const profiles = [
+      runnerEconomyCommitmentProfile("Broker", ["economy.burst_credit"]),
+      runnerEconomyCommitmentProfile("Rigged Investments", [
+        "economy.commitment_bank",
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Short-Term Contract", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Top Runners' Conference", [
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Loan from Chiba", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Databroker", ["economy.deferred_credit"]),
+      runnerEconomyCommitmentProfile("Organ Donor", [
+        "economy.burst_credit",
+        "risk.loss_condition",
+      ]),
+      runnerEconomyCommitmentProfile("Score!", ["economy.burst_credit"]),
+      runnerEconomyCommitmentProfile("Livewire's Contacts", [
+        "economy.deferred_credit",
+      ]),
+      runnerEconomyCommitmentProfile("Score! / burst-credit preps", [
+        "commitment.run_breaking",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "economy.burst_credit",
+        "economy.deferred_credit",
+        "economy.commitment_bank",
+        "risk.loss_condition",
+        "commitment.run_breaking",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp remote economy asset worklist package as diagnostic semantics", () => {
+    const profiles = [
+      corpRemoteEconomyAssetProfile("Holovid Campaign", [
+        "economy.campaign_drip",
+        "access.remote_trash_commitment",
+      ]),
+      corpRemoteEconomyAssetProfile("BBS Whispering Campaign", [
+        "economy.campaign_drip",
+        "corp_asset.economy_value",
+      ]),
+      corpRemoteEconomyAssetProfile("Braindance Campaign", [
+        "economy.finite_pool",
+      ]),
+      corpRemoteEconomyAssetProfile("Investment Firm", [
+        "economy.finite_pool",
+        "counter.bank",
+      ]),
+      corpRemoteEconomyAssetProfile("Rockerboy Promotion", [
+        "economy.campaign_drip",
+      ]),
+      corpRemoteEconomyAssetProfile("Department of Truth Enhancement", [
+        "corp_asset.economy_value",
+      ]),
+      corpRemoteEconomyAssetProfile("Information Laundering", [
+        "counter.bank",
+        "counter.cashout",
+      ]),
+      corpRemoteEconomyAssetProfile("Vapor Ops", ["corp_asset.economy_value"]),
+      corpRemoteEconomyAssetProfile("South African Mining Corp", [
+        "economy.finite_pool",
+      ]),
+      corpRemoteEconomyAssetProfile("ACME Savings and Loan", [
+        "counter.bank",
+        "counter.cashout",
+      ]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "economy.finite_pool",
+        "economy.campaign_drip",
+        "counter.bank",
+        "counter.cashout",
+        "access.remote_trash_commitment",
+        "corp_asset.economy_value",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
+
+  it("covers corp ice tax worklist package as diagnostic semantics", () => {
+    const profiles = [
+      corpIceTaxProfile("Data Masons", ["ice_tax"]),
+      corpIceTaxProfile("Encoder Inc.", ["rez_discount"]),
+      corpIceTaxProfile("Skälderviken SA Beta Test Site", [
+        "subroutine_support",
+        "constraint.only_model",
+      ]),
+      corpIceTaxProfile("Jerusalem City Grid", ["rez_discount"]),
+      corpIceTaxProfile("Crystal Palace Station Grid", ["break_cost_tax"]),
+      corpIceTaxProfile("Tesseract Fort Construction", [
+        "subroutine_support",
+        "target_profile.required",
+      ]),
+      corpIceTaxProfile("Ball and Chain", ["run_tax"]),
+      corpIceTaxProfile("Virizz", ["break_cost_tax"]),
+      corpIceTaxProfile("Newsgroup Taunting", ["run_tax"]),
+    ];
+
+    const report = buildActionSemanticInvariantReport(profiles);
+
+    expect(report.valid).toBe(true);
+    expect(profiles.flatMap((profile) => profile.tacticSignals)).toEqual(
+      expect.arrayContaining([
+        "ice_tax",
+        "rez_discount",
+        "subroutine_support",
+        "break_cost_tax",
+        "run_tax",
+        "constraint.only_model",
+        "target_profile.required",
+      ]),
+    );
+    expect(report.productiveUseAllowed).toBe(false);
+  });
 });
+
+function runnerAccessPayoffProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.runner_access_payoff`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.central_pressure",
+            role: "access_payoff",
+            confidence: "medium",
+            evidence: `${title} is classified by functional access payoff semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_central_or_accessed_card",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Access payoff remains diagnostic until side-safe target profile coverage exists.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function runnerEconomyCommitmentProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.runner_economy_commitment`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "runner.doctrine.economy_engine",
+            role: "economy_commitment",
+            confidence: "medium",
+            evidence: `${title} is classified by functional economy commitment semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.runner_economy_commitment",
+            status: "not_available",
+            issues: ["card_semantics_unavailable"],
+            evidence: [
+              "Commitment bank and loss-condition precision remains diagnostic.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpRemoteEconomyAssetProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_remote_economy_asset`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "corp.doctrine.asset_economy",
+            role: "remote_economy_asset",
+            confidence: "medium",
+            evidence: `${title} is classified by functional remote economy asset semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_remote_asset_economy",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Remote trash commitment and counter-state precision remains diagnostic.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function corpIceTaxProfile(
+  title: string,
+  tacticSignals: string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId: `onr_v1_worklist_${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    tacticSignals,
+    abilitySemantics: [
+      {
+        abilityId: `${title}.corp_ice_tax`,
+        tacticSignals,
+        strategySupport: [
+          {
+            strategyId: "corp.doctrine.ice_tax",
+            role: "ice_tax_support",
+            confidence: "medium",
+            evidence: `${title} is classified by functional ICE tax and rez-economy semantics.`,
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: "tp.corp_ice_tax_or_grid_context",
+            status: "not_available",
+            issues: ["target_context_unavailable"],
+            evidence: [
+              "Constraint-only effects stay separate from target profile matches.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
 
 function runnerBreakerSearchProfile(
   title: string,

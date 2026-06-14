@@ -1119,6 +1119,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       expect.arrayContaining([
         "pre_run_access_decision:defer_until_funded",
         "trash_decline_reason:reserve_would_break",
+        "known_remote_access_commitment_intended_action:decline",
+        "known_remote_access_commitment_reason:reserve_would_break",
         "known_remote_root_credits_after_trash:0",
         "known_remote_root_trash_preserves_reserve:false",
         "known_remote_run_no_progress_context:visible_random_ice",

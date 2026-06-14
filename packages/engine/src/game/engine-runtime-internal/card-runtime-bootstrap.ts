@@ -315,7 +315,8 @@ import {
   type ScoredAgendaAbilityHost,
 } from "../corp/scored-agenda-abilities";
 import { orderedFortRebuildPublicPayload } from "../corp/scored-agenda/ordered-fort-rebuild-sequence";
-import { runIsAtServerAfterPassingLastIce } from "../run/windows/after-passing-last-ice-window";
+import { stateIsAtServerAfterPassingLastIceWindow } from "../run/windows/after-passing-last-ice-window";
+import { applyRunWindowPayloadPatch } from "../run/windows/run-window-sequence-types";
 import {
   buildCorpTraceDamageAbilityActionsForCard,
   handleCorpTraceDamageActivatedAbility,
@@ -963,6 +964,7 @@ export function configureCardRuntimeBootstrap() {
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinitionId,
+    selectedHqCardIds: readonly CardInstanceId[] = [],
   ): { publicPayload: Record<string, string | number | boolean> } {
     const source = mustInstance(state.cardInstances, sourceCardId);
     if (
@@ -974,10 +976,7 @@ export function configureCardRuntimeBootstrap() {
     const server = mustServer(state, source.zone.serverId);
     if (server.kind !== "remote")
       throw new Error("Fort-Ersatz darf nur in einem Remote ausloesen.");
-    if (
-      !state.run ||
-      !runIsAtServerAfterPassingLastIce(state.run, server)
-    )
+    if (!stateIsAtServerAfterPassingLastIceWindow(state, server))
       throw new Error("Fort-Ersatz darf nur nach der letzten ICE dieses Forts ausloesen.");
     const removedIce = server.ice.slice();
     const removedRoot = server.root.slice();
@@ -985,10 +984,7 @@ export function configureCardRuntimeBootstrap() {
     const legalCandidates = legalFortReplacementHqCardIds(state, server, removedCount);
     if (legalCandidates.length < removedCount)
       throw new Error("Es gibt nicht genug legale HQ-Ersatzkarten.");
-    const hqSelection = String(legalAction.payload?.fortReplacementHqCardIds ?? "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean) as CardInstanceId[];
+    const hqSelection = selectedHqCardIds.slice();
     if (hqSelection.length === 0 && legalCandidates.length > removedCount) {
       openFortHqReplacementChoice(
         state,
@@ -1014,7 +1010,7 @@ export function configureCardRuntimeBootstrap() {
         replacementCount: removedCount,
         hqCandidateCount: legalCandidates.length,
       };
-      legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+      applyRunWindowPayloadPatch(legalAction, payload);
       return { publicPayload: payload };
     }
     const selected =
@@ -1081,7 +1077,7 @@ export function configureCardRuntimeBootstrap() {
       uninstalledCardsCount: removedCount,
       installedCardsCount: selected.length,
     };
-    legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+    applyRunWindowPayloadPatch(legalAction, payload);
     return { publicPayload: payload };
   }
   function legalFortReplacementHqCardIds(
@@ -1250,15 +1246,12 @@ export function configureCardRuntimeBootstrap() {
     if (selectedIds.length !== Number(count))
       throw new Error("Fort-Ersatz braucht exakt die geforderte Ersatzkartenzahl.");
     delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      fortReplacementHqCardIds: selectedIds.join(","),
-    };
     replaceFortCardsFromHq(
       state,
       legalAction,
       sourceCardId as CardInstanceId,
       sourceDefinitionId as CardDefinitionId,
+      selectedIds,
     );
   }
   function revalidateLastRezzedBlackIce(
