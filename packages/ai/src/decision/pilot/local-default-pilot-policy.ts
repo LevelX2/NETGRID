@@ -98,6 +98,7 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
         evidence: [
           "assessment:runner_safe_access:default_off_candidate",
           "decision:runner_safe_access:keep_explicit_env",
+          "decision_record:ai-runner-safe-access-explicit-env-record-2026-06-13",
           "structured_alignment:present",
           "risk_blocks:present",
           "false_positive_risk:medium",

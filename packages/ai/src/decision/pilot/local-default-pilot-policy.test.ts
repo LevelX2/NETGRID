@@ -67,6 +67,33 @@ describe("local default pilot policy", () => {
       }),
     ).toEqual([]);
   });
+
+  it("keeps runner safe access visible as explicit-env only policy", () => {
+    const policy = buildLocalDefaultPilotPolicy();
+    const runnerSafeAccess = policy.scopes.find(
+      (scope) => scope.scope === "runner_safe_access",
+    );
+
+    expect(runnerSafeAccess).toEqual(
+      expect.objectContaining({
+        status: "default_off_candidate",
+        enabledByDefault: false,
+        envGateRequired: true,
+        nextStep: "keep_runner_safe_access_explicit_env",
+        corpusReadiness: "structured_but_requires_explicit_env",
+        falsePositiveRisk: "medium",
+        hiddenInfoRisk: "low",
+      }),
+    );
+    expect(runnerSafeAccess?.evidence).toEqual(
+      expect.arrayContaining([
+        "decision:runner_safe_access:keep_explicit_env",
+        "decision_record:ai-runner-safe-access-explicit-env-record-2026-06-13",
+        "structured_alignment:present",
+        "risk_blocks:present",
+      ]),
+    );
+  });
 });
 
 function dryRun(
