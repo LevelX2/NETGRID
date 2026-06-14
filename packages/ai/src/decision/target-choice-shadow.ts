@@ -4,6 +4,7 @@ import {
   findForbiddenSemanticPath,
   redactSemanticString,
 } from "../diagnostics/semantic-redaction";
+import type { AccessDecisionProjectionTargetChoiceWouldSelect } from "./access-decision-projection";
 import type { AiOpportunityProjection } from "./opportunity-projection";
 import type { TacticalGoalUtilityFamily } from "./tactical-goal-utility";
 import type { AiThreatProjection } from "./threat-projection";
@@ -83,6 +84,26 @@ export type TargetChoiceShadowReport = {
   noRuntimeEffect: true;
   evidence: string[];
 };
+
+export function targetChoiceWouldSelectForAccessDecisionProjection(
+  report: Pick<TargetChoiceShadowReport, "selectionOutput">,
+): AccessDecisionProjectionTargetChoiceWouldSelect | undefined {
+  const wouldSelect = report.selectionOutput.wouldSelect;
+  if (!wouldSelect) return undefined;
+  return {
+    requirementId: safe(wouldSelect.requirementId),
+    optionId: safe(wouldSelect.optionId),
+    confidence: wouldSelect.confidence,
+    selectedChoicesCreated: false,
+    selectedTargetsCreated: false,
+    evidence: [
+      "target_choice_access_decision_projection:dry_run",
+      "target_choice_access_decision_projection_selected_choices_created:false",
+      "target_choice_access_decision_projection_selected_targets_created:false",
+      ...wouldSelect.evidence,
+    ].map(safe),
+  };
+}
 
 export type BuildTargetChoiceShadowReportParams = {
   action: LegalAction;

@@ -13,6 +13,8 @@ import {
   parsePilotScopes,
   pilotScopeAllowsAction,
   semanticPilotChoice,
+  semanticPlayStrengthPilotEnabled,
+  type AiPlayStrengthPilotScope,
 } from "./pilot-scope-registry";
 import { SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV } from "../semantic-shadow-calibration";
 import type { SemanticDecisionFrame } from "../semantic-decision-frame";
@@ -49,6 +51,16 @@ describe("pilot-scope-registry", () => {
         ` ${BASIC_SETUP_PILOT_MODE},unknown;${RUNNER_SAFE_ACCESS_PILOT_MODE} ${BASIC_SETUP_PILOT_MODE} `,
       ),
     ).toEqual([BASIC_SETUP_PILOT_MODE, RUNNER_SAFE_ACCESS_PILOT_MODE]);
+  });
+
+  it("keeps remote contest outside runtime pilot scopes", () => {
+    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = "remote_contest";
+
+    expect(parsePilotScopes("remote_contest")).toEqual([]);
+    expect(ALL_PLAY_STRENGTH_PILOT_SCOPES).not.toContain(
+      "remote_contest" as AiPlayStrengthPilotScope,
+    );
+    expect(semanticPlayStrengthPilotEnabled()).toBe(false);
   });
 
   it("expands the all token without duplicating explicit scopes", () => {

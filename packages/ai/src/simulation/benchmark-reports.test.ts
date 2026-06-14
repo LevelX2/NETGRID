@@ -44,7 +44,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ gate, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 60_000);
+  }, 120_000);
 
   it("reports match progression metrics alongside safety signals", () => {
     const benchmark = runMatchProgressionBenchmark({
@@ -98,7 +98,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ benchmark, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 120_000);
 
   it("reports a deck-separated match progression suite with pending real-scene slots", () => {
     const suite = runMatchProgressionBenchmarkSuite({

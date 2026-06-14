@@ -12,10 +12,10 @@ export const proteusSirenImplementation: CardImplementationDefinition = {
     },
   ],
   corpUtility: {
-    kind: "siren_start_run_redirect",
-    cost: { kind: "credit", amount: 1 },
-    timing: "start_of_run",
-    target: "source_fort",
+    kind: "start_run_redirect_to_source_fort",
+    cost: { credits: 1 },
+    timing: "run_start",
+    redirectTarget: "source_fort",
     visibility: "public",
   },
 };

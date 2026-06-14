@@ -33,6 +33,29 @@ describe("DoctrineGoal action fit coverage", () => {
         report.goalsOnlyBlocked +
         report.goalsNoCandidate,
     ).toBe(report.doctrineGoalsProduced);
+    expect(report.worklistCandidates).toHaveLength(
+      report.goalsOnlyBlocked + report.goalsNoCandidate,
+    );
+    expect(report.worklistCandidates.length).toBeGreaterThan(0);
+    expect(report.worklistCandidates[0]).toEqual(
+      expect.objectContaining({
+        candidateId: expect.any(String),
+        scenarioId: expect.any(String),
+        goalId: expect.any(String),
+        reason: expect.stringMatching(
+          /^(blocked_action_fit|missing_action_candidate)$/,
+        ),
+        evidence: expect.arrayContaining([
+          "doctrine_goal_action_fit_worklist:report_only",
+          "productive_use_allowed:false",
+        ]),
+      }),
+    );
+    expect(report.evidence).toEqual(
+      expect.arrayContaining([
+        `worklist_candidate_count:${report.worklistCandidates.length}`,
+      ]),
+    );
     expect(Object.keys(report.topFitByFamily).length).toBeGreaterThan(0);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });

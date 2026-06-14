@@ -49,6 +49,7 @@ export type RunAccessLegalActionHostCompositionHost = {
   choices: RunFlowHost["choices"] & AccessFlowCompositionHost["choices"];
   cardImplementation: {
     accessEffectsForDefinition: AccessFlowCompositionHost["cards"]["accessEffectsForDefinition"];
+    hiddenReplacementLongtailKindForDefinition: AccessFlowCompositionHost["cards"]["hiddenReplacementLongtailKindForDefinition"];
     accessHookKindsForDefinition: RunFlowHost["cards"]["cardImplementationAccessHookKindsForDefinition"];
     runCardImplementationActionHost: Parameters<
       typeof buildRunnerDuringRunCardImplementationActions
@@ -160,6 +161,8 @@ export function createRunAccessLegalActionHostComposition(
       cardHasSubtype: cards.cardHasSubtype,
       accessEffectsForDefinition:
         cardImplementation.accessEffectsForDefinition,
+      hiddenReplacementLongtailKindForDefinition:
+        cardImplementation.hiddenReplacementLongtailKindForDefinition,
     },
     servers: {
       mustServer: servers.mustServer,

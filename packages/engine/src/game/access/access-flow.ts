@@ -453,8 +453,8 @@ function stealAgenda(
   if (!cardId) throw new Error("Keine Agenda wird accessed.");
   const run = mustRun(host);
   attachAccessOriginPayload(legalAction, run);
-  if (run.bizarreEncryptionSchemeActive) {
-    return delayBizarreEncryptionSchemeAgendaScore(
+  if (delayedAgendaAccessReplacementEffect(run)) {
+    return delayAgendaAccessReplacementScore(
       host,
       cardId as CardInstanceId,
       legalAction,
@@ -584,16 +584,32 @@ function applyPendingAgendaPointBonusToStolenAgenda(
   }
 }
 
-function delayBizarreEncryptionSchemeAgendaScore(
+function delayedAgendaAccessReplacementEffect(
+  run: ActiveRun,
+):
+  | Extract<
+      NonNullable<ActiveRun["runDurationEffects"]>[number],
+      { kind: "delayed_agenda_access_replacement" }
+    >
+  | undefined {
+  return run.runDurationEffects?.find(
+    (effect) => effect.kind === "delayed_agenda_access_replacement",
+  );
+}
+
+function delayAgendaAccessReplacementScore(
   host: AccessFlowHost,
   cardId: CardInstanceId,
   legalAction?: LegalAction,
 ): AccessExecutionResult {
   const run = mustRun(host);
+  const replacementEffect = delayedAgendaAccessReplacementEffect(run);
+  if (!replacementEffect)
+    throw new Error("Es ist kein verzögerter Agenda-Access-Effekt aktiv.");
   const definition = host.cards.definitionFor(cardId);
   if (definition.type !== "agenda")
     throw new Error(
-      "Bizarre Encryption Scheme kann nur Agenda-Scoring verzögern.",
+      "Der verzögerte Access-Effekt kann nur Agenda-Scoring verzögern.",
     );
   const serverId = run.breach?.serverId ?? run.attackedServerId;
   const zone = host.cards.cardInstanceFor(cardId).zone;
@@ -604,11 +620,20 @@ function delayBizarreEncryptionSchemeAgendaScore(
   ) {
     throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
   }
-  const existing = host.state.bizarreEncryptionDelayedAgendas ?? [];
+  if (replacementEffect.serverId !== serverId)
+    throw new Error("Der verzögerte Access-Effekt passt nicht zu diesem Fort.");
+  const existing = host.state.delayedAccessEffects ?? [];
   if (!existing.some((entry) => entry.agendaId === cardId)) {
-    host.state.bizarreEncryptionDelayedAgendas = [
+    host.state.delayedAccessEffects = [
       ...existing,
-      { agendaId: cardId, serverId },
+      {
+        kind: "delayed_agenda_access_replacement",
+        agendaId: cardId,
+        serverId,
+        sourceCardInstanceId: replacementEffect.sourceCardInstanceId,
+        sourceDefinitionId: replacementEffect.sourceDefinitionId,
+        resolveAt: "runner_start_turn",
+      },
     ];
   }
   if (host.state.run?.breach) {

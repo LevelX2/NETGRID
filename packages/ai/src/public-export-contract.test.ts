@@ -63,6 +63,11 @@ describe("AI public export contract", () => {
       "recommendedLocalDefaultScopes",
       "buildRuntimeScoreBreakdown",
       "aggregateDoctrineMetricSums",
+      "projectKnownRemoteTrashCommitment",
+      "projectAccessDecision",
+      "buildProteusRandomModelReadinessReport",
+      "formatSemanticShadowLeagueDeltaDashboard",
+      "formatSelfplayPromotionActivityCandidates",
     ];
 
     for (const exportName of internalExports) {
@@ -82,13 +87,18 @@ describe("AI public export contract", () => {
       "./evaluation/semantic-shadow-league",
       "./evaluation/target-choice-shadow-coverage",
       "./evaluation/target-choice-shadow-readiness",
+      "./evaluation/proteus-random-model-readiness",
       "./evaluation/doctrine-goal-action-fit",
       "./evaluation/doctrine-goal-coverage",
+      "./decision/known-remote-access-commitment",
+      "./decision/access-decision-projection",
       "./decision/pilot/local-default-pilot-policy",
       "./decision/pilot/remote-contest-candidate",
       "./decision/target-choice-shadow",
       "./runtime/semantic-runtime-score-components",
       "./simulation/simulation-metric-aggregation",
+      "./reports/shadow-league-report-formatters",
+      "./reports/selfplay-promotion-activity-formatters",
     ];
 
     for (const modulePath of forbiddenPublicModules) {

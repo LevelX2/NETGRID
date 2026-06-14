@@ -157,21 +157,35 @@ export function handleTriggerAbilityExecution(
     return handled(legalAction);
   if (host.hiddenZone.handleHiddenZoneTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  if (legalAction.payload?.runnerAbility === "pirate_broadcast_sequence_failed") {
+  if (
+    legalAction.payload?.runnerAbility ===
+    "multi_server_success_sequence_failed"
+  ) {
     if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf die Pirate-Broadcast-Sequenz abschließen.");
+      throw new Error("Nur der Runner darf die offene Run-Sequenz abschliessen.");
     if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
-      throw new Error("Pirate Broadcast kann nur im Runner-Aktionsfenster scheitern.");
+      throw new Error(
+        "Die offene Run-Sequenz kann nur im Runner-Aktionsfenster scheitern.",
+      );
     const flags = host.runner.ensureTurnFlags(state);
-    if (!flags.pirateBroadcastPending)
-      throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
-    delete flags.pirateBroadcastPending;
+    const pendingSequence = flags.pendingSequences?.find(
+      (sequence) =>
+        sequence.kind === "multi_server_success_sequence" &&
+        sequence.pendingServerIds.length > 0,
+    );
+    if (!pendingSequence)
+      throw new Error("Es ist keine passende Run-Sequenz offen.");
+    const remainingSequences = (flags.pendingSequences ?? []).filter(
+      (sequence) => sequence !== pendingSequence,
+    );
+    if (remainingSequences.length > 0)
+      flags.pendingSequences = remainingSequences;
+    else delete flags.pendingSequences;
     flags.forgoNextActionsPending =
       Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      pirateBroadcastFailed: true,
-      pirateBroadcastSequenceFailed: true,
+      multiServerSuccessSequenceFailed: true,
       actionDebtAdded: 1,
       forgoNextActionsPending: flags.forgoNextActionsPending,
     };

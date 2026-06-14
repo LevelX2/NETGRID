@@ -81,6 +81,20 @@ describe("V1.0.4 match start derivation", () => {
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 
+  it("summarizes KI deck reuse without exposing deck details", () => {
+    const summary = matchStartSummary({
+      playMode: "human_vs_ai",
+      matchFormat: "rules_match",
+      matchCardPool: "originalset",
+      humanSideSelection: "random",
+      humanAiSideSelection: "runner",
+      aiDeckPolicy: "same_as_participant_a"
+    });
+
+    expect(summary).toContain("KI-Decks: wie Teilnehmer A");
+    expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
+  });
+
   it("does not let terminal lobby statuses block the match-start setup", () => {
     expect(matchStartLobbyBlocksSetup("pending")).toBe(true);
     expect(matchStartLobbyBlocksSetup("ready_check")).toBe(true);

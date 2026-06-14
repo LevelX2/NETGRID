@@ -4,6 +4,7 @@ import {
   afterPassingLastIceWindowContext,
   isAfterPassingLastIceWindowOpen,
   runIsAtServerAfterPassingLastIce,
+  stateIsAtServerAfterPassingLastIceWindow,
 } from "./after-passing-last-ice-window";
 
 function stateAtServer(
@@ -12,6 +13,7 @@ function stateAtServer(
     lastPassedIceId?: CardInstanceId;
     serverIce?: CardInstanceId[];
     attackedServerId?: "remote_1" | "remote_2";
+    timingPoint?: GameState["timingPoint"];
   } = {},
 ): GameState {
   const attackedServerId = input.attackedServerId ?? "remote_1";
@@ -20,7 +22,7 @@ function stateAtServer(
     stateVersion: 1,
     activeSide: "corp",
     phase: "run",
-    timingPoint: "run.jack_out_window",
+    timingPoint: input.timingPoint ?? "run.jack_out_window",
     corp: {
       clicks: 3,
       credits: 5,
@@ -72,6 +74,9 @@ describe("after passing last ice window", () => {
     const state = stateAtServer();
 
     expect(isAfterPassingLastIceWindowOpen(state)).toBe(true);
+    expect(
+      stateIsAtServerAfterPassingLastIceWindow(state, state.corp.servers[0]!),
+    ).toBe(true);
     expect(afterPassingLastIceWindowContext(state)).toMatchObject({
       passedIceId: "ice_outer",
       server: { id: "remote_1" },
@@ -94,6 +99,17 @@ describe("after passing last ice window", () => {
     expect(
       isAfterPassingLastIceWindowOpen(
         stateAtServer({ lastPassedIceId: "ice_unknown" as CardInstanceId }),
+      ),
+    ).toBe(false);
+    expect(
+      isAfterPassingLastIceWindowOpen(
+        stateAtServer({ timingPoint: "run.approach_ice" }),
+      ),
+    ).toBe(false);
+    expect(
+      stateIsAtServerAfterPassingLastIceWindow(
+        stateAtServer({ timingPoint: "run.approach_ice" }),
+        stateAtServer().corp.servers[0]!,
       ),
     ).toBe(false);
   });

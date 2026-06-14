@@ -251,7 +251,7 @@ export function createPendingChoiceRuntimeHosts(
     legalAction?: LegalAction,
   ): void {
     const run = state.run;
-    if (run) delete run.sirenStartRunRedirect;
+    if (run) delete run.runStartInterventions;
     state.activeSide = "runner";
     let advancedFromStart = false;
     if (run && run.phase === "start") {
@@ -268,6 +268,30 @@ export function createPendingChoiceRuntimeHosts(
       advancedFromStart = true;
     }
     return;
+  }
+
+  function originalRunStartServerId(
+    run: NonNullable<GameState["run"]>,
+  ): Exclude<ServerId, "new_remote"> {
+    return (
+      run.runStartInterventions?.[0]?.originalServerId ?? run.attackedServerId
+    );
+  }
+
+  function startRunRedirectInterventionForSource(
+    run: NonNullable<GameState["run"]>,
+    sourceCardId: CardInstanceId,
+  ):
+    | Extract<
+        NonNullable<NonNullable<GameState["run"]>["runStartInterventions"]>[number],
+        { kind: "start_run_redirect_to_source_fort" }
+      >
+    | undefined {
+    return run.runStartInterventions?.find(
+      (candidate) =>
+        candidate.kind === "start_run_redirect_to_source_fort" &&
+        candidate.sourceCardInstanceId === sourceCardId,
+    );
   }
 
   function openRunSpendCapChoice(
@@ -366,7 +390,7 @@ export function createPendingChoiceRuntimeHosts(
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           startOfRunRedirectDecision: "pass",
-          originalServerId: run.sirenStartRunRedirect?.originalServerId,
+          originalServerId: originalRunStartServerId(run),
         };
         const spendCap = mustServer(state, run.attackedServerId).root
           .slice()
@@ -471,11 +495,17 @@ export function createPendingChoiceRuntimeHosts(
       }
       const targetServerId = mustInstance(state.cardInstances, sourceCardId).zone.serverId;
       const source = mustInstance(state.cardInstances, sourceCardId);
+      const intervention = startRunRedirectInterventionForSource(
+        run,
+        sourceCardId,
+      );
       if (
+        !intervention ||
         !targetServerId ||
+        targetServerId !== intervention.targetServerId ||
         source.rezzed !== true ||
         corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
-          "siren_start_run_redirect"
+          "start_run_redirect_to_source_fort"
       )
         throw new Error("Diese Redirect-Quelle ist nicht legal.");
       const availableCredits = Math.max(
@@ -483,8 +513,9 @@ export function createPendingChoiceRuntimeHosts(
         state.corp.credits -
           Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
       );
-      if (availableCredits < 1) throw new Error("Die Korp kann den Redirect nicht bezahlen.");
-      state.corp.credits -= 1;
+      if (availableCredits < intervention.costCredits)
+        throw new Error("Die Korp kann den Redirect nicht bezahlen.");
+      state.corp.credits -= intervention.costCredits;
       run.attackedServerId = targetServerId;
       delete state.pendingChoice;
       legalAction.payload = {
@@ -492,9 +523,9 @@ export function createPendingChoiceRuntimeHosts(
         startOfRunRedirectDecision: "apply",
         sourceCardId,
         sourceDefinitionId: source.definitionId,
-        originalServerId: run.sirenStartRunRedirect?.originalServerId,
+        originalServerId: intervention.originalServerId,
         redirectedServerId: targetServerId,
-        paidCredits: 1,
+        paidCredits: intervention.costCredits,
         corpCreditsAfter: state.corp.credits,
       };
       continueRunAfterStartOfRunFortUtility(state, legalAction);

@@ -710,6 +710,33 @@ describe("PRO019 rule-contract baseline utilities", () => {
       ),
     ).toBe(false);
 
+    let wrongTiming = corpActionState("pro019-pavit-wrong-timing");
+    addCorpIce(
+      wrongTiming,
+      WALL,
+      "pavit_wrong_timing_old_ice",
+      "remote_1",
+      true,
+    );
+    const wrongTimingPavitId = addCorpRoot(
+      wrongTiming,
+      PAVIT,
+      "pavit_wrong_timing_source",
+      "remote_1",
+      false,
+    );
+    addCorpHq(wrongTiming, WALL, "pavit_wrong_timing_new_ice");
+    addCorpHq(wrongTiming, SIMPLE_UPGRADE, "pavit_wrong_timing_new_root");
+    forceRunAtServer(wrongTiming, "remote_1");
+    wrongTiming.timingPoint = "run.approach_ice";
+    expect(
+      getLegalActions(wrongTiming, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === wrongTimingPavitId,
+      ),
+    ).toBe(false);
+
     let state = corpActionState("pro019-pavit-choice");
     const oldIce = addCorpIce(
       state,
@@ -743,10 +770,19 @@ describe("PRO019 rule-contract baseline utilities", () => {
       minSelections: 2,
       maxSelections: 2,
     });
+    const runnerViewWithPavitChoice = JSON.stringify(
+      getPlayerView(state, "runner"),
+    );
+    expect(runnerViewWithPavitChoice).not.toContain(String(newIce));
+    expect(runnerViewWithPavitChoice).not.toContain(String(newRoot));
+    expect(runnerViewWithPavitChoice).not.toContain("fortReplacementHqCardIds");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "ordered_fort_rebuild_sequence",
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.privatePayload)).not.toContain(
+      "fortReplacementHqCardIds",
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       String(newIce),
     );
@@ -848,6 +884,67 @@ describe("PRO019 rule-contract baseline utilities", () => {
 
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale Pavit choice rejection.");
+    expect(stale.error.message).not.toContain(String(newIce));
+    expect(stale.error.message).not.toContain(String(newRoot));
+    expect(hashState(stale.state)).toBe(beforeStaleHash);
+    expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
+    expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
+    expect(remoteServer(stale.state, "remote_1").root).toEqual([pavitId]);
+    expect(stale.state.corp.hq).toEqual(
+      expect.arrayContaining([newIce, newRoot]),
+    );
+  });
+
+  it("rejects Pavit replacement choices after the after-last-ICE timing closes", () => {
+    let state = corpActionState("pro019-pavit-stale-timing-choice");
+    clearCorpHq(state);
+    const oldIce = addCorpIce(
+      state,
+      CHIHUAHUA,
+      "pavit_timing_old_ice",
+      "remote_1",
+      true,
+    );
+    const pavitId = addCorpRoot(
+      state,
+      PAVIT,
+      "pavit_timing_source",
+      "remote_1",
+      false,
+    );
+    const newIce = addCorpHq(state, WALL, "pavit_timing_new_ice");
+    const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_timing_new_root");
+    addCorpHq(state, CHIHUAHUA, "pavit_timing_extra_ice");
+    forceRunAtServer(state, "remote_1");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+    );
+    state.timingPoint = "run.approach_ice";
+    const beforeStaleHash = hashState(state);
+    const beforeStaleEventCount = state.eventLog.length;
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: mustAction(
+        state,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${newIce}`, `card_${newRoot}`],
+      },
+      idempotencyKey: "pavit-stale-timing-choice",
+    });
+
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale Pavit timing rejection.");
     expect(stale.error.message).not.toContain(String(newIce));
     expect(stale.error.message).not.toContain(String(newRoot));
     expect(hashState(stale.state)).toBe(beforeStaleHash);

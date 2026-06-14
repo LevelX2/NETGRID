@@ -165,6 +165,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
     },
     cardImplementation: {
       accessEffectsForDefinition: () => [],
+      hiddenReplacementLongtailKindForDefinition: () => undefined,
       accessHookKindsForDefinition: () => [],
       runCardImplementationActionHost: (targetState: GameState) =>
         ({ state: targetState }) as never,
@@ -180,7 +181,6 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       experimentalAi: "experimental",
       vacantSoulkiller: "soulkiller",
       virusTestSite: "virus",
-      bizarreEncryptionScheme: "bizarre",
       chimera: "chimera",
     },
     callbacks: {

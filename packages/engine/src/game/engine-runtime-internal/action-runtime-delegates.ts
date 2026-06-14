@@ -1,4 +1,4 @@
-import { runtimeDelegates } from "./runtime-delegate-store";
+﻿import { runtimeDelegates } from "./runtime-delegate-store";
 
 export function corpRunnerActionPaidWindowActions(...args: any[]): any {
   return (
@@ -209,10 +209,10 @@ export function untapRunnerCardsAtTurnStart(...args: any[]): any {
   )(...args);
 }
 
-export function resolveBizarreEncryptionDelayedAgendas(...args: any[]): any {
+export function resolveDelayedAccessEffects(...args: any[]): any {
   return (
     runtimeDelegates.turnRuntimeResolvers
-      .resolveBizarreEncryptionDelayedAgendas as any
+      .resolveDelayedAccessEffects as any
   )(...args);
 }
 

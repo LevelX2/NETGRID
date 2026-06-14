@@ -3,6 +3,7 @@ import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
@@ -298,13 +299,12 @@ export function buildRunnerMainActions(
     (sourceCardId) =>
       !(flags.runOnlyActionUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
   );
-  const pirateBroadcastPending = flags.pirateBroadcastPending;
-  const pirateBroadcastNextServerId =
-    pirateBroadcastPending?.pendingServerIds[0];
-  if (pirateBroadcastPending && pirateBroadcastNextServerId) {
-    const forcedRunActions = buildPirateBroadcastForcedRunActions(host, {
-      pirateBroadcastPending,
-      pirateBroadcastNextServerId,
+  const pendingSequence = nextMultiServerSuccessSequence(flags);
+  const nextSequenceServerId = pendingSequence?.pendingServerIds[0];
+  if (pendingSequence && nextSequenceServerId) {
+    const forcedRunActions = buildMultiServerSuccessSequenceForcedRunActions(host, {
+      pendingSequence,
+      nextSequenceServerId,
       runDurationPaymentHost: runDurationPaymentHost(state),
     });
     if (forcedRunActions.length > 0) return forcedRunActions;
@@ -313,13 +313,13 @@ export function buildRunnerMainActions(
         state,
         "runner",
         "trigger_ability",
-        "Pirate Broadcast: Sequenz scheitert",
+        `${pendingSequence.sourceTitle}: Sequenz scheitert`,
         "game_rule",
         [],
         {
-          runnerAbility: "pirate_broadcast_sequence_failed",
-          sourceDefinitionId: pirateBroadcastPending.sourceDefinitionId,
-          pirateBroadcastSequenceFailed: true,
+          runnerAbility: "multi_server_success_sequence_failed",
+          sourceDefinitionId: pendingSequence.sourceDefinitionId,
+          multiServerSuccessSequenceFailed: true,
           actionDebtAdded: 1,
         },
       ),
@@ -327,7 +327,7 @@ export function buildRunnerMainActions(
   }
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
-    pirateBroadcastNextServerId !== undefined;
+    nextSequenceServerId !== undefined;
   if (
     !hasClicks &&
     !bonusRunPending &&
@@ -1215,8 +1215,7 @@ export function buildRunnerMainActions(
     }
     if (
       bonusRunPending &&
-      (!pirateBroadcastNextServerId ||
-        pirateBroadcastNextServerId === server.id) &&
+      (!nextSequenceServerId || nextSequenceServerId === server.id) &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1233,16 +1232,16 @@ export function buildRunnerMainActions(
           {
             ...runPayload,
             bonusRunNoClick: true,
-            bonusRunSource: pirateBroadcastNextServerId
-              ? pirateBroadcastPending?.sourceDefinitionId
+            bonusRunSource: nextSequenceServerId
+              ? pendingSequence?.sourceDefinitionId
               : flags.bodyweightDataCrecheExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
             restrictedActionGrantActionType: "start_run",
             restrictedActionGrantCostProfile: "no_click",
             restrictedActionGrantRemainingActions: 1,
-            ...(pirateBroadcastNextServerId
-              ? { pirateBroadcastRun: true }
+            ...(nextSequenceServerId
+              ? { multiServerSuccessSequenceRun: true }
               : {}),
           },
         ),
@@ -1285,19 +1284,27 @@ export function buildRunnerMainActions(
   return filterActionsForRestrictedExtraActions(state, "runner", actions);
 }
 
-function buildPirateBroadcastForcedRunActions(
+function nextMultiServerSuccessSequence(
+  flags: NonNullable<GameState["runnerTurnFlags"]>,
+): MultiServerSuccessSequenceState | undefined {
+  return flags.pendingSequences?.find(
+    (sequence) =>
+      sequence.kind === "multi_server_success_sequence" &&
+      sequence.pendingServerIds.length > 0,
+  );
+}
+
+function buildMultiServerSuccessSequenceForcedRunActions(
   host: RunnerMainActionGenerationHost,
   input: {
-    pirateBroadcastPending: NonNullable<
-      NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"]
-    >;
-    pirateBroadcastNextServerId: string;
+    pendingSequence: MultiServerSuccessSequenceState;
+    nextSequenceServerId: string;
     runDurationPaymentHost: unknown;
   },
 ): LegalAction[] {
   const state = host.state;
   const server = state.corp.servers.find(
-    (candidate) => candidate.id === input.pirateBroadcastNextServerId,
+    (candidate) => candidate.id === input.nextSequenceServerId,
   );
   if (!server) return [];
   if (
@@ -1339,18 +1346,18 @@ function buildPirateBroadcastForcedRunActions(
       : {}),
     ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
     bonusRunNoClick: true,
-    bonusRunSource: input.pirateBroadcastPending.sourceDefinitionId,
+    bonusRunSource: input.pendingSequence.sourceDefinitionId,
     restrictedActionGrantActionType: "start_run",
     restrictedActionGrantCostProfile: "no_click",
     restrictedActionGrantRemainingActions: 1,
-    pirateBroadcastRun: true,
+    multiServerSuccessSequenceRun: true,
   };
   return [
     host.actions.buildLegalAction(
       state,
       "runner",
       "start_run",
-      `Pirate-Broadcast-Run auf ${server.label}`,
+      `Sequenz-Run auf ${server.label}`,
       "game_rule",
       runStartTaxCredits > 0 ? [{ credits: runStartTaxCredits }] : [],
       runPayload,

@@ -33,6 +33,7 @@ const PANIC_BUTTON = "onr_proteus_067_panic-button";
 const RAYMOND = "onr_proteus_071_raymond-ellison";
 const SIREN = "onr_proteus_074_siren";
 const SYD = "onr_proteus_076_syd-meyer-superstores";
+const ROVING_SUBMARINE = "onr_v1_368_roving-submarine";
 const WALL = "onr_v1_279_wall-of-static";
 const MOUSE = "onr_v1_042_mouse";
 const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
@@ -309,6 +310,16 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "runner", runHq.actionId);
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
+    expect(state.run?.runStartInterventions).toEqual([
+      {
+        kind: "start_run_redirect_to_source_fort",
+        originalServerId: "hq",
+        sourceCardInstanceId: sirenId,
+        sourceDefinitionId: SIREN,
+        targetServerId: "remote_1",
+        costCredits: 1,
+      },
+    ]);
     expect(getLegalActions(state, "runner")).toHaveLength(0);
 
     const stale = applyAction(state, {
@@ -322,6 +333,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     state = applyChoice(state, "corp", "pass");
     expect(state.run?.attackedServerId).toBe("hq");
+    expect(state.run?.runStartInterventions).toBeUndefined();
 
     const redirectedBefore = baseState("pro014-siren-redirect");
     addCorpRoot(redirectedBefore, SIREN, "siren_2", "remote_1", true);
@@ -334,6 +346,23 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     expect(redirected.run?.attackedServerId).toBe("remote_1");
     expect(redirected.corp.credits).toBe(19);
     expectReplayStable(redirectedBefore, redirected);
+  });
+
+  it("does not offer Siren redirect to an otherwise illegal source fort", () => {
+    const before = baseState("pro014-siren-roving-blocked");
+    addCorpRoot(before, SIREN, "siren_roving", "remote_1", true);
+    addCorpRoot(before, ROVING_SUBMARINE, "roving_blocks_remote_1", "remote_1", true);
+
+    const state = apply(
+      before,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+
+    expect(state.pendingChoice?.source ?? "").not.toContain(
+      "corp.start_of_run_redirect",
+    );
+    expect(state.run?.runStartInterventions).toBeUndefined();
   });
 
   it("opens Department of Misinformation expose prevention and keeps pass/use explicit", () => {
