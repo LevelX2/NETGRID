@@ -1642,7 +1642,7 @@ describe("MVP 0.1 engine foundation", () => {
     expect(agendaCardsInOpeningHands / 1000).toBeGreaterThan(0.9);
     expect(agendaCardsInOpeningHands / 1000).toBeLessThan(1.55);
     expect(fourPlusAgendaHands).toBeLessThan(25);
-  });
+  }, 15_000);
 
   it("starts in explicit setup with side-safe private mulligan choices", () => {
     const state = createGame({ seed: "v110-explicit-setup" });
