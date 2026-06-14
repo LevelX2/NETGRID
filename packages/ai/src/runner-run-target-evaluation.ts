@@ -467,7 +467,7 @@ function evaluateRunnerRunTarget(
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
-      ...payoff.evidence.slice(0, 28),
+      ...payoff.evidence.slice(0, 36),
       ...installedRunPayoff.evidence.slice(0, 8),
       ...runActionPayoff.evidence.slice(0, 8),
       ...projection.evidence.slice(0, 12),
