@@ -274,6 +274,21 @@ export type {
   ActionSemanticCoverageGroup,
 } from "./actions/action-semantic-coverage";
 export {
+  buildLegalActionWitness,
+  legalActionWitnessIsRedactionSafe,
+} from "./legalaction-witness";
+export type {
+  BuildLegalActionWitnessInput,
+  LegalActionWitness,
+  LegalActionWitnessAbilityRef,
+  LegalActionWitnessChoiceRef,
+  LegalActionWitnessCostProfile,
+  LegalActionWitnessRedactionPolicy,
+  LegalActionWitnessSourceRef,
+  LegalActionWitnessTargetRef,
+  LegalActionWitnessTimingProfile,
+} from "./legalaction-witness";
+export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
