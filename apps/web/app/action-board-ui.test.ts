@@ -821,13 +821,14 @@ describe("V1.0.5 action board UI helpers", () => {
   it("detects field-card choices for installed board cards only", () => {
     const bbs = card("corp_bbs_1", "BBS Whispering Campaign", "asset", false);
     const ice = card("corp_ice_1", "Wall", "ice", false);
+    const ice2 = card("corp_ice_2", "Barrier", "ice", false);
     const runnerProgram = card("runner_program_1", "Virus Program", "program");
     const board = view("runner", {
       own: {
         ...view("runner").own,
         rig: [runnerProgram]
       },
-      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice], root: [bbs] }]
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice, ice2], root: [bbs] }]
     });
     const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "hunt_club_bbs_choice",
@@ -911,6 +912,19 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const hermanChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "fort_ice_reorder_7",
+      side: "corp",
+      source: "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:remote_1",
+      prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
+      options: [
+        { id: "card_corp_ice_1", label: "Wall", value: "corp_ice_1" },
+        { id: "card_corp_ice_2", label: "Barrier", value: "corp_ice_2" }
+      ],
+      minSelections: 2,
+      maxSelections: 2
+    };
     const corpArchivesBoard = view("corp", {
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -948,8 +962,12 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(offSiteArchiveChoice, corpArchivesBoard)).toBe(false);
+    expect(shouldUseFieldCardChoice(hermanChoice, board)).toBe(false);
     expect(shouldUseCardChoicePanel(offSiteArchiveChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(hermanChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(hermanChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(hermanChoice)).toBe(true);
   });
 
   it("labels Runner program install trash choices for optional and required MU cases", () => {

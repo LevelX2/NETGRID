@@ -1204,6 +1204,7 @@ function isHiddenZoneReadableCardChoiceSource(source: string): boolean {
     source.startsWith("v1911.corp_rd_arrange_top2") ||
     source.startsWith("v1917.corp_rd_arrange_top2") ||
     source.startsWith("v1922.corp_rd_arrange_top5") ||
+    source.startsWith("corp.start_of_run_redirect.herman_reorder") ||
     source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
     source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
   );
@@ -1224,6 +1225,7 @@ export function shouldUseFieldCardChoice(
   if (choice.kind !== "select_cards") return false;
   if (choice.source === "discard_phase") return false;
   if (choice.source.startsWith("v1922.corp_archives_to_hq")) return false;
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return false;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
   const selectableOptions = choice.options.filter((option) => option.selectable !== false);
   if (selectableOptions.length === 0) return false;

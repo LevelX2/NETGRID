@@ -440,7 +440,7 @@ export function createPendingChoiceRuntimeHosts(
           choiceId: `fort_ice_reorder_${state.stateVersion + 1}`,
           side: "corp",
           source: `corp.start_of_run_redirect.herman_reorder:${run.runId}:${sourceCardId}:${server.id}`,
-          prompt: "ICE auf diesem Fort neu anordnen",
+          prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
           kind: "select_cards",
           options: server.ice.map((cardId, index) => ({
             id: `card_${cardId}`,

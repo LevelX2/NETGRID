@@ -11409,6 +11409,7 @@ function cardChoiceTitle(choice: VisibleChoice): string {
   if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
   if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Stack-Spitze wählen und anordnen";
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return "Herman Revista: ICE vor dem Server neu ordnen";
   if (choice.source.startsWith("p3_58.new_blood_reorder")) return "New Blood: ICE neu anordnen";
   if (choice.source.includes("corp_rd_arrange")) return "R&D-Spitze anordnen";
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
@@ -11433,6 +11434,7 @@ function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoic
     if (selectedOptions.length < choice.maxSelections) return `${firstTitle} wird in den Grip genommen.`;
     return `${firstTitle} in den Grip nehmen und den Rest anordnen?`;
   }
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return `${selectedOptions.length} ICE in dieser Reihenfolge vor dem Server übernehmen?`;
   if (choice.source.startsWith("p3_58.new_blood_reorder")) return `${selectedOptions.length} ICE in Zielslot-Reihenfolge übernehmen?`;
   if (cardChoiceUsesOrderedSelection(choice)) return `${selectedOptions.length} Karten in dieser Reihenfolge übernehmen?`;
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
@@ -11491,6 +11493,7 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (resolution?.destination === "grip") {
     return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
   }
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return "Wähle die ICE im Fenster nacheinander in der neuen Reihenfolge vor diesem Server.";
   if (choice.source.includes("corp_rd_arrange")) return "Die gewählte Reihenfolge wird für die R&D-Spitze übernommen.";
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
