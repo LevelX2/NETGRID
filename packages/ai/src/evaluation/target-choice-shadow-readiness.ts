@@ -20,6 +20,22 @@ export type TargetChoiceSelectedChoicesReadinessCase = {
   evidence: string[];
 };
 
+export type TargetChoiceFollowupCandidateKind =
+  | "missing_side_safe_options"
+  | "engine_only_target"
+  | "tie_without_preference"
+  | "hidden_info_blocked"
+  | "scorecard_unclear";
+
+export type TargetChoiceFollowupCandidate = {
+  candidateId: string;
+  scenarioId: string;
+  actionId: string;
+  actionType: TargetChoiceShadowReport["actionType"];
+  kind: TargetChoiceFollowupCandidateKind;
+  evidence: string[];
+};
+
 export type TargetChoiceSelectedChoicesReadinessReport = {
   version: "target-choice-selectedchoices-readiness-v1";
   scope: "target_choice_selectedchoices_readiness_report_only";
@@ -27,6 +43,7 @@ export type TargetChoiceSelectedChoicesReadinessReport = {
   actionReportCount: number;
   categoryCounts: Record<TargetChoiceSelectedChoicesReadinessCategory, number>;
   cases: TargetChoiceSelectedChoicesReadinessCase[];
+  followupCandidates: TargetChoiceFollowupCandidate[];
   productiveUseAllowed: false;
   selectedChoicesCreated: false;
   selectedTargetsCreated: false;
@@ -41,6 +58,11 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
   const readinessCases = cases.flatMap((coverageCase) =>
     coverageCase.reports.map((report) =>
       readinessCaseForReport(coverageCase.scenarioId, report),
+    ),
+  );
+  const followupCandidates = cases.flatMap((coverageCase) =>
+    coverageCase.reports.flatMap((report) =>
+      followupCandidatesForReport(coverageCase.scenarioId, report),
     ),
   );
   const categoryCounts = emptyCategoryCounts();
@@ -58,6 +80,12 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
         left.scenarioId.localeCompare(right.scenarioId) ||
         left.actionId.localeCompare(right.actionId),
     ),
+    followupCandidates: followupCandidates.sort(
+      (left, right) =>
+        left.scenarioId.localeCompare(right.scenarioId) ||
+        left.actionId.localeCompare(right.actionId) ||
+        left.kind.localeCompare(right.kind),
+    ),
     productiveUseAllowed: false,
     selectedChoicesCreated: false,
     selectedTargetsCreated: false,
@@ -67,6 +95,7 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
       "target_choice_selectedchoices_readiness:report_only",
       `scenario_count:${cases.length}`,
       `action_report_count:${readinessCases.length}`,
+      `followup_candidate_count:${followupCandidates.length}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
     ],
@@ -96,6 +125,70 @@ function readinessCaseForReport(
       `option_count:${report.scorecard.optionCount}`,
       `engine_only_blocked:${report.scorecard.engineOnlyBlockedCount}`,
       `no_side_safe_options_blocked:${report.scorecard.noSideSafeOptionsBlockedCount}`,
+      "productive_use_allowed:false",
+    ],
+  };
+}
+
+function followupCandidatesForReport(
+  scenarioId: string,
+  report: TargetChoiceShadowReport,
+): TargetChoiceFollowupCandidate[] {
+  const candidates: TargetChoiceFollowupCandidate[] = [];
+  if (report.scorecard.noSideSafeOptionsBlockedCount > 0) {
+    candidates.push(
+      followupCandidate(scenarioId, report, "missing_side_safe_options"),
+    );
+  }
+  if (report.scorecard.engineOnlyBlockedCount > 0) {
+    candidates.push(followupCandidate(scenarioId, report, "engine_only_target"));
+  }
+  if (
+    report.blockedRequirements.some((requirement) =>
+      requirement.evidence.some((entry) => entry.includes("hidden_info")),
+    )
+  ) {
+    candidates.push(followupCandidate(scenarioId, report, "hidden_info_blocked"));
+  }
+  const [top, second] = report.rankedOptions;
+  if (
+    report.scorecard.coverageStatus === "covered" &&
+    top &&
+    second &&
+    top.score - second.score < 20
+  ) {
+    candidates.push(followupCandidate(scenarioId, report, "tie_without_preference"));
+  }
+  if (
+    candidates.length === 0 &&
+    report.selectionOutput.wouldSelect === undefined &&
+    report.scorecard.coverageStatus !== "covered" &&
+    report.scorecard.coverageStatus !== "partial"
+  ) {
+    candidates.push(followupCandidate(scenarioId, report, "scorecard_unclear"));
+  }
+  return candidates;
+}
+
+function followupCandidate(
+  scenarioId: string,
+  report: TargetChoiceShadowReport,
+  kind: TargetChoiceFollowupCandidateKind,
+): TargetChoiceFollowupCandidate {
+  return {
+    candidateId: `${scenarioId}:${report.actionId}:${kind}`,
+    scenarioId,
+    actionId: report.actionId,
+    actionType: report.actionType,
+    kind,
+    evidence: [
+      `target_choice_followup:${kind}`,
+      `scenario:${scenarioId}`,
+      `action:${report.actionId}`,
+      `action_type:${report.actionType}`,
+      `coverage_status:${report.scorecard.coverageStatus}`,
+      `option_count:${report.scorecard.optionCount}`,
+      `blocked_requirement_count:${report.scorecard.blockedRequirementCount}`,
       "productive_use_allowed:false",
     ],
   };
