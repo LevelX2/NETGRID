@@ -283,6 +283,7 @@ export {
   targetRefIsCompleteOrIrrelevant,
   targetRefIsRedactionSafe,
 } from "./target-ref";
+export { buildWitnessOpportunityProjection } from "./witness-opportunity-projection";
 export type {
   BuildLegalActionWitnessInput,
   LegalActionWitness,
@@ -300,6 +301,11 @@ export type {
   TargetRefKind,
   TargetRefRedactionPolicy,
 } from "./target-ref";
+export type {
+  BuildWitnessOpportunityProjectionInput,
+  WitnessOpportunityProjection,
+  WitnessOpportunityProjectionStatus,
+} from "./witness-opportunity-projection";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
