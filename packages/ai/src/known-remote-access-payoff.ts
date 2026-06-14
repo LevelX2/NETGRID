@@ -14,6 +14,7 @@ import {
   knownRemoteLowValueAccessCommitment,
   projectKnownRemoteTrashCommitment,
 } from "./decision/known-remote-access-commitment";
+import { projectAccessDecision } from "./decision/access-decision-projection";
 import {
   createRemoteAccessOutcomeMemoryEntry,
   remoteAccessOutcomeEvidence,
@@ -135,6 +136,15 @@ export function evaluateKnownRemoteAccessPayoff(
       serverId,
       agendaRoots.map((root) => `known_remote_agenda_root:${root.positionKey}`),
     );
+    const accessProjection = projectAccessDecision({
+      source: "pre_run",
+      serverId,
+      ...(agendaRoots[0]?.definitionId
+        ? { knownRootDefinitionId: agendaRoots[0].definitionId }
+        : {}),
+      target: "agenda",
+      intendedAccessAction: "steal",
+    });
     return {
       payoff: "agenda",
       accessDecision: "steal",
@@ -148,6 +158,7 @@ export function evaluateKnownRemoteAccessPayoff(
         "remote_memory_payoff:agenda",
         "remote_run_boosted_by_known_remote_agenda:true",
         ...commitment.evidence,
+        ...accessProjection.evidence,
       ],
     };
   }
@@ -189,6 +200,27 @@ export function evaluateKnownRemoteAccessPayoff(
           stateVersion: input.playerView.stateVersion,
         })
       : undefined;
+    const accessProjection = projectAccessDecision({
+      source: "pre_run",
+      serverId,
+      knownRootDefinitionId: cheapestTrashRoot.definitionId,
+      target:
+        cheapestTrashRoot.type === "asset" ||
+        cheapestTrashRoot.type === "upgrade"
+          ? cheapestTrashRoot.type
+          : "unknown",
+      intendedAccessAction:
+        trashProjection.accessDecision === "trash" ? "trash" : "decline",
+      trashCost: cheapestTrashCost,
+      generalTrashCost: trashProjection.generalTrashCost,
+      dedicatedTrashCredits: Math.max(
+        0,
+        cheapestTrashCost - trashProjection.generalTrashCost,
+      ),
+      reserveWouldBreak:
+        trashProjection.declineReason === "reserve_would_break",
+      finitePoolValueRemaining: trashProjection.finitePoolValueRemaining,
+    });
     return {
       payoff: trashProjection.payoff,
       accessDecision: trashProjection.accessDecision,
@@ -220,6 +252,7 @@ export function evaluateKnownRemoteAccessPayoff(
           ? [`trash_decline_reason:${trashProjection.declineReason}`]
           : []),
         ...trashProjection.commitment.evidence,
+        ...accessProjection.evidence,
         ...(declinedTrashOutcome
           ? remoteAccessOutcomeEvidence(declinedTrashOutcome)
           : []),

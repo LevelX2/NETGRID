@@ -41,6 +41,7 @@ export type KnownRemoteTrashCommitmentProjection = {
   generalTrashCost: number;
   desiredCreditReserve: number;
   creditsAfterTrash: number;
+  finitePoolValueRemaining: number;
   technicallyAffordable: boolean;
   preservesReserve: boolean;
   reserveBreakAllowed: boolean;
@@ -137,6 +138,7 @@ export function projectKnownRemoteTrashCommitment(
       generalTrashCost,
       desiredCreditReserve,
       creditsAfterTrash,
+      finitePoolValueRemaining: targetProfile.corpValueRemaining,
       technicallyAffordable,
       preservesReserve,
       reserveBreakAllowed: false,
@@ -170,6 +172,7 @@ export function projectKnownRemoteTrashCommitment(
       generalTrashCost,
       desiredCreditReserve,
       creditsAfterTrash,
+      finitePoolValueRemaining: targetProfile.corpValueRemaining,
       technicallyAffordable,
       preservesReserve,
       reserveBreakAllowed: targetProfile.reserveBreakAllowed,
@@ -203,6 +206,7 @@ export function projectKnownRemoteTrashCommitment(
       generalTrashCost,
       desiredCreditReserve,
       creditsAfterTrash,
+      finitePoolValueRemaining: targetProfile.corpValueRemaining,
       technicallyAffordable,
       preservesReserve,
       reserveBreakAllowed: targetProfile.reserveBreakAllowed,
@@ -235,6 +239,7 @@ export function projectKnownRemoteTrashCommitment(
     generalTrashCost,
     desiredCreditReserve,
     creditsAfterTrash,
+    finitePoolValueRemaining: targetProfile.corpValueRemaining,
     technicallyAffordable,
     preservesReserve,
     reserveBreakAllowed: targetProfile.reserveBreakAllowed,
@@ -333,6 +338,7 @@ function knownRemoteTrashTargetProfile(
   reserveBreakAllowed: boolean;
   finitePoolEconomy: boolean;
   finitePoolDepleted: boolean;
+  corpValueRemaining: number;
   evidence: string[];
 } {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -375,6 +381,7 @@ function knownRemoteTrashTargetProfile(
     reserveBreakAllowed,
     finitePoolEconomy,
     finitePoolDepleted,
+    corpValueRemaining,
     evidence: [
       `known_remote_root_value:${value}`,
       `known_remote_root_high_impact_role:${highImpactRole}`,

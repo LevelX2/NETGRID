@@ -49,6 +49,14 @@ export function createRemoteAccessOutcomeMemoryEntry(params: {
 export function remoteAccessOutcomeEvidence(
   entry: RemoteAccessOutcomeMemoryEntry,
 ): string[] {
+  const projection = projectAccessDecision({
+    source: "plan_memory",
+    serverId: entry.serverId,
+    knownRootDefinitionId: entry.knownRootDefinitionId,
+    target: entry.accessDecision === "stolen" ? "agenda" : "unknown",
+    intendedAccessAction: accessProjectionActionForOutcome(entry.accessDecision),
+    reserveWouldBreak: entry.reason === "reserve_would_break",
+  });
   return [
     `remote_access_outcome_server:${entry.serverId}`,
     `remote_access_outcome_known_root:${entry.knownRootDefinitionId}`,
@@ -56,7 +64,23 @@ export function remoteAccessOutcomeEvidence(
     `remote_access_outcome_reason:${entry.reason}`,
     `remote_access_outcome_state_version:${entry.stateVersion}`,
     `remote_access_outcome_expires_when_remote_changes:${entry.expiresWhenRemoteChanges}`,
+    ...projection.evidence,
   ];
+}
+
+function accessProjectionActionForOutcome(
+  accessDecision: RemoteAccessOutcomeDecision,
+): "steal" | "trash" | "access_only" | "decline" {
+  switch (accessDecision) {
+    case "stolen":
+      return "steal";
+    case "trashed":
+      return "trash";
+    case "declined_trash":
+      return "decline";
+    case "access_only":
+      return "access_only";
+  }
 }
 
 export function evaluateRemoteAccessOutcomeMemory(
@@ -119,3 +143,4 @@ export function declinedTrashOutcomePlanEvidence(
     "remote_access_outcome_memory_applied:declined_trash",
   ];
 }
+import { projectAccessDecision } from "../decision/access-decision-projection";
