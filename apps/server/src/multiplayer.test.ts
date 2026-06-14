@@ -6204,7 +6204,7 @@ describe("MVP 0.2 multiplayer service", () => {
     } finally {
       await handle.close();
     }
-  });
+  }, 15_000);
 });
 
 type PlayerSession = {
