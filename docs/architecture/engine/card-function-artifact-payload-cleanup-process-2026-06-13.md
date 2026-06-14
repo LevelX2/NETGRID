@@ -2,7 +2,7 @@
 
 ## Status
 
-Abschlussbereit im Arbeitsbranch `codex/card-function-artifact-payload-cleanup`; lokale Integration nach `main` erfolgt im finalen P3-Schritt.
+Abgeschlossen und lokal nach `main` integriert. Der Arbeitsbranch `codex/card-function-artifact-payload-cleanup` wurde gemerged; der zugehörige Arbeits-Worktree wurde entfernt.
 
 ## Quelle/Vorgabe
 
@@ -10,11 +10,11 @@ Geprüfte Rückmeldung vom 2026-06-13 zum Card-Function-Abstraction-Stand nach d
 
 Die Rückmeldung ist im Kern plausibel, aber der lokale Stand zeigt eine wichtige Präzisierung:
 
-- Review-Markdown und Review-JSON standen beim Prozesseinstieg lokal bereits auf der 386er-Baseline; der aktuelle Generator kalibriert den Stand nach zwischenzeitlichen Engine-Strukturänderungen auf 389 Known-Findings.
+- Review-Markdown und Review-JSON standen beim Prozesseinstieg lokal bereits auf der 386er-Baseline; die damalige Zwischenkalibrierung des Generators lag nach zwischenzeitlichen Engine-Strukturänderungen bei 389 Known-Findings. Der Abschlussstand bleibt die unten dokumentierte 387er Baseline.
 - `Krumz` und `Startup Immolator` sind in Review-Markdown und JSON bereits `slice_done`.
 - Die Completion-Note erwähnt Krumz und Startup Immolator bereits.
-- Das vorherige Prozessartefakt `docs/architecture/engine/card-function-krumz-startup-process-2026-06-13.md` steht noch auf `In Umsetzung`, obwohl der Prozess integriert ist.
-- Im öffentlichen Trace-Payment-Payload existiert noch das kartenspezifische Feld `krumzBitsSpent`, obwohl die Runtime-Familie bereits generisch als `recurring_trace_credit_pool` modelliert ist.
+- Das vorherige Prozessartefakt `docs/architecture/engine/card-function-krumz-startup-process-2026-06-13.md` stand beim Prozesseinstieg noch auf `In Umsetzung`, obwohl der Prozess integriert war.
+- Im öffentlichen Trace-Payment-Payload existierte beim Prozesseinstieg noch das kartenspezifische Feld `krumzBitsSpent`, obwohl die Runtime-Familie bereits generisch als `recurring_trace_credit_pool` modelliert war.
 
 ## Zielprüfung
 
