@@ -2265,18 +2265,12 @@ function untapRunnerCardsAtTurnStart(state: GameState): void {
   }
 }
 
-function resolveDelayedAccessEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
+function resolveDelayedAccessEffects(state: GameState, effects?: AutomaticEffectCollector): void {
   const delayed = state.delayedAccessEffects ?? [];
   if (delayed.length === 0) return;
   const remaining: NonNullable<GameState["delayedAccessEffects"]> = [];
   for (const entry of delayed) {
-    if (
-      entry.kind !== "delayed_agenda_access_replacement" ||
-      entry.resolveAt !== "runner_start_turn"
-    ) {
+    if (entry.kind !== "delayed_agenda_access_replacement" || entry.resolveAt !== "runner_start_turn") {
       remaining.push(entry);
       continue;
     }
