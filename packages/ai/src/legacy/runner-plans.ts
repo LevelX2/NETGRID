@@ -8347,6 +8347,7 @@ function isRunnerLowValueDuplicateInstall(
   if (roles.some((role) => role === "memory" || role === "memory_support"))
     return false;
   if (roles.some(isRunnerPressureRole)) return false;
+  if (roles.some((role) => isRunnerNonAdditiveUtilityRole(role))) return true;
   if (roles.some((role) => role.startsWith("breaker_"))) return true;
   return roles.some(
     (role) =>
@@ -8378,6 +8379,17 @@ function isRunnerPressureRole(role: string): boolean {
     role.includes("pressure") ||
     role.includes("interface") ||
     role.includes("multiaccess")
+  );
+}
+
+function isRunnerNonAdditiveUtilityRole(role: string): boolean {
+  return (
+    role === "program_search" ||
+    role === "stack_search" ||
+    role === "trash_recovery" ||
+    role === "search_trash" ||
+    role.includes("setup.recovery") ||
+    role.includes("setup.stack_filter")
   );
 }
 

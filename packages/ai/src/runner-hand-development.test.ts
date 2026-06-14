@@ -294,6 +294,157 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("devalues a second Junkyard BBS as non-additive recovery utility", () => {
+    const secondJunkyard = visibleCard("junkyard-2", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      installCost: 0,
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const installedJunkyard = visibleCard("junkyard-installed", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const input = runnerInput({
+      credits: 6,
+      hand: [
+        secondJunkyard,
+        visibleCard("buffer-1", { type: "event" }),
+        visibleCard("buffer-2", { type: "event" }),
+        visibleCard("buffer-3", { type: "event" }),
+        visibleCard("buffer-4", { type: "event" }),
+      ],
+      rig: [installedJunkyard],
+      legalActions: [installAction("install-second-junkyard", secondJunkyard, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "junkyard-2",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "duplicate_or_low_value",
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        capabilityDelta: "backup_only",
+        duplicateRole: "redundant_duplicate",
+        stackabilityClass: "absolute_non_stackable",
+        installedSameDefinitionCount: 1,
+        installedSameFunctionalGroupCount: 1,
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(evaluation.persistentInstallEvaluation?.handBufferPenalty).toBeLessThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "non_additive_utility_duplicate",
+        "action_gated_utility_already_installed",
+        "duplicate_install_reduces_damage_buffer",
+        "why_duplicate_install_deferred:low_marginal_utility",
+      ]),
+    );
+  });
+
+  it("devalues a functionally similar second search resource", () => {
+    const shortCircuit = visibleCard("short-circuit-2", {
+      definitionId: "onr_v1_177_the-short-circuit",
+      title: "The Short Circuit",
+      type: "resource",
+      installCost: 2,
+      rulesText:
+        "A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
+    });
+    const installedAujourdOui = visibleCard("aujourdoui-installed", {
+      definitionId: "onr_v1_151_aujourdoui",
+      title: "Aujourd'Oui",
+      type: "resource",
+      rulesText:
+        "A: Look at the top five cards of your stack. You may bring any program cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle your stack.",
+    });
+    const input = runnerInput({
+      credits: 7,
+      hand: [
+        shortCircuit,
+        visibleCard("buffer-1", { type: "event" }),
+        visibleCard("buffer-2", { type: "event" }),
+        visibleCard("buffer-3", { type: "event" }),
+      ],
+      rig: [installedAujourdOui],
+      legalActions: [installAction("install-short-circuit", shortCircuit, 2)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.search_breaker_setup"],
+        }),
+      }),
+      "short-circuit-2",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "draw_or_search_engine",
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        capabilityDelta: "backup_only",
+        duplicateRole: "redundant_duplicate",
+        stackabilityClass: "absolute_non_stackable",
+        installedSameDefinitionCount: 0,
+        installedSameFunctionalGroupCount: 1,
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.newFunctionalCoverage).toEqual([]);
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "non_additive_utility_duplicate",
+        "action_gated_utility_already_installed",
+      ]),
+    );
+  });
+
+  it("allows recovery utility replacement when no copy remains installed", () => {
+    const replacementJunkyard = visibleCard("junkyard-replacement", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      installCost: 0,
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [replacementJunkyard],
+      rig: [],
+      legalActions: [
+        installAction("install-replacement-junkyard", replacementJunkyard, 0),
+      ],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "junkyard-replacement",
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        capabilityDelta: "new_coverage",
+        duplicateRole: "none",
+        installedSameDefinitionCount: 0,
+        installedSameFunctionalGroupCount: 0,
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).not.toEqual(
+      expect.arrayContaining(["non_additive_utility_duplicate"]),
+    );
+  });
+
   it("keeps cumulative damage prevention useful under risky breaker pressure", () => {
     const prevention = visibleCard("prevention-2", {
       definitionId: "test-damage-prevention",
