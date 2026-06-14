@@ -5,6 +5,9 @@ import {
   type AiPlayStrengthPilotScope,
 } from "./pilot-scope-common";
 
+export const AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV =
+  "NETGRID_AI_PLAY_STRENGTH_LOCAL_DEFAULT";
+
 export type LocalDefaultPilotPolicyStatus =
   | "default_off_candidate"
   | "keep_env_gated";
@@ -133,6 +136,15 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
 
 export function defaultActiveScopes(): [] {
   return [];
+}
+
+export function localDefaultPilotScopes(params: {
+  explicitPilotEnv: string | undefined;
+  localDefaultEnv: string | undefined;
+}): AiPlayStrengthPilotScope[] {
+  if (params.explicitPilotEnv?.trim()) return [];
+  if (params.localDefaultEnv?.trim() !== BASIC_SETUP_PILOT_MODE) return [];
+  return [BASIC_SETUP_PILOT_MODE];
 }
 
 export function recommendedLocalDefaultScopes(
