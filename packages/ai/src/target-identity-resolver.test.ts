@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveTargetIdentity } from "./target-identity-resolver";
+import {
+  resolveCandidateTargetIdentity,
+  resolveTargetIdentity,
+} from "./target-identity-resolver";
 
 describe("target identity resolver", () => {
   it("keeps side-safe server identities stable", () => {
@@ -50,6 +53,67 @@ describe("target identity resolver", () => {
       status: "complete",
       kind: "choice",
       identity: "choice:choice_1:option_a",
+    });
+  });
+
+  it("v2 marks no-target candidate actions as irrelevant", () => {
+    expect(
+      resolveCandidateTargetIdentity({
+        actionType: "gain_credit",
+        targetIdentity: "unknown_target",
+      }),
+    ).toMatchObject({
+      schemaVersion: "target-identity-resolution-v2",
+      status: "irrelevant",
+      kind: "none",
+      identity: "none",
+      playerActionTargetRequired: false,
+    });
+  });
+
+  it("v2 derives actor-known card references only from redacted snapshot evidence", () => {
+    expect(
+      resolveCandidateTargetIdentity({
+        actionType: "install_card",
+        targetIdentity: "unknown_target",
+        sourceDefinitionId: "Wall of Static",
+      }),
+    ).toMatchObject({
+      status: "complete",
+      kind: "installedOwnCard",
+      identity: "installedOwnCard:actorKnownRef:wall_of_static",
+      sideSafe: true,
+      snapshotStable: true,
+    });
+  });
+
+  it("v2 keeps missing server and choice targets blocked", () => {
+    expect(
+      resolveCandidateTargetIdentity({
+        actionType: "start_run",
+        targetIdentity: "server:unknown",
+      }).blocker,
+    ).toBe("server_target_missing");
+    expect(
+      resolveCandidateTargetIdentity({
+        actionType: "resolve_choice",
+        targetIdentity: "choice:unknown",
+      }).blocker,
+    ).toBe("choice_option_missing");
+  });
+
+  it("v2 derives side-safe ability identities when source and ability are present", () => {
+    expect(
+      resolveCandidateTargetIdentity({
+        actionType: "trigger_ability",
+        targetIdentity: "unknown_target",
+        sourceDefinitionId: "Self-Modifying Code",
+        abilityId: "search_install",
+      }),
+    ).toMatchObject({
+      status: "complete",
+      kind: "ability",
+      identity: "ability:self_modifying_code:search_install",
     });
   });
 });
