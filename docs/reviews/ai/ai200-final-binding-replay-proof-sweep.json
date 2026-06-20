@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "ai200-final-binding-replay-proof-sweep",
+  "generatedAt": "2026-06-14T14:00:10.704Z",
+  "gitHead": "20b652a1",
+  "sources": {
+    "scorecardV5": "docs/reviews/ai/ai199-scorecard-v5-binding-replay-proof.json",
+    "x5": "docs/reviews/ai/ai200-final-a-d-5seed-2026-06-14.json",
+    "x10": "docs/reviews/ai/ai200-final-a-d-10seed-2026-06-14.json"
+  },
+  "checks": [
+    {
+      "command": "corepack pnpm install --frozen-lockfile",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm -r --if-present run typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm -r --if-present run test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/engine test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/server test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web test",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    {
+      "command": "finaler x5 Trace",
+      "status": "passed"
+    },
+    {
+      "command": "finaler x10 Trace",
+      "status": "passed"
+    }
+  ],
+  "timeoutHardening": [
+    "packages/ai/package.json: AI Vitest uses one worker and 30s default timeout",
+    "packages/ai/src/index.test.ts: V0.8 starter smoke timeout 30s",
+    "apps/web/app/api/cards/catalog-data.test.ts: Proteus baseline catalog timeout 45s",
+    "apps/server/src/multiplayer.test.ts: AI-vs-AI simulation API timeout 15s"
+  ],
+  "scorecardMetrics": [
+    {
+      "id": "candidate_path_binding_rate",
+      "numerator": 21,
+      "denominator": 103,
+      "value": 0.2039,
+      "note": "Share of CandidatePathBindings with signature, action reference, no hard gate and non-blocking target seed."
+    },
+    {
+      "id": "target_identity_complete_rate",
+      "numerator": 33,
+      "denominator": 103,
+      "value": 0.3204,
+      "note": "Share of CandidatePathBindings with complete or irrelevant TargetIdentity v2."
+    },
+    {
+      "id": "dry_run_build_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of bindings that build a structural PlayerAction in the test-only dry-run builder."
+    },
+    {
+      "id": "replay_probe_pass_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of candidates with a successful PlayerAction replay probe."
+    },
+    {
+      "id": "coverage_binding_candidate_rate",
+      "numerator": 9,
+      "denominator": 13,
+      "value": 0.6923,
+      "note": "Share of Coverage cases with at least one CandidatePathBinding."
+    },
+    {
+      "id": "corp_tempo_binding_candidate_rate",
+      "numerator": 13,
+      "denominator": 17,
+      "value": 0.7647,
+      "note": "Share of Corp-Tempo cases with at least one CandidatePathBinding."
+    },
+    {
+      "id": "stale_punish_replacement_candidate_rate",
+      "numerator": 17,
+      "denominator": 20,
+      "value": 0.85,
+      "note": "Share of stale punish cases with a shadow replacement-goal candidate."
+    },
+    {
+      "id": "runtime_flagged_candidate_count",
+      "numerator": 0,
+      "denominator": 1,
+      "value": 0,
+      "note": "Count-like gate for any default-off opportunity micro-cutover candidate."
+    }
+  ],
+  "blocker": {
+    "current": "action_id_redacted_and_replay_probe_missing",
+    "runtimeCutoverEligible": false
+  },
+  "sweeps": {
+    "x5": {
+      "games": 20,
+      "decisions": 2492,
+      "findings": 836,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 4,
+        "medium": 592,
+        "low": 240
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 11,
+        "repeated_no_progress_run": 35,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 0,
+        "recovery_low_value_loop": 4,
+        "bank_over_target_without_funding_need": 7,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 2,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 539,
+        "semantic_override_suspicious": 408,
+        "corp_never_scores_long_game": 4,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 11,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 124.6,
+      "corpAgendaScores": 13,
+      "runnerAgendaSteals": 28,
+      "corpFlatlines": 5,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 4,
+      "passiveActionWithScoreLineAvailable": 7,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 1,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 1,
+        "action_limit_low_value_repeat": 7,
+        "action_limit_mixed_or_unknown": 2
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 2,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 2,
+        "corp_late_gain_credit_no_safe_alternative": 1,
+        "late_draw_for_coverage_or_hand_goal": 2,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 1,
+        "continue_chain_to_access": 2,
+        "break_pump_required": 1,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 0,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "x10": {
+      "games": 40,
+      "decisions": 5178,
+      "findings": 1754,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 11,
+        "medium": 1275,
+        "low": 468
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 23,
+        "repeated_no_progress_run": 57,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 1,
+        "recovery_low_value_loop": 14,
+        "bank_over_target_without_funding_need": 17,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 3,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 1181,
+        "semantic_override_suspicious": 912,
+        "corp_never_scores_long_game": 11,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 23,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 129.45,
+      "corpAgendaScores": 23,
+      "runnerAgendaSteals": 49,
+      "corpFlatlines": 10,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 7,
+      "passiveActionWithScoreLineAvailable": 14,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 1,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 2,
+        "action_limit_low_value_repeat": 16,
+        "action_limit_mixed_or_unknown": 4
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 6,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 5,
+        "corp_late_gain_credit_no_safe_alternative": 2,
+        "late_draw_for_coverage_or_hand_goal": 2,
+        "late_draw_without_coverage_or_hand_goal": 1,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 2,
+        "continue_chain_to_access": 3,
+        "break_pump_required": 1,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 1,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    }
+  },
+  "conclusion": {
+    "testsGreen": true,
+    "safetyGreen": true,
+    "runtimeCutoverEligible": false,
+    "runtimeChanged": false
+  }
+}

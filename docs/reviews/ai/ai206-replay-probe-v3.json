@@ -1,0 +1,2070 @@
+{
+  "schemaVersion": "ai206-replay-probe-v3",
+  "generatedAt": "2026-06-14T16:07:32.671Z",
+  "gitHead": "2d149002",
+  "sources": {
+    "ai205": "docs/reviews/ai/ai205-playeraction-builder-from-witness.json"
+  },
+  "aggregate": {
+    "candidates": 103,
+    "buildablePlayerActions": 0,
+    "replayProbed": 0,
+    "replayPassed": 0,
+    "notProbeable": 103,
+    "illegalActions": 0,
+    "replayFailures": 0,
+    "runtimeEffects": 0
+  },
+  "blockerCounts": {
+    "playeraction_not_built": 103,
+    "binding:target_identity_unresolved": 14,
+    "legalaction_witness_missing": 103,
+    "legalaction_witness_missing_real_action_id": 103,
+    "binding:choice_option_missing": 2,
+    "choice_option_missing": 2,
+    "binding:blocked_reason:plan_mismatch": 47,
+    "binding:hard_gate_blocked": 60,
+    "binding:target_blocked_by_hard_gate": 60,
+    "target_blocked_by_hard_gate": 60,
+    "binding:blocked_reason:semantic_excluded:archives_known_no_agenda": 7,
+    "binding:blocked_reason:semantic_excluded:known_ice_path_no_access": 6,
+    "binding:server_target_missing": 6,
+    "server_target_missing": 6,
+    "target_identity_unresolved": 2
+  },
+  "probes": [
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "choice:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:choice_option_missing",
+        "choice_option_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "ownInstalled:actorKnownRef:corporate_war",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "choice:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:choice_option_missing",
+        "choice_option_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "ownInstalled:actorKnownRef:off_site_backups",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "ownInstalled:actorKnownRef:corporate_war",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "ownInstalled:actorKnownRef:mantis_fixer_at_large",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-006",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "ownInstalled:actorKnownRef:tycho_mem_chip",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "ownInstalled:actorKnownRef:bbs_whispering_campaign",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "none",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:server_target_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "targetRef": "unknown_unprojected:unknown",
+      "buildable": false,
+      "probeStatus": "not_probeable",
+      "replayPassed": false,
+      "illegalAction": false,
+      "replayFailure": false,
+      "blockers": [
+        "playeraction_not_built",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ]
+    }
+  ],
+  "noGo": {
+    "reason": "no_witness_built_playeraction_candidates",
+    "removalConditions": [
+      "LegalActionWitness present in opportunity snapshot",
+      "buildPlayerActionFromWitness returns built",
+      "same-state snapshot harness available",
+      "applyAction accepts the PlayerAction",
+      "Replay and StateHash remain deterministic"
+    ]
+  }
+}

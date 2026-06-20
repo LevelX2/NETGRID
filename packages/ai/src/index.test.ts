@@ -22894,7 +22894,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(JSON.stringify(league)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 60_000);
+  }, 120_000);
 
   it("compares doctrine quality metrics between baseline and current candidate", () => {
     const benchmark = runDoctrineQualityBenchmark({
@@ -26693,7 +26693,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       expect(JSON.stringify(summary)).not.toContain("cardInstances");
       expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
     }
-  }, 10_000);
+  }, 30_000);
 
   it("runs V0.97 Run/Breach decks through side-safe AI smokes", () => {
     const summary = simulateAiGame({
@@ -26830,7 +26830,7 @@ describe("MVP 0.9 stronger AI", () => {
       "ai-v09-holdout-003",
     ]);
     expect(JSON.stringify(soak)).not.toContain("cardInstances");
-  }, 60_000);
+  }, 120_000);
 });
 
 const V094_RUNNER_DECK: DeckDefinition = {

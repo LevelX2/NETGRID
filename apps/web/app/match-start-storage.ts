@@ -1,9 +1,9 @@
-import type { HumanAiSideSelection, HumanSideSelection, MatchCardPoolSelection, MatchFormatSelection, PlayMode } from "./match-start";
+import type { AiDeckPolicySelection, HumanAiSideSelection, HumanSideSelection, MatchCardPoolSelection, MatchFormatSelection, PlayMode } from "./match-start";
 
 export type MatchStartMode = "host" | "join";
 export type MatchStartDeckSource = "snapshot" | "local";
 export type MatchStartAiDifficulty = "easy" | "normal" | "hard";
-export type MatchStartAiDeckPolicy = "fixed" | "selected" | "seeded_random";
+export type MatchStartAiDeckPolicy = AiDeckPolicySelection;
 export type MatchStartCountdownSeconds = 3 | 5 | 10;
 export type MatchStartPlayerClockMode = "none" | "player_clock";
 export type MatchStartPlayerClockMinutes = 5 | 10 | 15 | 20 | 30 | 45;
@@ -117,7 +117,7 @@ function isMatchStartAiDifficulty(value: unknown): value is MatchStartAiDifficul
 }
 
 function isMatchStartAiDeckPolicy(value: unknown): value is MatchStartAiDeckPolicy {
-  return value === "fixed" || value === "selected" || value === "seeded_random";
+  return value === "fixed" || value === "selected" || value === "seeded_random" || value === "same_as_participant_a";
 }
 
 function isMatchStartCountdownSeconds(value: unknown): value is MatchStartCountdownSeconds {

@@ -821,13 +821,14 @@ describe("V1.0.5 action board UI helpers", () => {
   it("detects field-card choices for installed board cards only", () => {
     const bbs = card("corp_bbs_1", "BBS Whispering Campaign", "asset", false);
     const ice = card("corp_ice_1", "Wall", "ice", false);
+    const ice2 = card("corp_ice_2", "Barrier", "ice", false);
     const runnerProgram = card("runner_program_1", "Virus Program", "program");
     const board = view("runner", {
       own: {
         ...view("runner").own,
         rig: [runnerProgram]
       },
-      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice], root: [bbs] }]
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice, ice2], root: [bbs] }]
     });
     const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "hunt_club_bbs_choice",
@@ -911,6 +912,19 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const hermanChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "fort_ice_reorder_7",
+      side: "corp",
+      source: "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:remote_1",
+      prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
+      options: [
+        { id: "card_corp_ice_1", label: "Wall", value: "corp_ice_1" },
+        { id: "card_corp_ice_2", label: "Barrier", value: "corp_ice_2" }
+      ],
+      minSelections: 2,
+      maxSelections: 2
+    };
     const corpArchivesBoard = view("corp", {
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
@@ -948,8 +962,12 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(offSiteArchiveChoice, corpArchivesBoard)).toBe(false);
+    expect(shouldUseFieldCardChoice(hermanChoice, board)).toBe(false);
     expect(shouldUseCardChoicePanel(offSiteArchiveChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(hermanChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(hermanChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(hermanChoice)).toBe(true);
   });
 
   it("labels Runner program install trash choices for optional and required MU cases", () => {
@@ -1687,6 +1705,44 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }))).toBe("Scoren");
   });
 
+  it("drops the card-name prefix for card-context run actions", () => {
+    const wilsonRun = legalAction(
+      "runner",
+      "start_run",
+      "wilson_1",
+      "Wilson, Weeflerunner Apprentice: Run auf R&D",
+      {
+        cardId: "wilson_1",
+        serverId: "rd",
+        runOnlyAction: true,
+      },
+    );
+
+    expect(actionButtonLabel(wilsonRun)).toBe("Wilson, Weeflerunner Apprentice: Run auf R&D");
+    expect(actionMatchesContext(wilsonRun, { kind: "card", id: "wilson_1", label: "Wilson, Weeflerunner Apprentice" })).toBe(true);
+    expect(contextualCardActionLabel(wilsonRun)).toBe("Run auf R&D");
+  });
+
+  it("drops generic card-name prefixes from card-context action labels", () => {
+    const genericAbility = legalAction(
+      "runner",
+      "trigger_ability",
+      "resource_1",
+      "Helpful Resource: Bezahlte Fähigkeit ausführen",
+      { cardId: "resource_1" },
+    );
+    const genericCredit = legalAction(
+      "runner",
+      "gain_credit",
+      "resource_1",
+      "Helpful Resource: 2 Credits nehmen",
+      { cardId: "resource_1" },
+    );
+
+    expect(contextualCardActionLabel(genericAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(contextualCardActionLabel(genericCredit)).toBe("2 Credits nehmen");
+  });
+
   it("names Corp install destinations in card context actions", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
@@ -1767,11 +1823,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([pump, breakAction]);
     expect(actionMatchesContext(pump, { kind: "card", id: "breaker_1", label: "Simple Decoder" })).toBe(true);
     expect(actionButtonLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
-    expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(contextualCardActionLabel(pump)).toBe("Stärke +1");
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen");
     expect(actionButtonLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen");
     expect(actionButtonLabel(paidPump)).toBe("Stärke +1 (Simple Decoder)");
     expect(actionButtonLabel(multiCostBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(actionCostChips(multiCostBreakAction)).toEqual([

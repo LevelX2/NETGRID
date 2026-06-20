@@ -4,7 +4,7 @@ import {
   buildSingaporeCityGridRunActions,
   buildStartRunIceRepositionActions,
   type FortPassWindowHost,
-} from "./fort-pass-window";
+} from "../fort-pass-window";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 

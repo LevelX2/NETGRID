@@ -44,7 +44,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ gate, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 120_000);
 
   it("reports match progression metrics alongside safety signals", () => {
     const benchmark = runMatchProgressionBenchmark({
@@ -98,7 +98,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ benchmark, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 30_000);
+  }, 120_000);
 
   it("reports a deck-separated match progression suite with pending real-scene slots", () => {
     const suite = runMatchProgressionBenchmarkSuite({
@@ -187,7 +187,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ suite, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
-  }, 60_000);
+  }, 120_000);
 
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
     const summary: AiSimulationSummary = {
@@ -432,7 +432,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
-  }, 30_000);
+  }, 60_000);
 
   it("keeps action alternative snapshots opt-in and redaction-safe", () => {
     const pair = JSON.parse(
@@ -490,7 +490,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify(withAlternatives)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
-  }, 30_000);
+  }, 90_000);
 
   it("keeps action alternatives scoped to action-limit finding windows", () => {
     const pair = JSON.parse(

@@ -207,7 +207,6 @@ function makeHost(legalAction: LegalAction) {
       experimentalAi: "experimental" as CardDefinitionId,
       vacantSoulkiller: "soulkiller" as CardDefinitionId,
       virusTestSite: "virus" as CardDefinitionId,
-      bizarreEncryptionScheme: "bizarre" as CardDefinitionId,
       chimera: definitions.chimera!.id,
     },
     cards: {
@@ -216,6 +215,7 @@ function makeHost(legalAction: LegalAction) {
       cardHasSubtype: (cardDefinition, subtype) =>
         cardDefinition.id === definitions.daemon!.id && subtype === "daemon",
       accessEffectsForDefinition: (definitionId) => accessEffects[definitionId] ?? [],
+      hiddenReplacementLongtailKindForDefinition: () => undefined,
     },
     damage: {
       resolveDamageOperation: (type, amount, source) => {

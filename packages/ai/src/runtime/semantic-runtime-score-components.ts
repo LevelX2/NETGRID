@@ -1,4 +1,4 @@
-import { FORBIDDEN_AI_INPUT_FIELDS } from "./ai-decision-input";
+import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
 export function semanticRuntimeChoiceWithEvidence(
@@ -38,11 +38,7 @@ export function semanticRuntimeConfidence(
 }
 
 export function scrubEvidence(evidence: readonly string[]): string[] {
-  return evidence.filter(
-    (entry) =>
-      !FORBIDDEN_AI_INPUT_FIELDS.some((needle) => entry.includes(needle)) &&
-      !entry.includes("_1"),
-  );
+  return evidence.filter((entry) => !containsForbiddenSemanticMarker(entry));
 }
 
 export function roundSemanticRuntimeScore(value: number): number {

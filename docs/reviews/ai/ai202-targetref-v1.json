@@ -1,0 +1,5098 @@
+{
+  "schemaVersion": "ai202-targetref-v1",
+  "generatedAt": "2026-06-14T15:52:30.582Z",
+  "gitHead": "c926d2fb",
+  "sources": {
+    "ai192": "docs/reviews/ai/ai192-target-identity-v2-candidate-paths.json"
+  },
+  "aggregate": {
+    "candidatePathBindings": 103,
+    "completeOrIrrelevant": 33,
+    "blocked": 70,
+    "hiddenBlocked": 0,
+    "ai183Candidates": 9,
+    "ai183CompleteOrIrrelevant": 8,
+    "redactionSafe": true
+  },
+  "blockerCounts": {
+    "choice_option_missing": 2,
+    "target_blocked_by_hard_gate": 60,
+    "server_target_missing": 6,
+    "target_identity_unresolved": 2
+  },
+  "redactionRules": [
+    "server targets use public server ids only",
+    "ice targets use public server id plus position, not card instance ids",
+    "ownInstalled targets use actor-safe refs only",
+    "choice targets require side-safe choice and option ids",
+    "access targets use server plus access context, not hidden card identity",
+    "abilitySource targets use side-safe source definition id and ability id",
+    "hidden targets become hidden_blocked",
+    "unprojected targets become unknown_unprojected with a blocker"
+  ],
+  "reviews": [
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:wall_of_static",
+        "identity": "ownInstalled:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:install_card",
+          "source:AI173",
+          "scope:ai177_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "choice:unknown",
+      "resolvedTargetIdentity": "choice:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "choice_option_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "choice",
+        "identity": "choice:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "choice_option_missing",
+        "evidence": [
+          "choice action lacks a concrete side-safe option id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "choice",
+        "ref": "choice:unknown",
+        "identity": "choice:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "choice_option_missing",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:resolve_choice",
+          "source:AI175",
+          "scope:ai177_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "choice_option_missing"
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:draw_card",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:wall_of_static",
+        "identity": "ownInstalled:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:install_card",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:end_turn",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "semanticActionType": "scoreline",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:corporate_war",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:corporate_war",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:corporate_war",
+        "identity": "ownInstalled:actorKnownRef:corporate_war",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:advance_card",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:draw_card",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:end_turn",
+          "source:AI175",
+          "scope:ai177_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:wall_of_static",
+        "identity": "ownInstalled:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "play_event",
+      "semanticActionType": "coverage_setup",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+        "identity": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:play_event",
+          "source:AI173",
+          "scope:coverage_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:install_card",
+          "source:AI173",
+          "scope:coverage_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "choice:unknown",
+      "resolvedTargetIdentity": "choice:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "choice_option_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "choice",
+        "identity": "choice:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "choice_option_missing",
+        "evidence": [
+          "choice action lacks a concrete side-safe option id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "choice",
+        "ref": "choice:unknown",
+        "identity": "choice:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "choice_option_missing",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:resolve_choice",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "choice_option_missing"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:off_site_backups",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:off_site_backups",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:off_site_backups",
+        "identity": "ownInstalled:actorKnownRef:off_site_backups",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:play_operation",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:wall_of_static",
+        "identity": "ownInstalled:actorKnownRef:wall_of_static",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:install_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:A-ai-v143-tuning-009",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "semanticActionType": "scoreline",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:corporate_war",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:corporate_war",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:corporate_war",
+        "identity": "ownInstalled:actorKnownRef:corporate_war",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:advance_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-001",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-006",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "coverage_setup",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+        "identity": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:play_event",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:activated_card_ability",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-008",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:B-ai-v143-tuning-009",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:mantis_fixer_at_large",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:mantis_fixer_at_large",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:mantis_fixer_at_large",
+        "identity": "ownInstalled:actorKnownRef:mantis_fixer_at_large",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:play_event",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-001",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:play_event",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-005",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-006",
+      "primaryPath": "economy",
+      "actionType": "mandatory_draw",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "unknown_target",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "unknown_target",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_identity_unresolved_from_snapshot",
+        "evidence": [
+          "no stable candidate target identity for mandatory_draw",
+          "targetContextStatus:reachability_relevant",
+          "hardGateSummary:clear"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_identity_unresolved",
+        "evidence": [
+          "case:C-ai-v143-tuning-006",
+          "action:mandatory_draw",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_identity_unresolved"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "unknown_target",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "unknown_target",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_identity_unresolved_from_snapshot",
+        "evidence": [
+          "no stable candidate target identity for activated_card_ability",
+          "targetContextStatus:reachability_relevant",
+          "hardGateSummary:clear"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_identity_unresolved",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:activated_card_ability",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_identity_unresolved"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "selected": false,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:tycho_mem_chip",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:tycho_mem_chip",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:tycho_mem_chip",
+        "identity": "ownInstalled:actorKnownRef:tycho_mem_chip",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:install_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-007",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "rez_ice",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "unknown_target",
+      "resolvedTargetIdentity": "installedOwnCard:actorKnownRef:bbs_whispering_campaign",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "target_identity_unresolved"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "complete",
+        "kind": "installedOwnCard",
+        "identity": "installedOwnCard:actorKnownRef:bbs_whispering_campaign",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "actor-known installed or installable card reference from snapshot"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "ownInstalled",
+        "ref": "ownInstalled:actorKnownRef:bbs_whispering_campaign",
+        "identity": "ownInstalled:actorKnownRef:bbs_whispering_campaign",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "actor_private",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:rez_ice",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "actor_known_installed_target"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:play_operation",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:install_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:install_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:C-ai-v143-tuning-008",
+          "action:install_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-003",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": true,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "none",
+      "resolvedTargetIdentity": "none",
+      "bindingProofStatus": "bound",
+      "bindingBlockers": [],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "irrelevant",
+        "kind": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "evidence": [
+          "target identity irrelevant for candidate action family"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": true,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:end_turn",
+          "source:AI175",
+          "scope:corp_tempo_candidate",
+          "target_ref_none"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": true
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-004",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "selected": true,
+      "originalTargetIdentity": "server:unknown",
+      "resolvedTargetIdentity": "server:unknown",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "server_target_missing"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "server",
+        "identity": "server:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "server_target_missing",
+        "evidence": [
+          "run-like action lacks a concrete side-safe server id"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "server_target_missing",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "server_target_missing"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:draw_card",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:start_run",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "selected": false,
+      "originalTargetIdentity": "blocked_by_hard_gate",
+      "resolvedTargetIdentity": "blocked_by_hard_gate",
+      "bindingProofStatus": "blocked",
+      "bindingBlockers": [
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "target_blocked_by_hard_gate"
+      ],
+      "resolution": {
+        "schemaVersion": "target-identity-resolution-v2",
+        "status": "blocked_unresolved",
+        "kind": "unknown_unresolved",
+        "identity": "blocked_by_hard_gate",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "target context was blocked by a hard gate before identity proof"
+        ]
+      },
+      "candidatePathReadyForPlayerAction": false,
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "unknown_unprojected",
+        "ref": "unknown_unprojected:unknown",
+        "identity": "unknown_unprojected:unknown",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "actor_private",
+        "blocker": "target_blocked_by_hard_gate",
+        "evidence": [
+          "case:D-ai-v143-tuning-008",
+          "action:gain_credit",
+          "source:AI175",
+          "scope:corp_tempo_candidate"
+        ]
+      },
+      "targetRefCompleteOrIrrelevant": false,
+      "blocker": "target_blocked_by_hard_gate"
+    }
+  ]
+}

@@ -511,7 +511,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(play.costs).toEqual([{ clicks: 1, credits: 1 }]);
     state = apply(state, "runner", (action) => action.actionId === play.actionId);
     expect(state.runner.credits).toBe(29);
-    expect(state.runnerTurnFlags?.pirateBroadcastPending).toMatchObject({
+    expect(state.runnerTurnFlags?.pendingSequences?.[0]).toMatchObject({
+      kind: "multi_server_success_sequence",
+      sequence: "run_each_data_fort",
       pendingServerIds: ["rd", "archives"],
       successfulServerIds: ["hq"],
     });
@@ -523,7 +525,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         type: "start_run",
         payload: {
           serverId: expectedNext,
-          pirateBroadcastRun: true,
+          multiServerSuccessSequenceRun: true,
           bonusRunNoClick: true,
         },
       });
@@ -532,7 +534,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     }
     expect(state.runner.scoreArea).toContain(pirateId);
     expect(state.cardInstances[pirateId]?.counters?.agenda).toBe(1);
-    expect(state.runnerTurnFlags?.pirateBroadcastPending).toBeUndefined();
+    expect(state.runnerTurnFlags?.pendingSequences).toBeUndefined();
     expect(state.runnerTurnFlags?.forgoNextActionsPending ?? 0).toBe(0);
     expectReplayStable(before, state);
 
@@ -541,26 +543,34 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       stoleAgendaThisTurn: false,
       stoleAgendaLastTurn: false,
     };
-    failed.runnerTurnFlags.pirateBroadcastPending = {
-      sourceCardId: "pro013_pirate_failed" as CardInstanceId,
-      sourceDefinitionId: PIRATE_BROADCAST,
-      sourceTitle: "Pirate Broadcast",
-      pendingServerIds: ["remote_99"],
-      successfulServerIds: ["hq"],
-    };
+    failed.runnerTurnFlags.pendingSequences = [
+      {
+        kind: "multi_server_success_sequence",
+        sequence: "run_each_data_fort",
+        sourceCardId: "pro013_pirate_failed" as CardInstanceId,
+        sourceDefinitionId: PIRATE_BROADCAST,
+        sourceTitle: "Pirate Broadcast",
+        pendingServerIds: ["remote_99"],
+        successfulServerIds: ["hq"],
+        onAllSuccessful: "gain_runner_event_agenda_point",
+        onAnyUnsuccessful: "forgo_next_action",
+        advanceOnSuccessfulRun: true,
+        failOnUnsuccessfulRun: true,
+      },
+    ];
     failed.runnerTurnFlags.forgoNextActionsPending = 0;
     const clicksBefore = failed.runner.clicks;
     failed = apply(
       failed,
       "runner",
       (action) =>
-        action.payload?.runnerAbility === "pirate_broadcast_sequence_failed",
+        action.payload?.runnerAbility === "multi_server_success_sequence_failed",
     );
-    expect(failed.runnerTurnFlags?.pirateBroadcastPending).toBeUndefined();
+    expect(failed.runnerTurnFlags?.pendingSequences).toBeUndefined();
     expect(failed.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
     expect(failed.runner.clicks).toBe(clicksBefore);
     expect(failed.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerAbility: "pirate_broadcast_sequence_failed",
+      runnerAbility: "multi_server_success_sequence_failed",
       amounts: { actionDebtAdded: 1 },
     });
   });

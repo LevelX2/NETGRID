@@ -6,7 +6,6 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
-  ServerId,
 } from "@netgrid/shared";
 import type {
   CardRunEncounterInterventionImplementation,
@@ -23,9 +22,15 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
-import { type FortPassWindowHost } from "./fort-pass-window";
-import { buildRegisteredRunWindowActions } from "./run-window-registry";
-import { runIsAtServerAfterPassingLastIce } from "./windows/after-passing-last-ice-window";
+import { buildRegisteredRunWindowActions } from "./windows/run-window-registry";
+import { stateIsAtServerAfterPassingLastIceWindow } from "./windows/after-passing-last-ice-window";
+import type {
+  RootRezContinuationResult,
+  RootRezEffectResult,
+  RunRezWindowHost,
+  RunRezWindowResult,
+  SpeedTrapRezWindowResult,
+} from "./windows/run-window-host";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -49,65 +54,14 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
   },
 };
 
-export type RunRezWindowHost = {
-  state: GameState;
-  cards: {
-    definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
-    runnerInstalledProgramIds: () => CardInstanceId[];
-  };
-  servers: {
-    mustServer: (
-      serverId: Exclude<ServerId, "new_remote"> | string,
-    ) => CorpServer;
-    publicServerLabel: (
-      serverId: Exclude<ServerId, "new_remote">,
-    ) => string | undefined;
-  };
-  fortPass: FortPassWindowHost;
-  choices: {
-    selectedChoiceIds: (
-      selectedChoices: PlayerAction["selectedChoices"],
-    ) => string[];
-  };
-  callbacks: {
-    canReplaceFortCardsFromHq: (
-      serverId: Exclude<ServerId, "new_remote">,
-    ) => boolean;
-    continueAfterRootRez: (legalAction?: LegalAction) => void;
-    finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    trashCorpInstalledCardToArchives: (
-      cardId: CardInstanceId,
-      legalAction?: LegalAction,
-    ) => void;
-    acmeSavingsAndLoanObligationCount: () => number;
-    addAcmeSavingsAndLoanObligation: (amount: number) => void;
-  };
-};
-
-export type RunRezWindowResult = {
-  handled: boolean;
-  rezzedCardId?: CardInstanceId;
-  sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
-  serverId?: Exclude<ServerId, "new_remote"> | string;
-  rootEffectResolved?: boolean;
-  speedTrapChoiceStarted?: boolean;
-  speedTrapResolved?: boolean;
-  runnerJackedOut?: boolean;
-  continueAfterRez?: boolean;
-  resolvedPayload?: NonNullable<LegalAction["payload"]> | undefined;
-  stateChanged?: boolean;
-};
-
-export type RootRezEffectResult = RunRezWindowResult;
-export type RootRezContinuationResult = RunRezWindowResult;
-export type SpeedTrapRezWindowResult = RunRezWindowResult & {
-  successfulRunWithoutAccess?: boolean;
-};
-export type RunRezActionBuildResult = {
-  legalActions: LegalAction[];
-};
+export type {
+  RootRezContinuationResult,
+  RootRezEffectResult,
+  RunRezActionBuildResult,
+  RunRezWindowHost,
+  RunRezWindowResult,
+  SpeedTrapRezWindowResult,
+} from "./windows/run-window-host";
 
 export function buildCorpApproachActions(
   host: RunRezWindowHost,
@@ -247,8 +201,8 @@ function rootRezLifecycleIsSolvable(
     )
   )
     return true;
-  const run = host.state.run;
-  if (!run || !runIsAtServerAfterPassingLastIce(run, server)) return false;
+  if (!stateIsAtServerAfterPassingLastIceWindow(host.state, server))
+    return false;
   return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 

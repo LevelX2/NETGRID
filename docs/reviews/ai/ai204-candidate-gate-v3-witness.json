@@ -1,0 +1,3005 @@
+{
+  "schemaVersion": "ai204-candidate-gate-v3-witness",
+  "generatedAt": "2026-06-14T16:02:16.657Z",
+  "gitHead": "f6be4b8f",
+  "sources": {
+    "ai203": "docs/reviews/ai/ai203-witness-opportunity-snapshots.json",
+    "ai195": "docs/reviews/ai/ai195-stale-punish-replacement-shadow.json",
+    "ai196": "docs/reviews/ai/ai196-coverage-candidate-binding-review.json"
+  },
+  "gates": [
+    "legalaction_witness_present",
+    "semantic_action_signature_present",
+    "targetref_complete_or_irrelevant",
+    "candidate_path_binding_from_witness",
+    "cost_timing_present",
+    "hard_risk_gates_clear",
+    "intent_contract_matches",
+    "repeated_case_or_clear_fixture",
+    "redaction_safe"
+  ],
+  "aggregate": {
+    "evaluatedCandidates": 103,
+    "passedCandidates": 0,
+    "blockedCandidates": 103,
+    "ai177Candidates": 9,
+    "ai177Passed": 0,
+    "coverageCases": 13,
+    "coverageBindings": 26,
+    "coverageDryRunCapable": 0,
+    "coverageRuntimeEffects": 0,
+    "stalePunishCases": 20,
+    "stalePunishReplacementCandidates": 17,
+    "stalePunishRuntimeEffects": 0,
+    "runtimeEffects": 0
+  },
+  "blockerCounts": {
+    "binding:target_identity_unresolved": 14,
+    "candidate_path_binding_not_from_witness": 103,
+    "legalaction_witness_missing": 103,
+    "legalaction_witness_missing_real_action_id": 103,
+    "binding:choice_option_missing": 2,
+    "choice_option_missing": 2,
+    "binding:blocked_reason:plan_mismatch": 47,
+    "binding:hard_gate_blocked": 60,
+    "binding:target_blocked_by_hard_gate": 60,
+    "target_blocked_by_hard_gate": 60,
+    "binding:blocked_reason:semantic_excluded:archives_known_no_agenda": 7,
+    "binding:blocked_reason:semantic_excluded:known_ice_path_no_access": 6,
+    "binding:server_target_missing": 6,
+    "server_target_missing": 6,
+    "target_identity_unresolved": 2
+  },
+  "gateReviews": [
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "targetRef": "choice:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:choice_option_missing",
+        "candidate_path_binding_not_from_witness",
+        "choice_option_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "targetRef": "ownInstalled:actorKnownRef:corporate_war",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "play_event",
+      "targetRef": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "targetRef": "choice:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:choice_option_missing",
+        "candidate_path_binding_not_from_witness",
+        "choice_option_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "targetRef": "ownInstalled:actorKnownRef:off_site_backups",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "ownInstalled:actorKnownRef:wall_of_static",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "targetRef": "ownInstalled:actorKnownRef:corporate_war",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "targetRef": "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "targetRef": "ownInstalled:actorKnownRef:mantis_fixer_at_large",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-006",
+      "primaryPath": "economy",
+      "actionType": "mandatory_draw",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "ownInstalled:actorKnownRef:tycho_mem_chip",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "rez_ice",
+      "targetRef": "ownInstalled:actorKnownRef:bbs_whispering_campaign",
+      "status": "blocked",
+      "blockers": [
+        "binding:target_identity_unresolved",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "targetRef": "none",
+      "status": "blocked",
+      "blockers": [
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:server_target_missing",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "targetRef": "unknown_unprojected:unknown",
+      "status": "blocked",
+      "blockers": [
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "candidate_path_binding_not_from_witness",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate"
+      ],
+      "gatesEvaluated": [
+        "legalaction_witness_present",
+        "semantic_action_signature_present",
+        "targetref_complete_or_irrelevant",
+        "candidate_path_binding_from_witness",
+        "cost_timing_present",
+        "hard_risk_gates_clear",
+        "intent_contract_matches",
+        "repeated_case_or_clear_fixture",
+        "redaction_safe"
+      ]
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import type {
   CardAccessEffectImplementation,
   CardAccessEffectStepImplementation,
   CardAccessZone,
+  CardHiddenReplacementLongtailImplementation,
   CardTraceSuccessEffectImplementation,
 } from "../../ability-engine/definition-types";
 
@@ -39,7 +40,6 @@ type AccessEffectDefinitionIds = {
   experimentalAi: CardDefinitionId;
   vacantSoulkiller: CardDefinitionId;
   virusTestSite: CardDefinitionId;
-  bizarreEncryptionScheme: CardDefinitionId;
   chimera: CardDefinitionId;
 };
 
@@ -54,6 +54,9 @@ export type AccessEffectHandlerHost = {
     accessEffectsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly CardAccessEffectImplementation[];
+    hiddenReplacementLongtailKindForDefinition: (
+      definitionId: CardDefinitionId,
+    ) => CardHiddenReplacementLongtailImplementation["kind"] | undefined;
   };
   damage: {
     resolveDamageOperation: (
@@ -1437,11 +1440,36 @@ function resolveV199AccessEffect(
 ): void {
   const legalAction = requireLegalAction(host);
   const definition = host.cards.definitionFor(cardId);
-  if (definition.id === host.definitions.bizarreEncryptionScheme && host.state.run) {
-    host.state.run.bizarreEncryptionSchemeActive = true;
+  if (
+    host.cards.hiddenReplacementLongtailKindForDefinition(definition.id) ===
+      "delayed_agenda_access_replacement" &&
+    host.state.run
+  ) {
+    const run = host.state.run;
+    const serverId = run.breach?.serverId ?? run.attackedServerId;
+    const existing = run.runDurationEffects ?? [];
+    if (
+      !existing.some(
+        (effect) =>
+          effect.kind === "delayed_agenda_access_replacement" &&
+          effect.sourceCardInstanceId === cardId,
+      )
+    ) {
+      run.runDurationEffects = [
+        ...existing,
+        {
+          kind: "delayed_agenda_access_replacement",
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          serverId,
+          replacementWindow: "agenda_access",
+          delayUntil: "runner_next_turn_start",
+        },
+      ];
+    }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      bizarreEncryptionSchemeAccessed: true,
+      delayedAgendaAccessReplacementActive: true,
     };
   }
   if (

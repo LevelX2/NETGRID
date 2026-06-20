@@ -1,0 +1,313 @@
+{
+  "schemaVersion": "ai212-final-witness-proof-sweep",
+  "generatedAt": "2026-06-14T19:14:40.918Z",
+  "gitHead": "810aee93",
+  "sources": {
+    "scorecardV6": "docs/reviews/ai/ai211-scorecard-v6-witness-proof.json",
+    "x5": "docs/reviews/ai/ai212-final-a-d-5seed-2026-06-14.json",
+    "x10": "docs/reviews/ai/ai212-final-a-d-10seed-2026-06-14.json",
+    "baselineAi200": "docs/reviews/ai/ai200-final-binding-replay-proof-sweep.json"
+  },
+  "checks": [
+    {
+      "command": "corepack pnpm install --frozen-lockfile",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm -r --if-present run typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm -r --if-present run test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/engine test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/server test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web test",
+      "status": "passed"
+    },
+    {
+      "command": "finaler x5 Trace",
+      "status": "passed"
+    },
+    {
+      "command": "finaler x10 Trace",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "timeoutHardening": [
+    "packages/ai/src/index.test.ts: V1.4.3 league timeout 120s",
+    "packages/ai/src/index.test.ts: V0.9 soak timeout 120s",
+    "packages/ai/src/simulation/benchmark-reports.test.ts: doctrine quality benchmark timeout 60s",
+    "packages/ai/src/simulation/benchmark-reports.test.ts: deck-separated match progression suite timeout 120s",
+    "packages/ai/src/simulation/benchmark-reports.test.ts: trace mining report timeout 60s",
+    "packages/ai/src/simulation/benchmark-reports.test.ts: action alternative snapshot timeout 90s",
+    "packages/ai/src/simulation/simulation-harness.test.ts: deterministic AI-vs-AI replay timeout 45s",
+    "packages/engine/src/index.test.ts: agenda shuffle timeout 15s",
+    "packages/engine/src/index.test.ts: HQ access replay timeout 15s"
+  ],
+  "scorecardMetrics": [
+    {
+      "id": "legalaction_witness_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of opportunity projections backed by a real LegalActionWitness."
+    },
+    {
+      "id": "targetref_complete_or_irrelevant_rate",
+      "numerator": 33,
+      "denominator": 103,
+      "value": 0.3204,
+      "note": "Share of projections whose TargetRef is complete, side-safe and snapshot-stable or irrelevant."
+    },
+    {
+      "id": "candidate_path_binding_from_witness_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of CandidatePathBindings derived from Witness evidence rather than redacted candidate refs."
+    },
+    {
+      "id": "playeraction_build_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of projections that build a PlayerAction from Witness evidence."
+    },
+    {
+      "id": "replay_probe_pass_rate",
+      "numerator": 0,
+      "denominator": 103,
+      "value": 0,
+      "note": "Share of candidates with a successful Replay Probe v3 pass."
+    },
+    {
+      "id": "coverage_witness_candidate_rate",
+      "numerator": 9,
+      "denominator": 13,
+      "value": 0.6923,
+      "note": "Share of coverage cases with at least one TargetRef-bound Witness Projection."
+    },
+    {
+      "id": "corp_tempo_witness_candidate_rate",
+      "numerator": 13,
+      "denominator": 17,
+      "value": 0.7647,
+      "note": "Share of Corp-Tempo cases with at least one TargetRef-bound Witness Projection."
+    },
+    {
+      "id": "punish_goal_switch_candidate_rate",
+      "numerator": 20,
+      "denominator": 20,
+      "value": 1,
+      "note": "Share of stale-punish cases where the shadow goal switch disables stale punish intent."
+    },
+    {
+      "id": "runtime_flagged_candidate_count",
+      "numerator": 0,
+      "denominator": 1,
+      "value": 0,
+      "note": "Count-like gate for any default-off runtime micro-cutover candidate."
+    }
+  ],
+  "blocker": {
+    "current": "legalaction_witness_missing_real_action_id",
+    "runtimeCutoverEligible": false,
+    "removalCondition": "A same-state opportunity snapshot must carry real LegalActions/actionIds into Witness projection."
+  },
+  "sweeps": {
+    "x5": {
+      "games": 20,
+      "decisions": 2492,
+      "findings": 836,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 4,
+        "medium": 592,
+        "low": 240
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 11,
+        "repeated_no_progress_run": 35,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 0,
+        "recovery_low_value_loop": 4,
+        "bank_over_target_without_funding_need": 7,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 2,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 539,
+        "semantic_override_suspicious": 408,
+        "corp_never_scores_long_game": 4,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 11,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 124.6,
+      "corpAgendaScores": 13,
+      "runnerAgendaSteals": 28,
+      "corpFlatlines": 5,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 4,
+      "passiveActionWithScoreLineAvailable": 7,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 1,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 1,
+        "action_limit_low_value_repeat": 7,
+        "action_limit_mixed_or_unknown": 2
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 2,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 2,
+        "corp_late_gain_credit_no_safe_alternative": 1,
+        "late_draw_for_coverage_or_hand_goal": 2,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 1,
+        "continue_chain_to_access": 2,
+        "break_pump_required": 1,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 0,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "x10": {
+      "games": 40,
+      "decisions": 5178,
+      "findings": 1757,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 11,
+        "medium": 1276,
+        "low": 470
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 23,
+        "repeated_no_progress_run": 57,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 1,
+        "recovery_low_value_loop": 13,
+        "bank_over_target_without_funding_need": 19,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 3,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 1181,
+        "semantic_override_suspicious": 914,
+        "corp_never_scores_long_game": 11,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 23,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 129.45,
+      "corpAgendaScores": 23,
+      "runnerAgendaSteals": 49,
+      "corpFlatlines": 10,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 7,
+      "passiveActionWithScoreLineAvailable": 14,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 1,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 2,
+        "action_limit_low_value_repeat": 16,
+        "action_limit_mixed_or_unknown": 4
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 6,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 5,
+        "corp_late_gain_credit_no_safe_alternative": 2,
+        "late_draw_for_coverage_or_hand_goal": 2,
+        "late_draw_without_coverage_or_hand_goal": 1,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 2,
+        "continue_chain_to_access": 3,
+        "break_pump_required": 1,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 1,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    }
+  },
+  "baselineComparison": {
+    "x5": {
+      "actionLimitReachedDelta": 0,
+      "illegalActionsDelta": 0,
+      "replayFailuresDelta": 0,
+      "hiddenInfoMarkerDelta": 0,
+      "highFindingsDelta": 0,
+      "criticalFindingsDelta": 0,
+      "hardGateNotWorse": true
+    },
+    "x10": {
+      "actionLimitReachedDelta": 0,
+      "illegalActionsDelta": 0,
+      "replayFailuresDelta": 0,
+      "hiddenInfoMarkerDelta": 0,
+      "highFindingsDelta": 0,
+      "criticalFindingsDelta": 0,
+      "hardGateNotWorse": true
+    }
+  },
+  "conclusion": {
+    "testsGreen": true,
+    "safetyGreen": true,
+    "witnessProofEstablished": false,
+    "runtimeCutoverEligible": false,
+    "runtimeChanged": false
+  }
+}

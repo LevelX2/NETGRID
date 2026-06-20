@@ -252,16 +252,24 @@ describe("start-run-action-execution", () => {
     expect(taxAction.payload).toMatchObject({ runStartTaxPaid: 2 });
   });
 
-  it("revalidates pending Pirate Broadcast sequence runs", () => {
+  it("revalidates pending multi-server success sequence runs", () => {
     const gameState = state();
     const calls: string[] = [];
-    gameState.runnerTurnFlags!.pirateBroadcastPending = {
-      sourceCardId: "pirate_1" as CardInstanceId,
-      sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
-      sourceTitle: "Pirate Broadcast",
-      pendingServerIds: ["rd", "archives"],
-      successfulServerIds: ["hq"],
-    };
+    gameState.runnerTurnFlags!.pendingSequences = [
+      {
+        kind: "multi_server_success_sequence",
+        sequence: "run_each_data_fort",
+        sourceCardId: "pirate_1" as CardInstanceId,
+        sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+        sourceTitle: "Pirate Broadcast",
+        pendingServerIds: ["rd", "archives"],
+        successfulServerIds: ["hq"],
+        onAllSuccessful: "gain_runner_event_agenda_point",
+        onAnyUnsuccessful: "forgo_next_action",
+        advanceOnSuccessfulRun: true,
+        failOnUnsuccessfulRun: true,
+      },
+    ];
 
     expect(() =>
       handleStartRunActionExecution(
@@ -269,23 +277,23 @@ describe("start-run-action-execution", () => {
         action({
           serverId: "hq",
           bonusRunNoClick: true,
-          pirateBroadcastRun: true,
+          multiServerSuccessSequenceRun: true,
         }),
       ),
-    ).toThrow("Pirate Broadcast verlangt den nächsten Data Fort.");
+    ).toThrow("Die offene Run-Sequenz verlangt den naechsten Data Fort.");
     expect(() =>
       handleStartRunActionExecution(
         hostFor(gameState, calls),
         action({ serverId: "rd" }),
       ),
-    ).toThrow("Pirate Broadcast erzwingt den nächsten Data-Fort-Run.");
+    ).toThrow("Die offene Run-Sequenz erzwingt den naechsten Data-Fort-Run.");
 
     handleStartRunActionExecution(
       hostFor(gameState, calls),
       action({
         serverId: "rd",
         bonusRunNoClick: true,
-        pirateBroadcastRun: true,
+        multiServerSuccessSequenceRun: true,
         bonusRunSource: "onr_proteus_116_pirate-broadcast",
       }),
     );

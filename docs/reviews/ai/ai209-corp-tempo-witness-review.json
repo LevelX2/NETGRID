@@ -1,0 +1,851 @@
+{
+  "schemaVersion": "ai209-corp-tempo-witness-review",
+  "generatedAt": "2026-06-14T16:17:18.234Z",
+  "gitHead": "b41218d8",
+  "sources": {
+    "ai197": "docs/reviews/ai/ai197-corp-tempo-candidate-binding-review.json",
+    "ai203": "docs/reviews/ai/ai203-witness-opportunity-snapshots.json",
+    "ai205": "docs/reviews/ai/ai205-playeraction-builder-from-witness.json"
+  },
+  "relevantCardPaths": [
+    "Corporate Boon",
+    "Corporate Coup",
+    "Political Coup",
+    "Project Consultants",
+    "Management Shake-Up",
+    "Systematic Layoffs",
+    "Chicago Branch",
+    "On-Call Solo Team",
+    "Scorched Earth",
+    "Urban Renewal",
+    "Solo Squad"
+  ],
+  "aggregate": {
+    "cases": 17,
+    "casesWithWitnessProjection": 13,
+    "witnessProjections": 76,
+    "witnessBuildableCases": 0,
+    "completeOrIrrelevantTargetRefs": 30,
+    "scorelineCases": 0,
+    "advanceLegalCases": 1,
+    "protectionCases": 10,
+    "punishReplacementCases": 13,
+    "dryRunCapable": 0,
+    "runtimeEffects": 0
+  },
+  "blockerCounts": {
+    "action_id_redacted": 13,
+    "binding:choice_option_missing": 1,
+    "binding:target_identity_unresolved": 7,
+    "choice_option_missing": 1,
+    "legalaction_witness_missing": 13,
+    "legalaction_witness_missing_real_action_id": 13,
+    "target_identity_unresolved": 7,
+    "unsupported_action_family_for_dry_run_builder": 13,
+    "binding:blocked_reason:plan_mismatch": 9,
+    "binding:hard_gate_blocked": 11,
+    "binding:target_blocked_by_hard_gate": 11,
+    "blocked_reason:plan_mismatch": 9,
+    "hard_gate_blocked": 11,
+    "target_blocked_by_hard_gate": 11,
+    "binding:blocked_reason:semantic_excluded:archives_known_no_agenda": 4,
+    "blocked_reason:semantic_excluded:archives_known_no_agenda": 4,
+    "binding:blocked_reason:semantic_excluded:known_ice_path_no_access": 2,
+    "blocked_reason:semantic_excluded:known_ice_path_no_access": 2,
+    "target_identity_unresolved_from_snapshot": 2,
+    "binding:server_target_missing": 3,
+    "server_target_missing": 3
+  },
+  "actionTypeCounts": {
+    "coverage_setup": 3,
+    "economy": 13,
+    "server_protection": 9,
+    "scoreline": 2
+  },
+  "cases": [
+    {
+      "caseId": "A-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "primaryPath": "opaque_ability",
+      "previousCutover": "no_go_no_tempo_path",
+      "candidateFamilies": [],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "no_replacement_candidate",
+      "candidatePathBindings": 0,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [],
+      "gateStatus": "blocked",
+      "witnessProjections": 0,
+      "targetRefs": [],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [],
+      "witnessSources": []
+    },
+    {
+      "caseId": "A-ai-v143-tuning-008",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "primaryPath": "opaque_or_basic",
+      "previousCutover": "no_go_missing_snapshot",
+      "candidateFamilies": [
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_protection",
+      "candidatePathBindings": 0,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [],
+      "gateStatus": "blocked",
+      "witnessProjections": 0,
+      "targetRefs": [],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [],
+      "witnessSources": []
+    },
+    {
+      "caseId": "A-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "cutover_candidate",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 5,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Off-Site Backups",
+        "Wall of Static"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:choice_option_missing",
+        "binding:target_identity_unresolved",
+        "choice_option_missing",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 11,
+      "targetRefs": [
+        "choice:unknown",
+        "none",
+        "ownInstalled:actorKnownRef:wall_of_static",
+        "ownInstalled:actorKnownRef:off_site_backups"
+      ],
+      "completeOrIrrelevantTargetRefs": 9,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "coverage_setup",
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "ai177_candidate",
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-001",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "cutover_candidate",
+      "candidateFamilies": [
+        "advance",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": true,
+      "protectionLegal": false,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_scoreline",
+      "candidatePathBindings": 7,
+      "completeOrIrrelevantTargetIdentities": 4,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Corporate War"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "binding:target_identity_unresolved",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 10,
+      "targetRefs": [
+        "ownInstalled:actorKnownRef:corporate_war",
+        "none",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 7,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "scoreline"
+      ],
+      "witnessSources": [
+        "ai177_candidate",
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-003",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "primaryPath": "opaque_or_basic",
+      "previousCutover": "no_go_missing_snapshot",
+      "candidateFamilies": [
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_protection",
+      "candidatePathBindings": 0,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [],
+      "gateStatus": "blocked",
+      "witnessProjections": 0,
+      "targetRefs": [],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [],
+      "witnessSources": []
+    },
+    {
+      "caseId": "B-ai-v143-tuning-006",
+      "dominantSubcluster": "continue_chain_to_access",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "no_replacement_candidate",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 1,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "none",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 1,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-008",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 2,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Bodyweight™ Synthetic Blood",
+        "Newsgroup Filter"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "binding:target_identity_unresolved",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "ownInstalled:actorKnownRef:bodyweight_synthetic_blood",
+        "unknown_unprojected:unknown",
+        "none"
+      ],
+      "completeOrIrrelevantTargetRefs": 2,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "coverage_setup",
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "B-ai-v143-tuning-009",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 1,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "none",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 1,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-001",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 1,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Mantis, Fixer-at-Large"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "binding:target_identity_unresolved",
+        "blocked_reason:plan_mismatch",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "ownInstalled:actorKnownRef:mantis_fixer_at_large",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 1,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-005",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 5,
+      "completeOrIrrelevantTargetIdentities": 1,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Mantis, Fixer-at-Large"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 5,
+      "targetRefs": [
+        "none",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 1,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-006",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "economy",
+      "previousCutover": "no_go_no_tempo_path",
+      "candidateFamilies": [
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 1,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_identity_unresolved",
+        "target_identity_unresolved_from_snapshot",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 1,
+      "targetRefs": [
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-007",
+      "dominantSubcluster": "corp_late_gain_credit_real_rez_or_protection_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_protection",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 4,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "Newsgroup Filter",
+        "Tycho Mem Chip"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "binding:target_identity_unresolved",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "target_identity_unresolved",
+        "target_identity_unresolved_from_snapshot",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "unknown_unprojected:unknown",
+        "none",
+        "ownInstalled:actorKnownRef:tycho_mem_chip"
+      ],
+      "completeOrIrrelevantTargetRefs": 4,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "coverage_setup",
+        "economy"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "C-ai-v143-tuning-008",
+      "dominantSubcluster": "run_microstep_required",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_scoreline",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 1,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [
+        "BBS Whispering Campaign",
+        "Efficiency Experts",
+        "Superior Net Barriers"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "binding:target_identity_unresolved",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "target_blocked_by_hard_gate",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "ownInstalled:actorKnownRef:bbs_whispering_campaign",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 1,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "scoreline",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-003",
+      "dominantSubcluster": "continue_chain_to_access",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "not_in_stale_punish_shadow",
+      "candidatePathBindings": 3,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:server_target_missing",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 3,
+      "targetRefs": [
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-004",
+      "dominantSubcluster": "runner_late_gain_credit_real_reserve",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline",
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 6,
+      "completeOrIrrelevantTargetIdentities": 3,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:server_target_missing",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 6,
+      "targetRefs": [
+        "none",
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 3,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-008",
+      "dominantSubcluster": "continue_chain_to_access",
+      "primaryPath": "scoreline",
+      "previousCutover": "no_go_hard_gate_or_target_context",
+      "candidateFamilies": [
+        "protection_rez",
+        "economy_to_scoreline"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": true,
+      "economyVisible": true,
+      "punishVisible": false,
+      "punishReplacementGoal": "no_replacement_candidate",
+      "candidatePathBindings": 4,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:server_target_missing",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "legalaction_witness_missing",
+        "legalaction_witness_missing_real_action_id",
+        "server_target_missing",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ],
+      "gateStatus": "blocked",
+      "witnessProjections": 4,
+      "targetRefs": [
+        "unknown_unprojected:unknown"
+      ],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [
+        "economy",
+        "server_protection"
+      ],
+      "witnessSources": [
+        "corp_tempo_candidate"
+      ]
+    },
+    {
+      "caseId": "D-ai-v143-tuning-010",
+      "dominantSubcluster": "continue_chain_to_access",
+      "primaryPath": "opaque_ability",
+      "previousCutover": "no_go_no_tempo_path",
+      "candidateFamilies": [
+        "punish_replacement"
+      ],
+      "scorelineLegal": false,
+      "advanceLegal": false,
+      "protectionLegal": false,
+      "economyVisible": false,
+      "punishVisible": false,
+      "punishReplacementGoal": "corp.replace_stale_punish_with_economy_conversion",
+      "candidatePathBindings": 0,
+      "completeOrIrrelevantTargetIdentities": 0,
+      "dryRunBuilt": 0,
+      "dryRunCapable": false,
+      "sourceDefinitions": [],
+      "blockers": [],
+      "gateStatus": "blocked",
+      "witnessProjections": 0,
+      "targetRefs": [],
+      "completeOrIrrelevantTargetRefs": 0,
+      "witnessBuildable": 0,
+      "witnessActionTypes": [],
+      "witnessSources": []
+    }
+  ]
+}

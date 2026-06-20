@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "ai201-legalaction-witness-contract-v1",
+  "generatedAt": "2026-06-14T15:54:44.807Z",
+  "gitHead": "c926d2fb",
+  "aggregate": {
+    "samples": 3,
+    "redactionSafe": true,
+    "noTargetWitnesses": 1,
+    "serverTargetWitnesses": 1,
+    "hiddenBlockedWitnesses": 1,
+    "runtimeChanged": false
+  },
+  "samples": [
+    {
+      "schemaVersion": "legalaction-witness-v1",
+      "witnessKey": "ai201.gain_credit|12|runner|gain_credit|none|no-choice",
+      "actionId": "ai201.gain_credit",
+      "stateVersion": 12,
+      "side": "runner",
+      "actionType": "gain_credit",
+      "sourceRef": {
+        "kind": "basic_action",
+        "ref": "basic_action",
+        "redactionPolicy": "public"
+      },
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "none",
+        "ref": "none",
+        "identity": "none",
+        "playerActionTargetRequired": false,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "target_ref_none"
+        ]
+      },
+      "costProfile": {
+        "clickCost": 1,
+        "creditCost": 0,
+        "additionalCosts": []
+      },
+      "timingProfile": {
+        "timingPoint": "runner_action.main",
+        "expiresAtStateVersion": 1
+      },
+      "redactionPolicy": "public",
+      "blockers": [],
+      "evidence": [
+        "legalaction_witness_from_existing_legalaction",
+        "visibility:public",
+        "server_not_present",
+        "choice_requirements_absent"
+      ]
+    },
+    {
+      "schemaVersion": "legalaction-witness-v1",
+      "witnessKey": "ai201.start_run|13|runner|start_run|server:rd|no-choice",
+      "actionId": "ai201.start_run",
+      "stateVersion": 13,
+      "side": "runner",
+      "actionType": "start_run",
+      "sourceRef": {
+        "kind": "basic_action",
+        "ref": "basic_action",
+        "redactionPolicy": "public"
+      },
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "server",
+        "ref": "server:rd",
+        "identity": "server:rd",
+        "playerActionTargetRequired": true,
+        "sideSafe": true,
+        "snapshotStable": true,
+        "redactionPolicy": "public",
+        "evidence": [
+          "side_safe_server_target"
+        ]
+      },
+      "costProfile": {
+        "clickCost": 0,
+        "creditCost": 0,
+        "additionalCosts": []
+      },
+      "timingProfile": {
+        "timingPoint": "runner_action.main",
+        "expiresAtStateVersion": 1
+      },
+      "redactionPolicy": "public",
+      "blockers": [],
+      "evidence": [
+        "legalaction_witness_from_existing_legalaction",
+        "visibility:public",
+        "server_from_legalaction_payload",
+        "choice_requirements_absent"
+      ]
+    },
+    {
+      "schemaVersion": "legalaction-witness-v1",
+      "witnessKey": "ai201.trigger_ability|14|runner|trigger_ability|hidden_blocked|no-choice",
+      "actionId": "ai201.trigger_ability",
+      "stateVersion": 14,
+      "side": "runner",
+      "actionType": "trigger_ability",
+      "sourceRef": {
+        "kind": "hidden_blocked",
+        "ref": "hidden_blocked",
+        "redactionPolicy": "hidden_blocked"
+      },
+      "targetRef": {
+        "schemaVersion": "target-ref-v1",
+        "kind": "hidden_blocked",
+        "ref": "hidden_blocked",
+        "identity": "hidden_blocked",
+        "playerActionTargetRequired": true,
+        "sideSafe": false,
+        "snapshotStable": false,
+        "redactionPolicy": "hidden_blocked",
+        "blocker": "hidden_target_blocked",
+        "evidence": [
+          "hidden_target_blocked"
+        ]
+      },
+      "costProfile": {
+        "clickCost": 0,
+        "creditCost": 0,
+        "additionalCosts": []
+      },
+      "timingProfile": {
+        "timingPoint": "runner_action.main",
+        "expiresAtStateVersion": 1
+      },
+      "redactionPolicy": "hidden_blocked",
+      "blockers": [
+        "target_ref_hidden_blocked",
+        "source_ref_hidden_blocked"
+      ],
+      "evidence": [
+        "legalaction_witness_from_existing_legalaction",
+        "visibility:public",
+        "server_not_present",
+        "choice_requirements_absent"
+      ]
+    }
+  ]
+}

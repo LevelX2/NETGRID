@@ -1,0 +1,2946 @@
+{
+  "schemaVersion": "ai193-playeraction-dry-run-builder",
+  "generatedAt": "2026-06-14T12:30:34.197Z",
+  "gitHead": "128a6973",
+  "sources": {
+    "ai191": "docs/reviews/ai/ai191-candidate-path-bindings-v1.json",
+    "ai192": "docs/reviews/ai/ai192-target-identity-v2-candidate-paths.json"
+  },
+  "aggregate": {
+    "candidatePathBindings": 103,
+    "dryRunBuilt": 0,
+    "dryRunBlocked": 103,
+    "ai177DryRunBuilt": 0
+  },
+  "blockerCounts": {
+    "action_id_redacted": 103,
+    "binding:target_identity_unresolved": 14,
+    "binding:choice_option_missing": 2,
+    "choice_option_missing": 2,
+    "binding:blocked_reason:plan_mismatch": 47,
+    "binding:hard_gate_blocked": 60,
+    "binding:target_blocked_by_hard_gate": 60,
+    "target_blocked_by_hard_gate": 60,
+    "unsupported_action_family_for_dry_run_builder": 66,
+    "binding:blocked_reason:semantic_excluded:archives_known_no_agenda": 7,
+    "binding:blocked_reason:semantic_excluded:known_ice_path_no_access": 6,
+    "binding:server_target_missing": 6,
+    "server_target_missing": 6,
+    "target_identity_unresolved_from_snapshot": 2
+  },
+  "builds": [
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Wall of Static|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:0c4d1d9c|101|corp|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:wall_of_static",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "choice:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:choice_option_missing",
+          "choice_option_missing"
+        ],
+        "evidence": [
+          "binding:action:resolve_choice|semantic:server_protection|source:game_rule|definition:none|ability:none|target:choice:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:protection_relevant|server:none|choice:none|redacted:fe7d4775|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:choice:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:protection_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:110f4692|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:7b6e1a19|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Wall of Static|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:34b96bf5|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:wall_of_static",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:4696d127|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "semanticActionType": "scoreline",
+      "targetIdentity": "installedOwnCard:actorKnownRef:corporate_war",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:advance_card|semantic:scoreline|source:visible_card_or_ability|definition:Corporate War|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:24e44c18|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:corporate_war",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:7e0742ed|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "ai177_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:35299676|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Wall of Static|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:8d95b057|101|corp|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:wall_of_static",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:3c6d57b6|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:ec6b18b8|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:f7e343ed|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "play_event",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_event|semantic:coverage_setup|source:visible_card_or_ability|definition:Bodyweight™ Synthetic Blood|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:b45e0af5|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:a4c22fc7|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:488ab2ef|101|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:103379c5|101|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:46b90510|101|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:4a8f03bd|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:a11a25c1|100|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Armored Fridge|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:8f975f9d|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:81e5c305|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:b36c9f3f|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:8b68394f|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:f965540f|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:7cbf2377|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:7cb1557e|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:6977fa19|100|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:cb04a653|104|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:f4d92fd9|104|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:8795674b|104|runner|AI173.runner_coverage.draw_solution",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:6573f376|101|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Bartmoss Memorial Icebreaker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:aa675fea|101|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:4706dfdb|101|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "coverage_candidate",
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Broker|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:062def45|101|runner|AI173.runner_coverage.visible_installable_solution",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "resolve_choice",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "choice:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:choice_option_missing",
+          "choice_option_missing"
+        ],
+        "evidence": [
+          "binding:action:resolve_choice|semantic:server_protection|source:game_rule|definition:none|ability:none|target:choice:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:protection_relevant|server:none|choice:none|redacted:d97d77b8|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:choice:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:protection_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "semanticActionType": "economy",
+      "targetIdentity": "installedOwnCard:actorKnownRef:off_site_backups",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_operation|semantic:economy|source:visible_card_or_ability|definition:Off-Site Backups|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none|redacted:13d77d93|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:off_site_backups",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:reachability_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:9ea3a427|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:1b40dda8|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:wall_of_static",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Wall of Static|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:20f9f592|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:wall_of_static",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:9cf953c2|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "advance_card",
+      "semanticActionType": "scoreline",
+      "targetIdentity": "installedOwnCard:actorKnownRef:corporate_war",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:advance_card|semantic:scoreline|source:visible_card_or_ability|definition:Corporate War|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:e8e59a51|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:corporate_war",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:b79ab0c8|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:23d347eb|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:945b48ee|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none|redacted:9a298dc2|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:reachability_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:8d0c0500|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:c9f4b04f|101|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:corp",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:8454efa4|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:836f7e23|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:42191445|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:6b2439e7|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:e626bfa6|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:b2e226b0|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_event|semantic:coverage_setup|source:visible_card_or_ability|definition:Bodyweight™ Synthetic Blood|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:543abd12|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:installedOwnCard:actorKnownRef:bodyweight_synthetic_blood",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:activated_card_ability|semantic:economy|source:visible_card_or_ability|definition:Newsgroup Filter|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:86ebddde|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:4a3b9b40|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:a316b939|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:617ccb48|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:29135999|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:5de1a755|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:741f0a58|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:0d6f6345|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:412a612e|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:6f2cec1f|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:56574d85|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "economy",
+      "targetIdentity": "installedOwnCard:actorKnownRef:mantis_fixer_at_large",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_event|semantic:economy|source:visible_card_or_ability|definition:Mantis, Fixer-at-Large|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:9be0fbfd|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:installedOwnCard:actorKnownRef:mantis_fixer_at_large",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:3f6dbdeb|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:bfdad502|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:9e84b27d|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:cd9a5eee|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:5dc12448|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:33ade5c8|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "play_event",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_event|semantic:economy|source:visible_card_or_ability|definition:Mantis, Fixer-at-Large|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:2c6e3172|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:0ef07f5c|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:35b88b0a|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:1a910784|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-006",
+      "primaryPath": "economy",
+      "actionType": "mandatory_draw",
+      "semanticActionType": "economy",
+      "targetIdentity": "unknown_target",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "target_identity_unresolved_from_snapshot",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:mandatory_draw|semantic:economy|source:game_rule|definition:none|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none|redacted:b88e0063|100|corp|AI175.corp_tempo.economy",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:unknown_target",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:reachability_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "activated_card_ability",
+      "semanticActionType": "economy",
+      "targetIdentity": "unknown_target",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved",
+          "target_identity_unresolved_from_snapshot",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:activated_card_ability|semantic:economy|source:visible_card_or_ability|definition:Newsgroup Filter|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none|redacted:8fc8133e|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:unknown_target",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:reachability_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:5e7cb1af|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:d22d27b8|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "coverage_setup",
+      "targetIdentity": "installedOwnCard:actorKnownRef:tycho_mem_chip",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:coverage_setup|source:visible_card_or_ability|definition:Tycho Mem Chip|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:8796dc15|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:installedOwnCard:actorKnownRef:tycho_mem_chip",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:ced44382|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:9b947af6|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:semantic_action_excluded+semantic_excluded:archives_known_no_agenda,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "rez_ice",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "installedOwnCard:actorKnownRef:bbs_whispering_campaign",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:target_identity_unresolved"
+        ],
+        "evidence": [
+          "binding:action:rez_ice|semantic:server_protection|source:visible_card_or_ability|definition:BBS Whispering Campaign|ability:none|target:unknown_target|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:e2e4083e|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:installedOwnCard:actorKnownRef:bbs_whispering_campaign",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:e5d30687|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "play_operation",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:play_operation|semantic:economy|source:visible_card_or_ability|definition:Efficiency Experts|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:fcbada17|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:bd537906|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:942d83a3|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "install_card",
+      "semanticActionType": "scoreline",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:install_card|semantic:scoreline|source:visible_card_or_ability|definition:Superior Net Barriers|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:e3350eec|100|corp|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:corp",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:4d3552a8|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:b2ad716c|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:4f0f0af4|100|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:100",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:reachability_relevant|server:none|choice:none|redacted:69dcf8b9|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:reachability_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:c527535d|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:1f6a5764|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "end_turn",
+      "semanticActionType": "economy",
+      "targetIdentity": "none",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted"
+        ],
+        "evidence": [
+          "binding:action:end_turn|semantic:economy|source:game_rule|definition:none|ability:none|target:none|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:b76a4793|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:none",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:e40d9168|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:93f84d2a|104|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:104",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:deck_doctrine_runtime_weight_suppressed+semantic_action_excluded+semantic_excluded:known_ice_path_no_access,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "server_protection",
+      "targetIdentity": "server:unknown",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:server_target_missing",
+          "server_target_missing"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:server_protection|source:basic_action|definition:none|ability:none|target:server:unknown|cost:hard_gate:none,economy:not_projected|timing:snapshot_context:scoreline_relevant|server:none|choice:none|redacted:aafbcbbd|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:server:unknown",
+          "costClass:hard_gate:none,economy:not_projected",
+          "timingClass:snapshot_context:scoreline_relevant"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "draw_card",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:draw_card|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:9dcf80f0|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "start_run",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:start_run|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:a84485f0|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    },
+    {
+      "reviewScope": "corp_tempo_candidate",
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "actionType": "gain_credit",
+      "semanticActionType": "economy",
+      "targetIdentity": "blocked_by_hard_gate",
+      "result": {
+        "schemaVersion": "playeraction-dry-run-builder-v1",
+        "status": "blocked",
+        "blockers": [
+          "action_id_redacted",
+          "binding:blocked_reason:plan_mismatch",
+          "binding:hard_gate_blocked",
+          "binding:target_blocked_by_hard_gate",
+          "target_blocked_by_hard_gate",
+          "unsupported_action_family_for_dry_run_builder"
+        ],
+        "evidence": [
+          "binding:action:gain_credit|semantic:economy|source:basic_action|definition:none|ability:none|target:blocked_by_hard_gate|cost:hard_gate:excluded_by_current_plan,economy:not_projected|timing:snapshot_context:blocked_by_hard_gate|server:none|choice:none|redacted:c106f2c2|101|runner|AI175.corp_tempo.scoreline",
+          "stateVersion:101",
+          "side:runner",
+          "targetIdentity:blocked_by_hard_gate",
+          "costClass:hard_gate:excluded_by_current_plan,economy:not_projected",
+          "timingClass:snapshot_context:blocked_by_hard_gate"
+        ]
+      }
+    }
+  ]
+}

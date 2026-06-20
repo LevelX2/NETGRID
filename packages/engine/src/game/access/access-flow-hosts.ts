@@ -11,8 +11,11 @@ import type {
   Side,
   TraceSuccessEffect,
 } from "@netgrid/shared";
-import type { CardAccessEffectImplementation } from "../../ability-engine/definition-types";
-import type { CardTraceSuccessEffectImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardAccessEffectImplementation,
+  CardHiddenReplacementLongtailImplementation,
+  CardTraceSuccessEffectImplementation,
+} from "../../ability-engine/definition-types";
 import { buildLegalAction as action } from "../turn/action-builders";
 import {
   handleAccessEffectsForCard,
@@ -32,6 +35,9 @@ export type AccessFlowCompositionHost = {
     accessEffectsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly CardAccessEffectImplementation[];
+    hiddenReplacementLongtailKindForDefinition: (
+      definitionId: CardDefinitionId,
+    ) => CardHiddenReplacementLongtailImplementation["kind"] | undefined;
   };
   servers: {
     mustServer: (
@@ -358,6 +364,8 @@ export function createAccessFlowAdapters(
         mustInstance: (cardId) => host.cards.cardInstanceFor(state, cardId),
         cardHasSubtype: host.cards.cardHasSubtype,
         accessEffectsForDefinition: host.cards.accessEffectsForDefinition,
+        hiddenReplacementLongtailKindForDefinition:
+          host.cards.hiddenReplacementLongtailKindForDefinition,
       },
       damage: {
         resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {

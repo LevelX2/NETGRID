@@ -2,6 +2,7 @@ import type {
   CardInstanceId,
   GameState,
   LegalAction,
+  MultiServerSuccessSequenceState,
   ServerId,
 } from "@netgrid/shared";
 import type { StartRunOptions } from "./run-core-execution";
@@ -50,23 +51,27 @@ export function executeStartRunAction(
     "new_remote"
   >;
   const flags = host.turn.ensureRunnerTurnFlags();
-  const pirateBroadcastNextServerId =
-    flags.pirateBroadcastPending?.pendingServerIds[0];
-  if (pirateBroadcastNextServerId) {
+  const pendingSequence = nextMultiServerSuccessSequence(flags);
+  const nextSequenceServerId = pendingSequence?.pendingServerIds[0];
+  if (pendingSequence && nextSequenceServerId) {
     if (
-      legalAction.payload?.pirateBroadcastRun !== true ||
+      legalAction.payload?.multiServerSuccessSequenceRun !== true ||
       legalAction.payload?.bonusRunNoClick !== true
     )
-      throw new Error("Pirate Broadcast erzwingt den nächsten Data-Fort-Run.");
-    if (serverId !== pirateBroadcastNextServerId)
-      throw new Error("Pirate Broadcast verlangt den nächsten Data Fort.");
+      throw new Error(
+        "Die offene Run-Sequenz erzwingt den naechsten Data-Fort-Run.",
+      );
+    if (serverId !== nextSequenceServerId)
+      throw new Error(
+        "Die offene Run-Sequenz verlangt den naechsten Data Fort.",
+      );
     if (
       legalAction.payload?.bonusRunSource !==
-      flags.pirateBroadcastPending?.sourceDefinitionId
+      pendingSequence.sourceDefinitionId
     )
-      throw new Error("Die Pirate-Broadcast-Quelle passt nicht zur Sequenz.");
-  } else if (legalAction.payload?.pirateBroadcastRun === true) {
-    throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
+      throw new Error("Die Sequenzquelle passt nicht zur offenen Run-Sequenz.");
+  } else if (legalAction.payload?.multiServerSuccessSequenceRun === true) {
+    throw new Error("Es ist keine passende Run-Sequenz offen.");
   }
   host.run.validateActivityGatedFortRun(serverId);
   let runOnlyActionSourceCardId: CardInstanceId | undefined;
@@ -93,7 +98,7 @@ export function executeStartRunAction(
     runOnlyActionSourceCardId = explicitSourceCardId;
   }
   if (legalAction.payload?.bonusRunNoClick === true) {
-    if (legalAction.payload?.pirateBroadcastRun !== true) {
+    if (legalAction.payload?.multiServerSuccessSequenceRun !== true) {
       flags.allNighterBonusRunPending = false;
       flags.bodyweightDataCrecheExtraRunPending = false;
     }
@@ -101,9 +106,9 @@ export function executeStartRunAction(
     host.payment.spendRunnerClick();
   }
   const startRunOptions =
-    legalAction.payload?.pirateBroadcastRun === true &&
-    flags.pirateBroadcastPending
-      ? { pirateBroadcast: flags.pirateBroadcastPending }
+    legalAction.payload?.multiServerSuccessSequenceRun === true &&
+    pendingSequence
+      ? { activeSequence: pendingSequence }
       : undefined;
   host.run.startRun(serverId, legalAction, startRunOptions);
   if (legalAction.payload?.runOnlyAction === true && host.state.run) {
@@ -124,4 +129,14 @@ export function executeStartRunAction(
     };
   }
   host.payment.payRunStartTaxCredits(legalAction);
+}
+
+function nextMultiServerSuccessSequence(
+  flags: NonNullable<GameState["runnerTurnFlags"]>,
+): MultiServerSuccessSequenceState | undefined {
+  return flags.pendingSequences?.find(
+    (sequence) =>
+      sequence.kind === "multi_server_success_sequence" &&
+      sequence.pendingServerIds.length > 0,
+  );
 }

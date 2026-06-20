@@ -10,11 +10,15 @@ import {
   semanticPilotChoice,
   type AiPlayStrengthPilotScope,
 } from "../decision/pilot-scope-registry";
-import { buildTargetChoiceShadowReport } from "../decision/target-choice-shadow";
+import {
+  buildTargetChoiceShadowReport,
+  type TargetChoiceShadowReport,
+} from "../decision/target-choice-shadow";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import {
   REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
+  REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS,
   SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS,
   buildRealEngineDecisionCorpusScenarios,
   buildSelfplayPromotedRealEngineCorpusScenarios,
@@ -24,6 +28,7 @@ import {
   type RealEngineDecisionCorpusSample,
   type RealEngineDecisionCorpusScenario,
 } from "./real-engine-decision-corpus";
+import { buildTargetChoiceSelectedChoicesReadinessReport } from "./target-choice-shadow-readiness";
 
 describe("RealEngineDecisionCorpus", () => {
   const originalPilot = process.env[AI_PLAY_STRENGTH_PILOT_ENV];
@@ -361,6 +366,107 @@ describe("RealEngineDecisionCorpus", () => {
       },
     });
     expect(tieReport.selectionOutput.wouldSelect).toBeUndefined();
+  });
+
+  it("promotes real Engine target-choice followups into readiness candidates", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios();
+    const samples = buildRealEngineDecisionCorpus(scenarios);
+    const serverScenario = scenarioFor(
+      scenarios,
+      "runner_real_target_choice_hq_remote_mix",
+    );
+    const serverAction = serverScenario.input.legalActions.find(
+      (action) => action.payload?.serverId === "remote_1",
+    );
+    if (!serverAction) throw new Error("Missing remote_1 run action");
+    const discardScenario = scenarioFor(
+      scenarios,
+      "runner_real_target_choice_discard_choice",
+    );
+    const discardAction = actionOfType(discardScenario, "resolve_choice");
+    const { payload: _payload, ...serverActionWithoutPayload } = serverAction;
+    const missingSideSafeOptions = buildTargetChoiceShadowReport({
+      action: {
+        ...serverActionWithoutPayload,
+        actionId: "real-engine-missing-side-safe-options",
+        targetRequirements: [
+          {
+            id: "server",
+            kind: "server",
+            visibility: "known_to_actor",
+          },
+        ],
+      },
+    });
+    const hiddenInfoBlocked: TargetChoiceShadowReport = {
+      ...missingSideSafeOptions,
+      actionId: "real-engine-hidden-info-blocked",
+      blockedRequirements: [
+        {
+          requirementId: "server",
+          kind: "server",
+          reason: "no_side_safe_options",
+          evidence: ["hidden_info_blocked"],
+        },
+      ],
+      scorecard: {
+        ...missingSideSafeOptions.scorecard,
+        noSideSafeOptionsBlockedCount: 0,
+        blockedRequirementCount: 1,
+      },
+    };
+    const report = buildTargetChoiceSelectedChoicesReadinessReport([
+      {
+        scenarioId: "real-engine-target-choice-followups",
+        reports: [
+          buildTargetChoiceShadowReport({
+            action: {
+              ...serverActionWithoutPayload,
+              actionId: "real-engine-engine-only-target",
+              targetRequirements: [
+                {
+                  id: "secret",
+                  kind: "card",
+                  visibility: "engine_only",
+                },
+              ],
+            },
+          }),
+          hiddenInfoBlocked,
+          missingSideSafeOptions,
+          buildTargetChoiceShadowReport({
+            action: {
+              ...serverActionWithoutPayload,
+              actionId: "real-engine-scorecard-unclear",
+              targetRequirements: [],
+            },
+          }),
+          buildTargetChoiceShadowReport({
+            action: {
+              ...discardAction,
+              actionId: "real-engine-tie-without-preference",
+              choiceRequirements: [
+                {
+                  choiceId: "tie",
+                  minSelections: 1,
+                  maxSelections: 1,
+                  optionIds: ["left", "right"],
+                },
+              ],
+            },
+            candidate: candidateFor(samples, discardScenario, discardAction),
+          }),
+        ],
+      },
+    ]);
+
+    expect(report.followupCandidates.map((candidate) => candidate.kind).sort())
+      .toEqual([...REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS].sort());
+    expect(report.followupCandidates).toHaveLength(5);
+    expect(report.evidence).toEqual(
+      expect.arrayContaining(["followup_candidate_count:5"]),
+    );
+    expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 
   it("keeps scenario fixture mutations behind the real engine fixture builder", () => {

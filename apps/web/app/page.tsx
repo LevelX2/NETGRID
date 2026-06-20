@@ -390,7 +390,7 @@ type GameMode = ApiClientGameMode;
 type MatchFormat = ApiMatchFormat;
 type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
-type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
+type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
 type AiPacingMode = ApiAiPacingMode;
 type AiTraceStartMode = "off" | "detailed";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
@@ -3134,6 +3134,7 @@ export default function Page() {
   }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
   const playerClockDetailControlsDisabled = matchStartSettingsLoaded ? playerClockMode === "none" : false;
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
+  const aiDeckPolicyUsesPrimaryDeckSlots = aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
   const joinTokenTrimmed = joinToken.trim();
@@ -3141,7 +3142,7 @@ export default function Page() {
   const canSubmitJoin = joinMatchIdTrimmed.length > 0 && (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
   const visibleDeckMetadataEntries =
     gameMode === "ai_vs_ai"
-      ? aiDeckPolicy === "selected"
+      ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             { label: "Runner-KI", metadata: participantARunnerMetadata },
             { label: "Korp-KI", metadata: participantACorpMetadata }
@@ -5352,7 +5353,7 @@ export default function Page() {
                   </label>
                 ) : null}
                 </div>
-                {gameMode !== "ai_vs_ai" || aiDeckPolicy === "selected" ? (
+                {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
                   <div className="deckSlotGrid">
                     <DeckSlotSelect
                       label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
@@ -5499,6 +5500,7 @@ export default function Page() {
                         KI-Decks
                         <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
                           <option value="selected">Explizit gewählte KI-Decks</option>
+                          <option value="same_as_participant_a">Gleiche Decks wie Teilnehmer A</option>
                           <option value="fixed">Feste Standard-Decks</option>
                           <option value="seeded_random">Deterministisch zufällig</option>
                         </select>
@@ -11407,6 +11409,7 @@ function cardChoiceTitle(choice: VisibleChoice): string {
   if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
   if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Stack-Spitze wählen und anordnen";
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return "Herman Revista: ICE vor dem Server neu ordnen";
   if (choice.source.startsWith("p3_58.new_blood_reorder")) return "New Blood: ICE neu anordnen";
   if (choice.source.includes("corp_rd_arrange")) return "R&D-Spitze anordnen";
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
@@ -11431,6 +11434,7 @@ function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoic
     if (selectedOptions.length < choice.maxSelections) return `${firstTitle} wird in den Grip genommen.`;
     return `${firstTitle} in den Grip nehmen und den Rest anordnen?`;
   }
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return `${selectedOptions.length} ICE in dieser Reihenfolge vor dem Server übernehmen?`;
   if (choice.source.startsWith("p3_58.new_blood_reorder")) return `${selectedOptions.length} ICE in Zielslot-Reihenfolge übernehmen?`;
   if (cardChoiceUsesOrderedSelection(choice)) return `${selectedOptions.length} Karten in dieser Reihenfolge übernehmen?`;
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
@@ -11489,6 +11493,7 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (resolution?.destination === "grip") {
     return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
   }
+  if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder")) return "Wähle die ICE im Fenster nacheinander in der neuen Reihenfolge vor diesem Server.";
   if (choice.source.includes("corp_rd_arrange")) return "Die gewählte Reihenfolge wird für die R&D-Spitze übernommen.";
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";

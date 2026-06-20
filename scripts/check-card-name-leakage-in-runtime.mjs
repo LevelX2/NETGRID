@@ -344,9 +344,14 @@ const abstractionPlan = [
       "Zweiter vertikaler Slice: Start-of-turn-Random-Table und persistenter Runner-Action-Modifikator sind generisch umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Pirate Broadcast",
-    currentNames: ["pirateBroadcastPending", "pirateBroadcastRun"],
+    currentNames: [
+      "multi_server_success_sequence",
+      "pendingSequences",
+      "activeSequence",
+      "multiServerSuccessSequenceRun",
+    ],
     targetKind: "multi_server_success_sequence",
     targetState: ["runnerTurnFlags.pendingSequences[]"],
     params: {
@@ -354,15 +359,16 @@ const abstractionPlan = [
       advanceOnSuccessfulRun: true,
       failOnUnsuccessfulRun: true,
     },
-    notes: "Größerer Sequenz-State; nicht in denselben Slice ziehen.",
+    notes:
+      "Mehrstufiger Run-Sequenz-State ist generisch ueber pendingSequences[], activeSequence und neutrale Sequenz-Payloads umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Bizarre Encryption Scheme",
     currentNames: [
-      "bizarre_encryption_scheme_access_replacement",
-      "bizarreEncryptionSchemeActive",
-      "bizarreEncryptionDelayedAgendas",
+      "delayed_agenda_access_replacement",
+      "runDurationEffects",
+      "delayedAccessEffects",
     ],
     targetKind: "delayed_agenda_access_replacement",
     targetState: ["runDurationEffects[]", "delayedAccessEffects[]"],
@@ -371,7 +377,7 @@ const abstractionPlan = [
       delay: "after_current_access_sequence",
     },
     notes:
-      "Access-/Breach-State betrifft Hidden-Info-Grenzen und braucht eigenen Regression-Slice.",
+      "Access-/Breach-State ist generisch ueber Run-Duration-Effects und Delayed-Access-Effects umgesetzt; die Quelle bleibt ueber sourceDefinitionId/sourceCardInstanceId nachvollziehbar.",
   },
   {
     priority: "slice_done",
@@ -418,9 +424,12 @@ const abstractionPlan = [
       "Trace-only Recurring-Credit-Pool und Start-of-Corp-Turn-Refresh sind generisch über CardImplementation umgesetzt.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Siren",
-    currentNames: ["siren_start_run_redirect"],
+    currentNames: [
+      "start_run_redirect_to_source_fort",
+      "runStartInterventions",
+    ],
     targetKind: "start_run_redirect_to_source_fort",
     targetState: ["runStartInterventions[]"],
     params: {
@@ -428,7 +437,7 @@ const abstractionPlan = [
       triggerWindow: "run_start",
     },
     notes:
-      "Run-Redirect braucht side-sichere Serverbindung und darf keine Hidden-Info über Zielauswahl leaken.",
+      "Run-Redirect ist generisch über CardImplementation und runStartInterventions umgesetzt; Ziel-Fort, Kosten und Quelle werden beim Choice-Resolve erneut geprüft.",
   },
   {
     priority: "deferred_refactor_required",
@@ -672,7 +681,7 @@ function renderMarkdown(report) {
     "Der erste Code-Slice hat `Preying Mantis` refaktoriert, weil dort alle problematischen Ebenen in einem schmalen Pfad zusammenfallen: `kind`, Payload-Ability, Resolvername, Usage-State und Delayed-End-Turn-State.",
   );
   lines.push(
-    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`- und `Startup Immolator`-Slices sind umgesetzt. `Pirate Broadcast`, `Bizarre Encryption Scheme` und `Siren` bleiben wegen Run-/Access-/Redirect-State eigene größere Prozesse.",
+    "Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Install-/Purge-/Corp-Trash-Slices sowie die kleinen `Krumz`-, `Startup Immolator`-, `Siren`-, `Bizarre Encryption Scheme`- und `Pirate Broadcast`-Slices sind umgesetzt. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben eigene Prozesse.",
   );
   if (report.derivedCatalogGuard) {
     lines.push("", "## Automatisch abgeleiteter Guard", "");
@@ -710,7 +719,7 @@ const report = {
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
-    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz und Startup Immolator sind abgeschlossen. Die übrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
+    "Inventar, Abstraktionsplan, Preying-Mantis-Vertikalschnitt, Baseline-Guard, Quest-for-Cattekin-Vertikalschnitt, Code-Viral-Cache-Install-/Purge-/Corp-Trash-Slices, Krumz, Startup Immolator, Siren, Bizarre Encryption Scheme und Pirate Broadcast sind abgeschlossen. Die uebrigen kartennamenspezifischen funktionalen Reststellen bleiben deferred_refactor_required.",
   scope: scopedRoots,
   categories: [
     "allowed_catalog_reference",

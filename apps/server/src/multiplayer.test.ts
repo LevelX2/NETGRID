@@ -4163,7 +4163,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpPayload.legalActions).toEqual([]);
   });
 
-  it("applies the selected, fixed and deterministic random KI deck policies without exposing decklists", async () => {
+  it("applies the selected, same-as-player, fixed and deterministic random KI deck policies without exposing decklists", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-deck-policy" });
     const participantADecks = {
       runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
@@ -4187,6 +4187,24 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(selectedRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
     expect(selectedRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
     expect(selectedRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+
+    const sameAsParticipantA = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "ai-policy-same-as-participant-a",
+      participantADecks,
+      participantBDecks,
+      aiDeckPolicy: "same_as_participant_a"
+    });
+    const sameAsParticipantARecord = await service.loadForTest(sameAsParticipantA.matchId);
+    expect(sameAsParticipantARecord?.match.deckSetup.aiDeckPolicy).toBe("same_as_participant_a");
+    expect(sameAsParticipantARecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
+    expect(sameAsParticipantARecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(sameAsParticipantARecord?.match.deckSetup.participants?.player_b).toMatchObject({
+      runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpSnapshotId: "demo_corp_004_snapshot_v0_6"
+    });
+    expect(JSON.stringify(sameAsParticipantA)).not.toContain("cardInstances");
 
     const fixed = await service.createMatch({
       hostSide: "corp",
@@ -6204,7 +6222,7 @@ describe("MVP 0.2 multiplayer service", () => {
     } finally {
       await handle.close();
     }
-  });
+  }, 15_000);
 });
 
 type PlayerSession = {

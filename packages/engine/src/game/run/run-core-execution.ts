@@ -45,7 +45,7 @@ export type StartRunOptions = Pick<
   | "runnerCreditGainOnCorpRez"
   | "damagePreventionPool"
   | "badPublicityRunAftermath"
-  | "pirateBroadcast"
+  | "activeSequence"
 >;
 
 export type RunCoreExecutionHost = {
@@ -238,8 +238,8 @@ export function startRun(
     ...(options?.badPublicityRunAftermath
       ? { badPublicityRunAftermath: { ...options.badPublicityRunAftermath } }
       : {}),
-    ...(options?.pirateBroadcast
-      ? { pirateBroadcast: { ...options.pirateBroadcast } }
+    ...(options?.activeSequence
+      ? { activeSequence: { ...options.activeSequence } }
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };

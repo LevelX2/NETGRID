@@ -1,0 +1,3452 @@
+{
+  "schemaVersion": "ai198-opportunity-micro-cutover-experiment",
+  "generatedAt": "2026-06-14T12:36:42.656Z",
+  "gitHead": "181d4ae5",
+  "sources": {
+    "ai191": "docs/reviews/ai/ai191-candidate-path-bindings-v1.json",
+    "ai192": "docs/reviews/ai/ai192-target-identity-v2-candidate-paths.json",
+    "ai193": "docs/reviews/ai/ai193-playeraction-dry-run-builder.json",
+    "ai194": "docs/reviews/ai/ai194-playeraction-replay-probe-v2.json"
+  },
+  "runtime": {
+    "flag": "NETGRID_AI_OPPORTUNITY_MICRO_CUTOVER",
+    "default": "off",
+    "implemented": false,
+    "reason": "no proof-complete candidate"
+  },
+  "aggregate": {
+    "reviewedBindings": 103,
+    "eligibleMicroCutoverCandidates": 0,
+    "runtimeFlaggedCandidateCount": 0,
+    "noGo": true
+  },
+  "blockerCounts": {
+    "action_id_redacted": 103,
+    "binding:target_identity_unresolved": 14,
+    "provide real actionId plus same-state replayable action proof": 103,
+    "target_identity_unresolved": 14,
+    "binding:choice_option_missing": 2,
+    "choice_option_missing": 2,
+    "binding:blocked_reason:plan_mismatch": 47,
+    "binding:hard_gate_blocked": 60,
+    "binding:target_blocked_by_hard_gate": 60,
+    "blocked_reason:plan_mismatch": 47,
+    "hard_gate_blocked": 60,
+    "target_blocked_by_hard_gate": 60,
+    "unsupported_action_family_for_dry_run_builder": 66,
+    "binding:blocked_reason:semantic_excluded:archives_known_no_agenda": 7,
+    "blocked_reason:semantic_excluded:archives_known_no_agenda": 7,
+    "binding:blocked_reason:semantic_excluded:known_ice_path_no_access": 6,
+    "blocked_reason:semantic_excluded:known_ice_path_no_access": 6,
+    "binding:server_target_missing": 6,
+    "server_target_missing": 6,
+    "target_identity_unresolved_from_snapshot": 2
+  },
+  "gateReviews": [
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:choice_option_missing",
+        "choice_option_missing",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "draw_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI173",
+      "family": "runner_coverage",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "visible_installable_solution",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:choice_option_missing",
+        "choice_option_missing",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "A-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-006",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "B-ai-v143-tuning-009",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-001",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-005",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-006",
+      "primaryPath": "economy",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "target_identity_unresolved_from_snapshot",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved",
+        "target_identity_unresolved_from_snapshot",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-007",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:archives_known_no_agenda",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:target_identity_unresolved",
+        "provide real actionId plus same-state replayable action proof",
+        "target_identity_unresolved"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "C-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-003",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": true,
+        "target_identity_complete_or_irrelevant": true,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "provide real actionId plus same-state replayable action proof"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-004",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:semantic_excluded:known_ice_path_no_access",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:server_target_missing",
+        "provide real actionId plus same-state replayable action proof",
+        "server_target_missing"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    },
+    {
+      "source": "AI175",
+      "family": "corp_tempo",
+      "caseId": "D-ai-v143-tuning-008",
+      "primaryPath": "scoreline",
+      "checks": {
+        "candidate_path_binding_complete": false,
+        "target_identity_complete_or_irrelevant": false,
+        "playeraction_dry_run_passed": false,
+        "replay_probe_passed": false,
+        "intent_contract_present": true,
+        "x5_not_worse": false,
+        "x10_not_worse": false,
+        "no_generic_penalty": true,
+        "runtime_flag_default_off": true
+      },
+      "failed": [
+        "candidate_path_binding_complete",
+        "target_identity_complete_or_irrelevant",
+        "playeraction_dry_run_passed",
+        "replay_probe_passed",
+        "x5_not_worse",
+        "x10_not_worse"
+      ],
+      "blockers": [
+        "action_id_redacted",
+        "binding:blocked_reason:plan_mismatch",
+        "binding:hard_gate_blocked",
+        "binding:target_blocked_by_hard_gate",
+        "blocked_reason:plan_mismatch",
+        "hard_gate_blocked",
+        "provide real actionId plus same-state replayable action proof",
+        "target_blocked_by_hard_gate",
+        "unsupported_action_family_for_dry_run_builder"
+      ]
+    }
+  ]
+}

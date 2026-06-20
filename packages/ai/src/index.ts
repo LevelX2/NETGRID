@@ -135,6 +135,7 @@ import {
 } from "./diagnostics/semantic-runtime-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
+import { projectAccessDecision } from "./decision/access-decision-projection";
 import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
   formatDebugFieldValue,
@@ -273,6 +274,47 @@ export type {
   ActionSemanticCandidateCoverageSummary,
   ActionSemanticCoverageGroup,
 } from "./actions/action-semantic-coverage";
+export {
+  buildLegalActionWitness,
+  legalActionWitnessIsRedactionSafe,
+} from "./legalaction-witness";
+export {
+  buildTargetRef,
+  targetRefFromIdentity,
+  targetRefIsCompleteOrIrrelevant,
+  targetRefIsRedactionSafe,
+} from "./target-ref";
+export { buildWitnessOpportunityProjection } from "./witness-opportunity-projection";
+export { buildPlayerActionFromWitness } from "./playeraction-dry-run-builder";
+export { evaluateStalePunishGoalSwitchShadow } from "./stale-punish-goal-switch-shadow";
+export type {
+  BuildLegalActionWitnessInput,
+  LegalActionWitness,
+  LegalActionWitnessAbilityRef,
+  LegalActionWitnessChoiceRef,
+  LegalActionWitnessCostProfile,
+  LegalActionWitnessRedactionPolicy,
+  LegalActionWitnessSourceRef,
+  LegalActionWitnessTargetRef,
+  LegalActionWitnessTimingProfile,
+} from "./legalaction-witness";
+export type {
+  TargetRef,
+  TargetRefInput,
+  TargetRefKind,
+  TargetRefRedactionPolicy,
+} from "./target-ref";
+export type {
+  BuildWitnessOpportunityProjectionInput,
+  WitnessOpportunityProjection,
+  WitnessOpportunityProjectionStatus,
+} from "./witness-opportunity-projection";
+export type { PlayerActionWitnessBuildInput } from "./playeraction-dry-run-builder";
+export type {
+  StalePunishGoalSwitchInput,
+  StalePunishGoalSwitchShadow,
+  StalePunishRootCause,
+} from "./stale-punish-goal-switch-shadow";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
@@ -35192,6 +35234,32 @@ function runnerRemoteTrashAccessContext(
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
     affordableRelevant && action.type === "trash_accessed_card";
+  const accessDecisionProjection = projectAccessDecision({
+    source: "access_window",
+    serverId: accessServerId ?? "unknown",
+    ...(accessed.definitionId
+      ? { knownRootDefinitionId: accessed.definitionId }
+      : {}),
+    target:
+      targetType === "asset_node"
+        ? "asset"
+        : targetType === "upgrade"
+          ? "upgrade"
+          : "unknown",
+    intendedAccessAction:
+      action.type === "steal_agenda"
+        ? "steal"
+        : action.type === "trash_accessed_card"
+        ? "trash"
+        : action.type === "decline_trash"
+          ? "decline"
+          : "access_only",
+    trashCost,
+    generalTrashCost: generalCreditCost,
+    dedicatedTrashCredits,
+    reserveWouldBreak: deferredByBudget,
+    finitePoolValueRemaining: corpValueRemaining,
+  });
   return {
     trashable,
     relevant,
@@ -35249,6 +35317,7 @@ function runnerRemoteTrashAccessContext(
       `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
       `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
       `remote_trash_corp_value_remaining:${corpValueRemaining}`,
+      ...accessDecisionProjection.evidence,
     ],
     ...(accessServerId ? { accessServerId } : {}),
     ...(trashable ? { targetType } : {}),
@@ -35796,6 +35865,7 @@ function isRunnerLowValueDuplicateInstall(
   if (roles.some((role) => role === "memory" || role === "memory_support"))
     return false;
   if (roles.some((role) => isRunnerPressureRole(role))) return false;
+  if (roles.some((role) => isRunnerNonAdditiveUtilityRole(role))) return true;
   if (roles.some((role) => role.startsWith("breaker_"))) return true;
   return roles.some(
     (role) =>
@@ -35827,6 +35897,17 @@ function isRunnerPressureRole(role: string): boolean {
     role.includes("pressure") ||
     role.includes("interface") ||
     role.includes("multiaccess")
+  );
+}
+
+function isRunnerNonAdditiveUtilityRole(role: string): boolean {
+  return (
+    role === "program_search" ||
+    role === "stack_search" ||
+    role === "trash_recovery" ||
+    role === "search_trash" ||
+    role.includes("setup.recovery") ||
+    role.includes("setup.stack_filter")
   );
 }
 

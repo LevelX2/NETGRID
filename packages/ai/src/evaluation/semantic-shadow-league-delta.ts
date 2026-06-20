@@ -73,6 +73,14 @@ export type SemanticShadowLeagueDoctrineFitDelta = {
   evidence: string[];
 };
 
+export type SemanticShadowLeagueDeltaDashboardSummary = {
+  scenarioCountDelta: number;
+  agreementDirection: SemanticShadowLeagueMetricDelta["direction"];
+  mistakeDirection: SemanticShadowLeagueMetricDelta["direction"];
+  followupDirection: SemanticShadowLeagueMetricDelta["direction"];
+  evidence: string[];
+};
+
 export type SemanticShadowLeagueDeltaReport = {
   schemaVersion: typeof SEMANTIC_SHADOW_LEAGUE_DELTA_SCHEMA_VERSION;
   scope: "semantic_shadow_league_delta_report_only";
@@ -98,6 +106,7 @@ export type SemanticShadowLeagueDeltaReport = {
   >;
   topDisagreementReasonDelta: SemanticShadowLeagueTopDisagreementReasonDelta;
   followupCandidateCountDelta: SemanticShadowLeagueMetricDelta;
+  dashboardSummary: SemanticShadowLeagueDeltaDashboardSummary;
   redactionStatus: "passed";
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
@@ -130,6 +139,16 @@ export function buildSemanticShadowLeagueDeltaReport({
     baseline.metrics.mistakeCount,
     current.metrics.mistakeCount,
   );
+  const agreementRateDelta = buildHigherIsBetterDelta(
+    "agreementRate",
+    baseline.metrics.agreementRate,
+    current.metrics.agreementRate,
+  );
+  const followupCandidateCountDelta = buildLowerIsBetterDelta(
+    "followupCandidateCount",
+    baseline.followupCandidates.length,
+    current.followupCandidates.length,
+  );
   const report: SemanticShadowLeagueDeltaReport = {
     schemaVersion: SEMANTIC_SHADOW_LEAGUE_DELTA_SCHEMA_VERSION,
     scope: "semantic_shadow_league_delta_report_only",
@@ -138,11 +157,7 @@ export function buildSemanticShadowLeagueDeltaReport({
     baselineScenarioCount: baseline.scenarioCount,
     currentScenarioCount: current.scenarioCount,
     scenarioCountDelta: current.scenarioCount - baseline.scenarioCount,
-    agreementRateDelta: buildHigherIsBetterDelta(
-      "agreementRate",
-      baseline.metrics.agreementRate,
-      current.metrics.agreementRate,
-    ),
+    agreementRateDelta,
     mistakeCountDelta,
     mistakeDelta: mistakeCountDelta,
     pilotEligibilityDelta: buildHigherIsBetterDelta(
@@ -170,11 +185,19 @@ export function buildSemanticShadowLeagueDeltaReport({
       baseline.topDisagreementReasons,
       current.topDisagreementReasons,
     ),
-    followupCandidateCountDelta: buildLowerIsBetterDelta(
-      "followupCandidateCount",
-      baseline.followupCandidates.length,
-      current.followupCandidates.length,
-    ),
+    followupCandidateCountDelta,
+    dashboardSummary: {
+      scenarioCountDelta: current.scenarioCount - baseline.scenarioCount,
+      agreementDirection: agreementRateDelta.direction,
+      mistakeDirection: mistakeCountDelta.direction,
+      followupDirection: followupCandidateCountDelta.direction,
+      evidence: [
+        "shadow_league_delta_dashboard_summary:report_only",
+        `agreement_direction:${agreementRateDelta.direction}`,
+        `mistake_direction:${mistakeCountDelta.direction}`,
+        `followup_direction:${followupCandidateCountDelta.direction}`,
+      ],
+    },
     redactionStatus: "passed",
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,

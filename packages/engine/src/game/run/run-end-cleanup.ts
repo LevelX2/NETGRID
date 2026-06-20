@@ -319,8 +319,8 @@ export function handleRunEndCleanup(
     }
   }
   if (run) applyBadPublicityRunAftermath(host, run, successful, legalAction);
-  const pirateBroadcast = run
-    ? applyPirateBroadcastRunResult(host, run, successful, legalAction)
+  const sequenceRun = run
+    ? applyMultiServerSuccessSequenceRunResult(host, run, successful, legalAction)
     : { handled: false };
   const allNighterBonusRunOnFinish =
     run?.grantAllNighterBonusRunOnFinish === true;
@@ -382,7 +382,7 @@ export function handleRunEndCleanup(
   host.state.phase = "runner_action_phase";
   host.state.timingPoint = "runner_action.main";
   host.state.activeSide = "runner";
-  if (!pirateBroadcast.deferActionDebtConsumption)
+  if (!sequenceRun.deferActionDebtConsumption)
     host.runner.consumeFutureActionDebt();
   host.cleanup.cleanupEmptyRemotes();
   return {
@@ -524,13 +524,13 @@ function applyBadPublicityRunAftermath(
   }
 }
 
-function applyPirateBroadcastRunResult(
+function applyMultiServerSuccessSequenceRunResult(
   host: RunEndCleanupHost,
   run: ActiveRun,
   successful: boolean,
   legalAction?: LegalAction,
 ): { handled: boolean; deferActionDebtConsumption?: boolean } {
-  const sequence = run.pirateBroadcast;
+  const sequence = run.activeSequence;
   if (!sequence) return { handled: false };
   if (!successful) {
     if (host.runner.addFutureActionDebt) {
@@ -540,11 +540,11 @@ function applyPirateBroadcastRunResult(
       flags.forgoNextActionsPending =
         Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
     }
-    delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+    removePendingSequence(host.runner.ensureTurnFlags(), sequence);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        pirateBroadcastFailed: true,
+        multiServerSuccessSequenceFailed: true,
         actionDebtAdded: 1,
         sourceDefinitionId: sequence.sourceDefinitionId,
       };
@@ -562,22 +562,23 @@ function applyPirateBroadcastRunResult(
           (serverId) => serverId !== run.attackedServerId,
         );
   if (remainingPendingServerIds.length > 0) {
-    host.runner.ensureTurnFlags().pirateBroadcastPending = {
+    replacePendingSequence(host.runner.ensureTurnFlags(), {
       ...sequence,
       pendingServerIds: remainingPendingServerIds,
       successfulServerIds,
-    };
+    });
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        pirateBroadcastRunSuccessful: true,
-        pirateBroadcastPendingServerCount: remainingPendingServerIds.length,
+        multiServerSuccessSequenceRunSuccessful: true,
+        multiServerSuccessSequencePendingServerCount:
+          remainingPendingServerIds.length,
         sourceDefinitionId: sequence.sourceDefinitionId,
       };
     }
     return { handled: true, deferActionDebtConsumption: true };
   }
-  delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+  removePendingSequence(host.runner.ensureTurnFlags(), sequence);
   if (!host.runner.awardEventAgendaPoint)
     throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
   host.runner.awardEventAgendaPoint(
@@ -588,12 +589,45 @@ function applyPirateBroadcastRunResult(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      pirateBroadcastComplete: true,
-      pirateBroadcastSuccessfulServerCount: successfulServerIds.length,
+      multiServerSuccessSequenceComplete: true,
+      multiServerSuccessSequenceSuccessfulServerCount: successfulServerIds.length,
       sourceDefinitionId: sequence.sourceDefinitionId,
     };
   }
   return { handled: true };
+}
+
+function replacePendingSequence(
+  flags: RunnerTurnFlags,
+  nextSequence: NonNullable<ActiveRun["activeSequence"]>,
+): void {
+  flags.pendingSequences = [
+    ...(flags.pendingSequences ?? []).filter(
+      (sequence) => !samePendingSequenceSource(sequence, nextSequence),
+    ),
+    nextSequence,
+  ];
+}
+
+function removePendingSequence(
+  flags: RunnerTurnFlags,
+  sequenceToRemove: NonNullable<ActiveRun["activeSequence"]>,
+): void {
+  flags.pendingSequences = (flags.pendingSequences ?? []).filter(
+    (sequence) => !samePendingSequenceSource(sequence, sequenceToRemove),
+  );
+  if (flags.pendingSequences.length === 0) delete flags.pendingSequences;
+}
+
+function samePendingSequenceSource(
+  left: NonNullable<RunnerTurnFlags["pendingSequences"]>[number],
+  right: NonNullable<ActiveRun["activeSequence"]>,
+): boolean {
+  return (
+    left.kind === right.kind &&
+    left.sourceCardId === right.sourceCardId &&
+    left.sourceDefinitionId === right.sourceDefinitionId
+  );
 }
 
 export function recordDupreBreakUsage(

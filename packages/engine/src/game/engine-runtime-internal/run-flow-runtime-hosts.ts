@@ -882,7 +882,11 @@ export function createRunFlowRuntimeHosts(
         return true;
       });
     }
-    if (definition.id === BIZARRE_ENCRYPTION_SCHEME_ID) return true;
+    if (
+      implementation?.hiddenReplacementLongtail?.kind ===
+      "delayed_agenda_access_replacement"
+    )
+      return true;
     return (definition.mechanics ?? []).some(
       (mechanic) =>
         mechanic === "access_ambush" ||

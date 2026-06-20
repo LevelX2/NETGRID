@@ -3,15 +3,23 @@ import {
   type AiDecisionInput,
   type VisibleCard,
 } from "@netgrid/shared";
-import { createAiHintsByCard, RUNTIME_CARDS } from "./ai-hints";
+import { RUNTIME_CARDS } from "./ai-hints";
 import {
   reconstructBeliefState,
   type BeliefState,
   type KnownPositionMemory,
 } from "./belief-state";
+import {
+  knownRemoteAgendaAccessCommitment,
+  knownRemoteLowValueAccessCommitment,
+  projectKnownRemoteTrashCommitment,
+} from "./decision/known-remote-access-commitment";
+import { projectAccessDecision } from "./decision/access-decision-projection";
+import {
+  createRemoteAccessOutcomeMemoryEntry,
+  remoteAccessOutcomeEvidence,
+} from "./memory/remote-access-outcome";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type KnownRemoteAccessPayoffKind =
   | "agenda"
@@ -124,6 +132,19 @@ export function evaluateKnownRemoteAccessPayoff(
     (root) => cardDefinitionType(root.definitionId) === "agenda",
   );
   if (agendaRoots.length > 0) {
+    const commitment = knownRemoteAgendaAccessCommitment(
+      serverId,
+      agendaRoots.map((root) => `known_remote_agenda_root:${root.positionKey}`),
+    );
+    const accessProjection = projectAccessDecision({
+      source: "pre_run",
+      serverId,
+      ...(agendaRoots[0]?.definitionId
+        ? { knownRootDefinitionId: agendaRoots[0].definitionId }
+        : {}),
+      target: "agenda",
+      intendedAccessAction: "steal",
+    });
     return {
       payoff: "agenda",
       accessDecision: "steal",
@@ -136,6 +157,8 @@ export function evaluateKnownRemoteAccessPayoff(
         ...evidenceBase,
         "remote_memory_payoff:agenda",
         "remote_run_boosted_by_known_remote_agenda:true",
+        ...commitment.evidence,
+        ...accessProjection.evidence,
       ],
     };
   }
@@ -158,14 +181,46 @@ export function evaluateKnownRemoteAccessPayoff(
         left.positionKey.localeCompare(right.positionKey),
     )[0]!;
     const cheapestTrashCost = cheapestTrashRoot.trashCost;
-    const trashProjection = projectKnownRemoteTrashCommitment(
-      input,
-      cheapestTrashRoot.definitionId,
-      cheapestTrashRoot.type,
-      cheapestTrashCost,
+    const trashProjection = projectKnownRemoteTrashCommitment(input, {
+      serverId,
+      definitionId: cheapestTrashRoot.definitionId,
+      rootType: cheapestTrashRoot.type,
+      trashCost: cheapestTrashCost,
       creditsAfterPath,
-      cheapestTrashRoot.visibleCard,
-    );
+      ...(cheapestTrashRoot.visibleCard
+        ? { visibleCard: cheapestTrashRoot.visibleCard }
+        : {}),
+    });
+    const declinedTrashOutcome = trashProjection.knownNoCurrentPayoff
+      ? createRemoteAccessOutcomeMemoryEntry({
+          serverId,
+          knownRootDefinitionId: cheapestTrashRoot.definitionId,
+          accessDecision: "declined_trash",
+          reason: trashProjection.commitment.reason,
+          stateVersion: input.playerView.stateVersion,
+        })
+      : undefined;
+    const accessProjection = projectAccessDecision({
+      source: "pre_run",
+      serverId,
+      knownRootDefinitionId: cheapestTrashRoot.definitionId,
+      target:
+        cheapestTrashRoot.type === "asset" ||
+        cheapestTrashRoot.type === "upgrade"
+          ? cheapestTrashRoot.type
+          : "unknown",
+      intendedAccessAction:
+        trashProjection.accessDecision === "trash" ? "trash" : "decline",
+      trashCost: cheapestTrashCost,
+      generalTrashCost: trashProjection.generalTrashCost,
+      dedicatedTrashCredits: Math.max(
+        0,
+        cheapestTrashCost - trashProjection.generalTrashCost,
+      ),
+      reserveWouldBreak:
+        trashProjection.declineReason === "reserve_would_break",
+      finitePoolValueRemaining: trashProjection.finitePoolValueRemaining,
+    });
     return {
       payoff: trashProjection.payoff,
       accessDecision: trashProjection.accessDecision,
@@ -196,6 +251,11 @@ export function evaluateKnownRemoteAccessPayoff(
         ...(trashProjection.declineReason
           ? [`trash_decline_reason:${trashProjection.declineReason}`]
           : []),
+        ...trashProjection.commitment.evidence,
+        ...accessProjection.evidence,
+        ...(declinedTrashOutcome
+          ? remoteAccessOutcomeEvidence(declinedTrashOutcome)
+          : []),
         ...trashProjection.evidence,
         trashProjection.contestable
           ? "remote_trash_boosted_by_known_remote_trashable:true"
@@ -205,6 +265,7 @@ export function evaluateKnownRemoteAccessPayoff(
     };
   }
 
+  const lowValueCommitment = knownRemoteLowValueAccessCommitment(serverId);
   return {
     payoff: "known_low_value",
     accessDecision: "decline",
@@ -218,6 +279,7 @@ export function evaluateKnownRemoteAccessPayoff(
       ...evidenceBase,
       "pre_run_access_decision:decline",
       "trash_decline_reason:low_value_target",
+      ...lowValueCommitment.evidence,
       "remote_run_suppressed_by_known_low_value_remote:true",
       "remote_memory_payoff:known_low_value",
     ],
@@ -294,307 +356,6 @@ function knownRemotePathCost(
     visibleBreakCost,
     creditsAfterPath: assessment.creditsAfterPath,
   };
-}
-
-function projectKnownRemoteTrashCommitment(
-  input: AiDecisionInput,
-  definitionId: string,
-  rootType: string,
-  trashCost: number,
-  creditsAfterPath: number,
-  visibleCard: VisibleCard | undefined,
-): {
-  payoff: KnownRemoteAccessPayoffKind;
-  accessDecision: KnownRemoteAccessDecision;
-  declineReason?: KnownRemoteAccessDeclineReason;
-  contestable: boolean;
-  knownNoCurrentPayoff: boolean;
-  score: number;
-  penalty: number;
-  reasons: string[];
-  evidence: string[];
-  targetValue: number;
-  generalTrashCost: number;
-  desiredCreditReserve: number;
-  creditsAfterTrash: number;
-  technicallyAffordable: boolean;
-  preservesReserve: boolean;
-  reserveBreakAllowed: boolean;
-} {
-  const desiredCreditReserve = knownRemoteTrashCreditReserve(input);
-  const support = knownRemoteTrashCreditSupport(input, rootType);
-  const generalTrashCost = support.freeTrash
-    ? 0
-    : Math.max(0, trashCost - support.dedicatedCredits);
-  const creditsAfterTrash = creditsAfterPath - generalTrashCost;
-  const technicallyAffordable = creditsAfterPath >= generalTrashCost;
-  const targetProfile = knownRemoteTrashTargetProfile(
-    definitionId,
-    trashCost,
-    visibleCard,
-  );
-  const preservesReserve = technicallyAffordable &&
-    creditsAfterTrash >= desiredCreditReserve;
-  if (!technicallyAffordable) {
-    return {
-      payoff: "trash_unaffordable",
-      accessDecision: "defer_until_funded",
-      declineReason: "insufficient_credits",
-      contestable: false,
-      knownNoCurrentPayoff: true,
-      score: 0,
-      penalty: 780,
-      reasons: [
-        "known_remote_root_trash_unaffordable_after_ice",
-        "known_remote_low_value",
-        "remote_known_no_current_payoff",
-        "remote_root_trash_unaffordable",
-      ],
-      evidence: [...support.evidence, ...targetProfile.evidence],
-      targetValue: targetProfile.value,
-      generalTrashCost,
-      desiredCreditReserve,
-      creditsAfterTrash,
-      technicallyAffordable,
-      preservesReserve,
-      reserveBreakAllowed: targetProfile.reserveBreakAllowed,
-    };
-  }
-  if (!preservesReserve && !targetProfile.reserveBreakAllowed) {
-    return {
-      payoff: "trash_unaffordable",
-      accessDecision: "defer_until_funded",
-      declineReason: "reserve_would_break",
-      contestable: false,
-      knownNoCurrentPayoff: true,
-      score: 0,
-      penalty: 720,
-      reasons: [
-        "known_remote_root_trash_declined_by_reserve",
-        "known_remote_low_value",
-        "remote_known_no_current_payoff",
-        "remote_root_trash_reserve_would_break",
-      ],
-      evidence: [...support.evidence, ...targetProfile.evidence],
-      targetValue: targetProfile.value,
-      generalTrashCost,
-      desiredCreditReserve,
-      creditsAfterTrash,
-      technicallyAffordable,
-      preservesReserve,
-      reserveBreakAllowed: targetProfile.reserveBreakAllowed,
-    };
-  }
-  return {
-    payoff: "trash_affordable",
-    accessDecision: "trash",
-    contestable: true,
-    knownNoCurrentPayoff: false,
-    score: 150,
-    penalty: 0,
-    reasons: [
-      "known_remote_trash_target",
-      "known_remote_root_trash_affordable_after_ice",
-      ...(!preservesReserve
-        ? ["known_remote_trash_reserve_break_allowed_by_target_value"]
-        : []),
-    ],
-    evidence: [...support.evidence, ...targetProfile.evidence],
-    targetValue: targetProfile.value,
-    generalTrashCost,
-    desiredCreditReserve,
-    creditsAfterTrash,
-    technicallyAffordable,
-    preservesReserve,
-    reserveBreakAllowed: targetProfile.reserveBreakAllowed,
-  };
-}
-
-function knownRemoteTrashCreditSupport(
-  input: AiDecisionInput,
-  rootType: string,
-): { dedicatedCredits: number; freeTrash: boolean; evidence: string[] } {
-  let dedicatedCredits = 0;
-  let freeTrash = false;
-  const sources: string[] = [];
-  for (const card of input.playerView.own.rig ?? []) {
-    if (!card.known || !card.definitionId) continue;
-    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-    const effects = (
-      hint as
-        | {
-            effects?: Array<{
-              amount?: number;
-              kind?: string;
-              resource?: string;
-              target?: string;
-            }>;
-          }
-        | undefined
-    )?.effects ?? [];
-    for (const effect of effects) {
-      if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
-      if (effect.target?.includes("free_trash")) {
-        freeTrash = true;
-        sources.push(card.definitionId);
-        continue;
-      }
-      if (effect.kind === "trash_credit") {
-        const amount = Math.max(0, Math.floor(effect.amount ?? 0));
-        if (amount <= 0) continue;
-        dedicatedCredits += amount;
-        sources.push(card.definitionId);
-      }
-    }
-  }
-  return {
-    dedicatedCredits,
-    freeTrash,
-    evidence: [
-      `known_remote_root_trash_dedicated_credits:${dedicatedCredits}`,
-      `known_remote_root_free_trash_support:${freeTrash}`,
-      ...[...new Set(sources)]
-        .slice(0, 4)
-        .map((source) => `known_remote_root_trash_support_source:${source}`),
-    ],
-  };
-}
-
-function trashSupportEffectMatchesRoot(
-  target: string | undefined,
-  rootType: string,
-): boolean {
-  if (!target) return true;
-  const normalized = target.toLowerCase();
-  if (normalized === "trash_cost") {
-    return true;
-  }
-  if (normalized === rootType) return true;
-  return normalized === "node" && rootType === "asset";
-}
-
-function knownRemoteTrashTargetProfile(
-  definitionId: string,
-  trashCost: number,
-  visibleCard: VisibleCard | undefined,
-): {
-  value: number;
-  reserveBreakAllowed: boolean;
-  evidence: string[];
-} {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];
-  const values = Object.values(hint?.valueHints ?? {}).filter(
-    (value): value is number => typeof value === "number",
-  );
-  const value = values.length > 0 ? Math.max(...values) : 0;
-  const corpValueRemaining = knownRemoteVisibleCorpValueRemaining(visibleCard);
-  const finitePoolEconomy = knownRemoteLooksLikeFinitePoolEconomy(
-    hint,
-    roles,
-    visibleCard,
-  );
-  const highRemainingFinitePool =
-    finitePoolEconomy &&
-    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
-    trashCost > 0;
-  const highImpactRole = roles.some((role) =>
-    [
-      "economy",
-      "campaign",
-      "scoring_protection",
-      "agenda_protection",
-      "remote_upgrade_tax",
-      "access_tax",
-      "run_tax",
-      "tag_punish",
-      "ambush",
-    ].some((token) => role.includes(token)),
-  );
-  const reserveBreakAllowed =
-    highImpactRole &&
-    value >= 2 &&
-    (!finitePoolEconomy || highRemainingFinitePool);
-  return {
-    value,
-    reserveBreakAllowed,
-    evidence: [
-      `known_remote_root_value:${value}`,
-      `known_remote_root_high_impact_role:${highImpactRole}`,
-      `known_remote_root_finite_pool_economy:${finitePoolEconomy}`,
-      `known_remote_root_corp_value_remaining:${corpValueRemaining}`,
-      `known_remote_root_high_remaining_finite_pool:${highRemainingFinitePool}`,
-      ...roles.slice(0, 6).map((role) => `known_remote_root_role:${role}`),
-    ],
-  };
-}
-
-function knownRemoteVisibleCorpValueRemaining(
-  visibleCard: VisibleCard | undefined,
-): number {
-  if (!visibleCard) return 0;
-  return Math.max(
-    0,
-    visibleCard.counters?.bit ?? 0,
-    visibleCard.counters?.recurring_credit ?? 0,
-  );
-}
-
-function knownRemoteLooksLikeFinitePoolEconomy(
-  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
-  roles: readonly string[],
-  visibleCard: VisibleCard | undefined,
-): boolean {
-  if (knownRemoteVisibleCorpValueRemaining(visibleCard) <= 0) return false;
-  return (
-    roles.some((role) => role.includes("campaign") || role.includes("economy")) ||
-    (hint?.effects ?? []).some(
-      (effect) =>
-        effect.kind === "economy" &&
-        effect.scope === "corp" &&
-        effect.finite === true,
-    )
-  );
-}
-
-function knownRemoteTrashCreditReserve(input: AiDecisionInput): number {
-  const phaseReserve = input.playerView.stateVersion <= 8 ? 4 : 5;
-  const emergencyReserve = input.playerView.own.tags > 0 ? 3 : 0;
-  return Math.max(
-    2,
-    phaseReserve,
-    knownRemoteContestReserve(input),
-    emergencyReserve,
-  );
-}
-
-function knownRemoteContestReserve(input: AiDecisionInput): number {
-  let visibleThreat = false;
-  let urgentThreat = false;
-  for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_") || server.root.length === 0) continue;
-    if (
-      server.root.some(
-        (card) => (card.advancementCounters ?? 0) > 0 ||
-          (card.known && card.type === "agenda"),
-      )
-    ) {
-      visibleThreat = true;
-    }
-    if (
-      server.root.some(
-        (card) => (card.advancementCounters ?? 0) >= 2 ||
-          (card.known && card.type === "agenda"),
-      ) ||
-      input.playerView.opponent.agendaPoints >=
-        input.playerView.agendaPointsToWin - 2
-    ) {
-      urgentThreat = true;
-    }
-  }
-  if (urgentThreat) return 8;
-  if (visibleThreat) return 6;
-  return 0;
 }
 
 function visibleNoProgressRunContext(
