@@ -20,6 +20,16 @@ export type AccessOutcomeMemoryEntry = {
 export type AccessOutcomeMemoryRecord = AccessOutcomeMemoryKey &
   AccessOutcomeMemoryEntry;
 
+export type AccessOutcomeMemoryInvalidationReason =
+  | "remote_fingerprint_changed"
+  | "credits_or_reserve_improved";
+
+export type AccessOutcomeMemoryStatus = {
+  applies: boolean;
+  invalidationReason?: AccessOutcomeMemoryInvalidationReason;
+  evidence: string[];
+};
+
 export type AccessOutcomeMemoryState = {
   records: AccessOutcomeMemoryRecord[];
 };
@@ -87,6 +97,49 @@ export function accessOutcomeMemoryEvidence(
   ];
 }
 
+export function evaluateAccessOutcomeMemoryStatus(
+  record: AccessOutcomeMemoryRecord,
+  context: {
+    currentRemoteFingerprint: string;
+    currentCredits: number;
+    currentDesiredReserve: number;
+  },
+): AccessOutcomeMemoryStatus {
+  if (record.remoteFingerprint !== context.currentRemoteFingerprint) {
+    return {
+      applies: false,
+      invalidationReason: "remote_fingerprint_changed",
+      evidence: [
+        ...accessOutcomeMemoryEvidence(record),
+        "access_outcome_memory_applies:false",
+        "access_outcome_memory_invalidated:remote_fingerprint_changed",
+      ],
+    };
+  }
+  if (
+    record.observedDecision === "decline" &&
+    context.currentCredits - context.currentDesiredReserve >
+      record.creditsAtOutcome - record.desiredReserveAtOutcome
+  ) {
+    return {
+      applies: false,
+      invalidationReason: "credits_or_reserve_improved",
+      evidence: [
+        ...accessOutcomeMemoryEvidence(record),
+        "access_outcome_memory_applies:false",
+        "access_outcome_memory_invalidated:credits_or_reserve_improved",
+      ],
+    };
+  }
+  return {
+    applies: true,
+    evidence: [
+      ...accessOutcomeMemoryEvidence(record),
+      "access_outcome_memory_applies:true",
+    ],
+  };
+}
+
 function sameAccessOutcomeKey(
   record: AccessOutcomeMemoryKey,
   key: AccessOutcomeMemoryKey,
@@ -98,4 +151,3 @@ function sameAccessOutcomeKey(
     record.serverId === key.serverId
   );
 }
-

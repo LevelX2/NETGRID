@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   accessOutcomeMemoryEvidence,
   createAccessOutcomeMemory,
+  evaluateAccessOutcomeMemoryStatus,
   readAccessOutcomeMemory,
   rememberAccessOutcome,
   resetAccessOutcomeMemoryForMatch,
@@ -107,5 +108,103 @@ describe("access outcome memory", () => {
       expect.objectContaining({ matchId: "match-2" }),
     ]);
   });
-});
 
+  it("invalidates remembered outcomes when the remote fingerprint changes", () => {
+    const record = rememberAccessOutcome(
+      createAccessOutcomeMemory(),
+      {
+        matchId: "match-1",
+        side: "runner",
+        profileId: "runner-ai",
+        serverId: "remote_1",
+      },
+      {
+        remoteFingerprint: "old",
+        observedDecision: "decline",
+        reason: "low_value_target",
+        creditsAtOutcome: 3,
+        desiredReserveAtOutcome: 5,
+        stateVersion: 1,
+      },
+    ).records[0]!;
+
+    expect(
+      evaluateAccessOutcomeMemoryStatus(record, {
+        currentRemoteFingerprint: "new",
+        currentCredits: 3,
+        currentDesiredReserve: 5,
+      }),
+    ).toMatchObject({
+      applies: false,
+      invalidationReason: "remote_fingerprint_changed",
+      evidence: expect.arrayContaining([
+        "access_outcome_memory_invalidated:remote_fingerprint_changed",
+      ]),
+    });
+  });
+
+  it("invalidates declined outcomes when credits or reserve improve", () => {
+    const record = rememberAccessOutcome(
+      createAccessOutcomeMemory(),
+      {
+        matchId: "match-1",
+        side: "runner",
+        profileId: "runner-ai",
+        serverId: "remote_1",
+      },
+      {
+        remoteFingerprint: "same",
+        observedDecision: "decline",
+        reason: "reserve_would_break",
+        creditsAtOutcome: 3,
+        desiredReserveAtOutcome: 5,
+        stateVersion: 1,
+      },
+    ).records[0]!;
+
+    expect(
+      evaluateAccessOutcomeMemoryStatus(record, {
+        currentRemoteFingerprint: "same",
+        currentCredits: 7,
+        currentDesiredReserve: 5,
+      }),
+    ).toMatchObject({
+      applies: false,
+      invalidationReason: "credits_or_reserve_improved",
+      evidence: expect.arrayContaining([
+        "access_outcome_memory_invalidated:credits_or_reserve_improved",
+      ]),
+    });
+  });
+
+  it("keeps matching outcome memory applicable while context is unchanged", () => {
+    const record = rememberAccessOutcome(
+      createAccessOutcomeMemory(),
+      {
+        matchId: "match-1",
+        side: "runner",
+        profileId: "runner-ai",
+        serverId: "remote_1",
+      },
+      {
+        remoteFingerprint: "same",
+        observedDecision: "decline",
+        reason: "reserve_would_break",
+        creditsAtOutcome: 3,
+        desiredReserveAtOutcome: 5,
+        stateVersion: 1,
+      },
+    ).records[0]!;
+
+    expect(
+      evaluateAccessOutcomeMemoryStatus(record, {
+        currentRemoteFingerprint: "same",
+        currentCredits: 3,
+        currentDesiredReserve: 5,
+      }),
+    ).toMatchObject({
+      applies: true,
+      evidence: expect.arrayContaining(["access_outcome_memory_applies:true"]),
+    });
+  });
+});
