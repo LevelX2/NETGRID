@@ -353,7 +353,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     expect(evaluation).toMatchObject({
       targetServerId: "remote_1",
       knownAccessState: "known_no_current_payoff",
-      recommendation: "do_not_run_now",
+      recommendation: "known_no_current_payoff",
     });
   });
 

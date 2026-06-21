@@ -55,4 +55,41 @@ describe("access window choice", () => {
       ]),
     );
   });
+
+  it("keeps steal and decline projections invariant-safe", () => {
+    expect(
+      projectAccessWindowChoice({
+        actionType: "steal_agenda",
+        serverId: "remote_1",
+        knownRootDefinitionId: "simple_agenda",
+        targetType: "unknown",
+        trashCost: 4,
+        generalTrashCost: 0,
+        dedicatedTrashCredits: 4,
+        reserveWouldBreak: false,
+        finitePoolValueRemaining: 0,
+      }),
+    ).toMatchObject({
+      target: "agenda",
+      intendedAccessAction: "steal",
+      projections: ["agenda_steal"],
+    });
+
+    expect(
+      projectAccessWindowChoice({
+        actionType: "decline_trash",
+        serverId: "remote_1",
+        targetType: "asset_node",
+        trashCost: 4,
+        generalTrashCost: 0,
+        dedicatedTrashCredits: 4,
+        reserveWouldBreak: true,
+        finitePoolValueRemaining: 0,
+      }),
+    ).toMatchObject({
+      target: "asset",
+      intendedAccessAction: "decline",
+      projections: ["decline_trash", "reserve_would_break"],
+    });
+  });
 });

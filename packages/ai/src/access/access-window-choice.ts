@@ -23,17 +23,25 @@ export function projectAccessWindowChoice(params: {
   reserveWouldBreak: boolean;
   finitePoolValueRemaining: number;
 }): AccessDecisionProjection {
+  const intendedAccessAction = accessWindowIntendedAction(params.actionType);
   return projectAccessDecision({
     source: "access_window",
     serverId: params.serverId ?? "unknown",
     ...(params.knownRootDefinitionId
       ? { knownRootDefinitionId: params.knownRootDefinitionId }
       : {}),
-    target: accessWindowProjectionTarget(params.targetType),
-    intendedAccessAction: accessWindowIntendedAction(params.actionType),
-    trashCost: params.trashCost,
-    generalTrashCost: params.generalTrashCost,
-    dedicatedTrashCredits: params.dedicatedTrashCredits,
+    target:
+      intendedAccessAction === "steal"
+        ? "agenda"
+        : accessWindowProjectionTarget(params.targetType),
+    intendedAccessAction,
+    ...(intendedAccessAction === "trash"
+      ? {
+          trashCost: params.trashCost,
+          generalTrashCost: params.generalTrashCost,
+          dedicatedTrashCredits: params.dedicatedTrashCredits,
+        }
+      : {}),
     reserveWouldBreak: params.reserveWouldBreak,
     finitePoolValueRemaining: params.finitePoolValueRemaining,
   });
