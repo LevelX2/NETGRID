@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT } from "../../corp/scored-agenda/ordered-fort-rebuild-sequence";
+import { ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT } from "./ordered-fort-rebuild-sequence";
 import { RUN_WINDOW_ACTION_RESOLVERS } from "./run-window-registry";
 
 describe("run window registry", () => {

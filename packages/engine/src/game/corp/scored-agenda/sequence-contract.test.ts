@@ -6,7 +6,7 @@ import {
   isHqToNewRemoteInstallRezRezChoiceSource,
 } from "./data-fort-reclamation-sequence";
 import { isScoredIceMarkModifierChoiceSource } from "./ice-transmutation-sequence";
-import { orderedFortRebuildPublicPayload } from "./ordered-fort-rebuild-sequence";
+import { orderedFortRebuildPublicPayload } from "../../run/windows/ordered-fort-rebuild-sequence";
 import { isPriorityRequisitionChoiceSource } from "./priority-requisition-sequence";
 import {
   resolveScoredAgendaSequenceChoice,
