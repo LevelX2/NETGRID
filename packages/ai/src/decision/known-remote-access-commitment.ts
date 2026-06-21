@@ -3,6 +3,10 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
+import {
+  quoteAccessReserve,
+  type AccessReserveEconomyPosture,
+} from "../access/access-reserve-adapter";
 import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 
@@ -86,10 +90,18 @@ export function projectKnownRemoteTrashCommitment(
     rootType: string;
     trashCost: number;
     creditsAfterPath: number;
+    economyPosture?: AccessReserveEconomyPosture;
     visibleCard?: VisibleCard;
   },
 ): KnownRemoteTrashCommitmentProjection {
-  const desiredCreditReserve = knownRemoteTrashCreditReserve(input);
+  const reserveQuote = quoteAccessReserve({
+    input,
+    fallbackReserve: knownRemoteTrashCreditReserve(input),
+    ...(params.economyPosture
+      ? { economyPosture: params.economyPosture }
+      : {}),
+  });
+  const desiredCreditReserve = reserveQuote.desiredCreditReserve;
   const support = knownRemoteTrashCreditSupport(input, params.rootType);
   const generalTrashCost = support.freeTrash
     ? 0
@@ -103,7 +115,11 @@ export function projectKnownRemoteTrashCommitment(
   );
   const preservesReserve =
     technicallyAffordable && creditsAfterTrash >= desiredCreditReserve;
-  const baseEvidence = [...support.evidence, ...targetProfile.evidence];
+  const baseEvidence = [
+    ...support.evidence,
+    ...targetProfile.evidence,
+    ...reserveQuote.evidence,
+  ];
 
   if (targetProfile.finitePoolDepleted) {
     const commitment = trashCommitment(params.serverId, {
