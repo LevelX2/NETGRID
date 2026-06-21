@@ -2,7 +2,9 @@
 
 ## Status
 
-In Umsetzung auf Branch `codex/card-function-rest-families` im Worktree `C:\Projekte\NETGRID_CARD_FUNCTION_REST_FAMILIES`.
+Umsetzung abgeschlossen auf Branch `codex/card-function-rest-families` im Worktree `C:\Projekte\NETGRID_CARD_FUNCTION_REST_FAMILIES`.
+
+Der Branch wurde paketweise umgesetzt und ist bereit für die lokale Integration nach `main`.
 
 ## Quelle/Vorgabe
 
@@ -178,3 +180,23 @@ Stop ohne Rückfrage, wenn:
 - Arbeits-Worktree ist entfernt.
 - Corporate War/Project Babylon, Newsgroup Taunting und Disinfectant sind neutralisiert oder ein Blocker ist dokumentiert.
 - Hidden-Zone-Familie ist als eigener Folgeprozess geplant, aber nicht vermischt.
+
+## Abschlussstand vor Integration
+
+Stand nach P5 und vor lokalem Merge:
+
+- Guard-Baseline: `Card function abstraction inventory matches 199 baseline findings`.
+- Corporate War / Project Babylon: generische Scored-Agenda-Familien `score_credit_swing_if_corp_credit_threshold_met` und `overadvance_bonus_agenda_points`.
+- Newsgroup Taunting: generische `run_start_tax`-Familie mit neutralen `runStartTaxCredits` / `runStartTaxSourceDefinitionIds`.
+- Disinfectant: generische `counter_prevention_replacement`-Familie mit neutralem `counterPreventionUsedSourceIdsThisTurn` / `counterPreventionCreditsPaid`.
+- Hidden-Zone-Familie: separates Planartefakt `docs/architecture/engine/card-function-hidden-zone-family-plan-2026-06-21.md`.
+
+Ausgeführte Checks:
+
+- `corepack pnpm check:card-function-abstraction`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda/sequence-contract.test.ts src/game/turn/runner-main-actions.test.ts src/game/turn/main-action-hosts.test.ts src/game/run/start-run-action-execution.test.ts src/game/run/run-duration-payment.test.ts src/game/run/run-end-cleanup.test.ts src/game/run/run-flow-hosts.test.ts src/game/run/run-access-legal-action-hosts.test.ts src/game/state/turn-flags-counters.test.ts src/game/turn/corp-main-actions.test.ts`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t "Corporate War"`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/agenda-global-random.test.ts -t "Newsgroup Taunting"`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/agenda-scorearea-recurring.test.ts`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/index-tests/releases/card-release-smokes.test.ts src/index-tests/originalset/trace-prevention-assets.test.ts -t "Disinfectant"`
