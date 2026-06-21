@@ -111,7 +111,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "newsgroup_taunting_run_start_tax";
+      kind: "run_start_tax";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }

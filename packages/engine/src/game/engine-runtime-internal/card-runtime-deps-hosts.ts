@@ -1280,7 +1280,7 @@ export function createCardRuntimeDepsHosts(
     };
   }
 
-  function newsgroupTauntingRunStartTax(state: GameState): {
+  function runStartTaxForCorpRootAssets(state: GameState): {
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
   } {
@@ -1289,7 +1289,7 @@ export function createCardRuntimeDepsHosts(
         (cardId) =>
           definitionFor(state, cardId).id ===
             NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID ||
-          hasCorpUtilityKind(state, cardId, "newsgroup_taunting_run_start_tax"),
+          hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
       .map((cardId) => definitionFor(state, cardId).id);
     return {
@@ -1342,7 +1342,7 @@ export function createCardRuntimeDepsHosts(
     relativeTraceSubroutinesForCurrentEncounter,
     runCardImplementationActionHost,
     runStartTaxForServerUpgrades,
-    newsgroupTauntingRunStartTax,
+    runStartTaxForCorpRootAssets,
     spendRunnerAccessTrashCredits,
   };
 }

@@ -927,7 +927,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     movableAdvancementSourceIds,
     moveAdvancementOptions,
     mustInstallInsideSubsidiaryDataFort,
-    newsgroupTauntingRunStartTax,
+    runStartTaxForCorpRootAssets,
     normalizeSubtypeLabel,
     openPostMeatDamageReactionWindow,
     openRunnerCostPenaltySupportWindow,

@@ -1412,6 +1412,11 @@ export function publicContextForAction(
       if (value !== undefined) context[key] = value;
     }
   }
+  if (typeof legalAction.payload?.runStartTaxCredits === "number")
+    context.runStartTaxCredits = legalAction.payload.runStartTaxCredits;
+  if (typeof legalAction.payload?.runStartTaxSourceDefinitionIds === "string")
+    context.runStartTaxSourceDefinitionIds =
+      legalAction.payload.runStartTaxSourceDefinitionIds;
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
     if (typeof legalAction.payload.runStartTaxPaid === "number")
@@ -1637,18 +1642,6 @@ export function publicContextForAction(
     if (typeof legalAction.payload.corpCreditsAfter === "number")
       context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
     if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
-    if (
-      typeof legalAction.payload.newsgroupTauntingRunStartTaxCredits ===
-      "number"
-    )
-      context.newsgroupTauntingRunStartTaxCredits =
-        legalAction.payload.newsgroupTauntingRunStartTaxCredits;
-    if (
-      typeof legalAction.payload.newsgroupTauntingSourceDefinitionIds ===
-      "string"
-    )
-      context.newsgroupTauntingSourceDefinitionIds =
-        legalAction.payload.newsgroupTauntingSourceDefinitionIds;
     if (typeof legalAction.payload.runStartTaxPaid === "number")
       context.runStartTaxPaid = legalAction.payload.runStartTaxPaid;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")

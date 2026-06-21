@@ -59,7 +59,7 @@ export type RunnerMainActionGenerationHost = {
       amount: number;
       sourceDefinitionIds: string[];
     }>;
-    newsgroupTauntingRunStartTax: HostFn<{
+    runStartTaxForCorpRootAssets: HostFn<{
       amount: number;
       sourceDefinitionIds: string[];
     }>;
@@ -227,7 +227,7 @@ export function buildRunnerMainActions(
   const fortRunSideFamiliesHostForState =
     host.run.fortRunSideFamiliesHostForState;
   const runStartTaxForServerUpgrades = host.run.runStartTaxForServerUpgrades;
-  const newsgroupTauntingRunStartTax = host.run.newsgroupTauntingRunStartTax;
+  const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
   const canOverlayProgramOnZetatechSoftwareInstaller =
@@ -1119,9 +1119,13 @@ export function buildRunnerMainActions(
       server.id,
     );
     const upgradeRunStartTax = runStartTaxForServerUpgrades(state, server.id);
-    const newsgroupRunTax = newsgroupTauntingRunStartTax(state);
+    const rootAssetRunTax = runStartTaxForCorpRootAssets(state);
     const runStartTaxCredits =
-      upgradeRunStartTax.amount + newsgroupRunTax.amount;
+      upgradeRunStartTax.amount + rootAssetRunTax.amount;
+    const runStartTaxSourceDefinitionIds = [
+      ...upgradeRunStartTax.sourceDefinitionIds,
+      ...rootAssetRunTax.sourceDefinitionIds,
+    ];
     const runLockActionsPending = Math.max(
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
@@ -1138,23 +1142,13 @@ export function buildRunnerMainActions(
     ];
     const runPayload = {
       serverId: server.id,
-      ...(upgradeRunStartTax.amount > 0
+      ...(runStartTaxCredits > 0
         ? {
-            v1918UpgradeAbility: "run_start_tax",
-            runStartTaxCredits: upgradeRunStartTax.amount,
+            runStartTaxCredits,
             runStartTaxSourceDefinitionIds:
-              upgradeRunStartTax.sourceDefinitionIds.join(","),
+              runStartTaxSourceDefinitionIds.join(","),
           }
         : {}),
-      ...(newsgroupRunTax.amount > 0
-        ? {
-            v1920AssetAbility: "newsgroup_taunting_run_start_tax",
-            newsgroupTauntingRunStartTaxCredits: newsgroupRunTax.amount,
-            newsgroupTauntingSourceDefinitionIds:
-              newsgroupRunTax.sourceDefinitionIds.join(","),
-          }
-        : {}),
-      ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
     };
     if (
       hasClicks &&
@@ -1318,8 +1312,13 @@ function buildMultiServerSuccessSequenceForcedRunActions(
     state,
     server.id,
   );
-  const newsgroupRunTax = host.run.newsgroupTauntingRunStartTax(state);
-  const runStartTaxCredits = upgradeRunStartTax.amount + newsgroupRunTax.amount;
+  const rootAssetRunTax = host.run.runStartTaxForCorpRootAssets(state);
+  const runStartTaxCredits =
+    upgradeRunStartTax.amount + rootAssetRunTax.amount;
+  const runStartTaxSourceDefinitionIds = [
+    ...upgradeRunStartTax.sourceDefinitionIds,
+    ...rootAssetRunTax.sourceDefinitionIds,
+  ];
   if (
     runStartTaxCredits > 0 &&
     host.runner.availableRunnerRunStartCredits(input.runDurationPaymentHost) <
@@ -1328,23 +1327,13 @@ function buildMultiServerSuccessSequenceForcedRunActions(
     return [];
   const runPayload = {
     serverId: server.id,
-    ...(upgradeRunStartTax.amount > 0
+    ...(runStartTaxCredits > 0
       ? {
-          v1918UpgradeAbility: "run_start_tax",
-          runStartTaxCredits: upgradeRunStartTax.amount,
+          runStartTaxCredits,
           runStartTaxSourceDefinitionIds:
-            upgradeRunStartTax.sourceDefinitionIds.join(","),
+            runStartTaxSourceDefinitionIds.join(","),
         }
       : {}),
-    ...(newsgroupRunTax.amount > 0
-      ? {
-          v1920AssetAbility: "newsgroup_taunting_run_start_tax",
-          newsgroupTauntingRunStartTaxCredits: newsgroupRunTax.amount,
-          newsgroupTauntingSourceDefinitionIds:
-            newsgroupRunTax.sourceDefinitionIds.join(","),
-        }
-      : {}),
-    ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
     bonusRunNoClick: true,
     bonusRunSource: input.pendingSequence.sourceDefinitionId,
     restrictedActionGrantActionType: "start_run",

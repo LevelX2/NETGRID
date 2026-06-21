@@ -323,7 +323,7 @@ function hostFor(
         amount: 0,
         sourceDefinitionIds: [],
       }),
-      newsgroupTauntingRunStartTax: () => ({
+      runStartTaxForCorpRootAssets: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),

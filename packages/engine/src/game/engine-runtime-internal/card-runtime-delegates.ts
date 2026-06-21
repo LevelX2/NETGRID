@@ -228,9 +228,9 @@ export function runStartTaxForServerUpgrades(...args: any[]): any {
   )(...args);
 }
 
-export function newsgroupTauntingRunStartTax(...args: any[]): any {
+export function runStartTaxForCorpRootAssets(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.newsgroupTauntingRunStartTax as any
+    runtimeDelegates.cardRuntimeHosts.runStartTaxForCorpRootAssets as any
   )(...args);
 }
 

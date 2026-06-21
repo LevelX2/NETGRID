@@ -14,10 +14,10 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 18 |
-| test_only_card_name | 56 |
+| functional_kind_uses_card_name | 16 |
+| test_only_card_name | 54 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 82 |
+| runtime_state_field_uses_card_name | 49 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 | false_positive | 22 |
 
@@ -26,13 +26,11 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:81` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:104` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:108` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:114` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:204` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:208` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:212` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:216` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:8` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts:8` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts:8` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts:8` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts:8` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
@@ -44,54 +42,35 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/create-game.ts:213` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:661` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:743` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:860` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:934` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/activated-card-runtime-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/apply-action-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts:622` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:659` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:741` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-delegates.ts:231` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-delegates.ts:233` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:1283` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:1292` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:1345` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:935` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1560` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1562` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1576` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-strength-cost-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts:940` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts:925` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/counter-turn-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/damage-trace-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/economy-runtime-services.ts:648` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:663` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:745` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts:815` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/lookup-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts:661` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts:743` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts:1157` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/run-flow-runtime-hosts.ts:632` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/runtime-bootstrap-support.ts:662` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/runtime-bootstrap-support.ts:744` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/scored-economy-runtime-hosts.ts:621` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-corp-runtime-resolvers.ts:648` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-corp-runtime-resolvers.ts:946` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts:662` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts:744` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts:1164` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:931` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1439` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1452` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1457` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
@@ -100,7 +79,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:944` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:649` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:930` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1178` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1184` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1188` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
@@ -134,19 +112,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:759` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:186` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/turn/corp-main-actions.ts:731` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/main-action-hosts.ts:252` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/main-action-hosts.ts:252` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:62` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:230` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:230` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1122` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1151` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1152` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1153` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1321` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1341` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1342` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/runner-main-actions.ts:1343` Newsgroup Taunting / `newsgroupTaunting` -> `run_start_tax`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:7` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:117` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`

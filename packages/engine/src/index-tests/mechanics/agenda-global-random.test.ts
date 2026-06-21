@@ -1793,9 +1793,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(legal.costs[0]?.credits).toBe(1);
     expect(legal.payload).toMatchObject({
-      v1920AssetAbility: "newsgroup_taunting_run_start_tax",
-      newsgroupTauntingRunStartTaxCredits: 1,
       runStartTaxCredits: 1,
+      runStartTaxSourceDefinitionIds: "onr_v1_332_newsgroup-taunting",
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1803,9 +1802,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      v1920AssetAbility: "newsgroup_taunting_run_start_tax",
-      newsgroupTauntingRunStartTaxCredits: 1,
-      runStartTaxPaid: 1,
+      runStartTaxCredits: 1,
+      runStartTaxSourceDefinitionIds: "onr_v1_332_newsgroup-taunting",
       runnerCreditsAfter: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
