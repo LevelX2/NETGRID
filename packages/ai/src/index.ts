@@ -142,6 +142,7 @@ import {
   uniqueDebugStrings,
 } from "./diagnostics/debug-format";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
+import { applyPracticalMicroRuntimeComparator } from "./runtime/practical-micro-runtime";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -3490,7 +3491,7 @@ function chooseSemanticRuntimeAction(
   legacyDecision: AiDecision,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
-  return chooseSemanticRuntimeActionFromRuntime(
+  const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
     input,
     legacyDecision,
     options,
@@ -3521,6 +3522,7 @@ function chooseSemanticRuntimeAction(
       semanticRuntimeDecisionDebug,
     },
   );
+  return applyPracticalMicroRuntimeComparator(input, legacyDecision, runtimeDecision, options);
 }
 
 function runnerSelfDamageImmediateWinSemanticChoice(
