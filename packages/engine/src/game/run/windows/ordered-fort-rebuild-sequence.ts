@@ -1,6 +1,6 @@
 import type { ServerId } from "@netgrid/shared";
 import { sanitizePayloadForSurface } from "../../view/surface-policy";
-import type { SequencePayloadPatch } from "./scored-agenda-sequence-types";
+import type { RunWindowSequencePayloadPatch } from "./run-window-sequence-types";
 
 export type OrderedFortRebuildStep =
   | "capture_source_fort"
@@ -69,7 +69,7 @@ export type OrderedFortRebuildPublicPayloadInput = {
 
 export function orderedFortRebuildPublicPayload(
   input: OrderedFortRebuildPublicPayloadInput,
-): SequencePayloadPatch {
+): RunWindowSequencePayloadPatch {
   return sanitizePayloadForSurface(
     {
       sequenceKind: ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT.kind,

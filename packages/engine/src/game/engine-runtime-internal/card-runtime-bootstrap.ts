@@ -314,7 +314,7 @@ import {
   handleScoredAgendaActivatedAbilityAction,
   type ScoredAgendaAbilityHost,
 } from "../corp/scored-agenda-abilities";
-import { orderedFortRebuildPublicPayload } from "../corp/scored-agenda/ordered-fort-rebuild-sequence";
+import { orderedFortRebuildPublicPayload } from "../run/windows/ordered-fort-rebuild-sequence";
 import { stateIsAtServerAfterPassingLastIceWindow } from "../run/windows/after-passing-last-ice-window";
 import { applyRunWindowPayloadPatch } from "../run/windows/run-window-sequence-types";
 import {

@@ -7386,6 +7386,148 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("marks safe scoreline through the practical micro runtime", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-practical-micro-scoreline",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(score).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!score || !gain)
+      throw new Error("Missing practical micro scoreline fixture actions");
+
+    const decision = chooseCorpAction(
+      { ...input, legalActions: [score, gain] },
+      {
+        persistTacticalPlanMemory: false,
+        practicalMicroRuntime: {
+          mode: "apply",
+          enabledRules: ["corp_safe_scoreline"],
+        },
+      },
+    );
+
+    expect(decision.actionId).toBe(score.actionId);
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_applied:corp_safe_scoreline",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_corp_safe_scoreline:true",
+    );
+  });
+
+  it("installs visible breaker coverage through the practical micro runtime", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-practical-micro-coverage-install",
+      (state) => {
+        state.runner.credits = 6;
+        const iceId = putCorpIceOnServer(state, "hq", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_fracter");
+      },
+    );
+    const install = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const runHq = input.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(install).toBeDefined();
+    expect(runHq).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!install || !runHq || !gain)
+      throw new Error("Missing practical micro coverage fixture actions");
+
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [runHq, install, gain] },
+      {
+        persistTacticalPlanMemory: false,
+        practicalMicroRuntime: {
+          mode: "apply",
+          enabledRules: ["runner_visible_coverage_install"],
+        },
+      },
+    );
+
+    expect(decision.actionId).toBe(install.actionId);
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_applied:runner_visible_coverage_install",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_runner_visible_coverage_install:true",
+    );
+  });
+
+  it("completes visible run payoff through the practical micro runtime", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-practical-micro-run-payoff",
+      (state) => {
+        state.runner.credits = 6;
+        ensureRemoteServer(state, "remote_1");
+        const agendaId = putCorpRootInServer(state, "remote_1", "simple_agenda", 0, {
+          faceup: true,
+          rezzed: true,
+        });
+        state.cardInstances[agendaId] = {
+          ...state.cardInstances[agendaId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    );
+    const runRemote = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(runRemote).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!runRemote || !gain)
+      throw new Error("Missing practical micro run payoff fixture actions");
+
+    const decision = chooseRunnerAction(
+      { ...input, legalActions: [runRemote, gain] },
+      {
+        persistTacticalPlanMemory: false,
+        practicalMicroRuntime: {
+          mode: "apply",
+          enabledRules: ["runner_run_payoff_completion"],
+        },
+      },
+    );
+
+    expect(decision.actionId).toBe(runRemote.actionId);
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_applied:runner_run_payoff_completion",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_runner_run_payoff_completion:true",
+    );
+  });
+
   it("applies deck doctrine to semantic Corp scoreline actions", () => {
     const input = corpActionPhaseInput(
       "ai-corp-semantic-doctrine-scoreline",
