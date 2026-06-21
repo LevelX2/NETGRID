@@ -14,12 +14,12 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 25 |
-| test_only_card_name | 59 |
+| functional_kind_uses_card_name | 18 |
+| test_only_card_name | 56 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 87 |
+| runtime_state_field_uses_card_name | 82 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
-| false_positive | 26 |
+| false_positive | 22 |
 
 ## Problemstellen
 
@@ -31,10 +31,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:208` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:212` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:216` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:809` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:831` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-war.ts:8` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/agendas/project-babylon.ts:8` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:8` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts:8` Newsgroup Taunting / `newsgroup_taunting` -> `run_start_tax`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts:8` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
@@ -45,13 +41,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- functional_kind_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:12` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:41` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/corporate-war-sequence.ts:48` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/overadvance-score-effects.ts:27` Project Babylon / `project_babylon` -> `overadvance_bonus_agenda_points`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/scored-agenda-direct-effect-registry.ts:110` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `packages/engine/src/game/corp/scored-agenda/scored-agenda-direct-effect-registry.ts:111` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/corp/scored-agenda/scored-agenda-direct-effect-registry.ts:114` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/create-game.ts:213` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:661` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -163,9 +152,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1485` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:868` Corporate War / `corporate_war` -> `score_credit_swing_if_corp_credit_threshold_met`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1524` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3700` Shell Traders / `shell_traders` -> `delayed_install_sequence`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1532` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3708` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
 ## Abstraktionsplan
 
@@ -179,7 +167,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | slice_done | Startup Immolator | `trash_fully_broken_passed_ice` | `runnerTurnFlags.abilityUsedSourceIdsByLimitKey[limitKey]` |
 | slice_done | Krumz | `recurring_trace_credit_pool` | `recurringCreditPools[]` |
 | slice_done | Siren | `start_run_redirect_to_source_fort` | `runStartInterventions[]` |
-| deferred_refactor_required | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
+| slice_done | Corporate War / Project Babylon | `score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points` | `scoredAgendaAbilities[]` |
 
 ## Nächste Umsetzung
 
@@ -188,14 +176,14 @@ Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Ins
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5708 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5703 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie | Anzahl |
 | --- | ---: |
 | new_unclassified_card_name_leak | 1303 |
 | functional_kind_uses_card_name | 42 |
-| runtime_state_field_uses_card_name | 4255 |
+| runtime_state_field_uses_card_name | 4250 |
 | resolver_function_uses_card_name | 106 |
 | payload_key_uses_card_name | 2 |
 

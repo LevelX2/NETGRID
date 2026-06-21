@@ -865,29 +865,37 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/kind:\s*"corporate_war_credit_swing"/.test(implementationText)) {
+  if (
+    /kind:\s*"score_credit_swing_if_corp_credit_threshold_met"/.test(
+      implementationText,
+    )
+  ) {
     addEffect(facts, {
       kind: "economy",
       timing: "when_scored",
       scope: "corp",
       resource: "credits",
       amount: propertyNumber(implementationText, "gainAmount"),
-      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+      source:
+        "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met",
     });
     addEffect(facts, {
       kind: "counter_economy",
       timing: "when_scored",
       scope: "corp",
       resource: "credits",
-      source: "implementation.scoredAgenda.corporate_war_credit_swing.fail",
+      source:
+        "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met.fail",
     });
     addCondition(facts, {
       kind: "requires_corp_credits_threshold",
-      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+      source:
+        "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met",
     });
     addCondition(facts, {
       kind: "requires_score_window",
-      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+      source:
+        "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met",
     });
     facts.derivationNotes.push(
       "Corporate War variable credit swing is represented as threshold-gated economy/counter-economy only; generated facts do not assert current credit state.",

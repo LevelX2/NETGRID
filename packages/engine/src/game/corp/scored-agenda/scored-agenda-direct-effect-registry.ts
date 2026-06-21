@@ -107,11 +107,15 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
       },
     },
     {
-      id: "corporate_war_score_effect",
-      kind: "corporate_war_credit_swing",
+      id: "score_credit_swing_threshold_effect",
+      kind: "score_credit_swing_if_corp_credit_threshold_met",
       mode: "agenda_kind",
       resolveOnScore: ({ host, definition, legalAction, scoredAgenda }) => {
-        if (scoredAgenda?.kind !== "corporate_war_credit_swing") return;
+        if (
+          scoredAgenda?.kind !==
+          "score_credit_swing_if_corp_credit_threshold_met"
+        )
+          return;
         resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
       },
     },

@@ -24,7 +24,7 @@ export function applyOveradvanceScoreEffects(
 ): OveradvanceScoreEffectResult {
   let bonusAgendaPoints = 0;
   let overadvancedBy = 0;
-  if (scoredAgenda?.kind === "project_babylon_bonus_points") {
+  if (scoredAgenda?.kind === "overadvance_bonus_agenda_points") {
     overadvancedBy = excessAdvancements(instanceBefore, requiredDifficulty);
     bonusAgendaPoints = Math.floor(
       overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
@@ -32,8 +32,8 @@ export function applyOveradvanceScoreEffects(
     host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {
       applySequencePayloadPatch(legalAction, {
-        projectBabylonOveradvance: overadvancedBy,
-        projectBabylonBonusAgendaPoints: bonusAgendaPoints,
+        overadvanceBonusAgendaPointOveradvance: overadvancedBy,
+        overadvanceBonusAgendaPoints: bonusAgendaPoints,
       });
     }
   }

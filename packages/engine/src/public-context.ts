@@ -1262,15 +1262,15 @@ export function publicContextForAction(
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
   }
-  if (typeof legalAction.payload?.corpCreditsBeforeCorporateWar === "number")
-    context.corpCreditsBeforeCorporateWar =
-      legalAction.payload.corpCreditsBeforeCorporateWar;
-  if (typeof legalAction.payload?.v1922CorporateWarThreshold === "number")
-    context.v1922CorporateWarThreshold =
-      legalAction.payload.v1922CorporateWarThreshold;
-  if (typeof legalAction.payload?.corporateWarThresholdMet === "boolean")
-    context.corporateWarThresholdMet =
-      legalAction.payload.corporateWarThresholdMet;
+  if (typeof legalAction.payload?.scoreCreditSwingCreditsBefore === "number")
+    context.scoreCreditSwingCreditsBefore =
+      legalAction.payload.scoreCreditSwingCreditsBefore;
+  if (typeof legalAction.payload?.scoreCreditSwingThreshold === "number")
+    context.scoreCreditSwingThreshold =
+      legalAction.payload.scoreCreditSwingThreshold;
+  if (typeof legalAction.payload?.scoreCreditSwingThresholdMet === "boolean")
+    context.scoreCreditSwingThresholdMet =
+      legalAction.payload.scoreCreditSwingThresholdMet;
   if (legalAction.payload?.onScoreLostAllCredits === true)
     context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number")
@@ -1887,12 +1887,15 @@ export function publicContextForAction(
     context.v1919Overadvance = legalAction.payload.v1919Overadvance;
   if (typeof legalAction.payload?.v1919BonusAgendaPoints === "number")
     context.v1919BonusAgendaPoints = legalAction.payload.v1919BonusAgendaPoints;
-  if (typeof legalAction.payload?.projectBabylonOveradvance === "number")
-    context.projectBabylonOveradvance =
-      legalAction.payload.projectBabylonOveradvance;
-  if (typeof legalAction.payload?.projectBabylonBonusAgendaPoints === "number")
-    context.projectBabylonBonusAgendaPoints =
-      legalAction.payload.projectBabylonBonusAgendaPoints;
+  if (
+    typeof legalAction.payload?.overadvanceBonusAgendaPointOveradvance ===
+    "number"
+  )
+    context.overadvanceBonusAgendaPointOveradvance =
+      legalAction.payload.overadvanceBonusAgendaPointOveradvance;
+  if (typeof legalAction.payload?.overadvanceBonusAgendaPoints === "number")
+    context.overadvanceBonusAgendaPoints =
+      legalAction.payload.overadvanceBonusAgendaPoints;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;

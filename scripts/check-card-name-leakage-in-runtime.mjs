@@ -440,11 +440,11 @@ const abstractionPlan = [
       "Run-Redirect ist generisch über CardImplementation und runStartInterventions umgesetzt; Ziel-Fort, Kosten und Quelle werden beim Choice-Resolve erneut geprüft.",
   },
   {
-    priority: "deferred_refactor_required",
+    priority: "slice_done",
     cardTitle: "Corporate War / Project Babylon",
     currentNames: [
-      "corporate_war_credit_swing",
-      "project_babylon_bonus_points",
+      "score_credit_swing_if_corp_credit_threshold_met",
+      "overadvance_bonus_agenda_points",
     ],
     targetKind:
       "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
@@ -454,7 +454,7 @@ const abstractionPlan = [
       conditionSource: "agenda_params",
     },
     notes:
-      "Agenda-Scoring-Familien sollten über parametrisierte Scored-Agenda-Abilities laufen.",
+      "Agenda-Scoring-Familien laufen ueber parametrisierte Scored-Agenda-Abilities und neutrale PublicPayload-Felder.",
   },
 ];
 

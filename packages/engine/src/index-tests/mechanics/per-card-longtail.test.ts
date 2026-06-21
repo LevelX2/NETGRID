@@ -4733,7 +4733,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
       cardDefinitionId: "onr_v1_196_corporate-war",
-      corporateWarThresholdMet: true,
+      scoreCreditSwingThresholdMet: true,
       onScoreGainCredits: 12,
       resolvedEffects: [
         expect.objectContaining({
@@ -4794,7 +4794,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(missState.corp.credits).toBe(0);
     expect(missState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      corporateWarThresholdMet: false,
+      scoreCreditSwingThresholdMet: false,
       onScoreLostAllCredits: true,
       resolvedEffects: [
         expect.objectContaining({

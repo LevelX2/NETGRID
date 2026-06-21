@@ -2615,7 +2615,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     expect(warState.corp.credits).toBe(24);
     expect(warState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      corporateWarThresholdMet: true,
+      scoreCreditSwingThresholdMet: true,
       onScoreGainCredits: 12,
     });
     expect(replayEvents(warInitial, warState.eventLog.slice(warReplayStart)).ok).toBe(true);

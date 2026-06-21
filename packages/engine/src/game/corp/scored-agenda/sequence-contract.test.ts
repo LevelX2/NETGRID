@@ -143,10 +143,10 @@ describe("scored agenda sequence contract matrix", () => {
     expect(directResolverIds.sort()).toEqual([
       "add_counters_on_score_effect",
       "corporate_retreat_score_effect",
-      "corporate_war_score_effect",
       "fixed_bonus_agenda_points_score_effect",
       "gain_credits_on_score_effect",
       "overadvance_score_effects",
+      "score_credit_swing_threshold_effect",
     ]);
     expect(directResolverIds.some((id) => reservedResolverIds.has(id))).toBe(
       false,
@@ -164,7 +164,7 @@ describe("scored agenda sequence contract matrix", () => {
       "shuffle_selected_hq_agendas_into_rd_gain_credits",
       "gain_credits_on_score",
       "add_counters_on_score",
-      "project_babylon_bonus_points",
+      "overadvance_bonus_agenda_points",
       "overadvance_start_of_corp_turn_credits",
       "overadvance_start_of_corp_turn_actions",
     ];

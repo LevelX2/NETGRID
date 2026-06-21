@@ -9,7 +9,7 @@ import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
 type CorporateWarScoredAgenda = Extract<
   CardScoredAgendaImplementation,
-  { kind: "corporate_war_credit_swing" }
+  { kind: "score_credit_swing_if_corp_credit_threshold_met" }
 >;
 
 export function resolveCorporateWarOnScore(
@@ -29,23 +29,23 @@ export function resolveCorporateWarOnScore(
   }
   if (legalAction) {
     applySequencePayloadPatch(legalAction, {
-      v1922CorporateWarThreshold: threshold,
-      corpCreditsBeforeCorporateWar: corpCreditsBefore,
-      corporateWarThresholdMet: thresholdMet,
+      scoreCreditSwingThreshold: threshold,
+      scoreCreditSwingCreditsBefore: corpCreditsBefore,
+      scoreCreditSwingThresholdMet: thresholdMet,
       onScoreGainCredits: thresholdMet ? gainAmount : 0,
       onScoreLostAllCredits: !thresholdMet,
       corpCreditsAfter: host.state.corp.credits,
     });
     if (thresholdMet) {
       appendScoreCreditEffect(legalAction, {
-        effectId: `${definition.id}.score.corporate_war.gain_credits`,
+        effectId: `${definition.id}.score.credit_swing.gain_credits`,
         kind: "gain_credits",
         amount: gainAmount,
         definition,
       });
     } else if (corpCreditsBefore > 0) {
       appendScoreCreditEffect(legalAction, {
-        effectId: `${definition.id}.score.corporate_war.lose_credits`,
+        effectId: `${definition.id}.score.credit_swing.lose_credits`,
         kind: "lose_credits",
         amount: corpCreditsBefore,
         definition,

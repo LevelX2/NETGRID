@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const corporateWarImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_196_corporate-war",
   scoredAgenda: {
-    kind: "corporate_war_credit_swing",
+    kind: "score_credit_swing_if_corp_credit_threshold_met",
     threshold: 12,
     gainAmount: 12,
     visibility: "public",
