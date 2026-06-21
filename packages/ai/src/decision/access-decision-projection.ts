@@ -1,4 +1,5 @@
 import type { AccessIntent, AccessTargetKind } from "../access/access-decision-types";
+import { assertAccessDecisionInvariants } from "../access/access-decision-invariants";
 
 export type AccessDecisionProjectionSource =
   | "pre_run"
@@ -55,6 +56,7 @@ export function projectAccessDecision(params: {
   finitePoolValueRemaining?: number;
   targetChoiceWouldSelect?: AccessDecisionProjectionTargetChoiceWouldSelect;
 }): AccessDecisionProjection {
+  assertAccessDecisionInvariants(params);
   const projections = new Set<AccessDecisionProjectionKind>();
   if (params.target === "agenda" && params.intendedAccessAction === "steal") {
     projections.add("agenda_steal");
