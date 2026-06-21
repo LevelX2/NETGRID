@@ -67,6 +67,37 @@ describe("known remote access commitment", () => {
     );
   });
 
+  it("keeps insufficient credits distinct from reserve preservation", () => {
+    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 2 }), {
+      serverId: "remote_1",
+      definitionId: "onr_v1_326_holovid-campaign",
+      rootType: "asset",
+      trashCost: 4,
+      creditsAfterPath: 2,
+      visibleCard: visibleCard("holovid", {
+        definitionId: "onr_v1_326_holovid-campaign",
+        title: "Holovid Campaign",
+        type: "asset",
+        counters: { bit: 5 },
+      }),
+    });
+
+    expect(projection).toMatchObject({
+      payoff: "trash_unaffordable",
+      accessDecision: "defer_until_funded",
+      declineReason: "insufficient_credits",
+      technicallyAffordable: false,
+      commitment: {
+        knownAccessState: "known_no_current_payoff",
+        intendedAccessAction: "decline",
+        reason: "insufficient_credits",
+      },
+    });
+    expect(projection.commitment.evidence).toContain(
+      "known_remote_access_commitment_reason:insufficient_credits",
+    );
+  });
+
   it("keeps affordable non-pooled remote trash as a trash commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
       serverId: "remote_1",

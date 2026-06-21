@@ -142,7 +142,7 @@ export function projectKnownRemoteTrashCommitment(
     const commitment = trashCommitment(params.serverId, {
       knownAccessState: "known_no_current_payoff",
       intendedAccessAction: "decline",
-      reason: "reserve_would_break",
+      reason: "insufficient_credits",
       evidence: baseEvidence,
     });
     return {
