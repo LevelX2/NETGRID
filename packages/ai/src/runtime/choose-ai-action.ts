@@ -3,6 +3,7 @@ import { type AiDecision, type AiDecisionInput } from "@netgrid/shared";
 export type AiDecisionRuntimeOptions = {
   persistTacticalPlanMemory?: boolean;
   practicalMicroRuntime?: PracticalMicroRuntimeOptions;
+  practicalTacticOverlay?: PracticalTacticOverlayOptions;
 };
 
 export type PracticalMicroRuntimeMode = "off" | "compare" | "apply";
@@ -16,6 +17,10 @@ export type PracticalMicroRuntimeRuleId =
 export type PracticalMicroRuntimeOptions = {
   mode?: PracticalMicroRuntimeMode;
   enabledRules?: readonly PracticalMicroRuntimeRuleId[];
+};
+
+export type PracticalTacticOverlayOptions = {
+  enabled?: boolean;
 };
 
 export type ChooseSideAction = (

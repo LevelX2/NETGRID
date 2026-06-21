@@ -146,6 +146,7 @@ import {
   applyPracticalMicroRuntimeComparator,
   type PracticalMicroCandidate,
 } from "./runtime/practical-micro-runtime";
+import { applyPracticalTacticOverlay } from "./runtime/practical-tactic-overlay";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -3526,13 +3527,14 @@ function chooseSemanticRuntimeAction(
       semanticRuntimeDecisionDebug,
     },
   );
-  return applyPracticalMicroRuntimeComparator(
+  const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
     input,
     legacyDecision,
     runtimeDecision,
     options,
     practicalMicroRuntimeCandidates(input, runtimeDecision),
   );
+  return applyPracticalTacticOverlay(input, practicalMicroDecision, options);
 }
 
 function practicalMicroRuntimeCandidates(
