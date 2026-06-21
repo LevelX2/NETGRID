@@ -1,20 +1,13 @@
+import type { AccessIntent, AccessTargetKind } from "../access/access-decision-types";
+
 export type AccessDecisionProjectionSource =
   | "pre_run"
   | "access_window"
   | "plan_memory";
 
-export type AccessDecisionProjectionAction =
-  | "steal"
-  | "trash"
-  | "access_only"
-  | "decline";
+export type AccessDecisionProjectionAction = AccessIntent;
 
-export type AccessDecisionProjectionTarget =
-  | "agenda"
-  | "asset"
-  | "node"
-  | "upgrade"
-  | "unknown";
+export type AccessDecisionProjectionTarget = AccessTargetKind;
 
 export type AccessDecisionProjectionKind =
   | "agenda_steal"

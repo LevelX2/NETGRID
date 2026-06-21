@@ -4,6 +4,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
+import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -13,17 +14,8 @@ export type KnownRemoteAccessCommitment = {
     | "known_payoff"
     | "known_no_current_payoff"
     | "unknown_payoff";
-  intendedAccessAction:
-    | "steal"
-    | "trash"
-    | "access_only"
-    | "decline";
-  reason:
-    | "reserve_would_break"
-    | "low_value_target"
-    | "finite_pool_depleted"
-    | "agenda_payoff"
-    | "trash_affordable";
+  intendedAccessAction: AccessIntent;
+  reason: AccessDecisionReason;
   evidence: string[];
 };
 
