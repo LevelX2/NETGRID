@@ -386,6 +386,15 @@ export type {
   RunnerPlanStep,
 } from "./runner-plans";
 export {
+  evaluatePracticalTacticBenchmark,
+  frozenLegacyPracticalTacticSelector,
+} from "./evaluation/practical-tactic-benchmark";
+export type {
+  PracticalTacticBenchmarkCase,
+  PracticalTacticBenchmarkCategory,
+  PracticalTacticBenchmarkResult,
+} from "./evaluation/practical-tactic-benchmark";
+export {
   buildDeckDoctrineProfile,
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
