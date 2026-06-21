@@ -1192,6 +1192,68 @@ describe("tactical plan model", () => {
     });
   });
 
+  it("uses structured access commitment and outcome memory for no-payoff remote plans", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote-2", "runner", "start_run", {
+        serverId: "remote_2",
+      }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_2", [], [
+        visibleCard("spent-event", "corp", "event", {
+          definitionId: "spent-event",
+        }),
+      ]),
+    ];
+
+    const result = evaluateTacticalPlans({
+      input,
+      accessCommitment: {
+        serverId: "remote_2",
+        knownAccessState: "known_no_current_payoff",
+        intendedAccessAction: "decline",
+        reason: "low_value_target",
+        evidence: ["test_structured_access_commitment"],
+      },
+      accessOutcomeMemory: {
+        applies: true,
+        suppressesPlanBonus: true,
+        evidence: ["test_structured_access_outcome_memory"],
+      },
+    });
+    const remotePlan = result.planAlternatives.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_2",
+    );
+
+    expect(remotePlan?.status).toBe("abandoned");
+    expect(remotePlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "structured_access_commitment_server:remote_2",
+        "structured_access_commitment_state:known_no_current_payoff",
+        "access_outcome_memory_no_plan_bonus:true",
+        "access_outcome_memory_applied:declined_access",
+      ]),
+    );
+    expect(remotePlan?.evidence.join("\n")).not.toContain(
+      "remote_access_outcome_memory_applied:declined_trash",
+    );
+    expect(result.accessCommitmentUsed).toEqual(
+      expect.arrayContaining([
+        "access_commitment_server:remote_2",
+        "access_commitment_intended_action:decline",
+      ]),
+    );
+    expect(result.accessOutcomeMemoryUsed).toEqual(
+      expect.arrayContaining([
+        "access_outcome_memory_applies:true",
+        "access_outcome_memory_suppresses_plan_bonus:true",
+      ]),
+    );
+  });
+
   it("explains normal remote run priority with run-target score components", () => {
     const remoteRun = legalAction("run-remote-2", "runner", "start_run", {
       serverId: "remote_2",

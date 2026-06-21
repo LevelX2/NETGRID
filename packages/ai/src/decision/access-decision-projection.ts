@@ -1,20 +1,14 @@
+import type { AccessIntent, AccessTargetKind } from "../access/access-decision-types";
+import { assertAccessDecisionInvariants } from "../access/access-decision-invariants";
+
 export type AccessDecisionProjectionSource =
   | "pre_run"
   | "access_window"
   | "plan_memory";
 
-export type AccessDecisionProjectionAction =
-  | "steal"
-  | "trash"
-  | "access_only"
-  | "decline";
+export type AccessDecisionProjectionAction = AccessIntent;
 
-export type AccessDecisionProjectionTarget =
-  | "agenda"
-  | "asset"
-  | "node"
-  | "upgrade"
-  | "unknown";
+export type AccessDecisionProjectionTarget = AccessTargetKind;
 
 export type AccessDecisionProjectionKind =
   | "agenda_steal"
@@ -62,6 +56,7 @@ export function projectAccessDecision(params: {
   finitePoolValueRemaining?: number;
   targetChoiceWouldSelect?: AccessDecisionProjectionTargetChoiceWouldSelect;
 }): AccessDecisionProjection {
+  assertAccessDecisionInvariants(params);
   const projections = new Set<AccessDecisionProjectionKind>();
   if (params.target === "agenda" && params.intendedAccessAction === "steal") {
     projections.add("agenda_steal");

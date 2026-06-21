@@ -14,6 +14,7 @@ import {
   evaluateRunnerRunTargets,
   projectRunnerRunActions,
 } from "./runner-run-target-evaluation";
+import { rankKnownRemoteAccessTargets } from "./access/access-target-ranking";
 import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   type RunnerHandDevelopmentEvaluation,
@@ -1072,7 +1073,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       targetServerId: "remote_1",
       accessPayoff: "known_low_value",
       knownAccessState: "known_no_current_payoff",
-      recommendation: "do_not_run_now",
+      recommendation: "known_no_current_payoff",
     });
   });
 
@@ -1203,6 +1204,148 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "known_remote_root_general_trash_cost:2",
         "known_remote_root_credits_after_trash:4",
         "known_remote_root_trash_support_source:onr_v1_048_poltergeist",
+      ]),
+    );
+  });
+
+  it("keeps active declined-trash memory visible as its own remote recommendation", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("spent-event", {
+              definitionId: "spent-event",
+              title: "Spent event",
+              type: "event",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      accessOutcomeMemory: {
+        applies: true,
+        suppressesPlanBonus: true,
+        evidence: ["test_declined_memory"],
+      },
+    });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "declined_trash_memory_active",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_access_memory_applies:true",
+        "run_target_access_memory_suppresses_plan_bonus:true",
+        "recommendation:declined_trash_memory_active",
+      ]),
+    );
+  });
+
+  it("reassesses a remote when access memory was invalidated by fingerprint change", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("spent-event", {
+              definitionId: "spent-event",
+              title: "Spent event",
+              type: "event",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      accessOutcomeMemory: {
+        applies: false,
+        invalidationReason: "remote_fingerprint_changed",
+        suppressesPlanBonus: false,
+        evidence: ["test_remote_changed"],
+      },
+    });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      recommendation: "remote_changed_reassess",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_access_memory_invalidation:remote_fingerprint_changed",
+        "recommendation:remote_changed_reassess",
+      ]),
+    );
+  });
+
+  it("adds ranked access target evidence to remote run evaluations", () => {
+    const input = aiInput({
+      credits: 8,
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-euromarket", {
+              definitionId: "onr_v1_322_euromarket-consortium",
+              title: "Euromarket Consortium",
+              type: "asset",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+    const rankedAccessTargets = rankKnownRemoteAccessTargets([
+      {
+        positionKey: "root:0",
+        instanceId: "remote-euromarket",
+        definitionId: "onr_v1_322_euromarket-consortium",
+        targetKind: "asset",
+        valueScore: 3,
+        commitment: {
+          serverId: "remote_1",
+          knownAccessState: "known_payoff",
+          intendedAccessAction: "trash",
+          reason: "trash_affordable",
+          evidence: [],
+        },
+        projection: {
+          source: "pre_run",
+          serverId: "remote_1",
+          knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+          target: "asset",
+          intendedAccessAction: "trash",
+          projections: ["asset_trash"],
+          evidence: [],
+        },
+      },
+    ]);
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      rankedAccessTargets,
+    });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_ranked_access_position:root:0",
+        "run_target_ranked_access_intent:trash",
+        "run_target_ranked_access_reason:trash_affordable",
       ]),
     );
   });

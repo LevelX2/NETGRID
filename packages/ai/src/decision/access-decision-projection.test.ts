@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 
+import { rankKnownRemoteAccessTargets } from "../access/access-target-ranking";
 import { projectAccessDecision } from "./access-decision-projection";
 import {
   buildTargetChoiceShadowReport,
@@ -151,6 +152,83 @@ describe("access decision projection", () => {
     );
     expect(projection).not.toHaveProperty("selectedChoices");
     expect(projection).not.toHaveProperty("selectedTargets");
+  });
+
+  it("aligns access target ranking with target-choice dry-run projection", () => {
+    const targetChoiceReport = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "access-trash-choice",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["trash", "decline"],
+          },
+        ],
+      }),
+      preferredOptionIds: ["trash"],
+    });
+    const targetChoiceWouldSelect =
+      targetChoiceWouldSelectForAccessDecisionProjection(targetChoiceReport);
+    if (!targetChoiceWouldSelect) {
+      throw new Error("expected target-choice wouldSelect dry-run");
+    }
+    const projection = projectAccessDecision({
+      source: "access_window",
+      serverId: "remote_1",
+      knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+      target: "asset",
+      intendedAccessAction: "trash",
+      targetChoiceWouldSelect,
+    });
+
+    const [ranked] = rankKnownRemoteAccessTargets([
+      {
+        positionKey: "root:0",
+        instanceId: "euromarket-1",
+        definitionId: "onr_v1_322_euromarket-consortium",
+        targetKind: "asset",
+        commitment: {
+          serverId: "remote_1",
+          knownAccessState: "known_payoff",
+          intendedAccessAction: "trash",
+          reason: "trash_affordable",
+          evidence: ["test_access_commitment"],
+        },
+        projection,
+        valueScore: 3,
+      },
+    ]);
+
+    expect(ranked).toMatchObject({
+      positionKey: "root:0",
+      targetKind: "asset",
+      commitment: {
+        intendedAccessAction: "trash",
+        reason: "trash_affordable",
+      },
+      projection: {
+        projections: ["asset_trash", "target_choice_would_select"],
+        targetChoiceWouldSelect: {
+          optionId: "trash",
+          selectedChoicesCreated: false,
+          selectedTargetsCreated: false,
+        },
+      },
+    });
+    expect(ranked?.rankEvidence).toEqual(
+      expect.arrayContaining([
+        "access_target_rank_position:root:0",
+        "access_target_rank_intent:trash",
+      ]),
+    );
+    expect(ranked?.projection.evidence).toEqual(
+      expect.arrayContaining([
+        "access_decision_projection_target_choice_option:trash",
+        "access_decision_projection_target_choice_selected_choices_created:false",
+        "access_decision_projection_target_choice_selected_targets_created:false",
+      ]),
+    );
   });
 });
 

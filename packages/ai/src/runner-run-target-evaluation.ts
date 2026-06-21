@@ -13,6 +13,8 @@ import {
   type KnownRemoteAccessPayoff,
 } from "./known-remote-access-payoff";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
+import type { RankedKnownRemoteAccessCandidate } from "./access/access-target-ranking";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
@@ -126,6 +128,9 @@ export type RunnerRunTargetRecommendation =
   | "draw_for_damage_buffer"
   | "gain_credits_first"
   | "find_breaker_first"
+  | "known_no_current_payoff"
+  | "remote_changed_reassess"
+  | "declined_trash_memory_active"
   | "do_not_run_now";
 
 export type BlinkRiskSeverity = "none" | "low" | "medium" | "high" | "lethal";
@@ -278,6 +283,8 @@ export type EvaluateRunnerRunTargetsParams = {
   beliefState?: BeliefState;
   handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
   actionCandidates?: readonly ActionSemanticCandidate[];
+  accessOutcomeMemory?: AccessOutcomeMemoryStatus;
+  rankedAccessTargets?: readonly RankedKnownRemoteAccessCandidate[];
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
@@ -368,6 +375,10 @@ function evaluateRunnerRunTarget(
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
+  const rankedAccessTarget = rankedAccessTargetForServer(
+    params.rankedAccessTargets,
+    accessServerId,
+  );
   const blinkRiskAssessment = assessBlinkRiskForRunAction(
     params.input,
     projection.action,
@@ -396,6 +407,10 @@ function evaluateRunnerRunTarget(
     economyPosture,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
+    ...(params.accessOutcomeMemory
+      ? { accessOutcomeMemory: params.accessOutcomeMemory }
+      : {}),
+    ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
   const score = scoreRunTargetEvaluation({
@@ -466,6 +481,8 @@ function evaluateRunnerRunTarget(
       ...(blinkRiskAssessment?.evidence ?? []),
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
+      ...accessOutcomeMemoryEvaluationEvidence(params.accessOutcomeMemory),
+      ...rankedAccessTargetEvaluationEvidence(rankedAccessTarget),
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
       ...payoff.evidence.slice(0, 36),
       ...installedRunPayoff.evidence.slice(0, 8),
@@ -751,6 +768,42 @@ function payoffForTarget(
   };
 }
 
+function rankedAccessTargetForServer(
+  rankedAccessTargets: readonly RankedKnownRemoteAccessCandidate[] | undefined,
+  serverId: string,
+): RankedKnownRemoteAccessCandidate | undefined {
+  return rankedAccessTargets?.find(
+    (candidate) => candidate.commitment.serverId === serverId,
+  );
+}
+
+function accessOutcomeMemoryEvaluationEvidence(
+  status: AccessOutcomeMemoryStatus | undefined,
+): string[] {
+  if (!status) return [];
+  return [
+    `run_target_access_memory_applies:${status.applies}`,
+    `run_target_access_memory_suppresses_plan_bonus:${status.suppressesPlanBonus}`,
+    ...(status.invalidationReason
+      ? [`run_target_access_memory_invalidation:${status.invalidationReason}`]
+      : []),
+  ];
+}
+
+function rankedAccessTargetEvaluationEvidence(
+  candidate: RankedKnownRemoteAccessCandidate | undefined,
+): string[] {
+  if (!candidate) return [];
+  return [
+    `run_target_ranked_access_position:${candidate.positionKey}`,
+    `run_target_ranked_access_kind:${candidate.targetKind}`,
+    `run_target_ranked_access_intent:${candidate.commitment.intendedAccessAction}`,
+    `run_target_ranked_access_reason:${candidate.commitment.reason}`,
+    `run_target_ranked_access_score:${candidate.rankScore}`,
+    ...candidate.rankEvidence.slice(0, 6),
+  ];
+}
+
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
@@ -800,6 +853,8 @@ function recommendationForRunTarget(params: {
   economyPosture: RunnerEconomyPosture;
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
+  accessOutcomeMemory?: AccessOutcomeMemoryStatus;
+  rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   blinkRiskAssessment?: BlinkRiskAssessment;
 }): RunnerRunTargetRecommendation {
   if (params.pathPassability === "blocked_by_blink_hand_buffer") {
@@ -834,7 +889,32 @@ function recommendationForRunTarget(params: {
       ? "find_breaker_first"
       : "gain_credits_first";
   }
+  if (
+    params.targetKind === "remote" &&
+    params.accessOutcomeMemory?.invalidationReason ===
+      "remote_fingerprint_changed"
+  ) {
+    return "remote_changed_reassess";
+  }
+  if (
+    params.targetKind === "remote" &&
+    params.accessOutcomeMemory?.applies === true &&
+    params.accessOutcomeMemory.suppressesPlanBonus
+  ) {
+    return "declined_trash_memory_active";
+  }
   if (params.knownAccessState === "known_no_current_payoff") {
+    if (params.targetKind === "remote") {
+      if (
+        params.rankedAccessTarget?.commitment.reason === "insufficient_credits" ||
+        params.rankedAccessTarget?.commitment.reason === "reserve_would_break"
+      ) {
+        return "gain_credits_first";
+      }
+      return params.accessPayoff === "trash_unaffordable"
+        ? "gain_credits_first"
+        : "known_no_current_payoff";
+    }
     return params.accessPayoff === "trash_unaffordable"
       ? "gain_credits_first"
       : "do_not_run_now";
@@ -942,6 +1022,12 @@ function recommendationRank(recommendation: RunnerRunTargetRecommendation): numb
       return 3;
     case "find_breaker_first":
       return 2;
+    case "remote_changed_reassess":
+      return 2;
+    case "declined_trash_memory_active":
+      return 1;
+    case "known_no_current_payoff":
+      return 1;
     case "do_not_run_now":
       return 1;
   }

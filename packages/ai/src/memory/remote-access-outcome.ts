@@ -1,16 +1,13 @@
+import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
+import { projectAccessDecision } from "../decision/access-decision-projection";
+
 export type RemoteAccessOutcomeDecision =
   | "declined_trash"
   | "trashed"
   | "stolen"
-  | "access_only";
+  | Extract<AccessIntent, "access_only">;
 
-export type RemoteAccessOutcomeReason =
-  | "reserve_would_break"
-  | "low_value_target"
-  | "finite_pool_depleted"
-  | "agenda_payoff"
-  | "trash_affordable"
-  | "unknown";
+export type RemoteAccessOutcomeReason = AccessDecisionReason;
 
 export type RemoteAccessOutcomeMemoryEntry = {
   serverId: string;
@@ -70,7 +67,7 @@ export function remoteAccessOutcomeEvidence(
 
 function accessProjectionActionForOutcome(
   accessDecision: RemoteAccessOutcomeDecision,
-): "steal" | "trash" | "access_only" | "decline" {
+): AccessIntent {
   switch (accessDecision) {
     case "stolen":
       return "steal";
@@ -143,4 +140,3 @@ export function declinedTrashOutcomePlanEvidence(
     "remote_access_outcome_memory_applied:declined_trash",
   ];
 }
-import { projectAccessDecision } from "../decision/access-decision-projection";

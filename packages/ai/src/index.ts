@@ -135,7 +135,7 @@ import {
 } from "./diagnostics/semantic-runtime-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { semanticShadowCalibrationProfileFromEnv } from "./decision/semantic-shadow-calibration";
-import { projectAccessDecision } from "./decision/access-decision-projection";
+import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { buildTargetChoiceShadowReport } from "./decision/target-choice-shadow";
 import {
   formatDebugFieldValue,
@@ -8525,6 +8525,12 @@ function semanticRuntimeRunTargetGuidanceValue(
       return -2100;
     case "find_breaker_first":
       return -2600;
+    case "remote_changed_reassess":
+      return -2400;
+    case "declined_trash_memory_active":
+      return -4200;
+    case "known_no_current_payoff":
+      return -4800;
     case "do_not_run_now":
       return -5000;
   }
@@ -35484,26 +35490,13 @@ function runnerRemoteTrashAccessContext(
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
     affordableRelevant && action.type === "trash_accessed_card";
-  const accessDecisionProjection = projectAccessDecision({
-    source: "access_window",
-    serverId: accessServerId ?? "unknown",
+  const accessDecisionProjection = projectAccessWindowChoice({
+    actionType: action.type,
+    serverId: accessServerId,
     ...(accessed.definitionId
       ? { knownRootDefinitionId: accessed.definitionId }
       : {}),
-    target:
-      targetType === "asset_node"
-        ? "asset"
-        : targetType === "upgrade"
-          ? "upgrade"
-          : "unknown",
-    intendedAccessAction:
-      action.type === "steal_agenda"
-        ? "steal"
-        : action.type === "trash_accessed_card"
-        ? "trash"
-        : action.type === "decline_trash"
-          ? "decline"
-          : "access_only",
+    targetType,
     trashCost,
     generalTrashCost: generalCreditCost,
     dedicatedTrashCredits,

@@ -67,16 +67,47 @@ describe("known remote access commitment", () => {
     );
   });
 
+  it("keeps insufficient credits distinct from reserve preservation", () => {
+    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 2 }), {
+      serverId: "remote_1",
+      definitionId: "onr_v1_326_holovid-campaign",
+      rootType: "asset",
+      trashCost: 4,
+      creditsAfterPath: 2,
+      visibleCard: visibleCard("holovid", {
+        definitionId: "onr_v1_326_holovid-campaign",
+        title: "Holovid Campaign",
+        type: "asset",
+        counters: { bit: 5 },
+      }),
+    });
+
+    expect(projection).toMatchObject({
+      payoff: "trash_unaffordable",
+      accessDecision: "defer_until_funded",
+      declineReason: "insufficient_credits",
+      technicallyAffordable: false,
+      commitment: {
+        knownAccessState: "known_no_current_payoff",
+        intendedAccessAction: "decline",
+        reason: "insufficient_credits",
+      },
+    });
+    expect(projection.commitment.evidence).toContain(
+      "known_remote_access_commitment_reason:insufficient_credits",
+    );
+  });
+
   it("keeps affordable non-pooled remote trash as a trash commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
       serverId: "remote_1",
-      definitionId: "onr_v1_322_euromarket-consortium",
+      definitionId: "neutral-known-asset",
       rootType: "asset",
       trashCost: 4,
       creditsAfterPath: 8,
-      visibleCard: visibleCard("euromarket", {
-        definitionId: "onr_v1_322_euromarket-consortium",
-        title: "Euromarket Consortium",
+      visibleCard: visibleCard("neutral-asset", {
+        definitionId: "neutral-known-asset",
+        title: "Neutral Asset",
         type: "asset",
       }),
     });
@@ -95,6 +126,42 @@ describe("known remote access commitment", () => {
       expect.arrayContaining([
         "known_remote_root_finite_pool_economy:false",
         "known_remote_root_trash_dedicated_credits:0",
+      ]),
+    );
+  });
+
+  it("uses supplied runner economy posture as access reserve basis", () => {
+    const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
+      serverId: "remote_1",
+      definitionId: "onr_v1_322_euromarket-consortium",
+      rootType: "asset",
+      trashCost: 4,
+      creditsAfterPath: 8,
+      economyPosture: {
+        desiredCreditReserve: 7,
+        creditReservePolicy: {
+          reserveDrivers: ["visible_remote_score_threat"],
+        },
+      },
+      visibleCard: visibleCard("euromarket", {
+        definitionId: "onr_v1_322_euromarket-consortium",
+        title: "Euromarket Consortium",
+        type: "asset",
+      }),
+    });
+
+    expect(projection).toMatchObject({
+      desiredCreditReserve: 7,
+      preservesReserve: false,
+      commitment: {
+        reason: "reserve_would_break",
+      },
+    });
+    expect(projection.evidence).toEqual(
+      expect.arrayContaining([
+        "access_reserve_source:runner_economy_posture",
+        "access_reserve_desired:7",
+        "access_reserve_driver:visible_remote_score_threat",
       ]),
     );
   });
