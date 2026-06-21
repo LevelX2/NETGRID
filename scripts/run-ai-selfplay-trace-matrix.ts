@@ -5,6 +5,8 @@ import {
   benchmarkDeckFromSnapshot,
   benchmarkDeckFromFrozenLocalSnapshot,
   runAiSelfplayTraceMining,
+  type PracticalMicroRuntimeMode,
+  type PracticalMicroRuntimeRuleId,
 } from "../packages/ai/src/index";
 import { progressAwareAlternativeSnapshot } from "../packages/ai/src/simulation/progress-aware-alternative-snapshot";
 
@@ -34,6 +36,12 @@ const DEFAULT_SEEDS = [
 ];
 
 const DEFAULT_PAIR_IDS: PairId[] = ["a", "b", "c", "d"];
+const DEFAULT_PRACTICAL_MICRO_RUNTIME_RULES: PracticalMicroRuntimeRuleId[] = [
+  "runner_visible_coverage_install",
+  "corp_stale_punish_deactivation",
+  "corp_safe_scoreline",
+  "runner_run_payoff_completion",
+];
 
 const repoRoot = findRepoRoot(process.cwd());
 const args = parseArgs(process.argv.slice(2));
@@ -45,6 +53,9 @@ const maxActions = args.maxActions ?? 160;
 const maxFindings = args.maxFindings ?? 50;
 const includeActionAlternatives = args.includeActionAlternatives ?? false;
 const maxAlternativesPerFinding = args.maxAlternativesPerFinding ?? 5;
+const practicalMicroRuntimeMode = args.practicalMicroRuntimeMode;
+const practicalMicroRuntimeRules =
+  args.practicalMicroRuntimeRules ?? DEFAULT_PRACTICAL_MICRO_RUNTIME_RULES;
 const opportunitySnapshotSource = args.opportunitySnapshotSource;
 const opportunitySnapshotRequestsByPair = opportunitySnapshotSource
   ? readOpportunitySnapshotRequests(opportunitySnapshotSource)
@@ -67,6 +78,16 @@ const matrix = pairs.map(({ pair }) => {
     maxFindings,
     includeActionAlternativesForFindings: includeActionAlternatives,
     maxAlternativesPerFinding,
+    ...(practicalMicroRuntimeMode
+      ? {
+          aiDecisionRuntimeOptions: {
+            practicalMicroRuntime: {
+              mode: practicalMicroRuntimeMode,
+              enabledRules: practicalMicroRuntimeRules,
+            },
+          },
+        }
+      : {}),
     opportunitySnapshotRequests:
       opportunitySnapshotRequestsByPair.get(pair.id.toUpperCase()) ?? [],
   });
@@ -142,6 +163,12 @@ const output = {
     maxFindings,
     includeActionAlternatives,
     maxAlternativesPerFinding,
+    ...(practicalMicroRuntimeMode
+      ? {
+          practicalMicroRuntimeMode,
+          practicalMicroRuntimeRules,
+        }
+      : {}),
     ...(opportunitySnapshotSource ? { opportunitySnapshotSource } : {}),
   },
   aggregate: combineAggregates(matrix.map((entry) => entry.aggregate)),
@@ -170,6 +197,8 @@ function parseArgs(argv: string[]): {
   maxFindings?: number;
   includeActionAlternatives?: boolean;
   maxAlternativesPerFinding?: number;
+  practicalMicroRuntimeMode?: PracticalMicroRuntimeMode;
+  practicalMicroRuntimeRules?: PracticalMicroRuntimeRuleId[];
   opportunitySnapshotSource?: string;
 } {
   let out: string | undefined;
@@ -181,6 +210,8 @@ function parseArgs(argv: string[]): {
   let maxFindingsArg: number | undefined;
   let includeActionAlternatives = false;
   let maxAlternativesPerFinding: number | undefined;
+  let practicalMicroRuntimeMode: PracticalMicroRuntimeMode | undefined;
+  let practicalMicroRuntimeRules: PracticalMicroRuntimeRuleId[] | undefined;
   let opportunitySnapshotSource: string | undefined;
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -236,6 +267,28 @@ function parseArgs(argv: string[]): {
       index += 1;
       continue;
     }
+    if (arg === "--practical-micro-runtime" && next) {
+      if (!["off", "compare", "apply"].includes(next)) {
+        throw new Error(
+          `Invalid --practical-micro-runtime ${next}; expected off, compare, or apply.`,
+        );
+      }
+      practicalMicroRuntimeMode = next as PracticalMicroRuntimeMode;
+      index += 1;
+      continue;
+    }
+    if (arg === "--practical-micro-rules" && next) {
+      practicalMicroRuntimeRules = next
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value): value is PracticalMicroRuntimeRuleId =>
+          DEFAULT_PRACTICAL_MICRO_RUNTIME_RULES.includes(
+            value as PracticalMicroRuntimeRuleId,
+          ),
+        );
+      index += 1;
+      continue;
+    }
     if (arg === "--opportunity-snapshot-source" && next) {
       opportunitySnapshotSource = next;
       index += 1;
@@ -256,6 +309,10 @@ function parseArgs(argv: string[]): {
     ...(includeActionAlternatives ? { includeActionAlternatives } : {}),
     ...(Number.isFinite(maxAlternativesPerFinding)
       ? { maxAlternativesPerFinding }
+      : {}),
+    ...(practicalMicroRuntimeMode ? { practicalMicroRuntimeMode } : {}),
+    ...(practicalMicroRuntimeRules && practicalMicroRuntimeRules.length > 0
+      ? { practicalMicroRuntimeRules }
       : {}),
     ...(opportunitySnapshotSource ? { opportunitySnapshotSource } : {}),
   };

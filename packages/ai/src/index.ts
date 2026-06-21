@@ -2614,6 +2614,7 @@ export type AiSimulationConfig = {
   beliefWorld?: SimulationWorld;
   includeActionAlternativesForFindings?: boolean;
   maxAlternativesPerFinding?: number;
+  aiDecisionRuntimeOptions?: AiDecisionRuntimeOptions;
   opportunitySnapshotRequests?: Array<{
     seed: string;
     actionIndices: number[];
@@ -14146,16 +14147,16 @@ function chooseDecisionForSimulation(
         : chooseRunnerBaselineAction(input);
     case "plan_corp_v1_4_0":
       return side === "corp"
-        ? chooseCorpAction(input)
+        ? chooseCorpAction(input, config.aiDecisionRuntimeOptions)
         : chooseRunnerBaselineAction(input);
     case "plan_runner_v1_4_1":
       return side === "runner"
-        ? chooseRunnerAction(input)
+        ? chooseRunnerAction(input, config.aiDecisionRuntimeOptions)
         : chooseCorpBaselineAction(input);
     case "belief_ai_v1_4_2":
-      return chooseAiAction(input);
+      return chooseAiAction(input, config.aiDecisionRuntimeOptions);
     case "current_candidate":
-      return chooseAiAction(input);
+      return chooseAiAction(input, config.aiDecisionRuntimeOptions);
   }
 }
 
