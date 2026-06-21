@@ -1,10 +1,10 @@
 import {
-  DEMO_CARDS_BY_ID,
   type AiDecisionInput,
   type VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
+import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -339,12 +339,15 @@ function knownRemoteTrashTargetProfile(
     (value): value is number => typeof value === "number",
   );
   const value = values.length > 0 ? Math.max(...values) : 0;
-  const corpValueRemaining = knownRemoteVisibleCorpValueRemaining(visibleCard);
-  const finitePoolEconomy = knownRemoteLooksLikeFinitePoolEconomy(
-    hint,
+  const valueProjection = projectRemoteRootValue({
+    definitionId,
     roles,
-    visibleCard,
-  );
+    ...(visibleCard ? { visibleCard } : {}),
+    ...(hint?.effects ? { effects: hint.effects } : {}),
+    ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
+  });
+  const corpValueRemaining = valueProjection.finitePoolValueRemaining;
+  const finitePoolEconomy = valueProjection.kind === "finite_economy_pool";
   const finitePoolDepleted = finitePoolEconomy && corpValueRemaining <= 0;
   const highRemainingFinitePool =
     finitePoolEconomy &&
@@ -381,43 +384,10 @@ function knownRemoteTrashTargetProfile(
       `known_remote_root_finite_pool_depleted:${finitePoolDepleted}`,
       `known_remote_root_corp_value_remaining:${corpValueRemaining}`,
       `known_remote_root_high_remaining_finite_pool:${highRemainingFinitePool}`,
+      ...valueProjection.evidence,
       ...roles.slice(0, 6).map((role) => `known_remote_root_role:${role}`),
     ],
   };
-}
-
-function knownRemoteVisibleCorpValueRemaining(
-  visibleCard: VisibleCard | undefined,
-): number {
-  if (!visibleCard) return 0;
-  return Math.max(
-    0,
-    visibleCard.counters?.bit ?? 0,
-    visibleCard.counters?.recurring_credit ?? 0,
-  );
-}
-
-function knownRemoteLooksLikeFinitePoolEconomy(
-  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
-  roles: readonly string[],
-  visibleCard: VisibleCard | undefined,
-): boolean {
-  const visiblePoolCounterKnown =
-    visibleCard?.counters?.bit !== undefined ||
-    visibleCard?.counters?.recurring_credit !== undefined;
-  if (!visiblePoolCounterKnown) return false;
-  return (
-    roles.some((role) => role.includes("campaign") || role.includes("economy")) ||
-    (hint?.effects ?? []).some(
-      (effect) =>
-        effect.kind === "economy" &&
-        effect.scope === "corp" &&
-        effect.finite === true,
-    ) ||
-    (visibleCard?.definitionId !== undefined &&
-      (DEMO_CARDS_BY_ID[visibleCard.definitionId]?.type === "asset" ||
-        visibleCard.type === "asset"))
-  );
 }
 
 function knownRemoteTrashCreditReserve(input: AiDecisionInput): number {
