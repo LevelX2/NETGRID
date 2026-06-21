@@ -15,10 +15,7 @@ import {
   projectKnownRemoteTrashCommitment,
 } from "./decision/known-remote-access-commitment";
 import { projectAccessDecision } from "./decision/access-decision-projection";
-import {
-  createRemoteAccessOutcomeMemoryEntry,
-  remoteAccessOutcomeEvidence,
-} from "./memory/remote-access-outcome";
+import { createProjectedAccessOutcome } from "./access/access-outcome-projection";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export type KnownRemoteAccessPayoffKind =
@@ -191,11 +188,11 @@ export function evaluateKnownRemoteAccessPayoff(
         ? { visibleCard: cheapestTrashRoot.visibleCard }
         : {}),
     });
-    const declinedTrashOutcome = trashProjection.knownNoCurrentPayoff
-      ? createRemoteAccessOutcomeMemoryEntry({
+    const projectedAccessOutcome = trashProjection.knownNoCurrentPayoff
+      ? createProjectedAccessOutcome({
           serverId,
           knownRootDefinitionId: cheapestTrashRoot.definitionId,
-          accessDecision: "declined_trash",
+          projectedIntent: "decline",
           reason: trashProjection.commitment.reason,
           stateVersion: input.playerView.stateVersion,
         })
@@ -253,9 +250,7 @@ export function evaluateKnownRemoteAccessPayoff(
           : []),
         ...trashProjection.commitment.evidence,
         ...accessProjection.evidence,
-        ...(declinedTrashOutcome
-          ? remoteAccessOutcomeEvidence(declinedTrashOutcome)
-          : []),
+        ...(projectedAccessOutcome ? projectedAccessOutcome.evidence : []),
         ...trashProjection.evidence,
         trashProjection.contestable
           ? "remote_trash_boosted_by_known_remote_trashable:true"
