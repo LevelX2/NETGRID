@@ -8514,6 +8514,12 @@ function semanticRuntimeRunTargetGuidanceValue(
       return -2100;
     case "find_breaker_first":
       return -2600;
+    case "remote_changed_reassess":
+      return -2400;
+    case "declined_trash_memory_active":
+      return -4200;
+    case "known_no_current_payoff":
+      return -4800;
     case "do_not_run_now":
       return -5000;
   }

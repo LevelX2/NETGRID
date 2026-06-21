@@ -2415,6 +2415,12 @@ function runnerRunTargetPriorityDelta(
       return -180;
     case "find_breaker_first":
       return -220;
+    case "remote_changed_reassess":
+      return -180;
+    case "declined_trash_memory_active":
+      return -520;
+    case "known_no_current_payoff":
+      return -620;
     case "do_not_run_now":
       return -720;
   }
