@@ -14028,7 +14028,7 @@
             "timing": "when_scored",
             "scope": "corp",
             "resource": "credits",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing.fail"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met.fail"
           },
           {
             "confidence": "high",
@@ -14037,19 +14037,19 @@
             "scope": "corp",
             "resource": "credits",
             "amount": 12,
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met"
           }
         ],
         "conditions": [
           {
             "confidence": "high",
             "kind": "requires_corp_credits_threshold",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met"
           },
           {
             "confidence": "high",
             "kind": "requires_score_window",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met"
           },
           {
             "confidence": "high",

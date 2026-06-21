@@ -3400,7 +3400,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/newsgroup_taunting_run_start_tax/.test(implementationText)) {
+  if (
+    /newsgroup_taunting_run_start_tax/.test(implementationText) ||
+    /kind:\s*"run_start_tax"/.test(implementationText)
+  ) {
     addEffect(facts, {
       kind: "remote_tax",
       timing: "during_run",
