@@ -27,6 +27,7 @@ export type AccessOutcomeMemoryInvalidationReason =
 export type AccessOutcomeMemoryStatus = {
   applies: boolean;
   invalidationReason?: AccessOutcomeMemoryInvalidationReason;
+  suppressesPlanBonus: boolean;
   evidence: string[];
 };
 
@@ -109,6 +110,7 @@ export function evaluateAccessOutcomeMemoryStatus(
     return {
       applies: false,
       invalidationReason: "remote_fingerprint_changed",
+      suppressesPlanBonus: false,
       evidence: [
         ...accessOutcomeMemoryEvidence(record),
         "access_outcome_memory_applies:false",
@@ -124,6 +126,7 @@ export function evaluateAccessOutcomeMemoryStatus(
     return {
       applies: false,
       invalidationReason: "credits_or_reserve_improved",
+      suppressesPlanBonus: false,
       evidence: [
         ...accessOutcomeMemoryEvidence(record),
         "access_outcome_memory_applies:false",
@@ -133,9 +136,11 @@ export function evaluateAccessOutcomeMemoryStatus(
   }
   return {
     applies: true,
+    suppressesPlanBonus: record.observedDecision === "decline",
     evidence: [
       ...accessOutcomeMemoryEvidence(record),
       "access_outcome_memory_applies:true",
+      `access_outcome_memory_suppresses_plan_bonus:${record.observedDecision === "decline"}`,
     ],
   };
 }

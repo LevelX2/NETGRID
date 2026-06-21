@@ -137,6 +137,7 @@ describe("access outcome memory", () => {
     ).toMatchObject({
       applies: false,
       invalidationReason: "remote_fingerprint_changed",
+      suppressesPlanBonus: false,
       evidence: expect.arrayContaining([
         "access_outcome_memory_invalidated:remote_fingerprint_changed",
       ]),
@@ -171,6 +172,7 @@ describe("access outcome memory", () => {
     ).toMatchObject({
       applies: false,
       invalidationReason: "credits_or_reserve_improved",
+      suppressesPlanBonus: false,
       evidence: expect.arrayContaining([
         "access_outcome_memory_invalidated:credits_or_reserve_improved",
       ]),
@@ -204,7 +206,11 @@ describe("access outcome memory", () => {
       }),
     ).toMatchObject({
       applies: true,
-      evidence: expect.arrayContaining(["access_outcome_memory_applies:true"]),
+      suppressesPlanBonus: true,
+      evidence: expect.arrayContaining([
+        "access_outcome_memory_applies:true",
+        "access_outcome_memory_suppresses_plan_bonus:true",
+      ]),
     });
   });
 });

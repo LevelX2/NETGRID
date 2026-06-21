@@ -7,6 +7,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
 import type {
   BreakerCoverageKind,
   DeckCapabilityProfile,
@@ -14,6 +15,7 @@ import type {
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
+import type { KnownRemoteAccessCommitment } from "./decision/known-remote-access-commitment";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -29,7 +31,6 @@ import {
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
-import { declinedTrashOutcomePlanEvidence } from "./memory/remote-access-outcome";
 import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import type {
@@ -123,6 +124,12 @@ export function evaluateTacticalPlans(
   const runnerTacticalGoalsUsed = context.runnerTacticalGoals
     ? redactedRunnerTacticalGoalFacts(context.runnerTacticalGoals)
     : [];
+  const accessCommitmentUsed = context.accessCommitment
+    ? redactedAccessCommitmentFacts(context.accessCommitment)
+    : [];
+  const accessOutcomeMemoryUsed = context.accessOutcomeMemory
+    ? redactedAccessOutcomeMemoryFacts(context.accessOutcomeMemory)
+    : [];
   const rawPlans = buildTacticalPlans({
     ...context,
     ...(previousPlan ? { previousPlan } : {}),
@@ -150,6 +157,8 @@ export function evaluateTacticalPlans(
           ? { runnerHandDevelopmentEvaluationsUsed }
           : {}),
         ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
+        ...(accessCommitmentUsed.length > 0 ? { accessCommitmentUsed } : {}),
+        ...(accessOutcomeMemoryUsed.length > 0 ? { accessOutcomeMemoryUsed } : {}),
         planAlternatives,
         blockedPlans,
         selectedPlan: plan,
@@ -174,6 +183,8 @@ export function evaluateTacticalPlans(
       ? { runnerHandDevelopmentEvaluationsUsed }
       : {}),
     ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
+    ...(accessCommitmentUsed.length > 0 ? { accessCommitmentUsed } : {}),
+    ...(accessOutcomeMemoryUsed.length > 0 ? { accessOutcomeMemoryUsed } : {}),
     planAlternatives,
     blockedPlans,
     ...(progression.planProgressionReason
@@ -198,6 +209,29 @@ function redactedRunnerStrategicIntentFacts(
     `runner_risk_profile:${intent.riskProfile.join("|") || "none"}`,
     `runner_rejected_intents:${intent.rejectedIntents.join("|") || "none"}`,
     `runner_intent_confidence:${intent.confidence}`,
+  ];
+}
+
+function redactedAccessCommitmentFacts(
+  commitment: KnownRemoteAccessCommitment,
+): string[] {
+  return [
+    `access_commitment_server:${commitment.serverId}`,
+    `access_commitment_state:${commitment.knownAccessState}`,
+    `access_commitment_intended_action:${commitment.intendedAccessAction}`,
+    `access_commitment_reason:${commitment.reason}`,
+  ];
+}
+
+function redactedAccessOutcomeMemoryFacts(
+  status: AccessOutcomeMemoryStatus,
+): string[] {
+  return [
+    `access_outcome_memory_applies:${status.applies}`,
+    `access_outcome_memory_suppresses_plan_bonus:${status.suppressesPlanBonus}`,
+    ...(status.invalidationReason
+      ? [`access_outcome_memory_invalidation:${status.invalidationReason}`]
+      : []),
   ];
 }
 
@@ -1380,6 +1414,29 @@ function bankStepMatchesCandidate(
   );
 }
 
+function accessCommitmentPlanEvidence(
+  commitment: KnownRemoteAccessCommitment | undefined,
+  serverId: string,
+): string[] {
+  if (!commitment || commitment.serverId !== serverId) return [];
+  return [
+    `structured_access_commitment_server:${commitment.serverId}`,
+    `structured_access_commitment_state:${commitment.knownAccessState}`,
+    `structured_access_commitment_intended_action:${commitment.intendedAccessAction}`,
+    `structured_access_commitment_reason:${commitment.reason}`,
+  ];
+}
+
+function accessOutcomeNoPlanBonusEvidence(
+  status: AccessOutcomeMemoryStatus | undefined,
+): string[] {
+  if (!status?.applies || !status.suppressesPlanBonus) return [];
+  return [
+    "access_outcome_memory_no_plan_bonus:true",
+    "access_outcome_memory_applied:declined_access",
+  ];
+}
+
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
   const input = context.input;
   const previousPlan = context.previousPlan;
@@ -1533,8 +1590,12 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     const serverId = actionServerId(action);
     if (!serverId) continue;
     const payoff = noPayoffByActionId.get(action.actionId);
-    const noPlanBonusEvidence = declinedTrashOutcomePlanEvidence(
-      payoff?.evidence ?? [],
+    const accessCommitmentEvidence = accessCommitmentPlanEvidence(
+      context.accessCommitment,
+      serverId,
+    );
+    const noPlanBonusEvidence = accessOutcomeNoPlanBonusEvidence(
+      context.accessOutcomeMemory,
     );
     plans.push(
       createTacticalPlan({
@@ -1559,6 +1620,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
               : {}),
             evidence: [
               "known remote root has no current access payoff",
+              ...accessCommitmentEvidence,
               ...noPlanBonusEvidence,
               ...(payoff?.evidence ?? []),
             ],
@@ -1574,6 +1636,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         }),
         evidence: [
           `known_no_payoff_remote_run_action:${action.actionId}`,
+          ...accessCommitmentEvidence,
           ...(payoff?.reasons ?? []),
           ...noPlanBonusEvidence,
           ...(payoff?.evidence ?? []),

@@ -1,6 +1,8 @@
 import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type { AccessOutcomeMemoryStatus } from "../access/access-outcome-memory";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
+import type { KnownRemoteAccessCommitment } from "../decision/known-remote-access-commitment";
 import type { RunnerEconomyPosture, RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
@@ -217,6 +219,8 @@ export type TacticalPlanBuildContext = {
   runnerEconomyPosture?: RunnerEconomyPosture;
   runnerHandDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
   runnerTacticalGoals?: readonly RunnerTacticalGoal[];
+  accessCommitment?: KnownRemoteAccessCommitment;
+  accessOutcomeMemory?: AccessOutcomeMemoryStatus;
 };
 
 export type PlanProgressionStatus =
@@ -262,6 +266,8 @@ export type TacticalPlanRuntimeResult = {
   runnerEconomyPostureUsed?: string[];
   runnerHandDevelopmentEvaluationsUsed?: string[];
   runnerTacticalGoalsUsed?: string[];
+  accessCommitmentUsed?: string[];
+  accessOutcomeMemoryUsed?: string[];
   planAlternatives: TacticalPlan[];
   blockedPlans: TacticalPlan[];
   selectedPlan?: TacticalPlan;
