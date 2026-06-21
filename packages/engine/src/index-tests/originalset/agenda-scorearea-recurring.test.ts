@@ -3403,8 +3403,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       });
       if (definitionId === "onr_v1_214_project-babylon") {
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          projectBabylonOveradvance: 4,
-          projectBabylonBonusAgendaPoints: 2,
+          overadvanceBonusAgendaPointOveradvance: 4,
+          overadvanceBonusAgendaPoints: 2,
         });
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(

@@ -750,7 +750,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     addCounterToAllInstalledRunnerIcebreakers,
     addCurrentRunAccessCount,
     addHackerTrackerTraceCounters,
-    addVirusCounterWithDisinfectantPrevention,
+    addVirusCounterWithCounterPrevention,
     addVisibleCardCounter,
     advanceableInstalledCardTargets,
     advancementDistributionOptions,
@@ -927,7 +927,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     movableAdvancementSourceIds,
     moveAdvancementOptions,
     mustInstallInsideSubsidiaryDataFort,
-    newsgroupTauntingRunStartTax,
+    runStartTaxForCorpRootAssets,
     normalizeSubtypeLabel,
     openPostMeatDamageReactionWindow,
     openRunnerCostPenaltySupportWindow,
@@ -951,7 +951,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     powerGridOverloadTrashCountFromPayload,
     poxCountersForServer,
     poxInstallTax,
-    preventOneVirusCounterWithDisinfectant,
+    preventOneVirusCounterWithCounterPrevention,
     printedCostCardImplementationMakeRunEffect,
     privateLookCardIds,
     publicIcePositionLabelForCard,
@@ -2132,7 +2132,7 @@ function startCorpTurn(
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn =
+  ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
     clearAbilityUsageSourceIds();
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
@@ -2200,7 +2200,7 @@ function startRunnerTurn(
   flags.delayedEndTurnEffects = [];
   flags.corpRezzedIceThisTurn = 0;
   delete flags.lastRezzedBlackIceThisTurn;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn =
+  ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
     clearAbilityUsageSourceIds();
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);

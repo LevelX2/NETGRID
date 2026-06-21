@@ -3411,7 +3411,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(disinfectant.eventLog.at(-1)?.publicPayload).toMatchObject({
       amounts: {
         virusCounterAvoided: 1,
-        disinfectantCreditsPaid: 1,
+        counterPreventionCreditsPaid: 1,
       },
     });
   });

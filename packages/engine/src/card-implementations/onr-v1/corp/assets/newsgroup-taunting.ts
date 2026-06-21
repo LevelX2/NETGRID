@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const newsgroupTauntingImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_332_newsgroup-taunting",
   corpUtility: {
-    kind: "newsgroup_taunting_run_start_tax",
+    kind: "run_start_tax",
     amount: 1,
     visibility: "public",
   },

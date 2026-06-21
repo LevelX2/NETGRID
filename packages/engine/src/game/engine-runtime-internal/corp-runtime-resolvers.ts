@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -742,7 +742,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     addCurrentRunAccessCount,
     addHackerTrackerTraceCounters,
     addRunnerFutureActionDebt,
-    addVirusCounterWithDisinfectantPrevention,
+    addVirusCounterWithCounterPrevention,
     addVisibleCardCounter,
     affordableRezzedInstalledIceIdsForRunner,
     agendaPoints,
@@ -922,7 +922,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     microtechBackupDriveIds,
     microtechTrodeSetBreakAdditionalCost,
     mustInstallInsideSubsidiaryDataFort,
-    newsgroupTauntingRunStartTax,
+    runStartTaxForCorpRootAssets,
     normalizeSubtypeLabel,
     openPostMeatDamageReactionWindow,
     openRunnerCostPenaltySupportWindow,
@@ -941,7 +941,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     postMeatDamageHiddenResourceCandidates,
     poxCountersForServer,
     poxInstallTax,
-    preventOneVirusCounterWithDisinfectant,
+    preventOneVirusCounterWithCounterPrevention,
     printedCostCardImplementationMakeRunEffect,
     privateLookCardIds,
     processDiscardStep,

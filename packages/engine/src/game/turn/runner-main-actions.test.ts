@@ -245,7 +245,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
         amount: 0,
         sourceDefinitionIds: [],
       }),
-      newsgroupTauntingRunStartTax: () => ({
+      runStartTaxForCorpRootAssets: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),

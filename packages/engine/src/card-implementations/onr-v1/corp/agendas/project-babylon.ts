@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const projectBabylonImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_214_project-babylon",
   scoredAgenda: {
-    kind: "project_babylon_bonus_points",
+    kind: "overadvance_bonus_agenda_points",
     perExcessAdvancementCounters: 2,
     visibility: "public",
   },

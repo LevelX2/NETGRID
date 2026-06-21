@@ -105,13 +105,13 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "disinfectant_avoid_virus_counter";
+      kind: "counter_prevention_replacement";
       cost: { kind: "credit"; amount: 1 };
       limit: "once_per_turn_per_source";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "newsgroup_taunting_run_start_tax";
+      kind: "run_start_tax";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -806,7 +806,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "corporate_war_credit_swing";
+      kind: "score_credit_swing_if_corp_credit_threshold_met";
       threshold: number;
       gainAmount: number;
       visibility: Extract<EventVisibilityClass, "public">;
@@ -828,7 +828,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "project_babylon_bonus_points";
+      kind: "overadvance_bonus_agenda_points";
       perExcessAdvancementCounters: number;
       visibility: Extract<EventVisibilityClass, "public">;
     }

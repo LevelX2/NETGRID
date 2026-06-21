@@ -560,7 +560,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(
       cardImplementationForDefinitionId("onr_v1_319_disinfectant-inc")
         ?.corpUtility,
-    ).toMatchObject({ kind: "disinfectant_avoid_virus_counter" });
+    ).toMatchObject({ kind: "counter_prevention_replacement" });
     expect(
       cardImplementationForDefinitionId("onr_v1_330_krumz")?.corpUtility,
     ).toMatchObject({

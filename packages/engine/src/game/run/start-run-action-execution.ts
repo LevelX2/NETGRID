@@ -111,6 +111,7 @@ export function executeStartRunAction(
       ? { activeSequence: pendingSequence }
       : undefined;
   host.run.startRun(serverId, legalAction, startRunOptions);
+  host.payment.payRunStartTaxCredits(legalAction);
   if (legalAction.payload?.runOnlyAction === true && host.state.run) {
     if (!runOnlyActionSourceCardId)
       throw new Error("Diese Run-Aktion benoetigt eine installierte Quelle.");
@@ -128,7 +129,6 @@ export function executeStartRunAction(
       runActionSpendingCapActive: true,
     };
   }
-  host.payment.payRunStartTaxCredits(legalAction);
 }
 
 function nextMultiServerSuccessSequence(

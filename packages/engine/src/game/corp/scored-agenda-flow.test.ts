@@ -268,7 +268,7 @@ describe("scored agenda flow", () => {
       effectiveDifficulty: 3,
       implementations: {
         project_babylon: {
-          kind: "project_babylon_bonus_points",
+          kind: "overadvance_bonus_agenda_points",
           perExcessAdvancementCounters: 2,
           visibility: "public",
         },
@@ -278,8 +278,8 @@ describe("scored agenda flow", () => {
     scoreAgenda(host, "babylon" as CardInstanceId);
 
     expect(legalAction.payload).toMatchObject({
-      projectBabylonOveradvance: 4,
-      projectBabylonBonusAgendaPoints: 2,
+      overadvanceBonusAgendaPointOveradvance: 4,
+      overadvanceBonusAgendaPoints: 2,
     });
   });
 

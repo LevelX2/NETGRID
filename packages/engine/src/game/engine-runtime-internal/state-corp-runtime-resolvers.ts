@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -750,7 +750,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     addCurrentRunAccessCount,
     addHackerTrackerTraceCounters,
     addRunnerFutureActionDebt,
-    addVirusCounterWithDisinfectantPrevention,
+    addVirusCounterWithCounterPrevention,
     addVisibleCardCounter,
     advanceableInstalledCardTargets,
     advancementDistributionOptions,
@@ -943,7 +943,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     movableAdvancementSourceIds,
     moveAdvancementOptions,
     mustInstallInsideSubsidiaryDataFort,
-    newsgroupTauntingRunStartTax,
+    runStartTaxForCorpRootAssets,
     normalizeSubtypeLabel,
     openPostMeatDamageReactionWindow,
     openRunnerCostPenaltySupportWindow,
@@ -967,7 +967,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     powerGridOverloadTrashCountFromPayload,
     poxCountersForServer,
     poxInstallTax,
-    preventOneVirusCounterWithDisinfectant,
+    preventOneVirusCounterWithCounterPrevention,
     printedCostCardImplementationMakeRunEffect,
     privateLookCardIds,
     processDiscardStep,

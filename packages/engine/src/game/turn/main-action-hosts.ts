@@ -249,7 +249,7 @@ export function createMainActionHostComposition(
         isActivityGatedFortRunBlocked: run.isActivityGatedFortRunBlocked,
         fortRunSideFamiliesHostForState: run.fortRunSideFamiliesHostForState,
         runStartTaxForServerUpgrades: run.runStartTaxForServerUpgrades,
-        newsgroupTauntingRunStartTax: run.newsgroupTauntingRunStartTax,
+        runStartTaxForCorpRootAssets: run.runStartTaxForCorpRootAssets,
       },
       install: {
         shouldOfferRunnerProgramTrashBeforeInstall:

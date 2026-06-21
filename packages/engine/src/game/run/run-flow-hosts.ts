@@ -296,13 +296,13 @@ export type RunFlowHost = {
       counterType: CounterType,
       amount: number,
     ) => void;
-    addVirusCounterWithDisinfectantPrevention: (
+    addVirusCounterWithCounterPrevention: (
       state: GameState,
       cardId: CardInstanceId,
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithDisinfectant: (state: GameState) => {
+    preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
       prevented: boolean;
       creditsPaid: number;
     };
@@ -1156,15 +1156,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.counters.setCardCounter(state, cardId, counterType, amount),
         addCardCounter: (cardId, counterType, amount) =>
           host.counters.addCardCounter(state, cardId, counterType, amount),
-        addVirusCounterWithDisinfectantPrevention: (cardId, amount, legalAction) =>
-          host.counters.addVirusCounterWithDisinfectantPrevention(
+        addVirusCounterWithCounterPrevention: (cardId, amount, legalAction) =>
+          host.counters.addVirusCounterWithCounterPrevention(
             state,
             cardId,
             amount,
             legalAction,
           ),
-        preventOneVirusCounterWithDisinfectant: () =>
-          host.counters.preventOneVirusCounterWithDisinfectant(state),
+        preventOneVirusCounterWithCounterPrevention: () =>
+          host.counters.preventOneVirusCounterWithCounterPrevention(state),
         poxCountersForServer: (serverId) =>
           host.counters.poxCountersForServer(state, serverId),
       },
