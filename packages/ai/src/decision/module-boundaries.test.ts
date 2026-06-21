@@ -261,6 +261,43 @@ describe("AI module boundaries", () => {
       .toEqual([]);
   });
 
+  it("keeps access intelligence modules below runtime, evaluation and public index", () => {
+    const violations = productionFiles("access").flatMap((file) =>
+      importsFrom(file).flatMap((reference) => {
+        if (resolvesToSrcArea(file, reference.importSource, "runtime")) {
+          return [
+            violation(
+              file,
+              reference,
+              "access modules must not import runtime implementation",
+            ),
+          ];
+        }
+        if (resolvesToSrcArea(file, reference.importSource, "evaluation")) {
+          return [
+            violation(
+              file,
+              reference,
+              "access modules must not import evaluation modules",
+            ),
+          ];
+        }
+        if (resolvesToSrcEntry(file, reference.importSource, "index")) {
+          return [
+            violation(
+              file,
+              reference,
+              "access modules must not import public index.ts",
+            ),
+          ];
+        }
+        return [];
+      }),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps diagnostics modules from mutating selected choice payloads", () => {
     const violations = productionFiles("diagnostics").flatMap((file) => {
       const content = readFileSync(file, "utf8");
@@ -298,6 +335,7 @@ describe("AI module boundaries", () => {
 
 function productionFiles(
   area:
+    | "access"
     | "actions"
     | "decision"
     | "diagnostics"
