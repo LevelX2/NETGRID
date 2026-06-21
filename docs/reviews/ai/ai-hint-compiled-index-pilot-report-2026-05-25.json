@@ -16178,7 +16178,7 @@
             "kind": "economy",
             "resource": "credits",
             "scope": "corp",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing",
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met",
             "timing": "when_scored"
           },
           {
@@ -16186,7 +16186,7 @@
             "kind": "counter_economy",
             "resource": "credits",
             "scope": "corp",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing.fail",
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met.fail",
             "timing": "when_scored"
           }
         ],
@@ -16194,12 +16194,12 @@
           {
             "confidence": "high",
             "kind": "requires_corp_credits_threshold",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met"
           },
           {
             "confidence": "high",
             "kind": "requires_score_window",
-            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+            "source": "implementation.scoredAgenda.score_credit_swing_if_corp_credit_threshold_met"
           },
           {
             "confidence": "high",
