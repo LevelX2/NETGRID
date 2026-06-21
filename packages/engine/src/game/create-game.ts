@@ -210,7 +210,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     corpTurnFlags: {
       scoredBlackOpsAgendaThisTurn: false,
       scoredBlackOpsAgendaLastTurn: false,
-      disinfectantUsedSourceIdsThisTurn: [],
+      counterPreventionUsedSourceIdsThisTurn: [],
     },
   };
 

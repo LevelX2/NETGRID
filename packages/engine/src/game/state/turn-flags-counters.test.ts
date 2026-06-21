@@ -85,6 +85,6 @@ describe("turn-flags-counters", () => {
 
     const corpFlags = ensureCorpTurnFlags(current);
     expect(corpFlags.scoredBlackOpsAgendaThisTurn).toBe(false);
-    expect(corpFlags.disinfectantUsedSourceIdsThisTurn).toEqual([]);
+    expect(corpFlags.counterPreventionUsedSourceIdsThisTurn).toEqual([]);
   });
 });

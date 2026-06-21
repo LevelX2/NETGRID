@@ -244,11 +244,11 @@ function makeHost(options: {
         };
         state.cardInstances[cardId] = instances[cardId]!;
       },
-      addVirusCounterWithDisinfectantPrevention: (cardId, amount) => {
+      addVirusCounterWithCounterPrevention: (cardId, amount) => {
         host.counters.addCardCounter(cardId, "virus" as CounterType, amount);
         return amount;
       },
-      preventOneVirusCounterWithDisinfectant: () => ({
+      preventOneVirusCounterWithCounterPrevention: () => ({
         prevented: false,
         creditsPaid: 0,
       }),

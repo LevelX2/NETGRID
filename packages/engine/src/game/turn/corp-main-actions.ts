@@ -728,7 +728,7 @@ export function buildCorpMainActions(
     }
     if (
       definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID &&
-      !hasCorpUtilityKind(state, assetId, "disinfectant_avoid_virus_counter")
+      !hasCorpUtilityKind(state, assetId, "counter_prevention_replacement")
     ) {
       for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);

@@ -1482,7 +1482,7 @@ export type GameState = {
     scoredBlackOpsAgendaLastTurn: boolean;
     restrictedActionGrants?: RestrictedActionGrantBucket;
     edgerunnerTempsInstallActionsRemaining?: number;
-    disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
+    counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
     employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
   };

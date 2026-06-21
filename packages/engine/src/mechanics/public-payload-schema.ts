@@ -114,7 +114,7 @@ const AMOUNT_KEYS = [
   "targetIceIndex",
   "newApproachIceIndex",
   "virusCounterAvoided",
-  "disinfectantCreditsPaid",
+  "counterPreventionCreditsPaid",
   "stolenAgendaAdvancementCountersLastTurn",
 ] as const;
 

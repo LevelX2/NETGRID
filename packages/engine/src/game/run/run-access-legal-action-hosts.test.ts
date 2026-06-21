@@ -239,8 +239,8 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         addCardCounter: () => undefined,
         setCardCounter: () => undefined,
         spendCardCounter: () => undefined,
-        addVirusCounterWithDisinfectantPrevention: () => 0,
-        preventOneVirusCounterWithDisinfectant: () => ({
+        addVirusCounterWithCounterPrevention: () => 0,
+        preventOneVirusCounterWithCounterPrevention: () => ({
           prevented: false,
           creditsPaid: 0,
         }),

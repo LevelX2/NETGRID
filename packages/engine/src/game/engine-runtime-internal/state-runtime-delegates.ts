@@ -638,17 +638,17 @@ export function agendaPoints(...args: any[]): any {
   return (runtimeDelegates.stateRuntimeResolvers.agendaPoints as any)(...args);
 }
 
-export function addVirusCounterWithDisinfectantPrevention(...args: any[]): any {
+export function addVirusCounterWithCounterPrevention(...args: any[]): any {
   return (
     runtimeDelegates.stateRuntimeResolvers
-      .addVirusCounterWithDisinfectantPrevention as any
+      .addVirusCounterWithCounterPrevention as any
   )(...args);
 }
 
-export function preventOneVirusCounterWithDisinfectant(...args: any[]): any {
+export function preventOneVirusCounterWithCounterPrevention(...args: any[]): any {
   return (
     runtimeDelegates.stateRuntimeResolvers
-      .preventOneVirusCounterWithDisinfectant as any
+      .preventOneVirusCounterWithCounterPrevention as any
   )(...args);
 }
 

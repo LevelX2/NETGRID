@@ -105,7 +105,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "disinfectant_avoid_virus_counter";
+      kind: "counter_prevention_replacement";
       cost: { kind: "credit"; amount: 1 };
       limit: "once_per_turn_per_source";
       visibility: Extract<EventVisibilityClass, "public">;

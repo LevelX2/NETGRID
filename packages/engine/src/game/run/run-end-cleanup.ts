@@ -124,12 +124,12 @@ export type RunEndCleanupHost = {
       counterType: CounterType,
       amount: number,
     ) => void;
-    addVirusCounterWithDisinfectantPrevention: (
+    addVirusCounterWithCounterPrevention: (
       targetCardId: CardInstanceId,
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithDisinfectant: () => {
+    preventOneVirusCounterWithCounterPrevention: () => {
       prevented: boolean;
       creditsPaid: number;
     };
@@ -677,7 +677,7 @@ export function resolvePattelsVirusCounterChoice(
     1,
     Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
   );
-  const added = host.counters.addVirusCounterWithDisinfectantPrevention(
+  const added = host.counters.addVirusCounterWithCounterPrevention(
     targetIceId,
     amount,
     legalAction,
@@ -872,7 +872,7 @@ function applyV181SuccessfulRunCounterTriggers(
     );
     if (targetIceIds.length === 1) {
       const targetIceId = targetIceIds[0]!;
-      const added = host.counters.addVirusCounterWithDisinfectantPrevention(
+      const added = host.counters.addVirusCounterWithCounterPrevention(
         targetIceId,
         pattelSources.length,
         legalAction,
@@ -1017,7 +1017,7 @@ function applyV181SuccessfulRunCounterTriggers(
       continue;
     }
     if (trigger.target === "source") {
-      const added = host.counters.addVirusCounterWithDisinfectantPrevention(
+      const added = host.counters.addVirusCounterWithCounterPrevention(
         cardId,
         trigger.amount,
         legalAction,
@@ -1050,7 +1050,7 @@ function applyV181SuccessfulRunCounterTriggers(
     const serverId = run.attackedServerId;
     if (implementation.counterKind === "pox") {
       const current = host.counters.poxCountersForServer(serverId);
-      const added = host.counters.preventOneVirusCounterWithDisinfectant().prevented
+      const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
         ? 0
         : trigger.amount;
       host.state.poxCountersByServer = {
@@ -1077,7 +1077,7 @@ function applyV181SuccessfulRunCounterTriggers(
         0,
         Math.floor(host.state.faitAccompliCountersByServer?.[serverId] ?? 0),
       );
-      const added = host.counters.preventOneVirusCounterWithDisinfectant().prevented
+      const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
         ? 0
         : trigger.amount;
       host.state.faitAccompliCountersByServer = {

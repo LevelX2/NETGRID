@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const disinfectantIncImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_319_disinfectant-inc",
   corpUtility: {
-    kind: "disinfectant_avoid_virus_counter",
+    kind: "counter_prevention_replacement",
     cost: { kind: "credit", amount: 1 },
     limit: "once_per_turn_per_source",
     visibility: "public",

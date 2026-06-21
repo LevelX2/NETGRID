@@ -14,10 +14,10 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 16 |
-| test_only_card_name | 54 |
+| functional_kind_uses_card_name | 14 |
+| test_only_card_name | 52 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 49 |
+| runtime_state_field_uses_card_name | 37 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 | false_positive | 22 |
 
@@ -25,12 +25,10 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:81` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:104` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:108` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:204` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:208` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:212` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:216` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:8` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts:8` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts:8` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts:8` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
@@ -39,7 +37,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/create-game.ts:213` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:661` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts:934` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -71,19 +68,12 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/scored-economy-runtime-hosts.ts:621` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-corp-runtime-resolvers.ts:648` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts:662` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1439` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1452` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1457` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1464` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts:1465` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:944` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:649` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1178` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1184` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1188` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2135` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:2203` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:360` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:368` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
@@ -110,13 +100,9 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:553` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:757` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:759` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/state/turn-flags-counters.ts:186` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/turn/corp-main-actions.ts:731` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:7` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
-- runtime_state_field_uses_card_name: `packages/engine/src/mechanics/public-payload-schema.ts:117` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- runtime_state_field_uses_card_name: `packages/shared/src/index.ts:1485` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1532` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3708` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 

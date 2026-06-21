@@ -1411,7 +1411,7 @@ function agendaPoints(state: GameState, side: Side): number {
     : scoredPoints;
 }
 
-function addVirusCounterWithDisinfectantPrevention(
+function addVirusCounterWithCounterPrevention(
   state: GameState,
   targetCardId: CardInstanceId,
   amount: number,
@@ -1423,7 +1423,7 @@ function addVirusCounterWithDisinfectantPrevention(
   let prevented = 0;
   let creditsPaid = 0;
   for (let index = 0; index < amount; index += 1) {
-    const prevention = preventOneVirusCounterWithDisinfectant(state);
+    const prevention = preventOneVirusCounterWithCounterPrevention(state);
     if (prevention.prevented) {
       prevented += 1;
       creditsPaid += prevention.creditsPaid;
@@ -1436,33 +1436,33 @@ function addVirusCounterWithDisinfectantPrevention(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       virusCounterAvoided: prevented,
-      disinfectantCreditsPaid: creditsPaid,
+      counterPreventionCreditsPaid: creditsPaid,
       corpCreditsAfter: state.corp.credits,
     };
   }
   return added;
 }
 
-function preventOneVirusCounterWithDisinfectant(
+function preventOneVirusCounterWithCounterPrevention(
   state: GameState,
 ): { prevented: boolean; creditsPaid: number } {
   const flags = ensureCorpTurnFlags(state);
   const sourceId = rezzedCorpRootCardIds(state)
     .filter((cardId: CardInstanceId) =>
-      hasCorpUtilityKind(state, cardId, "disinfectant_avoid_virus_counter"),
+      hasCorpUtilityKind(state, cardId, "counter_prevention_replacement"),
     )
     .filter(
       (cardId: CardInstanceId) =>
         !abilityUsageSourceUsed(
-          flags.disinfectantUsedSourceIdsThisTurn,
+          flags.counterPreventionUsedSourceIdsThisTurn,
           cardId,
         ),
     )
     .sort()[0];
   if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
   state.corp.credits -= 1;
-  flags.disinfectantUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
-    flags.disinfectantUsedSourceIdsThisTurn,
+  flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+    flags.counterPreventionUsedSourceIdsThisTurn,
     sourceId,
   );
   return { prevented: true, creditsPaid: 1 };
@@ -2057,8 +2057,8 @@ function refreshRecurringCredits(
     creditCostForAction,
     runnerActionsPerTurn,
     agendaPoints,
-    addVirusCounterWithDisinfectantPrevention,
-    preventOneVirusCounterWithDisinfectant,
+    addVirusCounterWithCounterPrevention,
+    preventOneVirusCounterWithCounterPrevention,
     addVisibleCardCounter,
     spendVisibleCardCounter,
     totalCounters,
