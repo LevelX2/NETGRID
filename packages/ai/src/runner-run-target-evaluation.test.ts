@@ -1299,6 +1299,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       accessPayoff: "trash_affordable",
       recommendation: "declined_trash_memory_active",
     });
+    expect(remoteEvaluation?.score).toBeLessThan(evaluations[0]?.score ?? -Infinity);
     expect(evaluations[0]?.targetServerId).toBe("rd");
   });
 

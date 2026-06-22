@@ -427,6 +427,7 @@ function evaluateRunnerRunTarget(
     multiaccessAvailable,
     installedRunPayoffScore: combinedRunPayoff.scoreBonus,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
+    ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
   const publicProjection = publicRunActionProjection(projection);
@@ -961,6 +962,7 @@ function scoreRunTargetEvaluation(params: {
   multiaccessAvailable: boolean;
   installedRunPayoffScore: number;
   accessPayoffScoreAdjustment: number;
+  accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   blinkRiskAssessment?: BlinkRiskAssessment;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
@@ -977,6 +979,12 @@ function scoreRunTargetEvaluation(params: {
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
   const blinkRiskPenalty = blinkRiskScorePenalty(params.blinkRiskAssessment);
+  const accessOutcomeMemoryPenalty =
+    params.targetKind === "remote" &&
+    params.accessOutcomeMemory?.applies === true &&
+    params.accessOutcomeMemory.suppressesPlanBonus
+      ? -360
+      : 0;
   return (
     payoffScore +
     pathPenalty +
@@ -986,6 +994,7 @@ function scoreRunTargetEvaluation(params: {
     scoreThreatBonus +
     params.accessPayoffScoreAdjustment +
     blinkRiskPenalty +
+    accessOutcomeMemoryPenalty +
     recommendationScore
   );
 }
