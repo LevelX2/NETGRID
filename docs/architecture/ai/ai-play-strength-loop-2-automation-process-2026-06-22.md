@@ -1,6 +1,6 @@
 # AI Play Strength Loop 2
 
-Status: package_done:AI-PS2-1
+Status: package_done:AI-PS2-2
 
 Datum: 2026-06-22
 
@@ -171,6 +171,20 @@ safety-grün und zeigt weiter die Runner-Asymmetrie:
 - Candidate-Corp: in diesem kleinen Lauf weiter nicht verbessert
 - IllegalActions: 0
 - ReplayFailures: 0
+
+## AI-PS2-2 Messbefund
+
+Corp-Practical-Tactic wurde stabilisiert, nicht aggressiver gemacht:
+
+- `corp_safe_score` greift nur noch, wenn die aktuelle `score_agenda`-Action
+  side-safe als `safeScoreWindow` oder `protectedRemoteReady` markiert ist oder
+  das Label explizit ein sicheres/protected Score-Fenster benennt.
+- Unmarkierte Score-Fenster werden nicht mehr durch das Overlay erzwungen.
+- Die Benchmark-Fixtures markieren sichere Score-Fenster explizit.
+
+Der kleine Gate-Lauf nach AI-PS2-2 bleibt safety-grün, zeigt aber noch keine
+Corp-Metrikverbesserung. Das Paket ist deshalb eine Stabilisierung des
+opt-in-Candidate-Verhaltens, keine Default- oder Stärke-Promotion.
 
 ## Paketdetails
 

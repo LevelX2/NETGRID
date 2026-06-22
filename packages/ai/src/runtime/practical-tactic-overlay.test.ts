@@ -86,6 +86,30 @@ describe("PracticalTacticOverlay", () => {
       ]),
     );
   });
+
+  it("does not force unmarked corp score windows through the overlay", () => {
+    const benchmarkCase = PRACTICAL_TACTIC_BENCHMARK_CASES.find(
+      (candidate) => candidate.category === "corp_safe_score",
+    );
+    expect(benchmarkCase).toBeDefined();
+    if (!benchmarkCase) throw new Error("Missing corp safe score case");
+    const input = {
+      ...benchmarkCase.input,
+      legalActions: benchmarkCase.input.legalActions.map((action) =>
+        action.type === "score_agenda" ? unmarkedScoreAction(action) : action,
+      ),
+    };
+    const legacy = frozenLegacyDecision(input);
+
+    const decision = applyPracticalTacticOverlay(input, legacy, {
+      practicalTacticOverlay: { enabled: true },
+    });
+
+    expect(decision.actionId).toBe(legacy.actionId);
+    expect(decision.evidence ?? []).not.toContain(
+      "practical_tactic:corp_safe_score",
+    );
+  });
 });
 
 function frozenLegacyDecision(input: AiDecisionInput): AiDecision {
@@ -97,4 +121,11 @@ function frozenLegacyDecision(input: AiDecisionInput): AiDecision {
     consideredActionIds: input.legalActions.map((action) => action.actionId),
     fallbackUsed: false,
   };
+}
+
+function unmarkedScoreAction(
+  action: AiDecisionInput["legalActions"][number],
+): AiDecisionInput["legalActions"][number] {
+  const { payload: _payload, ...withoutPayload } = action;
+  return { ...withoutPayload, label: "Score agenda" };
 }

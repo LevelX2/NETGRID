@@ -100,7 +100,9 @@ function corpSafeScoreCandidate(
   input: AiDecisionInput,
 ): PracticalTacticCandidate | undefined {
   if (input.side !== "corp") return undefined;
-  const action = input.legalActions.find((candidate) => candidate.type === "score_agenda");
+  const action = input.legalActions.find(
+    (candidate) => candidate.type === "score_agenda" && corpScoreLooksSafe(candidate),
+  );
   if (!action) return undefined;
   return tacticCandidate(action, "corp.practical_tactic.safe_score", 950, [
     "practical_tactic:corp_safe_score",
@@ -291,6 +293,14 @@ function cardText(card: VisibleCard): string {
 function corpActionLooksLikePunish(action: LegalAction): boolean {
   return /punish|closed accounts|scorched|tag/i.test(
     [action.label, action.type].join(" ").toLowerCase(),
+  );
+}
+
+function corpScoreLooksSafe(action: LegalAction): boolean {
+  return (
+    action.payload?.safeScoreWindow === true ||
+    action.payload?.protectedRemoteReady === true ||
+    /safe score|protected score|score protected/i.test(action.label)
   );
 }
 

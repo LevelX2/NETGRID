@@ -238,7 +238,12 @@ function safeScoreCases(): CaseSpec[] {
     badActionIds: [`gain-${index}`, `protect-${index}`],
     rationale: "Corp hat ein sicheres Score-Fenster; Scoren ist der konkrete Fortschritt.",
     actions: [
-      { actionId: `score-${index}`, type: "score_agenda", label: "Score agenda" },
+      {
+        actionId: `score-${index}`,
+        type: "score_agenda",
+        label: "Safe score agenda",
+        payload: { safeScoreWindow: true },
+      },
       { actionId: `gain-${index}`, type: "gain_credit", label: "Gain credit" },
       {
         actionId: `protect-${index}`,
