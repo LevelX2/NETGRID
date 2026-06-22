@@ -1,6 +1,6 @@
 # AI Runtime Tactical Boundary Optimization Loop
 
-Status: `package_done:AI-RTB-3`
+Status: `final_green_ready`
 
 Datum: 2026-06-22
 
@@ -224,6 +224,29 @@ Ergebnis:
 Commit: `refactor(ai): move runtime debug item formatting`
 
 ## FINAL-GREEN
+
+Restpotential nach AI-RTB-3:
+
+- `packages/ai/src/index.ts`: 35.063 Zeilen. Die verbliebenen
+  `semanticRuntime...`-Funktionen sind überwiegend Runtime-Scoring,
+  Action-Alternatives, Coverage-Selection, Runner-/Corp-Scorekomponenten,
+  Simulation-Diagnostik oder Entscheidungsevidence. Weitere Extraktion wäre
+  kein reiner Formatter-Slice mehr, sondern ein eigener Runtime-Scoring- oder
+  Simulation-Diagnostics-Audit.
+- `packages/ai/src/tactical-plans.ts`: 4.074 Zeilen. Die verbliebenen
+  Kandidaten liegen in Runner-Handentwicklung, Credit-Base, Draw-Overflow und
+  Corp-/Runner-Plan-Buildern. Diese Logik sollte nach Goal-Familien geplant
+  werden; opportunistische Extraktion ohne Fachschnitt würde Planner-Gewichte
+  und Evidence-Kontext zu leicht vermischen.
+- `packages/ai/src/legacy/runner-plans.ts`: 8.536 Zeilen. Legacy-Kandidaten
+  sind Planentscheidung, Action-Selection und Profil-/Scoringlogik. Da Legacy-
+  Notaus und Vergleichsbasis erhalten bleiben müssen, ist kein sicherer
+  Micro-Slice ohne separaten Legacy-Ablöse- oder Isolation-Audit sichtbar.
+
+Stop-Entscheidung: Der Boundary-Loop endet nach AI-RTB-3. Weiteres Potential
+existiert nur noch als eigener Audit für Runtime-Scoring, Tactical-Goal-Family-
+Split oder Legacy-Isolation, nicht als direkte Fortsetzung dieser
+Diagnostics-/Boundary-Schleife.
 
 Checks:
 
