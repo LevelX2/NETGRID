@@ -3366,6 +3366,50 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
   });
 
+  it("documents wasteful Runner Trace bids when the max bid cannot change the outcome", () => {
+    let state = traceCorpBidState("ai-trace-wasteful-runner-bid");
+    state.runner.credits = 2;
+
+    expect(state.pendingChoice?.options.map((option) => option.id)).toContain(
+      "bid_3",
+    );
+    state = applyChoice(state, "corp", ["bid_3"]);
+
+    const runnerInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+    });
+    const visibleTraceContext: PublicGameEvent = {
+      eventId: "ai_trace_wasteful_runner_bid_context",
+      type: "trace_step",
+      stateVersionBefore: state.stateVersion - 1,
+      stateVersionAfter: state.stateVersion,
+      stateHashAfter: hashState(state),
+      visibilityClass: "public",
+      publicPayload: {
+        traceStep: "runner_bid",
+        traceStrength: 5,
+        runnerLink: 0,
+        corpBid: 3,
+      },
+    };
+    runnerInput.eventTail = [...runnerInput.eventTail, visibleTraceContext];
+
+    expect(
+      runnerInput.playerView.pendingChoice?.options.map((option) => option.id),
+    ).toEqual(["bid_0", "bid_1", "bid_2"]);
+
+    const runnerDecision = chooseRunnerAction(runnerInput);
+
+    expect(runnerDecision.reasonCode).toBe("runner.trace.bid_visible_amount");
+    expect(runnerDecision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["bid_2"],
+    });
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(JSON.stringify(runnerInput)).not.toContain("cardInstances");
+    expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
+  });
+
   it("chooses post-bid Trace Link sources after both bids are visible", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
