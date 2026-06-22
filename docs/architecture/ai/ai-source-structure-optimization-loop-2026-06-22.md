@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: prepared_for_execution
+Status: final_green_ready
 
 Datum: 2026-06-22
 
@@ -93,6 +93,93 @@ dem weiterhin großen öffentlichen `index.ts`.
 4. `AI-SRCOPT-3` RunTarget-Guidance-Hilfen aus Public Index/Tactical Duplication lösen
 5. `AI-SRCOPT-4` Struktur-Gates und Abschlussdokumentation aktualisieren
 6. `FINAL-GREEN` Vollständige Paketverifikation und lokaler Merge nach `main`
+
+## AI-SRCOPT-0 Messbefund
+
+Ausgangsstand nach Worktree-Anlage:
+
+- Branch: `codex/ai-source-structure-optimization-loop-1`
+- Basis: `de180046 docs(ai): prepare source structure optimization loop`
+- `packages/ai/src/index.ts`: weiterhin größter AI-Entry mit ca. 1,3 MB.
+- Konkrete Strukturreste:
+  - `packages/ai/src/memory/remote-access-outcome.ts` existiert neben dem
+    neueren `packages/ai/src/access/access-outcome-memory.ts` und ist nur noch
+    durch Legacy-Tests direkt sichtbar.
+  - Access-Module importieren Projection-Typen/Funktionen noch direkt aus
+    `decision/access-decision-projection`.
+  - `index.ts` enthält noch eigene RunTarget-Guidance-Gewichtung, während
+    `tactical-plans.ts` eine verwandte Recommendation-Delta-Logik hält.
+- Veralteter Abschlussstatus:
+  - `docs/reviews/ai/ai-access-intelligence-consolidation-final-report-2026-06-21.md`
+    stand noch auf `implementation_complete_before_final_green`.
+  - Der Status wurde auf `complete` korrigiert und verweist auf den separat
+    laufenden Strukturprozess.
+
+## AI-SRCOPT-1 Ergebnis
+
+- Der neue `access/access-outcome-memory`-Pfad besitzt mit
+  `accessOutcomeMemoryPlanEvidence` einen strukturierten Helper für
+  No-Plan-Bonus-Evidence.
+- `tactical-plans.ts` nutzt diesen Helper statt einer lokalen Dublette.
+- `memory/remote-access-outcome.ts` ist als Legacy-Kompatibilitätsadapter
+  enger gefasst:
+  - kein direkter `decision/access-decision-projection`-Import mehr;
+  - Outcome-Evidence wird über Access-Outcome-Evidence gespiegelt;
+  - der alte `declinedTrashOutcomePlanEvidence`-Parser ist deprecated und
+    status-gated.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/access/access-outcome-memory.test.ts src/memory/remote-access-outcome.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-2 Ergebnis
+
+- `packages/ai/src/access/access-decision-projection.ts` ist die neue
+  access-nahe Fassade für Projection-Typen und `projectAccessDecision`.
+- Access-Module konsumieren Projection-Verträge über diese Fassade statt direkt
+  aus `decision/access-decision-projection`.
+- Der Boundary-Test erlaubt nur der Fassade den direkten Decision-Import und
+  schützt die übrigen Access-Module gegen erneute Direktkopplung.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/access-decision-projection.test.ts src/decision/module-boundaries.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-3 Ergebnis
+
+- `packages/ai/src/runner-run-target-guidance.ts` bündelt die
+  RunTarget-Recommendation-Gewichtung.
+- Runtime-Semantik und TacticalPlans bleiben getrennte Skalen:
+  - `runnerRunTargetSemanticGuidanceValue` für Runtime-Penalties;
+  - `runnerRunTargetTacticalPriorityDelta` für Plan-Prioritäten.
+- `index.ts` und `tactical-plans.ts` nutzen keine lokalen
+  Recommendation-Switches mehr für diese Guidance-Werte.
+- `runner-run-target-guidance.test.ts` schützt die Recommendation-Abdeckung und
+  die Sonderbehandlung von `run_if_free` bei unbekanntem Payoff.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-4 Ergebnis
+
+- Der Access-Intelligence-Abschlussbericht bleibt auf `complete` und verweist
+  auf diesen separaten Strukturprozess.
+- Der Placement Guide dokumentiert die Access-Projection-Fassade, den Legacy-
+  Adapterstatus und die gemeinsame RunTarget-Guidance-Quelle.
+- Boundary- und Public-Export-Gates schützen die neuen Grenzen.
+- Restpotential für eine nächste Schleife:
+  - `packages/ai/src/index.ts` bleibt groß, aber weitere Extraktion braucht
+    eine eigene Readiness-Messung, weil dort Runtime-Orchestration, Debug-
+    Evidence und Public-Fassade eng nebeneinander liegen.
+  - `packages/ai/src/tactical-plans.ts` bleibt Kandidat für weitere Aufteilung
+    nach Goal-Familien, aber nicht mehr im aktuellen engen Access-/Guidance-
+    Scope.
+  - Evaluation-/Report-Module sollten erst nach einem Importgraph-Audit weiter
+    getrennt werden.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/public-export-contract.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `git diff --check`
 
 ## Paketdetails
 

@@ -291,6 +291,20 @@ describe("AI module boundaries", () => {
             ),
           ];
         }
+        if (
+          resolvesToSrcArea(file, reference.importSource, "decision") &&
+          resolvedImportBasename(file, reference.importSource) ===
+            "access-decision-projection" &&
+          path.basename(file) !== "access-decision-projection.ts"
+        ) {
+          return [
+            violation(
+              file,
+              reference,
+              "access modules must use the access projection facade",
+            ),
+          ];
+        }
         return [];
       }),
     );

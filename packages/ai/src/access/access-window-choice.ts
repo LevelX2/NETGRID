@@ -3,7 +3,7 @@ import type { AccessTargetKind } from "./access-decision-types";
 import {
   projectAccessDecision,
   type AccessDecisionProjection,
-} from "../decision/access-decision-projection";
+} from "./access-decision-projection";
 
 export type AccessWindowTargetType =
   | "agenda"

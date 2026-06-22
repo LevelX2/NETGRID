@@ -1,5 +1,10 @@
 import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
-import { projectAccessDecision } from "../decision/access-decision-projection";
+import {
+  accessOutcomeMemoryEvidence,
+  evaluateAccessOutcomeMemoryStatus,
+  type AccessOutcomeMemoryRecord,
+} from "../access/access-outcome-memory";
+import { observedAccessOutcomeEvidence } from "../access/access-outcome-projection";
 
 export type RemoteAccessOutcomeDecision =
   | "declined_trash"
@@ -46,14 +51,6 @@ export function createRemoteAccessOutcomeMemoryEntry(params: {
 export function remoteAccessOutcomeEvidence(
   entry: RemoteAccessOutcomeMemoryEntry,
 ): string[] {
-  const projection = projectAccessDecision({
-    source: "plan_memory",
-    serverId: entry.serverId,
-    knownRootDefinitionId: entry.knownRootDefinitionId,
-    target: entry.accessDecision === "stolen" ? "agenda" : "unknown",
-    intendedAccessAction: accessProjectionActionForOutcome(entry.accessDecision),
-    reserveWouldBreak: entry.reason === "reserve_would_break",
-  });
   return [
     `remote_access_outcome_server:${entry.serverId}`,
     `remote_access_outcome_known_root:${entry.knownRootDefinitionId}`,
@@ -61,11 +58,18 @@ export function remoteAccessOutcomeEvidence(
     `remote_access_outcome_reason:${entry.reason}`,
     `remote_access_outcome_state_version:${entry.stateVersion}`,
     `remote_access_outcome_expires_when_remote_changes:${entry.expiresWhenRemoteChanges}`,
-    ...projection.evidence,
+    ...accessOutcomeMemoryEvidence(remoteAccessOutcomeCompatibilityRecord(entry)),
+    ...observedAccessOutcomeEvidence({
+      serverId: entry.serverId,
+      knownRootDefinitionId: entry.knownRootDefinitionId,
+      observedIntent: accessOutcomeIntentForDecision(entry.accessDecision),
+      reason: entry.reason,
+      stateVersion: entry.stateVersion,
+    }),
   ];
 }
 
-function accessProjectionActionForOutcome(
+function accessOutcomeIntentForDecision(
   accessDecision: RemoteAccessOutcomeDecision,
 ): AccessIntent {
   switch (accessDecision) {
@@ -87,56 +91,105 @@ export function evaluateRemoteAccessOutcomeMemory(
     creditsOrReserveImproved?: boolean;
   },
 ): RemoteAccessOutcomeMemoryStatus {
-  if (
-    entry.expiresWhenRemoteChanges &&
-    !context.currentKnownRootDefinitionIds.includes(entry.knownRootDefinitionId)
-  ) {
+  const status = evaluateAccessOutcomeMemoryStatus(
+    remoteAccessOutcomeCompatibilityRecord(entry),
+    {
+      currentRemoteFingerprint:
+        entry.expiresWhenRemoteChanges &&
+        !context.currentKnownRootDefinitionIds.includes(
+          entry.knownRootDefinitionId,
+        )
+          ? "legacy_remote_changed"
+          : legacyRemoteFingerprint(entry.knownRootDefinitionId),
+      currentCredits: context.creditsOrReserveImproved === true ? 1 : 0,
+      currentDesiredReserve: 0,
+    },
+  );
+  if (status.invalidationReason === "remote_fingerprint_changed") {
     return {
       applies: false,
       invalidationReason: "remote_changed",
       suppressesPlanBonus: false,
       evidence: [
         ...remoteAccessOutcomeEvidence(entry),
+        ...status.evidence,
         "remote_access_outcome_applies:false",
         "remote_access_outcome_invalidated:remote_changed",
       ],
     };
   }
-  if (
-    entry.accessDecision === "declined_trash" &&
-    context.creditsOrReserveImproved === true
-  ) {
+  if (status.invalidationReason === "credits_or_reserve_improved") {
     return {
       applies: false,
       invalidationReason: "credits_or_reserve_improved",
       suppressesPlanBonus: false,
       evidence: [
         ...remoteAccessOutcomeEvidence(entry),
+        ...status.evidence,
         "remote_access_outcome_applies:false",
         "remote_access_outcome_invalidated:credits_or_reserve_improved",
       ],
     };
   }
-  const suppressesPlanBonus = entry.accessDecision === "declined_trash";
   return {
     applies: true,
-    suppressesPlanBonus,
+    suppressesPlanBonus: status.suppressesPlanBonus,
     evidence: [
       ...remoteAccessOutcomeEvidence(entry),
+      ...status.evidence,
       "remote_access_outcome_applies:true",
-      `remote_access_outcome_suppresses_plan_bonus:${suppressesPlanBonus}`,
+      `remote_access_outcome_suppresses_plan_bonus:${status.suppressesPlanBonus}`,
     ],
   };
 }
 
+/**
+ * @deprecated Compatibility bridge for old payoff evidence arrays. New callers
+ * should use RemoteAccessOutcomeMemoryStatus plus
+ * remoteAccessOutcomePlanEvidence, or the access/access-outcome-memory helpers.
+ */
 export function declinedTrashOutcomePlanEvidence(
   payoffEvidence: readonly string[],
 ): string[] {
-  if (!payoffEvidence.includes("remote_access_outcome_decision:declined_trash")) {
-    return [];
-  }
+  const applies = payoffEvidence.includes("remote_access_outcome_applies:true");
+  const suppressesPlanBonus = payoffEvidence.includes(
+    "remote_access_outcome_suppresses_plan_bonus:true",
+  );
+  return remoteAccessOutcomePlanEvidence({
+    applies,
+    suppressesPlanBonus,
+  });
+}
+
+export function remoteAccessOutcomePlanEvidence(
+  status:
+    | Pick<RemoteAccessOutcomeMemoryStatus, "applies" | "suppressesPlanBonus">
+    | undefined,
+): string[] {
+  if (!status?.applies || !status.suppressesPlanBonus) return [];
   return [
     "remote_access_outcome_no_plan_bonus:true",
     "remote_access_outcome_memory_applied:declined_trash",
   ];
+}
+
+function remoteAccessOutcomeCompatibilityRecord(
+  entry: RemoteAccessOutcomeMemoryEntry,
+): AccessOutcomeMemoryRecord {
+  return {
+    matchId: "legacy_remote_access_outcome",
+    side: "runner",
+    profileId: "legacy",
+    serverId: entry.serverId,
+    remoteFingerprint: legacyRemoteFingerprint(entry.knownRootDefinitionId),
+    observedDecision: accessOutcomeIntentForDecision(entry.accessDecision),
+    reason: entry.reason,
+    creditsAtOutcome: 0,
+    desiredReserveAtOutcome: 0,
+    stateVersion: entry.stateVersion,
+  };
+}
+
+function legacyRemoteFingerprint(knownRootDefinitionId: string): string {
+  return `known_root:${knownRootDefinitionId}`;
 }

@@ -145,6 +145,16 @@ export function evaluateAccessOutcomeMemoryStatus(
   };
 }
 
+export function accessOutcomeMemoryPlanEvidence(
+  status: AccessOutcomeMemoryStatus | undefined,
+): string[] {
+  if (!status?.applies || !status.suppressesPlanBonus) return [];
+  return [
+    "access_outcome_memory_no_plan_bonus:true",
+    "access_outcome_memory_applied:declined_access",
+  ];
+}
+
 function sameAccessOutcomeKey(
   record: AccessOutcomeMemoryKey,
   key: AccessOutcomeMemoryKey,

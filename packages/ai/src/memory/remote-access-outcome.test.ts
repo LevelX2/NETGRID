@@ -4,6 +4,7 @@ import {
   createRemoteAccessOutcomeMemoryEntry,
   declinedTrashOutcomePlanEvidence,
   evaluateRemoteAccessOutcomeMemory,
+  remoteAccessOutcomePlanEvidence,
   remoteAccessOutcomeEvidence,
 } from "./remote-access-outcome";
 
@@ -104,7 +105,7 @@ describe("remote access outcome memory", () => {
     ).toBe(false);
   });
 
-  it("formats declined-trash plan evidence from side-safe payoff facts", () => {
+  it("formats declined-trash plan evidence from structured memory status", () => {
     const entry = createRemoteAccessOutcomeMemoryEntry({
       serverId: "remote_1",
       knownRootDefinitionId: "onr_v1_326_holovid-campaign",
@@ -112,11 +113,38 @@ describe("remote access outcome memory", () => {
       reason: "reserve_would_break",
       stateVersion: 12,
     });
+    const status = evaluateRemoteAccessOutcomeMemory(entry, {
+      currentKnownRootDefinitionIds: ["onr_v1_326_holovid-campaign"],
+    });
 
-    expect(declinedTrashOutcomePlanEvidence(remoteAccessOutcomeEvidence(entry)))
-      .toEqual([
-        "remote_access_outcome_no_plan_bonus:true",
-        "remote_access_outcome_memory_applied:declined_trash",
-      ]);
+    expect(remoteAccessOutcomePlanEvidence(status)).toEqual([
+      "remote_access_outcome_no_plan_bonus:true",
+      "remote_access_outcome_memory_applied:declined_trash",
+    ]);
+  });
+
+  it("keeps the deprecated declined-trash evidence bridge status-gated", () => {
+    const entry = createRemoteAccessOutcomeMemoryEntry({
+      serverId: "remote_1",
+      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      accessDecision: "declined_trash",
+      reason: "reserve_would_break",
+      stateVersion: 12,
+    });
+    const status = evaluateRemoteAccessOutcomeMemory(entry, {
+      currentKnownRootDefinitionIds: ["onr_v1_326_holovid-campaign"],
+    });
+
+    expect(declinedTrashOutcomePlanEvidence(status.evidence)).toEqual([
+      "remote_access_outcome_no_plan_bonus:true",
+      "remote_access_outcome_memory_applied:declined_trash",
+    ]);
+    expect(declinedTrashOutcomePlanEvidence(remoteAccessOutcomeEvidence(entry))).toEqual(
+      [],
+    );
+    const invalidated = evaluateRemoteAccessOutcomeMemory(entry, {
+      currentKnownRootDefinitionIds: ["different-card"],
+    });
+    expect(declinedTrashOutcomePlanEvidence(invalidated.evidence)).toEqual([]);
   });
 });
