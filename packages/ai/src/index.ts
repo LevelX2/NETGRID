@@ -210,6 +210,7 @@ import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
+import { selectEfficientTraceBidOption } from "./trace-bid-efficiency";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -13788,8 +13789,18 @@ function selectedChoicesForDecision(
     );
     desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, tieBid);
   }
-  const selected =
+  let selected =
     bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
+  if (input.side === "runner" && selected) {
+    const traceContext = latestTraceContext(input);
+    selected =
+      selectEfficientTraceBidOption({
+        side: input.side,
+        bidOptions,
+        desiredAmount: desired,
+        ...traceContext,
+      }).option ?? selected;
+  }
   return selected
     ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
@@ -15455,14 +15466,21 @@ function scoreSearchChoiceOption(
 function latestTraceContext(input: AiDecisionInput): {
   traceStrength?: number;
   runnerLink?: number;
+  corpBid?: number;
 } {
   for (const event of input.eventTail.slice().reverse()) {
     const traceStrength = event.publicPayload.traceStrength;
     const runnerLink = event.publicPayload.runnerLink;
-    if (typeof traceStrength === "number" || typeof runnerLink === "number") {
+    const corpBid = event.publicPayload.corpBid;
+    if (
+      typeof traceStrength === "number" ||
+      typeof runnerLink === "number" ||
+      typeof corpBid === "number"
+    ) {
       return {
         ...(typeof traceStrength === "number" ? { traceStrength } : {}),
         ...(typeof runnerLink === "number" ? { runnerLink } : {}),
+        ...(typeof corpBid === "number" ? { corpBid } : {}),
       };
     }
   }

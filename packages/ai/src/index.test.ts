@@ -3366,7 +3366,7 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
   });
 
-  it("documents wasteful Runner Trace bids when the max bid cannot change the outcome", () => {
+  it("avoids wasteful Runner Trace bids when the max bid cannot change the outcome", () => {
     let state = traceCorpBidState("ai-trace-wasteful-runner-bid");
     state.runner.credits = 2;
 
@@ -3403,7 +3403,7 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(runnerDecision.reasonCode).toBe("runner.trace.bid_visible_amount");
     expect(runnerDecision.selectedChoices).toEqual({
       choiceId: state.pendingChoice?.choiceId,
-      selectedOptionIds: ["bid_2"],
+      selectedOptionIds: ["bid_0"],
     });
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
     expect(JSON.stringify(runnerInput)).not.toContain("cardInstances");
