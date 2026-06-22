@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_5_regression_matrix_done`
+`tag_sem_6_review_and_knowledge_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -219,6 +219,18 @@ Datum: 2026-06-22
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`: grün, 1 Datei / 18 Tests.
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
   - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-6 abgeschlossen
+
+Datum: 2026-06-22
+
+- Final Report angelegt: `docs/reviews/ai/ai-activated-card-tag-semantics-final-report-2026-06-22.md`
+- Wissensbasis aktualisiert:
+  - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+  - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`
+- Prozessstand auf realen Abschluss bis AI-TAG-SEM-6 aktualisiert.
+- Checks:
   - `git diff --check`: grün.
 
 ## Paketfolge
