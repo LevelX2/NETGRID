@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_1_effect_inventory_done`
+`tag_sem_2_semantic_contract_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -154,6 +154,20 @@ Datum: 2026-06-22
 - Schlussfolgerung: Der Folgefix muss generisch an side-safe CardImplementation-/Payload-Metadaten ansetzen; AI-Hints sind unterstützend, aber nicht alleinige Autorität.
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-2 abgeschlossen
+
+Datum: 2026-06-22
+
+- Semantikvertrag angelegt: `docs/architecture/ai/ai-activated-card-tag-semantics-contract-2026-06-22.md`
+- Vertragliche Kernentscheidung:
+  - `ActionSemanticCandidate` darf eine side-safe `ActionTagEffectProfile`-Struktur tragen.
+  - `remove_tags` auf Runner wird bei sicher gebundener LegalAction/CardImplementation-Quelle als `tag.remove` und akutes `tag_removal` projiziert.
+  - `avoid_tag`, `avoid_next_tag` und Hosted-Credits für `remove_tags` bleiben support-only, solange keine aktuelle Tag-Entfernungs-LegalAction sichtbar ist.
+  - AI-Hints sind Evidence, nicht Autorität.
+  - Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertragsänderung.
+- Checks:
   - `git diff --check`: grün.
 
 ## Paketfolge
