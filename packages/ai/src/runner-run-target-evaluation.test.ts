@@ -1249,6 +1249,59 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not keep an unchanged observed no-progress remote run above central pressure", () => {
+    const noProgressRemoteEvents = [
+      syntheticPublicEvent("evt_run_remote_1", 8, "start_run", {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "remote_1",
+      }),
+      syntheticPublicEvent("evt_access_remote_1", 9, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "remote_1",
+        cardDefinitionId: "onr_v1_317_data-masons",
+        accessedCardPositionKey: "root:0",
+        accessedArea: "root",
+        accessedIndex: 0,
+      }),
+    ];
+    const input = aiInput({
+      credits: 6,
+      eventTail: noProgressRemoteEvents,
+      servers: [
+        server("rd"),
+        server("remote_1", {
+          root: [
+            visibleCard("remote-trashable-root", {
+              definitionId: "onr_v1_317_data-masons",
+              title: "Data Masons",
+              type: "asset",
+              trashCost: 1,
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-1", "remote_1"),
+        runAction("run-rd", "rd"),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+
+    const remoteEvaluation = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "remote_1",
+    );
+
+    expect(remoteEvaluation).toMatchObject({
+      accessPayoff: "trash_affordable",
+      recommendation: "declined_trash_memory_active",
+    });
+    expect(evaluations[0]?.targetServerId).toBe("rd");
+  });
+
   it("reassesses a remote when access memory was invalidated by fingerprint change", () => {
     const input = aiInput({
       credits: 6,
