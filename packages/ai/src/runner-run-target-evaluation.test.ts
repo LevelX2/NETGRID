@@ -77,6 +77,57 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("keeps visible R&D trace pressure available when the runner can cover the base trace", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("rd", {
+          ice: [aspTraceRunLockIce("rd-asp")],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "unproductive_visible_run_path:false",
+        "visible_trace_end_run_lock_unavoidable:false",
+      ]),
+    );
+  });
+
+  it("does not treat unrezzed trace ice as an unavoidable visible R&D run lock", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [
+        server("rd", {
+          ice: [{ ...aspTraceRunLockIce("rd-asp"), rezzed: false }],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "unproductive_visible_run_path:false",
+        "visible_trace_end_run_lock_unavoidable:false",
+      ]),
+    );
+  });
+
   it("suppresses R&D when the top card is stale known low value and no multiaccess is present", () => {
     const input = aiInput({
       credits: 6,

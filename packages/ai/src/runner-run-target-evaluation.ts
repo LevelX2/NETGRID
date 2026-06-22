@@ -402,6 +402,9 @@ function evaluateRunnerRunTarget(
   const creditsAfterRun = path.creditsAfterPath;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
+  const unproductiveVisibleRunPath = runnerRunTargetPathIsUnproductive(path);
+  const visibleTraceEndRunLockUnavoidable =
+    path.knownPathBlockedByUnavoidableTraceRunLock === true;
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
@@ -411,6 +414,7 @@ function evaluateRunnerRunTarget(
     economyPosture,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
+    unproductiveVisibleRunPath,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
@@ -482,6 +486,14 @@ function evaluateRunnerRunTarget(
       `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       ...(blinkRiskAssessment?.evidence ?? []),
+      `unproductive_visible_run_path:${unproductiveVisibleRunPath}`,
+      `visible_trace_end_run_lock_unavoidable:${visibleTraceEndRunLockUnavoidable}`,
+      ...(path.hardUnbrokenRunEffects?.length
+        ? [`hard_unbroken_run_effect:${path.hardUnbrokenRunEffects.join("|")}`]
+        : []),
+      ...(path.hardUnbrokenEffectIceTitle
+        ? [`hard_unbroken_run_effect_ice:${path.hardUnbrokenEffectIceTitle}`]
+        : []),
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...accessOutcomeMemoryEvaluationEvidence(accessOutcomeMemory),
@@ -857,6 +869,7 @@ function recommendationForRunTarget(params: {
   economyPosture: RunnerEconomyPosture;
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
+  unproductiveVisibleRunPath: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   blinkRiskAssessment?: BlinkRiskAssessment;
@@ -881,6 +894,9 @@ function recommendationForRunTarget(params: {
     params.blinkRiskAssessment.riskSeverity === "medium"
   ) {
     return "setup_first";
+  }
+  if (params.unproductiveVisibleRunPath) {
+    return "do_not_run_now";
   }
   if (params.pathPassability === "blocked_missing_coverage") {
     return "find_breaker_first";
@@ -1047,9 +1063,24 @@ function recommendationRank(recommendation: RunnerRunTargetRecommendation): numb
 
 function pathPassabilityFor(path: ReturnType<typeof assessKnownRezzedIcePath>): RunnerPathPassability {
   if (!path.blocked) return "reachable";
+  if (path.knownPathBlockedByHardUnbrokenEffect) {
+    return path.unpayableReason === "ice_unbreakable"
+      ? "blocked_unbreakable"
+      : "blocked_unpayable";
+  }
   if (path.knownPathBlockedByMissingCoverage) return "blocked_missing_coverage";
   if (path.unpayableReason === "ice_unbreakable") return "blocked_unbreakable";
   return "blocked_unpayable";
+}
+
+function runnerRunTargetPathIsUnproductive(
+  path: ReturnType<typeof assessKnownRezzedIcePath>,
+): boolean {
+  return (
+    path.blocked &&
+    path.canReachAccess === false &&
+    path.knownPathBlockedByHardUnbrokenEffect === true
+  );
 }
 
 function stealOrTrashAffordableFor(
