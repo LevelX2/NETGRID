@@ -131,6 +131,21 @@ Checks:
 
 Commit: `refactor(ai): share run target payoff classification`
 
+Ergebnis:
+
+- `runnerRunTargetHighPayoff`,
+  `runnerRunTargetPlausibleForMultiRun` und
+  `runnerRunTargetMultiRunPayoffClass` liegen jetzt in
+  `packages/ai/src/runner-run-target-guidance.ts`.
+- `packages/ai/src/index.ts` nutzt diese Helper statt lokaler Multi-Run-
+  Klassifikationsfunktionen.
+- `runner-run-target-guidance.test.ts` deckt Missing-/Blocked-/Low-/Unknown-/
+  High-Payoff und Plausibility-Fälle ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
 ### AI-SRCOPT2-2 Pressure-Probe-Guidance extrahieren
 
 Ziel: Pure Pressure-Probe-RunTarget-Helfer aus `tactical-plans.ts` in die
