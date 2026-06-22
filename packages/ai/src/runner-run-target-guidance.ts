@@ -22,6 +22,17 @@ type RunTargetTacticalPriorityInput = Pick<
   "recommendation"
 >;
 
+type RunTargetPressureProbeInput = Pick<
+  RunnerRunTargetEvaluation,
+  | "accessPayoff"
+  | "creditsAfterRun"
+  | "knownAccessState"
+  | "pathPassability"
+  | "recommendation"
+  | "targetKind"
+  | "targetServerId"
+>;
+
 export type RunnerRunTargetMultiRunPayoffClass =
   | "high_payoff"
   | "unknown_probe"
@@ -122,6 +133,31 @@ export function runnerRunTargetTacticalPriorityDelta(
   return RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION[
     evaluation.recommendation
   ];
+}
+
+export function runnerPressureProbeBasePriority(
+  evaluation: RunTargetPressureProbeInput,
+): number {
+  const basePriority = evaluation.targetServerId === "rd" ? 760 : 740;
+  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
+}
+
+export function runnerPressureProbeTargetAllowed(
+  evaluation: RunTargetPressureProbeInput,
+): boolean {
+  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
+    return false;
+  }
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  return (
+    evaluation.accessPayoff === "unknown" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    evaluation.recommendation === "run_now" ||
+    evaluation.recommendation === "run_if_free"
+  );
 }
 
 export function runnerRunTargetRecommendationGuidanceKeys(): RunnerRunTargetRecommendation[] {

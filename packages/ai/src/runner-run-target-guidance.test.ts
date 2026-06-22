@@ -6,6 +6,8 @@ import type {
 } from "./runner-run-target-evaluation";
 import {
   RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION,
+  runnerPressureProbeBasePriority,
+  runnerPressureProbeTargetAllowed,
   runnerRunTargetHighPayoff,
   runnerRunTargetMultiRunPayoffClass,
   runnerRunTargetPlausibleForMultiRun,
@@ -118,5 +120,53 @@ describe("runner run target guidance", () => {
     ).toBe(false);
     expect(runnerRunTargetHighPayoff({ accessPayoff: "fresh" })).toBe(true);
     expect(runnerRunTargetHighPayoff({ accessPayoff: "unknown" })).toBe(false);
+  });
+
+  it("keeps pressure-probe filtering and priorities in run-target guidance", () => {
+    const base = {
+      accessPayoff: "unknown" as RunnerAccessPayoff,
+      creditsAfterRun: 2,
+      knownAccessState: "unknown" as const,
+      pathPassability: "reachable" as const,
+      recommendation: "run_if_free" as RunnerRunTargetRecommendation,
+      targetKind: "rd" as const,
+      targetServerId: "rd",
+    };
+
+    expect(runnerPressureProbeTargetAllowed(base)).toBe(true);
+    expect(runnerPressureProbeBasePriority(base)).toBe(800);
+    expect(
+      runnerPressureProbeBasePriority({
+        ...base,
+        recommendation: "do_not_run_now",
+        targetKind: "hq",
+        targetServerId: "hq",
+      }),
+    ).toBe(20);
+    expect(
+      runnerPressureProbeTargetAllowed({
+        ...base,
+        targetKind: "remote",
+        targetServerId: "remote_1",
+      }),
+    ).toBe(false);
+    expect(
+      runnerPressureProbeTargetAllowed({
+        ...base,
+        knownAccessState: "known_no_current_payoff",
+      }),
+    ).toBe(false);
+    expect(
+      runnerPressureProbeTargetAllowed({
+        ...base,
+        pathPassability: "blocked_unpayable",
+      }),
+    ).toBe(false);
+    expect(
+      runnerPressureProbeTargetAllowed({
+        ...base,
+        creditsAfterRun: -1,
+      }),
+    ).toBe(false);
   });
 });

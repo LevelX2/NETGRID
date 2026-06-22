@@ -23,7 +23,11 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
-import { runnerRunTargetTacticalPriorityDelta } from "./runner-run-target-guidance";
+import {
+  runnerPressureProbeBasePriority,
+  runnerPressureProbeTargetAllowed,
+  runnerRunTargetTacticalPriorityDelta,
+} from "./runner-run-target-guidance";
 import {
   redactedRunnerHandDevelopmentFacts,
   type RunnerHandDevelopmentEvaluation,
@@ -2498,13 +2502,6 @@ function assessRunnerPressureBudget(
   };
 }
 
-function runnerPressureProbeBasePriority(
-  evaluation: RunnerRunTargetEvaluation,
-): number {
-  const basePriority = evaluation.targetServerId === "rd" ? 760 : 740;
-  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
-}
-
 function runnerPressurePreferredProbeTarget(
   targets: readonly string[],
   stateVersion: number,
@@ -2512,24 +2509,6 @@ function runnerPressurePreferredProbeTarget(
   if (targets.length === 0) return undefined;
   const index = Math.abs(stateVersion) % targets.length;
   return targets[index];
-}
-
-function runnerPressureProbeTargetAllowed(
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
-  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
-    return false;
-  }
-  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
-  if (evaluation.pathPassability !== "reachable") return false;
-  if (evaluation.creditsAfterRun < 0) return false;
-  return (
-    evaluation.accessPayoff === "unknown" ||
-    evaluation.accessPayoff === "fresh" ||
-    evaluation.accessPayoff === "access_bonus" ||
-    evaluation.recommendation === "run_now" ||
-    evaluation.recommendation === "run_if_free"
-  );
 }
 
 function runnerPressureProbeAllowance(
