@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_4_runtime_scoring_and_mapping_done`
+`tag_sem_5_regression_matrix_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -200,6 +200,24 @@ Datum: 2026-06-22
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: grün, 1 Datei / 52 Tests.
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: grün, 1 Datei / 517 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-5 abgeschlossen
+
+Datum: 2026-06-22
+
+- Regression-Matrix ergänzt:
+  - Danish-Repro: 4 Tags, 1 Credit, installierte Quelle, `activated_card_ability` gewinnt gegen `gain_credit`.
+  - Danish-Kandidat ist `tag.remove`, nicht `card_ability.unknown`.
+  - Gegenprobe ohne Tags: Danish wird nicht blind gegenüber Economy priorisiert.
+  - Bestehender BasicAction-`remove_tag`-Pfad bleibt `tag.remove`.
+  - `Nomad Allies` deckt eine zweite aktive `activated_card_ability`-Tag-Cleanup-Karte ab.
+  - `Fall Guy` deckt Tag-Vermeidung als support-only Gegenprobe ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: grün, 1 Datei / 53 Tests.
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`: grün, 1 Datei / 18 Tests.
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
   - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
   - `git diff --check`: grün.
 

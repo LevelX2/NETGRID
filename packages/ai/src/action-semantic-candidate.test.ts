@@ -1069,6 +1069,54 @@ describe("buildActionSemanticCandidates", () => {
     expect(JSON.stringify(candidate)).not.toContain("hiddenHqCards");
   });
 
+  it("projects another activated tag cleanup resource through the same descriptor path", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "nomad-instance",
+          costs: [{ clicks: 1 }, { credits: 1 }],
+        }),
+      ],
+      visibleSourceDefinitionsByInstanceId: {
+        "nomad-instance": "onr_v1_170_nomad-allies",
+      },
+    });
+
+    if (!candidate) throw new Error("Expected Nomad Allies candidate");
+    expect(candidate.semanticActionType).toBe("tag.remove");
+    expect(candidate.tagEffectProfile).toMatchObject({
+      kind: "remove_tags",
+      mode: "amount",
+      amount: 1,
+      acuteTagRemoval: true,
+    });
+    expect(candidate.costProfile).toMatchObject({
+      clickCost: 1,
+      creditCost: 1,
+    });
+  });
+
+  it("keeps tag avoidance sources support-only instead of acute tag removal", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trigger_ability", 0, {
+          source: "fall-guy-instance",
+        }),
+      ],
+      visibleSourceDefinitionsByInstanceId: {
+        "fall-guy-instance": "onr_v1_161_fall-guy",
+      },
+    });
+
+    if (!candidate) throw new Error("Expected Fall Guy candidate");
+    expect(candidate.semanticActionType).toBe("card_ability.trigger");
+    expect(candidate.tagEffectProfile).toMatchObject({
+      kind: "avoid_tag",
+      acuteTagRemoval: false,
+    });
+    expect(candidate.actionTacticSignals).toContain("tag.avoid_tag");
+  });
+
   it("keeps basic remove_tag projected through the existing tag removal path", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [legalAction("remove_tag", 0, { source: "basic_action" })],

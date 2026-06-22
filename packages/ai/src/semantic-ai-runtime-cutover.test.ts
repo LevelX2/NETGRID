@@ -127,6 +127,42 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("does not blindly prioritize activated tag cleanup when the runner has no tags", () => {
+    const input = aiInput("runner", [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction(
+        "use-danshi",
+        "runner",
+        "activated_card_ability",
+        "Danshi's Second ID: bis zu 3 Tags entfernen",
+        { credits: 0 },
+        {
+          source: "danshi-instance",
+          payload: {
+            cardImplementationAbility: "activated",
+            cardImplementationAbilityIndex: 0,
+            cardImplementationTrashSourceCost: true,
+          },
+        },
+      ),
+    ]);
+    input.playerView.own.tags = 0;
+    input.playerView.own.credits = 1;
+    input.playerView.own.rig = [
+      visibleCard("danshi-instance", "runner", "resource", {
+        definitionId: "onr_v1_158_danshis-second-id",
+        title: "Danshi's Second ID",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toContain("semantic_runtime_scope:basic_economy_draw");
+  });
+
   it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
     const rdRun = legalAction(
       "run-rd",
