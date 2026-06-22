@@ -1,6 +1,6 @@
 # AI Runtime Scoring Tactical Legacy Optimization Loop
 
-Status: `package_done:AI-RSL-0`
+Status: `package_done:AI-RSL-1`
 
 Datum: 2026-06-22
 
@@ -140,6 +140,20 @@ Checks:
 - `git diff --check`
 
 Commit: `refactor(ai): move semantic runtime score helpers`
+
+Ergebnis:
+
+- `semanticRuntimeScoreFromComponents` und `semanticRuntimeTypePriority`
+  liegen jetzt in `packages/ai/src/runtime/semantic-runtime-score-components.ts`.
+- `packages/ai/src/index.ts` importiert die Score-Helfer aus dem Runtime-
+  Score-Modul und enthält keine lokalen Duplikate mehr.
+- `semantic-runtime-score-components.test.ts` sichert Score-Summe, Confidence,
+  Evidence-Scrubbing und Type-Priority-Werte direkt ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-score-components.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+    grün: 2 Testdateien, 522 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - `git diff --check` grün.
 
 ### AI-RSL-2 Tactical Draw-Overflow-Familie extrahieren
 
