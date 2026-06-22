@@ -5,9 +5,11 @@ import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeConfidence,
+  semanticRuntimeScoreFromComponents,
+  semanticRuntimeTypePriority,
 } from "./semantic-runtime-score-components";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
-import type { LegalAction } from "@netgrid/shared";
+import type { AiDecisionDebug, LegalAction } from "@netgrid/shared";
 
 describe("semantic runtime score components", () => {
   it("rounds scores and derives confidence without selecting actions", () => {
@@ -78,6 +80,38 @@ describe("semantic runtime score components", () => {
         "sessionToken:hidden",
       ]),
     ).toEqual([]);
+  });
+
+  it("sums semantic runtime score components without rounding", () => {
+    const components: NonNullable<AiDecisionDebug["scoreBreakdown"]> = [
+      { key: "base", label: "base", value: 100 },
+      { key: "penalty", label: "penalty", value: -25.5 },
+      { key: "bonus", label: "bonus", value: 0.25 },
+    ];
+
+    expect(semanticRuntimeScoreFromComponents(components)).toBe(74.75);
+  });
+
+  it("keeps semantic runtime action type priorities centralized", () => {
+    expect(semanticRuntimeTypePriority("resolve_choice")).toBe(10000);
+    expect(semanticRuntimeTypePriority("mandatory_draw")).toBe(9800);
+    expect(semanticRuntimeTypePriority("steal_agenda")).toBe(9600);
+    expect(semanticRuntimeTypePriority("score_agenda")).toBe(9400);
+    expect(semanticRuntimeTypePriority("access_card")).toBe(9000);
+    expect(semanticRuntimeTypePriority("play_event")).toBe(6200);
+    expect(semanticRuntimeTypePriority("play_operation")).toBe(6200);
+    expect(semanticRuntimeTypePriority("trigger_ability")).toBe(6200);
+    expect(semanticRuntimeTypePriority("activated_card_ability")).toBe(6200);
+    expect(semanticRuntimeTypePriority("purge_virus_counters")).toBe(5800);
+    expect(semanticRuntimeTypePriority("purge_runner_virus_counters")).toBe(
+      5800,
+    );
+    expect(semanticRuntimeTypePriority("decline_trash")).toBe(3000);
+    expect(semanticRuntimeTypePriority("decline_rez")).toBe(3000);
+    expect(semanticRuntimeTypePriority("end_turn")).toBe(1000);
+    expect(
+      semanticRuntimeTypePriority("unknown_action" as LegalAction["type"]),
+    ).toBe(4000);
   });
 });
 

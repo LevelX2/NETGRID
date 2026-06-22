@@ -162,6 +162,8 @@ import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeConfidence,
+  semanticRuntimeScoreFromComponents,
+  semanticRuntimeTypePriority,
 } from "./runtime/semantic-runtime-score-components";
 import {
   bestSemanticRuntimeChoice,
@@ -6183,12 +6185,6 @@ function semanticRuntimeRunnerArchivesExclusion(
   };
 }
 
-function semanticRuntimeScoreFromComponents(
-  components: NonNullable<AiDecisionDebug["scoreBreakdown"]>,
-): number {
-  return components.reduce((sum, component) => sum + component.value, 0);
-}
-
 function semanticRuntimeScopeForAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -6377,62 +6373,6 @@ function semanticRuntimeBaseScore(
   return semanticRuntimeScoreFromComponents(
     semanticRuntimeScoreBreakdown(input, action, scopeId),
   );
-}
-
-function semanticRuntimeTypePriority(type: LegalAction["type"]): number {
-  switch (type) {
-    case "resolve_choice":
-      return 10000;
-    case "mandatory_draw":
-      return 9800;
-    case "steal_agenda":
-      return 9600;
-    case "score_agenda":
-      return 9400;
-    case "access_card":
-      return 9000;
-    case "remove_tag":
-      return 8800;
-    case "break_subroutine":
-      return 8500;
-    case "pump_breaker":
-      return 8300;
-    case "trash_accessed_card":
-      return 8000;
-    case "continue_run":
-      return 7800;
-    case "jack_out":
-      return 7400;
-    case "rez_ice":
-      return 7200;
-    case "advance_card":
-      return 7000;
-    case "start_run":
-      return 6800;
-    case "install_card":
-      return 6400;
-    case "play_event":
-    case "play_operation":
-    case "trigger_ability":
-    case "activated_card_ability":
-      return 6200;
-    case "trash_resource":
-      return 6000;
-    case "purge_virus_counters":
-    case "purge_runner_virus_counters":
-      return 5800;
-    case "gain_credit":
-      return 5400;
-    case "draw_card":
-      return 5300;
-    case "decline_trash":
-    case "decline_rez":
-      return 3000;
-    case "end_turn":
-      return 1000;
-    default:
-      return 4000;
-  }
 }
 
 function semanticRuntimeRunnerScore(
