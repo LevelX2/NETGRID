@@ -21,6 +21,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
+import { evaluateRunnerRunTargets } from "./runner-run-target-evaluation";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -1254,6 +1255,83 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("does not continue a previous no-progress remote plan over central pressure", () => {
+    const noProgressRemoteEvents = [
+      publicEvent("evt-run-remote-1", 8, "start_run", {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "remote_1",
+      }),
+      publicEvent("evt-access-remote-1", 9, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "remote_1",
+        cardDefinitionId: "onr_v1_317_data-masons",
+        accessedCardPositionKey: "root:0",
+        accessedArea: "root",
+      }),
+    ];
+    const input = aiInput("runner", [
+      legalAction("run-remote-1", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+    ]);
+    input.playerView.stateVersion = 10;
+    input.playerView.publicEvents = noProgressRemoteEvents;
+    input.eventTail = noProgressRemoteEvents;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [
+        visibleCard("remote-root", "corp", "asset", {
+          definitionId: "onr_v1_317_data-masons",
+          trashCost: 1,
+        }),
+      ]),
+    ];
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+
+    const result = evaluateTacticalPlans({
+      input,
+      previousPlan: {
+        schemaVersion: "tactical-plan-v1",
+        memoryId: "previous-remote-1",
+        side: "runner",
+        planId: "runner.contest_remote:remote_1",
+        type: "runner.contest_remote",
+        status: "progressing",
+        target: { kind: "server", id: "remote_1" },
+        selectedStepKind: "run_target",
+        selectedActionId: "run-remote-1",
+        blockedBy: [],
+        ttlDecisionsRemaining: 2,
+        planProgressionReason: "previous_plan_considered",
+        updatedAtStateVersion: 9,
+      },
+      runnerRunTargetEvaluations,
+    });
+    const remotePlan = result.planAlternatives.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_1",
+    );
+
+    expect(result.planAlternatives[0]?.planId).toBe(
+      "runner.opportunistic_central_run:rd",
+    );
+    expect(remotePlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "repeated_remote_no_progress_suppressed",
+        "known_remote_no_current_payoff",
+      ]),
+    );
+    expect(remotePlan?.priority).toBeLessThan(
+      result.planAlternatives[0]?.priority ?? -Infinity,
+    );
+  });
+
   it("explains normal remote run priority with run-target score components", () => {
     const remoteRun = legalAction("run-remote-2", "runner", "start_run", {
       serverId: "remote_2",
@@ -2164,6 +2242,23 @@ function visibleCard(
     type,
     known: true,
     ...overrides,
+  };
+}
+
+function publicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  type: string,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
   };
 }
 

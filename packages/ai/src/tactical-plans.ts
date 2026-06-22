@@ -2562,6 +2562,11 @@ function runnerRunTargetPlanEvidence(
     `runner_run_target_payoff:${evaluation.accessPayoff}`,
     `runner_run_target_path:${evaluation.pathPassability}`,
     `runner_run_target_score:${evaluation.score}`,
+    ...evaluation.evidence.filter(
+      (entry) =>
+        entry === "known_remote_no_current_payoff" ||
+        entry === "repeated_remote_no_progress_suppressed",
+    ),
   ];
 }
 

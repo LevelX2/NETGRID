@@ -200,6 +200,8 @@ describe("remote access outcome memory", () => {
         "remote_access_outcome_source:observed_public_access",
         "remote_access_outcome_decision:access_only",
         "remote_access_outcome_no_progress:true",
+        "known_remote_no_current_payoff",
+        "repeated_remote_no_progress_suppressed",
         "remote_access_outcome_source_event:evt-access",
       ]),
     );

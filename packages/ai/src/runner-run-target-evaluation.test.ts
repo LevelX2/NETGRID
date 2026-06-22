@@ -1299,6 +1299,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       accessPayoff: "trash_affordable",
       recommendation: "declined_trash_memory_active",
     });
+    expect(remoteEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_remote_no_current_payoff",
+        "repeated_remote_no_progress_suppressed",
+      ]),
+    );
+    expect(remoteEvaluation?.evidence.join("\n")).not.toMatch(
+      /privatePayload|cardInstances|decklist/i,
+    );
     expect(remoteEvaluation?.score).toBeLessThan(evaluations[0]?.score ?? -Infinity);
     expect(evaluations[0]?.targetServerId).toBe("rd");
   });

@@ -790,6 +790,7 @@ function accessOutcomeMemoryEvaluationEvidence(
     ...(status.invalidationReason
       ? [`run_target_access_memory_invalidation:${status.invalidationReason}`]
       : []),
+    ...status.evidence.slice(0, 20),
   ];
 }
 
