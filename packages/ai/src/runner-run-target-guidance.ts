@@ -8,10 +8,37 @@ type RunTargetSemanticGuidanceInput = Pick<
   "recommendation" | "accessPayoff"
 >;
 
+type RunTargetPayoffInput = Pick<
+  RunnerRunTargetEvaluation,
+  | "accessPayoff"
+  | "creditsAfterRun"
+  | "knownAccessState"
+  | "pathPassability"
+  | "recommendation"
+>;
+
 type RunTargetTacticalPriorityInput = Pick<
   RunnerRunTargetEvaluation,
   "recommendation"
 >;
+
+type RunTargetPressureProbeInput = Pick<
+  RunnerRunTargetEvaluation,
+  | "accessPayoff"
+  | "creditsAfterRun"
+  | "knownAccessState"
+  | "pathPassability"
+  | "recommendation"
+  | "targetKind"
+  | "targetServerId"
+>;
+
+export type RunnerRunTargetMultiRunPayoffClass =
+  | "high_payoff"
+  | "unknown_probe"
+  | "low_payoff"
+  | "blocked"
+  | "missing_target";
 
 export const RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION = {
   run_now: 180,
@@ -55,12 +82,91 @@ export function runnerRunTargetSemanticGuidanceValue(
   ];
 }
 
+export function runnerRunTargetHighPayoff(
+  evaluation: Pick<RunnerRunTargetEvaluation, "accessPayoff">,
+): boolean {
+  return (
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus"
+  );
+}
+
+export function runnerRunTargetPlausibleForMultiRun(
+  evaluation: RunTargetPayoffInput | undefined,
+): boolean {
+  if (!evaluation) return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  if (runnerRunTargetHighPayoff(evaluation)) return true;
+  return (
+    evaluation.recommendation === "run_now" ||
+    evaluation.recommendation === "run_if_free"
+  );
+}
+
+export function runnerRunTargetMultiRunPayoffClass(
+  evaluation: RunTargetPayoffInput | undefined,
+): RunnerRunTargetMultiRunPayoffClass {
+  if (!evaluation) return "missing_target";
+  if (
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.creditsAfterRun < 0
+  ) {
+    return "blocked";
+  }
+  if (evaluation.knownAccessState === "known_no_current_payoff") {
+    return "low_payoff";
+  }
+  if (evaluation.accessPayoff === "unknown") return "unknown_probe";
+  if (runnerRunTargetHighPayoff(evaluation)) return "high_payoff";
+  if (evaluation.recommendation === "run_if_free") return "unknown_probe";
+  return evaluation.recommendation === "run_now" ? "high_payoff" : "low_payoff";
+}
+
 export function runnerRunTargetTacticalPriorityDelta(
   evaluation: RunTargetTacticalPriorityInput,
 ): number {
   return RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION[
     evaluation.recommendation
   ];
+}
+
+export function runnerPressureProbeBasePriority(
+  evaluation: RunTargetPressureProbeInput,
+): number {
+  const basePriority = evaluation.targetServerId === "rd" ? 760 : 740;
+  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
+}
+
+export function runnerPressureProbeTargetAllowed(
+  evaluation: RunTargetPressureProbeInput,
+): boolean {
+  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
+    return false;
+  }
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  return (
+    evaluation.accessPayoff === "unknown" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    evaluation.recommendation === "run_now" ||
+    evaluation.recommendation === "run_if_free"
+  );
+}
+
+export function runnerPressurePreferredProbeTarget(
+  targets: readonly string[],
+  stateVersion: number,
+): string | undefined {
+  if (targets.length === 0) return undefined;
+  const index = Math.abs(stateVersion) % targets.length;
+  return targets[index];
 }
 
 export function runnerRunTargetRecommendationGuidanceKeys(): RunnerRunTargetRecommendation[] {
