@@ -1,6 +1,6 @@
 # AI Trace Bid Efficiency Final Report 2026-06-22
 
-Status: `completed_final_green_pending_merge`
+Status: `completed_on_main_with_runtime_followup`
 
 Branch: `codex/ai-trace-bid-efficiency`
 
@@ -8,7 +8,7 @@ Branch: `codex/ai-trace-bid-efficiency`
 
 AI-TRACE-BID-0 bis AI-TRACE-BID-4 wurden sequenziell umgesetzt. Die Runner-KI nutzt jetzt eine generische Trace-Bid-Effizienzpolicy für `bid_amount`-Choices: Wenn side-safe sichtbare Trace-Felder zeigen, dass ein bezahlbares Runner-Gebot das Trace-Ergebnis nicht verbessern kann, wählt die KI den billigsten gleichwertigen Bid, im Screenshot-Fall also `bid_0`.
 
-Der Fix ist kein `Chance Observation`-Sonderfall. Er wirkt auf Runner-Trace-Bids mit bekanntem `traceStrength`, `runnerLink` und sichtbarem `corpBid`. Bei unbekanntem Kontext bleibt die bisherige Auswahl erhalten.
+Der Fix ist kein `Chance Observation`-Sonderfall. Er wirkt auf Runner-Trace-Bids mit bekannter öffentlicher `traceStrength` und `runnerLink`. Dabei ist `traceStrength` der Engine-Vertrag für die bereits berechnete Korp-Trace-Stärke nach Korp-Gebot; `corpBid` ist öffentliche Kontextinformation, wird aber nicht erneut addiert. Bei unbekanntem Kontext bleibt die bisherige Auswahl erhalten.
 
 ## Umsetzung
 
@@ -16,6 +16,7 @@ Der Fix ist kein `Chance Observation`-Sonderfall. Er wirkt auf Runner-Trace-Bids
 - Neue fokussierte Tests: `packages/ai/src/trace-bid-efficiency.test.ts`.
 - Runtime-Anbindung: `packages/ai/src/index.ts` bei `bid_amount`-Choice-Auflösung für Runner.
 - Regression: `packages/ai/src/index.test.ts` deckt den Fall `Trace 5`, Korp-Bid 3, Runner 2 Credits ab und erwartet `bid_0`.
+- Runtime-Follow-up nach Playtest vom 2026-06-22: Der Regressionstest nutzt nun den echten AI-EventTail statt manuell injizierten Trace-Kontext; Engine-Trace-Events geben `corpBid` im öffentlichen Payload explizit weiter, und die DTO-Allowlist lässt dieses öffentliche Feld durch.
 
 ## Sicherheitsgrenzen
 
@@ -55,4 +56,23 @@ git status --short
 # Ergebnis: clean
 ```
 
-Der lokale Merge nach `main` folgt nach diesem FINAL-GREEN-Commit.
+## Follow-up-Verifikation
+
+Nach dem Fetch-4.0.1-Playtestbefund vom 2026-06-22 erneut ausgeführt und grün:
+
+```bash
+corepack pnpm --filter @netgrid/ai exec vitest run src/trace-bid-efficiency.test.ts src/index.test.ts
+# Ergebnis: 2 Test Files passed, 521 Tests passed
+
+corepack pnpm --filter @netgrid/engine exec vitest run src/game/trace/trace-orchestration.test.ts
+# Ergebnis: 1 Test File passed, 8 Tests passed
+
+corepack pnpm --filter @netgrid/ai typecheck
+# Ergebnis: passed
+
+corepack pnpm --filter @netgrid/engine typecheck
+# Ergebnis: passed
+
+git diff --check
+# Ergebnis: passed
+```

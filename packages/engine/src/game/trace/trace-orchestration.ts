@@ -350,6 +350,7 @@ function resolveTraceCorpBid(
         ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
         : {}),
       ...tracePaymentPayload,
+      corpBid: bid,
       traceStrength,
       runnerLink,
       traceBaseLinkChoiceOpened: true,
@@ -387,6 +388,7 @@ function resolveTraceCorpBid(
       ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
       : {}),
     ...tracePaymentPayload,
+    corpBid: bid,
     traceStrength,
     runnerLink,
     ...(cryingCounterCount > 0

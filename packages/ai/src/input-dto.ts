@@ -158,6 +158,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "damageResolved",
   "traceStarted",
   "traceStep",
+  "corpBid",
   "traceStrength",
   "runnerLink",
   "successful",

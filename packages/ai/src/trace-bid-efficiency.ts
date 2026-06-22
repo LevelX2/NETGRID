@@ -46,19 +46,16 @@ export function selectEfficientTraceBidOption(
 
   const traceStrength = input.traceStrength;
   const runnerLink = input.runnerLink;
-  const corpBid = input.corpBid;
   if (
     typeof traceStrength !== "number" ||
     typeof runnerLink !== "number" ||
-    typeof corpBid !== "number" ||
     !Number.isInteger(traceStrength) ||
-    !Number.isInteger(runnerLink) ||
-    !Number.isInteger(corpBid)
+    !Number.isInteger(runnerLink)
   ) {
     return { option: desiredOption, reason: "trace_bid_unknown_context" };
   }
 
-  const corpTotal = Math.max(0, traceStrength) + Math.max(0, corpBid);
+  const corpTotal = Math.max(0, traceStrength);
   const runnerBase = Math.max(0, runnerLink);
   const desiredOutcome = runnerAvoidsTrace(
     runnerBase,

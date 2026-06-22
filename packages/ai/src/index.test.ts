@@ -3378,21 +3378,14 @@ describe("MVP 0.3 AI controller contract", () => {
     const runnerInput = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
     });
-    const visibleTraceContext: PublicGameEvent = {
-      eventId: "ai_trace_wasteful_runner_bid_context",
-      type: "trace_step",
-      stateVersionBefore: state.stateVersion - 1,
-      stateVersionAfter: state.stateVersion,
-      stateHashAfter: hashState(state),
-      visibilityClass: "public",
-      publicPayload: {
-        traceStep: "runner_bid",
-        traceStrength: 5,
-        runnerLink: 0,
-        corpBid: 3,
-      },
-    };
-    runnerInput.eventTail = [...runnerInput.eventTail, visibleTraceContext];
+    expect(
+      runnerInput.eventTail.some(
+        (event) =>
+          event.publicPayload.traceStep === "corp_bid" &&
+          event.publicPayload.traceStrength === 5 &&
+          event.publicPayload.runnerLink === 0,
+      ),
+    ).toBe(true);
 
     expect(
       runnerInput.playerView.pendingChoice?.options.map((option) => option.id),

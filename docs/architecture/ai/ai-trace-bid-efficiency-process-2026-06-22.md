@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_complete_pending_merge`
+`completed_on_main_with_runtime_followup`
 
 Arbeitsbranch: `codex/ai-trace-bid-efficiency`
 
@@ -17,7 +17,8 @@ Hauptworkspace: `C:\Projekte\NETGRID`
 - `AI-TRACE-BID-2`: abgeschlossen und committed.
 - `AI-TRACE-BID-3`: abgeschlossen und committed.
 - `AI-TRACE-BID-4`: Review und Wissenspflege abgeschlossen; FINAL-GREEN steht noch aus.
-- `FINAL-GREEN`: AI-Test, Typecheck, `git diff --check` und sauberer Status abgeschlossen; lokaler Merge nach `main` steht noch aus.
+- `FINAL-GREEN`: AI-Test, Typecheck, `git diff --check`, sauberer Status und lokaler Merge nach `main` abgeschlossen.
+- `Follow-up 2026-06-22`: Fetch-4.0.1-Playtestbefund nachgehärtet; AI nutzt den echten EventTail-Vertrag für öffentliche `traceStrength`/`runnerLink`, Engine gibt `corpBid` im öffentlichen Korp-Bid-Payload explizit weiter.
 
 ## Quelle/Vorgabe
 

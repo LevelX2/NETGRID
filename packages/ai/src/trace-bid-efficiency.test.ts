@@ -11,7 +11,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_2", amount: 2 },
       ],
       desiredAmount: 2,
-      traceStrength: 5,
+      traceStrength: 8,
       runnerLink: 0,
       corpBid: 3,
     });
@@ -32,7 +32,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_3", amount: 3 },
       ],
       desiredAmount: 3,
-      traceStrength: 2,
+      traceStrength: 3,
       runnerLink: 0,
       corpBid: 1,
     });
@@ -53,7 +53,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_3", amount: 3 },
       ],
       desiredAmount: 3,
-      traceStrength: 2,
+      traceStrength: 3,
       runnerLink: 1,
       corpBid: 1,
     });
@@ -74,7 +74,6 @@ describe("Trace bid efficiency", () => {
       ],
       desiredAmount: 2,
       traceStrength: 5,
-      runnerLink: 0,
     });
 
     expect(selection).toEqual({
