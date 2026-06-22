@@ -93,10 +93,10 @@ Schnittkandidaten festlegen.
 
 Kernbefund:
 
-- `packages/ai/src/index.ts`: 35.063 Zeilen.
-- `packages/ai/src/tactical-plans.ts`: 4.074 Zeilen.
-- `packages/ai/src/legacy/runner-plans.ts`: 8.536 Zeilen.
-- `runtime/semantic-runtime-score-components.ts`: 42 Zeilen und damit klarer
+- `packages/ai/src/index.ts`: 36.108 Zeilen.
+- `packages/ai/src/tactical-plans.ts`: 4.230 Zeilen.
+- `packages/ai/src/legacy/runner-plans.ts`: 8.838 Zeilen.
+- `runtime/semantic-runtime-score-components.ts`: 46 Zeilen und damit klarer
   Zielort für Score-Summen- und Type-Priority-Helfer.
 - `tactical-plans.ts` enthält eine kompakte Draw-Overflow-Familie mit
   Penalty-, Evidence-, Rationale- und Credit-Plan-Support-Helfern.
@@ -112,12 +112,14 @@ Commit: `docs(ai): plan runtime tactical legacy optimization loop`
 
 Ergebnis:
 
-- Worktree `C:\Projekte\NETGRID_AI_RUNTIME_TACTICAL_LEGACY_AUDIT_LOOP` auf
-  Branch `codex/ai-runtime-tactical-legacy-audit-loop` angelegt.
-- Dependencies im Worktree per `corepack pnpm install` installiert.
+- Vorhandener Worktree
+  `C:\Projekte\NETGRID_AI_RUNTIME_TACTICAL_LEGACY_AUDIT_LOOP` auf Branch
+  `codex/ai-runtime-tactical-legacy-audit-loop` wurde wiederaufgenommen.
+- Planungsmessung wurde auf den aktuellen Main-Stand korrigiert.
 - Planungs-Gate grün:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-score-components.test.ts src/tactical-plans.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
-  - `git diff --check`
+    grün: 3 Testdateien, 561 Tests.
+  - `git diff --check` grün.
 
 ### AI-RSL-1 Runtime-Scoring-Kern extrahieren
 
