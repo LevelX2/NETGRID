@@ -6,6 +6,9 @@ import type {
 } from "./runner-run-target-evaluation";
 import {
   RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION,
+  runnerRunTargetHighPayoff,
+  runnerRunTargetMultiRunPayoffClass,
+  runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetRecommendationGuidanceKeys,
   runnerRunTargetSemanticGuidanceValue,
   runnerRunTargetTacticalPriorityDelta,
@@ -68,5 +71,52 @@ describe("runner run target guidance", () => {
     for (const entry of cases) {
       expect(runnerRunTargetSemanticGuidanceValue(entry)).toBe(entry.expected);
     }
+  });
+
+  it("classifies multi-run payoff without relying on semantic runtime state", () => {
+    const base = {
+      accessPayoff: "unknown" as RunnerAccessPayoff,
+      creditsAfterRun: 2,
+      knownAccessState: "unknown" as const,
+      pathPassability: "reachable" as const,
+      recommendation: "run_if_free" as RunnerRunTargetRecommendation,
+    };
+
+    expect(runnerRunTargetMultiRunPayoffClass(undefined)).toBe("missing_target");
+    expect(
+      runnerRunTargetMultiRunPayoffClass({
+        ...base,
+        pathPassability: "blocked_unpayable",
+      }),
+    ).toBe("blocked");
+    expect(
+      runnerRunTargetMultiRunPayoffClass({
+        ...base,
+        knownAccessState: "known_no_current_payoff",
+      }),
+    ).toBe("low_payoff");
+    expect(runnerRunTargetMultiRunPayoffClass(base)).toBe("unknown_probe");
+    expect(
+      runnerRunTargetMultiRunPayoffClass({
+        ...base,
+        accessPayoff: "agenda",
+        recommendation: "setup_first",
+      }),
+    ).toBe("high_payoff");
+    expect(
+      runnerRunTargetPlausibleForMultiRun({
+        ...base,
+        accessPayoff: "agenda",
+        recommendation: "setup_first",
+      }),
+    ).toBe(true);
+    expect(
+      runnerRunTargetPlausibleForMultiRun({
+        ...base,
+        creditsAfterRun: -1,
+      }),
+    ).toBe(false);
+    expect(runnerRunTargetHighPayoff({ accessPayoff: "fresh" })).toBe(true);
+    expect(runnerRunTargetHighPayoff({ accessPayoff: "unknown" })).toBe(false);
   });
 });

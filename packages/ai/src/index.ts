@@ -72,7 +72,13 @@ import {
   type BlinkRiskPayoffOverride,
   type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
-import { runnerRunTargetSemanticGuidanceValue } from "./runner-run-target-guidance";
+import {
+  runnerRunTargetHighPayoff,
+  runnerRunTargetMultiRunPayoffClass,
+  runnerRunTargetPlausibleForMultiRun,
+  runnerRunTargetSemanticGuidanceValue,
+  type RunnerRunTargetMultiRunPayoffClass,
+} from "./runner-run-target-guidance";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
   buildRunnerTacticalGoals,
@@ -3443,12 +3449,7 @@ type RunnerMultiRunEventAssessment = {
   targetServerId: string;
   phase: "first_run" | "followup_run";
   canTakeRun: boolean;
-  payoffClass:
-    | "high_payoff"
-    | "unknown_probe"
-    | "low_payoff"
-    | "blocked"
-    | "missing_target";
+  payoffClass: RunnerRunTargetMultiRunPayoffClass;
   value: number;
   evaluation?: RunnerRunTargetEvaluation;
   evidence: string[];
@@ -3749,8 +3750,8 @@ function runnerRunPayoffCompletionCandidate(
     return undefined;
   const evaluation = evaluateRunnerRunTargets({ input }).find(
     (candidate) =>
-      runnerMultiRunEvaluationPlausible(candidate) &&
-      runnerMultiRunHighPayoff(candidate),
+      runnerRunTargetPlausibleForMultiRun(candidate) &&
+      runnerRunTargetHighPayoff(candidate),
   );
   if (!evaluation) return undefined;
   const action = input.legalActions.find(
@@ -6446,7 +6447,7 @@ function runnerBankCommitmentRunOverride(
     return "remote_score_threat";
   const evaluation = runnerMultiRunTargetEvaluation(input, action, serverId);
   if (!evaluation) return undefined;
-  if (runnerMultiRunHighPayoff(evaluation)) {
+  if (runnerRunTargetHighPayoff(evaluation)) {
     return `high_payoff:${evaluation.accessPayoff}`;
   }
   if (
@@ -8367,8 +8368,8 @@ function runnerMultiRunEventAssessment(
     targetServerId === "unknown"
       ? undefined
       : runnerMultiRunTargetEvaluation(input, action, targetServerId);
-  const payoffClass = runnerMultiRunPayoffClass(evaluation);
-  const canTakeRun = runnerMultiRunEvaluationPlausible(evaluation);
+  const payoffClass = runnerRunTargetMultiRunPayoffClass(evaluation);
+  const canTakeRun = runnerRunTargetPlausibleForMultiRun(evaluation);
   const evidence = [
     `multiRunEvent:${phase}`,
     `multiRunEvent:source:${sourceDefinitionId || "bonus_run"}`,
@@ -8508,51 +8509,6 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
-}
-
-function runnerMultiRunEvaluationPlausible(
-  evaluation: RunnerRunTargetEvaluation | undefined,
-): boolean {
-  if (!evaluation) return false;
-  if (evaluation.pathPassability !== "reachable") return false;
-  if (evaluation.creditsAfterRun < 0) return false;
-  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
-  if (runnerMultiRunHighPayoff(evaluation)) return true;
-  return (
-    evaluation.recommendation === "run_now" ||
-    evaluation.recommendation === "run_if_free"
-  );
-}
-
-function runnerMultiRunPayoffClass(
-  evaluation: RunnerRunTargetEvaluation | undefined,
-): RunnerMultiRunEventAssessment["payoffClass"] {
-  if (!evaluation) return "missing_target";
-  if (
-    evaluation.pathPassability !== "reachable" ||
-    evaluation.creditsAfterRun < 0
-  ) {
-    return "blocked";
-  }
-  if (evaluation.knownAccessState === "known_no_current_payoff") {
-    return "low_payoff";
-  }
-  if (evaluation.accessPayoff === "unknown") return "unknown_probe";
-  if (runnerMultiRunHighPayoff(evaluation)) return "high_payoff";
-  if (evaluation.recommendation === "run_if_free") return "unknown_probe";
-  return evaluation.recommendation === "run_now" ? "high_payoff" : "low_payoff";
-}
-
-function runnerMultiRunHighPayoff(
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
-  return (
-    evaluation.accessPayoff === "agenda" ||
-    evaluation.accessPayoff === "score_threat" ||
-    evaluation.accessPayoff === "trash_affordable" ||
-    evaluation.accessPayoff === "fresh" ||
-    evaluation.accessPayoff === "access_bonus"
-  );
 }
 
 function runnerMultiRunEventScoreValue(
