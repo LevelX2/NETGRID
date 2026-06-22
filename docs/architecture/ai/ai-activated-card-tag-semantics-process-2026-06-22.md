@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_0_process_preflight_done`
+`tag_sem_1_effect_inventory_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -136,6 +136,24 @@ Datum: 2026-06-22
 - `AGENTS.md`, lokale Agent-Ergänzung aus dem Hauptworkspace, NETGRID-Wissensbasis, `release-implementation-agent`, `card-enablement-ai-knowledge-agent` und dieses Prozessartefakt wurden gelesen.
 - Checks:
   - `git status --short --branch`: nur das neue Prozessartefakt im Arbeits-Worktree vor Commit.
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-1 abgeschlossen
+
+Datum: 2026-06-22
+
+- Inventar angelegt: `docs/reviews/ai/ai-activated-card-tag-semantics-inventory-2026-06-22.md`
+- Vergleichbare aktive `remove_tags`-Fälle:
+  - `Danshi's Second ID`: `activated_card_ability`, bis zu 3 Tags, Source-Trash-Kosten.
+  - `Nomad Allies`: `activated_card_ability`, 1 Tag, 1 Credit, zusätzlich Tag-Vermeidung.
+  - `Open-Ended Mileage Program`: `play_event`, 1 Tag, optionale Rücknahme-Choice.
+  - `Total Genetic Retrofit`: `play_event`, alle Tags, zusätzliche nächste-Tag-Vermeidung.
+- Support-only-Fälle:
+  - `Armadillo` und `Drifter`: Hosted Credits mit `usableFor: ["remove_tags"]`, keine eigene Tag-Entfernungsaktion.
+  - `Fall Guy`, `Nasuko Cycle`, `Leland`, `Wilson` und `Expendable Family Member`: Tag-Vermeidung, keine akute Tag-Entfernung.
+- Schlussfolgerung: Der Folgefix muss generisch an side-safe CardImplementation-/Payload-Metadaten ansetzen; AI-Hints sind unterstützend, aber nicht alleinige Autorität.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
   - `git diff --check`: grün.
 
 ## Paketfolge
