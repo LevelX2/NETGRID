@@ -1,6 +1,6 @@
 # AI Runtime Scoring Tactical Legacy Optimization Loop
 
-Status: `package_done:AI-RSL-2`
+Status: `package_done:AI-RSL-3`
 
 Datum: 2026-06-22
 
@@ -218,6 +218,21 @@ Checks:
 - `git diff --check`
 
 Commit: `refactor(ai): isolate legacy runner plan metadata`
+
+Ergebnis:
+
+- `packages/ai/src/legacy/runner-plan-metadata.ts` kapselt statische
+  `RunnerPlanKind`-Metadaten: Kindliste, Base-Score, sichtbare Benefits,
+  sichtbare Risiken, Unsicherheit und Run-Plan-Klassifizierung.
+- `packages/ai/src/legacy/runner-plans.ts` re-exportiert den Typ und nutzt die
+  Legacy-Metadaten-Helper statt lokaler statischer Funktionen.
+- `runner-plan-metadata.test.ts` sichert vollständige Kind-Abdeckung,
+  Scorewerte, Benefit-/Risk-Strings, Uncertainty und Run-Plan-Klassifizierung.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/legacy/runner-plan-metadata.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+    grün: 2 Testdateien, 521 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - `git diff --check` grün.
 
 ## FINAL-GREEN
 
