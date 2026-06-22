@@ -165,6 +165,19 @@ Checks:
 
 Commit: `refactor(ai): share pressure probe run target helpers`
 
+Ergebnis:
+
+- `runnerPressureProbeBasePriority` und `runnerPressureProbeTargetAllowed`
+  liegen jetzt in `packages/ai/src/runner-run-target-guidance.ts`.
+- `packages/ai/src/tactical-plans.ts` nutzt die geteilten RunTarget-Guidance-
+  Helper statt lokaler Pressure-Probe-Funktionen.
+- `runner-run-target-guidance.test.ts` deckt Base-Priority sowie Target-Kind-,
+  Payoff-, Path- und Credit-Ausschlüsse ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
 ### AI-SRCOPT2-3 Restpotential bewerten und Abschluss dokumentieren
 
 Ziel: Nach den sicheren RunTarget-Slices bewerten, ob noch ein weiterer
