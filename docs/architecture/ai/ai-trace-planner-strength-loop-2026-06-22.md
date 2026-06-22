@@ -1,6 +1,6 @@
 # AI Trace Planner Strength Loop
 
-Status: package_done:TRACE-PLANNER-1
+Status: package_done:TRACE-PLANNER-2
 
 Datum: 2026-06-22
 
@@ -140,6 +140,32 @@ Konkreter Kandidat:
   oder Overdraw-Credit-Pressure aktiv ist.
 
 Entscheidung: `implement_candidate`.
+
+## TRACE-PLANNER-2 Umsetzungsergebnis
+
+Umgesetzt wurde eine enge Planner-Bremse für `runner.build_credit_base`:
+
+- Wenn eine nützliche Runner-Handentwicklung bereits legal ausführbar ist,
+  tritt der Credit-Base-Plan zurück.
+- Die Bremse greift nicht bei Mindestreserve-Unterschreitung.
+- Die Bremse greift nicht bei aktiver Remote-Contest-Finanzierung.
+- Die Bremse greift nicht bei Overdraw-Credit-Pressure.
+
+Fokussierter Schutz:
+
+- Ein neuer TacticalPlans-Test deckt den Trace-Fall ab: Eine legale nützliche
+  Economy-Install-Aktion schlägt weitere Credit-Base-Finanzierung, obwohl noch
+  eine andere nützliche Karte geblockt ist.
+- Der bestehende Gegenfall bleibt geschützt: Wenn die nützliche Karte nicht
+  bezahlbar ist, gewinnt weiterhin `runner.build_credit_base`.
+
+Checks:
+
+```text
+corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
+```
 
 ### TRACE-PLANNER-0 Prozess- und Baseline-Setup
 
