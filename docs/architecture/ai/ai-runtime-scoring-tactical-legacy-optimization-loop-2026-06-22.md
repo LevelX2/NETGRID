@@ -1,6 +1,6 @@
 # AI Runtime Scoring Tactical Legacy Optimization Loop
 
-Status: `package_done:AI-RSL-3`
+Status: `final_green_ready`
 
 Datum: 2026-06-22
 
@@ -249,6 +249,45 @@ Done-Gate:
 - Branch ist lokal nach `main` integriert.
 - Hauptworkspace ist sauber.
 - Worktree ist entfernt.
+
+Ergebnis vor Merge:
+
+- `corepack pnpm --filter @netgrid/ai test` grün:
+  131 Testdateien, 1507 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+- Arbeitsbranch `codex/ai-runtime-tactical-legacy-audit-loop` ist sauber.
+
+Restmessung:
+
+- `packages/ai/src/index.ts`: 36.048 Zeilen.
+- `packages/ai/src/tactical-plans.ts`: 3.860 Zeilen.
+- `packages/ai/src/legacy/runner-plans.ts`: 8.774 Zeilen.
+- `packages/ai/src/runtime/semantic-runtime-score-components.ts`: 110 Zeilen.
+- `packages/ai/src/plans/runner-draw-overflow.ts`: 419 Zeilen.
+- `packages/ai/src/legacy/runner-plan-metadata.ts`: 87 Zeilen.
+
+Restpotential:
+
+- `index.ts` enthält weiterhin viele Runtime-Semantic-Familien. Ein weiterer
+  sicherer Slice ist hier nicht mehr als reine Helper-Extraktion sichtbar,
+  sondern braucht einen eigenen Runtime-Facade-Audit, der Debug-, Evidence-,
+  Score-Component- und Doctrine-Gate-Grenzen gemeinsam bewertet.
+- `legacy/runner-plans.ts` enthält weiterhin große Legacy-Planungslogik. Nach
+  der Metadaten-Isolation bleibt als nächster sinnvoller Schritt nur ein
+  eigener Legacy-Isolation-Audit mit klarer Entscheidung, welche Runner-Plan-
+  Familien aus der Legacy-Orchestrierung herausgelöst werden dürfen.
+- `tactical-plans.ts` hat nach der Draw-Overflow-Isolation kein weiteres
+  offensichtlich kleines, risikoarmes Tactical-Goal-Family-Paket in dieser
+  Schleife. Weitere Splits sollten als separater Tactical-Goal-Family-Audit
+  geschnitten werden.
+
+Stoppentscheidung:
+
+- Die geplanten sicheren Runtime-Scoring-, Tactical-Draw-Overflow- und
+  Legacy-Metadaten-Slices sind umgesetzt.
+- Das verbleibende Potential ist fachlich breiter als diese Schleife und soll
+  nicht als Micro-Slice ohne eigenen Audit umgesetzt werden.
 
 ## Controller-Prompt-Kern
 
