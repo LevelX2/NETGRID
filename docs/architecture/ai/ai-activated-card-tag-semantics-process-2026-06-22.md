@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_6_review_and_knowledge_done`
+`final_green_verified_pending_merge`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -232,6 +232,19 @@ Datum: 2026-06-22
 - Prozessstand auf realen Abschluss bis AI-TAG-SEM-6 aktualisiert.
 - Checks:
   - `git diff --check`: grün.
+
+### FINAL-GREEN verifiziert
+
+Datum: 2026-06-22
+
+- Vollständiger AI-Testlauf:
+  - `corepack pnpm --filter @netgrid/ai test`: grün, 132 Testdateien / 1518 Tests.
+- Typecheck:
+  - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Workspace-Hygiene:
+  - `git diff --check`: grün.
+- Der erste vollständige AI-Testaufruf lief mit 124 Sekunden Tool-Timeout ohne verwertbare Ausgabe ab; der wiederholte Lauf mit größerem Timeout war vollständig grün.
+- Finaler lokaler Merge nach `main` ist der nächste Schritt nach diesem Paketcommit.
 
 ## Paketfolge
 
