@@ -1,6 +1,6 @@
 # AI Runtime Scoring Tactical Legacy Optimization Loop
 
-Status: `package_done:AI-RSL-1`
+Status: `package_done:AI-RSL-2`
 
 Datum: 2026-06-22
 
@@ -175,6 +175,22 @@ Checks:
 - `git diff --check`
 
 Commit: `refactor(ai): move runner draw overflow planning`
+
+Ergebnis:
+
+- Die Runner-Draw-Overflow-Familie liegt jetzt in
+  `packages/ai/src/plans/runner-draw-overflow.ts`.
+- `packages/ai/src/tactical-plans.ts` importiert nur noch die Plan-Family-
+  Helfer und enthält die Assessment-, Penalty-, Reason-, Evidence- und
+  Credit-Boost-Logik nicht mehr lokal.
+- `runner-draw-overflow.test.ts` sichert Severity, Penalty-Bounds,
+  Reason-Sortierung, Rationale, Evidence, Credit-Plan-Support und
+  Hand-Development-Bonus ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/runner-draw-overflow.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
+    grün: 2 Testdateien, 46 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - `git diff --check` grün.
 
 ### AI-RSL-3 Legacy-RunnerPlan-Metadaten isolieren
 
