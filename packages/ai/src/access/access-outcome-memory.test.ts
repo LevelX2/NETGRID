@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   accessOutcomeMemoryEvidence,
+  accessOutcomeMemoryPlanEvidence,
   createAccessOutcomeMemory,
   evaluateAccessOutcomeMemoryStatus,
   readAccessOutcomeMemory,
@@ -212,5 +213,41 @@ describe("access outcome memory", () => {
         "access_outcome_memory_suppresses_plan_bonus:true",
       ]),
     });
+  });
+
+  it("formats no-plan-bonus evidence from structured memory status", () => {
+    const record = rememberAccessOutcome(
+      createAccessOutcomeMemory(),
+      {
+        matchId: "match-1",
+        side: "runner",
+        profileId: "runner-ai",
+        serverId: "remote_1",
+      },
+      {
+        remoteFingerprint: "same",
+        observedDecision: "decline",
+        reason: "reserve_would_break",
+        creditsAtOutcome: 3,
+        desiredReserveAtOutcome: 5,
+        stateVersion: 1,
+      },
+    ).records[0]!;
+    const status = evaluateAccessOutcomeMemoryStatus(record, {
+      currentRemoteFingerprint: "same",
+      currentCredits: 3,
+      currentDesiredReserve: 5,
+    });
+
+    expect(accessOutcomeMemoryPlanEvidence(status)).toEqual([
+      "access_outcome_memory_no_plan_bonus:true",
+      "access_outcome_memory_applied:declined_access",
+    ]);
+    expect(
+      accessOutcomeMemoryPlanEvidence({
+        ...status,
+        applies: false,
+      }),
+    ).toEqual([]);
   });
 });

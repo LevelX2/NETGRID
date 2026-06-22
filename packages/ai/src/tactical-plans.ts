@@ -7,7 +7,10 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
+import {
+  accessOutcomeMemoryPlanEvidence,
+  type AccessOutcomeMemoryStatus,
+} from "./access/access-outcome-memory";
 import type {
   BreakerCoverageKind,
   DeckCapabilityProfile,
@@ -1427,16 +1430,6 @@ function accessCommitmentPlanEvidence(
   ];
 }
 
-function accessOutcomeNoPlanBonusEvidence(
-  status: AccessOutcomeMemoryStatus | undefined,
-): string[] {
-  if (!status?.applies || !status.suppressesPlanBonus) return [];
-  return [
-    "access_outcome_memory_no_plan_bonus:true",
-    "access_outcome_memory_applied:declined_access",
-  ];
-}
-
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
   const input = context.input;
   const previousPlan = context.previousPlan;
@@ -1594,7 +1587,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       context.accessCommitment,
       serverId,
     );
-    const noPlanBonusEvidence = accessOutcomeNoPlanBonusEvidence(
+    const noPlanBonusEvidence = accessOutcomeMemoryPlanEvidence(
       context.accessOutcomeMemory,
     );
     plans.push(

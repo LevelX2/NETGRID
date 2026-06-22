@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: package_done:AI-SRCOPT-0
+Status: package_done:AI-SRCOPT-1
 
 Datum: 2026-06-22
 
@@ -114,6 +114,23 @@ Ausgangsstand nach Worktree-Anlage:
     stand noch auf `implementation_complete_before_final_green`.
   - Der Status wurde auf `complete` korrigiert und verweist auf den separat
     laufenden Strukturprozess.
+
+## AI-SRCOPT-1 Ergebnis
+
+- Der neue `access/access-outcome-memory`-Pfad besitzt mit
+  `accessOutcomeMemoryPlanEvidence` einen strukturierten Helper für
+  No-Plan-Bonus-Evidence.
+- `tactical-plans.ts` nutzt diesen Helper statt einer lokalen Dublette.
+- `memory/remote-access-outcome.ts` ist als Legacy-Kompatibilitätsadapter
+  enger gefasst:
+  - kein direkter `decision/access-decision-projection`-Import mehr;
+  - Outcome-Evidence wird über Access-Outcome-Evidence gespiegelt;
+  - der alte `declinedTrashOutcomePlanEvidence`-Parser ist deprecated und
+    status-gated.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/access/access-outcome-memory.test.ts src/memory/remote-access-outcome.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
 
 ## Paketdetails
 
