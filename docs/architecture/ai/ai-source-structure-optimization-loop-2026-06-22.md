@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: package_done:AI-SRCOPT-1
+Status: package_done:AI-SRCOPT-2
 
 Datum: 2026-06-22
 
@@ -129,6 +129,19 @@ Ausgangsstand nach Worktree-Anlage:
     status-gated.
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/access/access-outcome-memory.test.ts src/memory/remote-access-outcome.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-2 Ergebnis
+
+- `packages/ai/src/access/access-decision-projection.ts` ist die neue
+  access-nahe Fassade für Projection-Typen und `projectAccessDecision`.
+- Access-Module konsumieren Projection-Verträge über diese Fassade statt direkt
+  aus `decision/access-decision-projection`.
+- Der Boundary-Test erlaubt nur der Fassade den direkten Decision-Import und
+  schützt die übrigen Access-Module gegen erneute Direktkopplung.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/access-decision-projection.test.ts src/decision/module-boundaries.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
   - `corepack pnpm --filter @netgrid/ai typecheck`
   - `git diff --check`
 

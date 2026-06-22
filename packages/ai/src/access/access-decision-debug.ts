@@ -1,4 +1,4 @@
-import type { AccessDecisionProjection } from "../decision/access-decision-projection";
+import type { AccessDecisionProjection } from "./access-decision-projection";
 
 export function accessDecisionProjectionDebugEvidence(
   projection: AccessDecisionProjection,
