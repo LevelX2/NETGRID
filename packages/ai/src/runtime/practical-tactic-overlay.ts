@@ -68,10 +68,12 @@ function bestPracticalTacticCandidate(
     runnerStealAgendaCandidate(input),
     corpSafeScoreCandidate(input),
     runnerTrashValueCandidate(input),
+    runnerOpenAccessCardCandidate(input),
     runnerInstallCoverageCandidate(input),
     corpRealPunishCandidate(input),
     corpAbandonStalePunishCandidate(input),
     runnerContinueReachableRunCandidate(input),
+    runnerHighPayoffRunCandidate(input),
     runnerAvoidStaleRunCandidate(input, runtimeDecision),
   ].filter(
     (candidate): candidate is PracticalTacticCandidate => candidate !== undefined,
@@ -117,6 +119,17 @@ function runnerTrashValueCandidate(
   if (!action) return undefined;
   return tacticCandidate(action, "runner.practical_tactic.trash_value", 900, [
     "practical_tactic:runner_trash_value",
+  ]);
+}
+
+function runnerOpenAccessCardCandidate(
+  input: AiDecisionInput,
+): PracticalTacticCandidate | undefined {
+  if (input.side !== "runner") return undefined;
+  const action = input.legalActions.find((candidate) => candidate.type === "access_card");
+  if (!action) return undefined;
+  return tacticCandidate(action, "runner.practical_tactic.open_access_card", 880, [
+    "practical_tactic:runner_open_access_card",
   ]);
 }
 
@@ -174,6 +187,22 @@ function runnerContinueReachableRunCandidate(
   if (!action) return undefined;
   return tacticCandidate(action, "runner.practical_tactic.continue_reachable_run", 740, [
     "practical_tactic:runner_continue_reachable_run",
+  ]);
+}
+
+function runnerHighPayoffRunCandidate(
+  input: AiDecisionInput,
+): PracticalTacticCandidate | undefined {
+  if (input.side !== "runner") return undefined;
+  const action = input.legalActions.find(
+    (candidate) =>
+      candidate.type === "start_run" &&
+      candidate.payload?.knownNoCurrentPayoff !== true &&
+      runnerRunLooksHighPayoff(candidate),
+  );
+  if (!action) return undefined;
+  return tacticCandidate(action, "runner.practical_tactic.high_payoff_run", 720, [
+    "practical_tactic:runner_high_payoff_run",
   ]);
 }
 
@@ -263,6 +292,14 @@ function corpActionLooksLikePunish(action: LegalAction): boolean {
   return /punish|closed accounts|scorched|tag/i.test(
     [action.label, action.type].join(" ").toLowerCase(),
   );
+}
+
+function runnerRunLooksHighPayoff(action: LegalAction): boolean {
+  const payloadPayoff = String(action.payload?.accessPayoff ?? "");
+  if (/agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(payloadPayoff)) {
+    return true;
+  }
+  return /agenda|score threat|fresh access|multiaccess|valuable access/i.test(action.label);
 }
 
 function actionCreditCost(action: LegalAction): number {

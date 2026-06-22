@@ -1,6 +1,6 @@
 # AI Play Strength Loop 2
 
-Status: package_done:AI-PS2-0
+Status: package_done:AI-PS2-1
 
 Datum: 2026-06-22
 
@@ -150,6 +150,27 @@ Schluss: Der erweiterte Gate-Runner funktioniert. Der schnelle Preflight stützt
 die zuvor identifizierte Asymmetrie: Runner kann punktuell profitieren, Corp ist
 im breiteren Szenario nicht automatisch stabil besser. Deshalb bleiben AI-PS2-1
 und AI-PS2-2 getrennt.
+
+## AI-PS2-1 Messbefund
+
+Runner-Practical-Tactic wurde eng erweitert:
+
+- `runner_open_access_card`: Wenn der Runner bereits eine legale `access_card`
+  Aktion im Access-Fenster hat, wird diese gegenüber passiver Vorbereitung
+  gewählt.
+- `runner_take_high_payoff_run`: Wenn eine legale `start_run`-Action explizit
+  side-safe als `accessPayoff` `agenda`, `score_threat`, `trash_affordable`,
+  `fresh` oder `access_bonus` markiert ist, wird dieser konkrete Run gegenüber
+  passiver Vorbereitung gewählt.
+
+Der praktische Taktik-Benchmark wächst von 32 auf 40 Fälle. Der Candidate trifft
+40/40, Frozen Legacy bleibt bei 0/40. Der kleine Gate-Lauf nach AI-PS2-1 bleibt
+safety-grün und zeigt weiter die Runner-Asymmetrie:
+
+- Candidate-Runner: Runner-Steals 4 statt 3, Action-Limits unverändert 1
+- Candidate-Corp: in diesem kleinen Lauf weiter nicht verbessert
+- IllegalActions: 0
+- ReplayFailures: 0
 
 ## Paketdetails
 

@@ -11,7 +11,9 @@ export type PracticalTacticBenchmarkCategory =
   | "corp_safe_score"
   | "runner_steal_agenda"
   | "runner_trash_value"
+  | "runner_open_access_card"
   | "runner_install_coverage"
+  | "runner_take_high_payoff_run"
   | "corp_real_punish"
   | "corp_abandon_stale_punish"
   | "runner_continue_reachable_run"
@@ -77,7 +79,9 @@ const CATEGORY_ORDER: PracticalTacticBenchmarkCategory[] = [
   "corp_safe_score",
   "runner_steal_agenda",
   "runner_trash_value",
+  "runner_open_access_card",
   "runner_install_coverage",
+  "runner_take_high_payoff_run",
   "corp_real_punish",
   "corp_abandon_stale_punish",
   "runner_continue_reachable_run",
@@ -89,7 +93,9 @@ export const PRACTICAL_TACTIC_BENCHMARK_CASES: PracticalTacticBenchmarkCase[] =
     ...safeScoreCases(),
     ...stealAgendaCases(),
     ...trashValueCases(),
+    ...openAccessCardCases(),
     ...coverageInstallCases(),
+    ...takeHighPayoffRunCases(),
     ...realPunishCases(),
     ...stalePunishCases(),
     ...continueRunCases(),
@@ -282,6 +288,28 @@ function trashValueCases(): CaseSpec[] {
   }));
 }
 
+function openAccessCardCases(): CaseSpec[] {
+  return [1, 2, 3, 4].map((index) => ({
+    caseId: `ai-ps2-runner-open-access-card-${index}`,
+    category: "runner_open_access_card",
+    side: "runner",
+    frozenLegacyActionId: `gain-before-access-${index}`,
+    acceptableActionIds: [`access-card-${index}`],
+    badActionIds: [`gain-before-access-${index}`],
+    rationale: "Runner ist bereits im Access-Fenster; die sichtbare Access-Aktion ist konkreter Fortschritt.",
+    run: {
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+      successful: true,
+    },
+    actions: [
+      { actionId: `access-card-${index}`, type: "access_card", label: "Access R&D card" },
+      { actionId: `gain-before-access-${index}`, type: "gain_credit", label: "Gain credit" },
+    ],
+  }));
+}
+
 function coverageInstallCases(): CaseSpec[] {
   return [1, 2, 3, 4].map((index) => ({
     caseId: `ai222-runner-install-coverage-${index}`,
@@ -302,6 +330,31 @@ function coverageInstallCases(): CaseSpec[] {
         source: `fracter-${index}`,
       },
       { actionId: `run-hq-${index}`, type: "start_run", label: "Run HQ", payload: { serverId: "hq" } },
+    ],
+  }));
+}
+
+function takeHighPayoffRunCases(): CaseSpec[] {
+  return [1, 2, 3, 4].map((index) => ({
+    caseId: `ai-ps2-runner-high-payoff-run-${index}`,
+    category: "runner_take_high_payoff_run",
+    side: "runner",
+    frozenLegacyActionId: `draw-before-payoff-run-${index}`,
+    acceptableActionIds: [`run-payoff-${index}`],
+    badActionIds: [`draw-before-payoff-run-${index}`],
+    rationale: "Ein markierter frischer High-Payoff-Run soll gegenüber passiver Vorbereitung genommen werden.",
+    actions: [
+      {
+        actionId: `run-payoff-${index}`,
+        type: "start_run",
+        label: "Run HQ for fresh access",
+        payload: { serverId: "hq", accessPayoff: "fresh" },
+      },
+      {
+        actionId: `draw-before-payoff-run-${index}`,
+        type: "draw_card",
+        label: "Draw before running",
+      },
     ],
   }));
 }

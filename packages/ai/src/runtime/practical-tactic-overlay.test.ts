@@ -20,7 +20,7 @@ describe("PracticalTacticOverlay", () => {
     );
 
     expect(legacy.hitRate).toBe(0);
-    expect(candidate.caseCount).toBe(32);
+    expect(candidate.caseCount).toBe(40);
     expect(candidate.hitRate).toBe(1);
     expect(candidate.hits - legacy.hits).toBeGreaterThanOrEqual(30);
     expect(candidate.missesByCase).toEqual([]);
@@ -60,6 +60,30 @@ describe("PracticalTacticOverlay", () => {
     );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload|secretGripIds|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
+    );
+  });
+
+  it("takes a marked high-payoff runner run over passive preparation", () => {
+    const benchmarkCase = PRACTICAL_TACTIC_BENCHMARK_CASES.find(
+      (candidate) => candidate.category === "runner_take_high_payoff_run",
+    );
+    expect(benchmarkCase).toBeDefined();
+    if (!benchmarkCase) {
+      throw new Error("Missing runner high-payoff benchmark case");
+    }
+
+    const decision = applyPracticalTacticOverlay(
+      benchmarkCase.input,
+      frozenLegacyDecision(benchmarkCase.input),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+
+    expect(benchmarkCase.acceptableActionIds).toContain(decision.actionId);
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:runner_high_payoff_run",
+        "practical_tactic_overlay_applied:runner.practical_tactic.high_payoff_run",
+      ]),
     );
   });
 });
