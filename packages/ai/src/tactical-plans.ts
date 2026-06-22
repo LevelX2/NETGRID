@@ -27,6 +27,7 @@ import {
   runnerPressurePreferredProbeTarget,
   runnerPressureProbeBasePriority,
   runnerPressureProbeTargetAllowed,
+  runnerRunTargetHighPayoff,
   runnerRunTargetTacticalPriorityDelta,
 } from "./runner-run-target-guidance";
 import {
@@ -622,6 +623,12 @@ function candidateMatchesStep(
     if (creditGain > 0) {
       return candidateTargetMatchesPlan(plan, candidate, action);
     }
+  }
+  if (step.kind === "draw_hand_buffer") {
+    return (
+      action.type === "draw_card" &&
+      candidateTargetMatchesPlan(plan, candidate, action)
+    );
   }
   if (step.kind === "install_breaker" && action.type === "install_card") {
     const requiredCoverage = planRequiredBreakerCoverage(plan, step);
@@ -1331,6 +1338,8 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       return false;
     case "draw_for_answer":
       return actionType === "draw_card";
+    case "draw_hand_buffer":
+      return actionType === "draw_card";
     case "search_for_answer":
       return (
         actionType === "trigger_ability" ||
@@ -1921,6 +1930,9 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   plans.push(
+    ...runnerHandBufferPlans(context, stateVersion, runnerGoalEvidence),
+  );
+  plans.push(
     ...runnerHandDevelopmentPlans(context, stateVersion, runnerGoalEvidence),
   );
   plans.push(
@@ -2065,6 +2077,157 @@ function applyRunnerDrawOverflowAdjustments(
 
 function runnerPlanUsesGenericDraw(plan: TacticalPlan): boolean {
   return plan.side === "runner" && plan.currentStep.kind === "draw_for_answer";
+}
+
+function runnerHandBufferPlans(
+  context: TacticalPlanBuildContext,
+  stateVersion: number,
+  runnerGoalEvidence: readonly string[],
+): TacticalPlan[] {
+  if (!context.input.legalActions.some((action) => action.type === "draw_card")) {
+    return [];
+  }
+  const assessment = runnerHandBufferAssessment(context.input);
+  if (!assessment.active) return [];
+  if (runnerHighPayoffRunAvailable(context)) return [];
+  return [
+    createTacticalPlan({
+      planId: "runner.restore_hand_buffer",
+      side: "runner",
+      type: "runner.restore_hand_buffer",
+      status: "active",
+      priority: assessment.planPriority,
+      horizonTurns: 1,
+      target: { kind: "capability", id: "runner_hand_buffer" },
+      requiredCapabilities: [
+        {
+          capabilityId: "runner.hand_buffer",
+          kind: "hand_buffer",
+          side: "runner",
+          target: { kind: "capability", id: "runner_hand_buffer" },
+          evidence: assessment.evidence,
+        },
+      ],
+      currentStep: createPlanStep({
+        stepId: "draw_for_hand_buffer",
+        kind: "draw_hand_buffer",
+        desiredActionSemantics: ["draw.card"],
+        requiredCapabilities: [
+          {
+            capabilityId: "runner.hand_buffer",
+            kind: "hand_buffer",
+            side: "runner",
+            target: { kind: "capability", id: "runner_hand_buffer" },
+            evidence: assessment.evidence,
+          },
+        ],
+        rationale: [
+          "runner hand buffer is too low for safe pressure",
+          ...assessment.evidence,
+        ],
+      }),
+      evidence: [...assessment.evidence, ...runnerGoalEvidence],
+      scoreBreakdown: [
+        {
+          key: "runner_restore_hand_buffer",
+          label: "Runner hand buffer",
+          value: assessment.planPriority,
+          reason: assessment.reason,
+        },
+      ],
+      stateVersion,
+    }),
+  ];
+}
+
+function runnerHandBufferAssessment(input: AiDecisionInput): {
+  active: boolean;
+  handCount: number;
+  damagePressure: boolean;
+  planPriority: number;
+  reason: string;
+  evidence: string[];
+} {
+  const handCount = input.playerView.own.gripOrHq.length;
+  const damagePressure = runnerVisibleDamagePressure(input);
+  const active = handCount <= 1 || (damagePressure && handCount <= 2);
+  const planPriority =
+    handCount <= 0
+      ? damagePressure
+        ? 1280
+        : 1220
+      : handCount === 1
+        ? damagePressure
+          ? 1140
+          : 1060
+        : damagePressure
+          ? 980
+          : 0;
+  const reason =
+    handCount <= 0
+      ? "empty_hand"
+      : damagePressure
+        ? "low_hand_damage_pressure"
+        : "low_hand";
+  return {
+    active,
+    handCount,
+    damagePressure,
+    planPriority,
+    reason,
+    evidence: [
+      `runner_hand_buffer_count:${handCount}`,
+      `runner_hand_buffer_damage_pressure:${damagePressure}`,
+      `runner_hand_buffer_reason:${reason}`,
+    ],
+  };
+}
+
+function runnerHighPayoffRunAvailable(
+  context: TacticalPlanBuildContext,
+): boolean {
+  return (context.runnerRunTargetEvaluations ?? []).some(
+    (evaluation) =>
+      evaluation.pathPassability === "reachable" &&
+      evaluation.creditsAfterRun >= 0 &&
+      runnerRunTargetHighPayoff(evaluation),
+  );
+}
+
+function runnerVisibleDamagePressure(input: AiDecisionInput): boolean {
+  if (input.playerView.own.tags > 0) return true;
+  const visibleCards = [
+    ...input.playerView.own.heapOrArchives,
+    ...(input.playerView.own.rig ?? []),
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ];
+  if (
+    visibleCards.some((card) =>
+      card.known !== false &&
+      /damage|flatline|net damage|meat damage|brain damage|tag/i.test(
+        [card.title, card.rulesText, card.definitionId]
+          .filter(Boolean)
+          .join(" "),
+      ),
+    )
+  ) {
+    return true;
+  }
+  return [...input.playerView.publicEvents, ...input.eventTail].some((event) =>
+    /damage|flatline|tag|trace/i.test(
+      [
+        event.type,
+        String(event.publicPayload.actionType ?? ""),
+        String(event.publicPayload.damageType ?? ""),
+        String(event.publicPayload.sourceTitle ?? ""),
+        String(event.publicPayload.sourceDefinitionId ?? ""),
+      ].join(" "),
+    ),
+  );
 }
 
 function runnerHandDevelopmentPlans(

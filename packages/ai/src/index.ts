@@ -6552,13 +6552,12 @@ function semanticRuntimeRunnerScoreComponents(
     );
     if (muPressureFunding) components.push(muPressureFunding);
   }
-  if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
-    components.push({
-      key: "runner_low_hand",
-      label: "Handkarten-Bedarf",
-      value: 550,
-      reason: `hand:${input.playerView.own.gripOrHq.length}`,
-    });
+  const handBufferComponent = runnerHandBufferNeedScoreComponent(
+    input,
+    action,
+  );
+  if (handBufferComponent) {
+    components.push(handBufferComponent);
   }
   const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(
     input,
@@ -6777,6 +6776,77 @@ function runnerLoanLiabilityScoreComponent(
     value: assessment.scoreValue,
     reason: sortedUnique(assessment.evidence).join("|"),
   };
+}
+
+function runnerHandBufferNeedScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (action.type !== "draw_card") return undefined;
+  const handCount = input.playerView.own.gripOrHq.length;
+  if (handCount >= 5) return undefined;
+  const damagePressure = semanticRuntimeRunnerVisibleDamagePressure(input);
+  const baseValue =
+    handCount <= 0
+      ? 2500
+      : handCount === 1
+        ? 1500
+        : handCount === 2
+          ? 850
+          : handCount === 3
+            ? 550
+            : 300;
+  const damageBoost = damagePressure && handCount <= 2 ? 350 : 0;
+  return {
+    key: "runner_hand_buffer_need",
+    label: "Handpuffer-Bedarf",
+    value: baseValue + damageBoost,
+    reason: [
+      `hand:${handCount}`,
+      `damage_pressure:${damagePressure}`,
+      `base:${baseValue}`,
+      `damage_boost:${damageBoost}`,
+    ].join("|"),
+  };
+}
+
+function semanticRuntimeRunnerVisibleDamagePressure(
+  input: AiDecisionInput,
+): boolean {
+  if (input.playerView.own.tags > 0) return true;
+  const visibleCards = [
+    ...input.playerView.own.heapOrArchives,
+    ...(input.playerView.own.rig ?? []),
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ];
+  if (
+    visibleCards.some((card) =>
+      card.known !== false &&
+      /damage|flatline|net damage|meat damage|brain damage|tag/i.test(
+        [card.title, card.rulesText, card.definitionId]
+          .filter(Boolean)
+          .join(" "),
+      ),
+    )
+  ) {
+    return true;
+  }
+  return [...input.playerView.publicEvents, ...input.eventTail].some((event) =>
+    /damage|flatline|tag|trace/i.test(
+      [
+        event.type,
+        String(event.publicPayload.actionType ?? ""),
+        String(event.publicPayload.damageType ?? ""),
+        String(event.publicPayload.sourceTitle ?? ""),
+        String(event.publicPayload.sourceDefinitionId ?? ""),
+      ].join(" "),
+    ),
+  );
 }
 
 function runnerLoanLiabilityAssessment(
