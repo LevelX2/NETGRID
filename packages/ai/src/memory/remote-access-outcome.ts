@@ -112,6 +112,7 @@ export function evaluateRemoteAccessOutcomeMemory(
       suppressesPlanBonus: false,
       evidence: [
         ...remoteAccessOutcomeEvidence(entry),
+        ...status.evidence,
         "remote_access_outcome_applies:false",
         "remote_access_outcome_invalidated:remote_changed",
       ],
@@ -124,6 +125,7 @@ export function evaluateRemoteAccessOutcomeMemory(
       suppressesPlanBonus: false,
       evidence: [
         ...remoteAccessOutcomeEvidence(entry),
+        ...status.evidence,
         "remote_access_outcome_applies:false",
         "remote_access_outcome_invalidated:credits_or_reserve_improved",
       ],
@@ -134,6 +136,7 @@ export function evaluateRemoteAccessOutcomeMemory(
     suppressesPlanBonus: status.suppressesPlanBonus,
     evidence: [
       ...remoteAccessOutcomeEvidence(entry),
+      ...status.evidence,
       "remote_access_outcome_applies:true",
       `remote_access_outcome_suppresses_plan_bonus:${status.suppressesPlanBonus}`,
     ],
