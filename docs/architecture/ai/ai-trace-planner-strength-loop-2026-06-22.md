@@ -1,6 +1,6 @@
 # AI Trace Planner Strength Loop
 
-Status: package_done:TRACE-PLANNER-1
+Status: final_no_potential_or_gate
 
 Datum: 2026-06-22
 
@@ -140,6 +140,60 @@ Konkreter Kandidat:
   oder Overdraw-Credit-Pressure aktiv ist.
 
 Entscheidung: `implement_candidate`.
+
+## TRACE-PLANNER-2/3 Umsetzung und Safety-Entscheidung
+
+Der Kandidat `yield credit base to legal hand development` wurde umgesetzt und
+fokussiert geprüft. Die Idee:
+
+- `runner.build_credit_base` tritt zurück, wenn eine nützliche
+  Runner-Handentwicklung bereits legal ausführbar ist.
+- Mindestreserve, Remote-Contest-Finanzierung und Overdraw-Credit-Pressure
+  bleiben harte Gegenargumente.
+
+Fokussierte Checks waren grün:
+
+```text
+corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
+```
+
+Das breite PS2-Gate zeigte zunächst praktischen Nutzen:
+
+- Candidate-Runner-Action-Limits: 10 statt 13 im PS3-Stand und 16 in Legacy
+- Runner-Steals: 47, unverändert zum PS3-Stand
+- Candidate-Corp-Action-Limits: 13, unverändert zum PS3-Stand
+- Corp-Scores: 21, unverändert zum PS3-Stand
+- PS2-Gate-Safety: 0 IllegalActions, 0 ReplayFailures
+
+Die nachgeschaltete Trace-Matrix über Pair A-D zeigte jedoch einen neuen
+Safety-Verstoß:
+
+- `illegalActions: 1`
+- Pair C `Blink Pressure Rig vs Ivory Bastion`
+- Seed `ai-v143-tuning-005`
+- Fehler: `ERR_INVALID_TARGET at stateVersion 50`
+
+Entscheidung: Der Kandidat ist trotz messbarer Action-Limit-Verbesserung nicht
+übernahmefähig. Der Code wurde per Revert aus dem Endzustand entfernt. Die
+Gate-Dateien bleiben als Rejected-Candidate-Evidence erhalten.
+
+## TRACE-PLANNER-3 No-Potential-Abschluss
+
+Nach dem Safety-Reject bleibt kein weiterer klarer Low-Risk-Hebel sichtbar,
+der innerhalb dieser Schleife seriös umgesetzt werden kann:
+
+- Der identifizierte Planner-Hebel war real und messbar, aber safety-negativ.
+- Der Safety-Befund liegt nicht in einer klar isolierten lokalen
+  `LegalAction`-Präferenz, sondern entsteht erst als Folgepfad in Pair C.
+- Ein weiterer kleiner Planner-Patch ohne eigene Engine-/State-Repro-Fixture
+  wäre zu wahrscheinlich Setup-Tuning.
+- Der nächste sinnvolle Schritt wäre ein separates Safety-/Repro-Paket für
+  `ERR_INVALID_TARGET` bei Pair C Seed `ai-v143-tuning-005`, nicht eine zweite
+  Spielstärke-Heuristik in dieser Schleife.
+
+Finale Entscheidung: `no_clear_low_risk_potential_after_safety_reject`.
 
 ### TRACE-PLANNER-0 Prozess- und Baseline-Setup
 

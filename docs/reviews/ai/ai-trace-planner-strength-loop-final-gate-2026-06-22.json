@@ -1,0 +1,2919 @@
+{
+  "schemaVersion": "ai-ps2-play-strength-gate-v1",
+  "generatedAt": "2026-06-22T17:46:17.503Z",
+  "config": {
+    "seeds": [
+      "ai-v143-tuning-001",
+      "ai-v143-tuning-002",
+      "ai-v143-tuning-003",
+      "ai-v143-tuning-004",
+      "ai-v143-tuning-005"
+    ],
+    "maxActions": 160,
+    "scenarios": [
+      "default_demo",
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "candidate": "current_candidate + practicalTacticOverlay.enabled",
+    "legacy": "basic_runner_ai/basic_corp_ai"
+  },
+  "tacticBenchmark": {
+    "legacy": {
+      "caseCount": 40,
+      "hits": 0,
+      "misses": 40,
+      "hitRate": 0,
+      "hitsByCategory": {
+        "corp_safe_score": 0,
+        "runner_steal_agenda": 0,
+        "runner_trash_value": 0,
+        "runner_open_access_card": 0,
+        "runner_install_coverage": 0,
+        "runner_take_high_payoff_run": 0,
+        "corp_real_punish": 0,
+        "corp_abandon_stale_punish": 0,
+        "runner_continue_reachable_run": 0,
+        "runner_avoid_stale_run": 0
+      },
+      "totalsByCategory": {
+        "corp_safe_score": 4,
+        "runner_steal_agenda": 4,
+        "runner_trash_value": 4,
+        "runner_open_access_card": 4,
+        "runner_install_coverage": 4,
+        "runner_take_high_payoff_run": 4,
+        "corp_real_punish": 4,
+        "corp_abandon_stale_punish": 4,
+        "runner_continue_reachable_run": 4,
+        "runner_avoid_stale_run": 4
+      },
+      "missesByCase": [
+        {
+          "caseId": "ai222-corp-safe-score-1",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-1",
+          "acceptableActionIds": [
+            "score-1"
+          ],
+          "badActionIds": [
+            "gain-1",
+            "protect-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-2",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-2",
+          "acceptableActionIds": [
+            "score-2"
+          ],
+          "badActionIds": [
+            "gain-2",
+            "protect-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-3",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-3",
+          "acceptableActionIds": [
+            "score-3"
+          ],
+          "badActionIds": [
+            "gain-3",
+            "protect-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-4",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-4",
+          "acceptableActionIds": [
+            "score-4"
+          ],
+          "badActionIds": [
+            "gain-4",
+            "protect-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-1",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-1",
+          "acceptableActionIds": [
+            "steal-1"
+          ],
+          "badActionIds": [
+            "decline-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-2",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-2",
+          "acceptableActionIds": [
+            "steal-2"
+          ],
+          "badActionIds": [
+            "decline-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-3",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-3",
+          "acceptableActionIds": [
+            "steal-3"
+          ],
+          "badActionIds": [
+            "decline-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-4",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-4",
+          "acceptableActionIds": [
+            "steal-4"
+          ],
+          "badActionIds": [
+            "decline-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-1",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-1",
+          "acceptableActionIds": [
+            "trash-1"
+          ],
+          "badActionIds": [
+            "decline-trash-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-2",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-2",
+          "acceptableActionIds": [
+            "trash-2"
+          ],
+          "badActionIds": [
+            "decline-trash-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-3",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-3",
+          "acceptableActionIds": [
+            "trash-3"
+          ],
+          "badActionIds": [
+            "decline-trash-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-4",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-4",
+          "acceptableActionIds": [
+            "trash-4"
+          ],
+          "badActionIds": [
+            "decline-trash-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-1",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-1",
+          "acceptableActionIds": [
+            "access-card-1"
+          ],
+          "badActionIds": [
+            "gain-before-access-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-2",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-2",
+          "acceptableActionIds": [
+            "access-card-2"
+          ],
+          "badActionIds": [
+            "gain-before-access-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-3",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-3",
+          "acceptableActionIds": [
+            "access-card-3"
+          ],
+          "badActionIds": [
+            "gain-before-access-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-4",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-4",
+          "acceptableActionIds": [
+            "access-card-4"
+          ],
+          "badActionIds": [
+            "gain-before-access-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-1",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-1",
+          "acceptableActionIds": [
+            "install-fracter-1"
+          ],
+          "badActionIds": [
+            "run-hq-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-2",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-2",
+          "acceptableActionIds": [
+            "install-fracter-2"
+          ],
+          "badActionIds": [
+            "run-hq-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-3",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-3",
+          "acceptableActionIds": [
+            "install-fracter-3"
+          ],
+          "badActionIds": [
+            "run-hq-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-4",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-4",
+          "acceptableActionIds": [
+            "install-fracter-4"
+          ],
+          "badActionIds": [
+            "run-hq-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-1",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-1",
+          "acceptableActionIds": [
+            "run-payoff-1"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-2",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-2",
+          "acceptableActionIds": [
+            "run-payoff-2"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-3",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-3",
+          "acceptableActionIds": [
+            "run-payoff-3"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-4",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-4",
+          "acceptableActionIds": [
+            "run-payoff-4"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-1",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-1",
+          "acceptableActionIds": [
+            "punish-1"
+          ],
+          "badActionIds": [
+            "gain-punish-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-2",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-2",
+          "acceptableActionIds": [
+            "punish-2"
+          ],
+          "badActionIds": [
+            "gain-punish-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-3",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-3",
+          "acceptableActionIds": [
+            "punish-3"
+          ],
+          "badActionIds": [
+            "gain-punish-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-4",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-4",
+          "acceptableActionIds": [
+            "punish-4"
+          ],
+          "badActionIds": [
+            "gain-punish-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-1",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-1",
+          "acceptableActionIds": [
+            "advance-1",
+            "score-1"
+          ],
+          "badActionIds": [
+            "punish-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-2",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-2",
+          "acceptableActionIds": [
+            "advance-2",
+            "score-2"
+          ],
+          "badActionIds": [
+            "punish-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-3",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-3",
+          "acceptableActionIds": [
+            "advance-3",
+            "score-3"
+          ],
+          "badActionIds": [
+            "punish-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-4",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-4",
+          "acceptableActionIds": [
+            "advance-4",
+            "score-4"
+          ],
+          "badActionIds": [
+            "punish-stale-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-1",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-1",
+          "acceptableActionIds": [
+            "continue-1"
+          ],
+          "badActionIds": [
+            "jack-out-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-2",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-2",
+          "acceptableActionIds": [
+            "continue-2"
+          ],
+          "badActionIds": [
+            "jack-out-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-3",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-3",
+          "acceptableActionIds": [
+            "continue-3"
+          ],
+          "badActionIds": [
+            "jack-out-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-4",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-4",
+          "acceptableActionIds": [
+            "continue-4"
+          ],
+          "badActionIds": [
+            "jack-out-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-1",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-1",
+          "acceptableActionIds": [
+            "install-pressure-1",
+            "draw-1"
+          ],
+          "badActionIds": [
+            "run-rd-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-2",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-2",
+          "acceptableActionIds": [
+            "install-pressure-2",
+            "draw-2"
+          ],
+          "badActionIds": [
+            "run-rd-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-3",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-3",
+          "acceptableActionIds": [
+            "install-pressure-3",
+            "draw-3"
+          ],
+          "badActionIds": [
+            "run-rd-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-4",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-4",
+          "acceptableActionIds": [
+            "install-pressure-4",
+            "draw-4"
+          ],
+          "badActionIds": [
+            "run-rd-stale-4"
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "caseCount": 40,
+      "hits": 40,
+      "misses": 0,
+      "hitRate": 1,
+      "hitsByCategory": {
+        "corp_safe_score": 4,
+        "runner_steal_agenda": 4,
+        "runner_trash_value": 4,
+        "runner_open_access_card": 4,
+        "runner_install_coverage": 4,
+        "runner_take_high_payoff_run": 4,
+        "corp_real_punish": 4,
+        "corp_abandon_stale_punish": 4,
+        "runner_continue_reachable_run": 4,
+        "runner_avoid_stale_run": 4
+      },
+      "totalsByCategory": {
+        "corp_safe_score": 4,
+        "runner_steal_agenda": 4,
+        "runner_trash_value": 4,
+        "runner_open_access_card": 4,
+        "runner_install_coverage": 4,
+        "runner_take_high_payoff_run": 4,
+        "corp_real_punish": 4,
+        "corp_abandon_stale_punish": 4,
+        "runner_continue_reachable_run": 4,
+        "runner_avoid_stale_run": 4
+      },
+      "missesByCase": []
+    },
+    "hitRateDelta": 1
+  },
+  "aggregate": {
+    "legacyVsLegacy": {
+      "games": 25,
+      "decisions": 3218,
+      "findings": 479,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 285,
+        "medium": 194,
+        "low": 0
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 16,
+        "repeated_no_progress_run": 444,
+        "repeated_known_no_payoff_remote": 279,
+        "repeated_low_value_archives": 60,
+        "recovery_low_value_loop": 0,
+        "bank_over_target_without_funding_need": 0,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 0,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 0,
+        "semantic_override_suspicious": 0,
+        "corp_never_scores_long_game": 6,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 16,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 128.72,
+      "corpAgendaScores": 12,
+      "runnerAgendaSteals": 40,
+      "corpFlatlines": 4,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 1,
+      "passiveActionWithScoreLineAvailable": 8,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 14,
+        "action_limit_mixed_or_unknown": 2
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 3,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 0,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 13,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "candidateRunnerVsLegacyCorp": {
+      "games": 25,
+      "decisions": 3097,
+      "findings": 627,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 4,
+        "medium": 555,
+        "low": 68
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 10,
+        "repeated_no_progress_run": 111,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 0,
+        "recovery_low_value_loop": 26,
+        "bank_over_target_without_funding_need": 16,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 3,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 418,
+        "semantic_override_suspicious": 240,
+        "corp_never_scores_long_game": 4,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 10,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 123.88,
+      "corpAgendaScores": 20,
+      "runnerAgendaSteals": 47,
+      "corpFlatlines": 5,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 7,
+      "passiveActionWithScoreLineAvailable": 5,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 9,
+        "action_limit_mixed_or_unknown": 1
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 4,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 1,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 1,
+        "access_pending": 4,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "legacyRunnerVsCandidateCorp": {
+      "games": 25,
+      "decisions": 3211,
+      "findings": 659,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 236,
+        "medium": 193,
+        "low": 230
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 13,
+        "repeated_no_progress_run": 385,
+        "repeated_known_no_payoff_remote": 229,
+        "repeated_low_value_archives": 148,
+        "recovery_low_value_loop": 0,
+        "bank_over_target_without_funding_need": 0,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 0,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 0,
+        "semantic_override_suspicious": 231,
+        "corp_never_scores_long_game": 7,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 13,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 128.44,
+      "corpAgendaScores": 21,
+      "runnerAgendaSteals": 26,
+      "corpFlatlines": 5,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 0,
+      "passiveActionWithScoreLineAvailable": 7,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 13,
+        "action_limit_mixed_or_unknown": 0
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 4,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 1,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 0,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 8,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    }
+  },
+  "aggregateDeltas": {
+    "candidateRunnerVsLegacy": {
+      "actionLimitReached": -6,
+      "runnerAgendaSteals": 7,
+      "corpAgendaScores": 8,
+      "averageGameLength": -4.84
+    },
+    "candidateCorpVsLegacy": {
+      "actionLimitReached": -3,
+      "runnerAgendaSteals": -14,
+      "corpAgendaScores": 9,
+      "averageGameLength": -0.28
+    }
+  },
+  "scenarioResults": [
+    {
+      "scenarioId": "default_demo",
+      "label": "Default demo decks",
+      "decks": {
+        "runner": "default",
+        "corp": "default"
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 800,
+            "findings": 134,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 41,
+              "medium": 93,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 5,
+              "repeated_no_progress_run": 126,
+              "repeated_known_no_payoff_remote": 40,
+              "repeated_low_value_archives": 7,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 5,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 160,
+            "corpAgendaScores": 5,
+            "runnerAgendaSteals": 8,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 4,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 5,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 4,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 5,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 5,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 4,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 5
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 800,
+            "findings": 181,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 162,
+              "low": 19
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 5,
+              "repeated_no_progress_run": 70,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 19,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 2,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 85,
+              "semantic_override_suspicious": 72,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 5,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 160,
+            "corpAgendaScores": 7,
+            "runnerAgendaSteals": 7,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 2,
+            "passiveActionWithScoreLineAvailable": 5,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 5,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 4,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 5,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 21,
+              "finalAgendaPoints": {
+                "runner": 4,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 21,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 5
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 5
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 661,
+            "findings": 118,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 43,
+              "medium": 39,
+              "low": 36
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 2,
+              "repeated_no_progress_run": 70,
+              "repeated_known_no_payoff_remote": 42,
+              "repeated_low_value_archives": 24,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 36,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 2,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 132.2,
+            "corpAgendaScores": 7,
+            "runnerAgendaSteals": 6,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 2,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 2,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 137,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "corp",
+              "actions": 124,
+              "turns": 14,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 7
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 5
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 80,
+              "turns": 9,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 4
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": -1,
+          "corpAgendaScores": 2,
+          "averageGameLength": 0
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": -3,
+          "runnerAgendaSteals": -2,
+          "corpAgendaScores": 2,
+          "averageGameLength": -27.8
+        }
+      }
+    },
+    {
+      "scenarioId": "A",
+      "label": "Deep Market Engine vs Siren Fortress",
+      "decks": {
+        "runner": {
+          "deckHash": "fnv1a:b409555d"
+        },
+        "corp": {
+          "deckHash": "fnv1a:c10cdf3d"
+        }
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 656,
+            "findings": 115,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 85,
+              "medium": 30,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 4,
+              "repeated_no_progress_run": 104,
+              "repeated_known_no_payoff_remote": 84,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 4,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 131.2,
+            "corpAgendaScores": 3,
+            "runnerAgendaSteals": 8,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 1,
+            "passiveActionWithScoreLineAvailable": 1,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 4,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 4,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 16,
+              "turns": 1,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 4,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 6,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 4
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 465,
+            "findings": 106,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 1,
+              "medium": 95,
+              "low": 10
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 0,
+              "repeated_no_progress_run": 12,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 2,
+              "bank_over_target_without_funding_need": 13,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 72,
+              "semantic_override_suspicious": 27,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 0,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 93,
+            "corpAgendaScores": 4,
+            "runnerAgendaSteals": 14,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 1,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 44,
+              "turns": 5,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 4
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "runner",
+              "actions": 151,
+              "turns": 15,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 101,
+              "turns": 15,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 43,
+              "turns": 5,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "runner",
+              "actions": 126,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 3
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 697,
+            "findings": 123,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 73,
+              "medium": 13,
+              "low": 37
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 4,
+              "repeated_no_progress_run": 73,
+              "repeated_known_no_payoff_remote": 71,
+              "repeated_low_value_archives": 3,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 38,
+              "corp_never_scores_long_game": 2,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 4,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 139.4,
+            "corpAgendaScores": 3,
+            "runnerAgendaSteals": 7,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 2,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 4,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 3,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 4
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 6,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 57,
+              "turns": 7,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 14,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 4
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": -4,
+          "runnerAgendaSteals": 6,
+          "corpAgendaScores": 1,
+          "averageGameLength": -38.2
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": -1,
+          "corpAgendaScores": 0,
+          "averageGameLength": 8.2
+        }
+      }
+    },
+    {
+      "scenarioId": "B",
+      "label": "Stealth Interface Starter vs Manhunt Pressure Bureau",
+      "decks": {
+        "runner": {
+          "deckHash": "fnv1a:c0db223e"
+        },
+        "corp": {
+          "deckHash": "fnv1a:6e07aa9b"
+        }
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 605,
+            "findings": 75,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 55,
+              "medium": 20,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 2,
+              "repeated_no_progress_run": 68,
+              "repeated_known_no_payoff_remote": 55,
+              "repeated_low_value_archives": 17,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 2,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 121,
+            "corpAgendaScores": 3,
+            "runnerAgendaSteals": 5,
+            "corpFlatlines": 2,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 1,
+              "action_limit_mixed_or_unknown": 1
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 1,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "corp",
+              "actions": 114,
+              "turns": 12,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 97,
+              "turns": 15,
+              "finalAgendaPoints": {
+                "runner": 9,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 27,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "corp",
+              "actions": 74,
+              "turns": 8,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 621,
+            "findings": 145,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 132,
+              "low": 13
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 2,
+              "repeated_no_progress_run": 9,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 1,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 1,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 122,
+              "semantic_override_suspicious": 65,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 2,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 124.2,
+            "corpAgendaScores": 5,
+            "runnerAgendaSteals": 3,
+            "corpFlatlines": 3,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 2,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 2,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 2,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 23,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "corp",
+              "actions": 101,
+              "turns": 16,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 25,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 6
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "corp",
+              "actions": 103,
+              "turns": 16,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "corp",
+              "actions": 97,
+              "turns": 14,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 708,
+            "findings": 175,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 54,
+              "medium": 51,
+              "low": 70
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 3,
+              "repeated_no_progress_run": 99,
+              "repeated_known_no_payoff_remote": 54,
+              "repeated_low_value_archives": 46,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 70,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 3,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 141.6,
+            "corpAgendaScores": 9,
+            "runnerAgendaSteals": 0,
+            "corpFlatlines": 1,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 3,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 2,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 1,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 6
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 23,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 6
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "corp",
+              "actions": 118,
+              "turns": 16,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 9
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 25,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 6
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "corp",
+              "actions": 110,
+              "turns": 12,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": -2,
+          "corpAgendaScores": 2,
+          "averageGameLength": 3.2
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": 1,
+          "runnerAgendaSteals": -5,
+          "corpAgendaScores": 6,
+          "averageGameLength": 20.6
+        }
+      }
+    },
+    {
+      "scenarioId": "C",
+      "label": "Blink Pressure Rig vs Ivory Bastion",
+      "decks": {
+        "runner": {
+          "deckHash": "fnv1a:39d02d0b"
+        },
+        "corp": {
+          "deckHash": "fnv1a:c5c32339"
+        }
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 800,
+            "findings": 131,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 104,
+              "medium": 27,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 5,
+              "repeated_no_progress_run": 122,
+              "repeated_known_no_payoff_remote": 100,
+              "repeated_low_value_archives": 13,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 4,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 5,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 160,
+            "corpAgendaScores": 1,
+            "runnerAgendaSteals": 6,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 3,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 4,
+              "action_limit_mixed_or_unknown": 1
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 4,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 5,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 25,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 735,
+            "findings": 116,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 2,
+              "medium": 107,
+              "low": 7
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 3,
+              "repeated_no_progress_run": 12,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 1,
+              "bank_over_target_without_funding_need": 1,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 91,
+              "semantic_override_suspicious": 32,
+              "corp_never_scores_long_game": 2,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 3,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 147,
+            "corpAgendaScores": 3,
+            "runnerAgendaSteals": 9,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 1,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 2,
+              "action_limit_mixed_or_unknown": 1
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 1,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 1,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 131,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 3
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 124,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 9,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 21,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 683,
+            "findings": 164,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 65,
+              "medium": 45,
+              "low": 54
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 3,
+              "repeated_no_progress_run": 99,
+              "repeated_known_no_payoff_remote": 62,
+              "repeated_low_value_archives": 36,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 54,
+              "corp_never_scores_long_game": 3,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 3,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 136.6,
+            "corpAgendaScores": 2,
+            "runnerAgendaSteals": 3,
+            "corpFlatlines": 2,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 5,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 3,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 1,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 2,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 19,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "corp",
+              "actions": 140,
+              "turns": 15,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 5
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "corp",
+              "actions": 63,
+              "turns": 7,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 23,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": -2,
+          "runnerAgendaSteals": 3,
+          "corpAgendaScores": 2,
+          "averageGameLength": -13
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": -2,
+          "runnerAgendaSteals": -3,
+          "corpAgendaScores": 1,
+          "averageGameLength": -23.4
+        }
+      }
+    },
+    {
+      "scenarioId": "D",
+      "label": "R&D Interface Dig vs Shadoe Tag & Bag",
+      "decks": {
+        "runner": {
+          "deckHash": "fnv1a:c542015e"
+        },
+        "corp": {
+          "deckHash": "fnv1a:8b871ccd"
+        }
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 357,
+            "findings": 24,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 24,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 0,
+              "repeated_no_progress_run": 24,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 23,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 0,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 71.4,
+            "corpAgendaScores": 0,
+            "runnerAgendaSteals": 13,
+            "corpFlatlines": 2,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "corp",
+              "actions": 72,
+              "turns": 10,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "corp",
+              "actions": 67,
+              "turns": 10,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 80,
+              "turns": 13,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 38,
+              "turns": 5,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "runner",
+              "actions": 100,
+              "turns": 15,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 476,
+            "findings": 79,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 1,
+              "medium": 59,
+              "low": 19
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 0,
+              "repeated_no_progress_run": 8,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 3,
+              "bank_over_target_without_funding_need": 2,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 48,
+              "semantic_override_suspicious": 44,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 0,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 95.2,
+            "corpAgendaScores": 1,
+            "runnerAgendaSteals": 14,
+            "corpFlatlines": 2,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 1,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "corp",
+              "actions": 81,
+              "turns": 12,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "corp",
+              "actions": 114,
+              "turns": 18,
+              "finalAgendaPoints": {
+                "runner": 4,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 116,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 2
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 42,
+              "turns": 5,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "runner",
+              "actions": 123,
+              "turns": 17,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 5,
+            "decisions": 462,
+            "findings": 79,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 1,
+              "medium": 45,
+              "low": 33
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 1,
+              "repeated_no_progress_run": 44,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 39,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 33,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 1,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 92.4,
+            "corpAgendaScores": 0,
+            "runnerAgendaSteals": 10,
+            "corpFlatlines": 2,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 1,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 1,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 160,
+              "turns": 27,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-002",
+              "winner": "corp",
+              "actions": 55,
+              "turns": 8,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-003",
+              "winner": "runner",
+              "actions": 88,
+              "turns": 11,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-004",
+              "winner": "runner",
+              "actions": 81,
+              "turns": 9,
+              "finalAgendaPoints": {
+                "runner": 7,
+                "corp": 0
+              },
+              "replayOk": true
+            },
+            {
+              "seed": "ai-v143-tuning-005",
+              "winner": "corp",
+              "actions": 78,
+              "turns": 12,
+              "finalAgendaPoints": {
+                "runner": 2,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": 1,
+          "corpAgendaScores": 1,
+          "averageGameLength": 23.8
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": 1,
+          "runnerAgendaSteals": -3,
+          "corpAgendaScores": 0,
+          "averageGameLength": 21
+        }
+      }
+    }
+  ],
+  "decision": {
+    "mergeAllowed": true,
+    "recommendation": "keep_candidate_opt_in",
+    "safetyGreen": true,
+    "tacticBetter": true,
+    "practicalMetricBetter": true,
+    "runnerMetricBetter": true,
+    "corpMetricBetter": true,
+    "evidence": [
+      "scenarios:5",
+      "games_per_leg:25",
+      "tactic_hit_rate_delta:1",
+      "legacy_action_limits:16",
+      "candidate_runner_action_limits:10",
+      "candidate_corp_action_limits:13",
+      "legacy_runner_steals:40",
+      "candidate_runner_steals:47",
+      "legacy_corp_scores:12",
+      "candidate_corp_scores:21",
+      "candidate_runner_illegal:0",
+      "candidate_corp_illegal:0",
+      "candidate_runner_replay_failures:0",
+      "candidate_corp_replay_failures:0"
+    ]
+  }
+}
