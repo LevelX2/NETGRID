@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: package_done:AI-SRCOPT-3
+Status: final_green_ready
 
 Datum: 2026-06-22
 
@@ -159,6 +159,26 @@ Ausgangsstand nach Worktree-Anlage:
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
   - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-4 Ergebnis
+
+- Der Access-Intelligence-Abschlussbericht bleibt auf `complete` und verweist
+  auf diesen separaten Strukturprozess.
+- Der Placement Guide dokumentiert die Access-Projection-Fassade, den Legacy-
+  Adapterstatus und die gemeinsame RunTarget-Guidance-Quelle.
+- Boundary- und Public-Export-Gates schützen die neuen Grenzen.
+- Restpotential für eine nächste Schleife:
+  - `packages/ai/src/index.ts` bleibt groß, aber weitere Extraktion braucht
+    eine eigene Readiness-Messung, weil dort Runtime-Orchestration, Debug-
+    Evidence und Public-Fassade eng nebeneinander liegen.
+  - `packages/ai/src/tactical-plans.ts` bleibt Kandidat für weitere Aufteilung
+    nach Goal-Familien, aber nicht mehr im aktuellen engen Access-/Guidance-
+    Scope.
+  - Evaluation-/Report-Module sollten erst nach einem Importgraph-Audit weiter
+    getrennt werden.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/public-export-contract.test.ts --maxWorkers=1 --testTimeout=30000`
   - `git diff --check`
 
 ## Paketdetails
