@@ -1797,6 +1797,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       "full_body_conversion_pay_1",
       "full_body_conversion_pay_2",
     ]);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Credits zahlen: 0 Meat Damage durchlassen",
+      "1 Credits zahlen: 1 Meat Damage durchlassen",
+      "2 Credits zahlen: 2 Meat Damage durchlassen",
+    ]);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -1877,6 +1882,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     );
     expect(preventAll.pendingChoice?.options.map((option) => option.id)).toEqual([
       "full_body_conversion_pay_0",
+    ]);
+    expect(preventAll.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Credits zahlen: 0 Meat Damage durchlassen",
     ]);
     preventAll = applyChoice(preventAll, "corp", "full_body_conversion_pay_0");
     expect(preventAll.runner.grip.length).toBe(preventAllGrip);

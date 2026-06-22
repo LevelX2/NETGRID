@@ -8311,21 +8311,24 @@ function DamageImpactOverlay({
   onDismiss(): void;
 }) {
   if (!cue) return null;
+  const preventedDamage = cue.amount === 0 && !cue.flatline;
   const survivableDamage = cue.runnerGripBefore;
   const overkillDamage = cue.flatline && survivableDamage !== undefined ? Math.max(0, cue.amount - survivableDamage) : 0;
   const meterUnits = damageImpactMeterUnits(cue);
-  const title = cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
+  const title = preventedDamage ? `${damageTypeLabel(cue.damageType)} verhindert` : cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
   const gripLabel = cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
     ? `Grip ${damageImpactGripValue(cue.runnerGripBefore, cue.runnerMaxHandSizeAfter)} -> ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
     : cue.runnerGripAfter !== undefined
       ? `Grip jetzt ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
       : "Grip-Pool";
-  const summary = cue.flatline && cue.runnerGripBefore !== undefined
+  const summary = preventedDamage
+    ? `${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel} verhindert.`
+    : cue.flatline && cue.runnerGripBefore !== undefined
     ? overkillDamage > 0
       ? `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; ${overkillDamage} über Flatline-Schwelle.`
       : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; Flatline-Schwelle erreicht.`
     : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
-  const thresholdLabel = cue.runnerGripBefore !== undefined
+  const thresholdLabel = !preventedDamage && cue.runnerGripBefore !== undefined
     ? cue.flatline
       ? `Null-Linie nach ${cue.runnerGripBefore} Damage`
       : `Verkraftet bis ${cue.runnerGripBefore} Damage`
@@ -8339,30 +8342,34 @@ function DamageImpactOverlay({
     : null;
 
   return (
-    <aside className={`damageImpactOverlay damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""}`} aria-live="assertive" data-testid="damage-impact">
+    <aside className={`damageImpactOverlay damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""} ${preventedDamage ? "is-prevented" : ""}`} aria-live="assertive" data-testid="damage-impact">
       <div className="damageImpactHeader">
         <span className="damageImpactIcon" aria-hidden="true">
-          {cue.flatline ? <AlertTriangle size={22} /> : cue.damageType === "core" ? <Brain size={22} /> : <Zap size={22} />}
+          {preventedDamage ? <Check size={22} /> : cue.flatline ? <AlertTriangle size={22} /> : cue.damageType === "core" ? <Brain size={22} /> : <Zap size={22} />}
         </span>
         <div>
           <strong>{title}</strong>
           <span>{summary}</span>
         </div>
       </div>
-      <div className="damageImpactMeter" aria-label={gripLabel}>
-        {meterUnits.map((unit, index) =>
-          unit.kind === "zero" ? (
-            <span key={`zero-${index}`} className="damageImpactZero" aria-label="Null-Linie">
-              0
-            </span>
-          ) : (
-            <span key={index} className={`damageImpactSegment ${unit.kind}`} aria-hidden="true" />
+      {!preventedDamage ? (
+        <div className="damageImpactMeter" aria-label={gripLabel}>
+          {meterUnits.map((unit, index) =>
+            unit.kind === "zero" ? (
+              <span key={`zero-${index}`} className="damageImpactZero" aria-label="Null-Linie">
+                0
+              </span>
+            ) : (
+              <span key={index} className={`damageImpactSegment ${unit.kind}`} aria-hidden="true" />
+            )
           )
-        )}
-      </div>
+          }
+        </div>
+      ) : null}
       <div className="damageImpactStats">
-        <span>{gripLabel}</span>
-        <span>Damage {cue.amount}</span>
+        {preventedDamage && cue.runnerGripBefore === undefined && cue.runnerGripAfter === undefined ? null : <span>{gripLabel}</span>}
+        <span>{preventedDamage ? `0 ${damageTypeLabel(cue.damageType)}` : `Damage ${cue.amount}`}</span>
+        {preventedDamage ? <span>Verhindert</span> : null}
         {thresholdLabel ? <span>{thresholdLabel}</span> : null}
         {overkillLabel ? <span>{overkillLabel}</span> : null}
         {coreDetail ? <span>{coreDetail}</span> : null}

@@ -22,4 +22,14 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain("Überhang +");
     expect(source).not.toContain("<span>-{cue.amount}</span>");
   });
+
+  it("renders prevented zero damage without the impact meter", () => {
+    const source = pageSource();
+
+    expect(source).toContain("const preventedDamage = cue.amount === 0 && !cue.flatline;");
+    expect(source).toContain('preventedDamage ? "is-prevented" : ""');
+    expect(source).toContain("`${damageTypeLabel(cue.damageType)} verhindert`");
+    expect(source).toContain("!preventedDamage ? (");
+    expect(source).toContain("Verhindert");
+  });
 });
