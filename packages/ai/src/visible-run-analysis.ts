@@ -21,6 +21,10 @@ type RootCardLike = { definitionId?: string; rezzed?: boolean; known: boolean };
 type RunPathProjectionEffect = NonNullable<
   VisibleEffectiveSubroutine["unbrokenRunEffect"]
 >;
+type RunPathProjection = {
+  effect: RunPathProjectionEffect;
+  sourceSubroutine: VisibleEffectiveSubroutine;
+};
 type HardUnbrokenRunEffectKind =
   | "damage_or_program_trash"
   | "run_lock_or_action_tax"
@@ -39,6 +43,7 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByMissingCoverage: boolean;
   knownPathBlockedByEtr: boolean;
   knownPathBlockedByHardUnbrokenEffect?: boolean;
+  knownPathBlockedByUnavoidableTraceRunLock?: boolean;
   hardUnbrokenRunEffects?: HardUnbrokenRunEffectKind[];
   creditsAfterPath: number;
   canBreakNextIceButNotFullPath: boolean;
@@ -300,12 +305,21 @@ function assessKnownRezzedIcePathInternal(
     }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
-      (effect) => !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
+      ({ effect }) => !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
     );
-    for (const effect of runPathEffects) {
+    for (const { effect, sourceSubroutine } of runPathEffects) {
+      const unavoidableTraceRunLock =
+        unbrokenEffectIsUnavoidableTraceRunLock(
+          effect,
+          sourceSubroutine,
+          remainingCredits,
+        );
       const hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
         futureIce.length,
+        unavoidableTraceRunLock === undefined
+          ? {}
+          : { unavoidableTraceRunLock },
       );
       if (hardEffectKinds.length > 0) {
         const breakAssessment =
@@ -345,6 +359,9 @@ function assessKnownRezzedIcePathInternal(
           firstKnownIceBreakable,
           assessedKnownIceCount,
           effectKinds: hardEffectKinds,
+          ...(unavoidableTraceRunLock === undefined
+            ? {}
+            : { unavoidableTraceRunLock }),
           unpayableReason:
             breakAssessment === undefined
               ? "ice_unbreakable"
@@ -476,11 +493,13 @@ function runPathEffectBreakAssessment(params: {
 
 function pathProjectionEffectsForQuote(
   quote: VisibleEffectiveIceRunQuote | undefined,
-): RunPathProjectionEffect[] {
-  const effects: RunPathProjectionEffect[] = [];
+): RunPathProjection[] {
+  const effects: RunPathProjection[] = [];
   for (const subroutine of quote?.subroutines ?? []) {
     const effect = subroutine.unbrokenRunEffect;
-    if (effect && runPathProjectionEffectCanMatter(effect)) effects.push(effect);
+    if (effect && runPathProjectionEffectCanMatter(effect)) {
+      effects.push({ effect, sourceSubroutine: subroutine });
+    }
   }
   return effects;
 }
@@ -537,15 +556,43 @@ function runPathProjectionEffectCanMatter(
 function hardUnbrokenRunEffectKinds(
   effect: RunPathProjectionEffect,
   futureIceCount: number,
+  options: { unavoidableTraceRunLock?: boolean } = {},
 ): HardUnbrokenRunEffectKind[] {
   const kinds: HardUnbrokenRunEffectKind[] = [];
   if (effect.causesDamageOrProgramTrash === true)
     kinds.push("damage_or_program_trash");
-  if ((effect.createsRunLockOrActionTax ?? 0) > 0)
+  if (
+    (effect.createsRunLockOrActionTax ?? 0) > 0 &&
+    !traceRunLockCanBeAvoidedByCurrentCredits(effect, options)
+  ) {
     kinds.push("run_lock_or_action_tax");
+  }
   if (effect.preventsJackOut === true && futureIceCount > 0)
     kinds.push("jack_out_lock");
   return kinds;
+}
+
+function traceRunLockCanBeAvoidedByCurrentCredits(
+  effect: RunPathProjectionEffect,
+  options: { unavoidableTraceRunLock?: boolean },
+): boolean {
+  return (
+    (effect.createsRunLockOrActionTax ?? 0) > 0 &&
+    options.unavoidableTraceRunLock === false
+  );
+}
+
+function unbrokenEffectIsUnavoidableTraceRunLock(
+  effect: RunPathProjectionEffect,
+  sourceSubroutine: VisibleEffectiveSubroutine,
+  remainingCredits: number,
+): boolean | undefined {
+  if ((effect.createsRunLockOrActionTax ?? 0) <= 0) return undefined;
+  if (sourceSubroutine.type !== "initiate_trace") return undefined;
+  if (typeof sourceSubroutine.amount !== "number") return true;
+  const traceBaseStrength = Math.max(0, Math.floor(sourceSubroutine.amount));
+  const runnerVisibleTraceCapacity = Math.max(0, Math.floor(remainingCredits));
+  return traceBaseStrength > runnerVisibleTraceCapacity;
 }
 
 function projectIceForRunPathEffects(
@@ -685,6 +732,7 @@ function hardUnbrokenEffectBlockedPathAssessment(params: {
   firstKnownIceBreakable: boolean;
   assessedKnownIceCount: number;
   effectKinds: HardUnbrokenRunEffectKind[];
+  unavoidableTraceRunLock?: boolean;
   unpayableReason: NonNullable<KnownRezzedIcePathAssessment["unpayableReason"]>;
 }): KnownRezzedIcePathAssessment {
   const unbreakable = params.unpayableReason === "ice_unbreakable";
@@ -706,6 +754,9 @@ function hardUnbrokenEffectBlockedPathAssessment(params: {
       unbreakable && Boolean(missingCoverage?.length),
     knownPathBlockedByEtr: false,
     knownPathBlockedByHardUnbrokenEffect: true,
+    ...(params.unavoidableTraceRunLock
+      ? { knownPathBlockedByUnavoidableTraceRunLock: true }
+      : {}),
     hardUnbrokenRunEffects: [...new Set(params.effectKinds)].sort(),
     creditsAfterPath: params.creditsAfterPath,
     canBreakNextIceButNotFullPath:
