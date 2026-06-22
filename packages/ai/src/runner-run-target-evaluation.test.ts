@@ -48,6 +48,35 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("does not start a visible R&D trace run that cannot reach access and adds a run lock", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [
+        server("rd", {
+          ice: [aspTraceRunLockIce("rd-asp")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "blocked_unbreakable",
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "unproductive_visible_run_path:true",
+        "visible_trace_end_run_lock_unavoidable:true",
+      ]),
+    );
+  });
+
   it("suppresses R&D when the top card is stale known low value and no multiaccess is present", () => {
     const input = aiInput({
       credits: 6,
@@ -2053,6 +2082,35 @@ function wallOfStaticIce(instanceId: string): VisibleCard {
         {
           id: `${instanceId}_etr`,
           type: "end_the_run",
+        },
+      ],
+    },
+  });
+}
+
+function aspTraceRunLockIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_v1_221_asp",
+    title: "Asp",
+    type: "ice",
+    subtypes: ["sentry", "trace"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_221_asp",
+      effectiveStrength: 4,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_221_asp",
+          sourceTitle: "Asp",
+          amount: 5,
+          unbrokenRunEffect: {
+            createsRunLockOrActionTax: 1,
+          },
         },
       ],
     },
