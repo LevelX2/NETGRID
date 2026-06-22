@@ -1,6 +1,6 @@
 # AI Remote No-Payoff Repeat Run Fix
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -61,3 +61,10 @@ Pakete führen fokussierte Vitest-Dateien, `corepack pnpm --filter @netgrid/ai t
 
 Blocker sind jede Nutzung verdeckter gegnerischer Kartendaten, eine Auswahl außerhalb von `input.legalActions`, eine Änderung an Engine-/StateHash-/Randomness-Verträgen oder ein Debug-/Payload-Leak privater Karteninformationen.
 
+## Umsetzungsergebnis
+
+- `memory/remote-access-outcome` leitet aus side-sicheren PublicEvents einen No-Progress-Remote-Access-Status ab, wenn derselbe bekannte Remote-Root seit `start_run`/`access_card` unverändert blieb und weder `trash_accessed_card` noch `steal_agenda` folgte.
+- `RunnerRunTargetEvaluation` nutzt diesen Status pro Remote-Ziel als Fallback-Memory, stuft den Run als `declined_trash_memory_active` ein und gibt eine harte Score-Penalty.
+- `TacticalPlans` übernehmen die side-sicheren Marker `known_remote_no_current_payoff` und `repeated_remote_no_progress_suppressed`, sodass Plan-Fortschreibung Remote 1 nicht mehr über bessere zentrale Ziele hebt.
+- Bekannte Remote-Agendas, neu veränderte Remotes und aktuell unbekannte Roots bleiben nicht durch den Repeat-Run-Guard blockiert.
+- Keine Engine-Regeländerung, keine neue LegalAction-Erzeugung und keine Änderung an `applyAction`, Replay, StateHash, Randomness oder Hidden-Info-Verträgen.
