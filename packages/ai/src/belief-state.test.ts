@@ -131,6 +131,63 @@ describe("belief-state HQ hand memory retention", () => {
     });
   });
 
+  it("does not count accessed HQ root upgrades as HQ hand cards", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "simple_economy_operation",
+      "simple_economy_asset",
+      "simple_upgrade",
+    ]);
+    const hiddenHqRootInstall = publicEvent("evt_install_hq_root", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "hq",
+      installPlacement: "root",
+    });
+    const accessedHqRootUpgrade = publicEvent("evt_access_hq_root", "access_card", 3, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "hq",
+      serverLabel: "HQ",
+      cardDefinitionId: "simple_upgrade",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, hiddenHqRootInstall, accessedHqRootUpgrade], 2),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 2,
+      knownCount: 2,
+      allCardsKnown: true,
+    });
+    expect(hqMemory?.knownDefinitions).toEqual(
+      expect.arrayContaining([
+        "simple_economy_operation",
+        "simple_economy_asset",
+      ]),
+    );
+    expect(hqMemory?.knownDefinitions).not.toContain("simple_upgrade");
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: expect.arrayContaining([
+        expect.objectContaining({ definitionId: "simple_economy_operation" }),
+        expect.objectContaining({ definitionId: "simple_economy_asset" }),
+      ]),
+    });
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
+      expect.objectContaining({
+        zone: "hq",
+        positionKey: "root:0",
+        definitionId: "simple_upgrade",
+      }),
+    );
+  });
+
   it("hard-invalidates HQ memory on hidden-zone reorder", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
       "onr_v1_230_cortical-scanner",
