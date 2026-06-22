@@ -1,6 +1,6 @@
 # AI Runtime Scoring Tactical Legacy Optimization Loop
 
-Status: `final_green_ready`
+Status: `complete`
 
 Datum: 2026-06-22
 
@@ -288,6 +288,12 @@ Stoppentscheidung:
   Legacy-Metadaten-Slices sind umgesetzt.
 - Das verbleibende Potential ist fachlich breiter als diese Schleife und soll
   nicht als Micro-Slice ohne eigenen Audit umgesetzt werden.
+
+Merge-Abschluss:
+
+- Arbeitsbranch `codex/ai-runtime-tactical-legacy-audit-loop` wurde lokal nach
+  `main` gemerged.
+- Abschlussstatus dieses Prozessartefakts: `complete`.
 
 ## Controller-Prompt-Kern
 
