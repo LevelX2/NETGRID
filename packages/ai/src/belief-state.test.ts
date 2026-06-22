@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   PlayerView,
   PublicGameEvent,
+  VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { reconstructBeliefState } from "./belief-state";
@@ -220,6 +221,56 @@ describe("belief-state HQ hand memory retention", () => {
   });
 });
 
+describe("belief-state known position memory", () => {
+  it("does not retain remote root cards that are currently visible in the board view", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_1",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_upgrade",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+    const input = runnerInput([remoteAccess]);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [visibleCard("simple_upgrade", "corp", "upgrade")],
+      },
+    ];
+
+    const belief = reconstructBeliefState(input);
+
+    expect(belief.knownPositionMemory ?? []).toEqual([]);
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toEqual([]);
+  });
+
+  it("retains remote root memory while the current board position is not visible", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_1",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_upgrade",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+
+    const belief = reconstructBeliefState(runnerInput([remoteAccess]));
+
+    expect(belief.knownPositionMemory?.[0]).toMatchObject({
+      zone: "remote_1",
+      positionKey: "root:0",
+      definitionId: "simple_upgrade",
+    });
+  });
+});
+
 function runnerInput(
   events: PublicGameEvent[],
   opponentHandCount = 0,
@@ -275,4 +326,20 @@ function publicEvent(
     visibilityClass: "hidden_info_barrier",
     publicPayload,
   } as PublicGameEvent;
+}
+
+function visibleCard(
+  definitionId: string,
+  owner: "runner" | "corp",
+  type: NonNullable<VisibleCard["type"]>,
+): VisibleCard {
+  return {
+    instanceId: `${definitionId}_instance`,
+    definitionId,
+    title: definitionId,
+    type,
+    known: true,
+    owner,
+    controller: owner,
+  };
 }

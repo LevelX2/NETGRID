@@ -1,6 +1,7 @@
 import {
   DEMO_CARDS_BY_ID,
   type AiDecisionInput,
+  type PlayerView,
   type PublicGameEvent,
   type Side,
   type VisibleCard,
@@ -229,7 +230,7 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const uncertainty = buildUncertainty(entries, input.side);
   const assumptions = buildAssumptions(input.side, entries, classifications);
   const rndTopFreshness = input.side === "runner" ? deriveRndTopFreshness(history, classifications) : undefined;
-  const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(history, classifications) : [];
+  const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(input.playerView, history, classifications) : [];
   const hqHandMemory = input.side === "runner" ? deriveKnownHqHandMemory(input, history, classifications) : undefined;
   const hiddenRemoteCandidateMemory = input.side === "runner" ? deriveHiddenRemoteCandidateMemory(input, history, classifications) : [];
   const runnerOpponentModel =
@@ -458,7 +459,7 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
   return entries;
 }
 
-function deriveKnownPositionMemory(history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownPositionMemory[] {
+function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownPositionMemory[] {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const memory = new Map<string, KnownPositionMemory>();
 
@@ -500,7 +501,29 @@ function deriveKnownPositionMemory(history: PublicGameEvent[], classifications: 
     }
   }
 
-  return normalizeKnownPositionMemory([...memory.values()]).sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+  return normalizeKnownPositionMemory([...memory.values()])
+    .filter((entry) => !positionCurrentlyKnownInView(playerView, entry))
+    .sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+}
+
+function positionCurrentlyKnownInView(
+  playerView: PlayerView,
+  entry: KnownPositionMemory,
+): boolean {
+  const server = playerView.servers.find(
+    (candidate) => candidate.id === entry.zone,
+  );
+  if (!server) return false;
+  const [area, rawIndex] = entry.positionKey.split(":");
+  const index = Number(rawIndex);
+  if (!Number.isInteger(index) || index < 0) return false;
+  const card =
+    area === "root"
+      ? server.root[index]
+      : area === "ice"
+        ? server.ice[index]
+        : undefined;
+  return card?.known === true && card.definitionId === entry.definitionId;
 }
 
 function normalizeKnownPositionMemory(entries: KnownPositionMemory[]): KnownPositionMemory[] {
