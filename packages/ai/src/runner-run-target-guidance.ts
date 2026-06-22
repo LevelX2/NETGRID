@@ -160,6 +160,15 @@ export function runnerPressureProbeTargetAllowed(
   );
 }
 
+export function runnerPressurePreferredProbeTarget(
+  targets: readonly string[],
+  stateVersion: number,
+): string | undefined {
+  if (targets.length === 0) return undefined;
+  const index = Math.abs(stateVersion) % targets.length;
+  return targets[index];
+}
+
 export function runnerRunTargetRecommendationGuidanceKeys(): RunnerRunTargetRecommendation[] {
   return Object.keys(
     RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION,

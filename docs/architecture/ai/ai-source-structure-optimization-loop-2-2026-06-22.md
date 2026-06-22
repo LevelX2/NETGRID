@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 2
 
-Status: `package_done:AI-SRCOPT2-2`
+Status: `final_green_ready`
 
 Datum: 2026-06-22
 
@@ -153,7 +153,8 @@ RunTarget-Guidance-Familie ziehen.
 
 Arbeit:
 
-- Base-Priority und Allowed-Prädikat als reine Helper ergänzen.
+- Base-Priority, Allowed-Prädikat und Preferred-Probe-Target als reine Helper
+  ergänzen.
 - Tests gegen bestehende Prioritäten und Ausschlussbedingungen ergänzen.
 - `tactical-plans.ts` auf die Helper umstellen.
 
@@ -167,35 +168,63 @@ Commit: `refactor(ai): share pressure probe run target helpers`
 
 Ergebnis:
 
-- `runnerPressureProbeBasePriority` und `runnerPressureProbeTargetAllowed`
-  liegen jetzt in `packages/ai/src/runner-run-target-guidance.ts`.
+- `runnerPressureProbeBasePriority`, `runnerPressureProbeTargetAllowed` und
+  `runnerPressurePreferredProbeTarget` liegen jetzt in
+  `packages/ai/src/runner-run-target-guidance.ts`.
 - `packages/ai/src/tactical-plans.ts` nutzt die geteilten RunTarget-Guidance-
   Helper statt lokaler Pressure-Probe-Funktionen.
-- `runner-run-target-guidance.test.ts` deckt Base-Priority sowie Target-Kind-,
-  Payoff-, Path- und Credit-Ausschlüsse ab.
+- `runner-run-target-guidance.test.ts` deckt Base-Priority, deterministische
+  Preferred-Target-Auswahl sowie Target-Kind-, Payoff-, Path- und
+  Credit-Ausschlüsse ab.
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
   - `corepack pnpm --filter @netgrid/ai typecheck`
   - `git diff --check`
 
-### AI-SRCOPT2-3 Restpotential bewerten und Abschluss dokumentieren
+### AI-SRCOPT2-3 Pressure-Probe-Zielwahl und Restpotential bewerten
 
-Ziel: Nach den sicheren RunTarget-Slices bewerten, ob noch ein weiterer
-testbarer Slice ohne neuen Spezialaudit sichtbar ist.
+Ziel: Nach den sicheren RunTarget-Slices den letzten kleinen
+Pressure-Probe-Helfer verschieben und bewerten, ob noch ein weiterer testbarer
+Slice ohne neuen Spezialaudit sichtbar ist.
 
-Erwartete Stoplinie:
+Arbeit:
 
-- Weitere `index.ts`-Splits betreffen Runtime-Orchestration, Debug-Evidence oder
-  Public-Fassade und brauchen einen neuen Readiness-Audit.
-- Weitere `tactical-plans.ts`-Splits sollen nach Goal-Familien geplant werden,
-  nicht als opportunistische Extraktion.
+- `runnerPressurePreferredProbeTarget` als reine deterministische Zielwahl in
+  `runner-run-target-guidance.ts` verschieben.
+- Tests fuer leere Zielmenge sowie positive und negative `stateVersion`-
+  Varianten ergaenzen.
+- Restpotential nach den RunTarget-/Pressure-Probe-Schnitten neu bewerten.
+
+Ergebnis:
+
+- `runnerPressurePreferredProbeTarget` liegt jetzt neben den Pressure-Probe-
+  Guidance-Helpern.
+- `tactical-plans.ts` enthaelt fuer Pressure-Probe nur noch Budget-,
+  Allowance-, Evidence- und Plan-Orchestrierung.
+- Nach der zweiten Messung bleiben keine kleinen, reinen Guidance-Helper mehr
+  sichtbar.
+
+Restpotential:
+
+- `packages/ai/src/index.ts` enthaelt weiterhin Multi-Run- und Runtime-nahe
+  Bewertungslogik. Die verbliebenen Kandidaten koppeln aber Action-Scoring,
+  Event-Bewertung, Runtime-Inputs oder Debug-Evidence und brauchen einen
+  eigenen Facade-/Runtime-Audit.
+- `packages/ai/src/tactical-plans.ts` enthaelt weiterhin RunTarget-
+  Plan-Evidence, ScoreBreakdown, Budget und Allowance. Diese Logik sollte nach
+  Goal-Familien geschnitten werden, nicht mehr als opportunistische Helper-
+  Extraktion.
+- Ein naechster sinnvoller Loop waere daher kein weiterer Micro-Helper-Loop,
+  sondern ein geplanter Audit fuer AI Runtime Facade oder Tactical Goal Family
+  Boundaries.
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/public-export-contract.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
-Commit: `docs(ai): close source structure optimization loop 2`
+Commit: `refactor(ai): share pressure probe target selection`
 
 ## FINAL-GREEN
 

@@ -24,6 +24,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import {
+  runnerPressurePreferredProbeTarget,
   runnerPressureProbeBasePriority,
   runnerPressureProbeTargetAllowed,
   runnerRunTargetTacticalPriorityDelta,
@@ -2500,15 +2501,6 @@ function assessRunnerPressureBudget(
       `variation_reason:${variationReason}`,
     ],
   };
-}
-
-function runnerPressurePreferredProbeTarget(
-  targets: readonly string[],
-  stateVersion: number,
-): string | undefined {
-  if (targets.length === 0) return undefined;
-  const index = Math.abs(stateVersion) % targets.length;
-  return targets[index];
 }
 
 function runnerPressureProbeAllowance(

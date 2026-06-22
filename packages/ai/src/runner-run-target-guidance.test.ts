@@ -6,6 +6,7 @@ import type {
 } from "./runner-run-target-evaluation";
 import {
   RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION,
+  runnerPressurePreferredProbeTarget,
   runnerPressureProbeBasePriority,
   runnerPressureProbeTargetAllowed,
   runnerRunTargetHighPayoff,
@@ -168,5 +169,9 @@ describe("runner run target guidance", () => {
         creditsAfterRun: -1,
       }),
     ).toBe(false);
+    expect(runnerPressurePreferredProbeTarget([], 4)).toBeUndefined();
+    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], 0)).toBe("hq");
+    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], 1)).toBe("rd");
+    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], -1)).toBe("rd");
   });
 });
