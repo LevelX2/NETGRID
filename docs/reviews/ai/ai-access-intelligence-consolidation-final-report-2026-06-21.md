@@ -1,8 +1,11 @@
 # AI Access Intelligence Consolidation Final Report
 
-Status: `implementation_complete_before_final_green`
+Status: `complete`
 
 Arbeitsbranch: `codex/ai-access-intelligence-consolidation`
+
+Abschlussstand: lokal nach `main` integriert und auf `origin/main` sichtbar mit
+Merge-Commit `07c921c5`.
 
 ## Kurzfazit
 
@@ -30,6 +33,10 @@ Der Stand bleibt AI-intern und diagnostisch. Es gibt keine Engine-Regeländerung
 - `packages/ai/src/evaluation/real-engine-access-corpus.ts`
 - `packages/ai/src/evaluation/access-loop-detection.ts`
 
-## Noch ausstehend
+## Abschlussnachtrag
 
-FINAL-GREEN und die lokale Integration nach `main` laufen nach diesem Dokumentationspaket. Der Abschlussstatus wird erst nach erfolgreicher Final-Verifikation und Main-Merge als vollständig grün bewertet.
+Der zuvor dokumentierte Pending-Status war nach dem Main-Merge veraltet.
+FINAL-GREEN, lokale Integration nach `main` und Remote-Sichtbarkeit sind für die
+Access-Intelligence-Consolidation abgeschlossen. Weiterführende
+Source-Strukturarbeit läuft ab 2026-06-22 separat über
+`docs/architecture/ai/ai-source-structure-optimization-loop-2026-06-22.md`.

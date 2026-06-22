@@ -7,7 +7,10 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
+import {
+  accessOutcomeMemoryPlanEvidence,
+  type AccessOutcomeMemoryStatus,
+} from "./access/access-outcome-memory";
 import type {
   BreakerCoverageKind,
   DeckCapabilityProfile,
@@ -20,6 +23,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
+import { runnerRunTargetTacticalPriorityDelta } from "./runner-run-target-guidance";
 import {
   redactedRunnerHandDevelopmentFacts,
   type RunnerHandDevelopmentEvaluation,
@@ -1427,16 +1431,6 @@ function accessCommitmentPlanEvidence(
   ];
 }
 
-function accessOutcomeNoPlanBonusEvidence(
-  status: AccessOutcomeMemoryStatus | undefined,
-): string[] {
-  if (!status?.applies || !status.suppressesPlanBonus) return [];
-  return [
-    "access_outcome_memory_no_plan_bonus:true",
-    "access_outcome_memory_applied:declined_access",
-  ];
-}
-
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
   const input = context.input;
   const previousPlan = context.previousPlan;
@@ -1594,7 +1588,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       context.accessCommitment,
       serverId,
     );
-    const noPlanBonusEvidence = accessOutcomeNoPlanBonusEvidence(
+    const noPlanBonusEvidence = accessOutcomeMemoryPlanEvidence(
       context.accessOutcomeMemory,
     );
     plans.push(
@@ -2366,7 +2360,7 @@ function runnerAdjustedPlanPriority(
 ): number {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
   if (!evaluation) return basePriority;
-  return basePriority + runnerRunTargetPriorityDelta(evaluation);
+  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
 }
 
 function runnerRunTargetPlanScoreBreakdown(
@@ -2387,7 +2381,7 @@ function runnerRunTargetPlanScoreBreakdown(
           {
             key: "runner_run_target_recommendation",
             label: "RunTarget-Empfehlung",
-            value: runnerRunTargetPriorityDelta(evaluation),
+            value: runnerRunTargetTacticalPriorityDelta(evaluation),
             reason: [
               evaluation.recommendation,
               `payoff:${evaluation.accessPayoff}`,
@@ -2397,33 +2391,6 @@ function runnerRunTargetPlanScoreBreakdown(
         ]
       : []),
   ];
-}
-
-function runnerRunTargetPriorityDelta(
-  evaluation: RunnerRunTargetEvaluation,
-): number {
-  switch (evaluation.recommendation) {
-    case "run_now":
-      return 180;
-    case "run_if_free":
-      return 40;
-    case "setup_first":
-      return -80;
-    case "draw_for_damage_buffer":
-      return -520;
-    case "gain_credits_first":
-      return -180;
-    case "find_breaker_first":
-      return -220;
-    case "remote_changed_reassess":
-      return -180;
-    case "declined_trash_memory_active":
-      return -520;
-    case "known_no_current_payoff":
-      return -620;
-    case "do_not_run_now":
-      return -720;
-  }
 }
 
 function runnerEconomyGoalPriority(
@@ -2535,7 +2502,7 @@ function runnerPressureProbeBasePriority(
   evaluation: RunnerRunTargetEvaluation,
 ): number {
   const basePriority = evaluation.targetServerId === "rd" ? 760 : 740;
-  return basePriority + runnerRunTargetPriorityDelta(evaluation);
+  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
 }
 
 function runnerPressurePreferredProbeTarget(

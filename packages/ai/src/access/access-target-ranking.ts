@@ -1,6 +1,6 @@
 import type { AccessTargetKind } from "./access-decision-types";
 import type { KnownRemoteAccessCommitment } from "../decision/known-remote-access-commitment";
-import type { AccessDecisionProjection } from "../decision/access-decision-projection";
+import type { AccessDecisionProjection } from "./access-decision-projection";
 
 export type KnownRemoteAccessCandidate = {
   positionKey: string;
@@ -59,4 +59,3 @@ function knownRemoteAccessRankScore(
   }
   return candidate.valueScore;
 }
-
