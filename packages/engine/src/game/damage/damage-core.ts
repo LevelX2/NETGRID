@@ -1593,7 +1593,7 @@ function eventModificationChoice(
         id: `full_body_conversion_pay_${paid}`,
         label:
           paid === 0
-            ? "0 Credits zahlen: gesamten Meat Damage verhindern"
+            ? "0 Credits zahlen: 0 Meat Damage durchlassen"
             : `${paid} Credits zahlen: ${paid} Meat Damage durchlassen`,
         publicLabel: "Event Modification",
         value: paid,
