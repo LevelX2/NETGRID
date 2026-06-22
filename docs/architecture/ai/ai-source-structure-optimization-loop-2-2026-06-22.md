@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 2
 
-Status: `package_done:AI-SRCOPT2-4`
+Status: `final_green_ready`
 
 Datum: 2026-06-22
 
@@ -231,6 +231,12 @@ Ergebnis:
   Legacy-Runner-Plan-Code gepflegt.
 - Die Bedeutung der Cost-/Unbreakable-/Aggregate-Prädikate ist explizit
   getestet.
+- Abschlussmessung nach Paket 4:
+  - `packages/ai/src/index.ts`: 35.666 Zeilen.
+  - `packages/ai/src/tactical-plans.ts`: 4.074 Zeilen.
+  - `packages/ai/src/legacy/runner-plans.ts`: 8.536 Zeilen.
+  - `packages/ai/src/runner-run-target-guidance.ts`: 159 Zeilen.
+  - `packages/ai/src/visible-run-analysis.ts`: 969 Zeilen.
 
 Restpotential:
 
