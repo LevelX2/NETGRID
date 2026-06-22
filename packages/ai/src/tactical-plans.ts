@@ -2152,13 +2152,6 @@ function runnerCreditBasePlans(
   ) {
     return [];
   }
-  if (
-    creditBase &&
-    !drawOverflowCreditPressure &&
-    runnerCreditBaseShouldYieldToUsefulLegalHandDevelopment(context, creditBase)
-  ) {
-    return [];
-  }
   const basePriority = creditBase
     ? creditBase.economyPriority === "high" ? 930 :
       creditBase.economyPriority === "medium" ? 820 :
@@ -2222,37 +2215,6 @@ function runnerCreditBasePlans(
       stateVersion,
     }),
   ];
-}
-
-function runnerCreditBaseShouldYieldToUsefulLegalHandDevelopment(
-  context: TacticalPlanBuildContext,
-  creditBase: RunnerEconomyPosture["creditBasePlan"],
-): boolean {
-  if (
-    !(context.runnerHandDevelopmentEvaluations ?? []).some(
-      usefulLegalRunnerHandDevelopment,
-    )
-  ) {
-    return false;
-  }
-  if (context.input.playerView.own.credits < creditBase.minimumCreditFloor) {
-    return false;
-  }
-  const reservePolicy = creditBase.creditReservePolicy;
-  if (
-    reservePolicy.remoteScoreThreat !== "none" &&
-    reservePolicy.belowReserveNow &&
-    reservePolicy.canContestIfFunded
-  ) {
-    return false;
-  }
-  if (
-    reservePolicy.belowReserveNow &&
-    creditBase.usefulHandCardsAffordableNow === 0
-  ) {
-    return false;
-  }
-  return true;
 }
 
 function usefulLegalRunnerHandDevelopment(

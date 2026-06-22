@@ -1698,79 +1698,6 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("lets useful legal hand development consume the funded window before more credit base", () => {
-    const rdRun = legalAction("run-rd", "runner", "start_run", {
-      serverId: "rd",
-    });
-    const gain = legalAction("gain", "runner", "gain_credit");
-    const install = legalAction("install-economy", "runner", "install_card", {}, {
-      source: "useful-economy",
-    });
-    const input = aiInput("runner", [rdRun, gain, install]);
-    input.playerView.own.credits = 5;
-    input.playerView.own.gripOrHq = [
-      visibleCard("useful-economy", "runner", "resource", { installCost: 3 }),
-      visibleCard("blocked-economy", "runner", "resource", { installCost: 8 }),
-      visibleCard("filler-1", "runner", "event"),
-      visibleCard("filler-2", "runner", "event"),
-    ];
-    input.playerView.own.maxHandSize = 5;
-    input.playerView.own.rig = [];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
-    const handDevelopmentEvaluations = [
-      runnerHandDevelopmentEvaluation({
-        cardInstanceId: "useful-economy",
-        availability: "legal_now",
-        developmentRole: "economy_engine",
-        strategicFit: "strong",
-        currentNeed: "useful_now",
-        priority: 650,
-        legalActionId: install.actionId,
-      }),
-      runnerHandDevelopmentEvaluation({
-        cardInstanceId: "blocked-economy",
-        availability: "missing_credits",
-        developmentRole: "economy_engine",
-        strategicFit: "blocked",
-        currentNeed: "useful_now",
-        priority: 650,
-        fundingNeed: {
-          installOrPlayCost: 8,
-          missingCredits: 3,
-          reason: "cannot_pay",
-        },
-        deferReason: "missing_credits",
-      }),
-    ];
-    const economyPosture = runnerEconomyPosture({
-      currentCredits: 5,
-      usefulHandCardsBlockedByCredits: 1,
-      usefulHandCardsAffordableNow: 1,
-      recommendation: "fund_useful_hand_card",
-      economyPriority: "high",
-    });
-
-    const result = evaluateTacticalPlans({
-      input,
-      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
-      runnerEconomyPosture: economyPosture,
-      candidates: [
-        candidateForUntargetedAction(rdRun),
-        candidateForUntargetedAction(gain),
-        candidateForUntargetedAction(install),
-      ],
-    });
-
-    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
-      install.actionId,
-    );
-  });
-
   it("reduces draw overflow penalty when clear discard fodder covers the overflow", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
@@ -2095,7 +2022,6 @@ function persistentInstallEvaluation(
 function runnerEconomyPosture(overrides: {
   currentCredits: number;
   usefulHandCardsBlockedByCredits?: number;
-  usefulHandCardsAffordableNow?: number;
   recommendation?: RunnerEconomyPosture["creditBasePlan"]["recommendation"];
   economyPriority?: RunnerEconomyPosture["creditBasePlan"]["economyPriority"];
 }): RunnerEconomyPosture {
@@ -2135,7 +2061,7 @@ function runnerEconomyPosture(overrides: {
       creditReservePolicy,
       fundingNeed: economyPriority === "high",
       usefulHandCardsBlockedByCredits,
-      usefulHandCardsAffordableNow: overrides.usefulHandCardsAffordableNow ?? 0,
+      usefulHandCardsAffordableNow: 0,
       recommendation,
       economyPriority,
       evidence: [],
