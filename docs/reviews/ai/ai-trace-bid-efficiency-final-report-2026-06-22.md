@@ -1,6 +1,6 @@
 # AI Trace Bid Efficiency Final Report 2026-06-22
 
-Status: `review_complete_pending_final_green`
+Status: `completed_final_green_pending_merge`
 
 Branch: `codex/ai-trace-bid-efficiency`
 
@@ -25,7 +25,7 @@ Der Fix ist kein `Chance Observation`-Sonderfall. Er wirkt auf Runner-Trace-Bids
 - Keine Hidden-Info-Ausweitung: Die Policy nutzt nur vorhandene LegalActions, `pendingChoice.options` und side-safe PublicEvent-Felder.
 - Korp-Bids wurden nicht produktiv umgestellt, weil der Korp-Bid vor späteren Runner-Link-/Runner-Bid-Schritten liegt und ohne zusätzliche sichere Prognose nicht eindeutig gleichwertig optimiert werden kann.
 
-## Bisherige Checks
+## Paketchecks
 
 Paketweise ausgeführt und grün:
 
@@ -37,5 +37,22 @@ corepack pnpm --filter @netgrid/ai typecheck
 git diff --check
 ```
 
-Der vollständige AI-Green-Lauf und der lokale Merge nach `main` folgen im Paket `FINAL-GREEN`.
+## FINAL-GREEN
 
+Ausgeführt am 2026-06-22 im Worktree `C:\Projekte\NETGRID_AI_TRACE_BID_EFFICIENCY`:
+
+```bash
+corepack pnpm --filter @netgrid/ai test
+# Ergebnis: 132 Test Files passed, 1512 Tests passed
+
+corepack pnpm --filter @netgrid/ai typecheck
+# Ergebnis: passed
+
+git diff --check
+# Ergebnis: passed
+
+git status --short
+# Ergebnis: clean
+```
+
+Der lokale Merge nach `main` folgt nach diesem FINAL-GREEN-Commit.

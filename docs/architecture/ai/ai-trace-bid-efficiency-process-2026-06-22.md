@@ -2,7 +2,7 @@
 
 ## Status
 
-`review_complete_pending_final_green`
+`final_green_complete_pending_merge`
 
 Arbeitsbranch: `codex/ai-trace-bid-efficiency`
 
@@ -17,7 +17,7 @@ Hauptworkspace: `C:\Projekte\NETGRID`
 - `AI-TRACE-BID-2`: abgeschlossen und committed.
 - `AI-TRACE-BID-3`: abgeschlossen und committed.
 - `AI-TRACE-BID-4`: Review und Wissenspflege abgeschlossen; FINAL-GREEN steht noch aus.
-- `FINAL-GREEN`: ausstehend.
+- `FINAL-GREEN`: AI-Test, Typecheck, `git diff --check` und sauberer Status abgeschlossen; lokaler Merge nach `main` steht noch aus.
 
 ## Quelle/Vorgabe
 
