@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: prepared_for_execution
+Status: package_done:AI-SRCOPT-0
 
 Datum: 2026-06-22
 
@@ -93,6 +93,27 @@ dem weiterhin großen öffentlichen `index.ts`.
 4. `AI-SRCOPT-3` RunTarget-Guidance-Hilfen aus Public Index/Tactical Duplication lösen
 5. `AI-SRCOPT-4` Struktur-Gates und Abschlussdokumentation aktualisieren
 6. `FINAL-GREEN` Vollständige Paketverifikation und lokaler Merge nach `main`
+
+## AI-SRCOPT-0 Messbefund
+
+Ausgangsstand nach Worktree-Anlage:
+
+- Branch: `codex/ai-source-structure-optimization-loop-1`
+- Basis: `de180046 docs(ai): prepare source structure optimization loop`
+- `packages/ai/src/index.ts`: weiterhin größter AI-Entry mit ca. 1,3 MB.
+- Konkrete Strukturreste:
+  - `packages/ai/src/memory/remote-access-outcome.ts` existiert neben dem
+    neueren `packages/ai/src/access/access-outcome-memory.ts` und ist nur noch
+    durch Legacy-Tests direkt sichtbar.
+  - Access-Module importieren Projection-Typen/Funktionen noch direkt aus
+    `decision/access-decision-projection`.
+  - `index.ts` enthält noch eigene RunTarget-Guidance-Gewichtung, während
+    `tactical-plans.ts` eine verwandte Recommendation-Delta-Logik hält.
+- Veralteter Abschlussstatus:
+  - `docs/reviews/ai/ai-access-intelligence-consolidation-final-report-2026-06-21.md`
+    stand noch auf `implementation_complete_before_final_green`.
+  - Der Status wurde auf `complete` korrigiert und verweist auf den separat
+    laufenden Strukturprozess.
 
 ## Paketdetails
 
