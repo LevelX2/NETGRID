@@ -156,6 +156,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   const currentKnownRootDefinitionIds =
     currentKnownRemoteRootDefinitionIds(input, serverId);
   if (currentKnownRootDefinitionIds.length === 0) return undefined;
+  if (currentKnownRemoteHasAgenda(input, serverId)) return undefined;
   const history = mergedPublicHistory(input);
   const lastRunIndex = findLastIndex(
     history,
@@ -277,6 +278,18 @@ function currentKnownRemoteRootDefinitionIds(
     .filter((card) => card.known && card.definitionId)
     .map((card) => card.definitionId!)
     .sort();
+}
+
+function currentKnownRemoteHasAgenda(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    server?.root.some((card) => card.known && card.type === "agenda") ?? false
+  );
 }
 
 function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {

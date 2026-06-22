@@ -1312,6 +1312,137 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluations[0]?.targetServerId).toBe("rd");
   });
 
+  it("keeps a known remote agenda attractive despite prior access-only telemetry", () => {
+    const input = aiInput({
+      credits: 6,
+      eventTail: [
+        syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "simple_agenda",
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-agenda", {
+              definitionId: "simple_agenda",
+              title: "Simple Agenda",
+              type: "agenda",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "agenda",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).not.toContain(
+      "repeated_remote_no_progress_suppressed",
+    );
+  });
+
+  it("reconsiders a no-progress remote after the remote visibly changes", () => {
+    const input = aiInput({
+      credits: 6,
+      eventTail: [
+        syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        syntheticPublicEvent("evt-install-remote-1", 10, "install_card", {
+          actor: "corp",
+          actionType: "install_card",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-root", {
+              definitionId: "onr_v1_317_data-masons",
+              title: "Data Masons",
+              type: "asset",
+              trashCost: 1,
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "trash_affordable",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).not.toContain(
+      "repeated_remote_no_progress_suppressed",
+    );
+  });
+
+  it("does not suppress remote runs when the current root is unknown", () => {
+    const input = aiInput({
+      credits: 6,
+      eventTail: [
+        syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-unknown-root", {
+              known: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "unknown",
+    });
+    expect(evaluation?.evidence).not.toContain(
+      "repeated_remote_no_progress_suppressed",
+    );
+  });
+
   it("reassesses a remote when access memory was invalidated by fingerprint change", () => {
     const input = aiInput({
       credits: 6,
