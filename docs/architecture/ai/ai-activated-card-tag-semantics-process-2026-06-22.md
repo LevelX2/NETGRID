@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_3_projection_implementation_done`
+`tag_sem_4_runtime_scoring_and_mapping_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -186,6 +186,20 @@ Datum: 2026-06-22
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`: grün, 1 Datei / 16 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-4 abgeschlossen
+
+Datum: 2026-06-22
+
+- `semanticRuntimeScopeForAction`/Candidate-Scope-Mapping routet `semanticActionType: "tag.remove"` in `tag_removal`.
+- `semanticRuntimeScoreBreakdown` reicht den `ActionSemanticCandidate` an Runner-Score-Komponenten weiter.
+- Runner-Scoring bewertet akute `tagEffectProfile`-Entfernung nur bei sichtbaren aktuellen Tags und mit konservativer Reduktionsmenge.
+- Regression ergänzt: Runner mit 4 Tags, 1 Credit und installiertem `Danshi's Second ID` wählt die aktivierte Kartenfähigkeit gegenüber `gain_credit`.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts`: grün, 1 Datei / 52 Tests.
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts`: grün, 1 Datei / 517 Tests.
   - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
   - `git diff --check`: grün.
 

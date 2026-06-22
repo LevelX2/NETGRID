@@ -115,6 +115,7 @@ import { buildAiDecisionInputDto } from "./input-dto";
 import {
   buildActionSemanticCandidates,
   type ActionSemanticCandidate,
+  type ActionTagEffectProfile,
 } from "./action-semantic-candidate";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import {
@@ -4033,6 +4034,7 @@ function scoreSemanticRuntimeAction(
     action,
     scopeId,
     exclusion,
+    actionSemanticCandidate,
   );
   const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
   return {
@@ -4482,11 +4484,17 @@ function semanticRuntimeScoreBreakdown(
   action: LegalAction,
   scopeId: string,
   exclusion?: SemanticRuntimeExclusion,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
   const typePriority = semanticRuntimeTypePriority(action.type);
   const contextComponents =
     input.side === "runner"
-      ? semanticRuntimeRunnerScoreComponents(input, action, scopeId)
+      ? semanticRuntimeRunnerScoreComponents(
+          input,
+          action,
+          scopeId,
+          actionSemanticCandidate,
+        )
       : semanticRuntimeCorpScoreComponents(input, action, scopeId);
   const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
   const costPenalty = -(actionCreditCost(action) * 35);
@@ -6271,6 +6279,8 @@ function semanticRuntimeScopeFromActionSemanticCandidate(
     case "economy.gain_credit":
     case "draw.card":
       return "basic_economy_draw";
+    case "tag.remove":
+      return "tag_removal";
     case "run.start": {
       const serverId = semanticRuntimeServerId(action);
       if (serverId === "hq" || serverId === "rd")
@@ -6459,10 +6469,41 @@ type RunnerLoanLiabilityAssessment = {
   evidence: string[];
 };
 
+function runnerTagCleanupScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): AiDecisionScoreComponent | undefined {
+  const currentTags = input.playerView.own.tags;
+  if (currentTags <= 0) return undefined;
+  const profile = actionSemanticCandidate?.tagEffectProfile;
+  const acuteTagRemoval =
+    profile?.acuteTagRemoval === true || action.type === "remove_tag";
+  if (!acuteTagRemoval) return undefined;
+  const reduction = tagCleanupReduction(profile?.currentTagReduction, currentTags);
+  const value = 900 + Math.max(0, reduction - 1) * 150;
+  return {
+    key: "runner_tags_present",
+    label: "Tags entfernen",
+    value,
+    reason: `tags:${currentTags};reduction:${reduction}`,
+  };
+}
+
+function tagCleanupReduction(
+  reduction: ActionTagEffectProfile["currentTagReduction"] | undefined,
+  currentTags: number,
+): number {
+  if (reduction === "all") return currentTags;
+  if (typeof reduction === "number") return Math.min(reduction, currentTags);
+  return 1;
+}
+
 function semanticRuntimeRunnerScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
@@ -6471,7 +6512,15 @@ function semanticRuntimeRunnerScoreComponents(
     loanLiabilityAssessment,
   );
   if (loanLiabilityComponent) components.push(loanLiabilityComponent);
-  if (action.type === "remove_tag" && input.playerView.own.tags > 0) {
+  const tagCleanup = runnerTagCleanupScoreComponent(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
+  if (tagCleanup) {
+    components.push(tagCleanup);
+  }
+  if (action.type === "remove_tag" && input.playerView.own.tags > 0 && !tagCleanup) {
     components.push({
       key: "runner_tags_present",
       label: "Tags entfernen",
