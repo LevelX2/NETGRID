@@ -1,8 +1,16 @@
-import type { AiDecisionDebug, AiDecisionScoreComponent } from "@netgrid/shared";
+import type {
+  AiDecisionDebug,
+  AiDecisionInput,
+  AiDecisionScoreComponent,
+  LegalAction,
+} from "@netgrid/shared";
+import { semanticShadowCalibrationProfileFromEnv } from "../decision/semantic-shadow-calibration";
+import { buildTargetChoiceShadowReport } from "../decision/target-choice-shadow";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
 } from "../runtime/semantic-runtime-types";
+import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
 import type { TacticalPlan, TacticalPlanRuntimeResult } from "../tactical-plans";
 import { formatDebugFieldValue } from "./debug-format";
 import { buildSemanticDecisionDebugScoreComponent } from "./decision-debug";
@@ -206,6 +214,154 @@ export function semanticRuntimeDebugRankedAlternatives(
           ? ["selected_action"]
           : ["semantic_score_below_selected"],
     }));
+}
+
+export function semanticRuntimeDebugShadowTopItems(
+  selected: SemanticRuntimeChoice,
+): string[] {
+  const topEvidence = selected.evidence.filter(
+    (entry) =>
+      entry.startsWith("ai_play_strength_pilot_score") ||
+      entry.startsWith("ai_play_strength_pilot_goal"),
+  );
+  if (topEvidence.length === 0) return [];
+  return scrubEvidence([
+    `semantic_shadow_top_action:${selected.action.actionId}`,
+    `semantic_shadow_top_action_type:${selected.action.type}`,
+    ...topEvidence,
+  ]);
+}
+
+export function semanticRuntimeDebugPilotScopeItems(
+  evidence: readonly string[],
+): string[] {
+  return scrubEvidence(
+    evidence.filter(
+      (entry) =>
+        entry.startsWith("ai_play_strength_pilot:") ||
+        entry.startsWith("pilot_scope"),
+    ),
+  );
+}
+
+export function semanticRuntimeDebugCalibrationProfileItems(
+  evidence: readonly string[],
+): string[] {
+  if (!evidence.some((entry) => entry.startsWith("ai_play_strength_pilot:"))) {
+    return [];
+  }
+  const profile = semanticShadowCalibrationProfileFromEnv();
+  return scrubEvidence([
+    `calibration_profile:${profile.profileId}`,
+    `calibration_mode:${profile.mode}`,
+    `calibration_version:${profile.version}`,
+    `calibration_baseline:${profile.baselineReference}`,
+    `calibration_minimum_score_gap:${profile.pilotMinimumScoreGap}`,
+    `calibration_productive_use_allowed:${profile.productiveUseAllowed}`,
+  ]);
+}
+
+export function semanticRuntimeDebugTargetChoiceShadowItems(
+  action: LegalAction,
+): string[] {
+  if (
+    (action.targetRequirements?.length ?? 0) === 0 &&
+    (action.choiceRequirements?.length ?? 0) === 0
+  ) {
+    return [];
+  }
+  try {
+    const report = buildTargetChoiceShadowReport({
+      action: {
+        ...action,
+        targetRequirements: action.targetRequirements ?? [],
+      },
+    });
+    return [
+      ...report.evidence,
+      `target_choice_action_type:${report.actionType}`,
+      `target_choice_ranked_option_count:${report.rankedOptions.length}`,
+      `target_choice_blocked_requirement_count:${report.blockedRequirements.length}`,
+      ...report.rankedOptions
+        .slice(0, 6)
+        .map(
+          (option) =>
+            `target_choice_option:${option.rank}:${option.kind}:${option.requirementId}:${option.optionId}:${option.score}`,
+        ),
+      ...report.blockedRequirements
+        .slice(0, 6)
+        .map(
+          (requirement) =>
+            `target_choice_blocked:${requirement.kind}:${requirement.reason}`,
+        ),
+    ];
+  } catch {
+    return ["target_choice_shadow:unavailable_redacted"];
+  }
+}
+
+export function semanticRuntimeDebugDoctrineGoalItems(
+  input: AiDecisionInput,
+  scoreBreakdown: readonly AiDecisionScoreComponent[],
+): string[] {
+  const doctrineComponents = scoreBreakdown.filter((component) =>
+    component.key.startsWith("deck_doctrine_runtime_weight"),
+  );
+  if (doctrineComponents.length === 0) return [];
+  return scrubEvidence([
+    "doctrine_goal_trace:decision_debug",
+    `doctrine_side:${input.ownDeckDoctrine?.side ?? input.side}`,
+    ...(input.ownDeckDoctrine?.archetypeTags ?? [])
+      .slice(0, 3)
+      .map((tag) => `doctrine_archetype:${tag}`),
+    ...doctrineComponents.flatMap(doctrineGoalComponentDebugItems),
+  ]).slice(0, 24);
+}
+
+export function semanticRuntimeDebugMistakeSummaryItems(
+  evidence: readonly string[],
+): string[] {
+  return scrubEvidence(
+    evidence.filter(
+      (entry) =>
+        entry.startsWith("mistake_summary:") ||
+        entry.startsWith("observed_mistake_count:"),
+    ),
+  );
+}
+
+function doctrineGoalComponentDebugItems(
+  component: AiDecisionScoreComponent,
+): string[] {
+  const fields = debugReasonFields(component.reason);
+  return [
+    `doctrine_goal_component:${component.key}`,
+    `doctrine_goal_weight:${component.value}`,
+    ...(fields.get("plan") ? [`doctrine_goal_plan:${fields.get("plan")}`] : []),
+    ...(fields.get("consumer")
+      ? [`doctrine_goal_consumer:${fields.get("consumer")}`]
+      : []),
+    ...(fields.get("deck_doctrine_runtime_gate_reason")
+      ? [
+          `doctrine_goal_gate_reason:${fields.get(
+            "deck_doctrine_runtime_gate_reason",
+          )}`,
+        ]
+      : []),
+    ...(component.key === "deck_doctrine_runtime_weight_suppressed"
+      ? ["doctrine_goal_suppressed:true"]
+      : []),
+  ];
+}
+
+function debugReasonFields(reason: string | undefined): Map<string, string> {
+  const fields = new Map<string, string>();
+  for (const part of reason?.split("|") ?? []) {
+    const separator = part.indexOf(":");
+    if (separator <= 0) continue;
+    fields.set(part.slice(0, separator), part.slice(separator + 1));
+  }
+  return fields;
 }
 
 export function semanticRuntimeDebugTacticalPlanItems(

@@ -1,6 +1,6 @@
 # AI Runtime Tactical Boundary Optimization Loop
 
-Status: `package_done:AI-RTB-2`
+Status: `package_done:AI-RTB-3`
 
 Datum: 2026-06-22
 
@@ -82,10 +82,11 @@ Stoppen, wenn:
 2. `package_done:AI-RTB-0`
 3. `package_done:AI-RTB-1`
 4. `package_done:AI-RTB-2`
-5. `final_green_ready`
-6. `merged_to_main`
-7. `complete`
-8. `blocked:<reason>`
+5. `package_done:AI-RTB-3`
+6. `final_green_ready`
+7. `merged_to_main`
+8. `complete`
+9. `blocked:<reason>`
 
 ## Paketfolge
 
@@ -178,8 +179,7 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
-Commit: `refactor(ai): move semantic runtime memory debug` oder
-`docs(ai): close runtime tactical boundary loop`
+Commit: `refactor(ai): move semantic runtime memory debug`
 
 Ergebnis:
 
@@ -195,6 +195,33 @@ Ergebnis:
   - `git diff --check`
 
 Commit: `refactor(ai): move semantic runtime memory debug`
+
+### AI-RTB-3 Runtime-Debug-Item-Grenze schließen
+
+Ziel: Die verbleibenden reinen Debug-Item-Formatter aus
+`semanticRuntimeDecisionDebug` in die bestehende Runtime-Diagnostics-Familie
+verschieben.
+
+Arbeit:
+
+- Shadow-Top-, Pilot-Scope-, Calibration-Profile-, Target-Choice-Shadow-,
+  Doctrine-Goal- und Mistake-Summary-Item-Formatter nach
+  `diagnostics/semantic-runtime-debug.ts` verschieben.
+- `index.ts` auf die geteilten `semanticRuntimeDebug...`-Helper umstellen.
+- Direkte Unit-Tests für Evidence-Filter, Calibration-Items, Doctrine-Reason-
+  Parsing und Target-Choice-Leerfall ergänzen.
+
+Ergebnis:
+
+- `index.ts` enthält in `semanticRuntimeDecisionDebug` nur noch
+  Debug-Orchestrierung und keine lokalen Evidence-Formatter mehr.
+- `semantic-runtime-debug.test.ts` deckt die neuen Debug-Item-Gruppen direkt ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/semantic-runtime-debug.test.ts src/diagnostics/semantic-runtime-memory-debug.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+Commit: `refactor(ai): move runtime debug item formatting`
 
 ## FINAL-GREEN
 
@@ -215,7 +242,7 @@ Done-Gate:
 ## Controller-Prompt-Kern
 
 `/Goal Arbeite AI Runtime Tactical Boundary Optimization Loop vollständig und
-sequenziell von AI-RTB-0 bis AI-RTB-2 plus FINAL-GREEN ab und merge den
+sequenziell von AI-RTB-0 bis AI-RTB-3 plus FINAL-GREEN ab und merge den
 abgeschlossenen Arbeitsbranch lokal nach main. Arbeite ausschließlich im
 Worktree C:\Projekte\NETGRID_AI_RUNTIME_TACTICAL_BOUNDARY_LOOP auf Branch
 codex/ai-runtime-tactical-boundary-loop. Nutze den Hauptworkspace nur für den

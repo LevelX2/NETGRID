@@ -10,10 +10,16 @@ import {
   semanticRuntimeDebugActionDisplayScore,
   semanticRuntimeDebugActionWhyChosen,
   semanticRuntimeDebugActionWhyNot,
+  semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
+  semanticRuntimeDebugDoctrineGoalItems,
+  semanticRuntimeDebugMistakeSummaryItems,
+  semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
   semanticRuntimeDebugRankedAlternatives,
+  semanticRuntimeDebugShadowTopItems,
   semanticRuntimeDebugTacticalPlanItems,
+  semanticRuntimeDebugTargetChoiceShadowItems,
 } from "./semantic-runtime-debug";
 
 describe("SemanticRuntimeDebug", () => {
@@ -117,6 +123,90 @@ describe("SemanticRuntimeDebug", () => {
         visibleReasons: ["safe"],
         whyNot: ["selected_action"],
       }),
+    ]);
+  });
+
+  it("formats semantic runtime evidence debug item groups", () => {
+    const selected = choice(action("run-hq", "start_run"), 90, {
+      evidence: [
+        "ai_play_strength_pilot:basic_setup",
+        "ai_play_strength_pilot_score:42",
+        "ai_play_strength_pilot_goal:runner_central_pressure",
+        "pilot_scope:eligible",
+        "mistake_summary:avoided_loop",
+        "observed_mistake_count:1",
+      ],
+    });
+
+    expect(semanticRuntimeDebugShadowTopItems(selected)).toEqual([
+      "semantic_shadow_top_action:run-hq",
+      "semantic_shadow_top_action_type:start_run",
+      "ai_play_strength_pilot_score:42",
+      "ai_play_strength_pilot_goal:runner_central_pressure",
+    ]);
+    expect(semanticRuntimeDebugPilotScopeItems(selected.evidence)).toEqual([
+      "ai_play_strength_pilot:basic_setup",
+      "pilot_scope:eligible",
+    ]);
+    expect(
+      semanticRuntimeDebugCalibrationProfileItems(selected.evidence),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^calibration_profile:/),
+        expect.stringMatching(/^calibration_mode:/),
+      ]),
+    );
+    expect(semanticRuntimeDebugMistakeSummaryItems(selected.evidence)).toEqual([
+      "mistake_summary:avoided_loop",
+      "observed_mistake_count:1",
+    ]);
+    expect(semanticRuntimeDebugTargetChoiceShadowItems(selected.action)).toEqual(
+      [],
+    );
+  });
+
+  it("formats doctrine goal debug items from score reasons", () => {
+    const items = semanticRuntimeDebugDoctrineGoalItems(
+      {
+        side: "runner",
+        ownDeckDoctrine: {
+          schemaVersion: "ai-deck-doctrine-v1",
+          deckSnapshotId: "doctrine-debug-test",
+          deckHash: "test:doctrine-debug-test",
+          side: "runner",
+          confidence: 0.8,
+          archetypeTags: ["pressure", "rig", "economy", "extra"],
+          roleCounts: {},
+          roleDensity: {},
+          planWeights: {},
+          mulliganWeights: {},
+          riskFlags: [],
+          evidence: [],
+        },
+      } as never,
+      [
+        {
+          key: "deck_doctrine_runtime_weight_suppressed",
+          label: "Doctrine",
+          value: -25,
+          reason:
+            "plan:runner_central_pressure|consumer:runtime|deck_doctrine_runtime_gate_reason:blocked",
+        },
+      ],
+    );
+
+    expect(items).toEqual([
+      "doctrine_goal_trace:decision_debug",
+      "doctrine_side:runner",
+      "doctrine_archetype:pressure",
+      "doctrine_archetype:rig",
+      "doctrine_archetype:economy",
+      "doctrine_goal_component:deck_doctrine_runtime_weight_suppressed",
+      "doctrine_goal_weight:-25",
+      "doctrine_goal_plan:runner_central_pressure",
+      "doctrine_goal_consumer:runtime",
+      "doctrine_goal_gate_reason:blocked",
+      "doctrine_goal_suppressed:true",
     ]);
   });
 
