@@ -1,6 +1,6 @@
 # AI Play Strength Loop 3 Iterative Optimization
 
-Status: package_done:AI-PS3-0
+Status: final_no_potential_or_gate
 
 Datum: 2026-06-22
 
@@ -132,6 +132,49 @@ Restpotential:
 
 Entscheidung für AI-PS3-1: Implementiere einen eng begrenzten
 `runner_tag_cleanup_before_pressure`-Kandidaten im Practical-Tactic-Overlay.
+
+## AI-PS3-1/2 Umsetzung und Gate-Entscheidung
+
+Der Kandidat `runner_tag_cleanup_before_pressure` wurde lokal implementiert
+und mit fokussierten Tests geprüft. Die Unit- und Typechecks waren grün:
+
+```text
+corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts src/evaluation/practical-tactic-benchmark.test.ts
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
+```
+
+Die anschließenden gepaarten Gates zeigten aber keine praktische Verbesserung:
+
+- Pair-D-Fokus blieb beim auffälligen Runner-Action-Limit-Cluster schlechter
+  als Legacy.
+- Der breite Gate-Lauf über Pair A-D blieb metrisch identisch zum
+  Planungsgate.
+- Safety blieb grün, aber der Kandidat bewegte den realen Gate-Gegenstand
+  nicht messbar.
+
+Entscheidung: Der Codekandidat wurde vor dem Commit verworfen. Ein Kandidat,
+der nur synthetische Fixtures verbessert, aber im gepaarten Spielstärke-Gate
+keinen Effekt zeigt, wird nicht in das KI-Verhalten übernommen.
+
+## AI-PS3-3 No-Potential-Abschluss
+
+Nach dem verworfenen Tag-Cleanup-Kandidaten bleibt innerhalb des aktuellen
+Practical-Tactic-Overlay-Zuschnitts kein weiterer klarer Low-Risk-Hebel
+sichtbar:
+
+- Die PS2-Heuristik ist weiterhin insgesamt positiv und safety-grün.
+- Die auffälligen Restsignale sind gemischt: mehr Fortschritt oder mehr
+  Scoring bei gleichzeitig einzelnen schlechteren Action-Limit-Clustern.
+- Eine weitere kleine Overlay-Regel wäre ohne Trace-Diagnose voraussichtlich
+  heuristisches Tuning statt belegbarer Entscheidungskorrektur.
+- Größeres Restpotential liegt eher in einem separaten Analysepaket mit
+  Trace-Level-Ursachenanalyse, Default-Cutover-Gate oder Planner-Struktur,
+  nicht in einer weiteren blind iterierten Mikro-Heuristik.
+
+Finale Entscheidung: `no_clear_low_risk_potential`. Die Schleife endet ohne
+neue Verhaltenänderung nach AI-PS3-0; der Planungs- und No-Potential-Befund
+wird übernommen.
 
 ## Paketdetails
 
