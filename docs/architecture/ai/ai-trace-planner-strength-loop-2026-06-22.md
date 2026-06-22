@@ -1,6 +1,6 @@
 # AI Trace Planner Strength Loop
 
-Status: prepared_for_execution
+Status: package_done:TRACE-PLANNER-1
 
 Datum: 2026-06-22
 
@@ -108,6 +108,38 @@ No-Potential-Abschluss dokumentiert.
 5. `FINAL-GREEN` Verifikation, lokaler Merge und Worktree-Cleanup
 
 ## Paketdetails
+
+## TRACE-PLANNER-1 Planungsergebnis
+
+Der Trace-Matrix-Lauf über Pair A-D mit Action-Alternativen war safety-grün:
+
+- Spiele: 20
+- Entscheidungen: 2492
+- IllegalActions: 0
+- ReplayFailures: 0
+- RedactionSafe: true
+- Action-Limits: 11
+- High Findings: 4
+- Medium Findings: 592
+
+Die größten Diagnoseklassen waren:
+
+- `plan_step_action_mismatch`: 539
+- `semantic_override_suspicious`: 408
+- `repeated_no_progress_run`: 35
+- `action_limit_reached`: 11
+
+Konkreter Kandidat:
+
+- Mehrere lange Spielsituationen zeigen, dass legale nützliche Runner-Hand-
+  Development-Aktionen als `plan_mismatch` ausgeschlossen werden, während der
+  aktive `runner.build_credit_base`-Plan weiter Credits sammelt.
+- Der engste Low-Risk-Hebel liegt im Planner, nicht im Overlay: Credit-Base
+  soll zurücktreten, wenn bereits eine nützliche legale Handentwicklung
+  verfügbar ist und keine harte Mindestreserve, Remote-Contest-Finanzierung
+  oder Overdraw-Credit-Pressure aktiv ist.
+
+Entscheidung: `implement_candidate`.
 
 ### TRACE-PLANNER-0 Prozess- und Baseline-Setup
 
