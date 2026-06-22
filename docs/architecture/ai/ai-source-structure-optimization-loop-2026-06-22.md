@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 1
 
-Status: package_done:AI-SRCOPT-2
+Status: package_done:AI-SRCOPT-3
 
 Datum: 2026-06-22
 
@@ -142,6 +142,22 @@ Ausgangsstand nach Worktree-Anlage:
   schützt die übrigen Access-Module gegen erneute Direktkopplung.
 - Checks:
   - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/access-decision-projection.test.ts src/decision/module-boundaries.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+## AI-SRCOPT-3 Ergebnis
+
+- `packages/ai/src/runner-run-target-guidance.ts` bündelt die
+  RunTarget-Recommendation-Gewichtung.
+- Runtime-Semantik und TacticalPlans bleiben getrennte Skalen:
+  - `runnerRunTargetSemanticGuidanceValue` für Runtime-Penalties;
+  - `runnerRunTargetTacticalPriorityDelta` für Plan-Prioritäten.
+- `index.ts` und `tactical-plans.ts` nutzen keine lokalen
+  Recommendation-Switches mehr für diese Guidance-Werte.
+- `runner-run-target-guidance.test.ts` schützt die Recommendation-Abdeckung und
+  die Sonderbehandlung von `run_if_free` bei unbekanntem Payoff.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
   - `corepack pnpm --filter @netgrid/ai typecheck`
   - `git diff --check`
 
