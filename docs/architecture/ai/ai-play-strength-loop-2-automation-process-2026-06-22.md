@@ -1,6 +1,6 @@
 # AI Play Strength Loop 2
 
-Status: package_done:AI-PS2-2
+Status: package_done:AI-PS2-3
 
 Datum: 2026-06-22
 
@@ -185,6 +185,27 @@ Corp-Practical-Tactic wurde stabilisiert, nicht aggressiver gemacht:
 Der kleine Gate-Lauf nach AI-PS2-2 bleibt safety-grün, zeigt aber noch keine
 Corp-Metrikverbesserung. Das Paket ist deshalb eine Stabilisierung des
 opt-in-Candidate-Verhaltens, keine Default- oder Stärke-Promotion.
+
+## AI-PS2-3 Messbefund
+
+Finaler Paired-Gate-Lauf:
+
+```text
+corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-ps2-play-strength-gate.ts --out docs/reviews/ai/ai-ps2-final-play-strength-gate-2026-06-22.json --pairs a,b --max-actions 160
+```
+
+Ergebnis:
+
+- Szenarien: 3 (`default_demo`, Pair A, Pair B)
+- Spiele je Leg: 15
+- Safety: 0 IllegalActions, 0 ReplayFailures, RedactionSafe true
+- Taktik-Benchmark: Frozen Legacy 0/40, Candidate 40/40
+- Candidate-Runner: Action-Limits 8 statt 11, Runner-Steals 22 statt 21
+- Candidate-Corp: Action-Limits 9 statt 11, Corp-Scores 19 statt 11
+
+Entscheidung: `keep_candidate_opt_in`. Die Schleife zeigt eine praktische
+Verbesserung in beiden Side-Legs, aber der Kandidat bleibt kontrolliert opt-in;
+ein globaler Default-Cutover bleibt außerhalb dieses Prozesses.
 
 ## Paketdetails
 
