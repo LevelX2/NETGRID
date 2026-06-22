@@ -3,6 +3,8 @@ import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
 } from "../runtime/semantic-runtime-types";
+import type { TacticalPlan, TacticalPlanRuntimeResult } from "../tactical-plans";
+import { formatDebugFieldValue } from "./debug-format";
 import { buildSemanticDecisionDebugScoreComponent } from "./decision-debug";
 
 export type SemanticRuntimeDebugPlanContext = {
@@ -204,6 +206,188 @@ export function semanticRuntimeDebugRankedAlternatives(
           ? ["selected_action"]
           : ["semantic_score_below_selected"],
     }));
+}
+
+export function semanticRuntimeDebugTacticalPlanItems(
+  planRuntime: TacticalPlanRuntimeResult,
+): string[] {
+  const selectedPlan = planRuntime.selectedPlan;
+  const selectedStep = planRuntime.selectedStep;
+  const selectedMapping = planRuntime.selectedMapping;
+  const previousPlan = planRuntime.previousPlan;
+  return [
+    ...(previousPlan
+      ? [
+          `previous_plan:${previousPlan.planId}`,
+          `previous_plan_type:${previousPlan.type}`,
+          `previous_plan_status:${previousPlan.status}`,
+          `previous_plan_ttl:${previousPlan.ttlDecisionsRemaining}`,
+        ]
+      : ["previous_plan:none"]),
+    ...(planRuntime.planProgressionReason
+      ? [`plan_progression_reason:${planRuntime.planProgressionReason}`]
+      : []),
+    ...(planRuntime.whyPlanAbandoned
+      ? [`why_plan_abandoned:${planRuntime.whyPlanAbandoned}`]
+      : []),
+    ...(planRuntime.deckCapabilitiesUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `deck_capability_used:${fact}`),
+    ...(planRuntime.runnerStrategicIntentUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_strategic_intent_used:${fact}`),
+    ...(planRuntime.runnerRunTargetEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_run_target_used:${fact}`),
+    ...(planRuntime.runnerEconomyPostureUsed ?? [])
+      .slice(0, 28)
+      .map((fact) => `runner_economy_posture_used:${fact}`),
+    ...(planRuntime.runnerHandDevelopmentEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_hand_development_used:${fact}`),
+    ...(planRuntime.runnerTacticalGoalsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_tactical_goal_used:${fact}`),
+    `plan_alternative_count:${planRuntime.planAlternatives.length}`,
+    `blocked_plan_count:${planRuntime.blockedPlans.length}`,
+    ...(selectedPlan
+      ? [
+          `selected_plan:${selectedPlan.planId}`,
+          `selected_plan_type:${selectedPlan.type}`,
+          `selected_plan_status:${selectedPlan.status}`,
+        ]
+      : ["selected_plan:none"]),
+    ...(selectedPlan?.type === "runner.develop_hand_card"
+      ? selectedPlan.evidence
+          .filter((entry) => entry.startsWith("hand_development_"))
+          .slice(0, 6)
+          .map((entry) => `selected_development_goal:${entry}`)
+      : []),
+    ...(selectedStep
+      ? [
+          `selected_step:${selectedStep.stepId}`,
+          `selected_step_kind:${selectedStep.kind}`,
+        ]
+      : []),
+    ...(selectedMapping
+      ? [
+          `selected_step_mapping:${selectedMapping.status}`,
+          `mapped_legal_actions:${selectedMapping.legalActions
+            .map((action) => action.actionId)
+            .join("|")}`,
+          ...selectedMapping.rationale
+            .slice(-4)
+            .map((entry) => `why_this_action:${entry}`),
+        ]
+      : []),
+    ...planRuntime.blockedPlans
+      .slice(0, 3)
+      .map(
+        (plan) =>
+          `why_not_other_plan:${plan.planId}:${plan.blockers
+            .map((blocker) => blocker.kind)
+            .join(",")}`,
+      ),
+    ...planRuntime.planAlternatives.map((plan, index) =>
+      tacticalPlanRankDebugItem(
+        plan,
+        index + 1,
+        selectedPlan?.planId === plan.planId,
+      ),
+    ),
+  ];
+}
+
+function tacticalPlanRankDebugItem(
+  plan: TacticalPlan,
+  rank: number,
+  selected: boolean,
+): string {
+  const fields: Array<[string, string | number | boolean | undefined]> = [
+    ["rank", rank],
+    ["id", plan.planId],
+    ["type", plan.type],
+    ["target", tacticalPlanTargetDebugValue(plan.target)],
+    ["target_label", plan.target?.label],
+    ["target_role", tacticalPlanTargetRoleDebugValue(plan)],
+    ["card_type", tacticalPlanEvidenceValue(plan, "card_type:")],
+    [
+      "handLimitPressure",
+      tacticalPlanEvidenceValue(plan, "hand_limit_pressure:"),
+    ],
+    [
+      "projectedOverflow",
+      tacticalPlanEvidenceValue(plan, "projected_overflow:"),
+    ],
+    [
+      "drawOverflowPenalty",
+      tacticalPlanEvidenceValue(plan, "draw_overflow_penalty:"),
+    ],
+    [
+      "discardFodderCount",
+      tacticalPlanEvidenceValue(plan, "discard_fodder_count:"),
+    ],
+    [
+      "usefulPlayableCardsInHand",
+      tacticalPlanEvidenceValue(plan, "useful_playable_cards_in_hand:"),
+    ],
+    ["urgencyOverride", tacticalPlanEvidenceValue(plan, "urgency_override:")],
+    [
+      "why_draw_over_install_or_credit",
+      tacticalPlanEvidenceValue(plan, "why_draw_over_install_or_credit:"),
+    ],
+    ["priority", plan.priority],
+    ["status", plan.status],
+    ["step", plan.currentStep.kind],
+    ["selected", selected],
+    ["blockers", plan.blockers.map((blocker) => blocker.kind).join(",")],
+    [
+      "capabilities",
+      plan.requiredCapabilities.map((capability) => capability.kind).join(","),
+    ],
+    ["unblocks", tacticalPlanUnblocksDebugValue(plan)],
+    ["scores", tacticalPlanScoreDebugValue(plan)],
+  ];
+  return `plan_rank|${fields
+    .filter(([, value]) => value !== undefined && String(value).length > 0)
+    .map(([key, value]) => `${key}=${formatDebugFieldValue(value!)}`)
+    .join("|")}`;
+}
+
+function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
+  if (!target) return "";
+  return [target.kind, target.id].filter(Boolean).join(":");
+}
+
+function tacticalPlanTargetRoleDebugValue(
+  plan: TacticalPlan,
+): string | undefined {
+  if (plan.type !== "runner.develop_hand_card") return undefined;
+  const prefix = "hand_development_role:";
+  const role = plan.evidence.find((entry) => entry.startsWith(prefix));
+  return role ? role.slice(prefix.length) : undefined;
+}
+
+function tacticalPlanEvidenceValue(
+  plan: TacticalPlan,
+  prefix: string,
+): string | undefined {
+  const entry = plan.evidence.find((candidate) => candidate.startsWith(prefix));
+  return entry ? entry.slice(prefix.length) : undefined;
+}
+
+function tacticalPlanUnblocksDebugValue(plan: TacticalPlan): string {
+  return plan.evidence
+    .filter((entry) => entry.startsWith("unblocks_plan:"))
+    .map((entry) => entry.slice("unblocks_plan:".length))
+    .join(",");
+}
+
+function tacticalPlanScoreDebugValue(plan: TacticalPlan): string {
+  return plan.scoreBreakdown
+    .slice(0, 5)
+    .map((component) => `${component.label}:${roundScore(component.value)}`)
+    .join(",");
 }
 
 function roundScore(value: number): number {

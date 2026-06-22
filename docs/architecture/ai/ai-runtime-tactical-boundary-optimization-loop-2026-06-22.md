@@ -1,6 +1,6 @@
 # AI Runtime Tactical Boundary Optimization Loop
 
-Status: `package_done:AI-RTB-0`
+Status: `package_done:AI-RTB-1`
 
 Datum: 2026-06-22
 
@@ -145,6 +145,19 @@ Checks:
 - `git diff --check`
 
 Commit: `refactor(ai): move tactical plan debug formatting`
+
+Ergebnis:
+
+- `semanticRuntimeDebugTacticalPlanItems` liegt jetzt in
+  `diagnostics/semantic-runtime-debug.ts`.
+- `index.ts` ruft nur noch den Diagnostics-Helper auf und enthält die
+  TacticalPlan-Ranking-Formatierung nicht mehr lokal.
+- `semantic-runtime-debug.test.ts` deckt Previous-Plan-, Mapping-,
+  Blocked-Plan-, Evidence- und `plan_rank`-Items ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/semantic-runtime-debug.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
 
 ### AI-RTB-2 Memory-Debuggrenze schließen oder Restpotential stoppen
 

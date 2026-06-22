@@ -1,6 +1,10 @@
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
+import type {
+  TacticalPlan,
+  TacticalPlanRuntimeResult,
+} from "../tactical-plans";
 import {
   buildSemanticRuntimeDebugPlanContext,
   semanticRuntimeDebugActionDisplayScore,
@@ -9,6 +13,7 @@ import {
   semanticRuntimeDebugCoverageScoreBreakdown,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
   semanticRuntimeDebugRankedAlternatives,
+  semanticRuntimeDebugTacticalPlanItems,
 } from "./semantic-runtime-debug";
 
 describe("SemanticRuntimeDebug", () => {
@@ -114,6 +119,91 @@ describe("SemanticRuntimeDebug", () => {
       }),
     ]);
   });
+
+  it("formats tactical plan runtime diagnostics without runtime selection logic", () => {
+    const selectedAction = action("install-breaker", "install_card");
+    const selectedPlan = tacticalPlan({
+      planId: "plan-coverage",
+      type: "runner.develop_hand_card",
+      priority: 320,
+      evidence: [
+        "hand_development_role:breaker|bad",
+        "card_type:program",
+        "hand_limit_pressure:high",
+        "projected_overflow:2",
+        "draw_overflow_penalty:-30",
+        "discard_fodder_count:1",
+        "useful_playable_cards_in_hand:2",
+        "urgency_override:find_breaker_for_score_threat",
+        "why_draw_over_install_or_credit:coverage_gap",
+        "unblocks_plan:run_remote_1",
+      ],
+      requiredCapabilityKind: "breaker_wall",
+      scoreReason: "coverage",
+    });
+    const blockedPlan = tacticalPlan({
+      planId: "plan-bank",
+      type: "runner.build_credit_bank",
+      blockerKind: "bank_tool_not_installed",
+    });
+    const runtime: TacticalPlanRuntimeResult = {
+      previousPlan: {
+        schemaVersion: "tactical-plan-v1",
+        memoryId: "memory-1",
+        side: "runner",
+        planId: "previous-plan",
+        type: "runner.obtain_breaker_coverage",
+        status: "active",
+        blockedBy: [],
+        ttlDecisionsRemaining: 2,
+        planProgressionReason: "continued",
+        updatedAtStateVersion: 7,
+      },
+      planAlternatives: [selectedPlan],
+      blockedPlans: [blockedPlan],
+      selectedPlan,
+      selectedStep: selectedPlan.currentStep,
+      selectedMapping: {
+        plan: selectedPlan,
+        step: selectedPlan.currentStep,
+        status: "matched",
+        actionCandidateIds: ["candidate-1"],
+        legalActions: [selectedAction],
+        rationale: [
+          "older",
+          "coverageAnswerRole:direct_breaker_install",
+          "selected_for_coverage",
+        ],
+      },
+      planProgressionReason: "mapping_selected",
+      deckCapabilitiesUsed: ["coverage:wall"],
+      runnerTacticalGoalsUsed: ["goal:contest_remote"],
+    };
+
+    const items = semanticRuntimeDebugTacticalPlanItems(runtime);
+
+    expect(items).toContain("previous_plan:previous-plan");
+    expect(items).toContain("previous_plan_ttl:2");
+    expect(items).toContain("plan_progression_reason:mapping_selected");
+    expect(items).toContain("selected_step_mapping:matched");
+    expect(items).toContain("mapped_legal_actions:install-breaker");
+    expect(items).toContain(
+      "why_not_other_plan:plan-bank:bank_tool_not_installed",
+    );
+    expect(items).toContain("deck_capability_used:coverage:wall");
+    expect(items).toContain("runner_tactical_goal_used:goal:contest_remote");
+    expect(items).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("plan_rank|rank=1|id=plan-coverage"),
+      ]),
+    );
+    const rankItem = items.find((entry) => entry.startsWith("plan_rank|"));
+    expect(rankItem).toContain("target=card:card-1");
+    expect(rankItem).toContain("target_label=Breaker Card");
+    expect(rankItem).toContain("target_role=breaker bad");
+    expect(rankItem).toContain("capabilities=breaker_wall");
+    expect(rankItem).toContain("scores=Coverage:12.35");
+  });
 });
 
 function choice(
@@ -144,5 +234,70 @@ function action(actionId: string, type: LegalAction["type"]): LegalAction {
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 1,
+  };
+}
+
+function tacticalPlan({
+  planId,
+  type,
+  priority = 100,
+  evidence = [],
+  requiredCapabilityKind = "credits",
+  blockerKind = "missing_credits",
+  scoreReason = "base",
+}: {
+  planId: string;
+  type: TacticalPlan["type"];
+  priority?: number;
+  evidence?: string[];
+  requiredCapabilityKind?: TacticalPlan["requiredCapabilities"][number]["kind"];
+  blockerKind?: TacticalPlan["blockers"][number]["kind"];
+  scoreReason?: string;
+}): TacticalPlan {
+  return {
+    schemaVersion: "tactical-plan-v1",
+    planId,
+    side: "runner",
+    type,
+    status: "active",
+    priority,
+    horizonTurns: 2,
+    target: { kind: "card", id: "card-1", label: "Breaker Card" },
+    requiredCapabilities: [
+      {
+        capabilityId: `${planId}-capability`,
+        kind: requiredCapabilityKind,
+        side: "runner",
+        evidence: ["required"],
+      },
+    ],
+    blockers: [
+      {
+        blockerId: `${planId}-blocker`,
+        kind: blockerKind,
+        severity: "soft",
+        evidence: ["blocked"],
+      },
+    ],
+    currentStep: {
+      stepId: `${planId}-step`,
+      kind: "install_development_card",
+      desiredActionSemantics: ["install"],
+      requiredCapabilities: [],
+      actionCandidateIds: [],
+      rationale: ["step"],
+    },
+    nextSteps: [],
+    evidence,
+    scoreBreakdown: [
+      {
+        key: `${planId}-score`,
+        label: "Coverage",
+        value: 12.345,
+        reason: scoreReason,
+      },
+    ],
+    createdAtStateVersion: 1,
+    updatedAtStateVersion: 1,
   };
 }
