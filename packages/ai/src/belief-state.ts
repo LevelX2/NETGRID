@@ -35,6 +35,8 @@ export type BeliefEventClassification = {
   family: BeliefEventFamily;
   actor: Side | "system";
   serverId?: string;
+  accessedCardPositionKey?: string;
+  accessedArea?: string;
   installPlacement?: HqInstallPlacementMemory;
   sourceEventIds: string[];
   invalidationReason?: string;
@@ -302,6 +304,8 @@ function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification 
   const actor = parseActor(event.publicPayload.actor);
   const family = eventFamily(actionType, event);
   const installPlacement = installPlacementFromEvent(event);
+  const accessedCardPositionKey = stringValue(event.publicPayload.accessedCardPositionKey);
+  const accessedArea = stringValue(event.publicPayload.accessedArea);
   return {
     eventId: event.eventId,
     eventType: event.type,
@@ -309,6 +313,8 @@ function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification 
     family,
     actor,
     ...(serverId ? { serverId } : {}),
+    ...(accessedCardPositionKey ? { accessedCardPositionKey } : {}),
+    ...(accessedArea ? { accessedArea } : {}),
     ...(installPlacement ? { installPlacement } : {}),
     sourceEventIds: [event.eventId],
     ...(invalidationReasonForEvent(family, actionType, actor, serverId, event) ? { invalidationReason: invalidationReasonForEvent(family, actionType, actor, serverId, event)! } : {})
@@ -1010,7 +1016,13 @@ function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
 }
 
 function isRunnerHqAccess(event: BeliefEventClassification): boolean {
-  return event.actor === "runner" && event.actionType === "access_card" && event.serverId === "hq";
+  return (
+    event.actor === "runner" &&
+    event.actionType === "access_card" &&
+    event.serverId === "hq" &&
+    event.accessedArea !== "root" &&
+    !event.accessedCardPositionKey?.startsWith("root:")
+  );
 }
 
 function rememberObservedHqAccessDefinition(
@@ -1135,11 +1147,12 @@ function knownDefinitionsFromEvent(
     return [{ definitionId: exposedDefinition, positionKey }];
   }
   if (!definitionId) return [];
-  if (classification.family === "access" && classification.serverId?.startsWith("remote_")) {
+  const accessedCardPositionKey = stringValue(event.publicPayload.accessedCardPositionKey);
+  if (classification.family === "access" && accessedCardPositionKey) {
     return [
       {
         definitionId,
-        positionKey: stringValue(event.publicPayload.accessedCardPositionKey) ?? "root:0"
+        positionKey: accessedCardPositionKey
       }
     ];
   }
