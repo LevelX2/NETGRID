@@ -17,6 +17,7 @@ import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
 import type { RankedKnownRemoteAccessCandidate } from "./access/access-target-ranking";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { deriveObservedRemoteNoProgressAccessMemory } from "./memory/remote-access-outcome";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
@@ -379,6 +380,9 @@ function evaluateRunnerRunTarget(
     params.rankedAccessTargets,
     accessServerId,
   );
+  const accessOutcomeMemory =
+    params.accessOutcomeMemory ??
+    deriveObservedRemoteNoProgressAccessMemory(params.input, accessServerId);
   const blinkRiskAssessment = assessBlinkRiskForRunAction(
     params.input,
     projection.action,
@@ -407,9 +411,7 @@ function evaluateRunnerRunTarget(
     economyPosture,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
-    ...(params.accessOutcomeMemory
-      ? { accessOutcomeMemory: params.accessOutcomeMemory }
-      : {}),
+    ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
@@ -481,7 +483,7 @@ function evaluateRunnerRunTarget(
       ...(blinkRiskAssessment?.evidence ?? []),
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
-      ...accessOutcomeMemoryEvaluationEvidence(params.accessOutcomeMemory),
+      ...accessOutcomeMemoryEvaluationEvidence(accessOutcomeMemory),
       ...rankedAccessTargetEvaluationEvidence(rankedAccessTarget),
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
       ...payoff.evidence.slice(0, 36),
