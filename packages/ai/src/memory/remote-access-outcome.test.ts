@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   createRemoteAccessOutcomeMemoryEntry,
   declinedTrashOutcomePlanEvidence,
+  deriveObservedRemoteNoProgressAccessMemory,
   evaluateRemoteAccessOutcomeMemory,
   remoteAccessOutcomePlanEvidence,
   remoteAccessOutcomeEvidence,
@@ -147,4 +156,214 @@ describe("remote access outcome memory", () => {
     });
     expect(declinedTrashOutcomePlanEvidence(invalidated.evidence)).toEqual([]);
   });
+
+  it("derives no-progress remote access memory from side-safe public events", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+          accessedCardPositionKey: "root:0",
+          accessedArea: "root",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            title: "Data Masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    const status = deriveObservedRemoteNoProgressAccessMemory(
+      input,
+      "remote_1",
+    );
+
+    expect(status).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+    });
+    expect(status?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_access_outcome_source:observed_public_access",
+        "remote_access_outcome_decision:access_only",
+        "remote_access_outcome_no_progress:true",
+        "remote_access_outcome_source_event:evt-access",
+      ]),
+    );
+    expect(status?.evidence.join("\n")).not.toMatch(
+      /privatePayload|cardInstances|decklist/i,
+    );
+  });
+
+  it("does not derive no-progress memory after a visible remote change", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        publicEvent("evt-install", 10, "install_card", {
+          actor: "corp",
+          actionType: "install_card",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+    ).toBeUndefined();
+  });
 });
+
+function aiInput(params: {
+  eventTail: PublicGameEvent[];
+  servers: PlayerView["servers"];
+}): AiDecisionInput {
+  const legalActions = [runAction("run-remote-1", "remote_1")];
+  const playerView: PlayerView = {
+    stateVersion: 11,
+    side: "runner",
+    activeSide: "runner",
+    phase: "runner_action_phase",
+    timingPoint: "runner_action.main",
+    own: {
+      identity: visibleIdentity("runner"),
+      credits: 6,
+      clicks: 3,
+      agendaPoints: 0,
+      gripOrHq: [],
+      stackOrRdCount: 20,
+      heapOrArchives: [],
+      scoreArea: [],
+      rig: [],
+      maxHandSize: 5,
+      tags: 0,
+    },
+    opponent: {
+      identity: visibleIdentity("corp"),
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      tags: 0,
+      handCount: 5,
+      maxHandSize: 5,
+      deckCount: 20,
+      discardCount: 0,
+      scoreArea: [],
+    },
+    servers: params.servers,
+    publicEvents: params.eventTail,
+    legalActions,
+    winner: null,
+    agendaPointsToWin: 7,
+  };
+  return {
+    side: "runner",
+    playerView,
+    eventTail: params.eventTail,
+    legalActions,
+    difficulty: "normal",
+    seed: "remote-access-outcome-test",
+    decisionId: "remote-access-outcome-test:1:runner",
+    actionNumber: 1,
+    profileId: "runner-ai-test",
+  };
+}
+
+function publicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  type: string,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
+  };
+}
+
+function server(
+  id: PlayerView["servers"][number]["id"],
+  root: VisibleCard[],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice: [],
+    root,
+  };
+}
+
+function runAction(actionId: string, serverId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "start_run",
+    label: `Run ${serverId}`,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 12,
+    payload: { serverId },
+  };
+}
+
+function visibleIdentity(side: Side): VisibleCard {
+  return {
+    instanceId: `${side}-identity`,
+    definitionId: `${side}-identity`,
+    title: `${side} identity`,
+    owner: side,
+    controller: side,
+    type: "identity",
+    known: true,
+  };
+}
+
+function visibleCard(
+  instanceId: string,
+  overrides: Omit<Partial<VisibleCard>, "instanceId">,
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    ...overrides,
+  };
+}
