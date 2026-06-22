@@ -1,6 +1,6 @@
 # AI Runtime Tactical Boundary Optimization Loop
 
-Status: `package_done:AI-RTB-1`
+Status: `package_done:AI-RTB-2`
 
 Datum: 2026-06-22
 
@@ -180,6 +180,21 @@ Checks:
 
 Commit: `refactor(ai): move semantic runtime memory debug` oder
 `docs(ai): close runtime tactical boundary loop`
+
+Ergebnis:
+
+- `semanticRuntimeMemoryDebug` liegt jetzt in
+  `diagnostics/semantic-runtime-memory-debug.ts`.
+- `index.ts` konsumiert nur noch die fertige Debugprojektion und enthält keine
+  Belief-/Opponent-Memory-Formatierungsdetails mehr.
+- `semantic-runtime-memory-debug.test.ts` deckt Runner- und Corp-Memory-
+  Debugitems, Own-Hand-Redaction und Opponent-Model-Summaries ab.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/semantic-runtime-memory-debug.test.ts src/diagnostics/semantic-runtime-debug.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
+  - `corepack pnpm --filter @netgrid/ai typecheck`
+  - `git diff --check`
+
+Commit: `refactor(ai): move semantic runtime memory debug`
 
 ## FINAL-GREEN
 
