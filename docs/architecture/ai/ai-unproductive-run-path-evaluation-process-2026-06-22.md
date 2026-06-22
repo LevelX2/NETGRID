@@ -1,6 +1,6 @@
 # AI Unproductive Run Path Evaluation Fix
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -72,7 +72,7 @@ Done-Gate:
 - Policy unterscheidet harte No-Access-Fälle, riskante aber sinnvolle High-Payoff-Fälle und Unknown-Fälle.
 - Pure oder fokussierte Tests decken den Trace-5-/4-Credits-Fall und mindestens einen Gegenfall ab.
 
-Commit: `feat(ai): model unproductive visible run paths`
+Commit: `fix(ai): suppress unproductive visible trace run paths`
 
 ### AIRUN-3: Bewertungsintegration
 
@@ -84,7 +84,7 @@ Done-Gate:
 - RunTarget-Evidence enthält klare Marker wie `unproductive_visible_run_path` und `visible_trace_end_run_lock_unavoidable`.
 - Keine sinnvollen Runs mit Agenda-/Score-/Closeout-Payoff werden pauschal blockiert.
 
-Commit: `fix(ai): suppress unproductive visible trace runs`
+Commit: `fix(ai): suppress unproductive visible trace run paths`
 
 ### AIRUN-4: Randfälle und Debug-Evidence
 
@@ -98,7 +98,7 @@ Mindestens prüfen:
 - High-Payoff-Ausnahmen wie bekannte Agenda oder unmittelbarer Sieg bleiben kontrolliert möglich, wenn der Pfad erreichbar ist;
 - Debug/Evidence bleibt redigiert.
 
-Commit: `test(ai): cover unproductive run path boundaries`
+Commit: `fix(ai): suppress unproductive visible trace run paths`
 
 ### AIRUN-5: Abschluss, Dokumentation und Integration
 
@@ -112,6 +112,8 @@ Finale Checks:
 - `git status --short`
 
 Commit: `docs(ai): record unproductive run path fix`
+
+Abschlussbericht: `docs/reviews/ai/ai-unproductive-run-path-evaluation-final-report-2026-06-22.md`
 
 ## Sicherheitsblocker
 
