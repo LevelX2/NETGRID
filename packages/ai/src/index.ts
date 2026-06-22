@@ -72,6 +72,7 @@ import {
   type BlinkRiskPayoffOverride,
   type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
+import { runnerRunTargetSemanticGuidanceValue } from "./runner-run-target-guidance";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
   buildRunnerTacticalGoals,
@@ -8490,7 +8491,7 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
     action,
   );
   if (!evaluation) return undefined;
-  const value = semanticRuntimeRunTargetGuidanceValue(evaluation);
+  const value = runnerRunTargetSemanticGuidanceValue(evaluation);
   if (value === 0) return undefined;
   return {
     key: "runner_run_target_semantic_guidance",
@@ -8507,33 +8508,6 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
-}
-
-function semanticRuntimeRunTargetGuidanceValue(
-  evaluation: RunnerRunTargetEvaluation,
-): number {
-  switch (evaluation.recommendation) {
-    case "run_now":
-      return 0;
-    case "run_if_free":
-      return evaluation.accessPayoff === "unknown" ? -1700 : -900;
-    case "setup_first":
-      return -1600;
-    case "draw_for_damage_buffer":
-      return -3600;
-    case "gain_credits_first":
-      return -2100;
-    case "find_breaker_first":
-      return -2600;
-    case "remote_changed_reassess":
-      return -2400;
-    case "declined_trash_memory_active":
-      return -4200;
-    case "known_no_current_payoff":
-      return -4800;
-    case "do_not_run_now":
-      return -5000;
-  }
 }
 
 function runnerMultiRunEvaluationPlausible(
