@@ -2,7 +2,7 @@
 
 ## Status
 
-`tag_sem_2_semantic_contract_done`
+`tag_sem_3_projection_implementation_done`
 
 Arbeitsbranch: `codex/ai-activated-card-tag-semantics`
 
@@ -168,6 +168,25 @@ Datum: 2026-06-22
   - AI-Hints sind Evidence, nicht Autorität.
   - Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertragsänderung.
 - Checks:
+  - `git diff --check`: grün.
+
+### AI-TAG-SEM-3 abgeschlossen
+
+Datum: 2026-06-22
+
+- `ActionSemanticCandidate` erweitert:
+  - optionale `tagEffectProfile`-Projektion.
+  - optionale `visibleSourceDefinitionsByInstanceId`-Build-Map für side-safe SourceDefinition-Bindung aus eigener PlayerView.
+- Neue Projektion: `packages/ai/src/actions/tag-effect-semantics.ts`
+  - BasicAction `remove_tag` erhält ein Tag-Cleanup-Profil.
+  - `activated_card_ability`/`play_event` mit sicherem `remove_tags`-Descriptor werden als `tag.remove` projiziert.
+  - Tag-Vermeidung und Tag-Clear-Credit-Support bleiben support-only.
+- Runtime-Bridge erweitert `buildActionSemanticCandidates` mit eigenen sichtbaren Karten aus `playerView.own`.
+- Regressionen ergänzt in `packages/ai/src/action-semantic-candidate.test.ts`.
+- Checks:
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts`: grün, 1 Datei / 5 Tests.
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts`: grün, 1 Datei / 16 Tests.
+  - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
   - `git diff --check`: grün.
 
 ## Paketfolge

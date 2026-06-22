@@ -6,6 +6,7 @@ import type {
 import { applyCardSemanticJoin } from "./actions/action-card-semantic-join";
 import { applyCostAndTimingProfiles } from "./actions/action-cost-timing";
 import { applyCardActionSourceBinding } from "./actions/action-source-binding";
+import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 
@@ -225,6 +226,21 @@ export type ActionRunProjectionSummary = {
   evidence: string[];
 };
 
+export type ActionTagEffectProfile = {
+  kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
+  recipient: "runner";
+  mode?: "amount" | "up_to_amount" | "all" | "support_only";
+  amount?: number | "all" | "unknown";
+  currentTagReduction?: number | "all" | "unknown";
+  acuteTagRemoval: boolean;
+  source:
+    | "legal_action_type"
+    | "legal_action_payload"
+    | "card_implementation"
+    | "ai_hint";
+  evidence: string[];
+};
+
 export type BoardContextSummary = {
   source: "ai_decision_input" | "player_view" | "not_projected";
   sideSafe: boolean;
@@ -279,6 +295,7 @@ export type ActionSemanticCandidate = {
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
+  tagEffectProfile?: ActionTagEffectProfile;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
   primaryProjectionStatus: ActionPrimaryProjectionStatus;
@@ -293,6 +310,9 @@ export type BuildActionSemanticCandidatesParams = {
   stateVersion?: number;
   projectionMode?: "neutral_only" | "basic_semantics";
   sideSafeAbilityBindings?: readonly SideSafeActionAbilityBinding[];
+  visibleSourceDefinitionsByInstanceId?: Readonly<
+    Record<CardInstanceId, CardDefinitionId>
+  >;
   selectedTargetsByActionId?: Readonly<
     Record<string, Readonly<Record<string, string>>>
   >;
@@ -368,6 +388,7 @@ export function buildActionSemanticCandidates(
           : {}),
       },
       params.sideSafeAbilityBindings ?? [],
+      params.visibleSourceDefinitionsByInstanceId,
       params.selectedTargetsByActionId?.[action.actionId],
       params.availableTargetsByActionId?.[action.actionId],
       params.cardSemanticProfilesByDefinitionId ??
@@ -381,6 +402,9 @@ function projectActionSemanticCandidate(
   projectionMode: "neutral_only" | "basic_semantics",
   options: BuildNeutralActionSemanticCandidateOptions,
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
+  visibleSourceDefinitionsByInstanceId:
+    | Readonly<Record<string, CardDefinitionId>>
+    | undefined,
   selectedTargets: Readonly<Record<string, string>> | undefined,
   availableTargets: readonly LegalTargetSummary[] | undefined,
   cardSemanticProfilesByDefinitionId:
@@ -394,6 +418,7 @@ function projectActionSemanticCandidate(
     basicCandidate,
     action,
     sideSafeAbilityBindings,
+    visibleSourceDefinitionsByInstanceId,
   );
   const targetCandidate = applyTargetContextProjection(
     sourceBoundCandidate,
@@ -405,8 +430,12 @@ function projectActionSemanticCandidate(
     targetCandidate,
     action,
   );
-  return applyCardSemanticJoin(
+  const tagEffectCandidate = applyTagEffectSemantics(
     costTimingCandidate,
+    action,
+  );
+  return applyCardSemanticJoin(
+    tagEffectCandidate,
     cardSemanticProfilesByDefinitionId,
   );
 }

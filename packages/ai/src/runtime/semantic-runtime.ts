@@ -2,6 +2,8 @@ import type {
   AiDecision,
   AiDecisionDebug,
   AiDecisionInput,
+  CardDefinitionId,
+  CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -51,6 +53,9 @@ export type SemanticRuntimeDependencies = {
     legalActions: readonly LegalAction[];
     observerSide: AiDecisionInput["side"];
     stateVersion: number;
+    visibleSourceDefinitionsByInstanceId?: Readonly<
+      Record<CardInstanceId, CardDefinitionId>
+    >;
   }) => ActionSemanticCandidate[];
   getTacticalPlanMemorySnapshot: (
     input: AiDecisionInput,
@@ -173,6 +178,8 @@ export function chooseSemanticRuntimeAction(
     legalActions: input.legalActions,
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId:
+      visibleSourceDefinitionsByInstanceId(input),
   });
   const choices = dependencies.semanticRuntimeChoices(
     input,
@@ -411,6 +418,31 @@ export function chooseSemanticRuntimeAction(
     difficulty: input.difficulty,
     reason: selectedChoice.reasonCode,
   };
+}
+
+function visibleSourceDefinitionsByInstanceId(
+  input: AiDecisionInput,
+): Readonly<Record<CardInstanceId, CardDefinitionId>> {
+  const entries = [
+    input.playerView.own.identity,
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+    ...(input.playerView.own.rig ?? []),
+  ]
+    .filter(
+      (
+        card,
+      ): card is typeof card & {
+        instanceId: CardInstanceId;
+        definitionId: CardDefinitionId;
+      } => card.known && card.definitionId !== undefined,
+    )
+    .map((card) => [card.instanceId, card.definitionId] as const);
+  return Object.fromEntries(entries) as Record<
+    CardInstanceId,
+    CardDefinitionId
+  >;
 }
 
 function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {

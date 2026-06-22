@@ -1,4 +1,4 @@
-import type { LegalAction } from "@netgrid/shared";
+import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
   ActionGateResult,
@@ -20,6 +20,9 @@ export function applyCardActionSourceBinding(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
+  visibleSourceDefinitionsByInstanceId:
+    | Readonly<Record<string, CardDefinitionId>>
+    | undefined,
 ): ActionSemanticCandidate {
   const sourceCardInstanceId = sourceCardInstanceIdForAction(action);
   const primitiveMetadata =
@@ -29,8 +32,15 @@ export function applyCardActionSourceBinding(
     sourceCardInstanceId,
     sideSafeAbilityBindings,
   );
+  const payloadSourceDefinitionId = sourceDefinitionIdForAction(action);
+  const visibleSourceDefinitionId =
+    sourceCardInstanceId !== undefined
+      ? visibleSourceDefinitionsByInstanceId?.[sourceCardInstanceId]
+      : undefined;
   const sourceDefinitionId =
-    sourceDefinitionIdForAction(action) ?? abilityBinding?.sourceDefinitionId;
+    payloadSourceDefinitionId ??
+    abilityBinding?.sourceDefinitionId ??
+    visibleSourceDefinitionId;
   const sourceKind: ActionSemanticSourceKind =
     sourceCardInstanceId !== undefined ? "card" : candidate.sourceKind;
   const projectionIssues = reconcileSourceAbilityIssues(
@@ -80,7 +90,10 @@ export function applyCardActionSourceBinding(
         : []),
       ...(sourceDefinitionId !== undefined
         ? [
-            `AI038 source definition bound from LegalAction: ${sourceDefinitionId}`,
+            payloadSourceDefinitionId !== undefined ||
+            abilityBinding?.sourceDefinitionId !== undefined
+              ? `AI038 source definition bound from LegalAction: ${sourceDefinitionId}`
+              : `AI038 source definition bound from visible PlayerView card: ${sourceDefinitionId}`,
           ]
         : []),
       ...(abilityBinding !== undefined ? abilityBinding.evidence : []),

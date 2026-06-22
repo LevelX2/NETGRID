@@ -1031,6 +1031,59 @@ describe("buildActionSemanticCandidates", () => {
       }),
     ]);
   });
+
+  it("projects activated CardImplementation tag cleanup as tag removal from visible source definition", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "danshi-instance",
+          payload: {
+            cardImplementationAbility: "activated",
+            cardImplementationAbilityIndex: 0,
+            cardImplementationTrashSourceCost: true,
+          },
+        }),
+      ],
+      visibleSourceDefinitionsByInstanceId: {
+        "danshi-instance": "onr_v1_158_danshis-second-id",
+      },
+    });
+
+    if (!candidate) throw new Error("Expected Danish tag cleanup candidate");
+    expect(candidate.sourceDefinitionId).toBe("onr_v1_158_danshis-second-id");
+    expect(candidate.semanticActionType).toBe("tag.remove");
+    expect(candidate.tagEffectProfile).toMatchObject({
+      kind: "remove_tags",
+      mode: "up_to_amount",
+      amount: 3,
+      currentTagReduction: 3,
+      acuteTagRemoval: true,
+      source: "card_implementation",
+    });
+    expect(candidate.projectionIssues).not.toContain("ability_unresolved");
+    expect(candidate.actionTacticSignals).toContain("tag.remove");
+    expect(candidate.strategySupport).toContainEqual(
+      expect.objectContaining({ strategyId: "runner_remove_tags" }),
+    );
+    expect(JSON.stringify(candidate)).not.toContain("fullGameState");
+    expect(JSON.stringify(candidate)).not.toContain("hiddenHqCards");
+  });
+
+  it("keeps basic remove_tag projected through the existing tag removal path", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [legalAction("remove_tag", 0, { source: "basic_action" })],
+    });
+
+    if (!candidate) throw new Error("Expected basic remove tag candidate");
+    expect(candidate.semanticActionType).toBe("tag.remove");
+    expect(candidate.tagEffectProfile).toMatchObject({
+      kind: "remove_tags",
+      amount: 1,
+      currentTagReduction: 1,
+      acuteTagRemoval: true,
+      source: "legal_action_type",
+    });
+  });
 });
 
 function legalAction(
