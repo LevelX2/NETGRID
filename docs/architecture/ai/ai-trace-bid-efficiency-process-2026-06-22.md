@@ -2,13 +2,22 @@
 
 ## Status
 
-`prepared_prompt_only`
+`review_complete_pending_final_green`
 
 Arbeitsbranch: `codex/ai-trace-bid-efficiency`
 
 Arbeits-Worktree: `C:\Projekte\NETGRID_AI_TRACE_BID_EFFICIENCY`
 
 Hauptworkspace: `C:\Projekte\NETGRID`
+
+## Paketfortschritt
+
+- `AI-TRACE-BID-0`: abgeschlossen und committed.
+- `AI-TRACE-BID-1`: abgeschlossen und committed.
+- `AI-TRACE-BID-2`: abgeschlossen und committed.
+- `AI-TRACE-BID-3`: abgeschlossen und committed.
+- `AI-TRACE-BID-4`: Review und Wissenspflege abgeschlossen; FINAL-GREEN steht noch aus.
+- `FINAL-GREEN`: ausstehend.
 
 ## Quelle/Vorgabe
 
