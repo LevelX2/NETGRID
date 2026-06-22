@@ -2087,8 +2087,15 @@ function runnerHandBufferPlans(
   if (!context.input.legalActions.some((action) => action.type === "draw_card")) {
     return [];
   }
+  if (runnerHasNonBasicHandBufferAlternative(context.input)) return [];
   const assessment = runnerHandBufferAssessment(context.input);
   if (!assessment.active) return [];
+  if (
+    !assessment.damagePressure &&
+    runnerEconomyActionPreferredOverHandBuffer(context)
+  ) {
+    return [];
+  }
   if (runnerHighPayoffRunAvailable(context)) return [];
   return [
     createTacticalPlan({
@@ -2140,6 +2147,27 @@ function runnerHandBufferPlans(
   ];
 }
 
+function runnerHasNonBasicHandBufferAlternative(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.side === "runner" &&
+      action.source !== "basic_action" &&
+      (action.type === "play_event" ||
+        action.type === "trigger_ability" ||
+        action.type === "activated_card_ability" ||
+        action.type === "install_card"),
+  );
+}
+
+function runnerEconomyActionPreferredOverHandBuffer(
+  context: TacticalPlanBuildContext,
+): boolean {
+  const legalCreditGainAvailable = context.input.legalActions.some(
+    (action) => legalActionCreditGainForPlan(context.input, action) > 0,
+  );
+  return legalCreditGainAvailable;
+}
+
 function runnerHandBufferAssessment(input: AiDecisionInput): {
   active: boolean;
   handCount: number;
@@ -2186,12 +2214,40 @@ function runnerHandBufferAssessment(input: AiDecisionInput): {
 function runnerHighPayoffRunAvailable(
   context: TacticalPlanBuildContext,
 ): boolean {
-  return (context.runnerRunTargetEvaluations ?? []).some(
+  if ((context.runnerRunTargetEvaluations ?? []).some(
     (evaluation) =>
       evaluation.pathPassability === "reachable" &&
       evaluation.creditsAfterRun >= 0 &&
       runnerRunTargetHighPayoff(evaluation),
-  );
+  )) {
+    return true;
+  }
+  return context.input.legalActions.some((action) => {
+    if (action.type !== "start_run") return false;
+    const serverId = actionServerId(action);
+    if (!serverId || !isRemoteServer(serverId)) return false;
+    const server = context.input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (!server) return false;
+    return server.root.some(
+      (card) =>
+        card.known &&
+        (card.type === "agenda" ||
+          (card.advancementCounters ?? 0) > 0 ||
+          remoteRootTrashCostForPlan(card) <=
+            context.input.playerView.own.credits),
+    );
+  });
+}
+
+function remoteRootTrashCostForPlan(card: VisibleCard): number {
+  if (card.type !== "asset" && card.type !== "upgrade") {
+    return Number.POSITIVE_INFINITY;
+  }
+  return typeof card.trashCost === "number"
+    ? card.trashCost
+    : Number.POSITIVE_INFINITY;
 }
 
 function runnerVisibleDamagePressure(input: AiDecisionInput): boolean {

@@ -6789,15 +6789,22 @@ function runnerHandBufferNeedScoreComponent(
   const damagePressure = semanticRuntimeRunnerVisibleDamagePressure(input);
   const baseValue =
     handCount <= 0
-      ? 2500
+      ? 750
       : handCount === 1
-        ? 1500
+        ? 600
         : handCount === 2
-          ? 850
+          ? 350
           : handCount === 3
-            ? 550
-            : 300;
-  const damageBoost = damagePressure && handCount <= 2 ? 350 : 0;
+            ? 350
+            : 150;
+  const damageBoost =
+    damagePressure && handCount <= 0
+      ? 1750
+      : damagePressure && handCount === 1
+        ? 900
+        : damagePressure && handCount === 2
+          ? 350
+          : 0;
   return {
     key: "runner_hand_buffer_need",
     label: "Handpuffer-Bedarf",
@@ -7925,6 +7932,9 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
   );
   if (!evaluation) return undefined;
   const value = runnerRunTargetSemanticGuidanceValue(evaluation);
+  if (value < 0 && semanticRuntimeRunnerVisibleHighPayoffRunOverride(input, action)) {
+    return undefined;
+  }
   if (value === 0) return undefined;
   return {
     key: "runner_run_target_semantic_guidance",
@@ -7941,6 +7951,28 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
+}
+
+function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (input.side !== "runner" || action.type !== "start_run") return false;
+  const serverId = semanticRuntimeServerId(action);
+  if (!serverId || !isRemoteServerTarget(serverId)) return false;
+  const server = input.playerView.servers.find((entry) => entry.id === serverId);
+  if (!server) return false;
+  return server.root.some((card) => {
+    if (!card.known) return false;
+    if (card.type === "agenda") return true;
+    if ((card.advancementCounters ?? 0) > 0) return true;
+    if (card.type !== "asset" && card.type !== "upgrade") return false;
+    const trashCost = remoteRootTrashCostForMetrics(card);
+    return (
+      trashCost !== undefined &&
+      input.playerView.own.credits >= trashCost + 1
+    );
+  });
 }
 
 function runnerMultiRunEventScoreValue(

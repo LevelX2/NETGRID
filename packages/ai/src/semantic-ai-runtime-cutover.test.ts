@@ -1157,6 +1157,97 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("restores an empty runner hand buffer before a generic R&D probe", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.playerView.publicEvents = [
+      publicEvent("corp-damage-card-seen", "net_damage", 12, {
+        actor: "corp",
+        actionType: "net_damage",
+        damageType: "net",
+        sourceTitle: "Dedicated Response Team",
+        sourceDefinitionId: "onr_v1_076_dedicated-response-team",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.reasonCode).toBe("runner.semantic.basic_economy_draw");
+    expect(decision.decisionDebug?.planKind).toBe("runner.restore_hand_buffer");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_hand_buffer_need",
+          value: 2500,
+          reason: expect.stringContaining("damage_pressure:true"),
+        }),
+      ]),
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "run-rd",
+        whyNot: expect.arrayContaining(["plan_mismatch"]),
+      }),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState|decklist/i,
+    );
+  });
+
+  it("keeps high-payoff remote access above empty-hand draw", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [visibleCard("agenda", "corp", "agenda")]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-remote");
+    expect(decision.reasonCode).toBe("runner.semantic.remote_contest");
+    expect(decision.decisionDebug?.planKind).not.toBe(
+      "runner.restore_hand_buffer",
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "draw",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_hand_buffer_need",
+            reason: expect.stringContaining("hand:0"),
+          }),
+        ]),
+      }),
+    );
+  });
+
   it("keeps preview decisions from advancing tactical plan memory", () => {
     const input = aiInput("runner", [
       legalAction(
@@ -1917,10 +2008,7 @@ describe("Semantic AI runtime cutover", () => {
 
     expect(decision.actionId).toBe("draw");
     expect(archivesAlternative?.whyNot).toEqual(
-      expect.arrayContaining([
-        "plan_mismatch",
-        "lower_final_score_after_adjustment",
-      ]),
+      expect.arrayContaining(["plan_mismatch"]),
     );
     expect(archivesAlternative?.priority ?? 0).toBeLessThan(
       selectedAlternative?.priority ?? 0,
@@ -2852,5 +2940,22 @@ function rdAccessEvent(
       serverId: "rd",
       cardDefinitionId,
     },
+  };
+}
+
+function publicEvent(
+  eventId: string,
+  actionType: string,
+  stateVersionBefore: number,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
   };
 }

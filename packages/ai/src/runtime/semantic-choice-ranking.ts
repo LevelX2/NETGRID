@@ -73,6 +73,15 @@ export function tacticalPlanMappedChoice(
       return { choice: mappedChoice };
     }
     const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
+    if (
+      tacticalPlanHandBufferMappingBlocksProbeRunOverride(
+        mapping,
+        overrideChoice,
+        scoreGap,
+      )
+    ) {
+      return { choice: mappedChoice };
+    }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     if (
@@ -93,6 +102,18 @@ export function tacticalPlanMappedChoice(
     }
   }
   return { choice: mappedChoice };
+}
+
+function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.restore_hand_buffer" &&
+    overrideChoice.action.type === "start_run" &&
+    scoreGap <= 1800
+  );
 }
 
 function tacticalPlanRepeatedRunMappingShouldYield(
