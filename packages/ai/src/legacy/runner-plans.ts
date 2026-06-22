@@ -32,6 +32,8 @@ import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
   iceHasEndTheRun,
+  runnerKnownPathAssessmentIsKnownNoAccess,
+  runnerKnownPathAssessmentIsUnbreakableNoAccess,
   serverIdFromEvent,
   type KnownRezzedIcePathAssessment,
 } from "../visible-run-analysis";
@@ -449,34 +451,6 @@ function runnerRunActionIsKnownNoAccess(
   if (runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment))
     return action.payload?.bypass !== true;
   return !runnerRunActionHasExplicitProbeValue(input, action);
-}
-
-function runnerKnownPathAssessmentIsCostNoAccess(
-  assessment: KnownRezzedIcePathAssessment,
-): boolean {
-  return (
-    assessment.unpayableReason === "ice_unaffordable" ||
-    assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
-  );
-}
-
-function runnerKnownPathAssessmentIsUnbreakableNoAccess(
-  assessment: KnownRezzedIcePathAssessment,
-): boolean {
-  return (
-    assessment.unpayableReason === "ice_unbreakable" ||
-    assessment.knownPathBlockedByUnbreakableIce === true ||
-    assessment.knownPathBlockedByMissingCoverage === true
-  );
-}
-
-function runnerKnownPathAssessmentIsKnownNoAccess(
-  assessment: KnownRezzedIcePathAssessment,
-): boolean {
-  return (
-    runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
-    runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)
-  );
 }
 
 function runnerRunActionHasExplicitProbeValue(

@@ -66,6 +66,34 @@ export type KnownRezzedIcePathAssessment = {
   assessedKnownIceCount: number;
 };
 
+export function runnerKnownPathAssessmentIsCostNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unaffordable" ||
+    assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
+  );
+}
+
+export function runnerKnownPathAssessmentIsUnbreakableNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unbreakable" ||
+    assessment.knownPathBlockedByUnbreakableIce === true ||
+    assessment.knownPathBlockedByMissingCoverage === true
+  );
+}
+
+export function runnerKnownPathAssessmentIsKnownNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+    runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)
+  );
+}
+
 const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set([
   "onr_v1_030_grubb",
   "onr_v1_039_krash",

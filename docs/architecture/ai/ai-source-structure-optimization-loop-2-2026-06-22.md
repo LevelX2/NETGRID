@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Loop 2
 
-Status: `final_green_ready`
+Status: `package_done:AI-SRCOPT2-4`
 
 Datum: 2026-06-22
 
@@ -77,10 +77,12 @@ Stoppen, wenn:
 2. `package_done:AI-SRCOPT2-0`
 3. `package_done:AI-SRCOPT2-1`
 4. `package_done:AI-SRCOPT2-2`
-5. `final_green_ready`
-6. `merged_to_main`
-7. `complete`
-8. `blocked:<reason>`
+5. `package_done:AI-SRCOPT2-3`
+6. `package_done:AI-SRCOPT2-4`
+7. `final_green_ready`
+8. `merged_to_main`
+9. `complete`
+10. `blocked:<reason>`
 
 ## Paketfolge
 
@@ -181,11 +183,10 @@ Ergebnis:
   - `corepack pnpm --filter @netgrid/ai typecheck`
   - `git diff --check`
 
-### AI-SRCOPT2-3 Pressure-Probe-Zielwahl und Restpotential bewerten
+### AI-SRCOPT2-3 Pressure-Probe-Zielwahl extrahieren
 
 Ziel: Nach den sicheren RunTarget-Slices den letzten kleinen
-Pressure-Probe-Helfer verschieben und bewerten, ob noch ein weiterer testbarer
-Slice ohne neuen Spezialaudit sichtbar ist.
+Pressure-Probe-Helfer verschieben.
 
 Arbeit:
 
@@ -193,23 +194,50 @@ Arbeit:
   `runner-run-target-guidance.ts` verschieben.
 - Tests fuer leere Zielmenge sowie positive und negative `stateVersion`-
   Varianten ergaenzen.
-- Restpotential nach den RunTarget-/Pressure-Probe-Schnitten neu bewerten.
-
 Ergebnis:
 
 - `runnerPressurePreferredProbeTarget` liegt jetzt neben den Pressure-Probe-
   Guidance-Helpern.
 - `tactical-plans.ts` enthaelt fuer Pressure-Probe nur noch Budget-,
   Allowance-, Evidence- und Plan-Orchestrierung.
-- Nach der zweiten Messung bleiben keine kleinen, reinen Guidance-Helper mehr
-  sichtbar.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `git diff --check`
+
+Commit: `refactor(ai): share pressure probe target selection`
+
+### AI-SRCOPT2-4 Known-Path-No-Access-Klassifizierung teilen
+
+Ziel: Die duplizierten Known-Path-No-Access-Prädikate aus `index.ts` und
+`legacy/runner-plans.ts` an die Quelle des `KnownRezzedIcePathAssessment`-
+Typs verschieben.
+
+Arbeit:
+
+- `runnerKnownPathAssessmentIsCostNoAccess`,
+  `runnerKnownPathAssessmentIsUnbreakableNoAccess` und
+  `runnerKnownPathAssessmentIsKnownNoAccess` in
+  `visible-run-analysis.ts` exportieren.
+- `index.ts` und `legacy/runner-plans.ts` auf diese geteilten Helper
+  umstellen.
+- Direktes Prädikat-Testfile fuer die drei Klassifizierungen ergaenzen.
+
+Ergebnis:
+
+- Die Known-Path-Klassifizierung ist nicht mehr doppelt in Runtime- und
+  Legacy-Runner-Plan-Code gepflegt.
+- Die Bedeutung der Cost-/Unbreakable-/Aggregate-Prädikate ist explizit
+  getestet.
 
 Restpotential:
 
-- `packages/ai/src/index.ts` enthaelt weiterhin Multi-Run- und Runtime-nahe
-  Bewertungslogik. Die verbliebenen Kandidaten koppeln aber Action-Scoring,
-  Event-Bewertung, Runtime-Inputs oder Debug-Evidence und brauchen einen
-  eigenen Facade-/Runtime-Audit.
+- `packages/ai/src/index.ts` enthaelt weiterhin Runtime-nahe Bewertungslogik.
+  Die verbliebenen Kandidaten koppeln aber Action-Scoring, Event-Bewertung,
+  Runtime-Inputs oder Debug-Evidence und brauchen einen eigenen Facade-/
+  Runtime-Audit.
 - `packages/ai/src/tactical-plans.ts` enthaelt weiterhin RunTarget-
   Plan-Evidence, ScoreBreakdown, Budget und Allowance. Diese Logik sollte nach
   Goal-Familien geschnitten werden, nicht mehr als opportunistische Helper-
@@ -220,11 +248,11 @@ Restpotential:
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-guidance.test.ts src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/visible-run-analysis.test.ts src/index.test.ts --maxWorkers=1 --testTimeout=30000`
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
-Commit: `refactor(ai): share pressure probe target selection`
+Commit: `refactor(ai): share known path no-access classification`
 
 ## FINAL-GREEN
 
@@ -245,7 +273,7 @@ Done-Gate:
 ## Controller-Prompt-Kern
 
 `/Goal Arbeite AI Source Structure Optimization Loop 2 vollständig und
-sequenziell von AI-SRCOPT2-0 bis AI-SRCOPT2-3 plus FINAL-GREEN ab und merge den
+sequenziell von AI-SRCOPT2-0 bis AI-SRCOPT2-4 plus FINAL-GREEN ab und merge den
 abgeschlossenen Arbeitsbranch lokal nach main. Arbeite ausschließlich im
 Worktree C:\Projekte\NETGRID_AI_SOURCE_STRUCTURE_OPT_LOOP_2 auf Branch
 codex/ai-source-structure-optimization-loop-2. Nutze den Hauptworkspace nur für
