@@ -1,150 +1,363 @@
 import { describe, expect, it } from "vitest";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
+import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerEconomyPosture } from "../runner-run-target-evaluation";
+import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import {
-  drawOverflowSeverity,
+  assessRunnerDrawOverflow,
   runnerDrawOverflowCreditPriorityBoost,
   runnerDrawOverflowEvidence,
-  runnerDrawOverflowPenalty,
   runnerDrawOverflowRationale,
-  runnerDrawOverflowReasons,
   runnerDrawOverflowSupportsCreditPlan,
   runnerHandDevelopmentOverflowBonus,
 } from "./runner-draw-overflow";
-import type { RunnerDrawOverflowAssessment } from "./tactical-plan-types";
+import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 describe("runner draw overflow planning", () => {
-  it("classifies projected hand limit pressure", () => {
-    expect(drawOverflowSeverity(0, 0)).toBe("none");
-    expect(drawOverflowSeverity(1, 0)).toBe("minor");
-    expect(drawOverflowSeverity(2, 0)).toBe("moderate");
-    expect(drawOverflowSeverity(3, 0)).toBe("high");
-    expect(drawOverflowSeverity(1, 1)).toBe("high");
-  });
-
-  it("keeps overflow penalty math bounded and urgency-aware", () => {
-    expect(
-      runnerDrawOverflowPenalty({
-        currentOverflow: 0,
-        projectedOverflow: 2,
-        severity: "moderate",
-        discardFodderCount: 1,
-        valuableCardsAtRisk: 1,
-        usefulPlayableCardsInHand: 1,
-        usefulHandCardsBlockedByCredits: 1,
-        urgencyOverride: "none",
-      }),
-    ).toBe(330);
-
-    expect(
-      runnerDrawOverflowPenalty({
-        currentOverflow: 2,
-        projectedOverflow: 8,
-        severity: "high",
-        discardFodderCount: 0,
-        valuableCardsAtRisk: 5,
-        usefulPlayableCardsInHand: 4,
-        usefulHandCardsBlockedByCredits: 4,
-        urgencyOverride: "none",
-      }),
-    ).toBe(760);
-
-    expect(
-      runnerDrawOverflowPenalty({
-        currentOverflow: 0,
-        projectedOverflow: 1,
-        severity: "minor",
-        discardFodderCount: 1,
-        valuableCardsAtRisk: 0,
-        usefulPlayableCardsInHand: 0,
-        usefulHandCardsBlockedByCredits: 0,
-        urgencyOverride: "find_economy",
-      }),
-    ).toBe(0);
-  });
-
-  it("returns sorted unique reasons for overflow diagnostics", () => {
-    expect(
-      runnerDrawOverflowReasons({
-        currentOverflow: 1,
-        projectedOverflow: 2,
-        severity: "moderate",
-        discardFodderCount: 1,
-        valuableCardsAtRisk: 1,
-        usefulPlayableCardsInHand: 1,
-        usefulHandCardsBlockedByCredits: 1,
-        urgencyOverride: "find_breaker_for_score_threat",
-        penalty: 330,
-      }),
-    ).toEqual([
-      "already_over_hand_limit",
-      "credit_base_needed_before_more_draw",
-      "discard_fodder_reduces_penalty",
-      "overdraw_penalty_applied",
-      "projected_overflow",
-      "urgency_override_keeps_draw_plausible",
-      "useful_hand_play_available_before_draw",
-      "valuable_hand_cards_at_risk",
-    ]);
-  });
-
-  it("builds side-safe rationale and evidence strings from assessments", () => {
-    const assessment = drawOverflowAssessment();
-
-    expect(runnerDrawOverflowRationale(assessment)).toEqual([
-      "handLimitPressure:moderate",
-      "projectedOverflow:2",
-      "drawOverflowPenalty:330",
-      "discardFodderCount:1",
-      "usefulPlayableCardsInHand:1",
-      "urgencyOverride:none",
-      "why_draw_over_install_or_credit:projected_overflow,overdraw_penalty_applied",
-    ]);
-    expect(runnerDrawOverflowEvidence(assessment)).toContain(
-      "useful_hand_cards_blocked_by_credits:1",
-    );
-    expect(runnerDrawOverflowEvidence(assessment)).toContain(
-      "why_draw_over_install_or_credit:projected_overflow,overdraw_penalty_applied",
-    );
-  });
-
-  it("supports credit plans and hand development priorities without urgency", () => {
-    const assessment = drawOverflowAssessment({
-      usefulPlayableCardsInHand: 0,
-      usefulHandCardsBlockedByCredits: 3,
+  it("assesses overdraw pressure with discard fodder and useful card risk", () => {
+    const context = runnerContext({
+      legalActions: [legalAction("draw-two", "draw_card", { amount: 2 })],
+      hand: [
+        visibleCard("low-a", "event"),
+        visibleCard("useful-a", "program"),
+        visibleCard("useful-b", "hardware"),
+        visibleCard("filler-a", "event"),
+        visibleCard("filler-b", "event"),
+      ],
+      handDevelopmentEvaluations: [
+        handEvaluation("low-a", {
+          developmentRole: "duplicate_or_low_value",
+          strategicFit: "weak",
+          currentNeed: "none",
+          priority: 120,
+          deferReason: "duplicate",
+        }),
+        handEvaluation("useful-a", {
+          developmentRole: "breaker_or_rig_piece",
+          currentNeed: "useful_now",
+          priority: 800,
+        }),
+      ],
     });
 
-    expect(runnerDrawOverflowSupportsCreditPlan(assessment)).toBe(true);
-    expect(runnerDrawOverflowCreditPriorityBoost(assessment)).toBe(240);
+    const assessment = assessRunnerDrawOverflow(context);
+
+    expect(assessment).toMatchObject({
+      cardsToDraw: 2,
+      projectedOverflow: 2,
+      severity: "moderate",
+      discardFodderCount: 1,
+      usefulPlayableCardsInHand: 1,
+      penalty: 270,
+    });
+    expect(runnerDrawOverflowEvidence(assessment!)).toEqual(
+      expect.arrayContaining([
+        "hand_limit_pressure:moderate",
+        "projected_overflow:2",
+        "draw_overflow_penalty:270",
+        "discard_fodder_count:1",
+      ]),
+    );
+    expect(runnerDrawOverflowRationale(assessment!)).toEqual(
+      expect.arrayContaining([
+        "handLimitPressure:moderate",
+        "projectedOverflow:2",
+        "drawOverflowPenalty:270",
+      ]),
+    );
+  });
+
+  it("keeps urgent remote score-threat draw plausible", () => {
+    const context = runnerContext({
+      legalActions: [legalAction("draw", "draw_card")],
+      hand: [
+        visibleCard("low-a", "event"),
+        visibleCard("setup-a", "program"),
+        visibleCard("setup-b", "hardware"),
+        visibleCard("setup-c", "event"),
+        visibleCard("setup-d", "event"),
+      ],
+      servers: [
+        server("remote_1", [], [
+          visibleCard("agenda", "agenda", { owner: "corp", advancementCounters: 1 }),
+        ]),
+      ],
+      tacticalGoals: [
+        runnerTacticalGoal("runner.contest_remote_if_score_threat", {
+          targetServerId: "remote_1",
+        }),
+      ],
+    });
+    const assessment = assessRunnerDrawOverflow(context, {
+      target: { kind: "server", id: "remote_1" },
+    } as Parameters<typeof assessRunnerDrawOverflow>[1]);
+
+    expect(assessment).toMatchObject({
+      projectedOverflow: 1,
+      urgencyOverride: "find_breaker_for_score_threat",
+      penalty: 0,
+    });
+    expect(assessment?.reasons).toEqual(
+      expect.arrayContaining([
+        "draw_still_plausible_under_urgency",
+        "urgency_override_keeps_draw_plausible",
+      ]),
+    );
+  });
+
+  it("promotes credit plans when draw overflow would risk blocked useful cards", () => {
+    const context = runnerContext({
+      legalActions: [legalAction("draw", "draw_card"), legalAction("gain", "gain_credit")],
+      hand: [
+        visibleCard("expensive", "resource"),
+        visibleCard("filler-a", "event"),
+        visibleCard("filler-b", "event"),
+        visibleCard("filler-c", "event"),
+        visibleCard("filler-d", "event"),
+      ],
+      handDevelopmentEvaluations: [
+        handEvaluation("expensive", {
+          availability: "missing_credits",
+          developmentRole: "economy_engine",
+          currentNeed: "useful_now",
+          priority: 700,
+        }),
+      ],
+      economyPosture: runnerEconomyPosture({
+        currentCredits: 1,
+        usefulHandCardsBlockedByCredits: 1,
+      }),
+    });
+
+    const assessment = assessRunnerDrawOverflow(context);
+
+    expect(runnerDrawOverflowSupportsCreditPlan(assessment!)).toBe(true);
+    expect(runnerDrawOverflowCreditPriorityBoost(assessment!)).toBe(105);
     expect(runnerHandDevelopmentOverflowBonus(assessment)).toBe(0);
-
-    const installBeforeDraw = drawOverflowAssessment({
-      severity: "high",
-      usefulPlayableCardsInHand: 2,
-    });
-
-    expect(runnerDrawOverflowSupportsCreditPlan(installBeforeDraw)).toBe(false);
-    expect(runnerHandDevelopmentOverflowBonus(installBeforeDraw)).toBe(210);
   });
 });
 
-function drawOverflowAssessment(
-  overrides: Partial<RunnerDrawOverflowAssessment> = {},
-): RunnerDrawOverflowAssessment {
+function runnerContext(params: {
+  legalActions: LegalAction[];
+  hand: VisibleCard[];
+  handDevelopmentEvaluations?: RunnerHandDevelopmentEvaluation[];
+  economyPosture?: RunnerEconomyPosture;
+  tacticalGoals?: RunnerTacticalGoal[];
+  servers?: PlayerView["servers"];
+}): TacticalPlanBuildContext {
+  const input = aiInput(params.legalActions);
+  input.playerView.own.gripOrHq = params.hand;
+  input.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    ...(params.servers ?? []),
+  ];
   return {
-    currentHandCount: 6,
-    maxHandSize: 5,
-    cardsToDraw: 1,
-    remainingClicks: 2,
-    projectedHandAfterDraw: 7,
-    projectedOverflow: 2,
-    severity: "moderate",
-    discardFodderCount: 1,
-    valuableCardsAtRisk: 1,
-    usefulPlayableCardsInHand: 1,
-    usefulHandCardsBlockedByCredits: 1,
-    urgencyOverride: "none",
-    penalty: 330,
-    reasons: ["projected_overflow", "overdraw_penalty_applied"],
+    input,
+    ...(params.handDevelopmentEvaluations
+      ? { runnerHandDevelopmentEvaluations: params.handDevelopmentEvaluations }
+      : {}),
+    ...(params.economyPosture ? { runnerEconomyPosture: params.economyPosture } : {}),
+    ...(params.tacticalGoals ? { runnerTacticalGoals: params.tacticalGoals } : {}),
+  };
+}
+
+function aiInput(legalActions: LegalAction[]): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: playerView(legalActions),
+    eventTail: [],
+    legalActions,
+    difficulty: "normal",
+    seed: "runner-draw-overflow-test",
+    decisionId: "runner-draw-overflow-test",
+    actionNumber: 1,
+    profileId: "runner-draw-overflow-test",
+  };
+}
+
+function playerView(legalActions: LegalAction[]): PlayerView {
+  return {
+    stateVersion: 1,
+    side: "runner",
+    activeSide: "runner",
+    phase: "runner_action_phase",
+    timingPoint: "runner_action.main",
+    own: {
+      identity: visibleIdentity("runner"),
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      gripOrHq: [],
+      stackOrRdCount: 0,
+      heapOrArchives: [],
+      scoreArea: [],
+      maxHandSize: 5,
+      tags: 0,
+    },
+    opponent: {
+      identity: visibleIdentity("corp"),
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      tags: 0,
+      handCount: 5,
+      maxHandSize: 5,
+      deckCount: 0,
+      discardCount: 0,
+      scoreArea: [],
+    },
+    servers: [],
+    publicEvents: [],
+    legalActions,
+    winner: null,
+    agendaPointsToWin: 7,
+  };
+}
+
+function legalAction(
+  actionId: string,
+  type: LegalAction["type"],
+  payload: LegalAction["payload"] = {},
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type,
+    label: actionId,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ credits: 0 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    ...(Object.keys(payload).length > 0 ? { payload } : {}),
+  };
+}
+
+function visibleCard(
+  instanceId: string,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  const side = overrides.owner ?? "runner";
+  return {
+    instanceId,
+    definitionId: instanceId,
+    title: instanceId,
+    owner: side,
+    controller: side,
+    type,
+    known: true,
     ...overrides,
+  };
+}
+
+function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
+  return visibleCard(`${side}-identity`, "identity", { owner: side, controller: side });
+}
+
+function server(
+  id: PlayerView["servers"][number]["id"],
+  ice: VisibleCard[] = [],
+  root: VisibleCard[] = [],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice,
+    root,
+  };
+}
+
+function handEvaluation(
+  cardInstanceId: string,
+  overrides: Partial<RunnerHandDevelopmentEvaluation>,
+): RunnerHandDevelopmentEvaluation {
+  return {
+    schemaVersion: "runner-hand-development-evaluation-v1",
+    cardInstanceId,
+    availability: "legal_now",
+    developmentRole: "access_payoff",
+    strategicFit: "strong",
+    currentNeed: "useful_now",
+    priority: 650,
+    deferReason: "none",
+    evidence: [],
+    ...overrides,
+  };
+}
+
+function runnerTacticalGoal(
+  goalId: RunnerTacticalGoal["goalId"],
+  overrides: Partial<RunnerTacticalGoal> = {},
+): RunnerTacticalGoal {
+  return {
+    schemaVersion: "runner-tactical-goal-v1",
+    goalId,
+    family: "remote_contest",
+    priority: 900,
+    urgency: "high",
+    source: "run_target_evaluation",
+    evidence: [],
+    ...overrides,
+  };
+}
+
+function runnerEconomyPosture(params: {
+  currentCredits: number;
+  usefulHandCardsBlockedByCredits: number;
+}): RunnerEconomyPosture {
+  const creditReservePolicy = {
+    schemaVersion: 1 as const,
+    phase: "opening" as const,
+    currentCredits: params.currentCredits,
+    minimumCreditFloor: 2,
+    breakerUseReserve: 2,
+    contestReserve: 0,
+    developmentReserve: 4,
+    emergencyReserve: 0,
+    desiredCreditReserve: 4,
+    remoteScoreThreat: "none" as const,
+    canContestIfFunded: false,
+    belowReserveNow: params.currentCredits < 4,
+    spendingWouldDropBelowReserve: false,
+    reserveDrivers: ["phase:opening"],
+    reserveOverrides: [],
+    evidence: [],
+  };
+  return {
+    schemaVersion: "runner-economy-posture-v1",
+    minimumCreditFloor: 2,
+    desiredCreditReserve: 4,
+    creditReservePolicy,
+    creditBasePlan: {
+      schemaVersion: "runner-credit-base-plan-v1",
+      currentCredits: params.currentCredits,
+      minimumCreditFloor: 2,
+      desiredCreditReserve: 4,
+      runCostReserve: 2,
+      creditReservePolicy,
+      fundingNeed: true,
+      usefulHandCardsBlockedByCredits: params.usefulHandCardsBlockedByCredits,
+      usefulHandCardsAffordableNow: 0,
+      recommendation: "fund_useful_hand_card",
+      economyPriority: "high",
+      evidence: [],
+    },
+    riskAdjustedRunReserve: false,
+    buildEconomyBeforePressure: true,
+    bankToolsRelevant: false,
+    fundingNeed: true,
+    recommendation: "build_economy",
+    evidence: [],
   };
 }

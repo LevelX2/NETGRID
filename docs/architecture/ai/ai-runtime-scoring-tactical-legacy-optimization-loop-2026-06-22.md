@@ -191,6 +191,13 @@ Ergebnis:
     grün: 2 Testdateien, 46 Tests.
   - `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - `git diff --check` grün.
+- Nachhärtung:
+  - `runner-draw-overflow.test.ts` wurde von reinen Helper-Fixtures auf
+    kontextnahe Assessment-Fixtures für Overdraw-Fodder, Score-Threat-Urgency
+    und Credit-Plan-Promotion umgestellt.
+  - `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/runner-draw-overflow.test.ts --maxWorkers=1 --testTimeout=30000`
+    grün: 1 Testdatei, 3 Tests.
+  - `git diff --check` grün.
 
 ### AI-RSL-3 Legacy-RunnerPlan-Metadaten isolieren
 
