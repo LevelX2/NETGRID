@@ -1,3 +1,5 @@
+// Legacy corp planner: keep as fallback and regression reference only.
+// Do not add new semantic strategy, target-choice or card-semantics consumers here.
 import corpPlanProfilesData from "../../../../data/ai/corp-plan-profiles-1.4.0.json";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,

@@ -1,3 +1,6 @@
+// Public package facade. Keep new AI behavior in focused runtime, decision,
+// action, access, diagnostics, reports or simulation modules, then re-export
+// only intentional public contracts here.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {

@@ -1,3 +1,5 @@
+// Legacy runner planner: keep as fallback and regression reference only.
+// Do not add new semantic strategy, target-choice or card-semantics consumers here.
 import runnerPlanProfilesData from "../../../../data/ai/runner-plan-profiles-1.4.1.json";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,

@@ -345,6 +345,40 @@ describe("AI module boundaries", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("marks legacy planner facades and implementations as compatibility-only", () => {
+    const requiredMarkers = [
+      {
+        file: path.join(srcDir, "runner-plans.ts"),
+        markers: ["Compatibility facade", "not legacy"],
+      },
+      {
+        file: path.join(srcDir, "corp-plans.ts"),
+        markers: ["Compatibility facade", "not legacy"],
+      },
+      {
+        file: path.join(srcDir, "legacy", "runner-plans.ts"),
+        markers: ["Legacy runner planner", "fallback", "Do not add new semantic"],
+      },
+      {
+        file: path.join(srcDir, "legacy", "corp-plans.ts"),
+        markers: ["Legacy corp planner", "fallback", "Do not add new semantic"],
+      },
+      {
+        file: path.join(srcDir, "index.ts"),
+        markers: ["Public package facade", "re-export", "intentional public contracts"],
+      },
+    ];
+
+    const missingMarkers = requiredMarkers.flatMap(({ file, markers }) => {
+      const content = readFileSync(file, "utf8");
+      return markers
+        .filter((marker) => !content.includes(marker))
+        .map((marker) => `${relativeFile(file)} is missing marker: ${marker}`);
+    });
+
+    expect(missingMarkers).toEqual([]);
+  });
 });
 
 function productionFiles(
