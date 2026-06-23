@@ -16,7 +16,7 @@ import { SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID } from "../../mechanics/longtail-ca
 import {
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
-  oliviaSalazarRezSourcesForRunIce,
+  discountedRezSourceIdsForRunIce,
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
@@ -100,12 +100,12 @@ export function buildCorpApproachActions(
     }
   }
   if (!ice.rezzed && !variableRezForDefinition(definition)) {
-    for (const sourceId of oliviaSalazarRezSourcesForRunIce(
+    for (const sourceId of discountedRezSourceIdsForRunIce(
       host.state,
       run.approachedIceId,
     )) {
       const oliviaRezQuote = quoteCorpRezCost(host.state, run.approachedIceId, {
-        oliviaSalazarSourceCardId: sourceId,
+        discountedRezSourceCardId: sourceId,
       });
       if (!oliviaRezQuote.canPay) continue;
       const oliviaRezCost = oliviaRezQuote.finalCredits;

@@ -16,7 +16,7 @@ export {
   corpServerIdForInstalledCard,
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
-  oliviaSalazarRezSourcesForRunIce,
+  discountedRezSourceIdsForRunIce,
   quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,

@@ -34,7 +34,7 @@ import type { CostModifierQuote, CostQuote } from "./cost-quote";
 export { corpServerIdForInstalledCard } from "../../ability-engine/card-implementation-modifiers";
 
 export type CorpRezCostOptions = {
-  oliviaSalazarSourceCardId?: CardInstanceId;
+  discountedRezSourceCardId?: CardInstanceId;
 };
 
 type ActiveCorpRezCostModifier = {
@@ -68,10 +68,7 @@ function mustServer(
   return server;
 }
 
-function definitionFor(
-  state: GameState,
-  id: CardInstanceId,
-): CardDefinition {
+function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   return cardDefinitionForInstance(state, id);
 }
 
@@ -149,7 +146,9 @@ function corpInstallCostModifierAppliesToCard(
     return selectedServerId === targetServerId;
   }
   if (!modifier.appliesTo.sameServerAsSource) return true;
-  return corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId;
+  return (
+    corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId
+  );
 }
 
 function activeCorpInstallCostModifiersForCard(
@@ -264,7 +263,10 @@ export function quoteCorpIceInstallCost(
 ): CostQuote {
   const definition = definitionFor(state, cardId);
   const baseCredits = Math.max(0, server.ice.length);
-  const additionalCredits = Math.max(0, Math.floor(options.additionalCredits ?? 0));
+  const additionalCredits = Math.max(
+    0,
+    Math.floor(options.additionalCredits ?? 0),
+  );
   const legacyReduction = Math.max(0, Math.floor(options.legacyReduction ?? 0));
   const modifierMatches =
     definition.type === "ice"
@@ -336,13 +338,14 @@ export function quoteCorpRezCost(
     definition.type === "ice"
       ? activeCorpRezCostModifiersForIce(state, iceId, definition)
       : [];
-  const existingSourceDefinitionIds =
-    existingModifierMatches.map((match) => match.sourceDefinitionId);
-  const oliviaSalazarSourceCardId = options.oliviaSalazarSourceCardId;
-  const oliviaSalazarSourceDefinitionId = oliviaSalazarSourceCardId
-    ? definitionFor(state, oliviaSalazarSourceCardId).id
+  const existingSourceDefinitionIds = existingModifierMatches.map(
+    (match) => match.sourceDefinitionId,
+  );
+  const discountedRezSourceCardId = options.discountedRezSourceCardId;
+  const discountedRezSourceDefinitionId = discountedRezSourceCardId
+    ? definitionFor(state, discountedRezSourceCardId).id
     : undefined;
-  const finalCredits = oliviaSalazarSourceCardId
+  const finalCredits = discountedRezSourceCardId
     ? Math.max(0, Math.floor(regularFinalCredits / 2))
     : regularFinalCredits;
   const publicPayload: NonNullable<LegalAction["payload"]> = {
@@ -352,10 +355,10 @@ export function quoteCorpRezCost(
     corpRezCostModifierQuoteForMatch(match),
   );
 
-  if (oliviaSalazarSourceCardId) {
-    const sourceDefinitionId = oliviaSalazarSourceDefinitionId!;
+  if (discountedRezSourceCardId) {
+    const sourceDefinitionId = discountedRezSourceDefinitionId!;
     publicPayload.serverId = corpServerIdForInstalledCard(state, iceId) ?? "";
-    publicPayload.oliviaSalazarRezSourceCardId = oliviaSalazarSourceCardId;
+    publicPayload.oliviaSalazarRezSourceCardId = discountedRezSourceCardId;
     publicPayload.oliviaSalazarRezSourceDefinitionId = sourceDefinitionId;
     publicPayload.oliviaSalazarRezCostBase = regularFinalCredits;
     publicPayload.oliviaSalazarTemporaryDerez = true;
@@ -366,10 +369,9 @@ export function quoteCorpRezCost(
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
     modifiers.push({
-      sourceCardInstanceId: oliviaSalazarSourceCardId,
+      sourceCardInstanceId: discountedRezSourceCardId,
       sourceDefinitionId,
-      label:
-        DEMO_CARDS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
+      label: DEMO_CARDS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
       amount: regularFinalCredits - finalCredits,
       kind: "reduction",
     });
@@ -404,7 +406,7 @@ function definitionHasFortRunWindowKind(
   );
 }
 
-function isOliviaSalazarRezSourceDefinition(
+function isDiscountedRezSourceDefinition(
   definitionId: CardDefinitionId,
 ): boolean {
   if (
@@ -420,7 +422,7 @@ function isOliviaSalazarRezSourceDefinition(
   );
 }
 
-export function oliviaSalazarRezSourcesForRunIce(
+export function discountedRezSourceIdsForRunIce(
   state: GameState,
   iceId: CardInstanceId,
 ): CardInstanceId[] {
@@ -436,7 +438,7 @@ export function oliviaSalazarRezSourcesForRunIce(
       const instance = state.cardInstances[sourceId];
       return (
         instance?.rezzed === true &&
-        isOliviaSalazarRezSourceDefinition(definitionFor(state, sourceId).id) &&
+        isDiscountedRezSourceDefinition(definitionFor(state, sourceId).id) &&
         !used.has(sourceId)
       );
     })
@@ -461,24 +463,24 @@ export function assertCorpRezCostQuoteValid(
     run.approachedIceId !== iceId
   )
     throw new Error("ICE ist nicht mehr im passenden Rez-Fenster.");
-  const oliviaSalazarSourceCardId =
+  const discountedRezSourceCardId =
     typeof legalAction.payload?.oliviaSalazarRezSourceCardId === "string"
       ? (legalAction.payload.oliviaSalazarRezSourceCardId as CardInstanceId)
       : undefined;
-  if (oliviaSalazarSourceCardId) {
-    if (!state.cardInstances[oliviaSalazarSourceCardId])
+  if (discountedRezSourceCardId) {
+    if (!state.cardInstances[discountedRezSourceCardId])
       throw new Error("Olivia-Salazar-Quelle fehlt.");
-    const availableSources = oliviaSalazarRezSourcesForRunIce(state, iceId);
-    if (!availableSources.includes(oliviaSalazarSourceCardId))
+    const availableSources = discountedRezSourceIdsForRunIce(state, iceId);
+    if (!availableSources.includes(discountedRezSourceCardId))
       throw new Error("Olivia Salazar ist fuer dieses ICE nicht aktiv.");
     if (
-      corpServerIdForInstalledCard(state, oliviaSalazarSourceCardId) !==
+      corpServerIdForInstalledCard(state, discountedRezSourceCardId) !==
       run.attackedServerId
     )
       throw new Error("Olivia Salazar gehoert nicht zu diesem Fort.");
   }
   const quote = quoteCorpRezCost(state, iceId, {
-    ...(oliviaSalazarSourceCardId ? { oliviaSalazarSourceCardId } : {}),
+    ...(discountedRezSourceCardId ? { discountedRezSourceCardId } : {}),
   });
   if (!quote.canPay) throw new Error("Corp kann die Rez-Kosten nicht zahlen.");
   if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)

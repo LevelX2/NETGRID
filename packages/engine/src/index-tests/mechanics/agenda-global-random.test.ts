@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -214,10 +210,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
-    ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+      "playable_mvp",
+    );
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -379,7 +374,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     expect(chicagoPlacement).toBeDefined();
     corpState = applyChoices(corpState, "corp", [chicagoPlacement?.id ?? ""]);
-    expect(corpState.cardInstances[targetAgendaId]?.advancementCounters).toBe(2);
+    expect(corpState.cardInstances[targetAgendaId]?.advancementCounters).toBe(
+      2,
+    );
     const beforeCredits = corpState.corp.credits;
     corpState = apply(
       corpState,
@@ -461,7 +458,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_300_project-consultants",
     );
-    expect(state.pendingChoice?.source).toContain("p3_34.distribute_advancement");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_34.distribute_advancement",
+    );
     const projectOption = state.pendingChoice?.options.find(
       (option) => String(option.value) === `${agendaId}:4`,
     );
@@ -549,7 +548,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
   });
 
   it("offers Systematic Layoffs advancement placements for installed advanceable cards", () => {
-    let state = MECHANIC_SMOKE_GAMES.agendaScoring("v1919-systematic-layoffs-choice");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring(
+      "v1919-systematic-layoffs-choice",
+    );
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.clicks = 5;
@@ -580,29 +581,22 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const placementOptions = state.pendingChoice?.options ?? [];
     expect(placementOptions).toHaveLength(3);
     expect(
-      placementOptions.some(
-        (option) => option.value === `${firstAgendaId}:2`,
-      ),
+      placementOptions.some((option) => option.value === `${firstAgendaId}:2`),
     ).toBe(true);
     expect(
-      placementOptions.some(
-        (option) => {
-          const selectedIds = new Set(
-            String(option.value)
-              .split("|")
-              .map((entry) => entry.split(":")[0]),
-          );
-          return (
-            selectedIds.has(firstAgendaId) &&
-            selectedIds.has(secondAgendaId)
-          );
-        },
-      ),
+      placementOptions.some((option) => {
+        const selectedIds = new Set(
+          String(option.value)
+            .split("|")
+            .map((entry) => entry.split(":")[0]),
+        );
+        return (
+          selectedIds.has(firstAgendaId) && selectedIds.has(secondAgendaId)
+        );
+      }),
     ).toBe(true);
     expect(
-      placementOptions.some(
-        (option) => option.value === `${secondAgendaId}:2`,
-      ),
+      placementOptions.some((option) => option.value === `${secondAgendaId}:2`),
     ).toBe(true);
 
     const splitOption = placementOptions.find((option) => {
@@ -874,7 +868,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       coreDamageRemoved: 1,
       futureAgendaPointForfeitPending: 3,
     });
-
   });
 
   it("offers Olivia Salazar half-cost ICE rez actions and derezzes that ICE at run end", () => {
@@ -898,10 +891,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 2;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(
-      state,
-      "onr_v1_363_olivia-salazar",
-    );
+    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -986,7 +976,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
     expect(staleCreditResult.ok).toBe(false);
 
-    state = apply(state, "corp", (action) => action.actionId === oliviaRez.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === oliviaRez.actionId,
+    );
     expect(state.corp.credits).toBe(0);
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
     expect(state.run?.oliviaSalazarUsedSourceIdsThisRun).toEqual([oliviaId]);
@@ -1041,7 +1035,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       faceup: true,
       rezzed: true,
     };
-    const iceId = putCorpIceOnServer(state, "remote_1", "onr_v1_228_cinderella");
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_228_cinderella",
+    );
 
     state = toRunnerTurnFromCorpMain(state);
     state = apply(
@@ -1059,7 +1057,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
     );
 
-    state = apply(state, "corp", (action) => action.actionId === oliviaRez.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === oliviaRez.actionId,
+    );
     const visibleIce = getPlayerView(state, "runner")
       .servers.find((server) => server.id === "remote_1")
       ?.ice.find((ice) => ice.instanceId === iceId);
@@ -1088,10 +1090,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(
-      state,
-      "onr_v1_363_olivia-salazar",
-    );
+    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -1161,10 +1160,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.maxHandSize = 100;
-    const oliviaId = putCorpRootInRemote(
-      state,
-      "onr_v1_363_olivia-salazar",
-    );
+    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
     state.cardInstances[oliviaId] = {
       ...state.cardInstances[oliviaId]!,
       faceup: true,
@@ -1187,7 +1183,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const beforeState = structuredClone(state);
     const normalQuote = quoteCorpRezCost(state, iceId);
     const oliviaQuote = quoteCorpRezCost(state, iceId, {
-      oliviaSalazarSourceCardId: oliviaId,
+      discountedRezSourceCardId: oliviaId,
     });
 
     expect(hashState(state)).toBe(beforeHash);
@@ -1215,7 +1211,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state.runner.credits = 20;
     installRunnerProgramForTest(state, "onr_v1_025_fait-accompli");
     putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
-    const remoteOne = state.corp.servers.find((server) => server.id === "remote_1");
+    const remoteOne = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     if (!remoteOne) throw new Error("remote_1 missing");
 
     const makeSuccessfulRemoteRun = (input: GameState): GameState => {
@@ -1223,7 +1221,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         input,
         "runner",
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === "remote_1",
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
       );
       next = passRootRezWindowBeforeAccessIfOpen(next);
       next = apply(next, "runner", (action) => action.type === "access_card");
@@ -1232,7 +1231,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           (action) => action.type === "decline_trash",
         )
       )
-        next = apply(next, "runner", (action) => action.type === "decline_trash");
+        next = apply(
+          next,
+          "runner",
+          (action) => action.type === "decline_trash",
+        );
       return next;
     };
 
@@ -1278,10 +1281,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
       );
     }
-    expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
-    ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+      "playable_mvp",
+    );
   });
 
   it("scores Encryption Breakthrough with code-gate reveal credits and a scored code-gate strength modifier", () => {
@@ -1388,8 +1390,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1920AssetAbility ===
-          "i_got_a_rock_tagged_meat_damage",
+        action.payload?.v1920AssetAbility === "i_got_a_rock_tagged_meat_damage",
     );
 
     expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
@@ -1473,7 +1474,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       actionType: "resolve_choice",
       replacementDecision: "apply",
       replacementOutcome: "replaced",
-      v1920RunnerProgramAbility: "emergency_self_construct_flatline_replacement",
+      v1920RunnerProgramAbility:
+        "emergency_self_construct_flatline_replacement",
       sourceDefinitionId: "onr_v1_022_emergency-self-construct",
       preventedAmount: 4,
       coreDamageRemoved: 1,
@@ -1678,9 +1680,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         }),
       ]),
     );
-    expect(
-      modifiers.reduce((sum, modifier) => sum + modifier.amount, 0),
-    ).toBe(5);
+    expect(modifiers.reduce((sum, modifier) => sum + modifier.amount, 0)).toBe(
+      5,
+    );
     expect(
       runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
@@ -1702,9 +1704,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   });
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
-    for (const definitionId of [
-      "onr_v1_334_pacifica-regional-ai",
-    ]) {
+    for (const definitionId of ["onr_v1_334_pacifica-regional-ai"]) {
       let state = apply(
         createGameAfterSetup({
           seed: `v1920-asset-actions-${definitionId}`,
@@ -1789,7 +1789,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const legal = mustAction(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(legal.costs[0]?.credits).toBe(1);
     expect(legal.payload).toMatchObject({
@@ -1798,7 +1799,11 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
@@ -1853,7 +1858,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    const assetId = putCorpRootInRemote(state, "onr_v1_334_pacifica-regional-ai");
+    const assetId = putCorpRootInRemote(
+      state,
+      "onr_v1_334_pacifica-regional-ai",
+    );
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
       faceup: true,
@@ -1964,9 +1972,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.actionId === legal.actionId,
     );
     expect(state.corp.credits).toBe(creditsBefore - 1);
-    expect(state.corp.servers.find((server) => server.id === "rd")?.ice).toContain(
-      iceId,
-    );
+    expect(
+      state.corp.servers.find((server) => server.id === "rd")?.ice,
+    ).toContain(iceId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       iceInstallBaseCost: 2,
@@ -2005,10 +2013,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     putCorpRootInRemote(unrezzed, "onr_v1_324_fortress-architects");
     putCorpIceOnServer(unrezzed, "rd", "simple_barrier_ice");
     putCorpIceOnServer(unrezzed, "rd", "simple_code_gate_ice");
-    const unrezzedIceId = moveCorpCardToHq(
-      unrezzed,
-      "onr_v1_232_crystal-wall",
-    );
+    const unrezzedIceId = moveCorpCardToHq(unrezzed, "onr_v1_232_crystal-wall");
     const unrezzedInstall = mustAction(
       unrezzed,
       "corp",
@@ -2042,10 +2047,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "rez_ice" &&
         sourceDefinition(nonIce, action) === "onr_v1_324_fortress-architects",
     );
-    const regionId = moveCorpCardToHq(
-      nonIce,
-      "onr_v1_360_jerusalem-city-grid",
-    );
+    const regionId = moveCorpCardToHq(nonIce, "onr_v1_360_jerusalem-city-grid");
     const regionInstall = mustAction(
       nonIce,
       "corp",
@@ -2084,13 +2086,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const legal = mustAction(
       state,
       "runner",
-      (action) =>
-        action.type === "install_card" &&
-        action.source === decoderId,
+      (action) => action.type === "install_card" && action.source === decoderId,
     );
     expect(legal.costs[0]).toMatchObject({ clicks: 1, credits: 3 });
     expect(legal.payload?.iceInstallReduction).toBeUndefined();
-    expect(legal.payload?.iceInstallReductionSourceDefinitionIds).toBeUndefined();
+    expect(
+      legal.payload?.iceInstallReductionSourceDefinitionIds,
+    ).toBeUndefined();
     expect(legal.payload?.iceInstallTotalCost).toBeUndefined();
 
     const creditsBefore = state.runner.credits;
@@ -2222,8 +2224,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_190_bioweapons-engineering",
+        sourceDefinition(state, action) === "onr_v1_190_bioweapons-engineering",
     );
     expect(
       state.corp.scoreArea.map((id) => state.cardInstances[id]?.definitionId),
@@ -2622,8 +2623,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     const oldDeckId = state.runner.rig.hardware.find(
       (id) =>
-        state.cardInstances[id]?.definitionId ===
-        "onr_v1_136_pandoras-deck",
+        state.cardInstances[id]?.definitionId === "onr_v1_136_pandoras-deck",
     );
     const memoryBefore = state.runner.memoryLimit;
     state = apply(
@@ -2634,7 +2634,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         sourceDefinition(state, action) === "onr_v1_122_artemis-2020",
     );
     const artemisId = state.runner.rig.hardware.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
     );
     expect(artemisId).toBeDefined();
     if (!artemisId) throw new Error("Missing Artemis");
@@ -2794,7 +2795,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         state,
         "runner",
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === iceServerId,
+          action.type === "start_run" &&
+          action.payload?.serverId === iceServerId,
       );
     };
     const ownServerState = approachIce(
@@ -2842,16 +2844,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) => action.actionId === ownServerRez.actionId,
     );
-    expect(getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength).toBe(
-      (DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1,
-    );
+    expect(
+      getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength,
+    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
     const otherServerAfterRez = apply(
       otherServerState,
       "corp",
       (action) => action.actionId === otherServerRez.actionId,
     );
     expect(
-      getPlayerView(otherServerAfterRez, "runner").run?.encounteredIce?.strength,
+      getPlayerView(otherServerAfterRez, "runner").run?.encounteredIce
+        ?.strength,
     ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
     const sameServerNonWallAfterRez = apply(
       sameServerNonWallState,
@@ -3019,10 +3022,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         "deterministic_random",
       );
     }
-    expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
-    ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+      "playable_mvp",
+    );
   });
 
   it("resolves Schlaghund as a tag-threshold die roll with meat damage and self-trash", () => {
@@ -3180,7 +3182,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         state,
         "runner",
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === "remote_1",
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
       );
       expect(state.run?.encounteredIceId).toBe(iceId);
       state.run = {
@@ -3190,7 +3193,11 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       const randomBefore = state.randomDrawRecords.length;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
 
       expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
       const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
@@ -3210,7 +3217,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       });
       expect(Boolean(state.run)).toBe(!expectedRunEnded);
       for (const side of ["runner", "corp"] as const) {
-        expect(getPlayerView(state, side).publicEvents.at(-1)?.publicPayload).toMatchObject({
+        expect(
+          getPlayerView(state, side).publicEvents.at(-1)?.publicPayload,
+        ).toMatchObject({
           v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
           sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
           passedIceDefinitionId: "simple_barrier_ice",
@@ -3352,7 +3361,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
@@ -3394,7 +3404,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     withoutAiBoon = apply(
       withoutAiBoon,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(withoutAiBoon.randomDrawRecords).toHaveLength(noSourceRandomBefore);
     expect(withoutAiBoon.run?.aiBoonRunStrength).toBeUndefined();
