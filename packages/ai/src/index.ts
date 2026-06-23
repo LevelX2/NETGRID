@@ -218,6 +218,9 @@ import {
 import {
   runnerStartRunScoreComponents,
 } from "./runtime/runner-start-run-score";
+import {
+  runnerBasicActionPenaltyScoreComponents,
+} from "./runtime/runner-basic-action-penalty-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5699,22 +5702,9 @@ function semanticRuntimeRunnerScoreComponents(
     action,
   );
   if (badPublicityRelevance) components.push(badPublicityRelevance);
-  if (action.type === "jack_out" && scopeId === "simple_run_choice") {
-    components.push({
-      key: "runner_jack_out_pressure_loss",
-      label: "Run abbrechen",
-      value: -450,
-      reason: scopeId,
-    });
-  }
-  if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
-    components.push({
-      key: "runner_unused_actions",
-      label: "Ungenutzte Aktionen",
-      value: -1500,
-      reason: `actions:${input.playerView.own.clicks}`,
-    });
-  }
+  components.push(
+    ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId),
+  );
   return components;
 }
 
