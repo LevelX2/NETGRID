@@ -112,6 +112,8 @@ process_prepared
   - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
 - `TRACEFIX-3`: abgeschlossen. Mehrere Trace-Subroutinen werden innerhalb desselben bekannten ICE gegen fortgeschriebene Credits bewertet; Break-Affordability nutzt das laufende Restbudget, damit Replicator-/Breaker-Kosten nicht mehrfach aus demselben Budget gezählt werden.
   - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
+- `TRACEFIX-4`: abgeschlossen. Ein echter Engine-`getPlayerView()`-zu-DTO-zu-Runner-AI-Test sichert `baseTraceStrength` und `traceSuccessEffect`; Top-Level-Entscheidungen decken Remote-Agenda-Override sowie `add_counter`, `net_damage`, `end_run_and_run_lock`, `end_run_trash_program_and_run_lock` und `trash_runner_resource_and_add_tag` ab.
+  - Checks: `packages/ai` `known-ice-run-risk.test.ts` + `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` + `runner-run-target-guidance.test.ts` grün, `packages/ai` Typecheck grün.
 
 ## Paketdetails
 
