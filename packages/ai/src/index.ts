@@ -186,6 +186,9 @@ import {
   runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
 } from "./runtime/runner-blink-run-exclusion";
 import {
+  runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
+} from "./runtime/runner-blink-break-exclusion";
+import {
   runnerEncounterActionExclusion as buildRunnerEncounterActionExclusion,
 } from "./runtime/runner-encounter-action-exclusion";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
@@ -4056,27 +4059,11 @@ function semanticRuntimeRunnerBlinkBreakExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const assessment = blinkRiskAssessmentForEncounterBreak(input, action);
-  if (!assessment) return undefined;
-  if (assessment.stableCoverageAvailable) {
-    return {
-      key: "blink_break_stable_alternative_available",
-      label: "Stabiler Breaker statt Blink",
-      reason: sortedUnique([
-        ...assessment.evidence,
-        "why_blink_break_blocked:stable_breaker_available",
-      ]).join("|"),
-    };
-  }
-  if (!blinkRiskShouldAvoidRun(assessment)) return undefined;
-  return {
-    key: "blink_break_self_net_damage_risk",
-    label: "Blink-Break mit Self-Net-Damage-Risiko",
-    reason: sortedUnique([
-      ...assessment.evidence,
-      "why_blink_break_blocked:self_net_damage_buffer_too_low",
-    ]).join("|"),
-  };
+  return buildRunnerBlinkBreakExclusion(input, action, {
+    riskAssessment: blinkRiskAssessmentForEncounterBreak,
+    shouldAvoidRun: (assessment) =>
+      blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+  });
 }
 
 function blinkRiskAssessmentForEncounterBreak(
