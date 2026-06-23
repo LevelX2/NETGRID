@@ -400,6 +400,18 @@ import {
   FloatingAiDecisionDebugOverlay,
   type AiDecisionDebugOverlayStatus
 } from "../features/debug/AiDecisionDebugOverlay";
+import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
+import {
+  formatLobbyTime,
+  isInvalidatingTerminalStatus,
+  matchFormatLabel,
+  openMatchAgeLabel,
+  playerSlotForSide,
+  resultReasonLabel,
+  seriesStatusText,
+  shouldForgetRecoveryStatus,
+  shortMatchId
+} from "../features/match-start/lobby-format";
 
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
@@ -6693,214 +6705,6 @@ function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined 
   return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
 
-function StartLobbyPanel({
-  lobby,
-  joinUrl,
-  chatText,
-  connection,
-  onReady,
-  onCancel,
-  onCancelMatch,
-  onLeaveMatch,
-  onRecreate,
-  onDiscardLocal,
-  onReturnToSetup,
-  onChatText,
-  onSendChat,
-  onCopyJoinLink
-}: {
-  lobby: LobbyClientPayload;
-  joinUrl?: string | undefined;
-  chatText: string;
-  connection: "offline" | "connecting" | "online";
-  onReady: (ready: boolean) => void;
-  onCancel: () => void;
-  onCancelMatch: () => void;
-  onLeaveMatch: () => void;
-  onRecreate: () => void;
-  onDiscardLocal: () => void;
-  onReturnToSetup: () => void;
-  onChatText: (value: string) => void;
-  onSendChat: () => void;
-  onCopyJoinLink: () => void;
-}) {
-  const start = lobby.startLobby;
-  const selfPlayer = start ? playerSlotForSide(start, lobby.side) : "player_a";
-  const self = start?.participants[selfPlayer];
-  const opponentPlayer = selfPlayer === "player_a" ? "player_b" : "player_a";
-  const opponent = start?.participants[opponentPlayer];
-  const selfReady = self?.ready ?? false;
-  const countdownActive = lobby.matchStatus === "countdown" && Boolean(start?.countdownEndsAt);
-  const opponentReady = opponent?.ready ?? false;
-  const terminal = isInvalidatingTerminalStatus(lobby.matchStatus) || lobby.matchStatus === "forfeited" || lobby.matchStatus === "finished";
-  const isHost = selfPlayer === "player_a";
-  const canUseReadiness = Boolean(start && (lobby.matchStatus === "ready_check" || lobby.matchStatus === "countdown"));
-  const showJoinLink = Boolean(joinUrl && !terminal && (lobby.pendingDeckHandshake || lobby.matchStatus === "pending"));
-  const opponentName = lobby.opponentStatus.displayName ?? (opponent?.connected ? opponent.displayName : "Wartet auf Gegenüber");
-  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
-  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
-  const countdownValue = useMemo(() => {
-    if (!countdownActive || !start?.countdownEndsAt) return null;
-    const remainingMs = new Date(start.countdownEndsAt).getTime() - countdownNowMs;
-    if (remainingMs <= 0) return null;
-    return Math.ceil(remainingMs / 1000);
-  }, [countdownActive, start?.countdownEndsAt, countdownNowMs]);
-  useEffect(() => {
-    const element = chatMessagesRef.current;
-    if (element) element.scrollTop = element.scrollHeight;
-  }, [start?.chatMessages.length]);
-  useEffect(() => {
-    if (!countdownActive || !start?.countdownEndsAt) return;
-    setCountdownNowMs(Date.now());
-    const handle = window.setInterval(() => setCountdownNowMs(Date.now()), 120);
-    return () => window.clearInterval(handle);
-  }, [countdownActive, start?.countdownEndsAt]);
-  return (
-    <section className="startLobbyPanel" data-testid="start-lobby">
-      {countdownValue ? (
-        <div className="lobbyCountdownOverlay" aria-live="polite" aria-atomic="true">
-          <span className="lobbyCountdownDigit" key={countdownValue}>
-            {countdownValue}
-          </span>
-        </div>
-      ) : null}
-      <div className="startLobbyHeader">
-        <div>
-          <p className="eyebrow">{terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}</p>
-          <h2>{terminal ? terminalLobbyTitle(lobby.matchStatus, lobby.lifecycleResult) : start ? startLobbySideHeadline(lobby) : "Match erstellt"}</h2>
-          <p className="meta">{opponentName ? `Gegenüber: ${opponentName}` : ""}</p>
-        </div>
-        <div className="startLobbyHeaderActions">
-          <span className={`statusPill ${connection}`}>{connection === "online" ? "Du: verbunden" : connection === "connecting" ? "Du: verbindest" : "Du: getrennt"}</span>
-          {terminal ? (
-            <>
-              <button className="button primary" onClick={onRecreate} type="button" data-testid="recreate-match">
-                <CopyPlus size={15} />
-                Neu erstellen
-              </button>
-              <button className="button subtle" onClick={onDiscardLocal} type="button" data-testid="discard-local-session">
-                <Trash2 size={15} />
-                Verwerfen
-              </button>
-            </>
-          ) : (
-            <button className="button subtle" onClick={onReturnToSetup} type="button">
-              <RotateCcw size={15} />
-              Zurück zur Auswahl
-            </button>
-          )}
-        </div>
-      </div>
-      {showJoinLink ? (
-        <div className="joinLinkRow">
-          <input value={joinUrl} readOnly aria-label="Join-Link" data-testid="join-link" />
-          <button className="button" onClick={onCopyJoinLink} type="button">
-            <Clipboard size={15} />
-            Join-Link kopieren
-          </button>
-        </div>
-      ) : null}
-      {terminal ? (
-        <p className="muted">{terminalLobbyMessage(lobby.matchStatus, lobby.lifecycleResult)}</p>
-      ) : start ? (
-        <>
-          <div className="lobbyFacts">
-            <span>{matchFormatLabel(start.matchFormat)}</span>
-            <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">Zielwert {start.agendaPointsToWin} Agenda-Punkte</span>
-            <span title="Spielerzeit-Einstellung für dieses Match.">{matchStartPlayerClockLabel(lobby.playerClock)}</span>
-            <span>Countdown {start.countdownSeconds}s</span>
-          </div>
-          <div className="lobbyParticipants">
-            <LobbyParticipantCard title="Du" participant={self} />
-            <LobbyParticipantCard title="Gegenüber" participant={opponent} />
-          </div>
-          {canUseReadiness ? (
-            <>
-              <div className="readinessSummary">
-                <span>{selfReady ? "Du bist bereit." : "Du bist noch nicht bereit."}</span>
-                <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
-              </div>
-              <div className="lobbyActions">
-                <button className={`button lobbyReadyToggle${selfReady ? " is-ready" : ""}`} onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
-                  {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
-                </button>
-                {countdownActive ? (
-                  <button className="button" onClick={onCancel} type="button">
-                    <X size={15} />
-                    Countdown abbrechen
-                  </button>
-                ) : null}
-                <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
-                  <X size={15} />
-                  {isHost ? "Match abbrechen" : "Lobby verlassen"}
-                </button>
-                <span className="countdownText">{countdownActive ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}` : "Startet automatisch, sobald beide bereit sind."}</span>
-              </div>
-              <div className="lobbyChat">
-                <div className="lobbyChatMessages" ref={chatMessagesRef}>
-                  {start.chatMessages.length === 0 ? <p className="muted">Noch keine Nachrichten.</p> : null}
-                  {start.chatMessages.map((message) => (
-                    <p key={message.id}>
-                      <strong>{message.displayName}</strong>
-                      <span>{formatLobbyTime(message.sentAt)}</span>
-                      {message.text}
-                    </p>
-                  ))}
-                </div>
-                <div className="lobbyChatInput">
-                  <input
-                    value={chatText}
-                    maxLength={300}
-                    onChange={(event) => onChatText(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") onSendChat();
-                    }}
-                    placeholder="Kurze Nachricht"
-                  />
-                  <button className="button" onClick={onSendChat} type="button">
-                    Senden
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="lobbyActions">
-              <span className="countdownText">{lobby.pendingDeckHandshake?.message ?? "Gegenüber kann jetzt über den Join-Link beitreten."}</span>
-              <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
-                <X size={15} />
-                {isHost ? "Match abbrechen" : "Lobby verlassen"}
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <p className="muted">{lobby.pendingDeckHandshake?.message ?? "Die Lobby wird vorbereitet."}</p>
-          <div className="lobbyActions">
-            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" data-testid={isHost ? "cancel-match" : "leave-lobby"}>
-              <X size={15} />
-              {isHost ? "Match abbrechen" : "Lobby verlassen"}
-            </button>
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-function LobbyParticipantCard({ title, participant }: { title: string; participant?: LobbyParticipant | undefined }) {
-  return (
-    <div className="lobbyParticipantCard">
-      <strong>{title}</strong>
-      <span>{participant?.displayName ?? "Noch nicht verbunden"}</span>
-      <span>{participant?.side ? sideLabel(participant.side) : "Seite wird beim Start ausgelost"}</span>
-      <span>{participant?.runnerDeckReady && participant.corpDeckReady ? "Decks geprüft" : "Decks offen"}</span>
-      <span>{participant?.ready ? "Status: bereit" : "Status: nicht bereit"}</span>
-      <span>{connectionQualityLabel(participant?.connectionQuality)}</span>
-    </div>
-  );
-}
-
 function AccessRevealModal({
   reveal,
   displayMode,
@@ -7238,59 +7042,6 @@ function ConfirmationDialog({
       </section>
     </div>
   );
-}
-
-function matchFormatLabel(format: MatchFormat): string {
-  if (format === "two_game_side_swap") return "Private Matchserie";
-  return "Regelmatch";
-}
-
-function resultReasonLabel(reason: GameResultSummary["reason"], winner?: Winner): string {
-  if (reason === "agenda_points" && winner === "runner") return "Der Runner hat die Pläne der Korp vereitelt.";
-  if (reason === "agenda_points" && winner === "corp") return "Die Korp hat ihre Agendas durchgesetzt.";
-  if (reason === "agenda_points") return "Die entscheidenden Agenda-Punkte wurden erreicht.";
-  if (reason === "bad_publicity_7") return "Die Korp hat 7 Bad Publicity erreicht.";
-  if (reason === "corp_deck_empty") return "Die Korp konnte keine Karte mehr ziehen.";
-  if (reason === "flatline") return "Der Runner wurde flatlined.";
-  if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
-  if (reason === "forfeit") return "Das Spiel wurde durch Aufgabe beendet.";
-  if (reason === "time_expired") return "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
-  return "Das Spiel wurde abgeschlossen.";
-}
-
-function terminalLobbyTitle(status: MatchStatus, result?: LifecycleResultSummary): string {
-  if (status === "cancelled") return "Match abgebrochen";
-  if (status === "abandoned") return "Lobby verlassen";
-  if (status === "forfeited") return result?.loserSide ? `${sideLabel(result.loserSide)} hat aufgegeben` : "Spiel aufgegeben";
-  if (status === "finished" && result?.reason === "time_expired") return result.loserSide ? `${sideLabel(result.loserSide)} verliert auf Zeit` : "Spielerzeit abgelaufen";
-  if (status === "finished") return "Spiel abgeschlossen";
-  return "Match nicht mehr aktiv";
-}
-
-function terminalLobbyMessage(status: MatchStatus, result?: LifecycleResultSummary): string {
-  if (status === "cancelled") return "Der Host hat dieses Match beendet. Der alte Join-Link und die alten Tokens sind ungültig.";
-  if (status === "abandoned") return "Die Gegenseite hat die Lobby verlassen. Dieses Match springt nicht in die Bereitschaftslobby zurück.";
-  if (status === "forfeited") return result?.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch Aufgabe. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch Aufgabe beendet.";
-  if (status === "finished" && result?.reason === "time_expired") return result.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch abgelaufene Spielerzeit. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
-  if (status === "finished") return "Das Spiel wurde regelgerecht beendet.";
-  return "Dieser Matchzustand kann nicht fortgesetzt werden.";
-}
-
-function isInvalidatingTerminalStatus(status: MatchStatus): boolean {
-  return status === "cancelled" || status === "abandoned";
-}
-
-function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
-  return status === "cancelled" || status === "abandoned" || status === "finished" || status === "forfeited";
-}
-
-function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", opponentLabel = "Gegenseite"): string {
-  if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${viewerLabel} vorne.` : `Matchserie abgeschlossen: ${viewerLabel} vorne.`;
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${opponentLabel} vorne.` : `Matchserie abgeschlossen: ${opponentLabel} vorne.`;
-    return "Die Matchserie endet unentschieden.";
-  }
-  return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
 }
 
 function OptionsPanel({
@@ -14998,38 +14749,4 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
       {value}
     </span>
   );
-}
-
-function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {
-  return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
-}
-
-function startLobbySideHeadline(lobby: LobbyClientPayload): string {
-  if (lobby.startLobby?.sideAssignmentMode === "random_pending") return "Seite wird beim Start ausgelost";
-  return `Du startest als ${sideLabel(lobby.side)}`;
-}
-
-function connectionQualityLabel(quality: LobbyParticipant["connectionQuality"] | undefined): string {
-  if (quality === "online") return "Teilnehmer verbunden";
-  if (quality === "unstable") return "Verbindung instabil";
-  return "Wartet auf Verbindung";
-}
-
-function formatLobbyTime(value: string | undefined): string {
-  if (!value) return "";
-  return new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(value));
-}
-
-function shortMatchId(matchId: string): string {
-  const normalized = matchId.replace(/^match_/, "");
-  return normalized.length > 10 ? normalized.slice(0, 10) : normalized;
-}
-
-function openMatchAgeLabel(ageSeconds: number): string {
-  if (!Number.isFinite(ageSeconds) || ageSeconds < 0) return "gerade erstellt";
-  if (ageSeconds < 60) return `${ageSeconds}s`;
-  const minutes = Math.floor(ageSeconds / 60);
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours} h`;
 }
