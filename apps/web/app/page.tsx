@@ -304,6 +304,7 @@ import {
   StatusBadges
 } from "../features/catalog/CatalogSupportPanels";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
+import { DeckCardThumb } from "../features/decks/DeckCardThumb";
 import {
   DECK_TABLE_CARD_WIDTH_DEFAULT,
   DECK_TABLE_CARD_WIDTH_MAX,
@@ -8585,62 +8586,6 @@ function DeckListCard({
         </button>
       </div>
     </DeckCardTooltipTrigger>
-  );
-}
-
-function DeckCardThumb({
-  cardId,
-  title,
-  cardType,
-  rulesText,
-  installCost,
-  cost,
-  large = false,
-  preview = false,
-  table = false
-}: {
-  cardId: string;
-  title: string;
-  cardType?: string;
-  rulesText?: string;
-  installCost?: number;
-  cost?: number;
-  large?: boolean;
-  preview?: boolean;
-  table?: boolean;
-}) {
-  const imageSource = usePreferredCardImageSource(cardId);
-  const imageUrl = imageSource.src;
-  const hasGeneratedImage = hasGeneratedCardArt(cardId);
-  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
-  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
-  return (
-    <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
-      {imageUrl ? (
-        <>
-          <CardImage src={imageUrl} fallbackSrc={imageSource.fallbackSrc} decorative />
-          {showHardwareOverlay ? (
-            <HardwareImageOverlay
-              title={title}
-              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
-              maxLines={preview ? 2 : 1}
-              {...(rulesText ? { rulesText } : {})}
-              {...(installCost !== undefined ? { installCost } : {})}
-            />
-          ) : showOperationOverlay ? (
-            <OperationImageOverlay
-              title={title}
-              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
-              maxLines={preview ? 2 : 1}
-              {...(rulesText ? { rulesText } : {})}
-              {...(cost !== undefined ? { cost } : {})}
-            />
-          ) : null}
-        </>
-      ) : (
-        <span className="deckCardThumbFallback">{title.slice(0, 1)}</span>
-      )}
-    </span>
   );
 }
 
