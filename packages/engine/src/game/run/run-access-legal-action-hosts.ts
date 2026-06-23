@@ -179,7 +179,7 @@ export function createRunAccessLegalActionHostComposition(
         buildRunnerDuringRunCardImplementationActions(
           cardImplementation.runCardImplementationActionHost(state),
         ).legalActions,
-      mysteryBoxRunActions: (state, activeRun) =>
+      hiddenStackInstallRunActions: (state, activeRun) =>
         buildMysteryBoxRunActions(
           runFlow.runnerEncounterActionHostForState(state),
           activeRun,

@@ -59,7 +59,7 @@ export type AccessFlowCompositionHost = {
     runnerDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
-    mysteryBoxRunActions: (state: GameState, run: ActiveRun) => LegalAction[];
+    hiddenStackInstallRunActions: (state: GameState, run: ActiveRun) => LegalAction[];
     startExpertScheduleAnalyzerPostAccessChoice: (
       state: GameState,
       run: ActiveRun,
@@ -266,7 +266,7 @@ export function createAccessFlowAdapters(
           host.run.successfulRunProgramActions(state, run),
         runnerDuringRunCardImplementationLegalActions: () =>
           host.run.runnerDuringRunCardImplementationLegalActions(state),
-        mysteryBoxRunActions: (run) => host.run.mysteryBoxRunActions(state, run),
+        hiddenStackInstallRunActions: (run) => host.run.hiddenStackInstallRunActions(state, run),
       },
     };
   }

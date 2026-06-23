@@ -165,7 +165,7 @@ function makeHost(options: {
     callbacks: {
       successfulRunProgramActions: () => [],
       runnerDuringRunCardImplementationLegalActions: () => [],
-      mysteryBoxRunActions: () => [],
+      hiddenStackInstallRunActions: () => [],
     },
   };
 

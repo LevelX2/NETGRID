@@ -898,7 +898,7 @@ export function buildMysteryBoxRunActions(
   run: ActiveRun,
 ): LegalAction[] {
   const state = host.state;
-  const used = new Set(run.mysteryBoxUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.hiddenStackInstallUsedSourceIdsThisRun ?? []);
   if (state.runner.stack.length === 0) return [];
   return state.runner.rig.programs
     .slice()

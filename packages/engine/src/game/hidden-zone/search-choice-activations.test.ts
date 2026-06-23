@@ -326,7 +326,7 @@ describe("hidden-zone search choice activations", () => {
       programFound: true,
       choiceVisibility: "public",
     });
-    expect(host.state.run?.mysteryBoxUsedSourceIdsThisRun).toEqual([
+    expect(host.state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([
       sourceCardId,
     ]);
   });

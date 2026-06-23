@@ -116,7 +116,7 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       finishRun: (_state, successful) => calls.push(`finishRun:${successful}`),
       successfulRunProgramActions: () => [],
       runnerDuringRunCardImplementationLegalActions: () => [],
-      mysteryBoxRunActions: () => [],
+      hiddenStackInstallRunActions: () => [],
       startExpertScheduleAnalyzerPostAccessChoice: () => false,
     },
     damage: {

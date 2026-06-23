@@ -596,7 +596,7 @@ export function handleTopFiveProgramInstallActivation(
     throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
   const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
     sourceCardId,
-    usedSourceIdsThisRun: run.mysteryBoxUsedSourceIdsThisRun ?? [],
+    usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],
   });
   const topCards = host.state.runner.stack.slice(0, 5);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
@@ -605,7 +605,7 @@ export function handleTopFiveProgramInstallActivation(
   );
   applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
     markUsedThisRun: (usedSourceIds) => {
-      run.mysteryBoxUsedSourceIdsThisRun = usedSourceIds;
+      run.hiddenStackInstallUsedSourceIdsThisRun = usedSourceIds;
     },
   });
   if (programIds.length === 0) {
