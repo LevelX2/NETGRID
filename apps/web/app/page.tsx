@@ -347,6 +347,25 @@ import {
 } from "../lib/storage-keys";
 import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
 import {
+  bootstrap,
+  enableAiDecisionDebugTracing,
+  fetchAiDecisionDebugTraceDetail,
+  fetchAiDecisionDebugTraceIndex,
+  fetchAiDecisionPreview,
+  fetchOpenLanMatches,
+  fetchRecentGameResults,
+  fromInitialResponse,
+  fromJoinedResponse,
+  lobbyFromInitialResponse,
+  lobbyFromJoinedResponse,
+  normalizeWebSocketUrl,
+  postJson,
+  serverErrorNotice,
+  type AiDecisionPreview,
+  type OpenMatchEntry
+} from "../lib/client-api";
+import { playActionCueSound, playResultSound, primeAudio, seriesAudioOutcome } from "../lib/audio";
+import {
   clampOverlayPosition,
   parseOverlayPositionPreference,
   serializeOverlayPositionPreference,
@@ -389,8 +408,6 @@ import {
 } from "../features/cards/CardTextRendering";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 
-const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
-const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
@@ -424,8 +441,6 @@ const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
 };
-
-let sharedAudioContext: AudioContext | null = null;
 
 type MatchStatus = ApiMatchStatus;
 type GameMode = ApiClientGameMode;
@@ -545,49 +560,12 @@ type LobbyClientPayload = ApiLobbyPayload;
 type ServerMessage = ApiServerMessage;
 type CreateMatchResponse = ApiCreateMatchResponse;
 type JoinMatchResponse = ApiJoinMatchResponse;
-type AiDecisionPreview = {
-  matchId: string;
-  matchVersion: number;
-  stateVersion: number;
-  requestedBy: Side;
-  side: Side;
-  generatedAt: string;
-  actionId: string;
-  actionType: LegalAction["type"];
-  actionLabel: string;
-  reasonCode: string;
-  explanation: string;
-  fallbackUsed: boolean;
-  timeoutUsed?: boolean;
-  confidence?: number;
-  selectedChoices?: Record<string, unknown>;
-  detail: Record<string, unknown>;
-};
 type AiDecisionDebugExportStatus = "idle" | "copied" | "copy_failed" | "blocked";
 
 function removePendingUndo<T extends { pendingUndo?: unknown }>(payload: T): Omit<T, "pendingUndo"> {
   const { pendingUndo: _pendingUndo, ...withoutPendingUndo } = payload;
   return withoutPendingUndo;
 }
-
-type OpenMatchEntry = {
-  matchId: string;
-  hostDisplayName: string;
-  mode: "human_vs_human";
-  status: "pending";
-  createdAt: string;
-  ageSeconds: number;
-};
-
-type OpenMatchesResponse = {
-  matches?: OpenMatchEntry[];
-  error?: { message: string };
-};
-
-type RecentGameResultsResponse = {
-  results?: ApiRecentResultEntry[];
-  error?: { message: string };
-};
 
 type LifecycleActionResponse =
   | {
@@ -16424,217 +16402,6 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
   );
 }
 
-function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
-  if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
-  const winner = response.winner ?? response.playerView.winner;
-  const payload: ClientPayload = {
-    matchId: response.matchId,
-    matchStatus: response.matchStatus ?? (response.mode === "human_vs_human" ? "pending" : "active"),
-    matchVersion: response.matchVersion,
-    side,
-    playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.playerView.publicEvents,
-    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
-  };
-  if (response.playerClock) payload.playerClock = response.playerClock;
-  if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
-  if (winner) payload.winner = winner;
-  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
-  if (response.resultSummary) payload.resultSummary = response.resultSummary;
-  if (response.retentionProtected) payload.retentionProtected = response.retentionProtected;
-  if (response.retentionProtectedAt) payload.retentionProtectedAt = response.retentionProtectedAt;
-  return payload;
-}
-
-function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
-  if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
-  const winner = response.winner ?? response.playerView.winner;
-  const payload: ClientPayload = {
-    matchId: response.matchId,
-    matchStatus: response.matchStatus ?? "active",
-    matchVersion: response.matchVersion,
-    side: response.side,
-    playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.eventTail ?? response.playerView.publicEvents,
-    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
-  };
-  if (response.playerClock) payload.playerClock = response.playerClock;
-  if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
-  if (response.pendingUndo) payload.pendingUndo = response.pendingUndo;
-  if (winner) payload.winner = winner;
-  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
-  if (response.resultSummary) payload.resultSummary = response.resultSummary;
-  if (response.retentionProtected) payload.retentionProtected = response.retentionProtected;
-  if (response.retentionProtectedAt) payload.retentionProtectedAt = response.retentionProtectedAt;
-  return payload;
-}
-
-function lobbyFromInitialResponse(response: CreateMatchResponse, side: Side): LobbyClientPayload {
-  return {
-    matchId: response.matchId,
-    matchStatus: response.matchStatus ?? "pending",
-    matchVersion: response.matchVersion,
-    side,
-    eventTail: [],
-    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: false },
-    ...(response.playerClock ? { playerClock: response.playerClock } : {}),
-    ...(response.pendingDeckHandshake ? { pendingDeckHandshake: { required: true, message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B." } } : {}),
-    ...(response.lobby ? { startLobby: response.lobby } : {})
-  };
-}
-
-function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayload {
-  return {
-    matchId: response.matchId,
-    matchStatus: response.matchStatus ?? "ready_check",
-    matchVersion: response.matchVersion,
-    side: response.side,
-    eventTail: response.eventTail ?? [],
-    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
-    ...(response.playerClock ? { playerClock: response.playerClock } : {}),
-    ...(response.lobby ? { startLobby: response.lobby } : {})
-  };
-}
-
-function normalizeWebSocketUrl(value: string): string {
-  return value
-    .trim()
-    .replace(/\s+(:\d+(?:\/|$|[?#]))/g, "$1")
-    .replace(/\s+(?=\/ws(?:$|[?#]))/, "");
-}
-
-async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`, {
-      headers: { authorization: `Bearer ${session.sessionToken}` },
-      cache: "no-store"
-    });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  if (!response.ok) return null;
-  return (await response.json()) as ClientPayload | LobbyClientPayload;
-}
-
-async function fetchOpenLanMatches(): Promise<OpenMatchesResponse> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}/api/matches/open`, { cache: "no-store" });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  if (!response.ok) {
-    let payload: OpenMatchesResponse | undefined;
-    try {
-      payload = (await response.json()) as OpenMatchesResponse;
-    } catch {
-      payload = undefined;
-    }
-    if (payload?.error?.message) return { error: { message: payload.error.message } };
-    if (response.status === 404) {
-      return { error: { message: "Dein Multiplayer-Server unterstützt die LAN-Liste noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
-    }
-    return { error: { message: "Offene Spiele konnten nicht geladen werden." } };
-  }
-  return (await response.json()) as OpenMatchesResponse;
-}
-
-async function fetchRecentGameResults(): Promise<RecentGameResultsResponse> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}/api/matches/recent-results?limit=20`, { cache: "no-store" });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  if (!response.ok) {
-    let payload: RecentGameResultsResponse | undefined;
-    try {
-      payload = (await response.json()) as RecentGameResultsResponse;
-    } catch {
-      payload = undefined;
-    }
-    if (payload?.error?.message) return { error: { message: payload.error.message } };
-    if (response.status === 404) {
-      return { error: { message: "Dein Multiplayer-Server unterstützt letzte Spiele noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
-    }
-    return { error: { message: "Letzte Spiele konnten nicht geladen werden." } };
-  }
-  return (await response.json()) as RecentGameResultsResponse;
-}
-
-async function enableAiDecisionDebugTracing(matchId: string): Promise<void> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}${buildMaintenanceAiTraceEnablePath(matchId)}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ mode: "detailed" })
-    });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  const payload = (await response.json()) as { match?: unknown; error?: { message?: string } };
-  if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace konnte nicht aktiviert werden.");
-  const markers = findForbiddenMaintenanceMarkers(payload);
-  if (markers.length > 0) throw new Error("KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.");
-}
-
-async function fetchAiDecisionDebugTraceIndex(matchId: string): Promise<MaintenanceAiTraceIndexEntry[]> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}${buildMaintenanceAiTraceIndexPath(matchId)}`, { cache: "no-store" });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
-  if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
-  const markers = findForbiddenMaintenanceMarkers(payload);
-  if (markers.length > 0) throw new Error("KI-Trace-Timeline wurde wegen Redaktionsprüfung blockiert.");
-  return payload.traces ?? [];
-}
-
-async function fetchAiDecisionDebugTraceDetail(traceId: string): Promise<MaintenanceAiTraceDetail> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`, { cache: "no-store" });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
-  if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
-  const markers = findForbiddenMaintenanceMarkers(payload);
-  if (markers.length > 0) throw new Error("KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.");
-  return payload as MaintenanceAiTraceDetail;
-}
-
-async function fetchAiDecisionPreview(session: SessionInfo, payload: ClientPayload): Promise<AiDecisionPreview> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/ai-preview`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${session.sessionToken}`
-      },
-      body: JSON.stringify({
-        side: session.side,
-        knownStateVersion: payload.playerView.stateVersion,
-        knownMatchVersion: payload.matchVersion
-      })
-    });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  const previewPayload = (await response.json()) as { ok?: boolean; preview?: AiDecisionPreview; error?: { message?: string } };
-  const markers = findForbiddenMaintenanceMarkers(previewPayload.preview ?? previewPayload.error ?? {});
-  if (markers.length > 0) throw new Error("KI-Preview wurde wegen Redaktionsprüfung blockiert.");
-  if (!response.ok || !previewPayload.preview) throw new Error(previewPayload.error?.message ?? "KI-Preview konnte nicht geladen werden.");
-  return previewPayload.preview;
-}
-
 function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {
   return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
 }
@@ -16667,218 +16434,4 @@ function openMatchAgeLabel(ageSeconds: number): string {
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   return `${hours} h`;
-}
-
-async function postJson<T>(path: string, body: unknown): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(`${SERVER_HTTP}${path}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body)
-    });
-  } catch {
-    throw new ServerConnectionError();
-  }
-  return (await response.json()) as T;
-}
-
-class ServerConnectionError extends Error {
-  constructor() {
-    super(SERVER_UNREACHABLE_NOTICE);
-    this.name = "ServerConnectionError";
-  }
-}
-
-function serverErrorNotice(error: unknown, fallback: string): string {
-  if (error instanceof ServerConnectionError) return error.message;
-  if (error instanceof TypeError && /fetch|network|failed/i.test(error.message)) return SERVER_UNREACHABLE_NOTICE;
-  if (error instanceof Error && error.message) return error.message;
-  return fallback;
-}
-
-function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {
-  if (result.series?.status !== "finished") return result.viewerOutcome;
-  return result.series.viewerSeriesOutcome;
-}
-
-function primeAudio(volume: number): void {
-  playActionCueSound("choice", volume);
-}
-
-function audioContext(): AudioContext | null {
-  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioCtor) return null;
-  if (!sharedAudioContext || sharedAudioContext.state === "closed") sharedAudioContext = new AudioCtor();
-  if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume().catch(() => undefined);
-  return sharedAudioContext;
-}
-
-function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
-  const context = audioContext();
-  if (!context) return;
-  const safeVolume = Math.min(1, Math.max(0, volume));
-  const notes =
-    outcome === "won"
-      ? [523.25, 659.25, 783.99]
-      : outcome === "lost"
-        ? [392, 329.63, 261.63]
-        : [440, 493.88, 440];
-  notes.forEach((frequency, index) => {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const start = context.currentTime + index * 0.11;
-    oscillator.type = outcome === "lost" ? "triangle" : "sine";
-    oscillator.frequency.setValueAtTime(frequency, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * 0.12), start + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(start);
-    oscillator.stop(start + 0.19);
-  });
-}
-
-function playActionCueSound(kind: ActionSoundKind, volume: number, repeatCount = 1): void {
-  const context = audioContext();
-  if (!context) return;
-  const safeVolume = Math.min(1, Math.max(0, volume));
-  if (kind === "draw") {
-    playCardDrawSnap(context, safeVolume, repeatCount);
-    return;
-  }
-  const pattern = actionSoundPattern(kind);
-  pattern.forEach((note, index) => {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const start = context.currentTime + index * 0.075;
-    oscillator.type = note.type;
-    oscillator.frequency.setValueAtTime(note.frequency, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * note.gain), start + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + note.duration);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(start);
-    oscillator.stop(start + note.duration + 0.02);
-  });
-}
-
-function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: number): void {
-  const safeCount = Math.min(5, Math.max(1, Math.floor(repeatCount)));
-  for (let index = 0; index < safeCount; index += 1) {
-    const start = context.currentTime + index * 0.085;
-    const noiseBuffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.035)), context.sampleRate);
-    const samples = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < samples.length; i += 1) {
-      const decay = 1 - i / samples.length;
-      samples[i] = (Math.random() * 2 - 1) * decay;
-    }
-    const noise = context.createBufferSource();
-    const noiseGain = context.createGain();
-    const highpass = context.createBiquadFilter();
-    noise.buffer = noiseBuffer;
-    highpass.type = "highpass";
-    highpass.frequency.setValueAtTime(1800, start);
-    noiseGain.gain.setValueAtTime(Math.max(0.0001, volume * 0.14), start);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.045);
-    noise.connect(highpass);
-    highpass.connect(noiseGain);
-    noiseGain.connect(context.destination);
-    noise.start(start);
-    noise.stop(start + 0.05);
-
-    const click = context.createOscillator();
-    const clickGain = context.createGain();
-    click.type = "square";
-    click.frequency.setValueAtTime(1220, start);
-    click.frequency.exponentialRampToValueAtTime(520, start + 0.035);
-    clickGain.gain.setValueAtTime(0.0001, start);
-    clickGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.07), start + 0.004);
-    clickGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.04);
-    click.connect(clickGain);
-    clickGain.connect(context.destination);
-    click.start(start);
-    click.stop(start + 0.055);
-  }
-}
-
-function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; duration: number; gain: number; type: OscillatorType }> {
-  switch (kind) {
-    case "draw":
-      return [{ frequency: 660, duration: 0.11, gain: 0.07, type: "sine" }];
-    case "credit":
-      return [
-        { frequency: 988, duration: 0.035, gain: 0.055, type: "triangle" },
-        { frequency: 1480, duration: 0.05, gain: 0.035, type: "triangle" }
-      ];
-    case "install_hidden":
-      return [{ frequency: 185, duration: 0.12, gain: 0.05, type: "triangle" }];
-    case "install_known":
-      return [
-        { frequency: 262, duration: 0.05, gain: 0.045, type: "triangle" },
-        { frequency: 392, duration: 0.08, gain: 0.04, type: "triangle" }
-      ];
-    case "play":
-      return [
-        { frequency: 440, duration: 0.09, gain: 0.06, type: "sine" },
-        { frequency: 554, duration: 0.1, gain: 0.05, type: "sine" }
-      ];
-    case "rez":
-      return [
-        { frequency: 110, duration: 0.08, gain: 0.055, type: "sawtooth" },
-        { frequency: 330, duration: 0.14, gain: 0.04, type: "triangle" }
-      ];
-    case "run":
-      return [
-        { frequency: 294, duration: 0.045, gain: 0.05, type: "triangle" },
-        { frequency: 587, duration: 0.065, gain: 0.035, type: "square" }
-      ];
-    case "access":
-      return [{ frequency: 740, duration: 0.11, gain: 0.055, type: "triangle" }];
-    case "agenda":
-      return [
-        { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
-        { frequency: 784, duration: 0.14, gain: 0.06, type: "sine" }
-      ];
-    case "trash":
-      return [
-        { frequency: 196, duration: 0.055, gain: 0.055, type: "sawtooth" },
-        { frequency: 98, duration: 0.12, gain: 0.035, type: "triangle" }
-      ];
-    case "tag_or_damage":
-      return [
-        { frequency: 247, duration: 0.08, gain: 0.08, type: "square" },
-        { frequency: 220, duration: 0.1, gain: 0.06, type: "square" }
-      ];
-    case "choice":
-      return [{ frequency: 660, duration: 0.075, gain: 0.045, type: "triangle" }];
-    case "game_end":
-      return [
-        { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
-        { frequency: 659, duration: 0.1, gain: 0.06, type: "sine" }
-      ];
-    case "runner_turn":
-      return [
-        { frequency: 392, duration: 0.13, gain: 0.1, type: "triangle" },
-        { frequency: 523, duration: 0.14, gain: 0.09, type: "sine" },
-        { frequency: 659, duration: 0.15, gain: 0.09, type: "sine" },
-        { frequency: 880, duration: 0.17, gain: 0.085, type: "triangle" },
-        { frequency: 1175, duration: 0.22, gain: 0.075, type: "sine" },
-        { frequency: 1568, duration: 0.19, gain: 0.045, type: "sine" }
-      ];
-    case "corp_turn":
-      return [
-        { frequency: 262, duration: 0.14, gain: 0.11, type: "sawtooth" },
-        { frequency: 196, duration: 0.16, gain: 0.1, type: "square" },
-        { frequency: 147, duration: 0.18, gain: 0.095, type: "sawtooth" },
-        { frequency: 98, duration: 0.23, gain: 0.085, type: "triangle" },
-        { frequency: 131, duration: 0.17, gain: 0.075, type: "square" },
-        { frequency: 87, duration: 0.24, gain: 0.065, type: "triangle" }
-      ];
-    case "turn":
-    default:
-      return [{ frequency: 247, duration: 0.09, gain: 0.04, type: "triangle" }];
-  }
 }
