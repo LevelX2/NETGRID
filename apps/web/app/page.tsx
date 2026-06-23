@@ -1,12 +1,8 @@
 "use client";
 
 import {
-  Cable,
   Check,
-  ChevronDown,
-  ChevronUp,
   Clock,
-  Flag,
   CopyPlus,
   Download,
   Eye,
@@ -17,14 +13,12 @@ import {
   ListFilter,
   Move,
   Moon,
-  PanelRightClose,
   PanelRightOpen,
   PanelTopOpen,
   Pause,
   Play,
   Plus,
   Route,
-  RotateCcw,
   Save,
   Search,
   Shield,
@@ -243,12 +237,12 @@ import {
   type OverlayPositionPreference
 } from "../lib/overlay-position";
 import {
-  ActiveMatchWorkspaceNav,
   AppBrand,
   ConnectionBadge,
   type ActiveMatchWorkspace,
   type ConnectionState
 } from "../features/app-shell/AppShell";
+import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
 import {
   ConfirmationDialog,
@@ -3683,76 +3677,34 @@ export default function Page() {
     <CardImagePreferenceContext.Provider value={{ preferGermanCardImages, showSetBadges }}>
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className={activeMatchClassName} data-theme={colorScheme}>
-      <header className="topbar" ref={topbarRef}>
-        <div className="topbarStatusGroup">
-          <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
-          <div className="topbarMeta">
-            <span className="topbarVersion">{APP_STATUS_LABEL}</span>
-            <ConnectionBadge text={statusText} state={connection} />
-          </div>
-        </div>
-        <ActiveMatchWorkspaceNav workspace={activeMatchWorkspace} onWorkspace={setActiveMatchWorkspace} />
-        {activeMatchIsGame ? (
-        <div className="toolbar">
-          <button
-            className={`button iconOnly topbarUndoToggle ${undoPanelOpen ? "active" : ""} ${payload.pendingUndo ? "attention" : ""}`}
-            onClick={() => setUndoPanelOpen((open) => !open)}
-            title={payload.pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen"}
-            aria-label={payload.pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen"}
-            aria-expanded={undoPanelOpen}
-            aria-controls="undo-strip"
-            type="button"
-          >
-            <RotateCcw size={16} />
-          </button>
-          {connection !== "online" ? (
-            <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
-              <Cable size={16} />
-              Wieder verbinden
-            </button>
-          ) : null}
-          <button
-            className={`button iconOnly matchDetailsToggle ${matchDetailsOpen ? "active" : ""}`}
-            onClick={() => setMatchDetailsOpen((open) => !open)}
-            title={matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden"}
-            aria-label={matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden"}
-            aria-expanded={matchDetailsOpen}
-            aria-controls="match-details-strip"
-            type="button"
-          >
-            {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-          {canStartNextSeriesGame ? (
-            <button className="button primary" onClick={startNextSeriesGame} disabled={seriesTransitioning} title="Nächstes Serienspiel mit Seitenwechsel erstellen" type="button">
-              <Play size={16} />
-              {seriesTransitioning ? "Erstelle..." : "Matchserie fortsetzen"}
-            </button>
-          ) : null}
-          {canReturnToStart ? (
-            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
-              <Play size={16} />
-              Startbildschirm
-            </button>
-          ) : null}
-          {canForfeit ? (
-            <button className="button dangerButton" onClick={requestForfeitMatch} title="Spiel aufgeben">
-              <Flag size={16} />
-              Aufgeben
-            </button>
-          ) : null}
-          <button
-            className={`button iconOnly rightRailHeaderToggle ${rightRailCollapsed ? "is-hidden" : "is-visible"}`}
-            onClick={() => setRightRailCollapsed((current) => !current)}
-            title={rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden"}
-            aria-label={rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden"}
-            aria-pressed={rightRailCollapsed}
-            type="button"
-          >
-            {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
-          </button>
-        </div>
-        ) : null}
-      </header>
+      <ActiveMatchTopbar
+        topbarRef={topbarRef}
+        appName={APP_NAME}
+        appStatusLabel={APP_STATUS_LABEL}
+        appIconSrc={APP_ICON_SRC}
+        appWordmarkSrc={APP_WORDMARK_SRC}
+        statusText={statusText}
+        connection={connection}
+        workspace={activeMatchWorkspace}
+        activeMatchIsGame={activeMatchIsGame}
+        undoPanelOpen={undoPanelOpen}
+        pendingUndo={payload.pendingUndo}
+        canReconnect={canReconnect}
+        matchDetailsOpen={matchDetailsOpen}
+        canStartNextSeriesGame={canStartNextSeriesGame}
+        seriesTransitioning={seriesTransitioning}
+        canReturnToStart={canReturnToStart}
+        canForfeit={canForfeit}
+        rightRailCollapsed={rightRailCollapsed}
+        onWorkspace={setActiveMatchWorkspace}
+        onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
+        onReconnect={reconnect}
+        onToggleMatchDetails={() => setMatchDetailsOpen((open) => !open)}
+        onStartNextSeriesGame={startNextSeriesGame}
+        onLeaveMatch={leaveMatch}
+        onRequestForfeitMatch={requestForfeitMatch}
+        onToggleRightRail={() => setRightRailCollapsed((current) => !current)}
+      />
 
       {matchDetailsOpen ? (
         <div className="matchStrip" id="match-details-strip" aria-label="Status zum aktiven Spiel">
