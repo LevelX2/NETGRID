@@ -198,7 +198,7 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
     mappedChoice.action.type !== "gain_credit" &&
     mappedChoice.action.type !== "draw_card"
   ) {
-    return true;
+    return mappedChoice.score > 0;
   }
   return (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&

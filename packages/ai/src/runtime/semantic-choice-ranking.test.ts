@@ -47,6 +47,23 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("prepare-shell-traders");
     expect(result.overrideChoice).toBeUndefined();
   });
+
+  it("lets a positive run override nonpositive direct coverage answers", () => {
+    const prepare = legalAction("prepare-stale", "trigger_ability");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 7800), choice(prepare, 0)],
+      coverageMapping([prepare]),
+      choice(run, 7800),
+    );
+
+    expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "prepare-stale",
+    );
+    expect(result.scoreGap).toBe(7800);
+  });
 });
 
 function choice(action: LegalAction, score: number): SemanticRuntimeChoice {

@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-06-23-ai-coverage-direct-action-score-gate
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-23
-startedAt:
-completedAt:
+startedAt: 2026-06-23
+completedAt: 2026-06-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/semantic-choice-ranking.ts
+  - packages/ai/src/runtime/semantic-choice-ranking.test.ts
+  - docs/reviews/ai/ai-coverage-direct-action-score-gate-2026-06-23.md
+  - docs/codex/CODEX_STATUS.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-choice-ranking.test.ts src/semantic-ai-runtime-cutover.test.ts --maxWorkers=1 --testTimeout=30000
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test
 ---
 
 # AI-Coverage: direkte Coverage-Aktionen an positiven Nutzen binden
@@ -54,4 +63,8 @@ Das verbleibende Ranking-Risiko aus dem Coverage-Mapping-Fix soll gezielt geprü
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Der Risikofall wurde bestätigt: Direkt gemappte Coverage-Aktionen im `runner.obtain_breaker_coverage`-Plan konnten auch mit nichtpositivem Semantic-Score einen klar positiven Run blockieren, solange sie keine generischen `gain_credit`-/`draw_card`-Fallbacks waren.
+
+`packages/ai/src/runtime/semantic-choice-ranking.ts` bindet den Schutz für direkte Coverage-Antworten jetzt an `mappedChoice.score > 0`. Damit bleiben sinnvoll bewertete direkte Coverage-Antworten geschützt, während nichtpositive oder nutzlose direkte Coverage-Antworten keinen klar positiven Run mehr blockieren. `packages/ai/src/runtime/semantic-choice-ranking.test.ts` deckt beide Fälle ab.
+
+Checks grün: fokussierte Runtime-Ranking-/Cutover-Tests, `@netgrid/ai typecheck` und vollständiger `@netgrid/ai test` mit 141 Testdateien und 1584 Tests. Hidden-Info-, LegalAction-, Replay-, StateHash-, Randomness- und `applyAction`-Verträge bleiben unverändert. Bericht: `docs/reviews/ai/ai-coverage-direct-action-score-gate-2026-06-23.md`.
