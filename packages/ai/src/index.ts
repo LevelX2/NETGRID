@@ -214,7 +214,10 @@ import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
-import { selectEfficientTraceBidOption } from "./trace-bid-efficiency";
+import {
+  selectEfficientPostBidLinkOption,
+  selectEfficientTraceBidOption,
+} from "./trace-bid-efficiency";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -13919,7 +13922,7 @@ function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.source.startsWith("trace_post_bid_link")) {
-    const selected =
+    const strongestLinkOption =
       choice.options
         .filter((option) => option.id.startsWith("trace_link_"))
         .sort((left, right) => {
@@ -13934,6 +13937,17 @@ function selectedChoicesForDecision(
         })[0] ??
       choice.options.find((option) => option.id === "pass") ??
       choice.options[0];
+    const selected =
+      selectEfficientPostBidLinkOption({
+        options: choice.options.map((option) => ({
+          id: option.id,
+          label: option.label,
+        })),
+        ...(strongestLinkOption
+          ? { fallbackOptionId: strongestLinkOption.id }
+          : {}),
+        ...latestTraceContext(input),
+      }).option ?? strongestLinkOption;
     return selected
       ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
@@ -15647,20 +15661,34 @@ function latestTraceContext(input: AiDecisionInput): {
   traceStrength?: number;
   runnerLink?: number;
   corpBid?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  postBidTraceLinkBonus?: number;
 } {
   for (const event of input.eventTail.slice().reverse()) {
     const traceStrength = event.publicPayload.traceStrength;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
+    const runnerBid = event.publicPayload.runnerBid;
+    const runnerStrength = event.publicPayload.runnerStrength;
+    const postBidTraceLinkBonus = event.publicPayload.postBidTraceLinkBonus;
     if (
       typeof traceStrength === "number" ||
       typeof runnerLink === "number" ||
-      typeof corpBid === "number"
+      typeof corpBid === "number" ||
+      typeof runnerBid === "number" ||
+      typeof runnerStrength === "number" ||
+      typeof postBidTraceLinkBonus === "number"
     ) {
       return {
         ...(typeof traceStrength === "number" ? { traceStrength } : {}),
         ...(typeof runnerLink === "number" ? { runnerLink } : {}),
         ...(typeof corpBid === "number" ? { corpBid } : {}),
+        ...(typeof runnerBid === "number" ? { runnerBid } : {}),
+        ...(typeof runnerStrength === "number" ? { runnerStrength } : {}),
+        ...(typeof postBidTraceLinkBonus === "number"
+          ? { postBidTraceLinkBonus }
+          : {}),
       };
     }
   }
