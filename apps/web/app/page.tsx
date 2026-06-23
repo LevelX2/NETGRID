@@ -331,7 +331,7 @@ import {
   type ConfirmationDialogRequest
 } from "../features/app-shell/ConfirmationDialog";
 import { OptionsDialog } from "../features/app-shell/OptionsDialog";
-import { CardDisplayModeSelector, OptionsPanel } from "../features/settings/OptionsPanel";
+import { OptionsPanel } from "../features/settings/OptionsPanel";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
 import {
   DECK_TABLE_CARD_WIDTH_DEFAULT,
@@ -413,6 +413,7 @@ import {
   scoreCardStateBadges
 } from "../features/cards/ScoredAgendaState";
 import { CardView } from "../features/cards/CardView";
+import { CardPreviewPanel } from "../features/cards/CardPreviewPanel";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { SimulationResult, type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
@@ -7550,54 +7551,6 @@ function UndoPanel({
           Zurücknahme anfragen
         </button>
       )}
-    </section>
-  );
-}
-
-function CardPreviewPanel({
-  card,
-  displayMode,
-  onDisplayMode,
-  hiddenSide,
-  collapsed,
-  onCollapsed
-}: {
-  card: DisplayVisibleCard | null;
-  displayMode: CardDisplayMode;
-  onDisplayMode(value: CardDisplayMode): void;
-  hiddenSide?: Side;
-  collapsed: boolean;
-  onCollapsed(value: boolean): void;
-}) {
-  return (
-    <section className={`section cardPreviewPanel ${collapsed ? "collapsed" : ""}`} data-testid="card-preview">
-      <div className="previewTitleLine">
-        <div>
-          <h2>Vorschau</h2>
-          <p className="meta">Kartenanzeige</p>
-        </div>
-        <div className="previewControls">
-          {!collapsed ? <CardDisplayModeSelector mode={displayMode} onChange={onDisplayMode} iconOnly /> : null}
-          <button
-            className="button iconOnly previewToggle"
-            type="button"
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? "Kartenvorschau ausklappen" : "Kartenvorschau einklappen"}
-            title={collapsed ? "Kartenvorschau ausklappen" : "Kartenvorschau einklappen"}
-            onClick={() => onCollapsed(!collapsed)}
-          >
-            {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-          </button>
-        </div>
-      </div>
-      {!collapsed && card ? (
-        <div className={`previewModeShell mode-${displayMode}`}>
-          <CardView card={card} displayMode={displayMode} {...(hiddenSide ? { hiddenSide } : {})} preview />
-        </div>
-      ) : null}
-      {!collapsed && !card ? (
-        <p className="meta">Wähle eine Karte für die Vorschau.</p>
-      ) : null}
     </section>
   );
 }
