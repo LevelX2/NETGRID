@@ -18,7 +18,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | allowed_catalog_reference | 43 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 | runtime_state_field_uses_card_name | 4 |
-| false_positive | 22 |
+| false_positive | 20 |
 | functional_kind_uses_card_name | 2 |
 
 ## Problemstellen
@@ -58,8 +58,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:7` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1532` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3711` Shell Traders / `shell_traders` -> `delayed_install_sequence`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1533` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3722` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
 ## Abstraktionsplan
 

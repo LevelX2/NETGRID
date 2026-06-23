@@ -81,7 +81,7 @@ Checks:
 - `corepack pnpm --filter @netgrid/engine test -- game/engine-runtime-internal/runtime-module-size.test.ts game/abilities/runner-special-trigger-execution.test.ts game/turn/runner-special-zone-install-actions.test.ts game/state/turn-flags-counters.test.ts compatibility/compatibility.test.ts` -> bestanden.
 - `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
 - `corepack pnpm --filter @netgrid/shared typecheck` -> bestanden.
-- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings.
+- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings im Arbeitsbranch; nach Integration auf `main` 145 Baseline-Findings.
 
 ### Paket 3: Effect-Familien
 
@@ -180,5 +180,5 @@ Checks:
 - `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
 - `corepack pnpm --filter @netgrid/shared typecheck` -> bestanden.
 - `corepack pnpm --filter @netgrid/engine test` -> bestanden, 173 Testdateien / 1518 Tests.
-- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings.
+- `corepack pnpm check:card-function-abstraction` -> bestanden, 145 Baseline-Findings auf integriertem `main`.
 - `corepack pnpm typecheck` -> bestanden.

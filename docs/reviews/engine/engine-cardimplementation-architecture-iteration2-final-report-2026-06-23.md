@@ -40,7 +40,7 @@ Die zweite Architekturiteration reduziert weitere kartennamenspezifische Runtime
 - `omniscience_foundation` als Tag-Cause -> `end_turn_tag_if_runner_received_tag`
 - `omniscienceFoundationTagsAdded` -> `endTurnTagIfRunnerReceivedTagAdded`
 
-Der Card-Function-Abstraction-Report sinkt von 151 auf 147 Baseline-Findings.
+Der Card-Function-Abstraction-Report sinkt von 151 auf 147 Baseline-Findings im Arbeitsbranch und nach Integration mit parallelen `main`-Aenderungen auf 145 Baseline-Findings.
 
 ## Aufgebrochene Monolithen
 
@@ -82,7 +82,7 @@ Erhalten bzw. ergaenzt wurden kurze Architekturkommentare an Dispatcher und Subr
 - `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
 - `corepack pnpm --filter @netgrid/shared typecheck` -> bestanden.
 - `corepack pnpm --filter @netgrid/engine test` -> bestanden, 173 Testdateien / 1518 Tests.
-- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings.
+- `corepack pnpm check:card-function-abstraction` -> bestanden, 145 Baseline-Findings auf integriertem `main`.
 - `corepack pnpm typecheck` -> bestanden.
 
 ## Offene Punkte
