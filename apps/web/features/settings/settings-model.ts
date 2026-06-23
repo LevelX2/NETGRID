@@ -73,3 +73,9 @@ export function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCE
   const snapped = Math.round(clamped / CARD_SCALE_PERCENT_STEP) * CARD_SCALE_PERCENT_STEP;
   return Math.max(min, Math.min(max, snapped));
 }
+
+export function aiPacingModeHelp(mode: AiPacingMode): string {
+  if (mode === "manual") return "Einzelschritt: Die KI macht nur dann genau einen Schritt, wenn Du KI-Schritt klickst.";
+  if (mode === "fast") return "Schnell: Die KI läuft ohne Präsentationspausen bis zum nächsten menschlichen Fenster.";
+  return "Getaktet: Die KI macht ihre Schritte automatisch, aber mit kurzen Pausen, damit Du sie verfolgen kannst.";
+}
