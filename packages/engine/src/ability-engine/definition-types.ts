@@ -78,7 +78,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "silver_lining_recovery";
+      kind: "gain_credits_from_stolen_agenda_advancement_history";
       multiplierPerAdvancementCounter: 3;
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -101,7 +101,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "omniscience_foundation_end_turn_tag";
+      kind: "end_turn_tag_if_runner_received_tag";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -201,19 +201,19 @@ export type CardCorpUtilityImplementation =
 
 export type CardHiddenReplacementLongtailImplementation =
   | {
-      kind: "fortress_respecification_ice_reorder";
+      kind: "successful_run_fort_ice_reorder";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "social_engineering_secret_guess_run";
+      kind: "secret_spend_guess_then_targeted_bypass_run";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "new_blood_conceal_reorder_installed_ice";
+      kind: "conceal_and_reorder_installed_ice";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "shell_traders_delayed_install";
+      kind: "delayed_install_with_counter_countdown";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {

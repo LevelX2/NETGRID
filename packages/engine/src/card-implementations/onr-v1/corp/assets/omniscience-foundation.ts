@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const omniscienceFoundationImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_333_omniscience-foundation",
   corpUtility: {
-    kind: "omniscience_foundation_end_turn_tag",
+    kind: "end_turn_tag_if_runner_received_tag",
     visibility: "public",
   },
 };

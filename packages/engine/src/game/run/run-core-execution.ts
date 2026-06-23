@@ -39,7 +39,7 @@ export type StartRunOptions = Pick<
   | "runnerRunTemporaryCredits"
   | "testSpinTemporaryInstall"
   | "unpreventableCoreDamageAtRunEnd"
-  | "socialEngineeringAutoPassIceId"
+  | "secretSpendGuessRunAutoPassIceId"
   | "prohibitNoisyIcebreakers"
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"
@@ -219,8 +219,8 @@ export function startRun(
           },
         }
       : {}),
-    ...(options?.socialEngineeringAutoPassIceId
-      ? { socialEngineeringAutoPassIceId: options.socialEngineeringAutoPassIceId }
+    ...(options?.secretSpendGuessRunAutoPassIceId
+      ? { secretSpendGuessRunAutoPassIceId: options.secretSpendGuessRunAutoPassIceId }
       : {}),
     ...(options?.prohibitNoisyIcebreakers
       ? { prohibitNoisyIcebreakers: true }

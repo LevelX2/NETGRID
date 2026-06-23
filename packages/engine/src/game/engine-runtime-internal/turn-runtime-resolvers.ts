@@ -276,11 +276,11 @@ import {
 } from "../hidden-zone/search-choice-handlers";
 import {
   handleHiddenZoneArrangeChoice,
-  resolveNewBloodConcealAndReorder,
+  resolveConcealAndReorderInstalledIce,
   startCorpAssetRdTopReorderChoice,
   startCorpRdArrangeChoice,
   startCorpRdTopReorderChoice,
-  startFortressRespecificationReorderChoice,
+  startSuccessfulRunFortIceReorderChoice,
   startRunnerStackArrangeChoice,
   startRunnerStackTop5Choice,
   type HiddenZoneArrangeChoiceHandlerHost,
@@ -292,7 +292,7 @@ import {
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
   startSmithsPawnshopChoice,
-  startSocialEngineeringHideChoice,
+  startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startSynchronizedAttackOnHqRetainChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
@@ -1168,14 +1168,14 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     withoutVariableIceState
   } = deps;
 
-function resolveOmniscienceFoundationEndTurnTag(
+function resolveEndTurnTagIfRunnerReceivedTag(
   state: GameState,
   legalAction: LegalAction,
 ): void {
   if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
   const sourceIds = rezzedCorpRootCardIds(state)
     .filter((cardId: CardInstanceId) =>
-      hasCorpUtilityKind(state, cardId, "omniscience_foundation_end_turn_tag"),
+      hasCorpUtilityKind(state, cardId, "end_turn_tag_if_runner_received_tag"),
     )
     .sort();
   if (sourceIds.length === 0) return;
@@ -1185,7 +1185,7 @@ function resolveOmniscienceFoundationEndTurnTag(
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1951CorpUtilityAbility: "omniscience_foundation_end_turn_tag",
+    v1951CorpUtilityAbility: "end_turn_tag_if_runner_received_tag",
     omniscienceFoundationTagsAdded: Math.max(0, state.runner.tags - tagsBefore),
     sourceCount: sourceIds.length,
     runnerTagsAfter: state.runner.tags,
@@ -1289,7 +1289,7 @@ function endTurn(
     if (state.winner) return;
     resolveFieldReporterEndOfRunnerTurn(state, legalAction);
     resolveDelayedEndTurnDamageEffects(state, legalAction);
-    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
+    resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
@@ -1318,7 +1318,7 @@ function endTurn(
     flags.runnerActionsTakenThisTurn = 0;
     delete flags.lastDamageRunnerActionOrdinal;
   } else {
-    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
+    resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
     const corpFlags = ensureCorpTurnFlags(state);
     corpFlags.scoredBlackOpsAgendaLastTurn =
       corpFlags.scoredBlackOpsAgendaThisTurn;
@@ -3139,7 +3139,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
 }
 
   return {
-    resolveOmniscienceFoundationEndTurnTag,
+    resolveEndTurnTagIfRunnerReceivedTag,
     resolveFieldReporterEndOfRunnerTurn,
     resolveDelayedEndTurnDamageEffects,
     endTurn,

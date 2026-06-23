@@ -1184,7 +1184,7 @@ export type RunState = {
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
   successfulRunInterventionWindowClosed?: boolean;
-  socialEngineeringAutoPassIceId?: CardInstanceId;
+  secretSpendGuessRunAutoPassIceId?: CardInstanceId;
   delayedSuccessfulRun?: {
     originalServerId: Exclude<ServerId, "new_remote">;
     interventionSourceId: CardInstanceId;
@@ -1375,7 +1375,7 @@ export type GameState = {
     subroutineIndex: number;
     corpSpend?: number;
   };
-  socialEngineeringSecret?: {
+  secretSpendGuessRunSecret?: {
     sourceCardId: CardInstanceId;
     hiddenAmount: number;
   };

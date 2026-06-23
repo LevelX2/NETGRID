@@ -1,4 +1,4 @@
-﻿import { runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegates } from "./runtime-delegate-store";
 
 export function corpRunnerActionPaidWindowActions(...args: any[]): any {
   return (
@@ -24,10 +24,10 @@ export function creditEconomyExecutionHost(...args: any[]): any {
   )(...args);
 }
 
-export function resolveOmniscienceFoundationEndTurnTag(...args: any[]): any {
+export function resolveEndTurnTagIfRunnerReceivedTag(...args: any[]): any {
   return (
     runtimeDelegates.turnRuntimeResolvers
-      .resolveOmniscienceFoundationEndTurnTag as any
+      .resolveEndTurnTagIfRunnerReceivedTag as any
   )(...args);
 }
 

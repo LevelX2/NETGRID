@@ -45,21 +45,21 @@ describe("P3.71 PendingChoice replay compatibility marker stability", () => {
   it("keeps P3.58 PendingChoice source helpers stable", () => {
     expect(
       isP358HiddenReplacementCompatibilityChoiceSource(
-        "p3_58.fortress_respecification:source:rd:1",
+        "hidden_zone.successful_run_fort_ice_reorder:source:rd:1",
       ),
     ).toBe(true);
     expect(
       isP358FortressRespecificationChoiceSource(
-        "p3_58.fortress_respecification:source:rd:1",
+        "hidden_zone.successful_run_fort_ice_reorder:source:rd:1",
       ),
     ).toBe(true);
     expect(
       isP358SocialEngineeringChoiceSource(
-        "p3_58.social_engineering_guess:source:1",
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:source:1",
       ),
     ).toBe(true);
     expect(
-      isP358NewBloodReorderChoiceSource("p3_58.new_blood_reorder:source:1"),
+      isP358NewBloodReorderChoiceSource("hidden_zone.conceal_and_reorder_installed_ice:source:1"),
     ).toBe(true);
     expect(
       isP358HiddenReplacementCompatibilityChoiceSource("p3_59.future_marker"),

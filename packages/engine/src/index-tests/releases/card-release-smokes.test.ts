@@ -3099,7 +3099,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.cardId === correctEventId,
     );
     expect(correct.pendingChoice?.source).toContain(
-      "p3_58.social_engineering_hide",
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide",
     );
     expect(getPlayerView(correct, "corp").pendingChoice).toBeUndefined();
     correct = applyChoice(correct, "runner", "hide_3");
@@ -3108,7 +3108,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       hiddenZoneBarrier: true,
     });
     expect(correct.pendingChoice?.source).toContain(
-      "p3_58.social_engineering_guess",
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess",
     );
     correct = applyChoice(correct, "corp", "guess_3");
     expect(correct.runner.credits).toBe(1);
@@ -3128,7 +3128,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         secretGuessAmount: 3,
       }),
       targets: expect.objectContaining({
-        socialEngineeringGuessCorrect: true,
+        secretSpendGuessRunGuessCorrect: true,
       }),
     });
 
@@ -3160,7 +3160,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     wrong = applyChoice(wrong, "runner", "hide_3");
     wrong = applyChoice(wrong, "corp", "guess_2");
     expect(wrong.pendingChoice?.source).toContain(
-      "p3_58.social_engineering_target",
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
     expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
     wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
@@ -3170,10 +3170,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_111_social-engineering",
-      socialEngineeringRun: true,
+      secretSpendGuessRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
-        socialEngineeringGuessCorrect: false,
+        secretSpendGuessRunGuessCorrect: false,
         autoPassChosenIce: true,
       }),
     });

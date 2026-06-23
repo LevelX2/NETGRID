@@ -31,7 +31,7 @@ export type HiddenZoneNonSearchChoiceHandlerHost = {
     | "pendingChoice"
     | "stateVersion"
     | "activeSide"
-    | "socialEngineeringSecret"
+    | "secretSpendGuessRunSecret"
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
@@ -104,7 +104,7 @@ export function handleHiddenZoneNonSearchChoice(
   if (source.startsWith("v170.smiths_pawnshop"))
     return resolveSmithsPawnshopChoice(host);
   if (isP358SocialEngineeringChoiceSource(source))
-    return resolveSocialEngineeringChoice(host);
+    return resolveSecretSpendGuessThenTargetedBypassRunChoice(host);
   return { handled: false };
 }
 
@@ -362,7 +362,7 @@ export function startSmithsPawnshopChoice(
   };
 }
 
-export function startSocialEngineeringHideChoice(
+export function startSecretSpendGuessThenTargetedBypassRunHideChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
@@ -371,9 +371,9 @@ export function startSocialEngineeringHideChoice(
   if (maxAmount < 2)
     throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
   host.state.pendingChoice = {
-    choiceId: `p3_58_social_engineering_hide_${host.state.stateVersion + 1}`,
+    choiceId: `secret_spend_guess_then_targeted_bypass_run_hide_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_58.social_engineering_hide:${sourceCardId}:${host.state.stateVersion + 1}`,
+    source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Social Engineering: Credits geheim verstecken.",
     kind: "bid_amount",
     options: Array.from({ length: maxAmount - 1 }, (_, index) => index + 2).map(
@@ -616,7 +616,7 @@ function resolveSmithsPawnshopChoice(
   return { handled: true, stateChanged: false };
 }
 
-function resolveSocialEngineeringChoice(
+function resolveSecretSpendGuessThenTargetedBypassRunChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
@@ -626,11 +626,11 @@ function resolveSocialEngineeringChoice(
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.runAccessPressureEventCardId)
     throw new Error("Die Social-Engineering-Quelle passt nicht zur Karte.");
   const playerAction = requirePlayerAction(host);
-  if (choice.source.startsWith("p3_58.social_engineering_hide:")) {
+  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:")) {
     const hiddenAmount = selectedBidAmount(choice, playerAction);
     if (hiddenAmount < 2 || hiddenAmount > host.state.runner.credits)
       throw new Error("Der Social-Engineering-Betrag ist nicht legal.");
-    host.state.socialEngineeringSecret = {
+    host.state.secretSpendGuessRunSecret = {
       sourceCardId,
       hiddenAmount,
     };
@@ -638,14 +638,14 @@ function resolveSocialEngineeringChoice(
     host.state.activeSide = "corp";
     const payload = {
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,
-      socialEngineeringStep: "runner_hidden_amount_selected",
+      secretSpendGuessRunStep: "runner_hidden_amount_selected",
       hiddenZoneBarrier: true,
     };
     host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
     return { handled: true, stateChanged: true, resolvedPayload: payload };
   }
-  if (choice.source.startsWith("p3_58.social_engineering_guess:")) {
-    const secret = host.state.socialEngineeringSecret;
+  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:")) {
+    const secret = host.state.secretSpendGuessRunSecret;
     if (!secret || secret.sourceCardId !== sourceCardId)
       throw new Error("Social Engineering hat keinen geheimen Betrag.");
     const guess = selectedBidAmount(choice, playerAction);
@@ -655,12 +655,12 @@ function resolveSocialEngineeringChoice(
         0,
         host.state.runner.credits - secret.hiddenAmount,
       );
-      delete host.state.socialEngineeringSecret;
+      delete host.state.secretSpendGuessRunSecret;
       delete host.state.pendingChoice;
       host.state.activeSide = "runner";
       const payload = {
         sourceDefinitionId: host.constants.runAccessPressureEventCardId,
-        socialEngineeringGuessCorrect: true,
+        secretSpendGuessRunGuessCorrect: true,
         secretHiddenAmountRevealed: secret.hiddenAmount,
         secretGuessAmount: guess,
         runnerCreditsAfter: host.state.runner.credits,
@@ -672,7 +672,7 @@ function resolveSocialEngineeringChoice(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,
-      socialEngineeringGuessCorrect: false,
+      secretSpendGuessRunGuessCorrect: false,
       secretHiddenAmountRevealed: secret.hiddenAmount,
       secretGuessAmount: guess,
       hiddenZoneBarrier: true,
@@ -680,7 +680,7 @@ function resolveSocialEngineeringChoice(
     startSocialEngineeringTargetChoice(host, sourceCardId);
     return { handled: true, stateChanged: true };
   }
-  if (choice.source.startsWith("p3_58.social_engineering_target:")) {
+  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:")) {
     const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const option = choice.options.find((candidate) => candidate.id === selectedId);
     const value = typeof option?.value === "string" ? option.value : "";
@@ -691,13 +691,13 @@ function resolveSocialEngineeringChoice(
     const server = host.servers.mustServer(serverId);
     if (!server.ice.includes(iceId))
       throw new Error("Das Social-Engineering-ICE-Ziel ist nicht mehr installiert.");
-    delete host.state.socialEngineeringSecret;
+    delete host.state.secretSpendGuessRunSecret;
     delete host.state.pendingChoice;
     const payload = {
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,
-      socialEngineeringGuessCorrect: false,
+      secretSpendGuessRunGuessCorrect: false,
       autoPassChosenIce: true,
-      socialEngineeringRun: true,
+      secretSpendGuessRun: true,
       hiddenZoneBarrier: true,
       serverId,
       chosenIcePosition: server.ice.indexOf(iceId),
@@ -720,22 +720,22 @@ function startSocialEngineeringTargetChoice(
 ): void {
   const slots = installedIceSlots(host);
   if (slots.length === 0) {
-    delete host.state.socialEngineeringSecret;
+    delete host.state.secretSpendGuessRunSecret;
     delete host.state.pendingChoice;
     host.state.activeSide = "runner";
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,
-      socialEngineeringGuessCorrect: false,
-      socialEngineeringNoIceTarget: true,
+      secretSpendGuessRunGuessCorrect: false,
+      secretSpendGuessRunNoIceTarget: true,
       hiddenZoneBarrier: true,
     };
     return;
   }
   host.state.pendingChoice = {
-    choiceId: `p3_58_social_engineering_target_${host.state.stateVersion + 1}`,
+    choiceId: `secret_spend_guess_then_targeted_bypass_run_target_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_58.social_engineering_target:${sourceCardId}:${host.state.stateVersion + 1}`,
+    source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Social Engineering: Fort und ICE fuer Auto-Pass waehlen.",
     kind: "select_cards",
     options: slots.map((slot) => {
@@ -766,9 +766,9 @@ function socialEngineeringGuessChoice(
 ): ChoiceRequest {
   const maxAmount = Math.max(2, Math.floor(host.state.runner.credits));
   return {
-    choiceId: `p3_58_social_engineering_guess_${host.state.stateVersion + 1}`,
+    choiceId: `secret_spend_guess_then_targeted_bypass_run_guess_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_58.social_engineering_guess:${sourceCardId}:${host.state.stateVersion + 1}`,
+    source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Social Engineering: versteckte Credits raten.",
     kind: "bid_amount",
     options: Array.from({ length: maxAmount + 1 }, (_, amount) => ({

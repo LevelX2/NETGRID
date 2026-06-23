@@ -680,7 +680,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       (action) => action.actionId === exposeAction.actionId,
     );
     expect(exposeState.pendingChoice?.source).toContain(
-      "p3_58.fortress_respecification",
+      "hidden_zone.successful_run_fort_ice_reorder",
     );
     exposeState = applyChoices(exposeState, "runner", [
       `card_${secondIceId}`,
@@ -688,7 +688,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     ]);
     expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      hiddenZoneAction: "successful_run_fort_ice_reorder",
       amounts: expect.objectContaining({ reorderedIceCount: 2 }),
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });

@@ -1113,8 +1113,8 @@ export function publicContextForAction(
     context.discardedCardsCount = legalAction.payload.discardedCardsCount;
   if (typeof legalAction.payload?.runnerTagsAfter === "number")
     context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
-  if (legalAction.payload?.socialEngineeringRun === true)
-    context.socialEngineeringRun = true;
+  if (legalAction.payload?.secretSpendGuessRun === true)
+    context.secretSpendGuessRun = true;
   // Hosted-credit and counter values copied below are public summaries already
   // produced by execution. Keep this list as presentation wiring, not as a
   // general counter-engine policy layer.

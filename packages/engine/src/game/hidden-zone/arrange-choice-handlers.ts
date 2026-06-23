@@ -106,9 +106,9 @@ export function handleHiddenZoneArrangeChoice(
   )
     return resolveRunnerStackTop5Choice(host);
   if (isP358FortressRespecificationChoiceSource(source))
-    return resolveFortressRespecificationReorderChoice(host);
+    return resolveSuccessfulRunFortIceReorderChoice(host);
   if (isP358NewBloodReorderChoiceSource(source))
-    return resolveNewBloodReorderChoice(host);
+    return resolveConcealAndReorderInstalledIceChoice(host);
   return { handled: false };
 }
 
@@ -339,7 +339,7 @@ export function startCorpRdTopReorderChoice(
   };
 }
 
-export function startFortressRespecificationReorderChoice(
+export function startSuccessfulRunFortIceReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: string,
 ): void {
@@ -357,7 +357,7 @@ export function startFortressRespecificationReorderChoice(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      hiddenZoneAction: "successful_run_fort_ice_reorder",
       serverId,
       reorderedIceCount: server.ice.length,
       concealedIceCount: concealedIceCountForCardIds(host, server.ice),
@@ -365,9 +365,9 @@ export function startFortressRespecificationReorderChoice(
     return;
   }
   host.state.pendingChoice = {
-    choiceId: `p3_58_fortress_respecification_${host.state.stateVersion + 1}`,
+    choiceId: `successful_run_fort_ice_reorder_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_58.fortress_respecification:${sourceCardId}:${serverId}:${host.state.stateVersion + 1}`,
+    source: `hidden_zone.successful_run_fort_ice_reorder:${sourceCardId}:${serverId}:${host.state.stateVersion + 1}`,
     prompt: "ICE auf dem letzten erfolgreichen Fort neu anordnen.",
     kind: "select_cards",
     options: server.ice.map((cardId, index) => {
@@ -387,7 +387,7 @@ export function startFortressRespecificationReorderChoice(
   };
 }
 
-export function resolveNewBloodConcealAndReorder(
+export function resolveConcealAndReorderInstalledIce(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): void {
   let concealedCount = 0;
@@ -403,7 +403,7 @@ export function resolveNewBloodConcealAndReorder(
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      hiddenZoneAction: "conceal_and_reorder_installed_ice",
       concealedIceCount: concealedCount,
       reorderedIceCount: slots.length,
     };
@@ -412,9 +412,9 @@ export function resolveNewBloodConcealAndReorder(
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const sourceCardId = String(host.legalAction.payload?.cardId ?? "");
   host.state.pendingChoice = {
-    choiceId: `p3_58_new_blood_reorder_${host.state.stateVersion + 1}`,
+    choiceId: `conceal_and_reorder_installed_ice_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_58.new_blood_reorder:${sourceCardId}:${host.state.stateVersion + 1}`,
+    source: `hidden_zone.conceal_and_reorder_installed_ice:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Installierte ICE neu anordnen.",
     kind: "select_cards",
     options: slots.map((slot) => {
@@ -436,7 +436,7 @@ export function resolveNewBloodConcealAndReorder(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+    hiddenZoneAction: "conceal_and_reorder_installed_ice",
     concealedIceCount: concealedCount,
     reorderedIceCount: slots.length,
   };
@@ -646,7 +646,7 @@ function resolveCorpRdTopReorderChoice(
   return resolvedCorpRdResult(host, selectedIds);
 }
 
-function resolveFortressRespecificationReorderChoice(
+function resolveSuccessfulRunFortIceReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
   const choice = requireChoice(
@@ -659,7 +659,7 @@ function resolveFortressRespecificationReorderChoice(
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (
     host.cards.hiddenReplacementLongtailKind(sourceDefinition.id) !==
-    "fortress_respecification_ice_reorder"
+    "successful_run_fort_ice_reorder"
   )
     throw new Error("Die Fortress-Respecification-Quelle passt nicht zur Karte.");
   const server = host.servers.mustServer(serverId);
@@ -682,7 +682,7 @@ function resolveFortressRespecificationReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+    hiddenZoneAction: "successful_run_fort_ice_reorder",
     sourceDefinitionId: sourceDefinition.id,
     serverId: server.id,
     reorderedIceCount: selectedIds.length,
@@ -698,7 +698,7 @@ function resolveFortressRespecificationReorderChoice(
   };
 }
 
-function resolveNewBloodReorderChoice(
+function resolveConcealAndReorderInstalledIceChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
   const choice = requireChoice(host, "Es ist keine New-Blood-Reorder-Choice offen.");
@@ -708,7 +708,7 @@ function resolveNewBloodReorderChoice(
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (
     host.cards.hiddenReplacementLongtailKind(sourceDefinition.id) !==
-    "new_blood_conceal_reorder_installed_ice"
+    "conceal_and_reorder_installed_ice"
   )
     throw new Error("Die New-Blood-Quelle passt nicht zur Karte.");
   const slots = installedIceSlots(host);
@@ -733,7 +733,7 @@ function resolveNewBloodReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+    hiddenZoneAction: "conceal_and_reorder_installed_ice",
     sourceDefinitionId: sourceDefinition.id,
     reorderedIceCount: selectedIds.length,
     concealedIceCount: concealedIceCountForCardIds(host, selectedIds),
