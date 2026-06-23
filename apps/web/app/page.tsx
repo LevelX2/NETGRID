@@ -256,7 +256,6 @@ import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSe
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
-import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadCurrentTabSession,
@@ -430,6 +429,12 @@ import {
   cardWithoutDevelopmentCounters,
   neededDevelopmentLabel
 } from "../features/cards/card-detail-lines";
+import {
+  ScoreCardStateBadges,
+  ScoredAgendaStateLines,
+  scoreCardStateBadges,
+  type ScoredAgendaStateLine
+} from "../features/cards/ScoredAgendaState";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { SimulationResult, type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
@@ -12077,56 +12082,6 @@ function CardView({
       ) : null}
       {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} actionLabelForAction={actionLabelForAction} onAction={onAction!} /> : null}
     </div>
-  );
-}
-
-type ScoredAgendaStateTone = "credit" | "agenda" | "action" | "effect" | "depleted";
-
-type ScoredAgendaStateLine = {
-  key: string;
-  value: string;
-  label: string;
-  tone: ScoredAgendaStateTone;
-};
-
-function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
-  const lines = scoredAgendaStateLines(card, side);
-  if (lines.length === 0) return null;
-  return (
-    <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
-      {lines.map((line) => (
-        <p className="scoredAgendaStateLine" key={`${card.instanceId}-${line.key}`}>
-          <span className={`scoredAgendaStatePill ${line.tone}`}>{line.value}</span>
-          <span>{line.label}</span>
-        </p>
-      ))}
-    </div>
-  );
-}
-
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
-  const lines: ScoredAgendaStateLine[] = [];
-  const effectLine = scoredAgendaEffectLineForScoreArea(card, side);
-  if (effectLine) lines.push(effectLine);
-  return lines;
-}
-
-function scoreCardStateBadges(card: DisplayVisibleCard, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
-  const badges: ScoredAgendaStateLine[] = [];
-  const researchDifficultyLine = researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards);
-  if (researchDifficultyLine) badges.push(researchDifficultyLine);
-  return badges;
-}
-
-function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
-  return (
-    <span className="scoreCardStateBadges" aria-hidden="true">
-      {badges.map((badge) => (
-        <span className={`scoreCardStateBadge ${badge.tone}`} key={badge.key}>
-          {badge.value}
-        </span>
-      ))}
-    </span>
   );
 }
 
