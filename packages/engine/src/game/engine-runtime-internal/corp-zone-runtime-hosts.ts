@@ -130,7 +130,7 @@ export function createCorpZoneRuntimeHosts(
     shouldLoadLegacyRecurringCredits,
     shuffleRunnerStackAndRefreshZones,
     shuffleStateIds,
-    sneakPreviewInstallableProgramIds,
+    temporaryProgramInstallableProgramIds,
     spendCardCounter,
     spendCredits,
     spendRunnerInstallCredits,

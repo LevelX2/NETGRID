@@ -210,7 +210,7 @@ function host(
       installRunnerProgramForFree: (cardId) =>
         overrides.installForFree?.(cardId) ?? cardId,
       searchStackInstallTargets: () => runner.stack,
-      sneakPreviewInstallableProgramIds: (sourceZone) =>
+      temporaryProgramInstallableProgramIds: (sourceZone) =>
         sourceZone === "heap" ? runner.heap : runner.stack,
       lookTopStackShowToCorpThenInstallMatchingTargets: () => runner.stack,
     },

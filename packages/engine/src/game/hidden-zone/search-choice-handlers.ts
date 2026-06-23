@@ -109,7 +109,7 @@ export type HiddenZoneSearchChoiceHandlerHost = {
       filter: "program",
       installCost: SearchInstallCost,
     ) => CardInstanceId[];
-    sneakPreviewInstallableProgramIds: (
+    temporaryProgramInstallableProgramIds: (
       sourceZone: SearchInstallSourceZone,
     ) => CardInstanceId[];
     lookTopStackShowToCorpThenInstallMatchingTargets: (
@@ -558,7 +558,7 @@ function handleSneakPreviewProgramChoice(
     choice,
     selectedCardId,
     legalTargetIdsForSourceZone: (sourceZone) =>
-      host.install.sneakPreviewInstallableProgramIds(sourceZone),
+      host.install.temporaryProgramInstallableProgramIds(sourceZone),
     selectedCardDefinition: selectedDefinition,
     defaultSourceDefinitionId: host.constants.sneakPreviewId,
   });
@@ -608,7 +608,7 @@ function startSneakPreviewProgramChoice(
     input.sourceZone === "heap"
       ? host.state.runner.heap.slice().sort()
       : host.state.runner.stack;
-  const targets = host.install.sneakPreviewInstallableProgramIds(input.sourceZone);
+  const targets = host.install.temporaryProgramInstallableProgramIds(input.sourceZone);
   const options = sourceCards.map((cardId) => {
     const definition = host.cards.definitionFor(cardId);
     const selectable = targets.includes(cardId);

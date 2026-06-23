@@ -129,7 +129,7 @@ export function createHiddenZoneSearchRuntime(
     shouldLoadLegacyRecurringCredits,
     shuffleRunnerStackAndRefreshZones,
     shuffleStateIds,
-    sneakPreviewInstallableProgramIds,
+    temporaryProgramInstallableProgramIds,
     spendCardCounter,
     spendCredits,
     spendRunnerInstallCredits,
@@ -288,8 +288,8 @@ export function createHiddenZoneSearchRuntime(
             filter,
             installCost,
           ),
-        sneakPreviewInstallableProgramIds: (sourceZone) =>
-          sneakPreviewInstallableProgramIds(
+        temporaryProgramInstallableProgramIds: (sourceZone) =>
+          temporaryProgramInstallableProgramIds(
             hiddenZoneSearchActivationTargetHost(state),
             sourceZone,
           ),

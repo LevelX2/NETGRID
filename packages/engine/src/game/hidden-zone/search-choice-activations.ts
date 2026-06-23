@@ -342,7 +342,7 @@ export function startStackOrTrashProgramInstallActivation(
     input.returnInstalledCardToGripAtEndOfTurn !== true
   )
     throw new Error("Diese Programminstallation ist nicht unterstuetzt.");
-  startSneakPreviewSourceActivation(host, {
+  startTemporaryProgramInstallSourceActivation(host, {
     sourcePrefix: "p3_38.stack_or_trash_program_install",
     sourceCardId: input.sourceCardId,
     sourceDefinitionId: input.sourceDefinitionId,
@@ -522,7 +522,7 @@ export function startHiddenStackProgramInstallActivation(
   });
 }
 
-export function sneakPreviewInstallableProgramIds(
+export function temporaryProgramInstallableProgramIds(
   host: HiddenZoneSearchActivationBaseHost,
   zone: SearchInstallSourceZone,
 ): CardInstanceId[] {
@@ -541,18 +541,18 @@ export function sneakPreviewInstallableProgramIds(
   });
 }
 
-export function sneakPreviewSourceOptions(
+export function temporaryProgramInstallSourceOptions(
   host: HiddenZoneSearchActivationBaseHost,
 ): ChoiceRequest["options"] {
   const options: ChoiceRequest["options"] = [];
-  if (sneakPreviewInstallableProgramIds(host, "heap").length > 0)
+  if (temporaryProgramInstallableProgramIds(host, "heap").length > 0)
     options.push({ id: "source_heap", label: "Heap", value: "heap" });
-  if (sneakPreviewInstallableProgramIds(host, "stack").length > 0)
+  if (temporaryProgramInstallableProgramIds(host, "stack").length > 0)
     options.push({ id: "source_stack", label: "Stack", value: "stack" });
   return options;
 }
 
-export function startSneakPreviewSourceActivation(
+export function startTemporaryProgramInstallSourceActivation(
   host: HiddenZoneSearchActivationHost,
   input: {
     sourcePrefix?: string;
@@ -562,7 +562,7 @@ export function startSneakPreviewSourceActivation(
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  const options = sneakPreviewSourceOptions(host);
+  const options = temporaryProgramInstallSourceOptions(host);
   if (options.length === 0)
     throw new Error(
       "Sneak Preview findet kein legal installierbares Programm.",

@@ -260,12 +260,12 @@ import {
 import {
   lookTopStackShowToCorpThenInstallMatchingTargets,
   searchStackInstallTargets,
-  sneakPreviewInstallableProgramIds,
-  sneakPreviewSourceOptions,
+  temporaryProgramInstallableProgramIds,
+  temporaryProgramInstallSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
   startHiddenStackProgramInstallActivation,
-  startSneakPreviewSourceActivation,
+  startTemporaryProgramInstallSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {
   handleHiddenZoneSearchChoice,
@@ -1065,10 +1065,10 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   [SNEAK_PREVIEW_ID]: {
     name: "onr_v1911_runner_event_sneak_preview_temporary_program_install",
     canPlay: (state) =>
-      sneakPreviewSourceOptions(hiddenZoneSearchActivationTargetHost(state))
+      temporaryProgramInstallSourceOptions(hiddenZoneSearchActivationTargetHost(state))
         .length > 0,
     resolve: (state, legalAction) => {
-      startSneakPreviewSourceActivation(
+      startTemporaryProgramInstallSourceActivation(
         hiddenZoneSearchActivationHandlerHost(state, legalAction),
       );
       legalAction.payload = {

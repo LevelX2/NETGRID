@@ -10,13 +10,13 @@ import {
   searchStackInstallTargets,
   searchStackToGripTargets,
   searchTrashToGripTargets,
-  sneakPreviewSourceOptions,
+  temporaryProgramInstallSourceOptions,
   startLookTopStackShowToCorpThenInstallMatchingActivation,
   startLookTopStackTakeMatchingActivation,
   startSearchStackInstallActivation,
   startSearchStackToGripActivation,
   startSearchTrashToGripActivation,
-  startSneakPreviewSourceActivation,
+  startTemporaryProgramInstallSourceActivation,
   type HiddenZoneSearchActivationHost,
 } from "./search-choice-activations";
 
@@ -285,9 +285,9 @@ describe("hidden-zone search choice activations", () => {
     });
 
     expect(
-      sneakPreviewSourceOptions(host).map((option) => option.value),
+      temporaryProgramInstallSourceOptions(host).map((option) => option.value),
     ).toEqual(["heap", "stack"]);
-    startSneakPreviewSourceActivation(host);
+    startTemporaryProgramInstallSourceActivation(host);
 
     expect(host.state.pendingChoice?.choiceId).toBe(
       "v1911_sneak_preview_source_11",
