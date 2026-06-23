@@ -273,13 +273,13 @@ export function approachOrEncounterIce(
   const run = mustRun(state);
   const ice = host.cards.cardInstanceFor(approachedIceId);
   run.approachedIceId = approachedIceId;
-  if (run.socialEngineeringAutoPassIceId === approachedIceId) {
-    delete run.socialEngineeringAutoPassIceId;
+  if (run.secretSpendGuessRunAutoPassIceId === approachedIceId) {
+    delete run.secretSpendGuessRunAutoPassIceId;
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         autoPassChosenIce: true,
-        socialEngineeringAutoPassedIce: true,
+        secretSpendGuessRunAutoPassedIce: true,
       };
     }
     return movePastCurrentIce(host);

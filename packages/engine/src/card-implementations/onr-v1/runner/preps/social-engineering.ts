@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const socialEngineeringImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_111_social-engineering",
   hiddenReplacementLongtail: {
-    kind: "social_engineering_secret_guess_run",
+    kind: "secret_spend_guess_then_targeted_bypass_run",
     visibility: "hidden_info_barrier",
   },
 };

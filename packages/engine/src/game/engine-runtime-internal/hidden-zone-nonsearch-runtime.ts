@@ -254,7 +254,7 @@ export function createHiddenZoneNonSearchRuntime(
             serverId,
             undefined,
             1,
-            { socialEngineeringAutoPassIceId: iceId },
+            { secretSpendGuessRunAutoPassIceId: iceId },
             legalAction,
           ),
       },

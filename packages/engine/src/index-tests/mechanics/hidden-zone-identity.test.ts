@@ -974,7 +974,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice?.source).toContain("p3_58.fortress_respecification");
+    expect(state.pendingChoice?.source).toContain("hidden_zone.successful_run_fort_ice_reorder");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.label)).toEqual([
       "ICE Position 1",
@@ -990,7 +990,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.cardInstances[secondIceId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      hiddenZoneAction: "successful_run_fort_ice_reorder",
       amounts: expect.objectContaining({ reorderedIceCount: 2 }),
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });

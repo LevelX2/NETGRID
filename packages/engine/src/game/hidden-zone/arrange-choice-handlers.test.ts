@@ -13,9 +13,9 @@ import { describe, expect, it } from "vitest";
 import {
   handleHiddenZoneArrangeChoice,
   moveTopTrashToGripForCardImplementation,
-  resolveNewBloodConcealAndReorder,
+  resolveConcealAndReorderInstalledIce,
   startCorpRdTopReorderChoice,
-  startFortressRespecificationReorderChoice,
+  startSuccessfulRunFortIceReorderChoice,
   type HiddenZoneArrangeChoiceHandlerHost,
 } from "./arrange-choice-handlers";
 
@@ -264,14 +264,14 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       servers: [server],
       definitions: { [source]: definition("fortress_def", "event", "Fortress") },
-      hiddenKinds: { fortress_def: "fortress_respecification_ice_reorder" },
+      hiddenKinds: { fortress_def: "successful_run_fort_ice_reorder" },
       instances: {
         [ice1]: { ...instance("ice_1_def"), faceup: false, rezzed: false },
         [ice2]: { ...instance("ice_2_def"), faceup: true, rezzed: true },
       },
     });
 
-    startFortressRespecificationReorderChoice(host, source);
+    startSuccessfulRunFortIceReorderChoice(host, source);
     expect(host.state.pendingChoice?.options[0]).toMatchObject({
       label: "ICE Position 1",
       publicLabel: "ICE Position 1",
@@ -282,7 +282,7 @@ describe("hidden-zone arrange choice handlers", () => {
     expect(result.handled).toBe(true);
     expect(server.ice).toEqual([ice2, ice1]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      hiddenZoneAction: "successful_run_fort_ice_reorder",
       hiddenOrderChoice: true,
       concealedIceCount: 1,
     });
@@ -302,7 +302,7 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       servers: [server],
       definitions: { [source]: definition("new_blood_def", "operation", "New Blood") },
-      hiddenKinds: { new_blood_def: "new_blood_conceal_reorder_installed_ice" },
+      hiddenKinds: { new_blood_def: "conceal_and_reorder_installed_ice" },
       legalAction: {
         side: "corp",
         payload: { cardId: source },
@@ -313,16 +313,16 @@ describe("hidden-zone arrange choice handlers", () => {
       },
     });
 
-    resolveNewBloodConcealAndReorder(host);
+    resolveConcealAndReorderInstalledIce(host);
     expect(host.state.cardInstances[ice1]?.faceup).toBe(false);
-    expect(host.state.pendingChoice?.choiceId).toBe("p3_58_new_blood_reorder_8");
+    expect(host.state.pendingChoice?.choiceId).toBe("conceal_and_reorder_installed_ice_8");
     host.playerAction = playerAction([`card_${ice2}`, `card_${ice1}`]);
     const result = handleHiddenZoneArrangeChoice(host);
 
     expect(result.handled).toBe(true);
     expect(server.ice).toEqual([ice2, ice1]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      hiddenZoneAction: "conceal_and_reorder_installed_ice",
       hiddenOrderChoice: true,
       concealedIceCount: 1,
     });

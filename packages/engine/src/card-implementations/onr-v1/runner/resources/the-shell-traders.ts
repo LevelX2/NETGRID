@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const theShellTradersImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_176_the-shell-traders",
   hiddenReplacementLongtail: {
-    kind: "shell_traders_delayed_install",
+    kind: "delayed_install_with_counter_countdown",
     visibility: "hidden_info_barrier",
   },
 };

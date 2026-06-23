@@ -23,6 +23,11 @@ import type {
   CardEffectImplementation,
   CardTraceSuccessEffectImplementation,
 } from "./definition-types";
+import { executeCreditEffect } from "./effect-families/credit-effects";
+import { executeDamageEffect } from "./effect-families/damage-effects";
+import { executeDrawEffect } from "./effect-families/draw-effects";
+import type { CardEffectFamilyRuntime } from "./effect-families/family-runtime";
+import { executeTagEffect } from "./effect-families/tag-effects";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
@@ -478,62 +483,43 @@ export function executeCardImplementationEffects(
 ): CardEffectExecutionResult {
   const publicPayload: Record<string, string | number | boolean> = {};
   const resolvedEffects: ResolvedGameEffect[] = [];
+  const familyRuntime: CardEffectFamilyRuntime = {
+    recipientSide,
+    gainCredits,
+    creditsForSide,
+    loseCredits,
+    spendCreditsIfAvailable,
+    loseGame,
+    addRunnerTags,
+    publicEffectId,
+    effectReason,
+    assertPositiveIntegerAmount,
+    assertPublicVisibility,
+    mergePublicPayload,
+  };
 
   effects.forEach((effect, index) => {
+    const familyInput = {
+      state,
+      context,
+      effect,
+      index,
+      publicPayload,
+      resolvedEffects,
+      runtime: familyRuntime,
+    };
+
+    // The dispatcher preserves effect order. New reusable effect behavior should
+    // live in a focused family module instead of extending this switch forever.
+    if (
+      executeCreditEffect(familyInput) ||
+      executeDrawEffect(familyInput) ||
+      executeTagEffect(familyInput) ||
+      executeDamageEffect(familyInput)
+    )
+      return;
+
     switch (effect.kind) {
-      case "gain_credits": {
-        assertPositiveIntegerAmount("gain_credits", effect.amount);
-        const side = recipientSide(context, effect.recipient);
-        gainCredits(state, side, effect.amount);
-        publicPayload.gainedCredits =
-          Number(publicPayload.gainedCredits ?? 0) + effect.amount;
-        publicPayload[
-          side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
-        ] = side === "corp" ? state.corp.credits : state.runner.credits;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "gain_credits"),
-          kind: "gain_credits",
-          visibility: effect.visibility,
-          side,
-          amount: effect.amount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "gain_credits_for_runner_trash_history": {
-        assertPublicVisibility("gain_credits_for_runner_trash_history", effect.visibility);
-        const amount =
-          state.runnerTurnFlags?.trashedAdvertisementThisTurn === true
-            ? effect.advertisementAmount
-            : state.runnerTurnFlags?.trashedTransactionsThisTurn === true
-              ? effect.transactionsAmount
-              : 0;
-        assertPositiveIntegerAmount(
-          "gain_credits_for_runner_trash_history",
-          amount,
-        );
-        gainCredits(state, context.controller, amount);
-        publicPayload.gainedCredits =
-          Number(publicPayload.gainedCredits ?? 0) + amount;
-        publicPayload.runnerCreditsAfter = state.runner.credits;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "gain_credits"),
-          kind: "gain_credits",
-          visibility: effect.visibility,
-          side: context.controller,
-          amount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
       case "add_bad_publicity": {
         assertPositiveIntegerAmount("add_bad_publicity", effect.amount);
         assertPublicVisibility("add_bad_publicity", effect.visibility);
@@ -608,175 +594,6 @@ export function executeCardImplementationEffects(
           side: "corp",
           amount,
           reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "gain_credits_per_advancement_counter_on_source": {
-        assertPositiveIntegerAmount(
-          "gain_credits_per_advancement_counter_on_source",
-          effect.amountPerCounter,
-        );
-        assertPublicVisibility(
-          "gain_credits_per_advancement_counter_on_source",
-          effect.visibility,
-        );
-        const source = state.cardInstances[context.sourceCardId];
-        if (!source)
-          throw new Error(
-            "gain_credits_per_advancement_counter_on_source source is missing.",
-          );
-        const advancementCounterCount = Math.max(
-          0,
-          Math.floor(source.advancementCounters),
-        );
-        const amount = advancementCounterCount * effect.amountPerCounter;
-        const side = recipientSide(context, effect.recipient);
-        gainCredits(state, side, amount);
-        publicPayload.advancementCounterCount = advancementCounterCount;
-        publicPayload.gainedCredits =
-          Number(publicPayload.gainedCredits ?? 0) + amount;
-        publicPayload[
-          side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
-        ] = side === "corp" ? state.corp.credits : state.runner.credits;
-        resolvedEffects.push({
-          effectId: publicEffectId(
-            context,
-            index,
-            "gain_credits_per_advancement_counter_on_source",
-          ),
-          kind: "gain_credits",
-          visibility: effect.visibility,
-          side,
-          amount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "draw_cards": {
-        assertPositiveIntegerAmount("draw_cards", effect.amount);
-        assertPublicVisibility("draw_cards", effect.visibility);
-        if (!context.drawCards)
-          throw new Error(
-            "draw_cards effect requires a drawCards execution context.",
-          );
-        const side = recipientSide(context, effect.recipient);
-        const drawResult = context.drawCards(side, effect.amount);
-        mergePublicPayload(publicPayload, drawResult.publicPayload);
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "draw_cards"),
-          kind: "draw_cards",
-          visibility: effect.visibility,
-          side,
-          amount: drawResult.drawnCount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "lose_credits": {
-        assertPublicVisibility("lose_credits", effect.visibility);
-        const mode = effect.mode ?? "amount";
-        if (mode !== "amount" && mode !== "all")
-          throw new Error("lose_credits effect mode must be amount or all.");
-        if (mode === "amount") {
-          if (effect.amount === undefined)
-            throw new Error("lose_credits amount mode requires an amount.");
-          assertPositiveIntegerAmount("lose_credits", effect.amount);
-        }
-        const side = recipientSide(context, effect.recipient);
-        const amountToLose =
-          mode === "all"
-            ? creditsForSide(state, side)
-            : Math.min(creditsForSide(state, side), effect.amount ?? 0);
-        loseCredits(state, side, amountToLose);
-        publicPayload.creditsLost =
-          Number(publicPayload.creditsLost ?? 0) + amountToLose;
-        publicPayload[
-          side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
-        ] = creditsForSide(state, side);
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "lose_credits"),
-          kind: "lose_credits",
-          visibility: effect.visibility,
-          side,
-          amount: amountToLose,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "pay_credits_or_lose_game": {
-        assertPositiveIntegerAmount(
-          "pay_credits_or_lose_game",
-          effect.amount,
-        );
-        assertPublicVisibility("pay_credits_or_lose_game", effect.visibility);
-        if (effect.reason !== "source_left_play")
-          throw new Error(
-            "pay_credits_or_lose_game reason must be source_left_play.",
-          );
-        const payer = recipientSide(context, effect.payer);
-        const loseSide = recipientSide(context, effect.loseSide);
-        const paid = spendCreditsIfAvailable(state, payer, effect.amount);
-        const winner = paid ? undefined : loseGame(state, loseSide);
-        publicPayload.creditsPaid =
-          Number(publicPayload.creditsPaid ?? 0) + (paid ? effect.amount : 0);
-        publicPayload.payCreditsOrLoseGameAmount = effect.amount;
-        publicPayload.payCreditsOrLoseGamePaid = paid;
-        publicPayload[payer === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"] =
-          creditsForSide(state, payer);
-        if (!paid) {
-          publicPayload.gameLost = true;
-          publicPayload.winner = winner ?? "";
-        }
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "pay_credits_or_lose_game"),
-          kind: "pay_credits_or_lose_game",
-          visibility: effect.visibility,
-          side: payer,
-          amount: effect.amount,
-          paidCredits: paid ? effect.amount : 0,
-          gameLost: !paid,
-          ...(winner ? { winner } : {}),
-          reason: effect.reason,
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "add_tags": {
-        assertPositiveIntegerAmount("add_tags", effect.amount);
-        assertPublicVisibility("add_tags", effect.visibility);
-        if ((effect as { recipient?: string }).recipient !== "runner")
-          throw new Error("add_tags effect recipient must be runner.");
-        addRunnerTags(state, effect.amount);
-        publicPayload.tagsAdded =
-          Number(publicPayload.tagsAdded ?? 0) + effect.amount;
-        publicPayload.runnerTagsAfter = state.runner.tags;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "add_tags"),
-          kind: "add_tags",
-          visibility: effect.visibility,
-          side: "runner",
-          amount: effect.amount,
-          reason: effectReason(context),
-          runnerTagsAfter: state.runner.tags,
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -872,59 +689,6 @@ export function executeCardImplementationEffects(
         );
         return;
       }
-      case "remove_tags": {
-        assertPublicVisibility("remove_tags", effect.visibility);
-        if (effect.recipient !== "runner")
-          throw new Error("remove_tags effect recipient must be runner.");
-        if (effect.mode !== "amount" && effect.mode !== "up_to_amount" && effect.mode !== "all")
-          throw new Error("remove_tags effect mode is invalid.");
-        if (effect.mode !== "all") {
-          if (effect.amount === undefined)
-            throw new Error("remove_tags amount modes require an amount.");
-          assertPositiveIntegerAmount("remove_tags", effect.amount);
-        }
-        if (!context.removeRunnerTags)
-          throw new Error(
-            "remove_tags effect requires a removeRunnerTags execution context.",
-          );
-        const removeResult = context.removeRunnerTags(
-          effect.mode,
-          effect.amount,
-        );
-        publicPayload.removedTags =
-          Number(publicPayload.removedTags ?? 0) + removeResult.removedTags;
-        publicPayload.runnerTagsAfter = removeResult.runnerTagsAfter;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "remove_tags"),
-          kind: "remove_tags",
-          visibility: effect.visibility,
-          side: "runner",
-          amount: removeResult.removedTags,
-          reason: effectReason(context),
-          runnerTagsAfter: removeResult.runnerTagsAfter,
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "avoid_next_tag": {
-        assertPublicVisibility("avoid_next_tag", effect.visibility);
-        if (effect.recipient !== "runner")
-          throw new Error("avoid_next_tag effect recipient must be runner.");
-        if (effect.amount !== 1)
-          throw new Error("avoid_next_tag supports only amount 1.");
-        if (!context.avoidNextTag)
-          throw new Error(
-            "avoid_next_tag effect requires an avoidNextTag execution context.",
-          );
-        const avoidResult = context.avoidNextTag(effect.amount);
-        mergePublicPayload(publicPayload, avoidResult.publicPayload);
-        publicPayload.preventedTagsNext =
-          Number(publicPayload.preventedTagsNext ?? 0) + avoidResult.amount;
-        return;
-      }
       case "return_source_to_grip_if_paid": {
         assertPublicVisibility(
           "return_source_to_grip_if_paid",
@@ -975,53 +739,6 @@ export function executeCardImplementationEffects(
           counterType: addResult.counterType,
           addedCounterAmount: addResult.amount,
           remainingCounters: addResult.countersAfter,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "damage": {
-        assertPositiveIntegerAmount("damage", effect.amount);
-        assertPublicVisibility("damage", effect.visibility);
-        if ((effect as { recipient?: string }).recipient !== "runner")
-          throw new Error("damage effect recipient must be runner.");
-        if (
-          !["meat", "net", "core"].includes(
-            (effect as { damageType?: string }).damageType ?? "",
-          )
-        )
-          throw new Error("damage effect damageType must be meat, net, or core.");
-        const preventable = (effect as { preventable?: boolean }).preventable;
-        if (preventable !== true && preventable !== false)
-          throw new Error("damage effect preventable must be true or false.");
-        const damageRunner =
-          preventable === true
-            ? context.damageRunner
-            : context.unpreventableDamageRunner;
-        if (!damageRunner)
-          throw new Error(
-            preventable === true
-              ? "damage effect requires a damageRunner execution context."
-              : "unpreventable damage effect requires an unpreventableDamageRunner execution context.",
-          );
-        const damageResult = damageRunner(
-          effect.damageType,
-          effect.amount,
-        );
-        mergePublicPayload(publicPayload, damageResult.publicPayload);
-        if (!damageResult.resolved) return;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "damage"),
-          kind: "damage",
-          visibility: effect.visibility,
-          side: "runner",
-          amount: damageResult.amount,
-          damageType: damageResult.damageType,
-          cardsTrashed: damageResult.cardsTrashed,
-          preventable,
           reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }

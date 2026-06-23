@@ -198,7 +198,7 @@ function hostFor(
         calls.push(`archivesToHq:${sourceCardId}`),
       startCorpRdTopReorderChoice: (_legalAction, sourceCardId) =>
         calls.push(`rdReorder:${sourceCardId}`),
-      resolveNewBloodConcealAndReorder: () => calls.push("newBlood"),
+      resolveConcealAndReorderInstalledIce: () => calls.push("newBlood"),
     },
     board: {
       installedAgendaOperationTarget: () => RESOURCE_ID,

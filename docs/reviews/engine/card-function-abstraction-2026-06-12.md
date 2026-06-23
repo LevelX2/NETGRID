@@ -14,27 +14,15 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| functional_kind_uses_card_name | 14 |
-| test_only_card_name | 52 |
+| test_only_card_name | 46 |
 | allowed_catalog_reference | 43 |
-| runtime_state_field_uses_card_name | 37 |
+| runtime_state_field_uses_card_name | 7 |
 | mechanics_constant_controls_behavior_by_card_id | 31 |
 | false_positive | 22 |
+| functional_kind_uses_card_name | 2 |
 
 ## Problemstellen
 
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:81` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:104` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:204` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:208` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:212` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- functional_kind_uses_card_name: `packages/engine/src/ability-engine/definition-types.ts:216` Shell Traders / `shell_traders` -> `delayed_install_sequence`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts:8` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts:8` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts:8` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/fortress-respecification.ts:8` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts:8` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- functional_kind_uses_card_name: `packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts:8` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:214` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/abilities/runner-special-trigger-execution.ts:351` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -46,9 +34,6 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts:659` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1560` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1562` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts:1576` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/card-strength-cost-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts:643` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
@@ -71,40 +56,13 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:620` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:944` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:649` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1178` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1184` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts:1188` Omniscience Foundation / `omniscience_foundation` -> `end_turn_tag_on_successful_run_condition`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts:639` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:360` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:368` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:370` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:406` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:415` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:417` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:439` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:662` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:685` Fortress Respecification / `fortress_respecification` -> `ice_reorder_hidden_zone_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:711` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/arrange-choice-handlers.ts:736` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:374` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:376` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:629` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:647` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:683` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:736` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:738` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:769` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts:771` Social Engineering / `social_engineering` -> `secret_guess_run_effect`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:433` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:543` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:553` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:757` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
-- runtime_state_field_uses_card_name: `packages/engine/src/game/play/corp-operation-resolution.ts:759` New Blood / `new_blood` -> `conceal_reorder_installed_ice`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/asset-node-effects.ts:7` Disinfectant / `disinfectant` -> `counter_prevention_replacement`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:5` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - runtime_state_field_uses_card_name: `packages/engine/src/mechanics/random-effects.ts:14` Quest for Cattekin / `questForCattekin` -> `persistentModifiers / start_turn_random_effect_table`
 - functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1532` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3708` Shell Traders / `shell_traders` -> `delayed_install_sequence`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3711` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
 ## Abstraktionsplan
 
@@ -127,15 +85,15 @@ Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Ins
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5703 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 5553 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie | Anzahl |
 | --- | ---: |
 | new_unclassified_card_name_leak | 1303 |
 | functional_kind_uses_card_name | 42 |
-| runtime_state_field_uses_card_name | 4250 |
-| resolver_function_uses_card_name | 106 |
+| runtime_state_field_uses_card_name | 4106 |
+| resolver_function_uses_card_name | 100 |
 | payload_key_uses_card_name | 2 |
 
 ## Erlaubte Referenzen
@@ -174,12 +132,12 @@ Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare R
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `siren`
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `Siren`
 - `packages/engine/src/card-implementations/registry.ts:474` Pirate Broadcast / `pirateBroadcast`
-- `packages/engine/src/card-implementations/registry.ts:648` Startup Immolator / `startupImmolator`
-- `packages/engine/src/card-implementations/registry.ts:679` Preying Mantis / `preyingMantis`
-- `packages/engine/src/card-implementations/registry.ts:680` Quest for Cattekin / `questForCattekin`
-- `packages/engine/src/card-implementations/registry.ts:793` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/registry.ts:804` Krumz / `krumz`
-- `packages/engine/src/card-implementations/registry.ts:806` Newsgroup Taunting / `newsgroupTaunting`
-- `packages/engine/src/card-implementations/registry.ts:888` Bizarre Encryption Scheme / `bizarreEncryption`
-- `packages/engine/src/card-implementations/registry.ts:972` Siren / `Siren`
-- `packages/engine/src/card-implementations/registry.ts:1004` Pirate Broadcast / `pirateBroadcast`
+- `packages/engine/src/card-implementations/registry.ts:628` Startup Immolator / `startupImmolator`
+- `packages/engine/src/card-implementations/registry.ts:659` Preying Mantis / `preyingMantis`
+- `packages/engine/src/card-implementations/registry.ts:660` Quest for Cattekin / `questForCattekin`
+- `packages/engine/src/card-implementations/registry.ts:773` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/registry.ts:784` Krumz / `krumz`
+- `packages/engine/src/card-implementations/registry.ts:786` Newsgroup Taunting / `newsgroupTaunting`
+- `packages/engine/src/card-implementations/registry.ts:868` Bizarre Encryption Scheme / `bizarreEncryption`
+- `packages/engine/src/card-implementations/registry.ts:952` Siren / `Siren`
+- `packages/engine/src/card-implementations/registry.ts:984` Pirate Broadcast / `pirateBroadcast`

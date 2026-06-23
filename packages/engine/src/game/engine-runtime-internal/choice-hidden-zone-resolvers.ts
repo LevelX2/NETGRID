@@ -271,11 +271,11 @@ import {
 } from "../hidden-zone/search-choice-handlers";
 import {
   handleHiddenZoneArrangeChoice,
-  resolveNewBloodConcealAndReorder,
+  resolveConcealAndReorderInstalledIce,
   startCorpAssetRdTopReorderChoice,
   startCorpRdArrangeChoice,
   startCorpRdTopReorderChoice,
-  startFortressRespecificationReorderChoice,
+  startSuccessfulRunFortIceReorderChoice,
   startRunnerStackArrangeChoice,
   startRunnerStackTop5Choice,
   type HiddenZoneArrangeChoiceHandlerHost,
@@ -287,7 +287,7 @@ import {
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
   startSmithsPawnshopChoice,
-  startSocialEngineeringHideChoice,
+  startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startSynchronizedAttackOnHqRetainChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
@@ -1014,7 +1014,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     resolveManagementShakeUpOperation,
     resolveMitWestTier,
     resolveMultiBreakSubroutinesAction,
-    resolveOmniscienceFoundationEndTurnTag,
+    resolveEndTurnTagIfRunnerReceivedTag,
     resolveOpenEndedMileageProgramReturnChoice,
     resolveP358HiddenReplacementChoice,
     resolvePlayfulAiDiceLoopEvent,

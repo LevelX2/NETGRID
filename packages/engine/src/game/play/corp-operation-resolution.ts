@@ -106,7 +106,7 @@ export type CorpOperationResolutionHost = {
       legalAction: LegalAction,
       sourceCardId: CardInstanceId,
     ) => void;
-    resolveNewBloodConcealAndReorder: (legalAction: LegalAction) => void;
+    resolveConcealAndReorderInstalledIce: (legalAction: LegalAction) => void;
   };
   board: {
     installedAgendaOperationTarget: () => CardInstanceId | undefined;
@@ -430,7 +430,7 @@ export function canPlayCorpUtilityOperation(
       return host.state.corp.rd.length >= 2;
     case "trojan_horse_tag":
       return host.corp.runnerStoleAgendaLastTurn();
-    case "silver_lining_recovery":
+    case "gain_credits_from_stolen_agenda_advancement_history":
       return host.corp.runnerStoleAgendaLastTurn();
     case "trash_runner_resources_if_tagged":
       return host.state.runner.tags > 0;
@@ -540,7 +540,7 @@ export function resolveCorpUtilityOperation(
       host.damage.addRunnerTagsWithPrevention(legalAction, 1, "trojan_horse");
       return;
     }
-    case "silver_lining_recovery": {
+    case "gain_credits_from_stolen_agenda_advancement_history": {
       if (!host.corp.runnerStoleAgendaLastTurn())
         throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
       const advancementCounters =
@@ -550,7 +550,7 @@ export function resolveCorpUtilityOperation(
       host.economy.gainCorpCredits(gainedCredits);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "silver_lining_recovery",
+        v1951CorpUtilityAbility: "gain_credits_from_stolen_agenda_advancement_history",
         stolenAgendaAdvancementCountersLastTurn: advancementCounters,
         gainedCredits,
         corpCreditsAfter: host.state.corp.credits,
@@ -754,11 +754,11 @@ function cardImplementationCorpOperationResolver(
 ): CorpOperationResolver | undefined {
   const hiddenLongtail = cardImplementationForDefinitionId(definition.id)
     ?.hiddenReplacementLongtail;
-  if (hiddenLongtail?.kind === "new_blood_conceal_reorder_installed_ice") {
+  if (hiddenLongtail?.kind === "conceal_and_reorder_installed_ice") {
     return {
-      name: "card_implementation_corp_operation_new_blood_conceal_reorder_installed_ice",
+      name: "card_implementation_corp_operation_conceal_and_reorder_installed_ice",
       resolve: (_host, legalAction) => {
-        host.hiddenZone.resolveNewBloodConcealAndReorder(legalAction);
+        host.hiddenZone.resolveConcealAndReorderInstalledIce(legalAction);
       },
     };
   }
