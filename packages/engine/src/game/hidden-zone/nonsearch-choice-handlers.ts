@@ -11,7 +11,7 @@ import type {
   ServerId,
   Side,
 } from "@netgrid/shared";
-import { isP358SocialEngineeringChoiceSource } from "../../compatibility/payload-compatibility";
+import { isSecretSpendGuessTargetedBypassRunChoiceSource } from "../../compatibility/payload-compatibility";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
 
@@ -103,7 +103,7 @@ export function handleHiddenZoneNonSearchChoice(
     return resolveRunnerInstalledTrashForCreditsChoice(host);
   if (source.startsWith("runner.installed_resource_trash_for_credits"))
     return resolveInstalledResourceTrashForCreditsChoice(host);
-  if (isP358SocialEngineeringChoiceSource(source))
+  if (isSecretSpendGuessTargetedBypassRunChoiceSource(source))
     return resolveSecretSpendGuessThenTargetedBypassRunChoice(host);
   return { handled: false };
 }
@@ -369,12 +369,12 @@ export function startSecretSpendGuessThenTargetedBypassRunHideChoice(
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const maxAmount = Math.max(0, Math.floor(host.state.runner.credits));
   if (maxAmount < 2)
-    throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
+    throw new Error("Die Secret-Spend-Guess-Faehigkeit benoetigt mindestens 2 Credits.");
   host.state.pendingChoice = {
     choiceId: `secret_spend_guess_then_targeted_bypass_run_hide_${host.state.stateVersion + 1}`,
     side: "runner",
     source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Social Engineering: Credits geheim verstecken.",
+    prompt: "Credits geheim verstecken.",
     kind: "bid_amount",
     options: Array.from({ length: maxAmount - 1 }, (_, index) => index + 2).map(
       (amount) => ({
@@ -627,21 +627,21 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !isP358SocialEngineeringChoiceSource(choice.source))
-    throw new Error("Es ist keine Social-Engineering-Choice offen.");
+  if (!choice || !isSecretSpendGuessTargetedBypassRunChoiceSource(choice.source))
+    throw new Error("Es ist keine Secret-Spend-Guess-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.runAccessPressureEventCardId)
-    throw new Error("Die Social-Engineering-Quelle passt nicht zur Karte.");
+    throw new Error("Die Secret-Spend-Guess-Quelle passt nicht zur Karte.");
   const playerAction = requirePlayerAction(host);
   if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:")) {
     const hiddenAmount = selectedBidAmount(choice, playerAction);
     if (hiddenAmount < 2 || hiddenAmount > host.state.runner.credits)
-      throw new Error("Der Social-Engineering-Betrag ist nicht legal.");
+      throw new Error("Der Secret-Spend-Guess-Betrag ist nicht legal.");
     host.state.secretSpendGuessRunSecret = {
       sourceCardId,
       hiddenAmount,
     };
-    host.state.pendingChoice = socialEngineeringGuessChoice(host, sourceCardId);
+    host.state.pendingChoice = secretSpendGuessChoice(host, sourceCardId);
     host.state.activeSide = "corp";
     const payload = {
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,
@@ -654,7 +654,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
   if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:")) {
     const secret = host.state.secretSpendGuessRunSecret;
     if (!secret || secret.sourceCardId !== sourceCardId)
-      throw new Error("Social Engineering hat keinen geheimen Betrag.");
+      throw new Error("Die Secret-Spend-Guess-Choice hat keinen geheimen Betrag.");
     const guess = selectedBidAmount(choice, playerAction);
     const correct = guess === secret.hiddenAmount;
     if (correct) {
@@ -684,7 +684,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       secretGuessAmount: guess,
       hiddenZoneBarrier: true,
     };
-    startSocialEngineeringTargetChoice(host, sourceCardId);
+    startSecretSpendGuessTargetedBypassRunTargetChoice(host, sourceCardId);
     return { handled: true, stateChanged: true };
   }
   if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:")) {
@@ -697,7 +697,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     ];
     const server = host.servers.mustServer(serverId);
     if (!server.ice.includes(iceId))
-      throw new Error("Das Social-Engineering-ICE-Ziel ist nicht mehr installiert.");
+      throw new Error("Das Secret-Spend-Guess-ICE-Ziel ist nicht mehr installiert.");
     delete host.state.secretSpendGuessRunSecret;
     delete host.state.pendingChoice;
     const payload = {
@@ -718,10 +718,10 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       resolvedPayload: payload,
     };
   }
-  throw new Error("Unbekannte Social-Engineering-Choice.");
+  throw new Error("Unbekannte Secret-Spend-Guess-Choice.");
 }
 
-function startSocialEngineeringTargetChoice(
+function startSecretSpendGuessTargetedBypassRunTargetChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): void {
@@ -743,7 +743,7 @@ function startSocialEngineeringTargetChoice(
     choiceId: `secret_spend_guess_then_targeted_bypass_run_target_${host.state.stateVersion + 1}`,
     side: "runner",
     source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Social Engineering: Fort und ICE fuer Auto-Pass waehlen.",
+    prompt: "Fort und ICE fuer Auto-Pass waehlen.",
     kind: "select_cards",
     options: slots.map((slot) => {
       const fallback = `${host.servers.publicServerLabel(slot.serverId) ?? slot.serverId} ICE ${slot.index + 1}`;
@@ -767,7 +767,7 @@ function startSocialEngineeringTargetChoice(
   host.state.activeSide = "runner";
 }
 
-function socialEngineeringGuessChoice(
+function secretSpendGuessChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): ChoiceRequest {
@@ -776,7 +776,7 @@ function socialEngineeringGuessChoice(
     choiceId: `secret_spend_guess_then_targeted_bypass_run_guess_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Social Engineering: versteckte Credits raten.",
+    prompt: "Versteckte Credits raten.",
     kind: "bid_amount",
     options: Array.from({ length: maxAmount + 1 }, (_, amount) => ({
       id: `guess_${amount}`,

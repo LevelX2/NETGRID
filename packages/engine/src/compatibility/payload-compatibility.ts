@@ -30,7 +30,7 @@ export const ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS = [
 const P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX = "hidden_zone.";
 const P358_FORTRESS_RESPECIFICATION_CHOICE_PREFIX =
   "hidden_zone.successful_run_fort_ice_reorder:";
-const P358_SOCIAL_ENGINEERING_CHOICE_PREFIX =
+const SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX =
   "hidden_zone.secret_spend_guess_then_targeted_bypass_run.";
 const P358_NEW_BLOOD_REORDER_CHOICE_PREFIX = "hidden_zone.conceal_and_reorder_installed_ice:";
 
@@ -48,8 +48,8 @@ export function isP358FortressRespecificationChoiceSource(
   return source.startsWith(P358_FORTRESS_RESPECIFICATION_CHOICE_PREFIX);
 }
 
-export function isP358SocialEngineeringChoiceSource(source: string): boolean {
-  return source.startsWith(P358_SOCIAL_ENGINEERING_CHOICE_PREFIX);
+export function isSecretSpendGuessTargetedBypassRunChoiceSource(source: string): boolean {
+  return source.startsWith(SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX);
 }
 
 export function isP358NewBloodReorderChoiceSource(source: string): boolean {

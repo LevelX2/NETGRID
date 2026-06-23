@@ -4,7 +4,7 @@ import {
   isP358FortressRespecificationChoiceSource,
   isP358HiddenReplacementCompatibilityChoiceSource,
   isP358NewBloodReorderChoiceSource,
-  isP358SocialEngineeringChoiceSource,
+  isSecretSpendGuessTargetedBypassRunChoiceSource,
   isReplayCompatibilityActionPayload,
 } from "./payload-compatibility";
 import {
@@ -54,7 +54,7 @@ describe("P3.71 PendingChoice replay compatibility marker stability", () => {
       ),
     ).toBe(true);
     expect(
-      isP358SocialEngineeringChoiceSource(
+      isSecretSpendGuessTargetedBypassRunChoiceSource(
         "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:source:1",
       ),
     ).toBe(true);

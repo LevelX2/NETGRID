@@ -1158,7 +1158,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     canPlay: (state) => state.runner.credits >= 2,
     resolve: (state, legalAction) => {
       if (state.runner.credits < 2)
-        throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
+        throw new Error("Die Secret-Spend-Guess-Faehigkeit benoetigt mindestens 2 Credits.");
       startSecretSpendGuessThenTargetedBypassRunHideChoice(
         hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
