@@ -651,30 +651,30 @@ function handleRunnerStackSearchChoice(
     ...instance,
     zone: { side: "runner", zone: "grip" },
   };
-  let shortCircuitSourceId: CardInstanceId | undefined;
+  let stackSearchGripSourceCardId: CardInstanceId | undefined;
   if (choice.source.startsWith("runner.stack_search_to_grip:")) {
-    shortCircuitSourceId = choice.source.split(":")[1] as
+    stackSearchGripSourceCardId = choice.source.split(":")[1] as
       | CardInstanceId
       | undefined;
     if (
-      !shortCircuitSourceId ||
-      !state.runner.rig.resources.includes(shortCircuitSourceId) ||
-      host.cards.definitionFor(shortCircuitSourceId).id !==
+      !stackSearchGripSourceCardId ||
+      !state.runner.rig.resources.includes(stackSearchGripSourceCardId) ||
+      host.cards.definitionFor(stackSearchGripSourceCardId).id !==
         host.constants.stackSearchGripSourceId
     )
-      throw new Error("The Short Circuit ist nicht mehr installiert.");
+      throw new Error("Die Stack-Search-to-Grip-Quelle ist nicht mehr installiert.");
   }
   host.shuffleRunnerStack(`v098_search_stack:${choice.choiceId}:shuffle`);
   const payload: HiddenZonePayload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: shortCircuitSourceId
+    hiddenZoneAction: stackSearchGripSourceCardId
       ? "runner_stack_search_to_grip"
       : "search_stack",
     selectedCount: 1,
     searchDestination: "runner_grip",
     shuffled: true,
-    ...(shortCircuitSourceId
+    ...(stackSearchGripSourceCardId
       ? {
           sourceDefinitionId: host.constants.stackSearchGripSourceId,
           cardDefinitionId: host.cards.definitionFor(cardId).id,
