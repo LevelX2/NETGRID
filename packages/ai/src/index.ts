@@ -170,6 +170,7 @@ import {
   semanticRuntimeScoreFromComponents,
   semanticRuntimeTypeTieBreakerScore,
 } from "./runtime/semantic-runtime-score-components";
+import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -6510,92 +6511,6 @@ function runnerTagCleanupScoreComponent(
   };
 }
 
-function runnerSemanticGoalFitScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (
-    scopeId === "tag_removal" &&
-    input.playerView.own.tags > 0 &&
-    (action.type === "remove_tag" ||
-      actionSemanticCandidate?.semanticActionType === "tag.remove")
-  ) {
-    return {
-      key: "runner_goal_fit_tag_removal",
-      label: "Tag-Zielerfuellung",
-      value: 900,
-      reason: `tags:${input.playerView.own.tags}`,
-    };
-  }
-  const sourceRole = semanticRuntimeRunnerSourceCardAnswerRole(input, action);
-  if (scopeId === "coverage_search" && sourceRole === "search") {
-    return {
-      key: "runner_goal_fit_coverage_search",
-      label: "Coverage-Suche",
-      value: 1400,
-      reason: "source_role:search",
-    };
-  }
-  if (scopeId === "setup_card_search" && sourceRole === "search") {
-    return {
-      key: "runner_goal_fit_setup_search",
-      label: "Setup-Suche",
-      value: 1000,
-      reason: "source_role:search",
-    };
-  }
-  if (
-    scopeId === "basic_economy_draw" &&
-    sourceRole === "draw" &&
-    action.type !== "draw_card"
-  ) {
-    return {
-      key: "runner_goal_fit_card_draw",
-      label: "Kartenzieh-Antwort",
-      value: 900,
-      reason: "source_role:draw",
-    };
-  }
-  if (action.type !== "start_run") return undefined;
-  if (action.payload?.runOnlyAction === true) {
-    const capAssessment = runnerRunActionSpendingCapAssessment(input, action);
-    return {
-      key: "runner_goal_fit_run_only_action",
-      label: "Run-only-Aktion",
-      value: capAssessment.ok ? 900 : -900,
-      reason: [
-        `cap_ok:${capAssessment.ok}`,
-        `cap_reason:${capAssessment.reason}`,
-        `visible_break_cost:${capAssessment.visibleBreakCost}`,
-      ].join("|"),
-    };
-  }
-  const evaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
-    input,
-    action,
-  );
-  if (
-    evaluation &&
-    evaluation.pathPassability === "reachable" &&
-    evaluation.recommendation !== "do_not_run_now"
-  ) {
-    return {
-      key: "runner_goal_fit_reachable_run",
-      label: "Erreichbarer Run",
-      value: 650,
-      reason: [
-        `target:${evaluation.targetServerId}`,
-        `recommendation:${evaluation.recommendation}`,
-        `payoff:${evaluation.accessPayoff}`,
-      ].join("|"),
-    };
-  }
-  return undefined;
-}
-
 function tagCleanupReduction(
   reduction: ActionTagEffectProfile["currentTagReduction"] | undefined,
   currentTags: number,
@@ -6631,6 +6546,12 @@ function semanticRuntimeRunnerScoreComponents(
     action,
     scopeId,
     actionSemanticCandidate,
+    {
+      sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
+      runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
+      runTargetEvaluationForAction:
+        semanticRuntimeRunnerRunTargetEvaluationForAction,
+    },
   );
   if (goalFit) {
     components.push(goalFit);

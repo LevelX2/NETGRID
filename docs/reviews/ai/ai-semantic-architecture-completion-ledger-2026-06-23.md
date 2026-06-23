@@ -51,7 +51,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | --- | --- | --- | --- | --- |
 | AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
-| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `PENDING` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Dünne Public-/Composition-Fassade; Boundary-Test verhindert neue Fachlogik. |
+| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `IN_PROGRESS` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Dünne Public-/Composition-Fassade; Boundary-Test verhindert neue Fachlogik. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `PENDING` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `PENDING` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
@@ -103,6 +103,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - `packages/ai/src/runtime/semantic-runtime.ts` akzeptiert einen Legacy-Provider und fordert Legacy erst bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Trace an.
   - Die direkte Runtime-Test-API bleibt kompatibel mit fertigen Legacy-Decisions, normalisiert intern aber ebenfalls auf einen Provider.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 55 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+
+- `AI-COMPLETE-03` erster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` kapselt die in `AI-COMPLETE-01` eingeführten Runner-Goal-Fit-Score-Komponenten.
+  - `packages/ai/src/index.ts` konsumiert die neue Runtime-Komponente nur noch mit lokalen Projection-Dependencies; die lokale Implementierung wurde entfernt.
+  - `packages/ai/src/index.ts` sank im aktuellen Branch von 36.331 auf 36.252 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-wilson-run-action.test.ts` grün, 63 Tests.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
