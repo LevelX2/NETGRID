@@ -42,11 +42,11 @@ export type HiddenZoneSearchActivationBaseHost = {
     "runner" | "pendingChoice" | "stateVersion" | "run" | "randomCounter"
   >;
   constants: {
-    aujourdOuiResourceCardId: CardDefinitionId;
-    mysteryBoxId: CardDefinitionId;
-    selfModifyingCodeId: CardDefinitionId;
-    shortCircuitResourceCardId: CardDefinitionId;
-    sneakPreviewId: CardDefinitionId;
+    topStackTakeMatchingSourceId: CardDefinitionId;
+    randomStackProgramInstallSourceId: CardDefinitionId;
+    stackProgramFreeInstallSourceId: CardDefinitionId;
+    stackSearchGripSourceId: CardDefinitionId;
+    temporaryProgramInstallSourceId: CardDefinitionId;
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
@@ -440,7 +440,7 @@ export function startAujourdOuiTop5Activation(
   if (
     !host.state.runner.rig.resources.includes(sourceCardId) ||
     host.cards.definitionFor(sourceCardId).id !==
-      host.constants.aujourdOuiResourceCardId
+      host.constants.topStackTakeMatchingSourceId
   ) {
     throw new Error("Aujourd'Oui ist nicht mehr installiert.");
   }
@@ -572,7 +572,7 @@ export function startTemporaryProgramInstallSourceActivation(
     sourcePrefix: input.sourcePrefix ?? "v1911.sneak_preview",
     sourceCardId: input.sourceCardId,
     sourceDefinitionId:
-      input.sourceDefinitionId ?? host.constants.sneakPreviewId,
+      input.sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
     options,
   });
   host.legalAction.payload = {
@@ -592,7 +592,7 @@ export function handleTopFiveProgramInstallActivation(
   ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Mystery Box ist nicht installiert.");
-  if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
+  if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
   const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
     sourceCardId,

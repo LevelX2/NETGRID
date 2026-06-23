@@ -195,11 +195,11 @@ function testHost(
     state,
     legalAction,
     constants: {
-      aujourdOuiResourceCardId: "aujourd_oui",
-      mysteryBoxId: MYSTERY_BOX_ID,
-      selfModifyingCodeId: "self_modifying_code",
-      shortCircuitResourceCardId: "short_circuit",
-      sneakPreviewId: "sneak_preview",
+      topStackTakeMatchingSourceId: "aujourd_oui",
+      randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+      stackProgramFreeInstallSourceId: "self_modifying_code",
+      stackSearchGripSourceId: "short_circuit",
+      temporaryProgramInstallSourceId: "sneak_preview",
     },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),

@@ -64,11 +64,11 @@ export type HiddenZoneSearchChoiceHandlerHost = {
     | "run"
   >;
   constants: {
-    aujourdOuiResourceCardId: CardDefinitionId;
-    mysteryBoxId: CardDefinitionId;
-    selfModifyingCodeId: CardDefinitionId;
-    shortCircuitResourceCardId: CardDefinitionId;
-    sneakPreviewId: CardDefinitionId;
+    topStackTakeMatchingSourceId: CardDefinitionId;
+    randomStackProgramInstallSourceId: CardDefinitionId;
+    stackProgramFreeInstallSourceId: CardDefinitionId;
+    stackSearchGripSourceId: CardDefinitionId;
+    temporaryProgramInstallSourceId: CardDefinitionId;
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
@@ -178,7 +178,7 @@ export function handleTopNTakeMatchingChoice(
 export function handleSelfModifyingCodeChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
-  if (host.choice.source.startsWith("v1911.self_modifying_code_free_mu"))
+  if (host.choice.source.startsWith("runner.program_free_memory"))
     return handleSelfModifyingCodeFreeMuChoice(host);
   return handleSelfModifyingCodeStackChoice(host);
 }
@@ -209,7 +209,7 @@ export function handleMysteryBoxChoice(
   const sourceCardId = plan.sourceCardId;
   if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Mystery Box ist nicht mehr installiert.");
-  if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
+  if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
   const execution = executeFreeProgramInstallPlan({
     plan: createMysteryBoxFreeProgramInstallInput(plan),
@@ -515,7 +515,7 @@ function handleTemporaryProgramInstallSourceChoice(
     : undefined;
   const sourceDefinitionId = isCardImplementationChoice
     ? (parts[2] as CardDefinitionId | undefined)
-    : host.constants.sneakPreviewId;
+    : host.constants.temporaryProgramInstallSourceId;
   const optionId = selectedChoiceIds(host.playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === optionId);
   const selectedSource = option?.value;
@@ -527,7 +527,7 @@ function handleTemporaryProgramInstallSourceChoice(
       ? "p3_38.stack_or_trash_program_install"
       : "v1911.sneak_preview",
     sourceCardId,
-    sourceDefinitionId: sourceDefinitionId ?? host.constants.sneakPreviewId,
+    sourceDefinitionId: sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
   });
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -535,7 +535,7 @@ function handleTemporaryProgramInstallSourceChoice(
     hiddenZoneAction: isCardImplementationChoice
       ? "p3_38_stack_or_trash_program_install_source_selected"
       : "sneak_preview_source_selected",
-    sourceDefinitionId: sourceDefinitionId ?? host.constants.sneakPreviewId,
+    sourceDefinitionId: sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
     choiceVisibility: "runner_private",
   };
   return {
@@ -560,7 +560,7 @@ function handleTemporaryProgramInstallChoice(
     legalTargetIdsForSourceZone: (sourceZone) =>
       host.install.temporaryProgramInstallableProgramIds(sourceZone),
     selectedCardDefinition: selectedDefinition,
-    defaultSourceDefinitionId: host.constants.sneakPreviewId,
+    defaultSourceDefinitionId: host.constants.temporaryProgramInstallSourceId,
   });
   const execution = executeFreeProgramInstallPlan({
     plan: createTemporaryProgramFreeInstallInput(plan),
@@ -652,7 +652,7 @@ function handleRunnerStackSearchChoice(
     zone: { side: "runner", zone: "grip" },
   };
   let shortCircuitSourceId: CardInstanceId | undefined;
-  if (choice.source.startsWith("v1911.short_circuit_search:")) {
+  if (choice.source.startsWith("runner.stack_search_to_grip:")) {
     shortCircuitSourceId = choice.source.split(":")[1] as
       | CardInstanceId
       | undefined;
@@ -660,7 +660,7 @@ function handleRunnerStackSearchChoice(
       !shortCircuitSourceId ||
       !state.runner.rig.resources.includes(shortCircuitSourceId) ||
       host.cards.definitionFor(shortCircuitSourceId).id !==
-        host.constants.shortCircuitResourceCardId
+        host.constants.stackSearchGripSourceId
     )
       throw new Error("The Short Circuit ist nicht mehr installiert.");
   }
@@ -669,14 +669,14 @@ function handleRunnerStackSearchChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: shortCircuitSourceId
-      ? "v1911_short_circuit_search"
+      ? "runner_stack_search_to_grip"
       : "search_stack",
     selectedCount: 1,
     searchDestination: "runner_grip",
     shuffled: true,
     ...(shortCircuitSourceId
       ? {
-          sourceDefinitionId: host.constants.shortCircuitResourceCardId,
+          sourceDefinitionId: host.constants.stackSearchGripSourceId,
           cardDefinitionId: host.cards.definitionFor(cardId).id,
           publicRevealDefinitionId: host.cards.definitionFor(cardId).id,
           publicRevealKind: "reveal",
@@ -742,7 +742,7 @@ function handleAujourdOuiTop5Choice(
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
     host.cards.definitionFor(sourceCardId).id !==
-      host.constants.aujourdOuiResourceCardId
+      host.constants.topStackTakeMatchingSourceId
   ) {
     throw new Error("Aujourd'Oui ist nicht mehr installiert.");
   }
@@ -792,7 +792,7 @@ function handleAujourdOuiTop5Choice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1911_aujourdoui_top5",
-    sourceDefinitionId: host.constants.aujourdOuiResourceCardId,
+    sourceDefinitionId: host.constants.topStackTakeMatchingSourceId,
     selectedCount: uniqueSelectedIds.length,
     searchedTopCount: topCardIds.length,
     searchDestination: "runner_grip",
@@ -877,7 +877,7 @@ function handleSelfModifyingCodeStackChoice(
     runnerMemoryLimit: host.runnerMemoryLimit(),
     uniqueBlocked: !!selectedDefinition &&
       host.cards.isUniqueRunnerDefinitionInstalled(selectedDefinition),
-    sourceDefinitionId: host.constants.selfModifyingCodeId,
+    sourceDefinitionId: host.constants.stackProgramFreeInstallSourceId,
   });
   const cardId = plan.selectedCardId;
   if (plan.shouldOpenMemoryChoice) {
@@ -920,7 +920,7 @@ function handleSelfModifyingCodeFreeMuChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   const { choice, state } = host;
-  if (!choice.source.startsWith("v1911.self_modifying_code_free_mu"))
+  if (!choice.source.startsWith("runner.program_free_memory"))
     throw new Error("Es ist keine Self-Modifying-Code-MU-Choice offen.");
   const selectedProgramId = choice.source.split(":")[1] as
     | CardInstanceId
@@ -949,8 +949,8 @@ function handleSelfModifyingCodeFreeMuChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    sourceDefinitionId: host.constants.selfModifyingCodeId,
-    hiddenZoneAction: "self_modifying_code_free_mu",
+    sourceDefinitionId: host.constants.stackProgramFreeInstallSourceId,
+    hiddenZoneAction: "runner_program_free_memory",
     publicRevealKind: "reveal",
     publicRevealDefinitionId: host.cards.definitionFor(selectedProgramId).id,
     trashedCount: uniqueTrashIds.length,
@@ -1024,7 +1024,7 @@ function lookTopStackTakeMatchingTargets(
 function isSelfModifyingCodeChoiceSource(source: string): boolean {
   return (
     source.startsWith("v1911.hidden_stack_program_install") ||
-    source.startsWith("v1911.self_modifying_code_free_mu")
+    source.startsWith("runner.program_free_memory")
   );
 }
 
@@ -1074,7 +1074,7 @@ function isSearchToGripChoiceSource(source: string): boolean {
     source.startsWith("v098.search_stack") ||
     source.startsWith("v1911.search_stack") ||
     source.startsWith("v1912.search_stack") ||
-    source.startsWith("v1911.short_circuit_search") ||
+    source.startsWith("runner.stack_search_to_grip") ||
     isCardImplementationSearchToGripChoiceSource(source)
   );
 }

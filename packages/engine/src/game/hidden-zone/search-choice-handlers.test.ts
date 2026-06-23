@@ -18,7 +18,7 @@ const secondProgramId = "program_2" as CardInstanceId;
 const hardwareId = "hardware_1" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
 const sourceDefinitionId = "source_definition" as CardDefinitionId;
-const selfModifyingCodeId =
+const stackProgramFreeInstallSourceId =
   "onr_v1_059_self-modifying-code" as CardDefinitionId;
 const aujourdOuiId = "onr_v1_089_aujourd-oui" as CardDefinitionId;
 const shortCircuitId = "onr_v1_096_the-short-circuit" as CardDefinitionId;
@@ -166,11 +166,11 @@ function host(
       >,
     },
     constants: {
-      aujourdOuiResourceCardId: aujourdOuiId,
-      mysteryBoxId: "mystery_box" as CardDefinitionId,
-      selfModifyingCodeId,
-      shortCircuitResourceCardId: shortCircuitId,
-      sneakPreviewId: "sneak_preview" as CardDefinitionId,
+      topStackTakeMatchingSourceId: aujourdOuiId,
+      randomStackProgramInstallSourceId: "mystery_box" as CardDefinitionId,
+      stackProgramFreeInstallSourceId,
+      stackSearchGripSourceId: shortCircuitId,
+      temporaryProgramInstallSourceId: "sneak_preview" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => {

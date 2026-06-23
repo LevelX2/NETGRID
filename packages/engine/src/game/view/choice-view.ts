@@ -102,7 +102,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1912.search_stack") ||
-      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("runner.stack_search_to_grip") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install"))
@@ -138,7 +138,7 @@ function stackSearchResolutionForChoice(
   if (!isRunnerStackSearchChoice(choice)) return undefined;
   return {
     reveal:
-      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("runner.stack_search_to_grip") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1911.hidden_stack_program_install") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||

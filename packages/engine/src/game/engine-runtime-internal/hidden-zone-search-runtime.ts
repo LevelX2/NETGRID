@@ -231,11 +231,11 @@ export function createHiddenZoneSearchRuntime(
       state,
       legalAction,
       constants: {
-        aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
-        mysteryBoxId: MYSTERY_BOX_ID,
-        selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
-        shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
-        sneakPreviewId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_CARD_ID,
+        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
@@ -312,11 +312,11 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       constants: {
-        aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
-        mysteryBoxId: MYSTERY_BOX_ID,
-        selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
-        shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
-        sneakPreviewId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_CARD_ID,
+        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
@@ -521,9 +521,9 @@ export function createHiddenZoneSearchRuntime(
       });
     if (options.length === 0) return false;
     state.pendingChoice = {
-      choiceId: `v1911_self_modifying_code_free_mu_${state.stateVersion + 1}`,
+      choiceId: `runner_program_free_memory_${state.stateVersion + 1}`,
       side: "runner",
-      source: `v1911.self_modifying_code_free_mu:${selectedProgramId}:${state.stateVersion + 1}`,
+      source: `runner.program_free_memory:${selectedProgramId}:${state.stateVersion + 1}`,
       prompt: "MU freimachen",
       kind: "select_cards",
       options,
@@ -665,11 +665,11 @@ export function createHiddenZoneSearchRuntime(
           {
             sourcePrefix:
               sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-                ? `v1911.short_circuit_search:${sourceCardId}`
+                ? `runner.stack_search_to_grip:${sourceCardId}`
                 : "v1911.search_stack",
             choiceIdPrefix:
               sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-                ? "v1911_short_circuit_search"
+                ? "runner_stack_search_to_grip"
                 : "v1911_search_stack",
           },
         );
@@ -682,7 +682,7 @@ export function createHiddenZoneSearchRuntime(
           sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID
             ? "v1911_aujourdoui_top5"
             : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-              ? "v1911_short_circuit_search"
+              ? "runner_stack_search_to_grip"
               : "v1911_search_stack",
       };
       return;

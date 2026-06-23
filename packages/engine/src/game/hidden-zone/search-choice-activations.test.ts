@@ -74,11 +74,11 @@ function makeHost(
       },
     } as unknown as HiddenZoneSearchActivationHost["state"],
     constants: {
-      aujourdOuiResourceCardId: "aujourd" as CardDefinitionId,
-      mysteryBoxId: "mystery_box" as CardDefinitionId,
-      selfModifyingCodeId: "smc" as CardDefinitionId,
-      shortCircuitResourceCardId: "short_circuit" as CardDefinitionId,
-      sneakPreviewId: "sneak_preview" as CardDefinitionId,
+      topStackTakeMatchingSourceId: "aujourd" as CardDefinitionId,
+      randomStackProgramInstallSourceId: "mystery_box" as CardDefinitionId,
+      stackProgramFreeInstallSourceId: "smc" as CardDefinitionId,
+      stackSearchGripSourceId: "short_circuit" as CardDefinitionId,
+      temporaryProgramInstallSourceId: "sneak_preview" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? card(cardId, "program"),
