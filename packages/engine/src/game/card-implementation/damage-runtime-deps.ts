@@ -131,9 +131,9 @@ export function createDamageCardImplementationRuntimeDeps(
     const publicPayload = damageSummaryPublicPayload(summary);
     if (typeof event.payload.baseDamageAmount === "number")
       publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
-    if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-      publicPayload.bioweaponsEngineeringModifier =
-        event.payload.bioweaponsEngineeringModifier;
+    if (typeof event.payload.damageAmountModifier === "number")
+      publicPayload.damageAmountModifier =
+        event.payload.damageAmountModifier;
     return {
       resolved: true,
       damageType: summary.damageType,

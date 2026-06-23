@@ -2247,7 +2247,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       damageResolved: true,
       damageType: "meat",
       baseDamageAmount: 4,
-      bioweaponsEngineeringModifier: 1,
+      damageAmountModifier: 1,
       damageAmount: 5,
       cardsTrashed: 5,
     });

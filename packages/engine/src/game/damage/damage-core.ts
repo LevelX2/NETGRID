@@ -611,9 +611,9 @@ export function resolveDamageOperation(
   const payload = (legalAction.payload ??= {});
   if (typeof event.payload.baseDamageAmount === "number")
     payload.baseDamageAmount = event.payload.baseDamageAmount;
-  if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-    payload.bioweaponsEngineeringModifier =
-      event.payload.bioweaponsEngineeringModifier;
+  if (typeof event.payload.damageAmountModifier === "number")
+    payload.damageAmountModifier =
+      event.payload.damageAmountModifier;
 }
 
 export function createDamageImminentEvent(
@@ -625,11 +625,11 @@ export function createDamageImminentEvent(
     source: string;
   },
 ): ImminentEvent {
-  const bioweaponsModifier =
-    request.damageType === "meat" && corpHasScoredBioweaponsEngineering(state)
+  const damageAmountModifier =
+    request.damageType === "meat" && corpHasScoredMeatDamageBonusAgenda(state)
       ? 1
       : 0;
-  const amount = request.amount + bioweaponsModifier;
+  const amount = request.amount + damageAmountModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
     eventType: "damage",
@@ -640,10 +640,10 @@ export function createDamageImminentEvent(
       damageId: request.damageId,
       damageType: request.damageType,
       amount,
-      ...(bioweaponsModifier > 0
+      ...(damageAmountModifier > 0
         ? {
             baseDamageAmount: request.amount,
-            bioweaponsEngineeringModifier: bioweaponsModifier,
+            damageAmountModifier: damageAmountModifier,
           }
         : {}),
       source: request.source,
@@ -701,7 +701,7 @@ function cybertechThinkTankBoostCandidates(
   return candidates;
 }
 
-function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
+function corpHasScoredMeatDamageBonusAgenda(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
       scoredAgendaKindForDefinition(definitionFor(state, cardId)) ===

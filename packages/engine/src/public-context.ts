@@ -686,9 +686,9 @@ export function publicContextForAction(
     context.flatline = legalAction.payload.flatline;
     if (typeof legalAction.payload.baseDamageAmount === "number")
       context.baseDamageAmount = legalAction.payload.baseDamageAmount;
-    if (typeof legalAction.payload.bioweaponsEngineeringModifier === "number")
-      context.bioweaponsEngineeringModifier =
-        legalAction.payload.bioweaponsEngineeringModifier;
+    if (typeof legalAction.payload.damageAmountModifier === "number")
+      context.damageAmountModifier =
+        legalAction.payload.damageAmountModifier;
     if (typeof legalAction.payload.coreDamageAfter === "number")
       context.coreDamageAfter = legalAction.payload.coreDamageAfter;
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
