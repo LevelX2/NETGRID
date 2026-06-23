@@ -23,10 +23,14 @@ import type {
   CardEffectImplementation,
   CardTraceSuccessEffectImplementation,
 } from "./definition-types";
+import { executeAdvancementEffect } from "./effect-families/advancement-effects";
+import { executeBadPublicityEffect } from "./effect-families/bad-publicity-effects";
 import { executeCreditEffect } from "./effect-families/credit-effects";
+import { executeCounterEffect } from "./effect-families/counter-effects";
 import { executeDamageEffect } from "./effect-families/damage-effects";
 import { executeDrawEffect } from "./effect-families/draw-effects";
 import type { CardEffectFamilyRuntime } from "./effect-families/family-runtime";
+import { executeHostedCreditEffect } from "./effect-families/hosted-credit-effects";
 import { executeTagEffect } from "./effect-families/tag-effects";
 
 export type CardEffectExecutionContext = {
@@ -513,6 +517,10 @@ export function executeCardImplementationEffects(
     // live in a focused family module instead of extending this switch forever.
     if (
       executeCreditEffect(familyInput) ||
+      executeBadPublicityEffect(familyInput) ||
+      executeCounterEffect(familyInput) ||
+      executeHostedCreditEffect(familyInput) ||
+      executeAdvancementEffect(familyInput) ||
       executeDrawEffect(familyInput) ||
       executeTagEffect(familyInput) ||
       executeDamageEffect(familyInput)
@@ -520,87 +528,6 @@ export function executeCardImplementationEffects(
       return;
 
     switch (effect.kind) {
-      case "add_bad_publicity": {
-        assertPositiveIntegerAmount("add_bad_publicity", effect.amount);
-        assertPublicVisibility("add_bad_publicity", effect.visibility);
-        const sourceVisibility = effect.sourceVisibility ?? "public";
-        if (sourceVisibility !== "public" && sourceVisibility !== "redacted")
-          throw new Error(
-            "add_bad_publicity sourceVisibility must be public or redacted.",
-          );
-        const before = state.corp.badPublicity;
-        state.corp.badPublicity += effect.amount;
-        publicPayload.badPublicityAdded =
-          Number(publicPayload.badPublicityAdded ?? 0) + effect.amount;
-        if (typeof publicPayload.corpBadPublicityBefore !== "number")
-          publicPayload.corpBadPublicityBefore = before;
-        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
-        publicPayload.sourceVisibility = sourceVisibility;
-        if (sourceVisibility === "redacted") {
-          publicPayload.redactedKind = "hidden_resource_source";
-        }
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "add_bad_publicity"),
-          kind: "add_bad_publicity",
-          visibility: effect.visibility,
-          side: "corp",
-          amount: effect.amount,
-          reason: effectReason(context),
-          ...(sourceVisibility === "redacted"
-            ? { redactedKind: "hidden_resource_source" }
-            : {}),
-          ...(sourceVisibility === "public" && context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(sourceVisibility === "public" && context.sourceTitle
-            ? { sourceTitle: context.sourceTitle }
-            : {}),
-        });
-        return;
-      }
-      case "add_bad_publicity_from_frame_up_history": {
-        assertPositiveIntegerAmount(
-          "add_bad_publicity_from_frame_up_history",
-          effect.baseAmount,
-        );
-        assertPositiveIntegerAmount(
-          "add_bad_publicity_from_frame_up_history",
-          effect.additionalAmount,
-        );
-        assertPublicVisibility(
-          "add_bad_publicity_from_frame_up_history",
-          effect.visibility,
-        );
-        const additional =
-          state.runnerTurnFlags
-            ?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn ===
-          true
-            ? effect.additionalAmount
-            : 0;
-        const amount = effect.baseAmount + additional;
-        const before = state.corp.badPublicity;
-        state.corp.badPublicity += amount;
-        publicPayload.badPublicityAdded =
-          Number(publicPayload.badPublicityAdded ?? 0) + amount;
-        publicPayload.frameUpBaseBadPublicity = effect.baseAmount;
-        publicPayload.frameUpAdditionalBadPublicity = additional;
-        if (typeof publicPayload.corpBadPublicityBefore !== "number")
-          publicPayload.corpBadPublicityBefore = before;
-        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "add_bad_publicity"),
-          kind: "add_bad_publicity",
-          visibility: effect.visibility,
-          side: "corp",
-          amount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
       case "add_current_encounter_additional_subroutine": {
         assertPublicVisibility(
           "add_current_encounter_additional_subroutine",
@@ -709,44 +636,6 @@ export function executeCardImplementationEffects(
         mergePublicPayload(publicPayload, returnResult.publicPayload);
         return;
       }
-      case "add_counters_to_source": {
-        assertPositiveIntegerAmount("add_counters_to_source", effect.amount);
-        assertPublicVisibility("add_counters_to_source", effect.visibility);
-        if (
-          effect.counterType !== "ablative" &&
-          effect.counterType !== "trauma" &&
-          effect.counterType !== "boon"
-        )
-          throw new Error(
-            "add_counters_to_source supports only explicit source counters.",
-          );
-        if (!context.addCountersToSource)
-          throw new Error(
-            "add_counters_to_source effect requires an addCountersToSource execution context.",
-          );
-        const addResult = context.addCountersToSource(
-          context.sourceCardId,
-          effect.counterType,
-          effect.amount,
-        );
-        mergePublicPayload(publicPayload, addResult.publicPayload);
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "add_counters_to_source"),
-          kind: "counter_change",
-          visibility: effect.visibility,
-          side: context.controller,
-          amount: addResult.amount,
-          counterType: addResult.counterType,
-          addedCounterAmount: addResult.amount,
-          remainingCounters: addResult.countersAfter,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
       case "trace": {
         assertPositiveIntegerAmount("trace", effect.baseTraceStrength);
         assertPublicVisibility("trace", effect.visibility);
@@ -760,51 +649,6 @@ export function executeCardImplementationEffects(
           effect.onSuccess,
         );
         mergePublicPayload(publicPayload, traceResult.publicPayload);
-        return;
-      }
-      case "add_counter_to_all_installed_runner_icebreakers": {
-        assertPositiveIntegerAmount(
-          "add_counter_to_all_installed_runner_icebreakers",
-          effect.amount,
-        );
-        assertPublicVisibility(
-          "add_counter_to_all_installed_runner_icebreakers",
-          effect.visibility,
-        );
-        if (
-          effect.counterType !== "militech" &&
-          effect.counterType !== "pattel_antibody"
-        )
-          throw new Error(
-            "add_counter_to_all_installed_runner_icebreakers supports only configured public icebreaker counters.",
-          );
-        if (!context.addCounterToAllInstalledRunnerIcebreakers)
-          throw new Error(
-            "add_counter_to_all_installed_runner_icebreakers requires a counter execution context.",
-          );
-        const addResult = context.addCounterToAllInstalledRunnerIcebreakers(
-          effect.counterType,
-          effect.amount,
-        );
-        mergePublicPayload(publicPayload, addResult.publicPayload);
-        resolvedEffects.push({
-          effectId: publicEffectId(
-            context,
-            index,
-            "add_counter_to_all_installed_runner_icebreakers",
-          ),
-          kind: "counter_change",
-          visibility: effect.visibility,
-          side: "runner",
-          amount: addResult.amount,
-          counterType: addResult.counterType,
-          addedCounterAmount: addResult.amount,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
         return;
       }
       case "shuffle_source_into_corp_rd": {
@@ -1567,54 +1411,6 @@ export function executeCardImplementationEffects(
         mergePublicPayload(publicPayload, shuffleResult.publicPayload);
         return;
       }
-      case "distribute_advancement_counters": {
-        assertPositiveIntegerAmount(
-          "distribute_advancement_counters",
-          effect.amount,
-        );
-        assertPublicVisibility(
-          "distribute_advancement_counters",
-          effect.visibility,
-        );
-        if (effect.target !== "installed_advanceable_cards")
-          throw new Error(
-            "distribute_advancement_counters target must be installed_advanceable_cards.",
-          );
-        if (!context.startDistributeAdvancementCounters)
-          throw new Error(
-            "distribute_advancement_counters requires a host choice context.",
-          );
-        const choiceResult = context.startDistributeAdvancementCounters(
-          effect.amount,
-          effect.distribution,
-        );
-        mergePublicPayload(publicPayload, choiceResult.publicPayload);
-        return;
-      }
-      case "move_advancement_counters": {
-        assertPublicVisibility("move_advancement_counters", effect.visibility);
-        if (effect.target !== "chosen_installed_advanceable_card")
-          throw new Error(
-            "move_advancement_counters target must be chosen_installed_advanceable_card.",
-          );
-        if (
-          effect.maxAmount !== "all" &&
-          (!Number.isInteger(effect.maxAmount) || effect.maxAmount <= 0)
-        )
-          throw new Error(
-            "move_advancement_counters maxAmount must be all or a positive integer.",
-          );
-        if (!context.startMoveAdvancementCounters)
-          throw new Error(
-            "move_advancement_counters requires a host choice context.",
-          );
-        const choiceResult = context.startMoveAdvancementCounters(
-          effect.source,
-          effect.maxAmount,
-        );
-        mergePublicPayload(publicPayload, choiceResult.publicPayload);
-        return;
-      }
       case "gain_temporary_corp_credits": {
         assertPositiveIntegerAmount("gain_temporary_corp_credits", effect.amount);
         assertPublicVisibility("gain_temporary_corp_credits", effect.visibility);
@@ -1802,112 +1598,6 @@ export function executeCardImplementationEffects(
           gainedCredits: effect.gainCredits,
           corpCreditsAfter: state.corp.credits,
           serverId,
-        });
-        return;
-      }
-      case "add_hosted_credits": {
-        assertPositiveIntegerAmount("add_hosted_credits", effect.amount);
-        assertPublicVisibility("add_hosted_credits", effect.visibility);
-        if ((effect as { target?: string }).target !== "source")
-          throw new Error("add_hosted_credits effect target must be source.");
-        if (!context.addHostedCredits)
-          throw new Error(
-            "add_hosted_credits effect requires an addHostedCredits execution context.",
-          );
-        const addResult = context.addHostedCredits(
-          context.sourceCardId,
-          effect.amount,
-        );
-        mergePublicPayload(publicPayload, addResult.publicPayload);
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "add_hosted_credits"),
-          kind: "add_hosted_credits",
-          visibility: effect.visibility,
-          side: context.controller,
-          amount: addResult.amount,
-          counterType: "bit",
-          addedCounterAmount: addResult.amount,
-          remainingCounters: addResult.hostedCreditsAfter,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "take_hosted_credits": {
-        assertPublicVisibility("take_hosted_credits", effect.visibility);
-        if ((effect as { source?: string }).source !== "source")
-          throw new Error("take_hosted_credits effect source must be source.");
-        if ((effect as { recipient?: string }).recipient !== "controller")
-          throw new Error(
-            "take_hosted_credits effect recipient must be controller.",
-          );
-        const mode = effect.mode ?? "up_to_amount_if_available";
-        if (mode !== "up_to_amount_if_available" && mode !== "all")
-          throw new Error(
-            "take_hosted_credits effect mode must be up_to_amount_if_available or all.",
-          );
-        if (mode === "up_to_amount_if_available") {
-          if (effect.amount === undefined)
-            throw new Error(
-              "take_hosted_credits amount mode requires an amount.",
-            );
-          assertPositiveIntegerAmount("take_hosted_credits", effect.amount);
-        }
-        if (!context.takeHostedCredits)
-          throw new Error(
-            "take_hosted_credits effect requires a takeHostedCredits execution context.",
-          );
-        const side = recipientSide(context, effect.recipient);
-        const takeResult = context.takeHostedCredits(
-          context.sourceCardId,
-          side,
-          mode === "all" ? "all" : effect.amount!,
-        );
-        mergePublicPayload(publicPayload, takeResult.publicPayload);
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "take_hosted_credits"),
-          kind: "take_hosted_credits",
-          visibility: effect.visibility,
-          side,
-          amount: takeResult.amount,
-          counterType: "bit",
-          removedCounterAmount: takeResult.amount,
-          remainingCounters: takeResult.hostedCreditsAfter,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
-        });
-        return;
-      }
-      case "trash_source_when_empty": {
-        assertPublicVisibility("trash_source_when_empty", effect.visibility);
-        if ((effect as { source?: string }).source !== "source")
-          throw new Error(
-            "trash_source_when_empty effect source must be source.",
-          );
-        if (!context.trashSourceWhenEmpty)
-          throw new Error(
-            "trash_source_when_empty effect requires a trashSourceWhenEmpty execution context.",
-          );
-        const trashResult = context.trashSourceWhenEmpty(context.sourceCardId);
-        mergePublicPayload(publicPayload, trashResult.publicPayload);
-        if (!trashResult.sourceTrashed) return;
-        resolvedEffects.push({
-          effectId: publicEffectId(context, index, "trash_source_when_empty"),
-          kind: "trash_source_when_empty",
-          visibility: effect.visibility,
-          side: context.controller,
-          amount: 1,
-          reason: effectReason(context),
-          ...(context.sourceDefinitionId
-            ? { sourceDefinitionId: context.sourceDefinitionId }
-            : {}),
-          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
         return;
       }

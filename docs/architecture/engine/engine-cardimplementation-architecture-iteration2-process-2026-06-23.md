@@ -85,11 +85,28 @@ Checks:
 
 ### Paket 3: Effect-Familien
 
-Status: geplant
+Status: abgeschlossen
 
 Ziel:
 
 - Weitere klar abgrenzbare Effektfamilien aus dem zentralen Interpreter herausziehen.
+
+Umgesetzt:
+
+- Neue Familie `bad-publicity-effects.ts` fuer `add_bad_publicity` und `add_bad_publicity_from_frame_up_history`.
+- Neue Familie `counter-effects.ts` fuer Source-Counter und Counter auf alle installierten Runner-Icebreaker.
+- Neue Familie `hosted-credit-effects.ts` fuer gehostete Credits und Trash-on-empty.
+- Neue Familie `advancement-effects.ts` fuer Advancement-Counter-Choice-Effekte.
+- Dispatcher-Kommentar bleibt als Leitplanke erhalten: Reihenfolge im Dispatcher, Verhalten in fokussierten Familien.
+
+Bewusste Restgrenze:
+
+- Die verbleibenden groesseren Bloecke im Interpreter sind ueberwiegend Hidden-Zone-, Run-, Search-/Install- und temporaere Credit-Pfade mit eng gekoppelten Host-Callbacks. Sie bleiben in diesem Paket im Dispatcher, bis die jeweiligen RuntimeDeps-/Host-Schnitte weiter stabilisiert sind.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
+- `corepack pnpm --filter @netgrid/engine test -- ability-engine game/engine-runtime-internal/runtime-module-size.test.ts` -> bestanden.
 
 ### Paket 4: Mechanics, Registry, RuntimeDeps und Helper
 
