@@ -15,7 +15,7 @@ import {
   startCorpArchivesToHqChoice,
   startRunnerGripTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./nonsearch-choice-handlers";
 
@@ -301,7 +301,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const discard = "discard" as CardInstanceId;
     const host = makeHost({ corpHq: [keep, discard] });
 
-    startSynchronizedAttackOnHqRetainChoice(host, sourceId);
+    startCorpHqRetainPaymentChoice(host, sourceId);
     host.playerAction = playerAction([`card_${keep}`]);
     const result = handleHiddenZoneNonSearchChoice(host);
 

@@ -74,7 +74,7 @@ export function handleCorpZoneChoice(
   return { handled: false };
 }
 
-export function startCorporateNegotiatingCenterChoice(
+export function startCorpHqAgendaRevealChoice(
   host: CorpZoneChoiceHandlerHost,
 ): void {
   const sourceIds = host.zones

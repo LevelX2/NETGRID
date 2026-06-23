@@ -142,7 +142,7 @@ export function startCorpArchivesToHqChoice(
   };
 }
 
-export function startSynchronizedAttackOnHqRetainChoice(
+export function startCorpHqRetainPaymentChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
@@ -192,7 +192,7 @@ export function startCorpDiscardHqWithRetainPaymentChoice(
     };
     return { publicPayload: host.legalAction.payload ?? {} };
   }
-  startSynchronizedAttackOnHqRetainChoice(host, input.sourceCardId);
+  startCorpHqRetainPaymentChoice(host, input.sourceCardId);
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
@@ -330,7 +330,7 @@ export function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
   return { publicPayload: payload };
 }
 
-export function startSmithsPawnshopChoice(
+export function startInstalledCardTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   pawnshopId: CardInstanceId,
 ): void {

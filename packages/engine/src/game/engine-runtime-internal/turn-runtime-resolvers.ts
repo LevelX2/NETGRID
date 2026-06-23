@@ -291,9 +291,9 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
@@ -301,7 +301,7 @@ import {
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startScoredAgendaHqShuffleCreditsChoice,
-  startCorporateNegotiatingCenterChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
@@ -2427,7 +2427,7 @@ function applyCorpStartOfTurnEffects(
     }
   }
   if (!state.pendingChoice)
-    startCorporateNegotiatingCenterChoice(
+    startCorpHqAgendaRevealChoice(
       corpZoneChoiceHandlerHost(
         state,
         { side: "corp", payload: {} } as LegalAction,
@@ -2688,7 +2688,7 @@ function applyRunnerStartOfTurnEffects(
       uniqueDirectLongtailKindForCard(state, cardId) ===
       "start_turn_trash_for_credits"
     )
-      startSmithsPawnshopChoice(
+      startInstalledCardTrashForCreditsChoice(
         hiddenZoneNonSearchChoiceHandlerHost(state, {
           side: "runner",
           payload: {},

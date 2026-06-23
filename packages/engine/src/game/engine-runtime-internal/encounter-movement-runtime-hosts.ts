@@ -275,9 +275,9 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
@@ -285,7 +285,7 @@ import {
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startScoredAgendaHqShuffleCreditsChoice,
-  startCorporateNegotiatingCenterChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {

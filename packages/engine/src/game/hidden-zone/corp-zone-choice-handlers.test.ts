@@ -13,7 +13,7 @@ import {
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startScoredAgendaHqShuffleCreditsChoice,
-  startCorporateNegotiatingCenterChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "./corp-zone-choice-handlers";
 
@@ -188,7 +188,7 @@ describe("corp zone choice handlers", () => {
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
     });
 
-    startCorporateNegotiatingCenterChoice(host);
+    startCorpHqAgendaRevealChoice(host);
 
     expect(host.state.pendingChoice?.source).toBe(
       "v1917.corp_negotiating_center:cnc_source:8",

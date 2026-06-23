@@ -289,9 +289,9 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
@@ -299,7 +299,7 @@ import {
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startScoredAgendaHqShuffleCreditsChoice,
-  startCorporateNegotiatingCenterChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
@@ -1026,7 +1026,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         throw new Error(
           "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
-      startSynchronizedAttackOnHqRetainChoice(
+      startCorpHqRetainPaymentChoice(
         hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
       );
