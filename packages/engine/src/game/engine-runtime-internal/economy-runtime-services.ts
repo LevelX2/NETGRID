@@ -727,7 +727,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
       const definition = definitionFor(state, agendaId);
       if (
         scoredAgendaKindForDefinition(definition) ===
-        "corporate_retreat_disable_on_rez_or_install"
+        "scored_agenda_credit_until_install_or_rez"
       )
         setCardCounter(state, agendaId, "mark", 0);
     }

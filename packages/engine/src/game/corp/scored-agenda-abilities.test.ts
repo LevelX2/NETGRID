@@ -195,7 +195,7 @@ describe("scored agenda activated abilities", () => {
           visibility: "hidden_info_barrier",
         },
         retreat: {
-          kind: "corporate_retreat_disable_on_rez_or_install",
+          kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
           visibility: "public",
@@ -216,7 +216,7 @@ describe("scored agenda activated abilities", () => {
       )?.label,
     ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "v1922_corporate_retreat",
+      "scored_agenda_credit_until_install_or_rez",
     );
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "v1919_scored_agenda_reveal_rd_top",
@@ -232,14 +232,14 @@ describe("scored agenda activated abilities", () => {
   it("handles Corporate Retreat credit execution", () => {
     const action = legalAction("gain_credit", {
       cardId: "retreat",
-      agendaAbility: "v1922_corporate_retreat",
+      agendaAbility: "scored_agenda_credit_until_install_or_rez",
       gainCreditsAmount: 2,
     });
     const { host } = makeHost({
       legalAction: action,
       implementations: {
         retreat: {
-          kind: "corporate_retreat_disable_on_rez_or_install",
+          kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
           visibility: "public",

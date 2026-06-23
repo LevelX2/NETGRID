@@ -3939,7 +3939,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_corporate_retreat",
+        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
     );
     const stolenState = structuredClone(state);
     stolenState.corp.scoreArea = stolenState.corp.scoreArea.filter(

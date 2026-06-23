@@ -96,11 +96,11 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
     },
     {
       id: "corporate_retreat_score_effect",
-      kind: "corporate_retreat_disable_on_rez_or_install",
+      kind: "scored_agenda_credit_until_install_or_rez",
       mode: "agenda_kind",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
         if (
-          scoredAgenda?.kind !== "corporate_retreat_disable_on_rez_or_install"
+          scoredAgenda?.kind !== "scored_agenda_credit_until_install_or_rez"
         )
           return;
         markCorporateRetreatAvailableOnScore(host, cardId, legalAction);

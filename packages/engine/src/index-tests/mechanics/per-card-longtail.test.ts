@@ -4297,7 +4297,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("uses Corporate Retreat until Corp installs or rezzes another card", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-      id: "onr_v1_corp_v1922_corporate_retreat",
+      id: "onr_v1_corp_scored_agenda_credit_until_install_or_rez",
       name: "O:NR V1.9.22 Corporate Retreat",
       cards: [
         { id: "onr_v1_195_corporate-retreat", quantity: 1 },
@@ -4348,7 +4348,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_corporate_retreat",
+        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -4378,13 +4378,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_corporate_retreat",
+        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
     );
     expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       cardDefinitionId: "onr_v1_195_corporate-retreat",
-      agendaAbility: "v1922_corporate_retreat",
+      agendaAbility: "scored_agenda_credit_until_install_or_rez",
       gainedCredits: 2,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -4404,7 +4404,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.payload?.agendaAbility === "v1922_corporate_retreat",
+        (action) => action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
       ),
     ).toBe(false);
 

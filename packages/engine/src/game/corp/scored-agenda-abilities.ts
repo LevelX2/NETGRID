@@ -277,7 +277,7 @@ export function buildScoredAgendaAbilityActionsForCard(
   }
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
-    "corporate_retreat_disable_on_rez_or_install"
+    "scored_agenda_credit_until_install_or_rez"
   ) {
     if (!isCorporateRetreatInstallCreditAbilityAvailable(host, agendaId))
       return { handled: true, actions };
@@ -290,7 +290,7 @@ export function buildScoredAgendaAbilityActionsForCard(
         [{ clicks: 1 }],
         {
           cardId: agendaId,
-          agendaAbility: "v1922_corporate_retreat",
+          agendaAbility: "scored_agenda_credit_until_install_or_rez",
           gainCreditsAmount: 2,
         },
       ),
@@ -335,7 +335,7 @@ export function handleScoredAgendaActivatedAbilityAction(
       resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
     };
   }
-  if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat")
+  if (legalAction.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez")
     return resolveCorporateRetreatAction(host);
   if (
     legalAction.payload?.agendaAbility ===
@@ -411,7 +411,7 @@ function resolveCorporateRetreatAction(
     throw new Error("Corporate Retreat ist nicht gescort.");
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation = host.cards.scoredAgendaForDefinition(definition);
-  if (implementation?.kind !== "corporate_retreat_disable_on_rez_or_install")
+  if (implementation?.kind !== "scored_agenda_credit_until_install_or_rez")
     throw new Error("Die Agenda-Aktion passt nicht zu Corporate Retreat.");
   if (!isCorporateRetreatInstallCreditAbilityAvailable(host, sourceCardId))
     throw new Error(
@@ -419,7 +419,7 @@ function resolveCorporateRetreatAction(
     );
   const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
   const expectedGain =
-    implementation.kind === "corporate_retreat_disable_on_rez_or_install"
+    implementation.kind === "scored_agenda_credit_until_install_or_rez"
       ? implementation.gainAmount
       : 0;
   if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
@@ -572,7 +572,7 @@ function isCorporateRetreatInstallCreditAbilityAvailable(
   return (
     host.state.corp.scoreArea.includes(agendaId) &&
     host.cards.scoredAgendaKindForDefinition(host.cards.definitionFor(agendaId)) ===
-      "corporate_retreat_disable_on_rez_or_install" &&
+      "scored_agenda_credit_until_install_or_rez" &&
     host.counters.cardCounter(agendaId, "mark") > 0
   );
 }

@@ -10,7 +10,7 @@ export function markCorporateRetreatAvailableOnScore(
   host.counters.setCardCounter(cardId, "mark", 1);
   if (legalAction)
     applySequencePayloadPatch(legalAction, {
-      agendaAbility: "v1922_corporate_retreat",
-      corporateRetreatAvailable: true,
+      agendaAbility: "scored_agenda_credit_until_install_or_rez",
+      scoredAgendaCreditAvailable: true,
     });
 }

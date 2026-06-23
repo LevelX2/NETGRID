@@ -1275,7 +1275,7 @@ export function publicContextForAction(
     context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number")
     context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
+  if (legalAction.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez") {
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;

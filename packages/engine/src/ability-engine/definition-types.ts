@@ -812,7 +812,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "corporate_retreat_disable_on_rez_or_install";
+      kind: "scored_agenda_credit_until_install_or_rez";
       counterType: Extract<CounterType, "mark">;
       gainAmount: number;
       visibility: Extract<EventVisibilityClass, "public">;
