@@ -159,6 +159,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` sechster Struktur-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts` kapselt RankedAlternatives-Debugverdrahtung.
+  - `packages/ai/src/index.ts` delegiert RankedAlternatives nur noch mit ScoreBreakdown-Callback.
+  - `packages/ai/src/public-export-contract.test.ts` verbietet den öffentlichen Re-Export des neuen Diagnostics-Moduls.
+  - `packages/ai/src/index.ts` sank weiter von 36.030 auf 36.029 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/diagnostics/semantic-runtime-debug.test.ts` grün, 64 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

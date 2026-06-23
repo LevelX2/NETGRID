@@ -139,6 +139,7 @@ import {
 } from "./diagnostics/decision-debug";
 import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "./diagnostics/coverage-selection-debug";
 import { buildSemanticRuntimeActionAlternatives } from "./diagnostics/semantic-runtime-action-alternatives";
+import { buildSemanticRuntimeRankedAlternatives } from "./diagnostics/semantic-runtime-ranked-alternatives";
 import {
   buildSemanticRuntimePlanSelectionDisplayContext,
   semanticRuntimeDebugActionDisplayScore,
@@ -148,7 +149,6 @@ import {
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
-  semanticRuntimeDebugRankedAlternatives,
   semanticRuntimeDebugShadowTopItems,
   semanticRuntimeDebugTacticalPlanItems,
   semanticRuntimeDebugTargetChoiceShadowItems,
@@ -4221,7 +4221,7 @@ function semanticRuntimeRankedAlternatives(
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
-  return semanticRuntimeDebugRankedAlternatives({
+  return buildSemanticRuntimeRankedAlternatives({
     rankedChoices,
     selectedActionId,
     scoreBreakdownForChoice: (choice) =>
@@ -4231,7 +4231,6 @@ function semanticRuntimeRankedAlternatives(
         choice.scopeId,
         choice.exclusion,
       ),
-    scrubEvidence,
   });
 }
 
