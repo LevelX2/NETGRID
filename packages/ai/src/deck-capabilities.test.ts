@@ -124,6 +124,34 @@ describe("DeckCapabilityProfile", () => {
     );
     expect(facts.join("\n")).not.toMatch(/onr_v1_|Codecracker|Dwarf|Broker/);
   });
+
+  it("marks text-only capability detection as transition fallback evidence", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("fallback-breaker-1", "local_text_only_breaker", "runner", "program", {
+        title: "Local Text Breaker",
+        rulesText: "Break one ice subroutine.",
+      }),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.evidence).toContain(
+      "capability_source_priority:structured>roles>visible_board>text_fallback",
+    );
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      cardId: "local_text_only_breaker",
+      confidence: "low",
+      evidence: expect.arrayContaining([
+        "capability_source:text_fallback",
+        "text_fallback:transition_only",
+      ]),
+    });
+  });
 });
 
 function runnerSnapshot(

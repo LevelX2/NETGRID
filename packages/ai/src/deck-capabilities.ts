@@ -190,6 +190,8 @@ type CardCapabilityRecord = {
 };
 
 const AI_HINTS = createAiHintsByCard();
+const CAPABILITY_SOURCE_PRIORITY =
+  "capability_source_priority:structured>roles>visible_board>text_fallback";
 const BREAKER_COVERAGES: BreakerCoverageKind[] = [
   "wall",
   "code_gate",
@@ -307,6 +309,7 @@ function buildRunnerDeckCapabilityProfile(
     missingCapabilities,
     confidence,
     evidence: [
+      CAPABILITY_SOURCE_PRIORITY,
       params.deckSnapshot ? "deck_snapshot:present" : "deck_snapshot:absent",
       `runner_breaker_inventory:${breakerInventory.length}`,
       `runner_search_tools:${searchAccess.tools.length}`,
@@ -337,6 +340,7 @@ function buildCorpDeckCapabilityProfile(
     missingCapabilities: [],
     confidence,
     evidence: [
+      CAPABILITY_SOURCE_PRIORITY,
       params.deckSnapshot ? "deck_snapshot:present" : "deck_snapshot:absent",
       `corp_ice_known:${rezReserveProfile.iceKnownInDeck}`,
       `corp_bank_tools:${economyBankTools.length}`,
@@ -447,10 +451,12 @@ function breakerCapabilityFromRecord(
   const coverage = breakerCoverageForRecord(record);
   if (coverage.length === 0) return undefined;
   const visible = record.visibleCards[0];
+  const roleBasedBreaker =
+    record.roles.some((role) => role.startsWith("breaker_")) ||
+    record.subtypes.some((subtype) => /icebreaker|fracter|decoder|killer/i.test(subtype));
   const confidence: DeckCapabilityConfidence = breakerProfile
     ? "high"
-    : record.roles.some((role) => role.startsWith("breaker_")) ||
-        record.subtypes.some((subtype) => /icebreaker|fracter|decoder|killer/i.test(subtype))
+    : roleBasedBreaker
       ? "medium"
       : "low";
   return {
@@ -483,6 +489,10 @@ function breakerCapabilityFromRecord(
     locations: sortedUnique(record.locations.length > 0 ? record.locations : ["unavailable"]),
     confidence,
     evidence: [
+      ...capabilitySourceEvidence({
+        structured: Boolean(breakerProfile),
+        roleBased: roleBasedBreaker,
+      }),
       breakerProfile ? "breaker_profile:structured" : `breaker_profile:${confidence}`,
       ...coverage.map((entry) => `coverage:${entry}`),
     ],
@@ -634,6 +644,9 @@ function searchAccessToolForRecord(
     /breaker_search/.test(signals);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
+  const structuredSearch =
+    /program_search|breaker_search/.test(signals) ||
+    record.roles.some((role) => role.includes("search"));
   return {
     cardId: record.cardId,
     title: record.title,
@@ -648,6 +661,10 @@ function searchAccessToolForRecord(
       ? "high"
       : "medium",
     evidence: [
+      ...capabilitySourceEvidence({
+        structured: structuredSearch,
+        roleBased: record.roles.length > 0 || record.planRoles.length > 0,
+      }),
       canSearchPrograms ? "search_programs:true" : "search_programs:false",
       canSearchBreakers ? "search_breakers:true" : "search_breakers:false",
       `status:${status}`,
@@ -685,6 +702,9 @@ function economyBankToolForRecord(
     actionMatchesBankCashOut(action, record),
   ) ?? false;
   const currentBankAmount = currentVisibleBankAmount(record.visibleCards);
+  const structuredBank =
+    /temporary_resource_bank|counter_bank/.test(signals) ||
+    currentBankAmount !== undefined;
   return {
     cardId: record.cardId,
     title: record.title,
@@ -701,6 +721,10 @@ function economyBankToolForRecord(
       ? "high"
       : "medium",
     evidence: [
+      ...capabilitySourceEvidence({
+        structured: structuredBank,
+        roleBased: record.roles.length > 0 || record.planRoles.length > 0,
+      }),
       `bank_status:${primaryStatus(record.locations)}`,
       buildActionLegal ? "bank_build_legal:true" : "bank_build_legal:false",
       cashOutActionLegal ? "bank_cashout_legal:true" : "bank_cashout_legal:false",
@@ -847,6 +871,15 @@ function normalizedRecordText(record: CardCapabilityRecord): string {
     ...record.roles,
     ...record.planRoles,
   ].join(" ").toLowerCase();
+}
+
+function capabilitySourceEvidence(input: {
+  structured: boolean;
+  roleBased: boolean;
+}): string[] {
+  if (input.structured) return ["capability_source:structured"];
+  if (input.roleBased) return ["capability_source:role_or_subtype"];
+  return ["capability_source:text_fallback", "text_fallback:transition_only"];
 }
 
 function actionSourceMatchesRecord(
