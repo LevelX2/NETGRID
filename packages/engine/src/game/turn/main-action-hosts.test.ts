@@ -243,10 +243,10 @@ function hostFor(
       ),
       buildRunnerValuPakInstallAction: unexpected("valu-pak install"),
       buildRunnerValuPakSequenceEndAction: unexpected("valu-pak end"),
-      buildRunnerShellTradersSetAsideAction: unexpected(
+      buildRunnerDelayedInstallSetAsideAction: unexpected(
         "shell traders set aside",
       ),
-      buildRunnerShellTradersRemoveCounterAction: unexpected(
+      buildRunnerDelayedInstallRemoveCounterAction: unexpected(
         "shell traders remove counter",
       ),
     },
@@ -381,9 +381,9 @@ function hostFor(
       edgerunnerTempsInstallActionsRemaining: () => 0,
       valuPakProgramInstallActionsRemaining: () => 0,
       runnerInstallableProgramIdsForValuPak: () => [],
-      shellTradersPrepareTargetIds: () => [],
-      shellTradersInstallCost: () => 0,
-      shellTradersPreparedTargetIds: () => [],
+      delayedInstallPrepareTargetIds: () => [],
+      delayedInstallCounterCost: () => 0,
+      delayedInstallPreparedTargetIds: () => [],
     },
     callbacks: {
       mustServer: unexpected("mustServer"),

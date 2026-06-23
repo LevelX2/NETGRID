@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {
   buildRunnerHiddenStackProgramInstallAction,
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "./runner-special-zone-install-actions";
@@ -88,7 +88,7 @@ describe("runner special zone install action builders", () => {
       3,
     );
 
-    const setAside = buildRunnerShellTradersSetAsideAction(state, {
+    const setAside = buildRunnerDelayedInstallSetAsideAction(state, {
       sourceCardId,
       sourceTitle: "The Shell Traders",
       sourceDefinitionId,
@@ -96,7 +96,7 @@ describe("runner special zone install action builders", () => {
       targetDefinition,
       shellCounterAmount: 3,
     });
-    const removeCounter = buildRunnerShellTradersRemoveCounterAction(state, {
+    const removeCounter = buildRunnerDelayedInstallRemoveCounterAction(state, {
       sourceCardId,
       sourceTitle: "The Shell Traders",
       sourceDefinitionId,

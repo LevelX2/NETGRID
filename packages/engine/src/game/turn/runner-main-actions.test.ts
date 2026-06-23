@@ -203,10 +203,10 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       ),
       buildRunnerValuPakInstallAction: unexpected("valu-pak install"),
       buildRunnerValuPakSequenceEndAction: unexpected("valu-pak end"),
-      buildRunnerShellTradersSetAsideAction: unexpected(
+      buildRunnerDelayedInstallSetAsideAction: unexpected(
         "shell traders set aside",
       ),
-      buildRunnerShellTradersRemoveCounterAction: unexpected(
+      buildRunnerDelayedInstallRemoveCounterAction: unexpected(
         "shell traders remove counter",
       ),
     },
@@ -276,9 +276,9 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       valuPakProgramInstallActionsRemaining: () => 0,
       runnerInstallableProgramIdsForValuPak: () => [],
       specialZoneHarnessActions: () => [],
-      shellTradersPrepareTargetIds: () => [],
-      shellTradersInstallCost: () => 0,
-      shellTradersPreparedTargetIds: () => [],
+      delayedInstallPrepareTargetIds: () => [],
+      delayedInstallCounterCost: () => 0,
+      delayedInstallPreparedTargetIds: () => [],
     },
     cardImplementation: {
       runtimeDeps: {},

@@ -206,10 +206,10 @@ export function createMainActionHostComposition(
           actions.buildRunnerValuPakInstallAction,
         buildRunnerValuPakSequenceEndAction:
           actions.buildRunnerValuPakSequenceEndAction,
-        buildRunnerShellTradersSetAsideAction:
-          actions.buildRunnerShellTradersSetAsideAction,
-        buildRunnerShellTradersRemoveCounterAction:
-          actions.buildRunnerShellTradersRemoveCounterAction,
+        buildRunnerDelayedInstallSetAsideAction:
+          actions.buildRunnerDelayedInstallSetAsideAction,
+        buildRunnerDelayedInstallRemoveCounterAction:
+          actions.buildRunnerDelayedInstallRemoveCounterAction,
       },
       cards: {
         definitionFor: cards.definitionFor,
@@ -284,10 +284,10 @@ export function createMainActionHostComposition(
         runnerInstallableProgramIdsForValuPak:
           specialZones.runnerInstallableProgramIdsForValuPak,
         specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        shellTradersPrepareTargetIds: specialZones.shellTradersPrepareTargetIds,
-        shellTradersInstallCost: specialZones.shellTradersInstallCost,
-        shellTradersPreparedTargetIds:
-          specialZones.shellTradersPreparedTargetIds,
+        delayedInstallPrepareTargetIds: specialZones.delayedInstallPrepareTargetIds,
+        delayedInstallCounterCost: specialZones.delayedInstallCounterCost,
+        delayedInstallPreparedTargetIds:
+          specialZones.delayedInstallPreparedTargetIds,
       },
       cardImplementation: {
         runtimeDeps: cardImplementation.runtimeDeps,

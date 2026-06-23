@@ -58,11 +58,11 @@ export {
 } from "./runner-program-trash-install-actions";
 export {
   buildRunnerHiddenStackProgramInstallAction,
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
-  type RunnerShellTradersRemoveCounterActionInput,
-  type RunnerShellTradersSetAsideActionInput,
+  type RunnerDelayedInstallRemoveCounterActionInput,
+  type RunnerDelayedInstallSetAsideActionInput,
   type RunnerValuPakInstallActionInput,
 } from "./runner-special-zone-install-actions";

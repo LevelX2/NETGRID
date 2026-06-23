@@ -27,8 +27,8 @@ export type RunnerMainActionGenerationHost = {
     buildRunnerStackSearchProgramToGripAction: HostFn<LegalAction>;
     buildRunnerValuPakInstallAction: HostFn<LegalAction>;
     buildRunnerValuPakSequenceEndAction: HostFn<LegalAction>;
-    buildRunnerShellTradersSetAsideAction: HostFn<LegalAction>;
-    buildRunnerShellTradersRemoveCounterAction: HostFn<LegalAction>;
+    buildRunnerDelayedInstallSetAsideAction: HostFn<LegalAction>;
+    buildRunnerDelayedInstallRemoveCounterAction: HostFn<LegalAction>;
   };
   cards: {
     definitionFor: HostFn<any>;
@@ -90,9 +90,9 @@ export type RunnerMainActionGenerationHost = {
     valuPakProgramInstallActionsRemaining: HostFn<number>;
     runnerInstallableProgramIdsForValuPak: HostFn<string[]>;
     specialZoneHarnessActions: HostFn<LegalAction[]>;
-    shellTradersPrepareTargetIds: HostFn<string[]>;
-    shellTradersInstallCost: HostFn<number>;
-    shellTradersPreparedTargetIds: HostFn<string[]>;
+    delayedInstallPrepareTargetIds: HostFn<string[]>;
+    delayedInstallCounterCost: HostFn<number>;
+    delayedInstallPreparedTargetIds: HostFn<string[]>;
   };
   cardImplementation: {
     runtimeDeps: unknown;
@@ -180,10 +180,10 @@ export function buildRunnerMainActions(
     host.actions.buildRunnerValuPakInstallAction;
   const buildRunnerValuPakSequenceEndAction =
     host.actions.buildRunnerValuPakSequenceEndAction;
-  const buildRunnerShellTradersSetAsideAction =
-    host.actions.buildRunnerShellTradersSetAsideAction;
-  const buildRunnerShellTradersRemoveCounterAction =
-    host.actions.buildRunnerShellTradersRemoveCounterAction;
+  const buildRunnerDelayedInstallSetAsideAction =
+    host.actions.buildRunnerDelayedInstallSetAsideAction;
+  const buildRunnerDelayedInstallRemoveCounterAction =
+    host.actions.buildRunnerDelayedInstallRemoveCounterAction;
   const definitionFor = host.cards.definitionFor;
   const mustServer = host.servers.mustServer;
   const serverChoiceDisplayLabel = host.servers.serverChoiceDisplayLabel;
@@ -215,11 +215,11 @@ export function buildRunnerMainActions(
   const runnerInstallableProgramIdsForValuPak =
     host.specialZones.runnerInstallableProgramIdsForValuPak;
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
-  const shellTradersPrepareTargetIds =
-    host.specialZones.shellTradersPrepareTargetIds;
-  const shellTradersInstallCost = host.specialZones.shellTradersInstallCost;
-  const shellTradersPreparedTargetIds =
-    host.specialZones.shellTradersPreparedTargetIds;
+  const delayedInstallPrepareTargetIds =
+    host.specialZones.delayedInstallPrepareTargetIds;
+  const delayedInstallCounterCost = host.specialZones.delayedInstallCounterCost;
+  const delayedInstallPreparedTargetIds =
+    host.specialZones.delayedInstallPreparedTargetIds;
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
@@ -1054,11 +1054,11 @@ export function buildRunnerMainActions(
         }
       }
       if (definition.id === SHELL_TRADERS_ID) {
-        for (const targetCardId of shellTradersPrepareTargetIds(state)) {
+        for (const targetCardId of delayedInstallPrepareTargetIds(state)) {
           const targetDefinition = definitionFor(state, targetCardId);
-          const shellCounterAmount = shellTradersInstallCost(targetDefinition);
+          const shellCounterAmount = delayedInstallCounterCost(targetDefinition);
           actions.push(
-            buildRunnerShellTradersSetAsideAction(state, {
+            buildRunnerDelayedInstallSetAsideAction(state, {
               sourceCardId: resourceId,
               sourceTitle: definition.title,
               sourceDefinitionId: SHELL_TRADERS_ID,
@@ -1069,10 +1069,10 @@ export function buildRunnerMainActions(
           );
         }
         if (state.runner.credits >= 1) {
-          for (const targetCardId of shellTradersPreparedTargetIds(state)) {
+          for (const targetCardId of delayedInstallPreparedTargetIds(state)) {
             const remainingCounters = cardCounter(state, targetCardId, "shell");
             actions.push(
-              buildRunnerShellTradersRemoveCounterAction(state, {
+              buildRunnerDelayedInstallRemoveCounterAction(state, {
                 sourceCardId: resourceId,
                 sourceTitle: definition.title,
                 sourceDefinitionId: SHELL_TRADERS_ID,

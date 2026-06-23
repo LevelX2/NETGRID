@@ -15,10 +15,10 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
-  applyShellTradersStartOfTurn,
+  applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
-  shellTradersPreparedTargetIds,
-  shellTradersPrepareTargetIds,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "./runner-special-trigger-execution";
@@ -108,7 +108,7 @@ describe("runner special trigger execution", () => {
       shellCounterAmount: 3,
     }, [{ clicks: 1 }]);
 
-    expect(shellTradersPrepareTargetIds(host)).toEqual([targetId]);
+    expect(delayedInstallPrepareTargetIds(host)).toEqual([targetId]);
     handleRunnerSpecialTriggerExecution(host, action);
 
     expect(state.runner.clicks).toBe(1);
@@ -160,7 +160,7 @@ describe("runner special trigger execution", () => {
       targetCardDefinitionId: "program_a",
     }, [{ credits: 1 }]);
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([targetId]);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([targetId]);
     handleRunnerSpecialTriggerExecution(host, action);
 
     expect(state.runner.credits).toBe(1);
@@ -208,8 +208,8 @@ describe("runner special trigger execution", () => {
     });
     const effects: ResolvedGameEffect[] = [];
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
-    applyShellTradersStartOfTurn(host, effects);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([]);
+    applyDelayedInstallStartOfTurn(host, effects);
 
     expect(effects).toEqual([]);
     expect(counter(state, targetId, "shell")).toBe(1);
@@ -251,15 +251,15 @@ describe("runner special trigger execution", () => {
     });
     const effects: ResolvedGameEffect[] = [];
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([targetId]);
-    applyShellTradersStartOfTurn(host, effects);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([targetId]);
+    applyDelayedInstallStartOfTurn(host, effects);
 
     expect(counter(state, targetId, "shell")).toBe(1);
     expect(state.specialZones?.setAside).toEqual([targetId]);
     expect(state.runner.rig.programs).toEqual([]);
     expect(state.runner.memoryUsed).toBe(4);
     expect(effects).toHaveLength(1);
-    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([]);
   });
 
   it("starts the same Self-Modifying Code hidden-zone search after trashing source", () => {

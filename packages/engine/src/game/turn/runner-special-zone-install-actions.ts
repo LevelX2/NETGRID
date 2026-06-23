@@ -12,7 +12,7 @@ export type RunnerValuPakInstallActionInput = {
   definition: CardDefinition;
 };
 
-export type RunnerShellTradersSetAsideActionInput = {
+export type RunnerDelayedInstallSetAsideActionInput = {
   sourceCardId: CardInstanceId;
   sourceTitle: string;
   sourceDefinitionId: CardDefinitionId;
@@ -21,7 +21,7 @@ export type RunnerShellTradersSetAsideActionInput = {
   shellCounterAmount: number;
 };
 
-export type RunnerShellTradersRemoveCounterActionInput = {
+export type RunnerDelayedInstallRemoveCounterActionInput = {
   sourceCardId: CardInstanceId;
   sourceTitle: string;
   sourceDefinitionId: CardDefinitionId;
@@ -64,9 +64,9 @@ export function buildRunnerValuPakSequenceEndAction(
   );
 }
 
-export function buildRunnerShellTradersSetAsideAction(
+export function buildRunnerDelayedInstallSetAsideAction(
   state: GameState,
-  input: RunnerShellTradersSetAsideActionInput,
+  input: RunnerDelayedInstallSetAsideActionInput,
 ): LegalAction {
   return buildLegalAction(
     state,
@@ -103,9 +103,9 @@ export function buildRunnerShellTradersSetAsideAction(
   );
 }
 
-export function buildRunnerShellTradersRemoveCounterAction(
+export function buildRunnerDelayedInstallRemoveCounterAction(
   state: GameState,
-  input: RunnerShellTradersRemoveCounterActionInput,
+  input: RunnerDelayedInstallRemoveCounterActionInput,
 ): LegalAction {
   return buildLegalAction(
     state,
