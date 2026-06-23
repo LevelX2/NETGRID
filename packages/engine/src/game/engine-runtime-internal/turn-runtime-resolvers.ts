@@ -2974,7 +2974,7 @@ function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
     );
   }
 
-  const deepThoughtSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
+  const privateRdLookSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
     const implementation = virusCounterImplementationForCard(state, cardId);
     const start = implementation?.startOfRunnerTurn;
     return (
@@ -2982,11 +2982,11 @@ function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
       cardCounter(state, cardId, "virus") >= start.threshold
     );
   });
-  if (!deepThoughtSourceCardId || state.corp.rd.length === 0) return false;
+  if (!privateRdLookSourceCardId || state.corp.rd.length === 0) return false;
   return startRunnerPrivateLookChoice(
     state,
-    deepThoughtSourceCardId,
-    definitionFor(state, deepThoughtSourceCardId).id,
+    privateRdLookSourceCardId,
+    definitionFor(state, privateRdLookSourceCardId).id,
     "rd",
     1,
     "ability",
