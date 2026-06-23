@@ -20,7 +20,10 @@ import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import { deriveObservedRemoteNoProgressAccessMemory } from "./memory/remote-access-outcome";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
-import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  type VisibleIceRunHazard,
+} from "./visible-run-analysis";
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
 import {
   assessBlinkRiskForRunAction,
@@ -251,6 +254,13 @@ export type RunnerRunTargetEvaluation = {
   pathPassability: RunnerPathPassability;
   pathCost: number;
   creditsAfterRun: number;
+  visibleIceRunHazards?: VisibleIceRunHazard[];
+  visibleIceHazardPenalty?: number;
+  visibleIceHazardAvoidanceCost?: number;
+  creditsAfterAvoidingVisibleIceHazards?: number;
+  expectedTagsFromVisibleIce?: number;
+  unavoidableVisibleIceHazardCount?: number;
+  visibleTraceTagHazardUnavoidable?: boolean;
   stealOrTrashAffordable: boolean | "unknown";
   installedRunPayoff: RunnerInstalledRunPayoff;
   runActionPayoff: RunnerInstalledRunPayoff;
@@ -273,7 +283,11 @@ export type RunnerEconomyPosture = {
   buildEconomyBeforePressure: boolean;
   bankToolsRelevant: boolean;
   fundingNeed: boolean;
-  recommendation: "stable" | "build_economy" | "cash_out_bank" | "can_spend_for_high_payoff";
+  recommendation:
+    | "stable"
+    | "build_economy"
+    | "cash_out_bank"
+    | "can_spend_for_high_payoff";
   evidence: string[];
 };
 
@@ -317,8 +331,9 @@ export function evaluateRunnerRunTargets(
     .map((projection) =>
       evaluateRunnerRunTarget(params, projection, economyPosture),
     )
-    .filter((evaluation): evaluation is RunnerRunTargetEvaluation =>
-      evaluation !== undefined,
+    .filter(
+      (evaluation): evaluation is RunnerRunTargetEvaluation =>
+        evaluation !== undefined,
     )
     .sort(
       (left, right) =>
@@ -388,8 +403,8 @@ function evaluateRunnerRunTarget(
     projection.action,
     { accessPayoff, scoreThreat },
   );
-  const riskyUniversalCoverage = hasRiskyUniversalPressure(params) &&
-    (server?.ice.length ?? 0) > 0;
+  const riskyUniversalCoverage =
+    hasRiskyUniversalPressure(params) && (server?.ice.length ?? 0) > 0;
   const basePathPassability = pathPassabilityFor(path);
   const spendLimitBlocksPath =
     projection.spendLimit !== undefined &&
@@ -405,6 +420,15 @@ function evaluateRunnerRunTarget(
   const unproductiveVisibleRunPath = runnerRunTargetPathIsUnproductive(path);
   const visibleTraceEndRunLockUnavoidable =
     path.knownPathBlockedByUnavoidableTraceRunLock === true;
+  const visibleIceHazardPenalty = path.visibleIceHazardPenalty ?? 0;
+  const visibleIceHazardAvoidanceCost = path.visibleIceHazardAvoidanceCost ?? 0;
+  const creditsAfterAvoidingVisibleIceHazards =
+    path.creditsAfterAvoidingVisibleIceHazards ?? creditsAfterRun;
+  const expectedTagsFromVisibleIce = path.expectedTagsFromVisibleIce ?? 0;
+  const unavoidableVisibleIceHazardCount =
+    path.unavoidableVisibleIceHazardCount ?? 0;
+  const visibleTraceTagHazardUnavoidable =
+    path.visibleTraceTagHazardUnavoidable === true;
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
@@ -415,6 +439,12 @@ function evaluateRunnerRunTarget(
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
     unproductiveVisibleRunPath,
+    visibleIceHazardPenalty,
+    visibleIceHazardAvoidanceCost,
+    creditsAfterAvoidingVisibleIceHazards,
+    expectedTagsFromVisibleIce,
+    unavoidableVisibleIceHazardCount,
+    visibleTraceTagHazardUnavoidable,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
@@ -431,6 +461,7 @@ function evaluateRunnerRunTarget(
     multiaccessAvailable,
     installedRunPayoffScore: combinedRunPayoff.scoreBonus,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
+    visibleIceHazardPenalty,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
@@ -448,6 +479,15 @@ function evaluateRunnerRunTarget(
     pathPassability,
     pathCost: path.visibleBreakCost ?? 0,
     creditsAfterRun,
+    ...(path.visibleIceRunHazards?.length
+      ? { visibleIceRunHazards: path.visibleIceRunHazards }
+      : {}),
+    visibleIceHazardPenalty,
+    visibleIceHazardAvoidanceCost,
+    creditsAfterAvoidingVisibleIceHazards,
+    expectedTagsFromVisibleIce,
+    unavoidableVisibleIceHazardCount,
+    visibleTraceTagHazardUnavoidable,
     stealOrTrashAffordable,
     installedRunPayoff,
     runActionPayoff,
@@ -467,6 +507,15 @@ function evaluateRunnerRunTarget(
       `path_passability:${pathPassability}`,
       `path_cost:${path.visibleBreakCost ?? 0}`,
       `credits_after_run:${creditsAfterRun}`,
+      `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
+      `visible_ice_hazard_avoidance_cost:${visibleIceHazardAvoidanceCost}`,
+      `credits_after_avoiding_visible_ice_hazards:${creditsAfterAvoidingVisibleIceHazards}`,
+      `expected_tags_from_visible_ice:${expectedTagsFromVisibleIce}`,
+      `unavoidable_visible_ice_hazard_count:${unavoidableVisibleIceHazardCount}`,
+      `visible_trace_tag_hazard_unavoidable:${visibleTraceTagHazardUnavoidable}`,
+      ...(path.visibleIceRunHazards ?? [])
+        .flatMap((hazard) => hazard.evidence)
+        .slice(0, 16),
       `multiaccess_available:${multiaccessAvailable}`,
       `installed_run_payoff_score:${installedRunPayoff.scoreBonus}`,
       `run_action_payoff_score:${runActionPayoff.scoreBonus}`,
@@ -537,7 +586,11 @@ function runActionPayoffForTarget(
     values.futureSetupValue += 35;
     evidence.add(`run_action_payoff:${targetKind}:multi_run_sequence`);
   }
-  if (projection.riskSignals.some((signal) => signal.includes("tag") || signal.includes("damage"))) {
+  if (
+    projection.riskSignals.some(
+      (signal) => signal.includes("tag") || signal.includes("damage"),
+    )
+  ) {
     values.riskPenalty += 25;
     evidence.add(`run_action_payoff:${targetKind}:risk_penalty`);
   }
@@ -560,7 +613,8 @@ function projectionHasAccessSignal(
   if (kind === "multiaccess") {
     return signals.some((signal) => {
       if (!signal.includes("multiaccess")) return false;
-      if (signal.includes("hq") || signal.includes("hand")) return targetKind === "hq";
+      if (signal.includes("hq") || signal.includes("hand"))
+        return targetKind === "hq";
       if (
         signal.includes("rnd") ||
         signal.includes("rd") ||
@@ -574,17 +628,23 @@ function projectionHasAccessSignal(
     });
   }
   if (kind === "hq_info") {
-    return targetKind === "hq" &&
-      signals.some((signal) => signal.includes("hq_info"));
+    return (
+      targetKind === "hq" &&
+      signals.some((signal) => signal.includes("hq_info"))
+    );
   }
   if (kind === "topdeck_info") {
-    return targetKind === "rd" &&
+    return (
+      targetKind === "rd" &&
       signals.some(
-        (signal) => signal.includes("topdeck") || signal.includes("rnd_topdeck"),
-      );
+        (signal) =>
+          signal.includes("topdeck") || signal.includes("rnd_topdeck"),
+      )
+    );
   }
   return signals.some(
-    (signal) => signal.includes("free_trash") || signal.includes("access_trash"),
+    (signal) =>
+      signal.includes("free_trash") || signal.includes("access_trash"),
   );
 }
 
@@ -603,8 +663,7 @@ function combineRunPayoffs(
         installedRunPayoff.purgeTaxValue + runActionPayoff.purgeTaxValue,
       economyValue:
         installedRunPayoff.economyValue + runActionPayoff.economyValue,
-      riskPenalty:
-        installedRunPayoff.riskPenalty + runActionPayoff.riskPenalty,
+      riskPenalty: installedRunPayoff.riskPenalty + runActionPayoff.riskPenalty,
     },
     installedRunPayoff.multiaccessAvailable ||
       runActionPayoff.multiaccessAvailable,
@@ -663,7 +722,9 @@ function payloadStringValues(
     const value = payload[key];
     if (typeof value === "string") return [value];
     if (Array.isArray(value)) {
-      return value.filter((entry): entry is string => typeof entry === "string");
+      return value.filter(
+        (entry): entry is string => typeof entry === "string",
+      );
     }
     if (
       value &&
@@ -689,7 +750,11 @@ function payloadSearchText(action: LegalAction): string {
   const payload = payloadRecord(action);
   return Object.entries(payload)
     .flatMap(([key, value]) => {
-      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
         return [`${key}:${value}`];
       }
       if (Array.isArray(value)) {
@@ -870,6 +935,12 @@ function recommendationForRunTarget(params: {
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
   unproductiveVisibleRunPath: boolean;
+  visibleIceHazardPenalty: number;
+  visibleIceHazardAvoidanceCost: number;
+  creditsAfterAvoidingVisibleIceHazards: number;
+  expectedTagsFromVisibleIce: number;
+  unavoidableVisibleIceHazardCount: number;
+  visibleTraceTagHazardUnavoidable: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   blinkRiskAssessment?: BlinkRiskAssessment;
@@ -897,6 +968,22 @@ function recommendationForRunTarget(params: {
   }
   if (params.unproductiveVisibleRunPath) {
     return "do_not_run_now";
+  }
+  if (
+    params.visibleTraceTagHazardUnavoidable &&
+    !highValuePayoff(params.accessPayoff) &&
+    !params.scoreThreat
+  ) {
+    return "gain_credits_first";
+  }
+  if (
+    params.unavoidableVisibleIceHazardCount > 0 &&
+    !highValuePayoff(params.accessPayoff) &&
+    !params.scoreThreat
+  ) {
+    return params.expectedTagsFromVisibleIce > 0
+      ? "gain_credits_first"
+      : "setup_first";
   }
   if (params.pathPassability === "blocked_missing_coverage") {
     return "find_breaker_first";
@@ -926,7 +1013,8 @@ function recommendationForRunTarget(params: {
   if (params.knownAccessState === "known_no_current_payoff") {
     if (params.targetKind === "remote") {
       if (
-        params.rankedAccessTarget?.commitment.reason === "insufficient_credits" ||
+        params.rankedAccessTarget?.commitment.reason ===
+          "insufficient_credits" ||
         params.rankedAccessTarget?.commitment.reason === "reserve_would_break"
       ) {
         return "gain_credits_first";
@@ -979,6 +1067,7 @@ function scoreRunTargetEvaluation(params: {
   multiaccessAvailable: boolean;
   installedRunPayoffScore: number;
   accessPayoffScoreAdjustment: number;
+  visibleIceHazardPenalty: number;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   blinkRiskAssessment?: BlinkRiskAssessment;
 }): number {
@@ -990,11 +1079,14 @@ function scoreRunTargetEvaluation(params: {
         ? -1200
         : -420;
   const reservePenalty =
-    params.creditsAfterRun < params.economyPosture.minimumCreditFloor ? -160 : 0;
+    params.creditsAfterRun < params.economyPosture.minimumCreditFloor
+      ? -160
+      : 0;
   const multiaccessBonus = params.multiaccessAvailable ? 80 : 0;
   const installedRunPayoffBonus = params.installedRunPayoffScore;
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
+  const visibleIceHazardPenalty = -Math.max(0, params.visibleIceHazardPenalty);
   const blinkRiskPenalty = blinkRiskScorePenalty(params.blinkRiskAssessment);
   const accessOutcomeMemoryPenalty =
     params.targetKind === "remote" &&
@@ -1010,6 +1102,7 @@ function scoreRunTargetEvaluation(params: {
     installedRunPayoffBonus +
     scoreThreatBonus +
     params.accessPayoffScoreAdjustment +
+    visibleIceHazardPenalty +
     blinkRiskPenalty +
     accessOutcomeMemoryPenalty +
     recommendationScore
@@ -1036,7 +1129,9 @@ function scoreForPayoff(payoff: RunnerAccessPayoff): number {
   }
 }
 
-function recommendationRank(recommendation: RunnerRunTargetRecommendation): number {
+function recommendationRank(
+  recommendation: RunnerRunTargetRecommendation,
+): number {
   switch (recommendation) {
     case "run_now":
       return 6;
@@ -1061,7 +1156,9 @@ function recommendationRank(recommendation: RunnerRunTargetRecommendation): numb
   }
 }
 
-function pathPassabilityFor(path: ReturnType<typeof assessKnownRezzedIcePath>): RunnerPathPassability {
+function pathPassabilityFor(
+  path: ReturnType<typeof assessKnownRezzedIcePath>,
+): RunnerPathPassability {
   if (!path.blocked) return "reachable";
   if (path.knownPathBlockedByHardUnbrokenEffect) {
     return path.unpayableReason === "ice_unbreakable"
@@ -1163,14 +1260,18 @@ function installedRunPayoffContributionForHint(
     multiaccessAvailable: false,
     evidence: [],
   };
-  const successfulRunTriggerMatches = effects.some((effect) =>
-    effect.kind === "persistent_counter_effect" &&
-    effect.timing === "successful_run" &&
-    effectScopeMatchesTarget(effect.scope, targetKind)
+  const successfulRunTriggerMatches = effects.some(
+    (effect) =>
+      effect.kind === "persistent_counter_effect" &&
+      effect.timing === "successful_run" &&
+      effectScopeMatchesTarget(effect.scope, targetKind),
   );
   for (const effect of effects) {
     const target = effectTarget(effect);
-    if (effect.kind === "multiaccess" && effectScopeMatchesTarget(effect.scope, targetKind)) {
+    if (
+      effect.kind === "multiaccess" &&
+      effectScopeMatchesTarget(effect.scope, targetKind)
+    ) {
       contribution.multiaccessAvailable = true;
       contribution.immediateAccessValue += 90;
       contribution.evidence.push(
@@ -1299,9 +1400,7 @@ function installedRunPayoffContributionForHint(
       (effect.timing === "action" || effect.timing === "successful_run")
     ) {
       contribution.riskPenalty += 25;
-      contribution.evidence.push(
-        `installed_run_payoff:${targetKind}:risk_tax`,
-      );
+      contribution.evidence.push(`installed_run_payoff:${targetKind}:risk_tax`);
     }
   }
   const rawScore =
@@ -1328,7 +1427,9 @@ function effectScopeMatchesTarget(
   return false;
 }
 
-function effectTarget(effect: NonNullable<AiCardHint["effects"]>[number]): string | undefined {
+function effectTarget(
+  effect: NonNullable<AiCardHint["effects"]>[number],
+): string | undefined {
   const target = (effect as Record<string, unknown>).target;
   return typeof target === "string" ? target : undefined;
 }
@@ -1343,7 +1444,8 @@ function hasRiskyUniversalPressure(
     (params.deckCapabilities?.runner?.breakerInventory.some(
       (breaker) =>
         breaker.coverage.includes("universal") && breaker.risks.length > 0,
-    ) ?? false)
+    ) ??
+      false)
   );
 }
 
@@ -1353,7 +1455,8 @@ function runnerCreditReservePhase(
 ): RunnerCreditReservePhase {
   if (
     remoteScoreThreat === "urgent" ||
-    input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 2
   ) {
     return "late_contest";
   }
@@ -1361,7 +1464,9 @@ function runnerCreditReservePhase(
   return input.playerView.stateVersion <= 8 ? "opening" : "midgame";
 }
 
-function runnerRemoteScoreThreat(input: AiDecisionInput): RunnerRemoteScoreThreat {
+function runnerRemoteScoreThreat(
+  input: AiDecisionInput,
+): RunnerRemoteScoreThreat {
   let threat: RunnerRemoteScoreThreat = "none";
   for (const server of input.playerView.servers) {
     if (!server.id.startsWith("remote_")) continue;
@@ -1378,7 +1483,8 @@ function runnerRemoteScoreThreat(input: AiDecisionInput): RunnerRemoteScoreThrea
     if (
       urgentRoot ||
       knownAgenda ||
-      input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2
+      input.playerView.opponent.agendaPoints >=
+        input.playerView.agendaPointsToWin - 2
     ) {
       return "urgent";
     }
@@ -1438,7 +1544,9 @@ function remoteHasScoreThreat(
   );
 }
 
-function targetKindForServerId(serverId: string): RunnerRunTargetKind | undefined {
+function targetKindForServerId(
+  serverId: string,
+): RunnerRunTargetKind | undefined {
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";

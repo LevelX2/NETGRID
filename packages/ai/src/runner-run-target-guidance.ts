@@ -151,6 +151,12 @@ export function runnerPressureProbeTargetAllowed(
   if (evaluation.knownAccessState === "known_no_current_payoff") return false;
   if (evaluation.pathPassability !== "reachable") return false;
   if (evaluation.creditsAfterRun < 0) return false;
+  if (
+    evaluation.recommendation !== "run_now" &&
+    evaluation.recommendation !== "run_if_free"
+  ) {
+    return false;
+  }
   return (
     evaluation.accessPayoff === "unknown" ||
     evaluation.accessPayoff === "fresh" ||

@@ -3567,7 +3567,10 @@ function practicalMicroRuntimeCandidates(
     runnerRunPayoffCompletionCandidate(input, runtimeDecision),
     runnerVisibleCoverageInstallCandidate(input, runtimeDecision),
     corpStalePunishDeactivationCandidate(input, runtimeDecision),
-  ].filter((candidate): candidate is PracticalMicroCandidate => candidate !== undefined);
+  ].filter(
+    (candidate): candidate is PracticalMicroCandidate =>
+      candidate !== undefined,
+  );
 }
 
 function runtimeSelectedLegalAction(
@@ -3584,7 +3587,8 @@ function runnerVisibleCoverageInstallCandidate(
   runtimeDecision: AiDecision,
 ): PracticalMicroCandidate | undefined {
   if (input.side !== "runner") return undefined;
-  if (!runnerHasKnownBlockedPathWithVisibleBreakerAnswer(input)) return undefined;
+  if (!runnerHasKnownBlockedPathWithVisibleBreakerAnswer(input))
+    return undefined;
   const action = input.legalActions.find((candidate) => {
     if (candidate.type !== "install_card") return false;
     const sourceCard = semanticRuntimeVisibleSourceCard(input, candidate);
@@ -3625,7 +3629,9 @@ function runnerHasKnownBlockedPathWithVisibleBreakerAnswer(
   for (const runAction of input.legalActions) {
     if (runAction.type !== "start_run") continue;
     const serverId = semanticRuntimeServerId(runAction);
-    const server = input.playerView.servers.find((entry) => entry.id === serverId);
+    const server = input.playerView.servers.find(
+      (entry) => entry.id === serverId,
+    );
     if (!server) continue;
     const assessment = assessKnownRezzedIcePath(
       server.ice,
@@ -3637,7 +3643,10 @@ function runnerHasKnownBlockedPathWithVisibleBreakerAnswer(
       continue;
     if (
       visibleBreakerInstalls.some((installAction) => {
-        const sourceCard = semanticRuntimeVisibleSourceCard(input, installAction);
+        const sourceCard = semanticRuntimeVisibleSourceCard(
+          input,
+          installAction,
+        );
         return (
           sourceCard !== undefined &&
           server.ice.some(
@@ -4116,7 +4125,9 @@ function semanticRuntimeDecisionDebug(
       : {}),
     ...(selectedStep ? { selectedStepKind: selectedStep.kind } : {}),
     ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
-      ? { tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime) }
+      ? {
+          tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime),
+        }
       : {}),
     ...(memoryDebug.items.length > 0
       ? { memoryItems: memoryDebug.items, memorySectionTitle: "KI-Speicher" }
@@ -6483,7 +6494,10 @@ function runnerTagCleanupScoreComponent(
   const acuteTagRemoval =
     profile?.acuteTagRemoval === true || action.type === "remove_tag";
   if (!acuteTagRemoval) return undefined;
-  const reduction = tagCleanupReduction(profile?.currentTagReduction, currentTags);
+  const reduction = tagCleanupReduction(
+    profile?.currentTagReduction,
+    currentTags,
+  );
   const value = 900 + Math.max(0, reduction - 1) * 150;
   return {
     key: "runner_tags_present",
@@ -6523,7 +6537,11 @@ function semanticRuntimeRunnerScoreComponents(
   if (tagCleanup) {
     components.push(tagCleanup);
   }
-  if (action.type === "remove_tag" && input.playerView.own.tags > 0 && !tagCleanup) {
+  if (
+    action.type === "remove_tag" &&
+    input.playerView.own.tags > 0 &&
+    !tagCleanup
+  ) {
     components.push({
       key: "runner_tags_present",
       label: "Tags entfernen",
@@ -6555,10 +6573,7 @@ function semanticRuntimeRunnerScoreComponents(
     );
     if (muPressureFunding) components.push(muPressureFunding);
   }
-  const handBufferComponent = runnerHandBufferNeedScoreComponent(
-    input,
-    action,
-  );
+  const handBufferComponent = runnerHandBufferNeedScoreComponent(input, action);
   if (handBufferComponent) {
     components.push(handBufferComponent);
   }
@@ -6835,13 +6850,14 @@ function semanticRuntimeRunnerVisibleDamagePressure(
     ]),
   ];
   if (
-    visibleCards.some((card) =>
-      card.known !== false &&
-      /damage|flatline|net damage|meat damage|brain damage|tag/i.test(
-        [card.title, card.rulesText, card.definitionId]
-          .filter(Boolean)
-          .join(" "),
-      ),
+    visibleCards.some(
+      (card) =>
+        card.known !== false &&
+        /damage|flatline|net damage|meat damage|brain damage|tag/i.test(
+          [card.title, card.rulesText, card.definitionId]
+            .filter(Boolean)
+            .join(" "),
+        ),
     )
   ) {
     return true;
@@ -7935,7 +7951,10 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
   );
   if (!evaluation) return undefined;
   const value = runnerRunTargetSemanticGuidanceValue(evaluation);
-  if (value < 0 && semanticRuntimeRunnerVisibleHighPayoffRunOverride(input, action)) {
+  if (
+    value < 0 &&
+    semanticRuntimeRunnerVisibleHighPayoffRunOverride(input, action)
+  ) {
     return undefined;
   }
   if (value === 0) return undefined;
@@ -7951,6 +7970,12 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       `known_access:${evaluation.knownAccessState}`,
       `path:${evaluation.pathPassability}`,
       `credits_after:${evaluation.creditsAfterRun}`,
+      `visible_ice_hazard_penalty:${evaluation.visibleIceHazardPenalty ?? 0}`,
+      `visible_trace_tag_hazard_unavoidable:${evaluation.visibleTraceTagHazardUnavoidable === true}`,
+      `unavoidable_visible_ice_hazard_count:${evaluation.unavoidableVisibleIceHazardCount ?? 0}`,
+      ...(evaluation.visibleIceRunHazards ?? [])
+        .flatMap((hazard) => hazard.evidence)
+        .slice(0, 10),
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
@@ -7963,7 +7988,9 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
   if (input.side !== "runner" || action.type !== "start_run") return false;
   const serverId = semanticRuntimeServerId(action);
   if (!serverId || !isRemoteServerTarget(serverId)) return false;
-  const server = input.playerView.servers.find((entry) => entry.id === serverId);
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
   if (!server) return false;
   return server.root.some((card) => {
     if (!card.known) return false;
@@ -7972,8 +7999,7 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
     if (card.type !== "asset" && card.type !== "upgrade") return false;
     const trashCost = remoteRootTrashCostForMetrics(card);
     return (
-      trashCost !== undefined &&
-      input.playerView.own.credits >= trashCost + 1
+      trashCost !== undefined && input.playerView.own.credits >= trashCost + 1
     );
   });
 }
