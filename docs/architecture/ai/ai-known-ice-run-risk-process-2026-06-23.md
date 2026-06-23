@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`abgeschlossen`
 
 ## Quelle/Vorgabe
 
@@ -101,8 +101,8 @@ process_prepared
 | `AIRISK-0` | Prozessartefakt und Preflight | Artefakt existiert, Worktree/Branch sauber, `git diff --check` grün | `docs(ai): define known ice run risk process` |
 | `AIRISK-1` | Analyse und Reproduktion | Repro-Test oder enger Testanker zeigt bekannten R&D-`Hunter`-Run als fehlerhaften Top-Run oder fehlendes Tag-Risiko | `test(ai): reproduce known trace tag run risk` |
 | `AIRISK-2` | Sichtbare ICE-Gefahrenprojektion | Generische Projektion erkennt sichtbare Tag-/Trace-/Damage-/Trash-/Lock-Gefahren mit Kosten/Risikoklassen | `feat(ai): project visible ice run hazards` |
-| `AIRISK-3` | Bewertungsintegration | RunTargetEvaluation, TacticalPlans und Semantic Runtime nutzen die Gefahrenbewertung; R&D-`Hunter` verliert gegen Credit-/Setup-Alternativen | `fix(ai): price visible ice hazards before runs` |
-| `AIRISK-4` | Varianten, Randfälle und Diagnostics | Bezahlbare/brechbare/High-Payoff/Unknown-Gegenfälle sind getestet; Evidence bleibt side-safe | `test(ai): cover visible ice hazard variants` |
+| `AIRISK-3` | Bewertungsintegration | RunTargetEvaluation, TacticalPlans und Semantic Runtime nutzen die Gefahrenbewertung; R&D-`Hunter` verliert gegen Credit-/Setup-Alternativen | `fix(ai): defer known trace tag runs` |
+| `AIRISK-4` | Varianten, Randfälle und Diagnostics | Bezahlbare/brechbare/High-Payoff/Unknown-Gegenfälle sind getestet; Evidence bleibt side-safe | `test(ai): cover known ice hazard variants` |
 | `AIRISK-5` | Review, Wissenspflege und Final Green | Final Review dokumentiert Scope, Checks und Grenzen; fokussierte AI-Checks, Typecheck und `git diff --check` bestehen | `docs(ai): review known ice run risk fix` |
 
 ## Paketdetails
@@ -276,4 +276,21 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Bezahlbare/brechbare/High-Payoff-Gegenfälle bleiben möglich.
 - Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertragsänderung.
 - Paketcommits liegen auf `codex/ai-known-ice-run-risk`.
+- Abschlussreport liegt unter `docs/reviews/ai/ai-known-ice-run-risk-final-report-2026-06-23.md`.
 - Arbeitsbranch ist lokal nach `main` integriert und der Worktree entfernt.
+
+## Abschlussstand 2026-06-23
+
+AIRISK-0 bis AIRISK-5 wurden umgesetzt. Der konkrete R&D-`Hunter`-Fall wird im Top-Level-Test `packages/ai/src/known-ice-run-risk.test.ts` abgesichert: Die semantische Runner-Entscheidung wählt `gain_credit`, und die R&D-Run-Alternative trägt `runner_run_target_semantic_guidance` mit `recommendation:gain_credits_first`, `visible_ice_hazard:trace_tag` und `visible_trace_tag_hazard_unavoidable:true`.
+
+Grüne Checks:
+
+```bash
+corepack pnpm exec vitest run src/known-ice-run-risk.test.ts src/visible-run-analysis.test.ts src/runner-run-target-evaluation.test.ts src/runner-run-target-guidance.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot
+corepack pnpm exec tsc -p tsconfig.json --noEmit
+corepack pnpm --filter @netgrid/shared typecheck
+corepack pnpm --filter @netgrid/engine typecheck
+git diff --check
+```
+
+Eingeordnet: `corepack pnpm --filter @netgrid/ai test` scheitert weiterhin an vier isoliert reproduzierbaren Shell-Traders-Fixture-Tests in `packages/ai/src/index.test.ts`; der erste Fehler scheitert auch isoliert und liegt außerhalb dieses Fixes.
