@@ -43,7 +43,7 @@ export type HiddenZoneNonSearchChoiceHandlerHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     hasCorpUtilityKind: (cardId: CardInstanceId, kind: string) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
-    smithsPawnshopGainCredits: (cardId: CardInstanceId) => number;
+    installedResourceTrashCreditGain: (cardId: CardInstanceId) => number;
   };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
@@ -101,8 +101,8 @@ export function handleHiddenZoneNonSearchChoice(
     source.startsWith("p3_47.runner_installed_trash_for_credits")
   )
     return resolveRunnerInstalledTrashForCreditsChoice(host);
-  if (source.startsWith("v170.smiths_pawnshop"))
-    return resolveSmithsPawnshopChoice(host);
+  if (source.startsWith("runner.installed_resource_trash_for_credits"))
+    return resolveInstalledResourceTrashForCreditsChoice(host);
   if (isP358SocialEngineeringChoiceSource(source))
     return resolveSecretSpendGuessThenTargetedBypassRunChoice(host);
   return { handled: false };
@@ -332,20 +332,20 @@ export function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
 
 export function startInstalledCardTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
-  pawnshopId: CardInstanceId,
+  sourceResourceId: CardInstanceId,
 ): void {
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (!host.state.runner.rig.resources.includes(pawnshopId)) return;
+  if (!host.state.runner.rig.resources.includes(sourceResourceId)) return;
   const eligible = runnerInstalledCardIds(host)
-    .filter((cardId) => cardId !== pawnshopId)
+    .filter((cardId) => cardId !== sourceResourceId)
     .sort();
   if (eligible.length === 0) return;
   host.state.pendingChoice = {
-    choiceId: `v170_smiths_pawnshop_${host.state.stateVersion + 1}`,
+    choiceId: `runner_installed_resource_trash_for_credits_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v170.smiths_pawnshop:${pawnshopId}:${host.state.stateVersion + 1}`,
+    source: `runner.installed_resource_trash_for_credits:${sourceResourceId}:${host.state.stateVersion + 1}`,
     prompt:
-      "Smith's Pawnshop: Eine andere installierte Karte trashen und 2 Credits nehmen?",
+      "Eine andere installierte Karte trashen und 2 Credits nehmen?",
     kind: "select_option",
     options: [
       { id: "pass", label: "Nein" },
@@ -562,26 +562,33 @@ function resolveRunnerInstalledTrashForCreditsChoice(
   };
 }
 
-function resolveSmithsPawnshopChoice(
+function resolveInstalledResourceTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v170.smiths_pawnshop"))
-    throw new Error("Es ist keine Smith's-Pawnshop-Choice offen.");
+  if (
+    !choice ||
+    !choice.source.startsWith("runner.installed_resource_trash_for_credits")
+  )
+    throw new Error("Es ist keine Ressourcen-Trash-fuer-Credits-Choice offen.");
   const sourceParts = choice.source.split(":");
-  const pawnshopId = sourceParts[1];
-  if (!pawnshopId || !host.state.runner.rig.resources.includes(pawnshopId))
-    throw new Error("Smith's Pawnshop ist nicht mehr installiert.");
-  const pawnshopDefinition = host.cards.definitionFor(pawnshopId);
-  const gainCredits = host.cards.smithsPawnshopGainCredits(pawnshopId);
+  const sourceResourceId = sourceParts[1];
+  if (
+    !sourceResourceId ||
+    !host.state.runner.rig.resources.includes(sourceResourceId)
+  )
+    throw new Error("Die ausloesende Ressource ist nicht mehr installiert.");
+  const sourceDefinition = host.cards.definitionFor(sourceResourceId);
+  const gainCredits =
+    host.cards.installedResourceTrashCreditGain(sourceResourceId);
   const selectedId =
     selectedChoiceIds(requirePlayerAction(host).selectedChoices)[0] ?? "pass";
   if (selectedId !== "pass") {
     const option = choice.options.find((candidate) => candidate.id === selectedId);
     const cardId = typeof option?.value === "string" ? option.value : "";
     if (!cardId) throw new Error("Die gewaehlte Karte ist ungueltig.");
-    if (cardId === pawnshopId)
-      throw new Error("Smith's Pawnshop kann sich nicht selbst trashen.");
+    if (cardId === sourceResourceId)
+      throw new Error("Die ausloesende Ressource kann sich nicht selbst trashen.");
     if (!runnerInstalledCardIds(host).includes(cardId))
       throw new Error("Die gewaehlte Karte ist nicht mehr installiert.");
     const trashedDefinition = host.cards.definitionFor(cardId);
@@ -589,9 +596,9 @@ function resolveSmithsPawnshopChoice(
     host.callbacks.gainRunnerCredits(gainCredits);
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-      smithsPawnshopTriggered: true,
-      smithsPawnshopCardId: pawnshopId,
-      sourceDefinitionId: pawnshopDefinition.id,
+      installedResourceTrashForCreditsTriggered: true,
+      trashForCreditsSourceCardId: sourceResourceId,
+      sourceDefinitionId: sourceDefinition.id,
       trashedCardId: cardId,
       trashedCardDefinitionId: trashedDefinition.id,
       trashedCardTitle: trashedDefinition.title,
@@ -608,9 +615,9 @@ function resolveSmithsPawnshopChoice(
   }
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    smithsPawnshopTriggered: false,
-    smithsPawnshopCardId: pawnshopId,
-    sourceDefinitionId: pawnshopDefinition.id,
+    installedResourceTrashForCreditsTriggered: false,
+    trashForCreditsSourceCardId: sourceResourceId,
+    sourceDefinitionId: sourceDefinition.id,
   };
   delete host.state.pendingChoice;
   return { handled: true, stateChanged: false };

@@ -3030,7 +3030,9 @@ describe("V1.7.0 Mechanikpaket D", () => {
       );
     }
     expect(
-      smithState.pendingChoice?.source.startsWith("v170.smiths_pawnshop"),
+      smithState.pendingChoice?.source.startsWith(
+        "runner.installed_resource_trash_for_credits",
+      ),
     ).toBe(true);
     expect(smithState.pendingChoice?.prompt).toContain("2 Credits");
     const forceShieldOption =
@@ -3052,7 +3054,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(smithState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
-      smithsPawnshopTriggered: true,
+      installedResourceTrashForCreditsTriggered: true,
       trashedCardDefinitionId: "onr_v1_028_force-shield",
       trashedCardTitle: "Force Shield",
       creditsGained: 2,

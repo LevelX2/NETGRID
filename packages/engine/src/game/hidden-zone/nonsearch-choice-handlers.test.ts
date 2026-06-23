@@ -165,7 +165,7 @@ function makeHost(input: {
         if (!found) throw new Error(`missing instance ${cardId}`);
         return found;
       },
-      smithsPawnshopGainCredits: () => 2,
+      installedResourceTrashCreditGain: () => 2,
     },
     zones: {
       removeFromAllZones: (cardId) => {

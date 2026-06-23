@@ -219,7 +219,7 @@ export function createHiddenZoneNonSearchRuntime(
             kind as Parameters<typeof hasCorpUtilityKind>[2],
           ),
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-        smithsPawnshopGainCredits: (cardId) => {
+        installedResourceTrashCreditGain: (cardId) => {
           const implementation =
             uniqueDirectLongtailImplementationForDefinition(
               definitionFor(state, cardId).id,

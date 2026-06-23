@@ -572,8 +572,8 @@ export function publicContextForAction(
       "trashedCardType",
       "trashedCount",
       "damageCannotBePrevented",
-      "smithsPawnshopTriggered",
-      "smithsPawnshopCardId",
+      "installedResourceTrashForCreditsTriggered",
+      "trashForCreditsSourceCardId",
       "trashedCardTitle",
       "creditsGained",
     ]) {

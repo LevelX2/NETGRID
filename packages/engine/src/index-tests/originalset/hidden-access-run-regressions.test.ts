@@ -3045,9 +3045,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         String(state.pendingChoice.options[0]?.id),
       );
     }
-    expect(state.pendingChoice?.source.startsWith("v170.smiths_pawnshop")).toBe(
-      true,
-    );
+    expect(
+      state.pendingChoice?.source.startsWith(
+        "runner.installed_resource_trash_for_credits",
+      ),
+    ).toBe(true);
     const resolveAction = mustAction(
       state,
       "runner",
