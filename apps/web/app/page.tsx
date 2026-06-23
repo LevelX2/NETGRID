@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import type {
   ApiClientGameMode,
   ApiCreateMatchResponse,
@@ -112,7 +112,6 @@ import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
-  RUN_TIMELINE_STEPS,
   accessRevealStatusLabel,
   actionButtonLabel,
   actionConsumesClick,
@@ -129,8 +128,6 @@ import {
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
-  breachHighlighterAccessHint,
-  breachProgressLabel,
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
@@ -142,27 +139,22 @@ import {
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
-  hasLegalAction,
   iceModifierBadgesForServer,
   newBloodReorderTargetLabel,
   newBloodReorderTargetSequenceHint,
   orderedCardContextActions,
   parseCuePositionPreference,
-  normalizeVisibleTerms,
   isSingleInstalledCorpExposeChoice,
   latestRetainableAccessRevealEvent,
   retainedAccessRevealEvent,
   retainedExposeReviewEvent,
   runnerProgramInstallTrashChoiceInfo,
-  runBreakerActionHint,
   runTargetServerIds,
   runAwareActionButtonLabel,
-  runWindowActionButtonLabel,
   runWindowActions,
   runCurrentIceLabel,
   runnerRigMemorySummary,
   runPositionStatusLabel,
-  runWindowStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
   shouldUseFieldCardChoice,
@@ -170,7 +162,6 @@ import {
   serverBoardRows,
   serverDisplayLabel,
   splitLegalActions,
-  currentRunTimelineStep,
   type ActionContext,
   type CuePositionPreference,
   type CuePositionPreset,
@@ -279,9 +270,7 @@ import {
   LEGACY_DISPLAY_NAME_STORAGE_KEY,
   LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
   LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
-  LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
   MATCH_START_SETTINGS_STORAGE_KEY,
-  RUN_OVERLAY_POSITION_STORAGE_KEY,
   cardPreviewCollapsedStorageKeyFor
 } from "../lib/storage-keys";
 import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
@@ -462,6 +451,7 @@ import {
   type FieldChoiceCardProps
 } from "../features/game-board/RunnerBoardStrips";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
+import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
 import { ActionSlotMeter, ActiveMatchResourceStrip } from "../features/game-board/ResourceStrip";
 import { ServerCounterStrip } from "../features/game-board/CounterStrips";
@@ -1267,19 +1257,6 @@ function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"
     if (match?.[1]) return Number(match[1]);
   }
   return null;
-}
-
-function runChoiceStatusLabel(view: PlayerView, choice: NonNullable<PlayerView["pendingChoice"]>): string | null {
-  if (choice.source.startsWith("p3_35.access_payment")) {
-    const amount = accessAmbushChoiceAmount(choice);
-    const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
-    return choice.side === view.side
-      ? `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`
-      : `${sideLabel(choice.side)} entscheidet jetzt, ob ${choice.side === "corp" ? "sie" : "er"} ${amountText} für den Access-Ambush zahlt.`;
-  }
-  const prompt = normalizeVisibleTerms(choice.prompt.trim());
-  if (!prompt) return null;
-  return prompt.endsWith(".") ? prompt : `${prompt}.`;
 }
 
 function snapshotAllowedForMatchCardPool(snapshot: DeckSnapshot, matchCardPool: MatchCardPoolSelection): boolean {
@@ -6134,180 +6111,6 @@ function OpponentCueTitle({
       {cue.title.slice(index + cue.cardTitle.length)}
     </>
   );
-}
-
-function RunTimelineOverlay({
-  view,
-  legalActions,
-  runActions,
-  cardDetailsById,
-  actionDisabled,
-  highlighted = false,
-  onAction,
-  onChoiceOption
-}: {
-  view: PlayerView;
-  legalActions: LegalAction[];
-  runActions: LegalAction[];
-  cardDetailsById: Record<string, CatalogCardDetail>;
-  actionDisabled: boolean;
-  highlighted?: boolean;
-  onAction(action: LegalAction): void;
-  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
-}) {
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
-  const [position, setPosition] = useState<RunOverlayPositionPreference>(() =>
-    typeof window === "undefined"
-      ? { kind: "default" }
-      : parseOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
-  );
-  useEffect(() => {
-    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(position));
-  }, [position]);
-  const run = view.run;
-  if (!run) return null;
-
-  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-    const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-  const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const overlay = overlayRef.current;
-    const offset = dragOffsetRef.current;
-    if (!overlay || !offset) return;
-    const rect = overlay.getBoundingClientRect();
-    setPosition(
-      clampOverlayPosition(
-        ((event.clientX - offset.x) / window.innerWidth) * 100,
-        ((event.clientY - offset.y) / window.innerHeight) * 100,
-        window.innerWidth,
-        window.innerHeight,
-        rect.width,
-        rect.height
-      )
-    );
-  };
-  const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-  };
-
-  const currentStep = currentRunTimelineStep(view, legalActions);
-  const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
-  const approachedIce = run.approachedIce ? enrichVisibleCard(run.approachedIce, cardDetailsById) : null;
-  const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
-  const runFocusIce = encounteredIce ?? approachedIce;
-  const runFocusIceFallback = approachedIce ? "Angesehenes ICE" : "Sichtbares ICE";
-  const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
-  const breachProgress = breachProgressLabel(view);
-  const breachHighlighterHint = breachHighlighterAccessHint(view);
-  const headerStatus = runWindowStatusLabel(view);
-  const breakerHint = runBreakerActionHint(view, legalActions);
-  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
-  const choiceAction = view.pendingChoice ? runActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === view.pendingChoice?.choiceId) : undefined;
-  const regularRunActions = choiceAction ? runActions.filter((action) => action.actionId !== choiceAction.actionId) : runActions;
-  const runChoice = view.pendingChoice && choiceAction && view.pendingChoice.minSelections === 1 && view.pendingChoice.maxSelections === 1 ? view.pendingChoice : null;
-  const runChoiceStatus = runChoice ? runChoiceStatusLabel(view, runChoice) : null;
-
-  const overlay = (
-    <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
-      <div className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline" role="status">
-        <div
-          className="runTimelineHead runTimelineDragHandle"
-          onPointerDown={startDrag}
-          onPointerMove={dragOverlay}
-          onPointerUp={stopDrag}
-          onPointerCancel={stopDrag}
-          title="Run-Fenster verschieben"
-          aria-label="Run-Fenster verschieben"
-        >
-          <RunIcon size={18} />
-          <span className="runTimelineTitle">
-            <strong>{`Run auf ${serverDisplayLabel(run.attackedServerId)}`}</strong>
-            {headerStatus ? <small>{headerStatus}</small> : null}
-          </span>
-          <Move size={15} aria-hidden="true" />
-        </div>
-        <div className="runSteps">
-          {verticalSteps.map((step) => (
-            <span className={currentStep === step.id ? "current" : ""} key={step.id}>
-              {step.label}
-            </span>
-          ))}
-        </div>
-        {runChoice && choiceAction ? (
-          <div className="runActionBar" aria-label={runChoice.prompt} data-testid="run-choice-action-bar">
-            {runChoiceStatus ? <p className="runHint runChoiceHint">{runChoiceStatus}</p> : null}
-            {runChoice.options.map((option) => (
-              <OverflowAwareActionButton
-                action={choiceAction}
-                className="button primary actionButton runActionButton"
-                key={option.id}
-                label={option.label}
-                displayLabel={option.label}
-                onClick={() => onChoiceOption(choiceAction, runChoice.choiceId, option.id)}
-                disabled={actionDisabled || option.selectable === false}
-                type="button"
-                data-testid="run-choice-button"
-                data-action-type={choiceAction.type}
-                iconSize={14}
-              />
-            ))}
-          </div>
-        ) : null}
-        {regularRunActions.length > 0 ? (
-          <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
-            {regularRunActions.map((action) => {
-              const compactLabel = runWindowActionButtonLabel(view, action);
-              const fullLabel =
-                compactLabel.startsWith("SMC:") && action.label
-                  ? normalizeVisibleTerms(action.label)
-                  : runAwareActionButtonLabel(view, action);
-              return (
-                <OverflowAwareActionButton
-                  action={action}
-                  className="button primary actionButton runActionButton"
-                  key={action.actionId}
-                  label={fullLabel}
-                  displayLabel={compactLabel}
-                  onClick={() => onAction(action)}
-                  disabled={actionDisabled}
-                  type="button"
-                  data-testid="run-action-button"
-                  data-action-type={action.type}
-                  iconSize={14}
-                />
-              );
-            })}
-          </div>
-        ) : !runChoice && jackOutAvailable ? (
-          <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
-        ) : null}
-        {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
-        {breachHighlighterHint ? <p className="runHint">{breachHighlighterHint}</p> : null}
-        {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
-        {runFocusIce ? (
-          <div className="encounterFocus">
-            {runFocusIce.known ? (
-              <div className="encounterFocusBody">
-                <strong>{runFocusIce.title ?? runFocusIceFallback}</strong>
-                {runFocusIce.rulesText ? <p>{runFocusIce.rulesText}</p> : null}
-              </div>
-            ) : (
-              <strong>Verdecktes ICE</strong>
-            )}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-
-  if (typeof document === "undefined") return null;
-  return createPortal(overlay, document.body);
 }
 
 function serverLabelFromId(serverId: string): string {
