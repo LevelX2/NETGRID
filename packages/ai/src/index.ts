@@ -134,26 +134,12 @@ import {
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
 import {
-  buildSemanticDecisionDebugDiagnostics,
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
 import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "./diagnostics/coverage-selection-debug";
 import { buildSemanticRuntimeActionAlternatives } from "./diagnostics/semantic-runtime-action-alternatives";
 import { buildSemanticRuntimeRankedAlternatives } from "./diagnostics/semantic-runtime-ranked-alternatives";
-import {
-  buildSemanticRuntimePlanSelectionDisplayContext,
-  semanticRuntimeDebugActionDisplayScore,
-  semanticRuntimeDebugCalibrationProfileItems,
-  semanticRuntimeDebugCoverageScoreBreakdown,
-  semanticRuntimeDebugDoctrineGoalItems,
-  semanticRuntimeDebugMistakeSummaryItems,
-  semanticRuntimeDebugPilotScopeItems,
-  semanticRuntimeDebugPlanSelectionScoreBreakdown,
-  semanticRuntimeDebugShadowTopItems,
-  semanticRuntimeDebugTacticalPlanItems,
-  semanticRuntimeDebugTargetChoiceShadowItems,
-} from "./diagnostics/semantic-runtime-debug";
-import { semanticRuntimeMemoryDebug } from "./diagnostics/semantic-runtime-memory-debug";
+import { buildSemanticRuntimeDecisionDebug } from "./diagnostics/semantic-runtime-decision-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
@@ -228,7 +214,6 @@ import {
   type TacticalPlanRuntimeResult,
 } from "./tactical-plans";
 import {
-  AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
@@ -4068,152 +4053,40 @@ function semanticRuntimeDecisionDebug(
   legacyActionType: LegalAction["type"] | undefined,
   planRuntime: TacticalPlanRuntimeResult,
 ): AiDecisionDebug {
-  const legacyDebug = legacyDecision.decisionDebug;
-  const legacyPlanKind = legacyDebug?.planKind;
-  const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
-  const memoryDebug = semanticRuntimeMemoryDebug(input);
   const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
     input,
     selected.action,
     planRuntime,
   );
-  const selectedPlan = planRuntime.selectedPlan;
-  const selectedStep = planRuntime.selectedStep;
-  const selectedMapping = planRuntime.selectedMapping;
   const selectedSemanticScoreBreakdown = semanticRuntimeScoreBreakdown(
     input,
     selected.action,
     selected.scopeId,
   );
-  const debugDiagnostics = buildSemanticDecisionDebugDiagnostics({
-    scopeId: selected.scopeId,
-    selectedActionType: selected.action.type,
-    ...(coverageSelectionDebug
-      ? { coverageEvidence: coverageSelectionDebug.evidence }
-      : {}),
-    ...(legacyActionType ? { legacyActionType } : {}),
-    ...(legacyPlanKind ? { legacyPlanKind } : {}),
-    ...(legacyDebugSelectedActionType ? { legacyDebugSelectedActionType } : {}),
-    selectedEvidence: scrubEvidence(selected.evidence),
-    ...(selectedPlan
-      ? {
-          selectedPlan: {
-            planId: selectedPlan.planId,
-            type: selectedPlan.type,
-          },
-        }
-      : {}),
-    ...(selectedStep ? { selectedStepKind: selectedStep.kind } : {}),
-    ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
-      ? { tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime) }
-      : {}),
-    ...(memoryDebug.items.length > 0
-      ? { memoryItems: memoryDebug.items, memorySectionTitle: "KI-Speicher" }
-      : {}),
-    semanticShadowTopItems: semanticRuntimeDebugShadowTopItems(selected),
-    pilotScopeItems: semanticRuntimeDebugPilotScopeItems(selected.evidence),
-    calibrationProfileItems: semanticRuntimeDebugCalibrationProfileItems(
-      selected.evidence,
-    ),
-    targetChoiceShadowItems: semanticRuntimeDebugTargetChoiceShadowItems(
-      selected.action,
-    ),
-    doctrineGoalItems: semanticRuntimeDebugDoctrineGoalItems(
-      input,
-      selectedSemanticScoreBreakdown,
-    ),
-    mistakeSummaryItems: semanticRuntimeDebugMistakeSummaryItems(
-      selected.evidence,
-    ),
-  });
-  const selectedPlanSelection = buildSemanticRuntimePlanSelectionDisplayContext({
+  const rankedAlternatives = semanticRuntimeRankedAlternatives(
+    input,
+    rankedChoices,
+    selected.action.actionId,
+  );
+  const actionAlternatives = semanticRuntimeActionAlternatives(
+    input,
+    rankedChoices,
+    selected.action.actionId,
     planRuntime,
-    selectedActionId: selected.action.actionId,
-    selectedChoice: selected,
+  );
+  return buildSemanticRuntimeDecisionDebug({
+    input,
+    selected,
+    legacyDecision,
+    ...(legacyActionType ? { legacyActionType } : {}),
+    planRuntime,
     ...(coverageSelectionDebug
       ? { coverageSelection: coverageSelectionDebug }
       : {}),
+    selectedScoreBreakdown: selectedSemanticScoreBreakdown,
+    rankedAlternatives,
+    actionAlternatives,
   });
-  const selectedDisplayScore = semanticRuntimeDebugActionDisplayScore(
-    selected,
-    true,
-    selectedPlanSelection,
-  );
-  return {
-    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-    aiLevel: legacyDebug?.aiLevel ?? 2,
-    summary: selected.explanation,
-    planId: selectedPlan?.planId ?? `semantic_runtime:${selected.scopeId}`,
-    planKind: selectedPlan?.type ?? selected.scopeId,
-    selectedActionType: selected.action.type,
-    score: selected.score,
-    ...(selected.confidence !== undefined
-      ? { confidence: selected.confidence }
-      : {}),
-    visibleReasons: scrubEvidence([
-      ...(coverageSelectionDebug?.evidence ?? []),
-      ...selected.evidence,
-    ]).slice(0, 8),
-    rankedAlternatives: semanticRuntimeRankedAlternatives(
-      input,
-      rankedChoices,
-      selected.action.actionId,
-    ),
-    actionAlternatives: semanticRuntimeActionAlternatives(
-      input,
-      rankedChoices,
-      selected.action.actionId,
-      planRuntime,
-    ),
-    scoreBreakdown: [
-      ...selectedSemanticScoreBreakdown,
-      ...semanticRuntimeDebugCoverageScoreBreakdown(
-        selected,
-        true,
-        selectedPlanSelection,
-      ),
-      ...semanticRuntimeDebugPlanSelectionScoreBreakdown(
-        selected,
-        true,
-        selectedDisplayScore,
-        selectedPlanSelection,
-      ),
-    ],
-    whyNot:
-      legacyActionType && legacyActionType !== selected.action.type
-        ? [`legacy_reference_action_type:${legacyActionType}`]
-        : [],
-    longTermPlan: debugDiagnostics.longTermPlan,
-    ...(memoryDebug.memoryVersion
-      ? { memoryVersion: memoryDebug.memoryVersion }
-      : {}),
-    ...(memoryDebug.facts.length > 0 ? { facts: memoryDebug.facts } : {}),
-    ...(memoryDebug.hypotheses.length > 0
-      ? { hypotheses: memoryDebug.hypotheses }
-      : {}),
-    ...(memoryDebug.invalidations.length > 0
-      ? { invalidations: memoryDebug.invalidations }
-      : {}),
-    ...(memoryDebug.beliefUncertainty.length > 0
-      ? { beliefUncertainty: memoryDebug.beliefUncertainty }
-      : {}),
-    ...(memoryDebug.opponentModel
-      ? { opponentModel: memoryDebug.opponentModel }
-      : {}),
-    ...(debugDiagnostics.warnings.length > 0
-      ? { warnings: debugDiagnostics.warnings }
-      : {}),
-    detailSections: debugDiagnostics.detailSections,
-    evidence: scrubEvidence([
-      ...selected.evidence,
-      ...(legacyDecision.evidence ?? []).map(
-        (entry) => `legacy_reference:${entry}`,
-      ),
-    ]).slice(0, 12),
-    fallbackUsed: false,
-    profileId: input.profileId,
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
-  };
 }
 
 function semanticRuntimeRankedAlternatives(
