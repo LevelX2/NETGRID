@@ -209,6 +209,9 @@ import {
   runnerDirectTagCleanupFallbackScoreComponent,
   runnerTagCleanupScoreComponent,
 } from "./runtime/runner-tag-cleanup-score";
+import {
+  runnerCreditNeedScoreComponents,
+} from "./runtime/runner-credit-need-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5547,7 +5550,6 @@ function semanticRuntimeRunnerScoreComponents(
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
-  const credits = input.playerView.own.credits;
   const loanLiabilityAssessment = runnerLoanLiabilityAssessment(input, action);
   const loanLiabilityComponent = runnerLoanLiabilityScoreComponent(
     loanLiabilityAssessment,
@@ -5582,24 +5584,12 @@ function semanticRuntimeRunnerScoreComponents(
     tagCleanup,
   );
   if (tagCleanupFallback) components.push(tagCleanupFallback);
-  if (action.type === "gain_credit" && credits < 5) {
-    components.push({
-      key: "runner_low_credits",
-      label: "Credit-Bedarf",
-      value: 700,
-      reason: `credits:${credits}`,
-    });
-  }
+  components.push(
+    ...runnerCreditNeedScoreComponents(input, action, {
+      handFundingTarget: runnerHandFundingTarget,
+    }),
+  );
   if (action.type === "gain_credit") {
-    const fundingTarget = runnerHandFundingTarget(input);
-    if (fundingTarget) {
-      components.push({
-        key: "runner_hand_funding_target",
-        label: "Handkarte finanzieren",
-        value: fundingTarget.value,
-        reason: fundingTarget.reason,
-      });
-    }
     const muPressureFunding = runnerMuPressureFundingScoreComponent(
       input,
       action,

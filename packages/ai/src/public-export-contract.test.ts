@@ -126,6 +126,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-source-card-answer-role",
       "./runtime/runner-hand-buffer-need",
       "./runtime/runner-tag-cleanup-score",
+      "./runtime/runner-credit-need-score",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
