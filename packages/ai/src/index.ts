@@ -158,6 +158,11 @@ import { semanticRuntimeMemoryDebug } from "./diagnostics/semantic-runtime-memor
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
+import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
+import {
+  semanticRuntimeActionTypeIsReactive,
+  semanticRuntimeChoiceIsReactive,
+} from "./runtime/reactive-action";
 import {
   applyPracticalMicroRuntimeComparator,
   type PracticalMicroCandidate,
@@ -3568,14 +3573,6 @@ function chooseSemanticRuntimeAction(
   return applyPracticalTacticOverlay(input, practicalMicroDecision, options);
 }
 
-function memoizeLegacyDecision(provider: () => AiDecision): () => AiDecision {
-  let cached: AiDecision | undefined;
-  return () => {
-    cached ??= provider();
-    return cached;
-  };
-}
-
 function practicalMicroRuntimeCandidates(
   input: AiDecisionInput,
   runtimeDecision: AiDecision,
@@ -3952,30 +3949,6 @@ function runnerRunActionSpendingCapAssessment(
     return { ok: false, reason: "unknown_ice_cap_risk", visibleBreakCost };
   }
   return { ok: true, reason: "visible_cost_within_cap", visibleBreakCost };
-}
-
-function semanticRuntimeChoiceIsReactive(
-  choice: SemanticRuntimeChoice,
-): boolean {
-  return semanticRuntimeActionTypeIsReactive(choice.action.type);
-}
-
-function semanticRuntimeActionTypeIsReactive(
-  type: LegalAction["type"],
-): boolean {
-  return (
-    type === "mandatory_draw" ||
-    type === "resolve_choice" ||
-    type === "access_card" ||
-    type === "steal_agenda" ||
-    type === "trash_accessed_card" ||
-    type === "decline_trash" ||
-    type === "break_subroutine" ||
-    type === "pump_breaker" ||
-    type === "continue_run" ||
-    type === "jack_out" ||
-    false
-  );
 }
 
 function semanticRuntimeChoices(

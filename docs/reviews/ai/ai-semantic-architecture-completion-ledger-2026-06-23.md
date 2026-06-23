@@ -116,6 +116,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` zweiter Struktur-Schnitt:
+  - `packages/ai/src/runtime/legacy-decision-provider.ts` kapselt die memoisierten Legacy-Provider für den lazy Legacy-Pfad aus `AI-COMPLETE-02`.
+  - `packages/ai/src/runtime/reactive-action.ts` kapselt die reaktive Action-Klassifikation für Semantic Runtime und Practical-Micro-Checks.
+  - `packages/ai/src/index.ts` sank weiter von 36.252 auf 36.225 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime-score-components.test.ts` grün, 65 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
