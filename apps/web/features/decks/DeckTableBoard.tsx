@@ -1,9 +1,10 @@
 "use client";
 
-import { Award, Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
+import { Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
 
 import { type DeckAgendaStatus } from "../../app/deck-editor-ui";
+import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import {
   DECK_TABLE_CARD_WIDTH_MAX,
   DECK_TABLE_CARD_WIDTH_MIN,
@@ -48,24 +49,6 @@ type CatalogCardDetail = CatalogCardSummary & {
   definitionId?: string;
 };
 
-const AgendaIcon = Award;
-
-function DeckAgendaStatusBadge({ status }: { status: DeckAgendaStatus | null }) {
-  if (!status) return null;
-  const complete = status.missingAgendaPoints === 0;
-  const loading = status.agendaPoints === null;
-  const missingLabel = loading ? "wird geladen" : complete ? "Mindestmenge erfüllt" : `${status.missingAgendaPoints} fehlen`;
-  return (
-    <p
-      className={`deckAgendaStatus ${loading ? "loading" : complete ? "complete" : "missing"}`}
-      title={`Agenda-Mindestmenge berechnet für ${status.effectiveCardsForMinimum} Karten.`}
-    >
-      <AgendaIcon size={14} />
-      <span>{loading ? `Agenda-Punkte / min. ${status.minimumAgendaPoints}` : `${status.agendaPoints} / ${status.minimumAgendaPoints} Agenda-Punkte`}</span>
-      <strong>{missingLabel}</strong>
-    </p>
-  );
-}
 export function DeckTableBoard({
   layout,
   deckName,

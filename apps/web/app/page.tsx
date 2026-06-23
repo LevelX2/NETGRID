@@ -304,6 +304,7 @@ import {
   StatusBadges
 } from "../features/catalog/CatalogSupportPanels";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
+import { DeckAgendaStatusBadge } from "../features/decks/DeckAgendaStatusBadge";
 import { DeckCardThumb } from "../features/decks/DeckCardThumb";
 import { DeckCardTooltipTrigger } from "../features/decks/DeckCardTooltipTrigger";
 import {
@@ -500,7 +501,6 @@ import {
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
-const AgendaIcon = Award;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
@@ -550,7 +550,6 @@ function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPaylo
   if (aiHasCurrentControl) return presentation;
   return { ...presentation, canAdvanceAi: false };
 }
-
 type LobbyParticipant = ApiLobbyParticipantPayload;
 type MatchStartLobby = ApiMatchStartLobbyPayload;
 type LobbyClientPayload = ApiLobbyPayload;
@@ -7777,22 +7776,5 @@ function DeckEditorPanel({
         </div>
       </div>
     </section>
-  );
-}
-
-function DeckAgendaStatusBadge({ status }: { status: DeckAgendaStatus | null }) {
-  if (!status) return null;
-  const complete = status.missingAgendaPoints === 0;
-  const loading = status.agendaPoints === null;
-  const missingLabel = loading ? "wird geladen" : complete ? "Mindestmenge erfüllt" : `${status.missingAgendaPoints} fehlen`;
-  return (
-    <p
-      className={`deckAgendaStatus ${loading ? "loading" : complete ? "complete" : "missing"}`}
-      title={`Agenda-Mindestmenge berechnet für ${status.effectiveCardsForMinimum} Karten.`}
-    >
-      <AgendaIcon size={14} />
-      <span>{loading ? `Agenda-Punkte / min. ${status.minimumAgendaPoints}` : `${status.agendaPoints} / ${status.minimumAgendaPoints} Agenda-Punkte`}</span>
-      <strong>{missingLabel}</strong>
-    </p>
   );
 }
