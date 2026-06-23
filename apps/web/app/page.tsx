@@ -3,7 +3,6 @@
 import {
   Activity,
   Bot,
-  Brain,
   Building2,
   Cable,
   Check,
@@ -19,7 +18,6 @@ import {
   Fingerprint,
   FlaskConical,
   Award,
-  Goal,
   Image,
   Keyboard,
   Layers3,
@@ -458,14 +456,9 @@ import {
 import { PlayerClockStrip, playerClockGraceDisplay } from "../features/game-board/PlayerClock";
 import { ArchivesDualStackLane } from "../features/game-board/ArchivesDualStackLane";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
-import {
-  ActionSlotMeter,
-  ActiveMatchResourceStrip,
-  CreditBadge,
-  ScoreAreaStat,
-  Stat
-} from "../features/game-board/ResourceStrip";
-import { IdentityCounterStrip, ServerCounterStrip } from "../features/game-board/CounterStrips";
+import { ActionSlotMeter, ActiveMatchResourceStrip } from "../features/game-board/ResourceStrip";
+import { ServerCounterStrip } from "../features/game-board/CounterStrips";
+import { OpponentPanel, PlayerPanel } from "../features/game-board/SideStatusPanels";
 import {
   ActionLeadIcon,
   ActionPanelDockPlaceholder,
@@ -520,8 +513,6 @@ const RunIcon = Route;
 const RunnerRoleIcon = Fingerprint;
 const CorpRoleIcon = Building2;
 const AgendaIcon = Award;
-const TagIcon = Goal;
-const CoreDamageIcon = Brain;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
@@ -10599,87 +10590,4 @@ function formatAiHintLabel(value: string): string {
     .replace(/_/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase();
-}
-
-function OpponentPanel({
-  view,
-  displayName,
-  agendaPointsToWin,
-  scoreAreaCards,
-  scoreAreaOpen,
-  scoreAreaHighlighted,
-  onToggleScoreArea
-}: {
-  view: PlayerView;
-  displayName?: string;
-  agendaPointsToWin: number;
-  scoreAreaCards: VisibleCard[];
-  scoreAreaOpen: boolean;
-  scoreAreaHighlighted: boolean;
-  onToggleScoreArea(): void;
-}) {
-  const side = opponentSide(view.side);
-  const turnSide = turnSideForView(view);
-  const isTurn = turnSide === side;
-  const RoleIcon = side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
-  return (
-    <section className={`section sideStatusPanel side-${side} ${isTurn ? "turnActive" : ""}`}>
-      <h2><RoleIcon size={16} />{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
-      <div className="stats">
-        <CreditBadge credits={view.opponent.credits} />
-        <ScoreAreaStat
-          value={`${view.opponent.agendaPoints} / ${agendaPointsToWin}`}
-          open={scoreAreaOpen}
-          highlighted={scoreAreaHighlighted}
-          interactive={scoreAreaCards.length > 0}
-          onToggle={onToggleScoreArea}
-        />
-        {side === "runner" ? <Stat value={view.opponent.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
-        {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
-      </div>
-      <IdentityCounterStrip displays={view.opponent.identity.counterDisplays} side={side} />
-      <p className="meta statusLine">{sideStatusLineForView(view, side)}</p>
-    </section>
-  );
-}
-
-function PlayerPanel({
-  view,
-  title,
-  scoreAreaCards,
-  agendaPointsToWin,
-  scoreAreaOpen,
-  scoreAreaHighlighted,
-  onToggleScoreArea
-}: {
-  view: PlayerView;
-  title: string;
-  scoreAreaCards: VisibleCard[];
-  agendaPointsToWin: number;
-  scoreAreaOpen: boolean;
-  scoreAreaHighlighted: boolean;
-  onToggleScoreArea(): void;
-}) {
-  const turnSide = turnSideForView(view);
-  const isTurn = turnSide === view.side;
-  const RoleIcon = view.side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
-  return (
-    <section className={`section sideStatusPanel side-${view.side} ${isTurn ? "turnActive" : ""}`}>
-      <h2><RoleIcon size={16} />{title}</h2>
-      <div className="stats">
-        <CreditBadge credits={view.own.credits} />
-        <ScoreAreaStat
-          value={`${view.own.agendaPoints} / ${agendaPointsToWin}`}
-          open={scoreAreaOpen}
-          highlighted={scoreAreaHighlighted}
-          interactive={scoreAreaCards.length > 0}
-          onToggle={onToggleScoreArea}
-        />
-        {view.side === "runner" ? <Stat value={view.own.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
-        {view.side === "runner" ? <Stat value={view.own.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
-      </div>
-      <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
-      <p className="meta statusLine">{sideStatusLineForView(view, view.side)}</p>
-    </section>
-  );
 }
