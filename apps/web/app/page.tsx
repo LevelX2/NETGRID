@@ -359,6 +359,61 @@ import {
 import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { CardDisplayModeSelector, OptionsPanel } from "../features/settings/OptionsPanel";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
+import {
+  DECK_TABLE_CARD_WIDTH_DEFAULT,
+  DECK_TABLE_CARD_WIDTH_MAX,
+  DECK_TABLE_CARD_WIDTH_MIN,
+  DECK_TABLE_CARD_WIDTH_STEP,
+  DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT,
+  DECK_TABLE_LIBRARY_CARD_WIDTH_MAX,
+  DECK_TABLE_LIBRARY_CARD_WIDTH_MIN,
+  DECK_TABLE_LIBRARY_CARD_WIDTH_STEP,
+  DECK_TABLE_LIBRARY_OVERLAP_DEFAULT,
+  DECK_TABLE_LIBRARY_OVERLAP_MAX,
+  DECK_TABLE_LIBRARY_OVERLAP_MIN,
+  DECK_TABLE_LIBRARY_OVERLAP_STEP,
+  DECK_TABLE_LIBRARY_WIDTH_DEFAULT,
+  DECK_TABLE_LIBRARY_WIDTH_MAX,
+  DECK_TABLE_LIBRARY_WIDTH_MIN,
+  DECK_TABLE_LIBRARY_WIDTH_STEP,
+  DECK_TABLE_MAX_COPIES_PER_CARD,
+  DECK_TABLE_OVERLAP_DEFAULT,
+  DECK_TABLE_OVERLAP_MAX,
+  DECK_TABLE_OVERLAP_MIN,
+  DECK_TABLE_OVERLAP_STEP,
+  MAX_DECK_TABLE_PILE_COUNT,
+  MIN_DECK_TABLE_PILE_COUNT,
+  applyDeckTablePileSort,
+  deckCardsFromTableLayout,
+  deckFingerprint,
+  deckMetadataFromEditable,
+  deckStrategyProfileFingerprint,
+  deckTableCardTotal,
+  deckTablePileSortModeLabel,
+  deckTableSelectionKey,
+  deckTableSortLabel,
+  defaultDeckTablePileName,
+  distributeDeckTableByInstallCost,
+  distributeDeckTableByType,
+  insertDeckTableEntries,
+  insertDeckTableEntry,
+  normalizeDeckTableLayout,
+  normalizeDeckTableViewSettings,
+  normalizeSteppedNumber,
+  parseDeckTableViewSettings,
+  reorderDeckTableEntries,
+  type DeckCardEntry,
+  type DeckEditorMode,
+  type DeckTableArrangeMode,
+  type DeckTableLayout,
+  type DeckTableLayoutEntry,
+  type DeckTablePile,
+  type DeckTablePileSortMode,
+  type DeckTableSelectionEntry,
+  type DeckTableSortKey,
+  type DeckTableViewSettings,
+  type EditableDeck
+} from "../features/decks/deck-table-model";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { SimulationResult, type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
@@ -690,61 +745,6 @@ type ExposeReview = {
   description: string;
 };
 
-type DeckCardEntry = {
-  cardId: string;
-  quantity: number;
-};
-
-type EditableDeck = {
-  deckId: string;
-  deckVersion: string;
-  name: string;
-  side: Side;
-  identityCardId: string;
-  cardPoolSnapshotId: string;
-  cardPoolVersion?: string;
-  formatProfileId: string;
-  formatProfileVersion?: string;
-  validationStatus?: "valid" | "invalid" | "needs_revalidation";
-  cards: DeckCardEntry[];
-  createdAt: string;
-  updatedAt: string;
-  notes?: string;
-  tableLayout?: DeckTableLayout;
-};
-
-type DeckEditorMode = "list" | "table";
-
-type DeckTableSortKey = "name" | "type" | "install" | "rez" | "trash" | "cost" | "strength" | "agenda";
-type DeckTablePileSortMode = "free" | DeckTableSortKey;
-type DeckTableArrangeMode = "type" | "install-piles" | DeckTableSortKey;
-
-type DeckTableLayoutEntry = {
-  cardId: string;
-  quantity: number;
-  order: number;
-};
-
-type DeckTablePile = {
-  id: string;
-  name?: string;
-  order: number;
-  sortMode: DeckTablePileSortMode;
-  entries: DeckTableLayoutEntry[];
-};
-
-type DeckTableLayout = {
-  schemaVersion: "deck-table-layout-v0.1";
-  showPileNames: boolean;
-  piles: DeckTablePile[];
-};
-
-type DeckTableSelectionEntry = {
-  pileId: string;
-  cardId: string;
-  order: number;
-};
-
 type DeckTemplate = {
   templateId: string;
   sourceDeckId: string;
@@ -898,35 +898,6 @@ const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
 const SPECIAL_ZONE_CARD_GAP = 6;
 const SCORE_AREA_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
-const DECK_TABLE_CARD_WIDTH_DEFAULT = 94;
-const DECK_TABLE_CARD_WIDTH_MIN = 72;
-const DECK_TABLE_CARD_WIDTH_MAX = 190;
-const DECK_TABLE_CARD_WIDTH_STEP = 2;
-const DECK_TABLE_OVERLAP_DEFAULT = 64;
-const DECK_TABLE_OVERLAP_MIN = 0;
-const DECK_TABLE_OVERLAP_MAX = 82;
-const DECK_TABLE_OVERLAP_STEP = 2;
-const DECK_TABLE_LIBRARY_WIDTH_DEFAULT = 250;
-const DECK_TABLE_LIBRARY_WIDTH_MIN = 160;
-const DECK_TABLE_LIBRARY_WIDTH_MAX = 760;
-const DECK_TABLE_LIBRARY_WIDTH_STEP = 10;
-const DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT = 92;
-const DECK_TABLE_LIBRARY_CARD_WIDTH_MIN = 58;
-const DECK_TABLE_LIBRARY_CARD_WIDTH_MAX = 190;
-const DECK_TABLE_LIBRARY_CARD_WIDTH_STEP = 2;
-const DECK_TABLE_LIBRARY_OVERLAP_DEFAULT = 0;
-const DECK_TABLE_LIBRARY_OVERLAP_MIN = 0;
-const DECK_TABLE_LIBRARY_OVERLAP_MAX = 72;
-const DECK_TABLE_LIBRARY_OVERLAP_STEP = 2;
-
-type DeckTableViewSettings = {
-  cardWidth: number;
-  overlapPercent: number;
-  libraryWidth: number;
-  libraryCardWidth: number;
-  libraryOverlapPercent: number;
-};
-
 function usePersistentCardScaleSettings() {
   const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
@@ -991,34 +962,6 @@ function usePersistentCardScaleSettings() {
     setCardBoardScalePercent,
     setCardRigScalePercent
   };
-}
-
-function normalizeSteppedNumber(value: unknown, fallback: number, min: number, max: number, step: number): number {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return fallback;
-  const clamped = Math.max(min, Math.min(max, Math.round(numeric)));
-  const snapped = Math.round(clamped / step) * step;
-  return Math.max(min, Math.min(max, snapped));
-}
-
-function normalizeDeckTableViewSettings(value: unknown): DeckTableViewSettings {
-  const candidate = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-  return {
-    cardWidth: normalizeSteppedNumber(candidate.cardWidth, DECK_TABLE_CARD_WIDTH_DEFAULT, DECK_TABLE_CARD_WIDTH_MIN, DECK_TABLE_CARD_WIDTH_MAX, DECK_TABLE_CARD_WIDTH_STEP),
-    overlapPercent: normalizeSteppedNumber(candidate.overlapPercent, DECK_TABLE_OVERLAP_DEFAULT, DECK_TABLE_OVERLAP_MIN, DECK_TABLE_OVERLAP_MAX, DECK_TABLE_OVERLAP_STEP),
-    libraryWidth: normalizeSteppedNumber(candidate.libraryWidth, DECK_TABLE_LIBRARY_WIDTH_DEFAULT, DECK_TABLE_LIBRARY_WIDTH_MIN, DECK_TABLE_LIBRARY_WIDTH_MAX, DECK_TABLE_LIBRARY_WIDTH_STEP),
-    libraryCardWidth: normalizeSteppedNumber(candidate.libraryCardWidth, DECK_TABLE_LIBRARY_CARD_WIDTH_DEFAULT, DECK_TABLE_LIBRARY_CARD_WIDTH_MIN, DECK_TABLE_LIBRARY_CARD_WIDTH_MAX, DECK_TABLE_LIBRARY_CARD_WIDTH_STEP),
-    libraryOverlapPercent: normalizeSteppedNumber(candidate.libraryOverlapPercent, DECK_TABLE_LIBRARY_OVERLAP_DEFAULT, DECK_TABLE_LIBRARY_OVERLAP_MIN, DECK_TABLE_LIBRARY_OVERLAP_MAX, DECK_TABLE_LIBRARY_OVERLAP_STEP)
-  };
-}
-
-function parseDeckTableViewSettings(raw: string | null): DeckTableViewSettings {
-  if (!raw) return normalizeDeckTableViewSettings(null);
-  try {
-    return normalizeDeckTableViewSettings(JSON.parse(raw));
-  } catch {
-    return normalizeDeckTableViewSettings(null);
-  }
 }
 
 function formatCatalogTerm(value: string): string {
@@ -1520,331 +1463,6 @@ function runChoiceStatusLabel(view: PlayerView, choice: NonNullable<PlayerView["
   const prompt = normalizeVisibleTerms(choice.prompt.trim());
   if (!prompt) return null;
   return prompt.endsWith(".") ? prompt : `${prompt}.`;
-}
-
-function deckFingerprint(deck: EditableDeck): string {
-  return JSON.stringify({
-    name: deck.name,
-    side: deck.side,
-    identityCardId: deck.identityCardId,
-    cardPoolSnapshotId: deck.cardPoolSnapshotId,
-    formatProfileId: deck.formatProfileId,
-    notes: deck.notes ?? "",
-    tableLayout: deck.tableLayout ?? null,
-    cards: [...deck.cards].sort((left, right) => left.cardId.localeCompare(right.cardId))
-  });
-}
-
-function deckStrategyProfileFingerprint(deck: EditableDeck): string {
-  return JSON.stringify({
-    deckId: deck.deckId,
-    name: deck.name,
-    side: deck.side,
-    identityCardId: deck.identityCardId,
-    cardPoolSnapshotId: deck.cardPoolSnapshotId,
-    cardPoolVersion: deck.cardPoolVersion ?? "",
-    formatProfileId: deck.formatProfileId,
-    formatProfileVersion: deck.formatProfileVersion ?? "",
-    cards: [...deck.cards]
-      .map((entry) => ({ cardId: entry.cardId, quantity: Math.max(0, Math.floor(entry.quantity)) }))
-      .filter((entry) => entry.quantity > 0)
-      .sort((left, right) => left.cardId.localeCompare(right.cardId))
-  });
-}
-
-const DEFAULT_DECK_TABLE_PILE_COUNT = 8;
-const MIN_DECK_TABLE_PILE_COUNT = 1;
-const MAX_DECK_TABLE_PILE_COUNT = 20;
-const DECK_TABLE_MAX_COPIES_PER_CARD = 3;
-
-function defaultDeckTablePileName(side: Side, index: number): string {
-  const runnerNames = ["Eisbrecher", "Programme", "Ressourcen", "Hardware", "Events", "Support", "Tempo", "Offen"];
-  const corpNames = ["ICE", "Agendas", "Assets", "Operationen", "Upgrades", "Ökonomie", "Schutz", "Offen"];
-  return (side === "runner" ? runnerNames : corpNames)[index] ?? `Stapel ${index + 1}`;
-}
-
-function defaultDeckTablePileIndexForCard(card: CatalogCardSummary | undefined): number {
-  if (!card) return 0;
-  const type = card.type.toLowerCase();
-  const subtypes = card.subtypes.map((subtype) => subtype.toLowerCase());
-  if (card.side === "runner") {
-    if (type === "program" && subtypes.includes("icebreaker")) return 0;
-    if (type === "program") return 1;
-    if (type === "resource") return 2;
-    if (type === "hardware") return 3;
-    if (type === "event") return 4;
-    return 7;
-  }
-  if (type === "ice") return 0;
-  if (type === "agenda") return 1;
-  if (type === "asset") return 2;
-  if (type === "operation") return 3;
-  if (type === "upgrade") return 4;
-  return 7;
-}
-
-function normalizeDeckTablePileSortMode(value: unknown): DeckTablePileSortMode {
-  return value === "name" || value === "type" || value === "install" || value === "rez" || value === "trash" || value === "cost" || value === "strength" || value === "agenda" ? value : "free";
-}
-
-function normalizeDeckTableLayout(deck: EditableDeck, cardLookup?: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail> = {}): DeckTableLayout {
-  const desired = new Map<string, number>();
-  for (const entry of deck.cards) {
-    if (!entry.cardId || !Number.isFinite(entry.quantity)) continue;
-    desired.set(entry.cardId, (desired.get(entry.cardId) ?? 0) + Math.max(0, Math.floor(entry.quantity)));
-  }
-  const sourcePiles = [...(deck.tableLayout?.piles ?? [])]
-    .filter((pile) => pile && typeof pile.id === "string")
-    .sort((left, right) => left.order - right.order);
-  const pileCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, deck.tableLayout?.piles.length ?? DEFAULT_DECK_TABLE_PILE_COUNT));
-  const normalizedPiles: DeckTablePile[] = Array.from({ length: pileCount }, (_, index) => {
-    const source = sourcePiles[index];
-    return {
-      id: source?.id || `pile-${index + 1}`,
-      name: typeof source?.name === "string" ? source.name.slice(0, 40) : defaultDeckTablePileName(deck.side, index),
-      order: index,
-      sortMode: normalizeDeckTablePileSortMode(source?.sortMode),
-      entries: []
-    };
-  });
-  const remaining = new Map(desired);
-  for (let pileIndex = 0; pileIndex < normalizedPiles.length; pileIndex += 1) {
-    const source = sourcePiles[pileIndex];
-    if (!source) continue;
-    const entries = [...(source.entries ?? [])].sort((left, right) => left.order - right.order);
-    for (const entry of entries) {
-      const available = remaining.get(entry.cardId) ?? 0;
-      if (available <= 0) continue;
-      const quantity = Math.min(available, Math.max(0, Math.floor(entry.quantity)));
-      if (quantity <= 0) continue;
-      for (let copy = 0; copy < quantity; copy += 1) {
-        normalizedPiles[pileIndex]!.entries.push({ cardId: entry.cardId, quantity: 1, order: normalizedPiles[pileIndex]!.entries.length });
-      }
-      remaining.set(entry.cardId, available - quantity);
-    }
-  }
-  for (const [cardId, quantity] of remaining) {
-    if (quantity <= 0) continue;
-    const pileIndex = Math.min(normalizedPiles.length - 1, Math.max(0, defaultDeckTablePileIndexForCard(cardLookup?.get(cardId))));
-    const fallbackPile = normalizedPiles[pileIndex]!;
-    for (let copy = 0; copy < quantity; copy += 1) {
-      fallbackPile.entries.push({ cardId, quantity: 1, order: fallbackPile.entries.length });
-    }
-  }
-  return {
-    schemaVersion: "deck-table-layout-v0.1",
-    showPileNames: deck.tableLayout?.showPileNames ?? false,
-    piles: normalizedPiles.map((pile) => applyDeckTablePileSort(pile, cardLookup ?? new Map<string, CatalogCardSummary>(), detailsById))
-  };
-}
-
-function deckCardsFromTableLayout(layout: DeckTableLayout): DeckCardEntry[] {
-  const byCard = new Map<string, number>();
-  for (const pile of layout.piles) {
-    for (const entry of pile.entries) {
-      byCard.set(entry.cardId, (byCard.get(entry.cardId) ?? 0) + Math.max(0, Math.floor(entry.quantity)));
-    }
-  }
-  return [...byCard.entries()]
-    .map(([cardId, quantity]) => ({ cardId, quantity }))
-    .filter((entry) => entry.quantity > 0)
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
-}
-
-function deckTableCardTotal(layout: DeckTableLayout, cardId: string): number {
-  return layout.piles.reduce((sum, pile) => sum + pile.entries.filter((entry) => entry.cardId === cardId).reduce((pileSum, entry) => pileSum + entry.quantity, 0), 0);
-}
-
-function reorderDeckTableEntries(entries: DeckTableLayoutEntry[]): DeckTableLayoutEntry[] {
-  return entries.map((entry, order) => ({ ...entry, order }));
-}
-
-function insertDeckTableEntry(entries: DeckTableLayoutEntry[], entry: DeckTableLayoutEntry, targetOrder?: number): DeckTableLayoutEntry[] {
-  const orderedEntries = [...entries].sort((left, right) => left.order - right.order);
-  if (targetOrder === undefined) return reorderDeckTableEntries([...orderedEntries, { ...entry, order: orderedEntries.length }]);
-  const targetIndex = orderedEntries.findIndex((candidate) => candidate.order === targetOrder);
-  if (targetIndex < 0) return reorderDeckTableEntries([...orderedEntries, { ...entry, order: orderedEntries.length }]);
-  return reorderDeckTableEntries([...orderedEntries.slice(0, targetIndex), { ...entry, order: targetIndex }, ...orderedEntries.slice(targetIndex)]);
-}
-
-function insertDeckTableEntries(entries: DeckTableLayoutEntry[], insertedEntries: DeckTableLayoutEntry[], targetOrder?: number): DeckTableLayoutEntry[] {
-  const orderedEntries = [...entries].sort((left, right) => left.order - right.order);
-  const normalizedInserted = insertedEntries.map((entry, offset) => ({ ...entry, order: offset }));
-  if (targetOrder === undefined) return reorderDeckTableEntries([...orderedEntries, ...normalizedInserted]);
-  const targetIndex = orderedEntries.findIndex((candidate) => candidate.order === targetOrder);
-  if (targetIndex < 0) return reorderDeckTableEntries([...orderedEntries, ...normalizedInserted]);
-  return reorderDeckTableEntries([...orderedEntries.slice(0, targetIndex), ...normalizedInserted, ...orderedEntries.slice(targetIndex)]);
-}
-
-function deckTableSelectionKey(pileId: string, cardId: string, order: number): string {
-  return `${pileId}::${order}::${cardId}`;
-}
-
-function deckTableSortLabel(sortBy: DeckTableSortKey): string {
-  switch (sortBy) {
-    case "type":
-      return "Typ";
-    case "install":
-      return "Installkosten";
-    case "rez":
-      return "Rez-Kosten";
-    case "trash":
-      return "Trashkosten";
-    case "cost":
-      return "Kosten";
-    case "strength":
-      return "Stärke";
-    case "agenda":
-      return "Agenda-Punkte";
-    default:
-      return "Name";
-  }
-}
-
-function deckTableNumericKey(sortBy: DeckTableSortKey): string | null {
-  if (sortBy === "install") return "installCost";
-  if (sortBy === "rez") return "rezCost";
-  if (sortBy === "trash") return "trashCost";
-  if (sortBy === "cost") return "cost";
-  if (sortBy === "strength") return "strength";
-  if (sortBy === "agenda") return "agendaPoints";
-  return null;
-}
-
-function sortDeckTableEntries(entries: DeckTableLayoutEntry[], cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>, sortBy: DeckTableSortKey): DeckTableLayoutEntry[] {
-  const numericValue = (entry: DeckTableLayoutEntry, key: string): number => {
-    const value = detailsById[entry.cardId]?.numeric[key];
-    return value === null || value === undefined ? Number.POSITIVE_INFINITY : value;
-  };
-  const titleValue = (entry: DeckTableLayoutEntry): string => cardLookup.get(entry.cardId)?.title ?? entry.cardId;
-  const typeValue = (entry: DeckTableLayoutEntry): string => deckBuilderCardGroup(cardLookup.get(entry.cardId) ?? null);
-  const numericKey = deckTableNumericKey(sortBy);
-  return reorderDeckTableEntries(
-    [...entries].sort((left, right) => {
-      if (numericKey) return numericValue(left, numericKey) - numericValue(right, numericKey) || typeValue(left).localeCompare(typeValue(right)) || titleValue(left).localeCompare(titleValue(right));
-      if (sortBy === "type") return typeValue(left).localeCompare(typeValue(right)) || titleValue(left).localeCompare(titleValue(right));
-      return titleValue(left).localeCompare(titleValue(right));
-    })
-  );
-}
-
-function deckTablePileSortModeLabel(sortMode: DeckTablePileSortMode): string {
-  return sortMode === "free" ? "Frei" : deckTableSortLabel(sortMode);
-}
-
-function applyDeckTablePileSort(pile: DeckTablePile, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTablePile {
-  if (pile.sortMode === "free") return { ...pile, entries: reorderDeckTableEntries(pile.entries) };
-  return { ...pile, entries: sortDeckTableEntries(pile.entries, cardLookup, detailsById, pile.sortMode) };
-}
-
-function deckTableEntryNumericValue(entry: DeckTableLayoutEntry, detailsById: Record<string, CatalogCardDetail>, key: string): number | null {
-  const value = detailsById[entry.cardId]?.numeric[key];
-  return value === null || value === undefined ? null : value;
-}
-
-function deckTableEntryBuildCost(entry: DeckTableLayoutEntry, detailsById: Record<string, CatalogCardDetail>): number | null {
-  const detail = detailsById[entry.cardId];
-  if (!detail) return null;
-  if (detail.type === "agenda") return detail.numeric.advancementRequirement ?? null;
-  return detail.numeric.installCost ?? detail.numeric.rezCost ?? detail.numeric.cost ?? null;
-}
-
-function deckTableBuildCostGroupName(key: string, entries: DeckTableLayoutEntry[], cardLookup: Map<string, CatalogCardSummary>): string {
-  if (key === "overflow") return "Weitere Kosten";
-  if (key === "none") return "Keine Kartenkosten";
-  const hasAgenda = entries.some((entry) => cardLookup.get(entry.cardId)?.type === "agenda");
-  const hasNonAgenda = entries.some((entry) => cardLookup.get(entry.cardId)?.type !== "agenda");
-  if (hasAgenda && !hasNonAgenda) return `Benötigt ${key}`;
-  if (hasAgenda && hasNonAgenda) return `Kosten/Benötigt ${key}`;
-  return `Kosten ${key}`;
-}
-
-function deckTableTypeGroupOrder(side: Side, label: string): number {
-  const filters = side === "corp" ? CORP_CATALOG_TYPE_FILTERS : RUNNER_CATALOG_TYPE_FILTERS;
-  const index = filters.findIndex((filter) => filter.label === label);
-  return index >= 0 ? index : filters.length;
-}
-
-function distributeDeckTableByType(layout: DeckTableLayout, side: Side, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTableLayout {
-  const allEntries = sortDeckTableEntries(layout.piles.flatMap((pile) => pile.entries), cardLookup, detailsById, "name");
-  const grouped = new Map<string, DeckTableLayoutEntry[]>();
-  for (const entry of allEntries) {
-    const label = deckBuilderCardGroup(cardLookup.get(entry.cardId) ?? null);
-    grouped.set(label, [...(grouped.get(label) ?? []), entry]);
-  }
-  const groups = [...grouped.entries()].sort((left, right) => deckTableTypeGroupOrder(side, left[0]) - deckTableTypeGroupOrder(side, right[0]) || left[0].localeCompare(right[0]));
-  const groupCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, groups.length || 1));
-  return {
-    ...layout,
-    piles: Array.from({ length: groupCount }, (_, index) => {
-      const [label, entries] = groups[index] ?? [defaultDeckTablePileName(side, index), []];
-      const sourcePile = layout.piles[index];
-      return {
-        id: sourcePile?.id ?? `pile-${index + 1}`,
-        name: label,
-        order: index,
-        sortMode: "name",
-        entries: reorderDeckTableEntries(entries)
-      };
-    })
-  };
-}
-
-function distributeDeckTableByInstallCost(layout: DeckTableLayout, side: Side, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTableLayout {
-  const allEntries = sortDeckTableEntries(layout.piles.flatMap((pile) => pile.entries), cardLookup, detailsById, "name").sort((left, right) => {
-    const leftValue = deckTableEntryBuildCost(left, detailsById);
-    const rightValue = deckTableEntryBuildCost(right, detailsById);
-    const normalizedLeft = leftValue === null ? Number.POSITIVE_INFINITY : leftValue;
-    const normalizedRight = rightValue === null ? Number.POSITIVE_INFINITY : rightValue;
-    const leftType = deckBuilderCardGroup(cardLookup.get(left.cardId) ?? null);
-    const rightType = deckBuilderCardGroup(cardLookup.get(right.cardId) ?? null);
-    return normalizedLeft - normalizedRight || leftType.localeCompare(rightType) || (cardLookup.get(left.cardId)?.title ?? left.cardId).localeCompare(cardLookup.get(right.cardId)?.title ?? right.cardId);
-  });
-  const grouped = new Map<string, DeckTableLayoutEntry[]>();
-  for (const entry of allEntries) {
-    const value = deckTableEntryBuildCost(entry, detailsById);
-    const key = value === null ? "none" : String(value);
-    grouped.set(key, [...(grouped.get(key) ?? []), entry]);
-  }
-  const groups = [...grouped.entries()].sort((left, right) => {
-    const leftValue = left[0] === "none" ? Number.POSITIVE_INFINITY : Number(left[0]);
-    const rightValue = right[0] === "none" ? Number.POSITIVE_INFINITY : Number(right[0]);
-    return leftValue - rightValue;
-  });
-  const visibleGroups =
-    groups.length > MAX_DECK_TABLE_PILE_COUNT
-      ? [...groups.slice(0, MAX_DECK_TABLE_PILE_COUNT - 1), ["overflow", groups.slice(MAX_DECK_TABLE_PILE_COUNT - 1).flatMap(([, entries]) => entries)] as [string, DeckTableLayoutEntry[]]]
-      : groups;
-  const groupCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, visibleGroups.length || 1));
-  return {
-    ...layout,
-    piles: Array.from({ length: groupCount }, (_, index) => {
-      const [key, entries] = visibleGroups[index] ?? [String(index), []];
-      const sourcePile = layout.piles[index];
-      const name = deckTableBuildCostGroupName(key, entries, cardLookup);
-      return {
-        id: sourcePile?.id ?? `pile-${index + 1}`,
-        name: entries.length > 0 ? name : defaultDeckTablePileName(side, index),
-        order: index,
-        sortMode: "name",
-        entries: reorderDeckTableEntries(entries)
-      };
-    })
-  };
-}
-
-function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata | undefined {
-  if (!deck) return undefined;
-  return {
-    side: deck.side,
-    identityCardId: deck.identityCardId,
-    deckName: deck.name,
-    cardPoolSnapshotId: deck.cardPoolSnapshotId,
-    ...(deck.cardPoolVersion ? { cardPoolVersion: deck.cardPoolVersion } : {}),
-    formatProfileId: deck.formatProfileId,
-    ...(deck.formatProfileVersion ? { formatProfileVersion: deck.formatProfileVersion } : {}),
-    deckHash: "wird beim Start geprüft"
-  };
 }
 
 function snapshotAllowedForMatchCardPool(snapshot: DeckSnapshot, matchCardPool: MatchCardPoolSelection): boolean {
