@@ -6,7 +6,7 @@ import {
 import {
   isScoredIceMarkModifierChoiceSource,
   resolveScoredRezzedIceMarkModifierChoice,
-} from "./ice-transmutation-sequence";
+} from "./scored-rezzed-ice-mark-modifier-sequence";
 import {
   isScoredSubtypeRevealChoiceSource,
   resolveScoredSubtypeRevealChoice,
@@ -26,7 +26,7 @@ export const SCORED_AGENDA_FLOW_CHOICE_RESOLVERS: readonly ScoredAgendaFlowChoic
       resolve: resolveScoredSubtypeRevealChoice,
     },
     {
-      id: "ice_transmutation_flow_choice",
+      id: "scored_rezzed_ice_mark_modifier_flow_choice",
       matches: isScoredIceMarkModifierChoiceSource,
       resolve: resolveScoredRezzedIceMarkModifierChoice,
     },

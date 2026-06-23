@@ -5,7 +5,7 @@ import {
   isHqToNewRemoteInstallRezChoiceSource,
   isHqToNewRemoteInstallRezRezChoiceSource,
 } from "./hq-to-new-remote-install-rez-sequence";
-import { isScoredIceMarkModifierChoiceSource } from "./ice-transmutation-sequence";
+import { isScoredIceMarkModifierChoiceSource } from "./scored-rezzed-ice-mark-modifier-sequence";
 import { orderedFortRebuildPublicPayload } from "../../run/windows/ordered-fort-rebuild-sequence";
 import { isScoredAgendaFreeRezChoiceSource } from "./scored-agenda-free-rez-sequence";
 import {
@@ -38,8 +38,8 @@ describe("scored agenda sequence contract matrix", () => {
       "agenda_purge_score_start",
       "corporate_downsizing_score_start",
       "hq_to_new_remote_install_rez_score_start",
-      "ice_transmutation_score_start",
       "scored_agenda_free_rez_score_start",
+      "scored_rezzed_ice_mark_modifier_score_start",
       "security_net_optimization_score_start",
       "subtype_reveal_economy_score_start",
     ]);
@@ -60,7 +60,7 @@ describe("scored agenda sequence contract matrix", () => {
       },
       {
         kind: "select_rezzed_ice_mark_modifier",
-        id: "ice_transmutation_score_start",
+        id: "scored_rezzed_ice_mark_modifier_score_start",
       },
       {
         kind: "score_rez_installed_ice_at_no_cost",
@@ -117,8 +117,8 @@ describe("scored agenda sequence contract matrix", () => {
 
     expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
     expect(flowResolverIds.sort()).toEqual([
-      "ice_transmutation_flow_choice",
       "scored_agenda_start_draw_flow_choice",
+      "scored_rezzed_ice_mark_modifier_flow_choice",
       "subtype_reveal_flow_choice",
     ]);
     expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
@@ -210,8 +210,8 @@ describe("scored agenda sequence contract matrix", () => {
         resolverId: "subtype_reveal_flow_choice",
       },
       {
-        source: "v1920.ice_transmutation:transmutation_agenda:8",
-        resolverId: "ice_transmutation_flow_choice",
+        source: "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
+        resolverId: "scored_rezzed_ice_mark_modifier_flow_choice",
       },
       {
         source: "scored_agenda.start_draw_choice:employee:8",
@@ -240,7 +240,7 @@ describe("scored agenda sequence contract matrix", () => {
       "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
       "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
       "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1:8",
-      "v1920.ice_transmutation:transmutation_agenda:8",
+      "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
     ];
 
     for (const source of sources) {

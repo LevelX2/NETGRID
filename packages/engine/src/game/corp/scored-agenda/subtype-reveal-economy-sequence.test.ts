@@ -10,7 +10,7 @@ describe("subtype reveal economy sequence routing", () => {
     ).toBe(true);
     expect(
       isScoredSubtypeRevealChoiceSource(
-        "v1920.ice_transmutation:transmutation_agenda:8",
+        "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
       ),
     ).toBe(false);
   });

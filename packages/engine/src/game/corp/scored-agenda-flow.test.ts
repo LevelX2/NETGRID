@@ -412,7 +412,7 @@ describe("scored agenda flow", () => {
       },
     ]);
     expect(choice.prompt).toBe(
-      "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+      "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
     expect(legalAction.payload).toMatchObject({
       cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
@@ -437,7 +437,7 @@ describe("scored agenda flow", () => {
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
-      agendaAbility: "v1920_ice_transmutation",
+      agendaAbility: "scored_rezzed_ice_mark_modifier",
       targetIceId: "ice_1",
       cardImplementationTargetKind: "rezzed_installed_ice",
       cardImplementationCounterType: "mark",
@@ -497,7 +497,7 @@ describe("scored agenda flow", () => {
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
       scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
-      iceTransmutationSkippedReason: "no_rezzed_ice",
+      scoredIceMarkModifierSkippedReason: "no_rezzed_ice",
     });
   });
 

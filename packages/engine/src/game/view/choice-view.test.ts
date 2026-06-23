@@ -217,7 +217,7 @@ describe("ChoiceView projection", () => {
       side: "corp",
       source:
         "card_implementation_primitive.select_rezzed_ice_mark_modifier:ice_transmutation:1",
-      prompt: "Ice Transmutation: Rezzed ICE wählen.",
+      prompt: "Scored Agenda: Rezzed ICE wählen.",
       kind: "select_cards",
       options: [
         {

@@ -1100,7 +1100,7 @@ export function createCardRuntimeDepsHosts(
       for (let index = 0; index < transmutationCopies; index += 1) {
         copies.push({
           ...subroutine,
-          id: `${subroutine.id}.v1920_ice_transmutation.${index + 1}`,
+          id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
         });
       }
       return copies.map((copy) =>

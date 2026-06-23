@@ -1,5 +1,5 @@
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
-import { startScoredRezzedIceMarkModifierChoice } from "./ice-transmutation-sequence";
+import { startScoredRezzedIceMarkModifierChoice } from "./scored-rezzed-ice-mark-modifier-sequence";
 import { resolveSecurityNetOptimizationOnScore } from "./security-net-optimization-sequence";
 import type {
   ScoredAgendaScoreTimeContext,
@@ -18,7 +18,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       },
     },
     {
-      id: "ice_transmutation_score_start",
+      id: "scored_rezzed_ice_mark_modifier_score_start",
       kind: "select_rezzed_ice_mark_modifier",
       mode: "choice_start",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {

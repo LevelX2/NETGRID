@@ -1605,7 +1605,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(cardCounterAmount(state, iceId, "mark")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "v1920_ice_transmutation",
+      agendaAbility: "scored_rezzed_ice_mark_modifier",
       targetIceDefinitionId: "onr_v1_232_crystal-wall",
       strengthBonus: 1,
       duplicatedSubroutineCount: 1,
