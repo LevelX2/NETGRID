@@ -1109,7 +1109,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     startCorpTurn,
     startCrashEverettDrawChoice,
     startDiscardPhase,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     startExposeInstalledCorpCardsChoice,
     startForgedActivationOrdersTargetChoice,
     startHuntClubBbsExposeChoice,

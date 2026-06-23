@@ -1299,7 +1299,7 @@ function resolveRunnerPrivateLookChoice(
     finishRun(state, true, legalAction);
 }
 
-function startExpertScheduleAnalyzerPostAccessChoice(
+function startPostAccessInstalledProgramChoice(
   state: GameState,
   run: ActiveRun,
   legalAction?: LegalAction,
@@ -1410,7 +1410,7 @@ function appendRegionReplacementTrashEffect(
   return {
     startRunnerPrivateLookChoice,
     resolveRunnerPrivateLookChoice,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     v1915InstalledRevealHelperIds,
     runnerHasInstalledDefinition,
     trashOlderRegionUpgradesInServer,

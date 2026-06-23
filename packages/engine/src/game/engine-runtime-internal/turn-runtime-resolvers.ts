@@ -1115,7 +1115,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     startCodeViralCachePurgeChoice,
     startCoreCommandJettisonIceChoice,
     startCrashEverettDrawChoice,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     startExposeInstalledCorpCardsChoice,
     startForgedActivationOrdersTargetChoice,
     startHuntClubBbsExposeChoice,

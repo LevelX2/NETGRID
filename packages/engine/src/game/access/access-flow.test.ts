@@ -251,7 +251,7 @@ function makeHost(options: {
         finishedRuns.push(successful);
         delete state.run;
       },
-      startExpertScheduleAnalyzerPostAccessChoice: () => false,
+      startPostAccessInstalledProgramChoice: () => false,
     },
     access: {
       installedRevealHelperCount: () => 0,

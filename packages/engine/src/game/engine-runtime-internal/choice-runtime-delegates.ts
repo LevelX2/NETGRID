@@ -14,12 +14,12 @@ export function resolveRunnerPrivateLookChoice(...args: any[]): any {
   )(...args);
 }
 
-export function startExpertScheduleAnalyzerPostAccessChoice(
+export function startPostAccessInstalledProgramChoice(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "choiceHiddenZoneResolvers",
-    "startExpertScheduleAnalyzerPostAccessChoice",
+    "startPostAccessInstalledProgramChoice",
   )(...args);
 }
 

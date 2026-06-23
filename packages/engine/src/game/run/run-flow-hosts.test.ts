@@ -135,7 +135,7 @@ function hostFor(calls: string[]): RunFlowHost {
       advanceArchivesBreachPastNonDecisionCards: () =>
         calls.push("advanceArchivesBreach"),
       startRunnerPrivateLookChoice: () => true,
-      startExpertScheduleAnalyzerPostAccessChoice: () =>
+      startPostAccessInstalledProgramChoice: () =>
         calls.push("expertScheduleAnalyzer"),
     },
     run: {

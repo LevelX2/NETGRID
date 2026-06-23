@@ -60,7 +60,7 @@ export type AccessFlowCompositionHost = {
       state: GameState,
     ) => LegalAction[];
     hiddenStackInstallRunActions: (state: GameState, run: ActiveRun) => LegalAction[];
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       state: GameState,
       run: ActiveRun,
       legalAction?: LegalAction,
@@ -337,8 +337,8 @@ export function createAccessFlowAdapters(
       run: {
         finishRun: (successful, legalAction) =>
           host.run.finishRun(state, successful, legalAction),
-        startExpertScheduleAnalyzerPostAccessChoice: (run, legalAction) =>
-          host.run.startExpertScheduleAnalyzerPostAccessChoice(
+        startPostAccessInstalledProgramChoice: (run, legalAction) =>
+          host.run.startPostAccessInstalledProgramChoice(
             state,
             run,
             legalAction,

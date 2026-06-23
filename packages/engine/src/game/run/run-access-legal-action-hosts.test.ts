@@ -138,7 +138,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         calls.push(`finishRun:${successful}`),
       successfulRunInterventionHost: (targetState: GameState) =>
         ({ state: targetState }) as never,
-      startExpertScheduleAnalyzerPostAccessChoice: () => false,
+      startPostAccessInstalledProgramChoice: () => false,
     },
     access: {
       advanceArchivesBreachPastNonDecisionCards: () =>

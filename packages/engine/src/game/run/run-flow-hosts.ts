@@ -192,7 +192,7 @@ export type RunFlowHost = {
       reason: "ability" | "successful_run" | "post_access",
       legalAction?: LegalAction,
     ) => boolean;
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       state: GameState,
       run: NonNullable<GameState["run"]>,
       legalAction?: LegalAction,

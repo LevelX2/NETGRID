@@ -117,7 +117,7 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       successfulRunProgramActions: () => [],
       runnerDuringRunCardImplementationLegalActions: () => [],
       hiddenStackInstallRunActions: () => [],
-      startExpertScheduleAnalyzerPostAccessChoice: () => false,
+      startPostAccessInstalledProgramChoice: () => false,
     },
     damage: {
       resolveDamageOperation: () => calls.push("resolveDamageOperation"),

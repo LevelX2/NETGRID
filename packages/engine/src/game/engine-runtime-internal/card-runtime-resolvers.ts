@@ -1102,7 +1102,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     startCorpTurn,
     startCrashEverettDrawChoice,
     startDiscardPhase,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     startExposeInstalledCorpCardsChoice,
     startForgedActivationOrdersTargetChoice,
     startHuntClubBbsExposeChoice,

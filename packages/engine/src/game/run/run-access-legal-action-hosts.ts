@@ -30,7 +30,7 @@ export type RunAccessLegalActionHostCompositionHost = {
   > & {
     finishRun: RunFlowHost["callbacks"]["finishRun"];
     successfulRunInterventionHost: StateHostFn<SuccessfulRunInterventionHost>;
-    startExpertScheduleAnalyzerPostAccessChoice: AccessFlowCompositionHost["run"]["startExpertScheduleAnalyzerPostAccessChoice"];
+    startPostAccessInstalledProgramChoice: AccessFlowCompositionHost["run"]["startPostAccessInstalledProgramChoice"];
   };
   access: Pick<
     RunFlowHost["access"],
@@ -113,8 +113,8 @@ export function createRunAccessLegalActionHostComposition(
       advanceArchivesBreachPastNonDecisionCards:
         access.advanceArchivesBreachPastNonDecisionCards,
       startRunnerPrivateLookChoice: access.startRunnerPrivateLookChoice,
-      startExpertScheduleAnalyzerPostAccessChoice:
-        run.startExpertScheduleAnalyzerPostAccessChoice,
+      startPostAccessInstalledProgramChoice:
+        run.startPostAccessInstalledProgramChoice,
     },
     run: {
       currentRun: run.currentRun,
@@ -184,8 +184,8 @@ export function createRunAccessLegalActionHostComposition(
           runFlow.runnerEncounterActionHostForState(state),
           activeRun,
         ),
-      startExpertScheduleAnalyzerPostAccessChoice:
-        run.startExpertScheduleAnalyzerPostAccessChoice,
+      startPostAccessInstalledProgramChoice:
+        run.startPostAccessInstalledProgramChoice,
     },
     damage: {
       resolveDamageOperation: callbacks.damage.resolveDamageOperation,

@@ -1082,7 +1082,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     startCorpTurn,
     startCrashEverettDrawChoice,
     startDiscardPhase,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     startExposeInstalledCorpCardsChoice,
     startForgedActivationOrdersTargetChoice,
     startHuntClubBbsExposeChoice,

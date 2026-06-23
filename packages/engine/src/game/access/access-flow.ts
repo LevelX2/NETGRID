@@ -73,7 +73,7 @@ export type AccessFlowHost = {
   };
   run: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       run: ActiveRun,
       legalAction?: LegalAction,
     ) => boolean;
@@ -402,7 +402,7 @@ export function completeCurrentBreachAccess(
       },
     };
     host.state.run = completedRun;
-    if (host.run.startExpertScheduleAnalyzerPostAccessChoice(completedRun, legalAction))
+    if (host.run.startPostAccessInstalledProgramChoice(completedRun, legalAction))
       return {
         handled: true,
         accessFinished: true,
