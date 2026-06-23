@@ -55,7 +55,7 @@ import {
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
   ApiAiPacingMode,
   ApiClientGameMode,
@@ -370,6 +370,14 @@ import {
   ScoreAreaStat,
   Stat
 } from "../features/game-board/ResourceStrip";
+import {
+  ActionLeadIcon,
+  ActionPanelDockPlaceholder,
+  ActionPanelFloatButton,
+  CostChips,
+  OverflowAwareActionButton,
+  PriorityWindowHoldToggle
+} from "../features/actions/ActionControls";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
@@ -10865,37 +10873,6 @@ function aiDecisionDebugStatusLabel(status: AiDecisionDebugOverlayStatus, traceC
   return "Aus";
 }
 
-function ActionPanelDockPlaceholder({
-  runActive,
-  floatingVisible,
-  onDock
-}: {
-  runActive: boolean;
-  floatingVisible: boolean;
-  onDock(): void;
-}) {
-  return (
-    <section className="section actionPanelDockPlaceholder" data-testid="legal-actions-dock-placeholder">
-      <div className="sectionTitleLine">
-        <h2>Mögliche Aktionen</h2>
-        <button className="button actionPanelDockButton" type="button" onClick={onDock} title="Aktionsfenster andocken">
-          <PanelTopClose size={14} />
-          Andocken
-        </button>
-      </div>
-      <p className="meta">{runActive && !floatingVisible ? "Run-Fenster aktiv." : "Schwebendes Aktionsfenster aktiv."}</p>
-    </section>
-  );
-}
-
-function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
-  return (
-    <button className="priorityHoldToggle actionPanelFloatToggle" type="button" onClick={onFloat} aria-label="Aktionsfenster schweben lassen" title="Aktionsfenster schweben lassen">
-      <PanelTopOpen size={14} />
-    </button>
-  );
-}
-
 function LegalActionsPanel({
   view,
   primaryActions,
@@ -11096,49 +11073,6 @@ function LegalActionsPanel({
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
-  );
-}
-
-function PriorityWindowHoldToggle({ enabled, onToggle }: { enabled: boolean; onToggle(enabled: boolean): void }) {
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
-  const tooltipText = "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
-  const label = enabled ? "Fensterhalt ausschalten" : "Fensterhalt einschalten";
-  const showTooltip = (element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    const margin = 10;
-    const width = 276;
-    const left = Math.min(Math.max(margin, rect.right - width), window.innerWidth - width - margin);
-    const belowTop = rect.bottom + 8;
-    const top = belowTop + 64 < window.innerHeight ? belowTop : Math.max(margin, rect.top - 72);
-    setTooltipStyle({ left, top, width });
-  };
-  const tooltip =
-    tooltipStyle && typeof document !== "undefined"
-      ? createPortal(
-          <span className="priorityHoldTooltip" role="tooltip" style={tooltipStyle}>
-            {tooltipText}
-          </span>,
-          document.body
-        )
-      : null;
-
-  return (
-    <>
-      <button
-        className={`priorityHoldToggle ${enabled ? "active" : ""}`}
-        type="button"
-        aria-label={label}
-        aria-pressed={enabled}
-        onClick={() => onToggle(!enabled)}
-        onPointerEnter={(event) => showTooltip(event.currentTarget)}
-        onPointerLeave={() => setTooltipStyle(null)}
-        onFocus={(event) => showTooltip(event.currentTarget)}
-        onBlur={() => setTooltipStyle(null)}
-      >
-        <Pause size={15} />
-      </button>
-      {tooltip}
-    </>
   );
 }
 
@@ -11574,91 +11508,6 @@ function DiscardChoicePanel({
       </button>
     </section>
   );
-}
-
-function CostChips({ action }: { action: LegalAction }) {
-  const chips = actionCostChips(action);
-  if (chips.length === 0) return null;
-  return (
-    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
-      {chips.map((chip) => (
-        <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
-          {chip.kind === "action" ? (
-            Array.from({ length: chip.amount }, (_, index) => <span className="costActionIcon" aria-hidden="true" key={`action-${index}`} />)
-          ) : (
-            <>
-              <span className="costCreditIcon" aria-hidden="true" />
-              {chip.amount}
-            </>
-          )}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-type OverflowAwareActionButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
-  action: LegalAction;
-  label: string;
-  displayLabel?: string;
-  iconSize?: number;
-};
-
-function OverflowAwareActionButton({
-  action,
-  label,
-  displayLabel = label,
-  iconSize,
-  type = "button",
-  ...buttonProps
-}: OverflowAwareActionButtonProps) {
-  const labelRef = useRef<HTMLSpanElement | null>(null);
-  const [tooltipEnabled, setTooltipEnabled] = useState(false);
-
-  useEffect(() => {
-    const labelElement = labelRef.current;
-    if (!labelElement) {
-      setTooltipEnabled(false);
-      return;
-    }
-
-    const updateTooltipAvailability = () => {
-      const clipped =
-        labelElement.scrollWidth > labelElement.clientWidth + 1 ||
-        labelElement.scrollHeight > labelElement.clientHeight + 1;
-      setTooltipEnabled((current) => (current === clipped ? current : clipped));
-    };
-
-    updateTooltipAvailability();
-    const frame = window.requestAnimationFrame(updateTooltipAvailability);
-    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateTooltipAvailability) : null;
-    resizeObserver?.observe(labelElement);
-    window.addEventListener("resize", updateTooltipAvailability);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      resizeObserver?.disconnect();
-      window.removeEventListener("resize", updateTooltipAvailability);
-    };
-  }, [displayLabel, label]);
-
-  return (
-    <button
-      {...buttonProps}
-      type={type}
-      aria-label={label}
-      data-tooltip={tooltipEnabled ? label : undefined}
-    >
-      <ActionLeadIcon action={action} {...(iconSize !== undefined ? { size: iconSize } : {})} />
-      <span className="actionButtonLabel" ref={labelRef}>{displayLabel}</span>
-      <CostChips action={action} />
-    </button>
-  );
-}
-
-function ActionLeadIcon({ action, size = 15 }: { action: LegalAction; size?: number }) {
-  if (action.type === "jack_out") return <X size={size} aria-hidden="true" />;
-  if (action.type === "continue_run") return <Route size={size} aria-hidden="true" />;
-  return actionConsumesClick(action) ? <Play size={size} aria-hidden="true" /> : <Zap size={size} aria-hidden="true" />;
 }
 
 function setupWaitingLabel(view: PlayerView): string {
