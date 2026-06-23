@@ -87,7 +87,7 @@ export type ScoredAgendaAbilityHost = {
     ) => void;
     resolveActivatedCardImplementationAbility: () => boolean;
     revealCorpRdTop: () => void;
-    resolveAiChiefFinancialOfficer: (sourceCardId: CardInstanceId) => void;
+    resolveHqArchivesShuffleDraw: (sourceCardId: CardInstanceId) => void;
   };
 };
 
@@ -189,7 +189,7 @@ export function buildScoredAgendaAbilityActionsForCard(
         [{ clicks: 1 }],
         {
           cardId: agendaId,
-          agendaAbility: "ai_chief_financial_officer",
+          agendaAbility: "hq_archives_shuffle_draw",
           drawCardsAmount,
         },
       ),
@@ -279,7 +279,7 @@ export function buildScoredAgendaAbilityActionsForCard(
     host.cards.scoredAgendaKindForDefinition(definition) ===
     "scored_agenda_credit_until_install_or_rez"
   ) {
-    if (!isCorporateRetreatInstallCreditAbilityAvailable(host, agendaId))
+    if (!isScoredAgendaInstallRezCreditAvailable(host, agendaId))
       return { handled: true, actions };
     actions.push(
       host.actions.createLegalAction(
@@ -336,14 +336,14 @@ export function handleScoredAgendaActivatedAbilityAction(
     };
   }
   if (legalAction.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez")
-    return resolveCorporateRetreatAction(host);
+    return resolveScoredAgendaInstallRezCreditAction(host);
   if (
     legalAction.payload?.agendaAbility ===
     "v1919_scored_agenda_reveal_rd_top"
   )
     return resolveScoredAgendaRevealRdTopAction(host);
-  if (legalAction.payload?.agendaAbility === "ai_chief_financial_officer")
-    return resolveAiChiefFinancialOfficerAction(host);
+  if (legalAction.payload?.agendaAbility === "hq_archives_shuffle_draw")
+    return resolveHqArchivesShuffleDrawAction(host);
   if (legalAction.payload?.agendaAbility === "proteus_corporate_headhunters")
     return resolveCorporateHeadhuntersAction(host);
   return { handled: false };
@@ -400,22 +400,26 @@ function resolveCorporateHeadhuntersAction(
   };
 }
 
-function resolveCorporateRetreatAction(
+function resolveScoredAgendaInstallRezCreditAction(
   host: ScoredAgendaAbilityHost,
 ): ScoredAgendaActivatedAbilityHandlerResult {
   const legalAction = requireLegalAction(host);
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Corporate Retreat nutzen.");
+    throw new Error(
+      "Nur die Korp darf scored Agenda-Install/Rez-Credits nutzen.",
+    );
   const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
   if (!host.state.corp.scoreArea.includes(sourceCardId))
-    throw new Error("Corporate Retreat ist nicht gescort.");
+    throw new Error("Die Install/Rez-Credit-Agenda ist nicht gescort.");
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation = host.cards.scoredAgendaForDefinition(definition);
   if (implementation?.kind !== "scored_agenda_credit_until_install_or_rez")
-    throw new Error("Die Agenda-Aktion passt nicht zu Corporate Retreat.");
-  if (!isCorporateRetreatInstallCreditAbilityAvailable(host, sourceCardId))
     throw new Error(
-      "Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.",
+      "Die Agenda-Aktion passt nicht zu Install/Rez-Credits.",
+    );
+  if (!isScoredAgendaInstallRezCreditAvailable(host, sourceCardId))
+    throw new Error(
+      "Die Install/Rez-Credit-Agenda ist nach Install oder Rez nicht mehr verfuegbar.",
     );
   const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
   const expectedGain =
@@ -423,7 +427,9 @@ function resolveCorporateRetreatAction(
       ? implementation.gainAmount
       : 0;
   if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
-    throw new Error("Corporate Retreat gewaehrt in diesem Scope genau 2 Credits.");
+    throw new Error(
+      "Die Install/Rez-Credit-Agenda gewaehrt in diesem Scope genau 2 Credits.",
+    );
   host.credits.gainCorpCredits(gainAmount);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -468,26 +474,26 @@ function resolveScoredAgendaRevealRdTopAction(
   };
 }
 
-function resolveAiChiefFinancialOfficerAction(
+function resolveHqArchivesShuffleDrawAction(
   host: ScoredAgendaAbilityHost,
 ): ScoredAgendaActivatedAbilityHandlerResult {
   const legalAction = requireLegalAction(host);
   if (legalAction.side !== "corp")
     throw new Error(
-      "Nur die Korp darf die AI Chief Financial Officer Agenda-Aktion nutzen.",
+      "Nur die Korp darf die HQ/Archives-Shuffle-Draw-Agenda-Aktion nutzen.",
     );
   const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
   if (!host.state.corp.scoreArea.includes(sourceCardId))
     throw new Error(
-      "Die gewaehlte AI Chief Financial Officer Agenda ist nicht gescort.",
+      "Die gewaehlte HQ/Archives-Shuffle-Draw-Agenda ist nicht gescort.",
     );
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation = host.cards.scoredAgendaForDefinition(definition);
   if (implementation?.kind !== "shuffle_hq_archives_into_rd_then_draw")
     throw new Error(
-      "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
+      "Die Agenda-Aktion passt nicht zur ausgewaehlten HQ/Archives-Shuffle-Draw-Agenda.",
     );
-  host.callbacks.resolveAiChiefFinancialOfficer(sourceCardId);
+  host.callbacks.resolveHqArchivesShuffleDraw(sourceCardId);
   return {
     handled: true,
     stateChanged: true,
@@ -565,7 +571,7 @@ function validateScoredAgendaCounterCreditAction(
     throw new Error("Die scored Agenda-Aktion hat einen ungueltigen Creditbetrag.");
 }
 
-function isCorporateRetreatInstallCreditAbilityAvailable(
+function isScoredAgendaInstallRezCreditAvailable(
   host: ScoredAgendaAbilityHost,
   agendaId: CardInstanceId,
 ): boolean {

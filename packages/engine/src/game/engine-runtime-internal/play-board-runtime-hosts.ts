@@ -282,7 +282,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,

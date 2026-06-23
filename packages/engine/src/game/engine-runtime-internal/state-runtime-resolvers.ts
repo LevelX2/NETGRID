@@ -301,7 +301,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -851,7 +851,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     encounterResolutionHostForState,
     encounterSpecialWindowHostForState,
     endTurn,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     exposeCorpCardInServer,
     exposeInstalledCorpCardForImplementation,
     exposeInstalledCorpCardLabel,

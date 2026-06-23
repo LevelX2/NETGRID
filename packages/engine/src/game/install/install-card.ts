@@ -97,7 +97,7 @@ export type InstallCardHost = {
     hiddenRunnerResourceSlotId: (cardId: CardInstanceId) => CardInstanceId;
   };
   corp: {
-    expireCorporateRetreatInstallCreditAbilities: () => void;
+    expireScoredAgendaInstallRezCreditAbilities: () => void;
     consumeEdgerunnerTempsInstallAction: (legalAction: LegalAction) => void;
     isRegionUpgrade: (definition: CardDefinition) => boolean;
     isFortTraceBitPoolSource: (cardId: CardInstanceId) => boolean;
@@ -222,7 +222,7 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
   }
   host.payment.spendClick(legalAction.side);
   if (legalAction.side === "corp")
-    host.corp.expireCorporateRetreatInstallCreditAbilities();
+    host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (legalAction.side === "runner") {
     installRunnerCard(host, legalAction, cardId, definition);
     return;

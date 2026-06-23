@@ -1,11 +1,11 @@
 import { runtimeDelegate } from "./runtime-delegate-store";
 
-export function expireCorporateRetreatInstallCreditAbilities(
+export function expireScoredAgendaInstallRezCreditAbilities(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "stateRuntimeServices",
-    "expireCorporateRetreatInstallCreditAbilities",
+    "expireScoredAgendaInstallRezCreditAbilities",
   )(...args);
 }
 

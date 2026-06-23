@@ -6611,7 +6611,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
   });
 
-  it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {
+  it("handles Polymer start-of-turn credits, HQ/Archives-Shuffle-Draw hidden-zone shuffle action and Data Naga program trash", () => {
     let state = toRunnerTurn(v192CardReleaseGame("v192-polymer-cfo-data-naga"));
     state.runner.credits = 20;
     state.corp.credits = 5;
@@ -6667,11 +6667,11 @@ describe("V1.9.2 Mechanikpaket K", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "ai_chief_financial_officer",
+        action.payload?.agendaAbility === "hq_archives_shuffle_draw",
     );
     expect(state.corp.archives).toHaveLength(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+      hiddenZoneAction: "hq_archives_shuffle_into_rd",
     });
 
     state = toRunnerTurnFromCorpMain(state);

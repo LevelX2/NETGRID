@@ -289,7 +289,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -724,7 +724,7 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
   const {
     cardInstallCapabilitiesForDefinition,
     cardHasSubtype,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     fortCapacityModifiersForCard,
     mustInstallInsideSubsidiaryDataFort,
     rezCardHost,
@@ -811,8 +811,8 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
       rez: {
         executeRezCard: (cardId, rootRez, legalAction) =>
           executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
-        expireCorporateRetreatInstallCreditAbilities: () =>
-          expireCorporateRetreatInstallCreditAbilities(state),
+        expireScoredAgendaInstallRezCreditAbilities: () =>
+          expireScoredAgendaInstallRezCreditAbilities(state),
       },
       run: {
         passCorpRunRootRezWindow: (legalAction) =>

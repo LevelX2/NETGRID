@@ -468,7 +468,7 @@ function testHost(
         `hidden_runner_resource:${cardId}` as CardInstanceId,
     },
     corp: {
-      expireCorporateRetreatInstallCreditAbilities: () => undefined,
+      expireScoredAgendaInstallRezCreditAbilities: () => undefined,
       consumeEdgerunnerTempsInstallAction: () => undefined,
       isRegionUpgrade: (definition) => definition.subtypes.includes("region"),
       isFortTraceBitPoolSource: () => false,

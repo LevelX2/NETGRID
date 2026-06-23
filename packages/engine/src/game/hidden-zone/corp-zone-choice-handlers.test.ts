@@ -10,7 +10,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -102,7 +102,7 @@ function makeHost(input: {
       "Corporate Downsizing",
       2,
     ),
-    ai_cfo_source: definition(aiCfoDefinitionId, "agenda", "AI CFO", 2),
+    ai_cfo_source: definition(aiCfoDefinitionId, "agenda", "HQ/Archives-Shuffle-Draw", 2),
     hq_agenda_1: definition("agenda_alpha", "agenda", "Agenda Alpha", 2),
     hq_agenda_2: definition("agenda_beta", "agenda", "Agenda Beta", 3),
     hq_operation: definition("operation_alpha", "operation", "Operation Alpha"),
@@ -335,7 +335,7 @@ describe("corp zone choice handlers", () => {
     expect(JSON.stringify(host.legalAction.payload)).not.toContain("hq_agenda_1");
   });
 
-  it("resolves AI CFO with HQ/Archives counts and draw five", () => {
+  it("resolves HQ/Archives-Shuffle-Draw with HQ/Archives counts and draw five", () => {
     const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
     const drawCalls: number[] = [];
     const host = makeHost({
@@ -350,7 +350,7 @@ describe("corp zone choice handlers", () => {
       drawCalls,
     });
 
-    const result = resolveAiChiefFinancialOfficer(
+    const result = resolveHqArchivesShuffleDraw(
       host,
       "ai_cfo_source" as CardInstanceId,
     );
@@ -360,11 +360,11 @@ describe("corp zone choice handlers", () => {
     expect(drawCalls).toEqual([5]);
     expect(shuffleInputs[0]).toEqual({
       ids: ["rd_1", "hq_agenda_1", "archives_1"],
-      purpose: "v192.shuffle.ai_cfo.hq_archives_into_rd.8",
+      purpose: "scored_agenda.shuffle.hq_archives_into_rd.8",
     });
     expect(host.state.corp.archives).toEqual([]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+      hiddenZoneAction: "hq_archives_shuffle_into_rd",
       shuffledCardsCount: 2,
       drawnCardsCount: 3,
     });

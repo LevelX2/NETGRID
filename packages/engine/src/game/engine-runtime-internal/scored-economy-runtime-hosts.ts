@@ -283,7 +283,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -1011,9 +1011,9 @@ export function createScoredEconomyRuntimeHosts(
           if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
           revealCorpRdTop(state, legalAction);
         },
-        resolveAiChiefFinancialOfficer: (sourceCardId) => {
-          if (!legalAction) throw new Error("AI CFO braucht eine LegalAction.");
-          resolveAiChiefFinancialOfficer(
+        resolveHqArchivesShuffleDraw: (sourceCardId) => {
+          if (!legalAction) throw new Error("HQ/Archives-Shuffle-Draw braucht eine LegalAction.");
+          resolveHqArchivesShuffleDraw(
             corpZoneChoiceHandlerHost(state, legalAction),
             sourceCardId,
           );

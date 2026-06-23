@@ -58,7 +58,7 @@ type HostInput = {
 
 function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
-    ai_cfo: definition("ai_cfo", "agenda", "AI CFO"),
+    ai_cfo: definition("ai_cfo", "agenda", "HQ/Archives-Shuffle-Draw"),
     retreat: definition("retreat", "agenda", "Corporate Retreat"),
     reveal: definition("reveal", "agenda", "Reveal Agenda"),
     stored: definition("stored", "agenda", "Stored Credits"),
@@ -163,7 +163,7 @@ function makeHost(input: HostInput = {}) {
       revealCorpRdTop: () => {
         calls.reveal += 1;
       },
-      resolveAiChiefFinancialOfficer: (sourceCardId) => {
+      resolveHqArchivesShuffleDraw: (sourceCardId) => {
         calls.aiCfo.push(sourceCardId);
       },
     },
@@ -207,12 +207,12 @@ describe("scored agenda activated abilities", () => {
 
     expect(calls.pushed).toEqual(["boon"]);
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "ai_chief_financial_officer",
+      "hq_archives_shuffle_draw",
     );
     expect(
       actions.find(
         (action) =>
-          action.payload?.agendaAbility === "ai_chief_financial_officer",
+          action.payload?.agendaAbility === "hq_archives_shuffle_draw",
       )?.label,
     ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
@@ -257,10 +257,10 @@ describe("scored agenda activated abilities", () => {
     });
   });
 
-  it("delegates AI CFO execution to the corp-zone handler", () => {
+  it("delegates HQ/Archives-Shuffle-Draw execution to the corp-zone handler", () => {
     const action = legalAction("gain_credit", {
       cardId: "ai_cfo",
-      agendaAbility: "ai_chief_financial_officer",
+      agendaAbility: "hq_archives_shuffle_draw",
       drawCardsAmount: 5,
     });
     const { host, calls } = makeHost({

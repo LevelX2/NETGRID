@@ -282,7 +282,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -725,7 +725,7 @@ export function createCardLifecycleRuntimeHosts(
     creditCostForAction,
     drawRunnerCards,
     encounterEntryHostForState,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     forfeitRunnerAgendaForPointCost,
     fortRunSideFamiliesHostForState,
     hasCardImplementationMemoryUnitModifier,
@@ -828,8 +828,8 @@ export function createCardLifecycleRuntimeHosts(
         hiddenRunnerResourceSlotId,
       },
       corp: {
-        expireCorporateRetreatInstallCreditAbilities: () =>
-          expireCorporateRetreatInstallCreditAbilities(state),
+        expireScoredAgendaInstallRezCreditAbilities: () =>
+          expireScoredAgendaInstallRezCreditAbilities(state),
         consumeEdgerunnerTempsInstallAction: (legalAction) =>
           consumeEdgerunnerTempsInstallAction(state, legalAction),
         isRegionUpgrade,

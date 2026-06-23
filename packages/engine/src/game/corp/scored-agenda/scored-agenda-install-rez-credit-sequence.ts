@@ -2,7 +2,7 @@ import type { CardInstanceId, LegalAction } from "@netgrid/shared";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
-export function markCorporateRetreatAvailableOnScore(
+export function markScoredAgendaInstallRezCreditAvailableOnScore(
   host: ScoredAgendaFlowHost,
   cardId: CardInstanceId,
   legalAction: LegalAction | undefined,

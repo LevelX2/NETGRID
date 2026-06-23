@@ -225,7 +225,7 @@ export function resolveReschedulerHqShuffleDraw(
   };
 }
 
-export function resolveAiChiefFinancialOfficer(
+export function resolveHqArchivesShuffleDraw(
   host: CorpZoneChoiceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpZoneChoiceHandlerResult {
@@ -237,7 +237,7 @@ export function resolveAiChiefFinancialOfficer(
   host.state.corp.archives = [];
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     merge,
-    `v192.shuffle.${sourceDefinition.id}.hq_archives_into_rd.${host.state.stateVersion + 1}`,
+    `scored_agenda.shuffle.hq_archives_into_rd.${host.state.stateVersion + 1}`,
   );
   refreshCorpRndZones(host, { faceup: false, rezzed: false });
   const drawAmount = host.cards.scoredAgendaDrawCount(agendaId);
@@ -250,7 +250,7 @@ export function resolveAiChiefFinancialOfficer(
     cardDefinitionId: sourceDefinition.id,
     sourceDefinitionId: sourceDefinition.id,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+    hiddenZoneAction: "hq_archives_shuffle_into_rd",
     shuffledCardsCount: previousHq.length + previousArchives.length,
     drawnCardsCount,
   };

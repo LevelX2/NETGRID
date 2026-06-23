@@ -2545,7 +2545,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "ai_chief_financial_officer" &&
+        action.payload?.agendaAbility === "hq_archives_shuffle_draw" &&
         action.payload?.cardId === secondCfo,
     );
     expect(
@@ -2569,10 +2569,10 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     state = apply(state, "corp", (action) => action.actionId === legal.actionId);
     expect(state.corp.hq.length).toBeLessThanOrEqual(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaAbility: "ai_chief_financial_officer",
+      agendaAbility: "hq_archives_shuffle_draw",
       cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
       sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
-      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+      hiddenZoneAction: "hq_archives_shuffle_into_rd",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"archives"|"cardInstances"|"privatePayload"|simple_agenda/,

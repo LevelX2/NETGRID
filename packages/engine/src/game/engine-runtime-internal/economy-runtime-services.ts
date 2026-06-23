@@ -291,7 +291,7 @@ import {
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
@@ -720,7 +720,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
   } = deps;
 
-  function expireCorporateRetreatInstallCreditAbilities(
+  function expireScoredAgendaInstallRezCreditAbilities(
     state: GameState,
   ): void {
     for (const agendaId of state.corp.scoreArea) {
@@ -950,7 +950,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   }
 
   return {
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     isCorpInstallableCardType,
     edgerunnerTempsInstallActionsRemaining,
     clearEdgerunnerTempsInstallFlags,

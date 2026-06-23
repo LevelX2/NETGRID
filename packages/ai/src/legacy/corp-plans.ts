@@ -5007,7 +5007,7 @@ export function classifyCorpScoredAgendaAbility(
       numberPayload(action, "removePowerCounterAmount") > 0 ||
       /counter|coup|take\s+\[?\d+\]?.*from/i.test(text));
   const heuristicKind: CorpScoredAgendaAbilityKind =
-    action.payload?.agendaAbility === "ai_chief_financial_officer" ||
+    action.payload?.agendaAbility === "hq_archives_shuffle_draw" ||
     (lowerText.includes("shuffle") && observedDrawAmount > 0)
       ? "scored_agenda_shuffle_draw"
       : counterEconomy
