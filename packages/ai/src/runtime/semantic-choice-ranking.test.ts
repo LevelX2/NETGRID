@@ -33,6 +33,20 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("gain");
     expect(result.overrideChoice).toBeUndefined();
   });
+
+  it("keeps direct coverage answers even with a clear semantic run gap", () => {
+    const prepare = legalAction("prepare-shell-traders", "trigger_ability");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 8200), choice(prepare, 6200)],
+      coverageMapping([prepare]),
+      choice(run, 8200),
+    );
+
+    expect(result.choice?.action.actionId).toBe("prepare-shell-traders");
+    expect(result.overrideChoice).toBeUndefined();
+  });
 });
 
 function choice(action: LegalAction, score: number): SemanticRuntimeChoice {

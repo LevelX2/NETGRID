@@ -67,6 +67,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanCoverageMappingBlocksRunOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
         scoreGap,
@@ -185,10 +186,20 @@ function tacticalPlanBlocksSemanticChoice(
 
 function tacticalPlanCoverageMappingBlocksRunOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
   scoreGap: number,
 ): boolean {
+  if (
+    mapping.plan.type === "runner.obtain_breaker_coverage" &&
+    overrideChoice.action.type === "start_run" &&
+    !mappedActionIds.has(overrideChoice.action.actionId) &&
+    mappedChoice.action.type !== "gain_credit" &&
+    mappedChoice.action.type !== "draw_card"
+  ) {
+    return true;
+  }
   return (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     overrideChoice.action.type === "start_run" &&
