@@ -25,7 +25,7 @@ export type FreeProgramInstallExecutionCallbacks = {
   installProgramForFree: (programId: CardInstanceId) => CardInstanceId | undefined;
 };
 
-export function createSneakPreviewFreeProgramInstallInput(
+export function createTemporaryProgramFreeInstallInput(
   plan: SneakPreviewSearchInstallExecutionPlan,
 ): FreeProgramInstallExecutionInput {
   return {

@@ -252,7 +252,7 @@ export function buildSelfModifyingCodeSearchInstallChoice(input: {
   };
 }
 
-export function buildSneakPreviewSourceChoice(input: {
+export function buildTemporaryProgramInstallSourceChoice(input: {
   stateVersion: number;
   sourcePrefix: string;
   sourceCardId?: CardInstanceId | undefined;
@@ -277,7 +277,7 @@ export function buildSneakPreviewSourceChoice(input: {
   };
 }
 
-export function buildSneakPreviewSourceChoicePayload(): HiddenZonePayload {
+export function buildTemporaryProgramInstallSourceChoicePayload(): HiddenZonePayload {
   return {
     hiddenZoneBarrier: true,
     hiddenZoneAction: "sneak_preview_source_choice",
@@ -285,7 +285,7 @@ export function buildSneakPreviewSourceChoicePayload(): HiddenZonePayload {
   };
 }
 
-export function buildSneakPreviewProgramChoice(input: {
+export function buildTemporaryProgramInstallChoice(input: {
   stateVersion: number;
   sourceZone: InstallSourceZone;
   sourcePrefix: string;

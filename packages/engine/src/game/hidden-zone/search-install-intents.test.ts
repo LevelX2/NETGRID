@@ -9,11 +9,11 @@ import {
   buildMysteryBoxSearchInstallResolvedPayload,
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
-  buildSneakPreviewSearchInstallResolvedPayload,
+  buildTemporaryProgramSearchInstallResolvedPayload,
   createMysteryBoxNoInstallIntent,
   resolveMysteryBoxSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
-  resolveSneakPreviewSearchInstallIntent,
+  resolveTemporaryProgramSearchInstallIntent,
 } from "./search-install-intents";
 
 const sourceDefinitionId = "onr_v1_059_self-modifying-code" as CardDefinitionId;
@@ -175,7 +175,7 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("builds a Sneak Preview stack search/install plan", () => {
-    const plan = resolveSneakPreviewSearchInstallIntent({
+    const plan = resolveTemporaryProgramSearchInstallIntent({
       choice: choice({
         source: "v1911.sneak_preview_stack_install:8",
       }),
@@ -201,7 +201,7 @@ describe("hidden-zone search/install intents", () => {
       temporaryReturnNeeded: true,
       isCardImplementationChoice: false,
     });
-    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+    expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "sneak_preview_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
@@ -218,7 +218,7 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("builds a Sneak Preview heap search/install plan without shuffle", () => {
-    const plan = resolveSneakPreviewSearchInstallIntent({
+    const plan = resolveTemporaryProgramSearchInstallIntent({
       choice: choice({
         source: "v1911.sneak_preview_heap_install:8",
       }),
@@ -243,7 +243,7 @@ describe("hidden-zone search/install intents", () => {
       temporaryReturnNeeded: true,
       isCardImplementationChoice: false,
     });
-    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+    expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "sneak_preview_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
@@ -259,7 +259,7 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid Sneak Preview program selections", () => {
     expect(() =>
-      resolveSneakPreviewSearchInstallIntent({
+      resolveTemporaryProgramSearchInstallIntent({
         choice: choice({
           source: "v1911.sneak_preview_stack_install:8",
         }),

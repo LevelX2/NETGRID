@@ -6,7 +6,7 @@ import {
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
   resolveSelfModifyingCodeSearchInstallSelection,
-  resolveSneakPreviewSearchInstallSelection,
+  resolveTemporaryProgramSearchInstallSelection,
 } from "./search-choice-resolvers";
 
 function choice(overrides: Partial<ChoiceRequest>): ChoiceRequest {
@@ -128,7 +128,7 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveSneakPreviewSearchInstallSelection({
+    expect(resolveTemporaryProgramSearchInstallSelection({
       choice: choice({
         source: "v1911.sneak_preview_stack_install:8",
       }),

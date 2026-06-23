@@ -1038,7 +1038,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveRunnerTargetedEventImplementation,
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
-    resolveSneakPreviewTemporaryInstallReturns,
+    resolveTemporaryProgramInstallReturns,
     resolveAdvancementPlacementChoice,
     resolveAdvancementPlacementOperation,
     resolveTraceHardwareWreckerSuccess,

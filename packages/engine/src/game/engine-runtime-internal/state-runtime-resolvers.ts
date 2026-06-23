@@ -1018,7 +1018,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     resolveRunnerTargetedEventImplementation,
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
-    resolveSneakPreviewTemporaryInstallReturns,
+    resolveTemporaryProgramInstallReturns,
     resolveAdvancementPlacementChoice,
     resolveAdvancementPlacementOperation,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,

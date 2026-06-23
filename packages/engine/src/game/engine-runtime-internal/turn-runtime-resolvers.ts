@@ -1290,7 +1290,7 @@ function endTurn(
     resolveFieldReporterEndOfRunnerTurn(state, legalAction);
     resolveDelayedEndTurnDamageEffects(state, legalAction);
     resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
-    resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
+    resolveTemporaryProgramInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
     flags.stolenAgendaAdvancementCountersLastTurn =
@@ -1331,11 +1331,11 @@ function endTurn(
   startDiscardPhase(state, side, legalAction);
 }
 
-function resolveSneakPreviewTemporaryInstallReturns(
+function resolveTemporaryProgramInstallReturns(
   state: GameState,
   legalAction: LegalAction,
 ): void {
-  const pending = state.sneakPreviewTemporaryInstalls ?? [];
+  const pending = state.temporaryProgramInstallReturns ?? [];
   if (pending.length === 0) return;
   const returnedDefinitionIds: string[] = [];
   for (const entry of pending) {
@@ -1365,7 +1365,7 @@ function resolveSneakPreviewTemporaryInstallReturns(
       returnedDefinitionIds.push(definition.id);
     }
   }
-  state.sneakPreviewTemporaryInstalls = [];
+  state.temporaryProgramInstallReturns = [];
   if (returnedDefinitionIds.length > 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -3143,7 +3143,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     resolveFieldReporterEndOfRunnerTurn,
     resolveDelayedEndTurnDamageEffects,
     endTurn,
-    resolveSneakPreviewTemporaryInstallReturns,
+    resolveTemporaryProgramInstallReturns,
     resolveCorpObligationEndOfTurn,
     startDiscardPhase,
     processDiscardStep,

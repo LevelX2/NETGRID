@@ -1031,7 +1031,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     resolveRunnerTargetedEventImplementation,
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
-    resolveSneakPreviewTemporaryInstallReturns,
+    resolveTemporaryProgramInstallReturns,
     resolveAdvancementPlacementChoice,
     resolveAdvancementPlacementOperation,
     resolveTraceHardwareWreckerSuccess,

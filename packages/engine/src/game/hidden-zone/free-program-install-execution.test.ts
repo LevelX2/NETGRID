@@ -2,7 +2,7 @@ import type { CardDefinitionId, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   createMysteryBoxFreeProgramInstallInput,
-  createSneakPreviewFreeProgramInstallInput,
+  createTemporaryProgramFreeInstallInput,
   executeFreeProgramInstallPlan,
   type FreeProgramInstallExecutionInput,
 } from "./free-program-install-execution";
@@ -85,7 +85,7 @@ describe("free program install execution", () => {
   });
 
   it("carries Sneak Preview temporary return and stack shuffle metadata", () => {
-    const plan = createSneakPreviewFreeProgramInstallInput(sneakPlan());
+    const plan = createTemporaryProgramFreeInstallInput(sneakPlan());
 
     expect(plan).toEqual({
       selectedProgramId: programId,
@@ -99,7 +99,7 @@ describe("free program install execution", () => {
   });
 
   it("carries Sneak Preview heap metadata without shuffle", () => {
-    const plan = createSneakPreviewFreeProgramInstallInput(
+    const plan = createTemporaryProgramFreeInstallInput(
       sneakPlan({
         sourceZone: "heap",
         shuffleNeeded: false,
@@ -148,7 +148,7 @@ describe("free program install execution", () => {
   it("fails when the install callback does not return an installed id", () => {
     expect(() =>
       executeFreeProgramInstallPlan({
-        plan: createSneakPreviewFreeProgramInstallInput(sneakPlan()),
+        plan: createTemporaryProgramFreeInstallInput(sneakPlan()),
         callbacks: {
           installProgramForFree: () => undefined,
         },

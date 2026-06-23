@@ -1,11 +1,11 @@
 import type {
   CardDefinitionId,
   CardInstanceId,
-  SneakPreviewTemporaryInstall,
+  TemporaryProgramInstallReturn,
 } from "@netgrid/shared";
 import type { FreeProgramInstallExecutionResult } from "./free-program-install-execution";
 
-export type SneakPreviewPostInstallSideEffectPlan = {
+export type TemporaryProgramInstallPostInstallSideEffectPlan = {
   kind: "sneak_preview";
   installedProgramId: CardInstanceId;
   selectedProgramId: CardInstanceId;
@@ -14,7 +14,7 @@ export type SneakPreviewPostInstallSideEffectPlan = {
   temporaryReturnNeeded: boolean;
   sourceTrashNeeded: false;
   oncePerRunNeeded: false;
-  temporaryReturnRecord?: SneakPreviewTemporaryInstall | undefined;
+  temporaryReturnRecord?: TemporaryProgramInstallReturn | undefined;
 };
 
 export type MysteryBoxPostInstallSideEffectPlan = {
@@ -36,13 +36,13 @@ export type MysteryBoxOncePerRunPlan = {
 };
 
 export type HiddenZonePostInstallSideEffectPlan =
-  | SneakPreviewPostInstallSideEffectPlan
+  | TemporaryProgramInstallPostInstallSideEffectPlan
   | MysteryBoxPostInstallSideEffectPlan;
 
-export function createSneakPreviewPostInstallSideEffectPlan(input: {
+export function createTemporaryProgramInstallPostInstallSideEffectPlan(input: {
   execution: FreeProgramInstallExecutionResult;
   sourceCardDefinitionId: CardDefinitionId;
-}): SneakPreviewPostInstallSideEffectPlan {
+}): TemporaryProgramInstallPostInstallSideEffectPlan {
   const temporaryReturnRecord = input.execution.temporaryReturnNeeded
     ? {
         cardId: input.execution.installedProgramId,
@@ -96,10 +96,10 @@ export function createMysteryBoxOncePerRunPlan(input: {
   };
 }
 
-export function applySneakPreviewTemporaryReturnPlan(
-  plan: SneakPreviewPostInstallSideEffectPlan,
+export function applyTemporaryProgramInstallReturnPlan(
+  plan: TemporaryProgramInstallPostInstallSideEffectPlan,
   callbacks: {
-    recordTemporaryReturn: (record: SneakPreviewTemporaryInstall) => void;
+    recordTemporaryReturn: (record: TemporaryProgramInstallReturn) => void;
   },
 ): { temporaryReturnRecorded: boolean } {
   if (!plan.temporaryReturnNeeded || !plan.temporaryReturnRecord)

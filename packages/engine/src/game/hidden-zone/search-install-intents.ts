@@ -6,7 +6,7 @@ import type {
 import {
   resolveMysteryBoxInstallSelection,
   resolveSelfModifyingCodeSearchInstallSelection,
-  resolveSneakPreviewSearchInstallSelection,
+  resolveTemporaryProgramSearchInstallSelection,
 } from "./search-choice-resolvers";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
@@ -121,7 +121,7 @@ export function resolveSelfModifyingCodeSearchInstallIntent(input: {
   };
 }
 
-export function resolveSneakPreviewSearchInstallIntent(input: {
+export function resolveTemporaryProgramSearchInstallIntent(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   legalTargetIdsForSourceZone: (
@@ -136,7 +136,7 @@ export function resolveSneakPreviewSearchInstallIntent(input: {
   defaultSourceDefinitionId: CardDefinitionId;
 }): SneakPreviewSearchInstallExecutionPlan {
   const sourceZone = sneakPreviewSourceZone(input.choice);
-  const selection = resolveSneakPreviewSearchInstallSelection({
+  const selection = resolveTemporaryProgramSearchInstallSelection({
     choice: input.choice,
     selectedCardId: input.selectedCardId,
     legalTargetIds: sourceZone
@@ -165,7 +165,7 @@ export function resolveSneakPreviewSearchInstallIntent(input: {
   };
 }
 
-export function buildSneakPreviewSearchInstallResolvedPayload(
+export function buildTemporaryProgramSearchInstallResolvedPayload(
   plan: SneakPreviewSearchInstallExecutionPlan,
 ): HiddenZonePayload {
   return {

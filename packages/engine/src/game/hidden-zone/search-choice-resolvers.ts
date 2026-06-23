@@ -239,7 +239,7 @@ export function resolveSelfModifyingCodeSearchInstallSelection(input: {
   };
 }
 
-export function resolveSneakPreviewSearchInstallSelection(input: {
+export function resolveTemporaryProgramSearchInstallSelection(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   legalTargetIds: readonly CardInstanceId[];

@@ -9,15 +9,15 @@ import type {
 } from "@netgrid/shared";
 import {
   buildLookTopStackShowToCorpThenInstallMatchingChoice,
-  buildSneakPreviewProgramChoice,
+  buildTemporaryProgramInstallChoice,
 } from "./search-choice-builders";
 import {
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildMysteryBoxSearchInstallResolvedPayload,
-  buildSneakPreviewSearchInstallResolvedPayload,
+  buildTemporaryProgramSearchInstallResolvedPayload,
   resolveMysteryBoxSearchInstallIntent,
   buildSelfModifyingCodeResolvedPayload,
-  resolveSneakPreviewSearchInstallIntent,
+  resolveTemporaryProgramSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
 } from "./search-install-intents";
 import {
@@ -34,15 +34,15 @@ import {
 } from "./topn-move-intents";
 import {
   createMysteryBoxFreeProgramInstallInput,
-  createSneakPreviewFreeProgramInstallInput,
+  createTemporaryProgramFreeInstallInput,
   executeFreeProgramInstallPlan,
 } from "./free-program-install-execution";
 import {
   applyMysteryBoxOncePerRunPlan,
   applyMysteryBoxSourceTrashPlan,
-  applySneakPreviewTemporaryReturnPlan,
+  applyTemporaryProgramInstallReturnPlan,
   createMysteryBoxPostInstallSideEffectPlan,
-  createSneakPreviewPostInstallSideEffectPlan,
+  createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
@@ -60,7 +60,7 @@ export type HiddenZoneSearchChoiceHandlerHost = {
     | "pendingChoice"
     | "randomCounter"
     | "stateVersion"
-    | "sneakPreviewTemporaryInstalls"
+    | "temporaryProgramInstallReturns"
     | "run"
   >;
   constants: {
@@ -187,8 +187,8 @@ export function handleSneakPreviewChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   if (isSneakPreviewSourceChoiceSource(host.choice.source))
-    return handleSneakPreviewSourceChoice(host);
-  return handleSneakPreviewProgramChoice(host);
+    return handleTemporaryProgramInstallSourceChoice(host);
+  return handleTemporaryProgramInstallChoice(host);
 }
 
 export function handleMysteryBoxChoice(
@@ -500,7 +500,7 @@ export function handleLookTopStackShowInstallChoice(
   };
 }
 
-function handleSneakPreviewSourceChoice(
+function handleTemporaryProgramInstallSourceChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   const { choice } = host;
@@ -521,7 +521,7 @@ function handleSneakPreviewSourceChoice(
   const selectedSource = option?.value;
   if (selectedSource !== "heap" && selectedSource !== "stack")
     throw new Error("Die Sneak-Preview-Quelle ist ungueltig.");
-  startSneakPreviewProgramChoice(host, {
+  startTemporaryProgramInstallChoice(host, {
     sourceZone: selectedSource,
     sourcePrefix: isCardImplementationChoice
       ? "p3_38.stack_or_trash_program_install"
@@ -545,7 +545,7 @@ function handleSneakPreviewSourceChoice(
   };
 }
 
-function handleSneakPreviewProgramChoice(
+function handleTemporaryProgramInstallChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   const { choice } = host;
@@ -554,7 +554,7 @@ function handleSneakPreviewProgramChoice(
     selectedCardId && host.state.cardInstances[selectedCardId]
       ? host.cards.definitionFor(selectedCardId)
       : undefined;
-  const plan = resolveSneakPreviewSearchInstallIntent({
+  const plan = resolveTemporaryProgramSearchInstallIntent({
     choice,
     selectedCardId,
     legalTargetIdsForSourceZone: (sourceZone) =>
@@ -563,27 +563,27 @@ function handleSneakPreviewProgramChoice(
     defaultSourceDefinitionId: host.constants.sneakPreviewId,
   });
   const execution = executeFreeProgramInstallPlan({
-    plan: createSneakPreviewFreeProgramInstallInput(plan),
+    plan: createTemporaryProgramFreeInstallInput(plan),
     callbacks: {
       installProgramForFree: (programId) =>
         host.install.installRunnerProgramForFree(programId),
     },
   });
-  const postInstall = createSneakPreviewPostInstallSideEffectPlan({
+  const postInstall = createTemporaryProgramInstallPostInstallSideEffectPlan({
     execution,
     sourceCardDefinitionId: plan.sourceDefinitionId,
   });
-  applySneakPreviewTemporaryReturnPlan(postInstall, {
+  applyTemporaryProgramInstallReturnPlan(postInstall, {
     recordTemporaryReturn: (record) => {
-      host.state.sneakPreviewTemporaryInstalls ??= [];
-      host.state.sneakPreviewTemporaryInstalls.push(record);
+      host.state.temporaryProgramInstallReturns ??= [];
+      host.state.temporaryProgramInstallReturns.push(record);
     },
   });
   if (execution.shuffleNeeded)
     host.shuffleRunnerStack(`v1911_sneak_preview:${choice.choiceId}:shuffle`);
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    ...buildSneakPreviewSearchInstallResolvedPayload(plan),
+    ...buildTemporaryProgramSearchInstallResolvedPayload(plan),
   };
   return {
     handled: true,
@@ -595,7 +595,7 @@ function handleSneakPreviewProgramChoice(
   };
 }
 
-function startSneakPreviewProgramChoice(
+function startTemporaryProgramInstallChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
   input: {
     sourceZone: SearchInstallSourceZone;
@@ -621,7 +621,7 @@ function startSneakPreviewProgramChoice(
   });
   if (targets.length === 0)
     throw new Error("In dieser Sneak-Preview-Quelle liegt kein legales Programm.");
-  host.state.pendingChoice = buildSneakPreviewProgramChoice({
+  host.state.pendingChoice = buildTemporaryProgramInstallChoice({
     stateVersion: host.state.stateVersion,
     sourceZone: input.sourceZone,
     sourcePrefix: input.sourcePrefix,

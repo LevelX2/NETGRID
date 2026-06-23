@@ -11,9 +11,9 @@ import {
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
   buildSelfModifyingCodeSearchInstallChoice,
-  buildSneakPreviewProgramChoice,
-  buildSneakPreviewSourceChoice,
-  buildSneakPreviewSourceChoicePayload,
+  buildTemporaryProgramInstallChoice,
+  buildTemporaryProgramInstallSourceChoice,
+  buildTemporaryProgramInstallSourceChoicePayload,
 } from "./search-choice-builders";
 
 const sourceCardId = "source_card" as CardInstanceId;
@@ -208,14 +208,14 @@ describe("hidden-zone search choice builders", () => {
       sourceCardId,
       options: [{ id: "card_program", label: "Program", value: "program" }],
     });
-    const sneakSource = buildSneakPreviewSourceChoice({
+    const sneakSource = buildTemporaryProgramInstallSourceChoice({
       stateVersion: 7,
       sourcePrefix: "p3_38.stack_or_trash_program_install",
       sourceCardId,
       sourceDefinitionId,
       options: [{ id: "source_stack", label: "Stack", value: "stack" }],
     });
-    const sneakProgram = buildSneakPreviewProgramChoice({
+    const sneakProgram = buildTemporaryProgramInstallChoice({
       stateVersion: 7,
       sourceZone: "stack",
       sourcePrefix: "v1911.sneak_preview",
@@ -248,7 +248,7 @@ describe("hidden-zone search choice builders", () => {
       prompt: "Sneak-Preview-Quelle wählen",
       visibility: "hidden_info_barrier",
     });
-    expect(buildSneakPreviewSourceChoicePayload()).toEqual({
+    expect(buildTemporaryProgramInstallSourceChoicePayload()).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "sneak_preview_source_choice",
       choiceVisibility: "runner_private",

@@ -671,7 +671,7 @@ export type CardSearchPresentation = StackSearchResolution & {
   temporaryReturnAtEndOfTurn?: boolean;
 };
 
-export type SneakPreviewTemporaryInstall = {
+export type TemporaryProgramInstallReturn = {
   cardId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
 };
@@ -1347,7 +1347,7 @@ export type GameState = {
   setup?: SetupState;
   pendingChoice?: PendingChoice;
   imminentEvent?: ImminentEvent;
-  sneakPreviewTemporaryInstalls?: SneakPreviewTemporaryInstall[];
+  temporaryProgramInstallReturns?: TemporaryProgramInstallReturn[];
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
   runnerTagAvoidanceCredits?: number;

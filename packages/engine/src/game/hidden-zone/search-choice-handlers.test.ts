@@ -382,7 +382,7 @@ describe("hidden-zone search choice handlers", () => {
       installedCardId: programId,
     });
     expect(installed).toEqual([programId]);
-    expect(testHost.state.sneakPreviewTemporaryInstalls).toEqual([
+    expect(testHost.state.temporaryProgramInstallReturns).toEqual([
       { cardId: programId, sourceCardDefinitionId: "sneak_preview" },
     ]);
     expect(testHost.legalAction.payload).toMatchObject({

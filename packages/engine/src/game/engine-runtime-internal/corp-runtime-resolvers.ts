@@ -984,7 +984,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveRunnerTargetedEventImplementation,
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
-    resolveSneakPreviewTemporaryInstallReturns,
+    resolveTemporaryProgramInstallReturns,
     resolveTraceHardwareWreckerSuccess,
     resolveTraceTrashRunnerResourceSuccess,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,

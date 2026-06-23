@@ -18,8 +18,8 @@ import {
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
   buildSelfModifyingCodeSearchInstallChoice,
-  buildSneakPreviewSourceChoice,
-  buildSneakPreviewSourceChoicePayload,
+  buildTemporaryProgramInstallSourceChoice,
+  buildTemporaryProgramInstallSourceChoicePayload,
 } from "./search-choice-builders";
 import {
   buildMysteryBoxNoInstallResolvedPayload,
@@ -567,7 +567,7 @@ export function startTemporaryProgramInstallSourceActivation(
     throw new Error(
       "Sneak Preview findet kein legal installierbares Programm.",
     );
-  host.state.pendingChoice = buildSneakPreviewSourceChoice({
+  host.state.pendingChoice = buildTemporaryProgramInstallSourceChoice({
     stateVersion: host.state.stateVersion,
     sourcePrefix: input.sourcePrefix ?? "v1911.sneak_preview",
     sourceCardId: input.sourceCardId,
@@ -577,7 +577,7 @@ export function startTemporaryProgramInstallSourceActivation(
   });
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    ...buildSneakPreviewSourceChoicePayload(),
+    ...buildTemporaryProgramInstallSourceChoicePayload(),
   };
 }
 

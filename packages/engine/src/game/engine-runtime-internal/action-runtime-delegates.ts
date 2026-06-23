@@ -53,12 +53,12 @@ export function endTurn(...args: any[]): any {
   return runtimeDelegate("turnRuntimeResolvers", "endTurn")(...args);
 }
 
-export function resolveSneakPreviewTemporaryInstallReturns(
+export function resolveTemporaryProgramInstallReturns(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "turnRuntimeResolvers",
-    "resolveSneakPreviewTemporaryInstallReturns",
+    "resolveTemporaryProgramInstallReturns",
   )(...args);
 }
 

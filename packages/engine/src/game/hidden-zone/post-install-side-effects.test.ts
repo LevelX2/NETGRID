@@ -4,10 +4,10 @@ import type { FreeProgramInstallExecutionResult } from "./free-program-install-e
 import {
   applyMysteryBoxOncePerRunPlan,
   applyMysteryBoxSourceTrashPlan,
-  applySneakPreviewTemporaryReturnPlan,
+  applyTemporaryProgramInstallReturnPlan,
   createMysteryBoxOncePerRunPlan,
   createMysteryBoxPostInstallSideEffectPlan,
-  createSneakPreviewPostInstallSideEffectPlan,
+  createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
 
 const selectedProgramId = "selected_program" as CardInstanceId;
@@ -33,7 +33,7 @@ function execution(
 
 describe("hidden-zone post-install side effects", () => {
   it("plans and records Sneak Preview temporary return", () => {
-    const plan = createSneakPreviewPostInstallSideEffectPlan({
+    const plan = createTemporaryProgramInstallPostInstallSideEffectPlan({
       execution: execution({
         temporaryReturnNeeded: true,
         sourceTrashNeeded: false,
@@ -41,7 +41,7 @@ describe("hidden-zone post-install side effects", () => {
       sourceCardDefinitionId: sourceDefinitionId,
     });
     const records: unknown[] = [];
-    const result = applySneakPreviewTemporaryReturnPlan(plan, {
+    const result = applyTemporaryProgramInstallReturnPlan(plan, {
       recordTemporaryReturn: (record) => records.push(record),
     });
 
@@ -61,13 +61,13 @@ describe("hidden-zone post-install side effects", () => {
   });
 
   it("does not create Sneak source-trash or once-per-run side effects", () => {
-    const plan = createSneakPreviewPostInstallSideEffectPlan({
+    const plan = createTemporaryProgramInstallPostInstallSideEffectPlan({
       execution: execution({ temporaryReturnNeeded: false }),
       sourceCardDefinitionId: sourceDefinitionId,
     });
     const records: unknown[] = [];
 
-    expect(applySneakPreviewTemporaryReturnPlan(plan, {
+    expect(applyTemporaryProgramInstallReturnPlan(plan, {
       recordTemporaryReturn: (record) => records.push(record),
     })).toEqual({ temporaryReturnRecorded: false });
     expect(plan.temporaryReturnRecord).toBeUndefined();
