@@ -512,27 +512,7 @@ import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
 import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
 import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
-import { proteusAirportLockerImplementation } from "./proteus/runner/resources/airport-locker";
-import { proteusBargainWithViacoxImplementation } from "./proteus/runner/resources/bargain-with-viacox";
-import { proteusBackDoorToNetwatchImplementation } from "./proteus/runner/resources/back-door-to-netwatch";
-import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
-import { proteusBackDoorToRivalsImplementation } from "./proteus/runner/resources/back-door-to-rivals";
-import { proteusBoltHoleImplementation } from "./proteus/runner/resources/bolt-hole";
-import { proteusChibaBankAccountImplementation } from "./proteus/runner/resources/chiba-bank-account";
-import { proteusCreditSubversionImplementation } from "./proteus/runner/resources/credit-subversion";
-import { proteusDeathFromAboveImplementation } from "./proteus/runner/resources/death-from-above";
-import { proteusExpendableFamilyMemberImplementation } from "./proteus/runner/resources/expendable-family-member";
-import { proteusGetReadyToRumbleImplementation } from "./proteus/runner/resources/get-ready-to-rumble";
-import { proteusHqMoleImplementation } from "./proteus/runner/resources/hq-mole";
-import { proteusLiberatedSavingsAccountImplementation } from "./proteus/runner/resources/liberated-savings-account";
-import { proteusMercenarySubcontractImplementation } from "./proteus/runner/resources/mercenary-subcontract";
-import { proteusRAndDMoleImplementation } from "./proteus/runner/resources/r-and-d-mole";
-import { proteusRunnerSenseiImplementation } from "./proteus/runner/resources/runner-sensei";
-import { proteusSimulacrumImplementation } from "./proteus/runner/resources/simulacrum";
-import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
-import { proteusSwissBankAccountImplementation } from "./proteus/runner/resources/swiss-bank-account";
-import { proteusTimeToCollectImplementation } from "./proteus/runner/resources/time-to-collect";
-import { proteusWiredSwitchboardImplementation } from "./proteus/runner/resources/wired-switchboard";
+import { PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./subregistries/proteus-runner-resources";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -1042,27 +1022,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusVienna22Implementation,
   proteusViralPipelineImplementation,
   proteusWreckingBallImplementation,
-  proteusAirportLockerImplementation,
-  proteusBargainWithViacoxImplementation,
-  proteusBackDoorToNetwatchImplementation,
-  proteusBackDoorToRivalsImplementation,
-  proteusBoltHoleImplementation,
-  proteusChibaBankAccountImplementation,
-  proteusCreditSubversionImplementation,
-  proteusDeathFromAboveImplementation,
-  proteusExpendableFamilyMemberImplementation,
-  proteusGetReadyToRumbleImplementation,
-  proteusHqMoleImplementation,
-  proteusLiberatedSavingsAccountImplementation,
-  proteusMercenarySubcontractImplementation,
-  proteusPrecisionBriberyImplementation,
-  proteusRAndDMoleImplementation,
-  proteusRunnerSenseiImplementation,
-  proteusSimulacrumImplementation,
-  proteusStreetwareDistributorImplementation,
-  proteusSwissBankAccountImplementation,
-  proteusTimeToCollectImplementation,
-  proteusWiredSwitchboardImplementation,
+  ...PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<
