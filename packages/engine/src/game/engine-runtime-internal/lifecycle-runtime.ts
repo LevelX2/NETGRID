@@ -30,7 +30,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     cardHasSubtype,
     cardImplementationForDefinitionId,
     cardImplementationRuntimeDeps,
-    citySurveillanceSourceIds,
+    drawTaxSourceIds,
     clearCardCounters,
     corpRootAgendaOrNodeCapacityInServer,
     corpRootMainCardIdsInServer,
@@ -415,9 +415,9 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     };
     summary.drawnCount = 1;
     (summary.drawnCardIds ??= []).push(cardId);
-    const citySurveillanceIds = citySurveillanceSourceIds(state);
-    summary.drawTaxSourceCount = citySurveillanceIds.length;
-    for (const _sourceId of citySurveillanceIds) {
+    const drawTaxSourceCardIds = drawTaxSourceIds(state);
+    summary.drawTaxSourceCount = drawTaxSourceCardIds.length;
+    for (const _sourceId of drawTaxSourceCardIds) {
       void _sourceId;
       if (
         drawTaxDecision === "pay" ||

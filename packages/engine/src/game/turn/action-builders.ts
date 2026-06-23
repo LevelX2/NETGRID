@@ -167,8 +167,8 @@ export function makeActionId(
     parts.push(String(payload.secondTargetCardId));
   if (payload?.powerGridOverloadTrashCount)
     parts.push(String(payload.powerGridOverloadTrashCount));
-  if (payload?.citySurveillanceDrawDecision)
-    parts.push(String(payload.citySurveillanceDrawDecision));
+  if (payload?.drawTaxDecision)
+    parts.push(String(payload.drawTaxDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
   if (payload?.approachIceExposeViewDecision)

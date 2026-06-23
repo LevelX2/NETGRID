@@ -202,7 +202,7 @@ export function handleTurnBasicExecution(
 export function drawTaxDecisionFromPayload(
   legalAction: LegalAction,
 ): DrawTaxDecision {
-  const decision = legalAction.payload?.citySurveillanceDrawDecision;
+  const decision = legalAction.payload?.drawTaxDecision;
   if (decision === "pay" || decision === "tag") return decision;
   return "auto";
 }

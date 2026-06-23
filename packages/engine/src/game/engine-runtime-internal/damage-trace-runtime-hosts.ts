@@ -833,10 +833,10 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     );
   }
 
-  function isCitySurveillanceCard(state: GameState, cardId: CardInstanceId): boolean {
+  function isDrawTaxSourceDefinition(state: GameState, cardId: CardInstanceId): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
-      "city_surveillance_draw_tag"
+      "runner_draw_tax_tag"
     );
   }
 
@@ -996,7 +996,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     remainingReplacementLongtailImplementationForCard,
     remainingReplacementLongtailKindForCard,
     isObligationDebtDefinition,
-    isCitySurveillanceCard,
+    isDrawTaxSourceDefinition,
     isInvestmentFirmCard,
     isHackerTrackerCentralCard,
     applyRunnerTraceCounterRunStartEffects,

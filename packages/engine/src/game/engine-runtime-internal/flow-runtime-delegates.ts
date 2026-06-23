@@ -140,8 +140,8 @@ export function isObligationDebtDefinition(...args: any[]): any {
   )(...args);
 }
 
-export function isCitySurveillanceCard(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "isCitySurveillanceCard")(...args);
+export function isDrawTaxSourceDefinition(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "isDrawTaxSourceDefinition")(...args);
 }
 
 export function isInvestmentFirmCard(...args: any[]): any {

@@ -1137,7 +1137,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "city_surveillance_draw_tag";
+      kind: "runner_draw_tax_tag";
       avoidTagCost: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }

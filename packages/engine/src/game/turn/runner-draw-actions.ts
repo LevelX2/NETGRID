@@ -25,24 +25,24 @@ export function buildRunnerDrawCardActions(
   }
 
   const actions: LegalAction[] = [];
-  const projectedCitySurveillanceCost = drawTaxSourceCount * projectedDrawCount;
-  if (state.runner.credits >= projectedCitySurveillanceCost) {
+  const projectedDrawTaxCost = drawTaxSourceCount * projectedDrawCount;
+  if (state.runner.credits >= projectedDrawTaxCost) {
     actions.push(
       buildLegalAction(
         state,
         "runner",
         "draw_card",
-        projectedCitySurveillanceCost === 1
+        projectedDrawTaxCost === 1
           ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
-          : `Karte ziehen (City Surveillance: ${projectedCitySurveillanceCost} Credits zahlen)`,
+          : `Karte ziehen (City Surveillance: ${projectedDrawTaxCost} Credits zahlen)`,
         "basic_action",
-        [{ clicks: 1, credits: projectedCitySurveillanceCost }],
+        [{ clicks: 1, credits: projectedDrawTaxCost }],
         {
-          citySurveillanceSourceCount: drawTaxSourceCount,
-          citySurveillanceProjectedDrawCount: projectedDrawCount,
-          citySurveillanceDrawDecision: "pay",
-          citySurveillanceProjectedCreditsPaid: projectedCitySurveillanceCost,
-          citySurveillanceProjectedTagsAdded: 0,
+          drawTaxSourceCount: drawTaxSourceCount,
+          drawTaxProjectedDrawCount: projectedDrawCount,
+          drawTaxDecision: "pay",
+          drawTaxProjectedCreditsPaid: projectedDrawTaxCost,
+          drawTaxProjectedTagsAdded: 0,
         },
       ),
     );
@@ -59,11 +59,11 @@ export function buildRunnerDrawCardActions(
       "basic_action",
       [{ clicks: 1 }],
       {
-        citySurveillanceSourceCount: drawTaxSourceCount,
-        citySurveillanceProjectedDrawCount: projectedDrawCount,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded:
+        drawTaxSourceCount: drawTaxSourceCount,
+        drawTaxProjectedDrawCount: projectedDrawCount,
+        drawTaxDecision: "tag",
+        drawTaxProjectedCreditsPaid: 0,
+        drawTaxProjectedTagsAdded:
           drawTaxSourceCount * projectedDrawCount,
       },
     ),

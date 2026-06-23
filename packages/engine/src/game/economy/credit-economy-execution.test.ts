@@ -76,7 +76,7 @@ describe("credit economy execution", () => {
     expect(action.payload).toMatchObject({
       drawCardAfter: true,
       drawnCount: 1,
-      citySurveillanceSourceCount: 0,
+      drawTaxSourceCount: 0,
     });
   });
 
@@ -254,9 +254,9 @@ function testHost(
         action.payload = {
           ...(action.payload ?? {}),
           drawnCount: summary.drawnCount,
-          citySurveillanceSourceCount: summary.drawTaxSourceCount,
-          citySurveillanceCreditsPaid: summary.drawTaxCreditsPaid,
-          citySurveillanceTagsAdded: summary.drawTaxTagsAdded,
+          drawTaxSourceCount: summary.drawTaxSourceCount,
+          drawTaxCreditsPaid: summary.drawTaxCreditsPaid,
+          drawTaxTagsAdded: summary.drawTaxTagsAdded,
         };
       },
       ensureTurnFlags: (stateToMutate) =>

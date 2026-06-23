@@ -713,7 +713,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   const {
     activeCrashEverettSourceId,
     availableRunnerProgramInstallCredits,
-    citySurveillanceSourceIds,
+    drawTaxSourceIds,
     hasInstalledUniqueCardDefinition,
     isUniqueCard,
     runnerProgramUsesMemory,
@@ -944,7 +944,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
 
   function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
     return {
-      drawTaxSourceCount: citySurveillanceSourceIds(state).length,
+      drawTaxSourceCount: drawTaxSourceIds(state).length,
       projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
     };
   }

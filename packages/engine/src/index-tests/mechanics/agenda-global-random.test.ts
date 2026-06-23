@@ -2939,26 +2939,26 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(drawActions).toHaveLength(2);
     expect(
       drawActions.find(
-        (action) => action.payload?.citySurveillanceDrawDecision === "pay",
+        (action) => action.payload?.drawTaxDecision === "pay",
       ),
     ).toMatchObject({
       costs: [{ clicks: 1, credits: 1 }],
       payload: {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceProjectedCreditsPaid: 1,
-        citySurveillanceProjectedTagsAdded: 0,
+        drawTaxSourceCount: 1,
+        drawTaxProjectedCreditsPaid: 1,
+        drawTaxProjectedTagsAdded: 0,
       },
     });
     expect(
       drawActions.find(
-        (action) => action.payload?.citySurveillanceDrawDecision === "tag",
+        (action) => action.payload?.drawTaxDecision === "tag",
       ),
     ).toMatchObject({
       costs: [{ clicks: 1 }],
       payload: {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded: 1,
+        drawTaxSourceCount: 1,
+        drawTaxProjectedCreditsPaid: 0,
+        drawTaxProjectedTagsAdded: 1,
       },
     });
     const initial = structuredClone(state);
@@ -2968,16 +2968,16 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "runner",
       (action) =>
         action.type === "draw_card" &&
-        action.payload?.citySurveillanceDrawDecision === "pay",
+        action.payload?.drawTaxDecision === "pay",
     );
     expect(state.runner.credits).toBe(0);
     expect(state.runner.tags).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       drawnCount: 1,
-      citySurveillanceSourceCount: 1,
-      citySurveillanceDrawDecision: "pay",
-      citySurveillanceCreditsPaid: 1,
-      citySurveillanceTagsAdded: 0,
+      drawTaxSourceCount: 1,
+      drawTaxDecision: "pay",
+      drawTaxCreditsPaid: 1,
+      drawTaxTagsAdded: 0,
       runnerCreditsAfter: 0,
     });
     const tagOnlyDrawActions = getLegalActions(state, "runner").filter(
@@ -2985,22 +2985,22 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(tagOnlyDrawActions).toHaveLength(1);
     expect(tagOnlyDrawActions[0]?.payload).toMatchObject({
-      citySurveillanceDrawDecision: "tag",
-      citySurveillanceProjectedTagsAdded: 1,
+      drawTaxDecision: "tag",
+      drawTaxProjectedTagsAdded: 1,
     });
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "draw_card" &&
-        action.payload?.citySurveillanceDrawDecision === "tag",
+        action.payload?.drawTaxDecision === "tag",
     );
     expect(state.runner.tags).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      citySurveillanceSourceCount: 1,
-      citySurveillanceDrawDecision: "tag",
-      citySurveillanceCreditsPaid: 0,
-      citySurveillanceTagsAdded: 1,
+      drawTaxSourceCount: 1,
+      drawTaxDecision: "tag",
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 1,
       runnerTagsAfter: 1,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

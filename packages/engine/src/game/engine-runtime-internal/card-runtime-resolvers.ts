@@ -778,7 +778,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     cardInstallCapabilitiesForDefinition,
     choiceAction,
     chooseCorpAgendasForPointCost,
-    citySurveillanceSourceIds,
+    drawTaxSourceIds,
     cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
     clearEdgerunnerTempsInstallFlags,
     clearValuPakProgramInstallFlags,
@@ -892,7 +892,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     installedRunnerVirusSourceIds,
     installedVirusCounterTotalForDefinition,
     isObligationDebtDefinition,
-    isCitySurveillanceCard,
+    isDrawTaxSourceDefinition,
     isCorpInstallableCardType,
     isHackerTrackerCentralCard,
     isInstalledCorpCardAdvanceable,
@@ -1697,10 +1697,10 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
         : {}),
       ...(summary.drawTaxSourceCount > 0
         ? {
-            citySurveillanceSourceCount: summary.drawTaxSourceCount,
-            citySurveillanceCreditsPaid: summary.drawTaxCreditsPaid,
-            citySurveillanceTagsAdded: summary.drawTaxTagsAdded,
-            citySurveillanceTags: summary.drawTaxTagsAdded,
+            drawTaxSourceCount: summary.drawTaxSourceCount,
+            drawTaxCreditsPaid: summary.drawTaxCreditsPaid,
+            drawTaxTagsAdded: summary.drawTaxTagsAdded,
+            drawTaxTags: summary.drawTaxTagsAdded,
             runnerCreditsAfter: state.runner.credits,
             runnerTagsAfter: state.runner.tags,
           }
