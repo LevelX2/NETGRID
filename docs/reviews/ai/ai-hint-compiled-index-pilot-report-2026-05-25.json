@@ -26307,7 +26307,7 @@
             "kind": "tag_source",
             "resource": "tags",
             "scope": "runner",
-            "source": "implementation.corpUtility.omniscience_foundation_end_turn_tag",
+            "source": "implementation.corpUtility.end_turn_tag_if_runner_received_tag",
             "timing": "runner_turn"
           }
         ],
@@ -26315,7 +26315,7 @@
           {
             "confidence": "high",
             "kind": "requires_runner_tagged",
-            "source": "implementation.corpUtility.omniscience_foundation_end_turn_tag"
+            "source": "implementation.corpUtility.end_turn_tag_if_runner_received_tag"
           }
         ],
         "remoteRole": {

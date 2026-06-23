@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_passed_pending_main_merge`
+`final_green_passed_after_main_sync_pending_main_merge`
 
 Arbeitsbranch: `codex/ai-player-semantic-controller`
 

@@ -1529,7 +1529,11 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"silver_lining_recovery"/.test(implementationText)) {
+  if (
+    /kind:\s*"silver_lining_recovery"|kind:\s*"gain_credits_from_stolen_agenda_advancement_history"/.test(
+      implementationText,
+    )
+  ) {
     addEffect(facts, {
       kind: "economy",
       timing: "action",
@@ -3449,17 +3453,23 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/omniscience_foundation_end_turn_tag/.test(implementationText)) {
+  if (
+    /omniscience_foundation_end_turn_tag|end_turn_tag_if_runner_received_tag/.test(
+      implementationText,
+    )
+  ) {
     addEffect(facts, {
       kind: "tag_source",
       timing: "runner_turn",
       scope: "runner",
       resource: "tags",
-      source: "implementation.corpUtility.omniscience_foundation_end_turn_tag",
+      source:
+        "implementation.corpUtility.end_turn_tag_if_runner_received_tag",
     });
     addCondition(facts, {
       kind: "requires_runner_tagged",
-      source: "implementation.corpUtility.omniscience_foundation_end_turn_tag",
+      source:
+        "implementation.corpUtility.end_turn_tag_if_runner_received_tag",
     });
   }
 
@@ -3530,7 +3540,7 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /new_blood_conceal_reorder_installed_ice|rescheduler_hq_shuffle_draw|cowboy_sysop_uninstall_corp_card_to_hq|swap_unrezzed_fort_ice_with_hq_ice|temporary_hq_ice_encounter_after_successful_run/.test(
+    /new_blood_conceal_reorder_installed_ice|conceal_and_reorder_installed_ice|rescheduler_hq_shuffle_draw|cowboy_sysop_uninstall_corp_card_to_hq|swap_unrezzed_fort_ice_with_hq_ice|temporary_hq_ice_encounter_after_successful_run/.test(
       implementationText,
     )
   ) {
@@ -3708,7 +3718,11 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/kind:\s*"shell_traders_delayed_install"/.test(implementationText)) {
+  if (
+    /kind:\s*"shell_traders_delayed_install"|kind:\s*"delayed_install_with_counter_countdown"/.test(
+      implementationText,
+    )
+  ) {
     addEffect(facts, {
       kind: "install_discount",
       timing: "persistent",

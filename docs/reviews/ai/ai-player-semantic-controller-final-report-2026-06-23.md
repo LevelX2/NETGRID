@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_green_passed_pending_main_merge`
+`final_green_passed_after_main_sync_pending_main_merge`
 
 Arbeitsbranch: `codex/ai-player-semantic-controller`
 
@@ -33,6 +33,7 @@ Die Umsetzung bleibt AI-intern und legalitätsneutral. Es wurden keine Engine-Re
 - Capability-Signale tragen eine Quellenpriorität. Strukturierte Signale, Rollen/Subtypes und sichtbarer Boardstate sind vor Text-/Label-Fallbacks eingeordnet; Textfallbacks sind als Übergangsdiagnose markiert.
 - `TacticalPlans` ist als Mapping-Schicht abgegrenzt. Kartensemantik soll in Action-/Card-Semantikmodulen entstehen, nicht in der Plan-Mapping-Datei.
 - Ein kleiner Runtime-Score-Helper für echte Action-Type-Tiebreaks ist vorbereitet und getestet. Die produktive Runtime nutzt aber weiter die bisherige volle `semanticRuntimeTypePriority`, weil eine sofortige Reduktion mehrere Runtime-Cutover- und Benchmark-Regressionen ausgelöst hat.
+- Nach dem Sync mit dem aktuellen `main` erkennt der AI-Derived-Facts-Scanner zusätzlich die neuen Engine-Descriptor-Namen `delayed_install_with_counter_countdown`, `conceal_and_reorder_installed_ice`, `gain_credits_from_stolen_agenda_advancement_history` und `end_turn_tag_if_runner_received_tag`. Das hält die AI-Gates streng, ohne Pilot-Erwartungen zu entfernen.
 
 ## Geänderte Hauptmodule
 
@@ -48,6 +49,9 @@ Die Umsetzung bleibt AI-intern und legalitätsneutral. Es wurden keine Engine-Re
 - `packages/ai/src/decision/hard-gates.ts`
 - `packages/ai/src/decision/semantic-decision-frame.ts`
 - `packages/ai/src/runtime/semantic-runtime-score-components.ts`
+- `scripts/check-ai-derived-facts.mjs`
+- `docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json`
+- `docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json`
 - zugehörige AI-Tests unter `packages/ai/src/**`
 
 ## Praktische Spielwirkung
@@ -93,9 +97,13 @@ passed
 corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/semantic-ai-runtime-cutover.test.ts
 2 Test Files passed
 572 tests passed
+
+corepack pnpm --filter @netgrid/ai exec vitest run src/derived-basic-facts-gate.test.ts src/compiled-index-gate.test.ts
+2 Test Files passed
+17 tests passed
 ```
 
-Zusätzlich wurden pro Paket fokussierte Vitest-Läufe für Boundary-, Doctrine-, Corp-TacticalGoal-, ActionGoalFit-, Capability-, Runtime-Score-, Shadow- und Cutover-Pfade ausgeführt.
+Nach dem Sync mit `main` wurde der vollständige `@netgrid/ai`-Testlauf erneut ausgeführt und blieb grün: 134 Test Files, 1541 Tests. Zusätzlich wurden pro Paket fokussierte Vitest-Läufe für Boundary-, Doctrine-, Corp-TacticalGoal-, ActionGoalFit-, Capability-, Runtime-Score-, Shadow-, Derived-Facts-, Compiled-Index- und Cutover-Pfade ausgeführt.
 
 ## Vertragsprüfung
 

@@ -25972,14 +25972,14 @@
             "timing": "runner_turn",
             "scope": "runner",
             "resource": "tags",
-            "source": "implementation.corpUtility.omniscience_foundation_end_turn_tag"
+            "source": "implementation.corpUtility.end_turn_tag_if_runner_received_tag"
           }
         ],
         "conditions": [
           {
             "confidence": "high",
             "kind": "requires_runner_tagged",
-            "source": "implementation.corpUtility.omniscience_foundation_end_turn_tag"
+            "source": "implementation.corpUtility.end_turn_tag_if_runner_received_tag"
           }
         ],
         "costProfile": {},
