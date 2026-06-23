@@ -36,10 +36,10 @@ describe("scored agenda sequence contract matrix", () => {
       SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id).sort(),
     ).toEqual([
       "agenda_purge_score_start",
-      "corporate_downsizing_score_start",
       "hq_to_new_remote_install_rez_score_start",
       "scored_agenda_free_rez_score_start",
       "scored_fort_ice_strength_bonus_score_start",
+      "scored_hq_agenda_shuffle_credits_score_start",
       "scored_rezzed_ice_mark_modifier_score_start",
       "subtype_reveal_economy_score_start",
     ]);
@@ -76,7 +76,7 @@ describe("scored agenda sequence contract matrix", () => {
       },
       {
         kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
-        id: "corporate_downsizing_score_start",
+        id: "scored_hq_agenda_shuffle_credits_score_start",
       },
       {
         kind: "choose_fort_ice_strength_bonus",

@@ -284,7 +284,7 @@ import {
   handleCorpZoneChoice,
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
   startCorporateNegotiatingCenterChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";

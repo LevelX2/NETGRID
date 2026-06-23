@@ -290,7 +290,7 @@ function testHost(
     },
     hiddenZone: {
       resolveV1911RunnerHiddenZoneAbility: () => undefined,
-      resolveV1911CorporateDownsizing: () => undefined,
+      resolveScoredAgendaCorpRdTopReveal: () => undefined,
       revealRunnerStackTop: () => undefined,
       revealCorpRdTop: () => undefined,
       resolveReschedulerHqShuffleDraw: () => undefined,

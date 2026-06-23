@@ -119,7 +119,7 @@ export type CreditEconomyExecutionHost = {
   };
   hiddenZone: {
     resolveV1911RunnerHiddenZoneAbility: HostFn<void>;
-    resolveV1911CorporateDownsizing: HostFn<void>;
+    resolveScoredAgendaCorpRdTopReveal: HostFn<void>;
     revealRunnerStackTop: HostFn<void>;
     revealCorpRdTop: HostFn<void>;
     resolveReschedulerHqShuffleDraw: HostFn<void>;
@@ -190,11 +190,8 @@ export function handleCreditEconomyExecution(
     host.hiddenZone.resolveV1911RunnerHiddenZoneAbility(state, legalAction);
     return handled(legalAction);
   }
-  if (
-    legalAction.payload?.agendaAbility ===
-    "v1911_corporate_downsizing_reveal_rd_top"
-  ) {
-    host.hiddenZone.resolveV1911CorporateDownsizing(state, legalAction);
+  if (legalAction.payload?.agendaAbility === "scored_agenda_reveal_rd_top") {
+    host.hiddenZone.resolveScoredAgendaCorpRdTopReveal(state, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.v1912CounterAbility === "reveal_stack_top") {

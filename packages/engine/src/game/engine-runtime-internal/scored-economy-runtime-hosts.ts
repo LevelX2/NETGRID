@@ -285,7 +285,7 @@ import {
   handleCorpZoneChoice,
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
   startCorporateNegotiatingCenterChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
@@ -906,10 +906,10 @@ export function createScoredEconomyRuntimeHosts(
             cardId,
           );
         },
-        startCorporateDownsizing: (cardId, creditPerAgendaPoint) => {
+        startScoredAgendaHqShuffleCredits: (cardId, creditPerAgendaPoint) => {
           if (!legalAction)
-            throw new Error("Corporate Downsizing braucht eine LegalAction.");
-          startCorporateDownsizingScoreChoice(
+            throw new Error("HQ-Agenda-Shuffle braucht eine LegalAction.");
+          startScoredAgendaHqShuffleCreditsChoice(
             corpZoneChoiceHandlerHost(state, legalAction),
             { sourceCardId: cardId, creditPerAgendaPoint },
           );

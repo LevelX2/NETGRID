@@ -204,7 +204,7 @@ export function createHiddenZoneSearchRuntime(
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveRandomDiceSplitChoice,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,

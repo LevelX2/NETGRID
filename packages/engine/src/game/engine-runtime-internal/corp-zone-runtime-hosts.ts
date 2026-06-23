@@ -281,20 +281,20 @@ export function createCorpZoneRuntimeHosts(
     return [];
   }
 
-  function resolveV1911CorporateDownsizing(
+  function resolveScoredAgendaCorpRdTopReveal(
     state: GameState,
     legalAction: LegalAction,
   ): void {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Corporate Downsizing nutzen.");
+      throw new Error("Nur die Korp darf diese Scored-Agenda-Aktion nutzen.");
     const sourceCardId = String(legalAction.payload?.cardId ?? "");
     if (!state.corp.scoreArea.includes(sourceCardId))
-      throw new Error("Corporate Downsizing ist nicht gescort.");
+      throw new Error("Die Scored Agenda ist nicht gescort.");
     if (
       scoredAgendaKindForDefinition(definitionFor(state, sourceCardId)) !==
       "shuffle_selected_hq_agendas_into_rd_gain_credits"
     )
-      throw new Error("Die Agenda-Aktion passt nicht zu Corporate Downsizing.");
+      throw new Error("Die Agenda-Aktion passt nicht zur Scored-Agenda-Art.");
     revealCorpRdTop(state, legalAction);
   }
 
@@ -1204,7 +1204,7 @@ export function createCorpZoneRuntimeHosts(
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     shuffleCorpCardIntoRd,
     startExposeInstalledCorpCardsChoice,
     startMultiExposeInstalledCorpCardsChoice,

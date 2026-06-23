@@ -84,7 +84,7 @@ export type ScoredAgendaFlowHost = {
   choices: {
     startHqToNewRemoteInstallRez: (cardId: CardInstanceId) => void;
     startScoredAgendaFreeRez: (cardId: CardInstanceId) => void;
-    startCorporateDownsizing: (
+    startScoredAgendaHqShuffleCredits: (
       cardId: CardInstanceId,
       creditPerAgendaPoint: number,
     ) => void;

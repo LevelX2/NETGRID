@@ -12,7 +12,7 @@ import {
   handleCorpZoneChoice,
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
   startCorporateNegotiatingCenterChoice,
   type CorpZoneChoiceHandlerHost,
 } from "./corp-zone-choice-handlers";
@@ -253,12 +253,12 @@ describe("corp zone choice handlers", () => {
       shuffleInputs,
     });
 
-    startCorporateDownsizingScoreChoice(host, {
+    startScoredAgendaHqShuffleCreditsChoice(host, {
       sourceCardId: "downsizing_source" as CardInstanceId,
       creditPerAgendaPoint: 2,
     });
     expect(host.state.pendingChoice?.source).toBe(
-      "p3_50.corporate_downsizing:downsizing_source:2:8",
+      "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:8",
     );
 
     host.playerAction = playerAction(["card_hq_agenda_1", "card_hq_agenda_2"]);
@@ -272,11 +272,11 @@ describe("corp zone choice handlers", () => {
     expect(shuffleInputs).toEqual([
       {
         ids: ["rd_1", "hq_agenda_1", "hq_agenda_2"],
-        purpose: "p3_50.corporate_downsizing.hq_agendas_into_rd.downsizing_source.8",
+        purpose: "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.downsizing_source.8",
       },
     ]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
       shownCardDefinitionIds: "agenda_alpha,agenda_beta",
       shownCount: 2,
       shuffledIntoRndCount: 2,
@@ -294,14 +294,14 @@ describe("corp zone choice handlers", () => {
         downsizing_source: "shuffle_selected_hq_agendas_into_rd_gain_credits",
       },
       pendingChoice: selectCardsChoice(
-        "p3_50.corporate_downsizing:downsizing_source:2:8",
+        "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:8",
         ["hq_operation"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_operation"]),
     });
 
     expect(() => handleCorpZoneChoice(host)).toThrow(
-      "Corporate Downsizing darf nur HQ-Agenden zeigen.",
+      "Diese Scored Agenda darf nur HQ-Agenden zeigen.",
     );
   });
 

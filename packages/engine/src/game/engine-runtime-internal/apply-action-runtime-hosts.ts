@@ -284,7 +284,7 @@ import {
   handleCorpZoneChoice,
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
   startCorporateNegotiatingCenterChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
@@ -713,7 +713,7 @@ export function createApplyActionRuntimeHosts(
     hasCorpUtilityKind,
     hiddenZoneArrangeChoiceHandlerHost,
     resolveCorpInstalledEconomyAction,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
     revealCorpRdTop,
     revealRunnerStackTop,
@@ -798,7 +798,7 @@ export function createApplyActionRuntimeHosts(
       },
       hiddenZone: {
         resolveV1911RunnerHiddenZoneAbility,
-        resolveV1911CorporateDownsizing,
+        resolveScoredAgendaCorpRdTopReveal,
         revealRunnerStackTop,
         revealCorpRdTop,
         resolveReschedulerHqShuffleDraw: (

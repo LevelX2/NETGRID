@@ -183,7 +183,7 @@ export function createHiddenZoneNonSearchRuntime(
     resolveMultiExposeInstalledCorpCardsChoice,
     resolveP358HiddenReplacementChoice,
     resolveSetupMulliganChoice,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
     revealCorpRdTop,
     revealRunnerStackTop,

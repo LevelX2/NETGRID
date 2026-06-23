@@ -300,7 +300,7 @@ import {
   handleCorpZoneChoice,
   resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
   startCorporateNegotiatingCenterChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
@@ -1018,7 +1018,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     resolveTraceHardwareWreckerSuccess,
     resolveTraceTrashRunnerResourceSuccess,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
     resolveRandomDiceSplitChoice,
     restorePurgePreservedVirusCounters,

@@ -65,7 +65,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       },
     },
     {
-      id: "corporate_downsizing_score_start",
+      id: "scored_hq_agenda_shuffle_credits_score_start",
       kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId, scoredAgenda }) => {
@@ -73,8 +73,8 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
           scoredAgenda.kind !==
           "shuffle_selected_hq_agendas_into_rd_gain_credits"
         )
-          throw new Error("Corporate-Downsizing-Score-Time-Vertrag ungueltig.");
-        host.choices.startCorporateDownsizing(
+          throw new Error("HQ-Agenda-Shuffle-Score-Time-Vertrag ungueltig.");
+        host.choices.startScoredAgendaHqShuffleCredits(
           cardId,
           scoredAgenda.creditPerAgendaPoint,
         );

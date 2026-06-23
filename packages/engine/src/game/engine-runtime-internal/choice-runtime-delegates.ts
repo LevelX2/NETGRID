@@ -481,10 +481,10 @@ export function resolveV1911RunnerHiddenZoneAbility(...args: any[]): any {
   )(...args);
 }
 
-export function resolveV1911CorporateDownsizing(...args: any[]): any {
+export function resolveScoredAgendaCorpRdTopReveal(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveV1911CorporateDownsizing",
+    "resolveScoredAgendaCorpRdTopReveal",
   )(...args);
 }
 

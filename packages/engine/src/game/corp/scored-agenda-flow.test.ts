@@ -232,7 +232,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     choices: {
       startHqToNewRemoteInstallRez: (cardId) => callbacks.dataFort.push(cardId),
       startScoredAgendaFreeRez: (cardId) => callbacks.priority.push(cardId),
-      startCorporateDownsizing: (cardId, creditPerAgendaPoint) =>
+      startScoredAgendaHqShuffleCredits: (cardId, creditPerAgendaPoint) =>
         callbacks.downsizing.push({ cardId, creditPerAgendaPoint }),
       resolveAgendaPurge: () => {
         callbacks.agendaPurge += 1;

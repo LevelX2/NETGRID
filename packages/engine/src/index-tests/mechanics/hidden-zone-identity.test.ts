@@ -1313,11 +1313,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       (action) =>
         action.type === "score_agenda" && action.payload?.cardId === agendaId,
     );
-    expect(state.pendingChoice?.source).toContain("p3_50.corporate_downsizing");
+    expect(state.pendingChoice?.source).toContain("scored_agenda.hq_agenda_shuffle_credits");
     state = applyChoices(state, "corp", [`card_${shownAgendaId}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
       publicRevealKind: "reveal",
       shownCount: 1,
       shuffledIntoRndCount: 1,

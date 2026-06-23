@@ -210,7 +210,7 @@ export function createHiddenZoneArrangeRuntime(
     resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
     resolveRandomDiceSplitChoice,
     revealCorpRdTop,
