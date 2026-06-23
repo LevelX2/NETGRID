@@ -909,7 +909,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     isCorpInstallableCardType,
     isHackerTrackerCentralCard,
     isInstalledCorpCardAdvanceable,
-    isInvestmentFirmCard,
+    isCorpInstalledEconomyCreditSource,
     isRegionUpgrade,
     isUniqueCard,
     isV097OrLater,
@@ -993,7 +993,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
-    resolveInvestmentFirmCreditChoice,
+    resolveCorpInstalledEconomyCreditChoice,
     resolveManagementShakeUpOperation,
     resolveMitWestTier,
     resolveMultiBreakSubroutinesAction,
@@ -1032,7 +1032,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     rezzedCorpRootCardIds,
     rezzedIceOutsideThisIceCount,
     rezzedInstalledIceIds,
-    rezzedInvestmentFirmIds,
+    rezzedCorpInstalledEconomyCreditSourceIds,
     rootInstallRezzesOnInstall,
     runAccessLegalActionHostComposition,
     runAccessTransitionHost,
@@ -1093,7 +1093,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,
-    shouldOpenInvestmentFirmCreditChoice,
+    shouldOpenCorpInstalledEconomyCreditChoice,
     shuffleCorpCardIntoRd,
     shuffleGripTrashAndStackThenDrawForCardImplementation,
     shuffleRunnerStack,
@@ -1119,7 +1119,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     startExposeInstalledCorpCardsChoice,
     startCorpChoiceRezOrTrashIceChoice,
     startMultiExposeInstalledCorpCardsChoice,
-    startInvestmentFirmCreditChoice,
+    startCorpInstalledEconomyCreditChoice,
     startPaidSourceReturnToGripChoice,
     startPowerGridOverloadChoice,
     startRun,
@@ -2385,21 +2385,21 @@ function applyCorpStartOfTurnEffects(
       if (cardCounter(state, cardId, "bit") < capacity)
         setCardCounter(state, cardId, "bit", capacity);
     }
-    if (isInvestmentFirmCard(state, cardId)) {
+    if (isCorpInstalledEconomyCreditSource(state, cardId)) {
       if (cardCounter(state, cardId, "recurring_credit") > 0) {
         spendCardCounter(state, cardId, "recurring_credit", 1);
         credits(state, "corp", 1);
         const remainingCounters = cardCounter(state, cardId, "recurring_credit");
         effects?.push(
           automaticGainCreditsEffect(
-            `corp.start.investment_firm.${cardId}`,
+            `corp.start.installed_economy_credit.${cardId}`,
             "corp",
             1,
             definitionId,
           ),
         );
         effects?.push({
-          effectId: `corp.start.investment_firm.counter.${cardId}`,
+          effectId: `corp.start.installed_economy_credit.counter.${cardId}`,
           kind: "counter_change",
           visibility: "public",
           side: "corp",

@@ -158,8 +158,8 @@ function pendingChoiceHost(
       resolveExposeInstalledCorpCardsChoice: unexpected(
         "resolveExposeInstalledCorpCardsChoice",
       ),
-      resolveInvestmentFirmCreditChoice: unexpected(
-        "resolveInvestmentFirmCreditChoice",
+      resolveCorpInstalledEconomyCreditChoice: unexpected(
+        "resolveCorpInstalledEconomyCreditChoice",
       ),
       resolveCrashEverettDrawChoice: unexpected("resolveCrashEverettDrawChoice"),
       resolvePowerGridOverloadChoice: unexpected("resolvePowerGridOverloadChoice"),

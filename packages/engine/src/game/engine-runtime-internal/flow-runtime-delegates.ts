@@ -144,8 +144,8 @@ export function isDrawTaxSourceDefinition(...args: any[]): any {
   return runtimeDelegate("flowRuntimeHosts", "isDrawTaxSourceDefinition")(...args);
 }
 
-export function isInvestmentFirmCard(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "isInvestmentFirmCard")(...args);
+export function isCorpInstalledEconomyCreditSource(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "isCorpInstalledEconomyCreditSource")(...args);
 }
 
 export function isHackerTrackerCentralCard(...args: any[]): any {

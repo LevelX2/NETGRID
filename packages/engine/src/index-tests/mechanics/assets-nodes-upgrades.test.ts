@@ -496,12 +496,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.clicks).toBe(clicksBefore - 1);
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("v1917.investment_firm_credit"),
+      source: expect.stringContaining("corp_installed_economy.credit_choice"),
       minSelections: 1,
       maxSelections: 1,
     });
     expect(getPlayerView(state, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(
-      expect.arrayContaining(["take_credit", `investment_firm_${firmId}`]),
+      expect.arrayContaining(["take_credit", `corp_installed_economy_credit_${firmId}`]),
     );
     const resolve = mustAction(
       state,
@@ -516,7 +516,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         selectedChoices: {
           choiceId: state.pendingChoice?.choiceId,
-          selectedOptionIds: [`investment_firm_${firmId}`],
+          selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
         },
       }).ok,
     ).toBe(false);
@@ -528,7 +528,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         selectedChoices: {
           choiceId: state.pendingChoice?.choiceId,
-          selectedOptionIds: [`investment_firm_${firmId}`],
+          selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
         },
       }),
     ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
@@ -559,7 +559,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`investment_firm_${firmId}`],
+        selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
       },
       idempotencyKey: "v1917-investment-firm-store-credit",
     });
@@ -597,7 +597,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.archives).not.toContain(firmId);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.investment_firm"),
+        effectId: expect.stringContaining("corp.start.installed_economy_credit"),
         kind: "gain_credits",
         amount: 1,
         sourceDefinitionId: "onr_v1_329_investment-firm",
@@ -605,7 +605,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.investment_firm.counter"),
+        effectId: expect.stringContaining("corp.start.installed_economy_credit.counter"),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
@@ -628,7 +628,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.investment_firm.counter"),
+        effectId: expect.stringContaining("corp.start.installed_economy_credit.counter"),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
@@ -690,8 +690,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(multiOptions).toEqual(
       expect.arrayContaining([
         "take_credit",
-        `investment_firm_${firstFirm}`,
-        `investment_firm_${secondFirm}`,
+        `corp_installed_economy_credit_${firstFirm}`,
+        `corp_installed_economy_credit_${secondFirm}`,
       ]),
     );
     expect(validateGameState(state).ok).toBe(true);

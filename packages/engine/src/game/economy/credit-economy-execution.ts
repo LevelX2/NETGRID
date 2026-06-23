@@ -126,11 +126,11 @@ export type CreditEconomyExecutionHost = {
     startCorpAssetRdTopReorderChoice: HostFn<void>;
   };
   delegates: {
-    shouldOpenInvestmentFirmCreditChoice: (
+    shouldOpenCorpInstalledEconomyCreditChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => boolean;
-    startInvestmentFirmCreditChoice: (
+    startCorpInstalledEconomyCreditChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => void;
@@ -182,8 +182,8 @@ export function handleCreditEconomyExecution(
 
   const { state } = host;
   host.actions.spendClick(state, legalAction.side);
-  if (host.delegates.shouldOpenInvestmentFirmCreditChoice(state, legalAction)) {
-    host.delegates.startInvestmentFirmCreditChoice(state, legalAction);
+  if (host.delegates.shouldOpenCorpInstalledEconomyCreditChoice(state, legalAction)) {
+    host.delegates.startCorpInstalledEconomyCreditChoice(state, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.v1911HiddenZoneAbility) {

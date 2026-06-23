@@ -887,7 +887,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     isDrawTaxSourceDefinition,
     isCorpInstallableCardType,
     isHackerTrackerCentralCard,
-    isInvestmentFirmCard,
+    isCorpInstalledEconomyCreditSource,
     isRegionUpgrade,
     isUniqueCard,
     isV097OrLater,
@@ -1921,13 +1921,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       );
   }
 
-  function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {
+  function rezzedCorpInstalledEconomyCreditSourceIds(state: GameState): CardInstanceId[] {
     return rezzedCorpRootCardIds(state)
-      .filter((cardId: CardInstanceId) => isInvestmentFirmCard(state, cardId))
+      .filter((cardId: CardInstanceId) => isCorpInstalledEconomyCreditSource(state, cardId))
       .sort();
   }
 
-  function shouldOpenInvestmentFirmCreditChoice(
+  function shouldOpenCorpInstalledEconomyCreditChoice(
     state: GameState,
     legalAction: LegalAction,
   ): boolean {
@@ -1936,26 +1936,26 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       legalAction.source === "basic_action" &&
       legalAction.type === "gain_credit" &&
       Object.keys(legalAction.payload ?? {}).length === 0 &&
-      rezzedInvestmentFirmIds(state).length > 0
+      rezzedCorpInstalledEconomyCreditSourceIds(state).length > 0
     );
   }
 
-  function startInvestmentFirmCreditChoice(
+  function startCorpInstalledEconomyCreditChoice(
     state: GameState,
     legalAction: LegalAction,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const investmentFirmIds = rezzedInvestmentFirmIds(state);
-    if (investmentFirmIds.length === 0)
-      throw new Error("Investment Firm ist nicht rezzed installiert.");
-    const sourceDefinitionId = definitionFor(state, investmentFirmIds[0]!).id;
+    const economyCreditSourceIds = rezzedCorpInstalledEconomyCreditSourceIds(state);
+    if (economyCreditSourceIds.length === 0)
+      throw new Error("Es ist keine rezzed installierte Economy-Credit-Quelle vorhanden.");
+    const sourceDefinitionId = definitionFor(state, economyCreditSourceIds[0]!).id;
     state.pendingChoice = {
-      choiceId: `v1917_investment_firm_credit_${state.stateVersion + 1}`,
+      choiceId: `corp_installed_economy_credit_choice_${state.stateVersion + 1}`,
       side: "corp",
-      source: `v1917.investment_firm_credit:${state.stateVersion + 1}`,
+      source: `corp_installed_economy.credit_choice:${state.stateVersion + 1}`,
       prompt:
-        "Investment Firm: Credit nehmen oder 2 Credits auf die Karte legen?",
+        "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
       kind: "select_option",
       options: [
         {
@@ -1964,13 +1964,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
           publicLabel: "1 Credit genommen",
           value: "take_credit",
         },
-        ...investmentFirmIds.map((cardId, index) => ({
-          id: `investment_firm_${cardId}`,
+        ...economyCreditSourceIds.map((cardId, index) => ({
+          id: `corp_installed_economy_credit_${cardId}`,
           label:
-            investmentFirmIds.length === 1
-              ? "2 Credits auf Investment Firm legen"
-              : `2 Credits auf Investment Firm ${index + 1} legen`,
-          publicLabel: "2 Credits auf Investment Firm gelegt",
+            economyCreditSourceIds.length === 1
+              ? "2 Credits auf die Economy-Quelle legen"
+              : `2 Credits auf Economy-Quelle ${index + 1} legen`,
+          publicLabel: "2 Credits auf Economy-Quelle gelegt",
           value: cardId,
         })),
       ],
@@ -1980,27 +1980,27 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       visibility: "public",
     };
     legalAction.payload = {
-      investmentFirmChoiceOpened: true,
+      corpInstalledEconomyCreditChoiceOpened: true,
       gainCreditsAmount: 0,
       sourceDefinitionId,
     };
   }
 
-  function resolveInvestmentFirmCreditChoice(
+  function resolveCorpInstalledEconomyCreditChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1917.investment_firm_credit"))
-      throw new Error("Es ist keine Investment-Firm-Choice offen.");
+    if (!choice || !choice.source.startsWith("corp_installed_economy.credit_choice"))
+      throw new Error("Es ist keine Economy-Credit-Choice offen.");
     if (choice.side !== "corp" || legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Investment Firm nutzen.");
+      throw new Error("Nur die Korp darf diese Economy-Credit-Choice nutzen.");
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "take_credit") {
       const sourceDefinitionId = definitionFor(
         state,
-        rezzedInvestmentFirmIds(state)[0]!,
+        rezzedCorpInstalledEconomyCreditSourceIds(state)[0]!,
       ).id;
       credits(state, "corp", 1);
       delete state.pendingChoice;
@@ -2018,8 +2018,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       (option) => option.id === selected,
     );
     const sourceCardId = String(selectedOption?.value ?? "");
-    if (!rezzedInvestmentFirmIds(state).includes(sourceCardId))
-      throw new Error("Die gewaehlte Investment Firm ist nicht mehr legal.");
+    if (!rezzedCorpInstalledEconomyCreditSourceIds(state).includes(sourceCardId))
+      throw new Error("Die gewaehlte Economy-Credit-Quelle ist nicht mehr legal.");
     const counterPayload = addVisibleCardCounter(
       state,
       sourceCardId,
@@ -2082,9 +2082,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     abilityMetadata,
     resolveCorpInstalledEconomyAction,
     validateCorpInstalledEconomyAction,
-    rezzedInvestmentFirmIds,
-    shouldOpenInvestmentFirmCreditChoice,
-    startInvestmentFirmCreditChoice,
-    resolveInvestmentFirmCreditChoice,
+    rezzedCorpInstalledEconomyCreditSourceIds,
+    shouldOpenCorpInstalledEconomyCreditChoice,
+    startCorpInstalledEconomyCreditChoice,
+    resolveCorpInstalledEconomyCreditChoice,
   };
 }

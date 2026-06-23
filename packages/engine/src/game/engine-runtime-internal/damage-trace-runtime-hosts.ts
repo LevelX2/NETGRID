@@ -840,7 +840,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     );
   }
 
-  function isInvestmentFirmCard(state: GameState, cardId: CardInstanceId): boolean {
+  function isCorpInstalledEconomyCreditSource(state: GameState, cardId: CardInstanceId): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
       "basic_credit_diversion_to_recurring_credits"
@@ -997,7 +997,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     remainingReplacementLongtailKindForCard,
     isObligationDebtDefinition,
     isDrawTaxSourceDefinition,
-    isInvestmentFirmCard,
+    isCorpInstalledEconomyCreditSource,
     isHackerTrackerCentralCard,
     applyRunnerTraceCounterRunStartEffects,
     hackerTrackerCardIds,

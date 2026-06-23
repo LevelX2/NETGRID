@@ -29,7 +29,7 @@ export type PendingChoiceResolutionHost = {
     hiddenZoneSearchChoiceHandlerHost: HostFn<unknown>;
     resolveMultiExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
-    resolveInvestmentFirmCreditChoice: HostFn<void>;
+    resolveCorpInstalledEconomyCreditChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolvePowerGridOverloadChoice: HostFn<void>;
     resolveSystematicLayoffsAdvancementChoice: HostFn<void>;
@@ -133,8 +133,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveMultiExposeInstalledCorpCardsChoice;
   const resolveExposeInstalledCorpCardsChoice =
     host.hiddenZone.resolveExposeInstalledCorpCardsChoice;
-  const resolveInvestmentFirmCreditChoice =
-    host.hiddenZone.resolveInvestmentFirmCreditChoice;
+  const resolveCorpInstalledEconomyCreditChoice =
+    host.hiddenZone.resolveCorpInstalledEconomyCreditChoice;
   const resolveCrashEverettDrawChoice =
     host.hiddenZone.resolveCrashEverettDrawChoice;
   const resolvePowerGridOverloadChoice =
@@ -345,8 +345,8 @@ export function resolvePendingChoice(
     resolveFortHqReplacementChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
-    resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("corp_installed_economy.credit_choice")) {
+    resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {

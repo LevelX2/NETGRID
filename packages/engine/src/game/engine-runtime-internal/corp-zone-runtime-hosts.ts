@@ -89,7 +89,7 @@ export function createCorpZoneRuntimeHosts(
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,
-    resolveInvestmentFirmCreditChoice,
+    resolveCorpInstalledEconomyCreditChoice,
     resolveMicrotechAiInterfacePreAccessChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
     resolvePattelsVirusCounterChoice,

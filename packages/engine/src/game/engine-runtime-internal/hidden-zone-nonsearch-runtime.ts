@@ -88,7 +88,7 @@ export function createHiddenZoneNonSearchRuntime(
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,
-    resolveInvestmentFirmCreditChoice,
+    resolveCorpInstalledEconomyCreditChoice,
     resolveMicrotechAiInterfacePreAccessChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
     resolvePattelsVirusCounterChoice,

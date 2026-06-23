@@ -626,31 +626,31 @@ export function validateCorpInstalledEconomyAction(...args: any[]): any {
   )(...args);
 }
 
-export function rezzedInvestmentFirmIds(...args: any[]): any {
+export function rezzedCorpInstalledEconomyCreditSourceIds(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "rezzedInvestmentFirmIds",
+    "rezzedCorpInstalledEconomyCreditSourceIds",
   )(...args);
 }
 
-export function shouldOpenInvestmentFirmCreditChoice(...args: any[]): any {
+export function shouldOpenCorpInstalledEconomyCreditChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "shouldOpenInvestmentFirmCreditChoice",
+    "shouldOpenCorpInstalledEconomyCreditChoice",
   )(...args);
 }
 
-export function startInvestmentFirmCreditChoice(...args: any[]): any {
+export function startCorpInstalledEconomyCreditChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "startInvestmentFirmCreditChoice",
+    "startCorpInstalledEconomyCreditChoice",
   )(...args);
 }
 
-export function resolveInvestmentFirmCreditChoice(...args: any[]): any {
+export function resolveCorpInstalledEconomyCreditChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolveInvestmentFirmCreditChoice",
+    "resolveCorpInstalledEconomyCreditChoice",
   )(...args);
 }
 

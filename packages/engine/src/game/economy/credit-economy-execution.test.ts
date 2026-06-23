@@ -297,8 +297,8 @@ function testHost(
       startCorpAssetRdTopReorderChoice: () => undefined,
     },
     delegates: {
-      shouldOpenInvestmentFirmCreditChoice: () => false,
-      startInvestmentFirmCreditChoice: () => undefined,
+      shouldOpenCorpInstalledEconomyCreditChoice: () => false,
+      startCorpInstalledEconomyCreditChoice: () => undefined,
       resolveCorpInstalledEconomyAction: () => false,
       handleTraceOrchestrationAction: () => ({ handled: false }),
       handleCorpSpecialDamageAbilityAction: () => ({ handled: false }),

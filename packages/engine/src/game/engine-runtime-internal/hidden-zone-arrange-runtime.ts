@@ -88,7 +88,7 @@ export function createHiddenZoneArrangeRuntime(
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,
-    resolveInvestmentFirmCreditChoice,
+    resolveCorpInstalledEconomyCreditChoice,
     resolveMicrotechAiInterfacePreAccessChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
     resolvePattelsVirusCounterChoice,

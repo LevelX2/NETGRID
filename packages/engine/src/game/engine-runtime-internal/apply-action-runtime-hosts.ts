@@ -718,10 +718,10 @@ export function createApplyActionRuntimeHosts(
     revealCorpRdTop,
     revealRunnerStackTop,
     rezzedCorpRootCardIds,
-    shouldOpenInvestmentFirmCreditChoice,
+    shouldOpenCorpInstalledEconomyCreditChoice,
     spendRunnerTagRemovalCredits,
     startVirusCounterPurgePreserveChoice,
-    startInvestmentFirmCreditChoice,
+    startCorpInstalledEconomyCreditChoice,
     traceOrchestrationHost,
     trashCorpInstalledCardToArchives,
     trashRunnerInstalledCardToHeap,
@@ -821,8 +821,8 @@ export function createApplyActionRuntimeHosts(
           ),
       },
       delegates: {
-        shouldOpenInvestmentFirmCreditChoice,
-        startInvestmentFirmCreditChoice,
+        shouldOpenCorpInstalledEconomyCreditChoice,
+        startCorpInstalledEconomyCreditChoice,
         resolveCorpInstalledEconomyAction,
         handleTraceOrchestrationAction: (legalAction) =>
           handleTraceOrchestrationAction(
