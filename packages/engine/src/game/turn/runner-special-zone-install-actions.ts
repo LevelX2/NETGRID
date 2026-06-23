@@ -140,7 +140,7 @@ export function buildRunnerShellTradersRemoveCounterAction(
   );
 }
 
-export function buildRunnerSelfModifyingCodeInstallAction(
+export function buildRunnerHiddenStackProgramInstallAction(
   state: GameState,
   sourceCardId: CardInstanceId,
 ): LegalAction {
@@ -153,15 +153,15 @@ export function buildRunnerSelfModifyingCodeInstallAction(
     [],
     {
       cardId: sourceCardId,
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      v1911HiddenZoneAbility: "hidden_stack_program_install",
       hiddenZoneBarrier: true,
     },
     {
       abilityRef: {
         sourceCardInstanceId: sourceCardId,
-        abilityId: "self_modifying_code_install_program",
+        abilityId: "hidden_stack_program_install",
       },
-      effectRef: "effect.self_modifying_code_install_program",
+      effectRef: "effect.hidden_stack_program_install",
     },
   );
 }

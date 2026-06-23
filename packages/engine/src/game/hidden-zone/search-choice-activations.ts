@@ -491,7 +491,7 @@ export function startAujourdOuiTop5Activation(
   };
 }
 
-export function startSelfModifyingCodeStackActivation(
+export function startHiddenStackProgramInstallActivation(
   host: HiddenZoneSearchActivationHost,
   sourceCardId: CardInstanceId,
 ): void {

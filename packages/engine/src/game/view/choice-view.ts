@@ -97,7 +97,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
   return (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v098.search_stack") ||
-      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.hidden_stack_program_install") ||
       choice.source.startsWith("v1911.search_stack_card") ||
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
@@ -140,7 +140,7 @@ function stackSearchResolutionForChoice(
     reveal:
       choice.source.startsWith("v1911.short_circuit_search") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
-      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.hidden_stack_program_install") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
@@ -148,14 +148,14 @@ function stackSearchResolutionForChoice(
         ? "public"
         : "hidden",
     destination:
-      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.hidden_stack_program_install") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? "install_program"
         : "grip",
     shuffleAfter: true,
-    ...(choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+    ...(choice.source.startsWith("v1911.hidden_stack_program_install") ||
     choice.source.startsWith("v1911.sneak_preview_stack_install") ||
     choice.source.startsWith("p3_38.search_stack_install") ||
     choice.source.startsWith("p3_38.stack_or_trash_program_install")

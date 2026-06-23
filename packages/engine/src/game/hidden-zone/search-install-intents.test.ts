@@ -26,7 +26,7 @@ function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
   return {
     choiceId: "choice_1",
     side: "runner",
-    source: "v1911.self_modifying_code_install_program:source_card:8",
+    source: "v1911.hidden_stack_program_install:source_card:8",
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: [],
@@ -81,7 +81,7 @@ describe("hidden-zone search/install intents", () => {
     ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       selectedCount: 1,
@@ -117,7 +117,7 @@ describe("hidden-zone search/install intents", () => {
     ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       selectedCount: 1,

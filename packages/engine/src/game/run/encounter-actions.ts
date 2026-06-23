@@ -20,7 +20,7 @@ import {
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
 import { AI_BOON_RANDOM_BREAKER_CARD_ID } from "../../mechanics/random-effects";
-import { buildRunnerSelfModifyingCodeInstallAction } from "../turn/runner-special-zone-install-actions";
+import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -633,7 +633,7 @@ function selfModifyingCodeEncounterActions(
       (cardId) =>
         !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
     )
-    .map((cardId) => buildRunnerSelfModifyingCodeInstallAction(state, cardId));
+    .map((cardId) => buildRunnerHiddenStackProgramInstallAction(state, cardId));
 }
 
 function multiBreakSubroutineActions(

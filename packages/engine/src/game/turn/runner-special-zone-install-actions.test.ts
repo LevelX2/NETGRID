@@ -6,7 +6,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {
-  buildRunnerSelfModifyingCodeInstallAction,
+  buildRunnerHiddenStackProgramInstallAction,
   buildRunnerShellTradersRemoveCounterAction,
   buildRunnerShellTradersSetAsideAction,
   buildRunnerValuPakInstallAction,
@@ -180,14 +180,14 @@ describe("runner special zone install action builders", () => {
     const before = structuredClone(state);
     const sourceCardId = "self_modifying_code_source" as CardInstanceId;
 
-    const action = buildRunnerSelfModifyingCodeInstallAction(
+    const action = buildRunnerHiddenStackProgramInstallAction(
       state,
       sourceCardId,
     );
 
     expect(action).toMatchObject({
       actionId:
-        "runner.trigger_ability.self_modifying_code_source.self_modifying_code_source.self_modifying_code_install_program",
+        "runner.trigger_ability.self_modifying_code_source.self_modifying_code_source.hidden_stack_program_install",
       side: "runner",
       type: "trigger_ability",
       label: "Self-Modifying Code trashen: Programm aus Stack installieren",
@@ -195,14 +195,14 @@ describe("runner special zone install action builders", () => {
       costs: [],
       payload: {
         cardId: sourceCardId,
-        v1911HiddenZoneAbility: "self_modifying_code_install_program",
+        v1911HiddenZoneAbility: "hidden_stack_program_install",
         hiddenZoneBarrier: true,
       },
       abilityRef: {
         sourceCardInstanceId: sourceCardId,
-        abilityId: "self_modifying_code_install_program",
+        abilityId: "hidden_stack_program_install",
       },
-      effectRef: "effect.self_modifying_code_install_program",
+      effectRef: "effect.hidden_stack_program_install",
       targetRequirements: [],
       visibility: "private_to_actor",
     });

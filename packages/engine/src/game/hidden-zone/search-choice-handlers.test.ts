@@ -307,7 +307,7 @@ describe("hidden-zone search choice handlers", () => {
     const installed: CardInstanceId[] = [];
     const testHost = host(
       choice({
-        source: `v1911.self_modifying_code_install_program:${sourceCardId}:1`,
+        source: `v1911.hidden_stack_program_install:${sourceCardId}:1`,
       }),
       playerAction(`card_${programId}`),
       {
@@ -328,7 +328,7 @@ describe("hidden-zone search choice handlers", () => {
     });
     expect(installed).toEqual([programId]);
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       installed: true,
       searchDestination: "runner_rig",
     });

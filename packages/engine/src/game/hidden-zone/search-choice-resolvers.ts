@@ -227,7 +227,7 @@ export function resolveSelfModifyingCodeSearchInstallSelection(input: {
   isSelectedProgram: boolean;
 }): SelfModifyingCodeSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1911.self_modifying_code_install_program"))
+  if (!choice || !choice.source.startsWith("v1911.hidden_stack_program_install"))
     throw new Error("Es ist keine Self-Modifying-Code-Choice offen.");
   if (!input.selectedCardId || !input.stackCardIds.includes(input.selectedCardId))
     throw new Error("Die gewählte Karte liegt nicht im Stack.");

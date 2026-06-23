@@ -254,7 +254,7 @@ import {
   sneakPreviewSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
-  startSelfModifyingCodeStackActivation,
+  startHiddenStackProgramInstallActivation,
   startSneakPreviewSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {

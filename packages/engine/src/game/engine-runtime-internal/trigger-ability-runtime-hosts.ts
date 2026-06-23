@@ -250,7 +250,7 @@ import {
   sneakPreviewSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
-  startSelfModifyingCodeStackActivation,
+  startHiddenStackProgramInstallActivation,
   startSneakPreviewSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {
@@ -763,8 +763,8 @@ export function createTriggerAbilityRuntimeHosts(
         runnerMemoryLimit,
       },
       hiddenZone: {
-        startSelfModifyingCodeStackActivation: (sourceCardId, legalAction) =>
-          startSelfModifyingCodeStackActivation(
+        startHiddenStackProgramInstallActivation: (sourceCardId, legalAction) =>
+          startHiddenStackProgramInstallActivation(
             hiddenZoneSearchActivationHandlerHost(state, legalAction),
             sourceCardId,
           ),

@@ -300,7 +300,7 @@ export function buildSelfModifyingCodeMemoryDeferredPayload(
   return {
     hiddenZoneBarrier: true,
     sourceDefinitionId: plan.sourceDefinitionId,
-    hiddenZoneAction: "self_modifying_code_install_program",
+    hiddenZoneAction: "hidden_stack_program_install",
     publicRevealKind: "reveal",
     publicRevealDefinitionId: plan.selectedCardDefinitionId,
     selectedCount: 1,
@@ -320,7 +320,7 @@ export function buildSelfModifyingCodeResolvedPayload(
   return {
     hiddenZoneBarrier: true,
     sourceDefinitionId: plan.sourceDefinitionId,
-    hiddenZoneAction: "self_modifying_code_install_program",
+    hiddenZoneAction: "hidden_stack_program_install",
     publicRevealKind: "reveal",
     publicRevealDefinitionId: plan.selectedCardDefinitionId,
     selectedCount: 1,

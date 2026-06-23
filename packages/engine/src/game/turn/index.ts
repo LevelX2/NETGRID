@@ -57,7 +57,7 @@ export {
   buildRunnerProgramTrashBeforeInstallAction,
 } from "./runner-program-trash-install-actions";
 export {
-  buildRunnerSelfModifyingCodeInstallAction,
+  buildRunnerHiddenStackProgramInstallAction,
   buildRunnerShellTradersRemoveCounterAction,
   buildRunnerShellTradersSetAsideAction,
   buildRunnerValuPakInstallAction,

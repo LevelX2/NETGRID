@@ -1023,7 +1023,7 @@ function lookTopStackTakeMatchingTargets(
 
 function isSelfModifyingCodeChoiceSource(source: string): boolean {
   return (
-    source.startsWith("v1911.self_modifying_code_install_program") ||
+    source.startsWith("v1911.hidden_stack_program_install") ||
     source.startsWith("v1911.self_modifying_code_free_mu")
   );
 }

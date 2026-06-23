@@ -224,9 +224,9 @@ export function buildSelfModifyingCodeSearchInstallChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_self_modifying_code_install_program_${nextStateVersion}`,
+    choiceId: `v1911_hidden_stack_program_install_${nextStateVersion}`,
     side: "runner",
-    source: `v1911.self_modifying_code_install_program:${input.sourceCardId}:${nextStateVersion}`,
+    source: `v1911.hidden_stack_program_install:${input.sourceCardId}:${nextStateVersion}`,
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: input.options,

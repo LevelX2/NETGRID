@@ -280,7 +280,7 @@ describe("runner special trigger execution", () => {
         stack_program_def: definition("stack_program_def", "program"),
       },
       {
-        startSelfModifyingCodeStackActivation: (sourceCardId) => {
+        startHiddenStackProgramInstallActivation: (sourceCardId) => {
           activations.push(sourceCardId);
           state.pendingChoice = {
             id: "choice_smc",
@@ -298,7 +298,7 @@ describe("runner special trigger execution", () => {
     );
     const action = triggerAction(state, {
       cardId: sourceId,
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      v1911HiddenZoneAbility: "hidden_stack_program_install",
     });
 
     handleRunnerSpecialTriggerExecution(host, action);
@@ -310,7 +310,7 @@ describe("runner special trigger execution", () => {
     expect(action.payload).toMatchObject({
       hiddenZoneBarrier: true,
       sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       trashOnUse: true,
       trashedCardDefinitionId: SELF_MODIFYING_CODE_ID,
     });
@@ -367,7 +367,7 @@ function triggerAction(
 }
 
 type HostOverrides = {
-  startSelfModifyingCodeStackActivation?: (
+  startHiddenStackProgramInstallActivation?: (
     sourceCardId: CardInstanceId,
     legalAction: LegalAction,
   ) => void;
@@ -453,8 +453,8 @@ function testHost(
       runnerMemoryLimit: (stateToRead) => stateToRead.runner.memoryLimit,
     },
     hiddenZone: {
-      startSelfModifyingCodeStackActivation:
-        overrides.startSelfModifyingCodeStackActivation ??
+      startHiddenStackProgramInstallActivation:
+        overrides.startHiddenStackProgramInstallActivation ??
         (() => undefined),
     },
     constants: {

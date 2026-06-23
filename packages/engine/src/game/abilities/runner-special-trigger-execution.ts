@@ -75,7 +75,7 @@ export type RunnerSpecialTriggerExecutionHost = {
     runnerMemoryLimit: (state: GameState) => number;
   };
   hiddenZone: {
-    startSelfModifyingCodeStackActivation: (
+    startHiddenStackProgramInstallActivation: (
       sourceCardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
@@ -102,9 +102,9 @@ export function handleRunnerSpecialTriggerExecution(
 
   if (
     legalAction.payload?.v1911HiddenZoneAbility ===
-    "self_modifying_code_install_program"
+    "hidden_stack_program_install"
   ) {
-    resolveSelfModifyingCodeAbility(host, legalAction);
+    resolveHiddenStackProgramInstallAbility(host, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.resourceAbility === "return_top_heap_card") {
@@ -516,7 +516,7 @@ function shellTradersCanInstallPreparedCardForFree(
   );
 }
 
-function resolveSelfModifyingCodeAbility(
+function resolveHiddenStackProgramInstallAbility(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -541,7 +541,7 @@ function resolveSelfModifyingCodeAbility(
     throw new Error("Keine suchbare Programmkarte im Stack.");
 
   host.zones.trashRunnerInstalledCardToHeap(state, sourceCardId);
-  host.hiddenZone.startSelfModifyingCodeStackActivation(
+  host.hiddenZone.startHiddenStackProgramInstallActivation(
     sourceCardId,
     legalAction,
   );
@@ -549,7 +549,7 @@ function resolveSelfModifyingCodeAbility(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     sourceDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
-    hiddenZoneAction: "self_modifying_code_install_program",
+    hiddenZoneAction: "hidden_stack_program_install",
     trashOnUse: true,
     trashedCardDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
   };

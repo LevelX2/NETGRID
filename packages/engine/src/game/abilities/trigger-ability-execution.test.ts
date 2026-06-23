@@ -88,7 +88,7 @@ describe("trigger ability execution", () => {
     });
     const calls: string[] = [];
     const action = triggerAction(state, "runner", {
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      v1911HiddenZoneAbility: "hidden_stack_program_install",
     });
 
     handleTriggerAbilityExecution(

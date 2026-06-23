@@ -230,8 +230,8 @@ describe("hidden-zone search choice builders", () => {
     });
 
     expect(smc).toMatchObject({
-      choiceId: "v1911_self_modifying_code_install_program_8",
-      source: "v1911.self_modifying_code_install_program:source_card:8",
+      choiceId: "v1911_hidden_stack_program_install_8",
+      source: "v1911.hidden_stack_program_install:source_card:8",
       cardSearchPresentation: {
         sourceZone: "stack",
         selectableFilter: "program",

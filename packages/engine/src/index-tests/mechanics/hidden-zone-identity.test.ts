@@ -1184,7 +1184,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.payload?.v1911HiddenZoneAbility ===
-          "self_modifying_code_install_program",
+          "hidden_stack_program_install",
       ),
     ).toBe(false);
 
@@ -1216,7 +1216,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.payload?.v1911HiddenZoneAbility ===
-          "self_modifying_code_install_program",
+          "hidden_stack_program_install",
       ),
     ).toBe(false);
   });
