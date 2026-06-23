@@ -53,7 +53,7 @@ import {
   Zap,
   ZoomIn
 } from "lucide-react";
-import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
@@ -419,6 +419,15 @@ import {
   visibleKnownCardIds,
   type DisplayVisibleCard
 } from "../features/cards/card-view-model";
+import {
+  CardImagePreferenceContext,
+  CardScaleSettingsContext,
+  CardTooltipSettingsContext,
+  useCardImagePreference,
+  useCardScaleSettings,
+  useCardTooltipSettings,
+  usePreferredCardImageSource
+} from "../features/cards/card-display-settings";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { SimulationResult, type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
@@ -544,52 +553,6 @@ type AiTraceStartMode = "off" | "detailed";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
 type RunOverlayPositionPreference = OverlayPositionPreference;
-
-type CardImagePreferenceSettings = {
-  preferGermanCardImages: boolean;
-  showSetBadges: boolean;
-};
-
-const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
-  hoverOpenDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
-  mode: "enhanced"
-});
-
-const CardScaleSettingsContext = createContext<CardScaleSettings>({
-  tooltipPercent: CARD_SCALE_DEFAULT_PERCENT,
-  handPercent: CARD_SCALE_DEFAULT_PERCENT,
-  archivePercent: CARD_SCALE_DEFAULT_PERCENT,
-  zonePercent: CARD_SCALE_DEFAULT_PERCENT,
-  boardPercent: CARD_SCALE_DEFAULT_PERCENT,
-  rigPercent: CARD_SCALE_DEFAULT_PERCENT
-});
-
-const CardImagePreferenceContext = createContext<CardImagePreferenceSettings>({
-  preferGermanCardImages: false,
-  showSetBadges: true
-});
-
-function useCardTooltipSettings(): CardTooltipSettings {
-  return useContext(CardTooltipSettingsContext);
-}
-
-function useCardScaleSettings(): CardScaleSettings {
-  return useContext(CardScaleSettingsContext);
-}
-
-function useCardImagePreference(): CardImagePreferenceSettings {
-  return useContext(CardImagePreferenceContext);
-}
-
-function usePreferredCardImageSource(cardId: string | undefined | null): { src: string | undefined; fallbackSrc: string | undefined } {
-  const { preferGermanCardImages } = useCardImagePreference();
-  const src = localCardImageUrl(cardId, { preferGerman: preferGermanCardImages });
-  const originalSrc = preferGermanCardImages ? localCardImageUrl(cardId) : undefined;
-  return {
-    src,
-    fallbackSrc: originalSrc && originalSrc !== src ? originalSrc : undefined
-  };
-}
 
 type SeriesResultSummary = ApiSeriesResultSummary;
 type GameResultSummary = ApiGameResultSummary;
