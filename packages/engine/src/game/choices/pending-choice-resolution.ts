@@ -33,11 +33,11 @@ export type PendingChoiceResolutionHost = {
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolvePowerGridOverloadChoice: HostFn<void>;
     resolveSystematicLayoffsAdvancementChoice: HostFn<void>;
-    resolveAnonymousTipDerezBlackIceChoice: HostFn<void>;
-    resolveCoreCommandJettisonIceChoice: HostFn<void>;
-    resolveForgedActivationOrdersTargetChoice: HostFn<void>;
-    resolveForgedActivationOrdersCorpChoice: HostFn<void>;
-    resolveSecurityCodeWormChipTrashIceChoice: HostFn<void>;
+    resolveDerezRezzedBlackIceChoice: HostFn<void>;
+    resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
+    resolveCorpChoiceRezOrTrashIceTargetChoice: HostFn<void>;
+    resolveCorpChoiceRezOrTrashIceDecisionChoice: HostFn<void>;
+    resolveTrashUnrezzedIceChoice: HostFn<void>;
     resolveV1921PlayfulAiChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
     resolveGripInstallTemporaryCreditChoice: HostFn<void>;
@@ -141,16 +141,16 @@ export function resolvePendingChoice(
     host.hiddenZone.resolvePowerGridOverloadChoice;
   const resolveSystematicLayoffsAdvancementChoice =
     host.hiddenZone.resolveSystematicLayoffsAdvancementChoice;
-  const resolveAnonymousTipDerezBlackIceChoice =
-    host.hiddenZone.resolveAnonymousTipDerezBlackIceChoice;
-  const resolveCoreCommandJettisonIceChoice =
-    host.hiddenZone.resolveCoreCommandJettisonIceChoice;
-  const resolveForgedActivationOrdersTargetChoice =
-    host.hiddenZone.resolveForgedActivationOrdersTargetChoice;
-  const resolveForgedActivationOrdersCorpChoice =
-    host.hiddenZone.resolveForgedActivationOrdersCorpChoice;
-  const resolveSecurityCodeWormChipTrashIceChoice =
-    host.hiddenZone.resolveSecurityCodeWormChipTrashIceChoice;
+  const resolveDerezRezzedBlackIceChoice =
+    host.hiddenZone.resolveDerezRezzedBlackIceChoice;
+  const resolvePayRezCostToTrashRezzedIceChoice =
+    host.hiddenZone.resolvePayRezCostToTrashRezzedIceChoice;
+  const resolveCorpChoiceRezOrTrashIceTargetChoice =
+    host.hiddenZone.resolveCorpChoiceRezOrTrashIceTargetChoice;
+  const resolveCorpChoiceRezOrTrashIceDecisionChoice =
+    host.hiddenZone.resolveCorpChoiceRezOrTrashIceDecisionChoice;
+  const resolveTrashUnrezzedIceChoice =
+    host.hiddenZone.resolveTrashUnrezzedIceChoice;
   const resolveV1921PlayfulAiChoice =
     host.hiddenZone.resolveV1921PlayfulAiChoice;
   const resolveRunnerInstalledConnectionTrashBadPublicityChoice =
@@ -378,23 +378,23 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")
+    state.pendingChoice.source.startsWith("card_implementation.derez_rezzed_black_ice")
   ) {
-    resolveAnonymousTipDerezBlackIceChoice(state, legalAction, playerAction);
+    resolveDerezRezzedBlackIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.core_command_jettison_ice")
+    state.pendingChoice.source.startsWith("card_implementation.pay_rez_cost_trash_rezzed_ice")
   ) {
-    resolveCoreCommandJettisonIceChoice(state, legalAction, playerAction);
+    resolvePayRezCostToTrashRezzedIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith(
-      "v1922.forged_activation_orders_target",
+      "card_implementation.corp_choice_rez_or_trash_ice_target",
     )
   ) {
-    resolveForgedActivationOrdersTargetChoice(
+    resolveCorpChoiceRezOrTrashIceTargetChoice(
       state,
       legalAction,
       playerAction,
@@ -402,17 +402,17 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.forged_activation_orders_corp")
+    state.pendingChoice.source.startsWith("card_implementation.corp_choice_rez_or_trash_ice_decision")
   ) {
-    resolveForgedActivationOrdersCorpChoice(
+    resolveCorpChoiceRezOrTrashIceDecisionChoice(
       state,
       legalAction,
       playerAction,
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.security_code_worm_chip")) {
-    resolveSecurityCodeWormChipTrashIceChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.trash_unrezzed_ice")) {
+    resolveTrashUnrezzedIceChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {

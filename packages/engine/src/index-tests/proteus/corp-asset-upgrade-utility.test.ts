@@ -741,8 +741,8 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     state.pendingChoice = {
       choiceId: "raymond_unintended_fao",
       side: "corp",
-      source: `v1922.forged_activation_orders_corp:${unrezzedIce}:${state.stateVersion}`,
-      prompt: "Forged Activation Orders: ICE rezzen oder trashen.",
+      source: `card_implementation.corp_choice_rez_or_trash_ice_decision:${unrezzedIce}:${state.stateVersion}`,
+      prompt: "Rez-oder-Trash-Entscheidung: ICE rezzen oder trashen.",
       kind: "select_option",
       options: [
         { id: "rez_ice", label: "Rez ICE", publicLabel: "Rez ICE", value: "rez_ice" },

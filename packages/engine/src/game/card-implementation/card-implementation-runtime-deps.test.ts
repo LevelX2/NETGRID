@@ -159,10 +159,10 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           unrezzedInstalledIceIds: () => [],
           installedIceIds: () => [],
           rezzedBlackIceIds: () => [],
-          startCoreCommandJettisonIceChoice: () => undefined,
-          startSecurityCodeWormChipTrashIceChoice: () => undefined,
-          startForgedActivationOrdersTargetChoice: () => undefined,
-          startAnonymousTipDerezBlackIceChoice: () => undefined,
+          startPayRezCostToTrashRezzedIceChoice: () => undefined,
+          startTrashUnrezzedIceChoice: () => undefined,
+          startCorpChoiceRezOrTrashIceChoice: () => undefined,
+          startDerezRezzedBlackIceChoice: () => undefined,
         },
         runner: {
           ensureTurnFlags: (gameState) =>

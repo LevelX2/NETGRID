@@ -174,31 +174,31 @@ export function installRunnerProgramForFree(...args: any[]): any {
   )(...args);
 }
 
-export function startAnonymousTipDerezBlackIceChoice(...args: any[]): any {
+export function startDerezRezzedBlackIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startAnonymousTipDerezBlackIceChoice",
+    "startDerezRezzedBlackIceChoice",
   )(...args);
 }
 
-export function resolveAnonymousTipDerezBlackIceChoice(...args: any[]): any {
+export function resolveDerezRezzedBlackIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveAnonymousTipDerezBlackIceChoice",
+    "resolveDerezRezzedBlackIceChoice",
   )(...args);
 }
 
-export function startCoreCommandJettisonIceChoice(...args: any[]): any {
+export function startPayRezCostToTrashRezzedIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startCoreCommandJettisonIceChoice",
+    "startPayRezCostToTrashRezzedIceChoice",
   )(...args);
 }
 
-export function resolveCoreCommandJettisonIceChoice(...args: any[]): any {
+export function resolvePayRezCostToTrashRezzedIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveCoreCommandJettisonIceChoice",
+    "resolvePayRezCostToTrashRezzedIceChoice",
   )(...args);
 }
 
@@ -216,38 +216,38 @@ export function publicIceSelectionLabelForCard(...args: any[]): any {
   )(...args);
 }
 
-export function startForgedActivationOrdersTargetChoice(...args: any[]): any {
+export function startCorpChoiceRezOrTrashIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startForgedActivationOrdersTargetChoice",
+    "startCorpChoiceRezOrTrashIceChoice",
   )(...args);
 }
 
-export function resolveForgedActivationOrdersTargetChoice(...args: any[]): any {
+export function resolveCorpChoiceRezOrTrashIceTargetChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveForgedActivationOrdersTargetChoice",
+    "resolveCorpChoiceRezOrTrashIceTargetChoice",
   )(...args);
 }
 
-export function resolveForgedActivationOrdersCorpChoice(...args: any[]): any {
+export function resolveCorpChoiceRezOrTrashIceDecisionChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveForgedActivationOrdersCorpChoice",
+    "resolveCorpChoiceRezOrTrashIceDecisionChoice",
   )(...args);
 }
 
-export function startSecurityCodeWormChipTrashIceChoice(...args: any[]): any {
+export function startTrashUnrezzedIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startSecurityCodeWormChipTrashIceChoice",
+    "startTrashUnrezzedIceChoice",
   )(...args);
 }
 
-export function resolveSecurityCodeWormChipTrashIceChoice(...args: any[]): any {
+export function resolveTrashUnrezzedIceChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveSecurityCodeWormChipTrashIceChoice",
+    "resolveTrashUnrezzedIceChoice",
   )(...args);
 }
 

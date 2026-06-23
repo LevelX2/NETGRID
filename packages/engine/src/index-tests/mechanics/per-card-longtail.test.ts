@@ -1025,7 +1025,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 5;
     state.runner.clicks = 4;
-    const blackIceId = "v1922_anonymous_tip_black_ice" as CardInstanceId;
+    const blackIceId = "card_implementation_derez_rezzed_black_ice_black_ice" as CardInstanceId;
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer).toBeDefined();
     if (!rdServer) throw new Error("Missing R&D server");
@@ -1093,7 +1093,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "onr_v1_077_anonymous-tip",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.anonymous_tip_derez_black_ice",
+      "card_implementation.derez_rezzed_black_ice",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(state.runner.credits).toBe(2);
@@ -1212,7 +1212,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.runner.credits).toBe(1);
     expect(state.pendingChoice?.source).toContain(
-      "v1922.forged_activation_orders_target",
+      "card_implementation.corp_choice_rez_or_trash_ice_target",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(
@@ -1240,12 +1240,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(targetOption).toBeDefined();
     state = applyChoice(state, "runner", targetOption?.id ?? "");
     expect(state.pendingChoice?.source).toContain(
-      "v1922.forged_activation_orders_corp",
+      "card_implementation.corp_choice_rez_or_trash_ice_decision",
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(state.pendingChoice?.prompt).toBe(
-      "Forged Activation Orders: ICE 1 in R&D rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung: ICE 1 in R&D rezzen oder trashen",
     );
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
       "ICE 1 in R&D rezzen",
@@ -1381,7 +1381,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     trashState = applyChoice(trashState, "runner", trashTargetOption?.id ?? "");
     expect(trashState.pendingChoice?.prompt).toBe(
-      "Forged Activation Orders: ICE 1 in HQ rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung: ICE 1 in HQ rezzen oder trashen",
     );
     expect(
       trashState.pendingChoice?.options.map((option) => option.label),
@@ -1419,7 +1419,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-core-command-jettison-ice",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_core_command_jettison_ice",
+          id: "onr_v1_runner_card_implementation_pay_rez_cost_trash_rezzed_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice",
           cards: [
             { id: "onr_v1_080_core-command-jettison-ice", quantity: 1 },
@@ -1428,7 +1428,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         },
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-          id: "onr_v1_corp_v1922_core_command_jettison_ice",
+          id: "onr_v1_corp_card_implementation_pay_rez_cost_trash_rezzed_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
@@ -1513,7 +1513,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "onr_v1_080_core-command-jettison-ice",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.core_command_jettison_ice",
+      "card_implementation.pay_rez_cost_trash_rezzed_ice",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     const pendingChoice = state.pendingChoice;
@@ -1550,7 +1550,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-security-code-worm-chip",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_security_code_worm_chip",
+          id: "onr_v1_runner_card_implementation_trash_unrezzed_ice",
           name: "O:NR V1.9.22 Security Code WORM Chip",
           cards: [
             { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
@@ -1559,7 +1559,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         },
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-          id: "onr_v1_corp_v1922_security_code_worm_chip",
+          id: "onr_v1_corp_card_implementation_trash_unrezzed_ice",
           name: "O:NR V1.9.22 Security Code WORM Chip Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
@@ -1636,7 +1636,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "onr_v1_109_security-code-worm-chip",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.security_code_worm_chip",
+      "card_implementation.trash_unrezzed_ice",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(
@@ -1682,7 +1682,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-security-code-worm-chip-no-target",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_security_code_worm_chip_no_target",
+          id: "onr_v1_runner_card_implementation_trash_unrezzed_ice_no_target",
           name: "O:NR V1.9.22 Security Code WORM Chip No Target",
           cards: [
             { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },

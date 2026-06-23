@@ -166,20 +166,20 @@ function pendingChoiceHost(
       resolveSystematicLayoffsAdvancementChoice: unexpected(
         "resolveSystematicLayoffsAdvancementChoice",
       ),
-      resolveAnonymousTipDerezBlackIceChoice: unexpected(
-        "resolveAnonymousTipDerezBlackIceChoice",
+      resolveDerezRezzedBlackIceChoice: unexpected(
+        "resolveDerezRezzedBlackIceChoice",
       ),
-      resolveCoreCommandJettisonIceChoice: unexpected(
-        "resolveCoreCommandJettisonIceChoice",
+      resolvePayRezCostToTrashRezzedIceChoice: unexpected(
+        "resolvePayRezCostToTrashRezzedIceChoice",
       ),
-      resolveForgedActivationOrdersTargetChoice: unexpected(
-        "resolveForgedActivationOrdersTargetChoice",
+      resolveCorpChoiceRezOrTrashIceTargetChoice: unexpected(
+        "resolveCorpChoiceRezOrTrashIceTargetChoice",
       ),
-      resolveForgedActivationOrdersCorpChoice: unexpected(
-        "resolveForgedActivationOrdersCorpChoice",
+      resolveCorpChoiceRezOrTrashIceDecisionChoice: unexpected(
+        "resolveCorpChoiceRezOrTrashIceDecisionChoice",
       ),
-      resolveSecurityCodeWormChipTrashIceChoice: unexpected(
-        "resolveSecurityCodeWormChipTrashIceChoice",
+      resolveTrashUnrezzedIceChoice: unexpected(
+        "resolveTrashUnrezzedIceChoice",
       ),
       resolveV1921PlayfulAiChoice: unexpected("resolveV1921PlayfulAiChoice"),
       resolveRunnerInstalledConnectionTrashBadPublicityChoice: unexpected(
