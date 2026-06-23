@@ -15,7 +15,6 @@ import {
   Award,
   Image,
   Layers3,
-  Link2,
   ListFilter,
   Move,
   Moon,
@@ -33,7 +32,6 @@ import {
   SlidersHorizontal,
   Sparkles,
   Sun,
-  Trash2,
   Upload,
   User,
   UserPlus,
@@ -393,7 +391,6 @@ import {
 import { eventActionType, localActionSoundKey, localActionSoundKind, publicEventsAfter } from "../features/actions/local-action-sounds";
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
-import { recentSessionHeadline, recentSessionStatusLabel } from "../features/recent/recent-session-labels";
 import { effectiveAiTurnPresentation, removePendingUndo } from "../features/match-session/client-payload-helpers";
 import { ChroniclePanel, chronicleContextByEventId } from "../features/chronicle/ChroniclePanel";
 import {
@@ -403,6 +400,7 @@ import {
 import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
 import { MatchJoinConsole } from "../features/match-start/MatchJoinConsole";
+import { MatchResumePanel } from "../features/match-start/MatchResumePanel";
 import { MatchStartChoiceSections } from "../features/match-start/MatchStartChoiceSections";
 import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
 import {
@@ -3406,72 +3404,21 @@ export default function Page() {
               ) : null}
             </div>
 
-            {activeStartTab === "resume" && showingSessionRecovery && session ? (
-              <section className="resumeSessionInline" aria-label="Sitzung wiederherstellen">
-                <div className="resumeSessionSummary">
-                  <p className="eyebrow">Aktive lokale Sitzung</p>
-                  <h2>Match {session.matchId}</h2>
-                  <p className="meta">
-                    {sideLabel(session.side)} · {session.displayName}
-                    {connection !== "online" ? " · nicht verbunden" : ""}
-                  </p>
-                </div>
-                <div className="resumeSessionActions">
-                  <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Aktive lokale Sitzung wieder verbinden" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
-                    <button className="button primary" onClick={reconnect} type="button" disabled={!canReconnect}>
-                      <Cable size={15} />
-                      Wieder verbinden
-                    </button>
-                  </span>
-                  <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Wiederverbindungslink kopieren" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
-                    <button className="button" onClick={copyReconnectLink} type="button" disabled={!canReconnect}>
-                      <Link2 size={15} />
-                      Link kopieren
-                    </button>
-                  </span>
-                  <span className="resumeActionTooltip" data-tooltip="Löst nur die lokale Browser-Sitzung. Das serverseitige Match bleibt unverändert.">
-                    <button className="button" onClick={leaveMatch} type="button">
-                      <Trash2 size={15} />
-                      Lokale Sitzung lösen
-                    </button>
-                  </span>
-                </div>
-              </section>
-            ) : activeStartTab === "resume" && recentSession ? (
-              <section className="resumeSessionInline" aria-label="Gespeichertes Spiel fortsetzen">
-                <div className="resumeSessionSummary">
-                  <p className="eyebrow">Gespeichertes Spiel</p>
-                  <h2>{recentSessionHeadline(recentSession)}</h2>
-                  <p className="meta">
-                    {recentSession.displayName} · {recentSessionStatusLabel(recentSession.matchStatus)}
-                    {canResumeRecentSession ? " · Fortsetzen verfügbar" : " · Token neu eintragen"}
-                  </p>
-                  <details className="matchIdDetails">
-                    <summary>Match-ID anzeigen</summary>
-                    <code>{recentSession.matchId}</code>
-                  </details>
-                </div>
-                <div className="resumeSessionActions">
-                  <span className="resumeActionTooltip" data-tooltip={canResumeRecentSession ? "Gespeicherte Sitzung fortsetzen" : "Für dieses Spiel liegt kein verwertbares Session-Token mehr vor."}>
-                    <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!canResumeRecentSession}>
-                      <Cable size={15} />
-                      Fortsetzen
-                    </button>
-                  </span>
-                  <span className="resumeActionTooltip" data-tooltip="Öffnet Beitreten mit dieser Match-ID. Den Token musst du aus dem Link ergänzen.">
-                    <button className="button" onClick={reconnectFromRecentSession} type="button">
-                      <Link2 size={15} />
-                      Über Token verbinden
-                    </button>
-                  </span>
-                  <span className="resumeActionTooltip" data-tooltip="Entfernt nur dieses gespeicherte Spiel aus diesem Browser. Das serverseitige Match bleibt unverändert.">
-                    <button className="button" onClick={discardRecentSession} type="button">
-                      <Trash2 size={15} />
-                      Verwerfen
-                    </button>
-                  </span>
-                </div>
-              </section>
+            {activeStartTab === "resume" ? (
+              <MatchResumePanel
+                showingSessionRecovery={showingSessionRecovery}
+                session={session}
+                connection={connection}
+                canReconnect={canReconnect}
+                recentSession={recentSession}
+                canResumeRecentSession={canResumeRecentSession}
+                onReconnect={reconnect}
+                onCopyReconnectLink={copyReconnectLink}
+                onLeaveMatch={leaveMatch}
+                onResumeRecentSession={resumeRecentSession}
+                onReconnectFromRecentSession={reconnectFromRecentSession}
+                onDiscardRecentSession={discardRecentSession}
+              />
             ) : activeStartTab === "host" ? (
               <div className="matchStartConsole">
                 <MatchStartChoiceSections
