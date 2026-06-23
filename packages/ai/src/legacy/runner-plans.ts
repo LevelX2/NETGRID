@@ -54,6 +54,7 @@ import {
   visibleRisksForPlan,
   type RunnerPlanKind,
 } from "./runner-plan-metadata";
+import { delayedInstallAbilityForAction } from "../actions/delayed-install-action";
 
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
   "onr_v1_309_bbs-whispering-campaign";
@@ -5323,7 +5324,7 @@ function classifyShellTradersAction(
     return undefined;
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
-  const ability = action.payload?.shellTradersAbility;
+  const ability = delayedInstallAbilityForAction(action);
   if (ability !== "set_aside_from_grip" && ability !== "remove_shell_counter")
     return undefined;
   const sourceCard = findVisibleCard(input, action.source);

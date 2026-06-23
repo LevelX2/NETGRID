@@ -94,6 +94,7 @@ import {
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
 } from "./index";
+import { delayedInstallAbilityForAction } from "./actions/delayed-install-action";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -456,7 +457,7 @@ describe("MVP 0.3 AI controller contract", () => {
             serverId: "rd",
             placement: "ice",
             encounterContinue: true,
-            shellTradersAbility: "set_aside_from_grip",
+            delayedInstallAbility: "set_aside_from_grip",
             privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
             cardInstances: { hidden: { definitionId: "simple_agenda" } },
             fullGameState: { stateVersion: 999 },
@@ -482,7 +483,7 @@ describe("MVP 0.3 AI controller contract", () => {
         serverId: "rd",
         placement: "ice",
         encounterContinue: true,
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
       });
       expect(input.eventTail[0]?.publicPayload).toMatchObject({
         actor: side,
@@ -2448,7 +2449,7 @@ describe("MVP 0.3 AI controller contract", () => {
       expiresAtStateVersion: state.stateVersion,
       payload: {
         cardId: "shell_traders_1",
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
         shellCounterAmount: 2,
       },
@@ -2513,7 +2514,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip",
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2551,7 +2552,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
         action.payload?.targetCardId === fracterId,
     );
     setShellCountersForTest(state, fracterId, 1);
@@ -2562,7 +2563,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const remove = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "remove_shell_counter",
+        delayedInstallAbilityForAction(action) === "remove_shell_counter",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2600,7 +2601,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
         action.payload?.targetCardId === firstTargetId,
     );
     state = apply(
@@ -2608,7 +2609,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
         action.payload?.targetCardId === secondTargetId,
     );
     setShellCountersForTest(state, firstTargetId, 1);
@@ -2623,12 +2624,12 @@ describe("MVP 0.3 AI controller contract", () => {
     const remove = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "remove_shell_counter",
+        delayedInstallAbilityForAction(action) === "remove_shell_counter",
     );
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip",
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2669,7 +2670,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
         action.payload?.targetCardDefinitionId === "simple_fracter",
     );
     const directInstall = input.legalActions.find(

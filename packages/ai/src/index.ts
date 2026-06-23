@@ -120,6 +120,7 @@ import {
   type ActionSemanticCandidate,
   type ActionTagEffectProfile,
 } from "./action-semantic-candidate";
+import { delayedInstallAbilityForAction } from "./actions/delayed-install-action";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import {
   FORBIDDEN_AI_INPUT_FIELDS,
@@ -11578,8 +11579,8 @@ function baselineShellTradersPlanIsVisible(
   );
   if (!action || action.type !== "trigger_ability") return false;
   if (
-    action.payload?.shellTradersAbility !== "set_aside_from_grip" &&
-    action.payload?.shellTradersAbility !== "remove_shell_counter"
+    delayedInstallAbilityForAction(action) !== "set_aside_from_grip" &&
+    delayedInstallAbilityForAction(action) !== "remove_shell_counter"
   )
     return false;
   if (action.source === "basic_action" || action.source === "game_rule")
@@ -15985,9 +15986,10 @@ function scoreRunnerAction(
       evidence.push("own_event_role_known", ...publicRoleEvidence(roles));
       break;
     case "trigger_ability":
-      if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+      const delayedInstallAbility = delayedInstallAbilityForAction(action);
+      if (delayedInstallAbility === "set_aside_from_grip") {
         const counterAmount =
-          typeof action.payload.shellCounterAmount === "number"
+          typeof action.payload?.shellCounterAmount === "number"
             ? action.payload.shellCounterAmount
             : 0;
         const targetRoles = shellTradersTargetRoles(input, action);
@@ -16032,11 +16034,9 @@ function scoreRunnerAction(
           `shell_traders_direct_install_penalty:${directInstallPenalty}`,
           `shell_traders_immediate_remove:${immediateRemoveAvailable}`,
         );
-      } else if (
-        action.payload?.shellTradersAbility === "remove_shell_counter"
-      ) {
+      } else if (delayedInstallAbility === "remove_shell_counter") {
         const remaining =
-          typeof action.payload.remainingCounters === "number"
+          typeof action.payload?.remainingCounters === "number"
             ? action.payload.remainingCounters
             : 1;
         score = remaining <= 1 ? 650 : 360;
@@ -18048,8 +18048,8 @@ function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
   return input.legalActions.some(
     (action) =>
       action.type === "trigger_ability" &&
-      action.payload?.shellTradersAbility === "remove_shell_counter" &&
-      typeof action.payload.remainingCountersBefore === "number" &&
+      delayedInstallAbilityForAction(action) === "remove_shell_counter" &&
+      typeof action.payload?.remainingCountersBefore === "number" &&
       action.payload.remainingCountersBefore <= 1,
   );
 }

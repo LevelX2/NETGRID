@@ -43,7 +43,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `corepack pnpm install` | `VERIFIED` | Lockfile unverändert; Worktree-Abhängigkeiten installiert. |
 | `corepack pnpm --filter @netgrid/ai typecheck` | `VERIFIED` | grün. |
 | `git diff --check` | `VERIFIED` | grün. |
-| `corepack pnpm --filter @netgrid/ai test` | `PENDING` | 1537/1541 grün; 4 bestehende `The Shell Traders`-Tests in `packages/ai/src/index.test.ts` rot. |
+| `corepack pnpm --filter @netgrid/ai test` | `VERIFIED` | Nach `AI-COMPLETE-F001`: 134 Dateien, 1541 Tests grün. |
 
 ## Startziele
 
@@ -74,11 +74,20 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 
 | ID | Ziel | Status | Ausgangsevidenz | Definition of Done |
 | --- | --- | --- | --- | --- |
-| AI-COMPLETE-F001 | Baseline-Regression bei `The Shell Traders` reparieren. | `PENDING` | Full AI-Test rot: vier `packages/ai/src/index.test.ts`-Fälle finden keine erwarteten Shell-Traders-`LegalActions`. | Ursache verstanden und repariert; fokussierte Shell-Traders-Tests und vollständiger `@netgrid/ai test` grün. |
+| AI-COMPLETE-F001 | Baseline-Regression bei `The Shell Traders` reparieren. | `VERIFIED` | Full AI-Test war rot: vier `packages/ai/src/index.test.ts`-Fälle fanden keine erwarteten Shell-Traders-`LegalActions`, weil Engine-LegalActions jetzt `delayedInstallAbility` statt `shellTradersAbility` tragen. | Erfüllt: gemeinsame Delayed-Install-Erkennung akzeptiert neue Engine-Payloads und alte Fixtures; fokussierte Shell-Traders-Tests und vollständiger `@netgrid/ai test` grün. |
 
 ## Implementierungsnachweise
 
-Noch keine Codeänderungen. Nächstes aktives Ziel: `AI-COMPLETE-F001`.
+- `AI-COMPLETE-F001`:
+  - `packages/ai/src/actions/delayed-install-action.ts` ergänzt eine gekapselte Delayed-Install-Ability-Erkennung für neue `delayedInstallAbility`-Payloads und alte `shellTradersAbility`-Fixtures.
+  - `packages/ai/src/input-dto.ts` lässt `delayedInstallAbility` side-safe in AI LegalAction-Payloads durch.
+  - `packages/ai/src/index.ts`, `packages/ai/src/legacy/runner-plans.ts` und `packages/ai/src/index.test.ts` nutzen die gemeinsame Erkennung statt direkter Shell-Traders-Payloadvergleiche.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Shell Traders"` grün, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+
+Nächstes aktives Ziel: `AI-COMPLETE-01`.
 
 ## Audit-Ledger
 
