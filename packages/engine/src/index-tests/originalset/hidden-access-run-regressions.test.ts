@@ -1960,7 +1960,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     setCardCounterForTest(state, state.runner.identity, "trauma", 2);
     setCardCounterForTest(state, virusId, "virus", 3);
     setCardCounterForTest(state, fridgeId, "ablative", 2);
-    setCardCounterForTest(state, state.runner.identity, "data_raven", 1);
+    setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 1);
     setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
     setCardCounterForTest(state, state.runner.identity, "mastiff", 3);
     setCardCounterForTest(state, state.runner.identity, "crying", 1);
@@ -2066,7 +2066,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
       "trauma",
-      "data_raven",
+      "trace_tag_counter",
       "cerberus",
       "mastiff",
       "crying",
@@ -2081,10 +2081,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           label: "Trauma-Counter",
         }),
         expect.objectContaining({
-          id: "data_raven",
+          id: "trace_tag_counter",
           amount: 1,
           displayKind: "trace",
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
         }),
         expect.objectContaining({
           id: "cerberus",

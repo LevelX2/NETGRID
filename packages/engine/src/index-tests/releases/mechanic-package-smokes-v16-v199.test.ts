@@ -7507,7 +7507,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     expect(runnerBid).toBeDefined();
     state = applyChoice(state, "runner", String(runnerBid?.id));
 
-    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
     expect(state.runner.tags).toBe(1);
 
     state.activeSide = "corp";
@@ -7516,7 +7516,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     state.corp.clicks = 1;
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.tags).toBe(2);
-    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
   });
 });
 

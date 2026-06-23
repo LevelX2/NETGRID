@@ -156,10 +156,10 @@ export type CounterType =
   | "socket_rd"
   | "pipe"
   | "spy"
-  | "doppelganger_antibody"
-  | "pattel_antibody"
+  | "link_reduction_counter"
+  | "breaker_strength_penalty"
   | "cerberus"
-  | "data_raven"
+  | "trace_tag_counter"
   | "mastiff"
   | "militech"
   | "power"
@@ -8016,13 +8016,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
     subroutines: [
       {
-        id: "onr_v1_236_data_raven_trace_counter",
+        id: "onr_v1_236_trace_tag_counter_trace_counter",
         type: "initiate_trace",
         baseTraceStrength: 5,
         traceSuccessEffect: {
           type: "add_tag_and_counter",
           tagAmount: 1,
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           amount: 1,
         },
       },

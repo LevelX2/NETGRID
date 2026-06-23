@@ -188,7 +188,7 @@ export function buildRunnerEncounterActions(
       ) ?? 0) +
       host.cards.cardCounter(breakerId, "militech") +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
-      host.cards.cardCounter(breakerId, "pattel_antibody") * -1 +
+      host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
       host.breaker.dupreStrengthCounterBonus(breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);

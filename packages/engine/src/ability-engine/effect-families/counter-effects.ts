@@ -60,7 +60,7 @@ export function executeCounterEffect(input: CardEffectFamilyInput): boolean {
       );
       if (
         effect.counterType !== "militech" &&
-        effect.counterType !== "pattel_antibody"
+        effect.counterType !== "breaker_strength_penalty"
       )
         throw new Error(
           "add_counter_to_all_installed_runner_icebreakers supports only configured public icebreaker counters.",

@@ -219,7 +219,7 @@ export type CardEffectCounterResult = {
   amount: number;
   counterType: Extract<
     CounterType,
-    "ablative" | "trauma" | "boon" | "militech" | "pattel_antibody"
+    "ablative" | "trauma" | "boon" | "militech" | "breaker_strength_penalty"
   >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;

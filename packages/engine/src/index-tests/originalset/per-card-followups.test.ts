@@ -735,13 +735,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     let state = toRunnerTurn(v196CardReleaseGame("spotcheck-data-raven-remove"));
     state.runner.credits = 5;
     putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
-    setCardCounterForTest(state, state.runner.identity, "data_raven", 2);
+    setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 2);
     expect(
       getPlayerView(state, "runner").legalActions.some(
         (action) =>
           action.type === "trigger_ability" &&
           action.payload?.runnerAbility === "remove_runner_trace_counter" &&
-          action.payload?.counterType === "data_raven" &&
+          action.payload?.counterType === "trace_tag_counter" &&
           action.payload?.cardId === state.runner.identity,
       ),
     ).toBe(true);
@@ -751,14 +751,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.runnerAbility === "remove_runner_trace_counter" &&
-        action.payload?.counterType === "data_raven",
+        action.payload?.counterType === "trace_tag_counter",
     );
-    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
     expect(state.runner.credits).toBe(4);
     expect(state.runner.clicks).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerAbility: "remove_runner_trace_counter",
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       removedCounterAmount: 1,
       remainingCounters: 1,
     });

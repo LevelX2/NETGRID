@@ -915,7 +915,7 @@ export function createCardRuntimeDepsHosts(
       icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      cardCounter(state, breakerId, "pattel_antibody") * -1 +
+      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, iceId))
@@ -1069,7 +1069,7 @@ export function createCardRuntimeDepsHosts(
       icebreakerEncounterStrengthBonus(state, breakerId, run.encounteredIceId) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      cardCounter(state, breakerId, "pattel_antibody") * -1 +
+      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))

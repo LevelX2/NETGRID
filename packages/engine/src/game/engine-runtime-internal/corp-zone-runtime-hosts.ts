@@ -509,11 +509,11 @@ export function createCorpZoneRuntimeHosts(
     amount: number,
   ): {
     amount: number;
-    counterType: Extract<CounterType, "militech" | "pattel_antibody">;
+    counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
     countersAfter: number;
     publicPayload: Record<string, string | number | boolean>;
   } {
-    if (counterType !== "militech" && counterType !== "pattel_antibody")
+    if (counterType !== "militech" && counterType !== "breaker_strength_penalty")
       throw new Error("Dieser Icebreaker-Counter-Typ wird nicht unterstuetzt.");
     const targetIds = installedRunnerIcebreakerIds(state);
     for (const cardId of targetIds)

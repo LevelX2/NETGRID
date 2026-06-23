@@ -424,12 +424,12 @@ function specialCounterDisplays(
           counterType: definition.id === COCKROACH_ID ? "cockroach" : "virus",
           usageHint: "status_marker",
         })),
-    ...singleCounterDisplay(counters.data_raven, {
-      id: "data_raven",
+    ...singleCounterDisplay(counters.trace_tag_counter, {
+      id: "trace_tag_counter",
       displayKind: "trace",
       label: "Data-Raven-Counter",
       ariaLabelName: "Data-Raven-Counter",
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.cerberus, {
@@ -472,20 +472,20 @@ function specialCounterDisplays(
       counterType: "power",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.doppelganger_antibody, {
-      id: "doppelganger_antibody",
+    ...singleCounterDisplay(counters.link_reduction_counter, {
+      id: "link_reduction_counter",
       displayKind: "generic_counter",
       label: "Doppelganger-Counter",
       ariaLabelName: "Doppelganger-Counter",
-      counterType: "doppelganger_antibody",
+      counterType: "link_reduction_counter",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.pattel_antibody, {
-      id: "pattel_antibody",
+    ...singleCounterDisplay(counters.breaker_strength_penalty, {
+      id: "breaker_strength_penalty",
       displayKind: "generic_counter",
       label: "Pattel-Counter",
       ariaLabelName: "Pattel-Counter",
-      counterType: "pattel_antibody",
+      counterType: "breaker_strength_penalty",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.mark, {
@@ -730,7 +730,7 @@ function singleCounterDisplay(
 }
 
 function pattelAntibodyStrengthPenalty(instance: CardInstance): number {
-  return Math.max(0, Math.floor(instance.counters?.pattel_antibody ?? 0));
+  return Math.max(0, Math.floor(instance.counters?.breaker_strength_penalty ?? 0));
 }
 
 export function visibleRunnerRigCardForViewer(

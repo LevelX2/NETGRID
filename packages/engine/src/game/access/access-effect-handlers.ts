@@ -464,16 +464,16 @@ function accessEffectHiddenZoneAction(
     effect.effects.some(
       (step) =>
         step.kind === "add_runner_counter" &&
-        step.counterType === "doppelganger_antibody",
+        step.counterType === "link_reduction_counter",
     )
   )
-    return "proteus_doppelganger_antibody_access_counter";
+    return "proteus_link_reduction_counter_access_counter";
   if (
     effect.effects.some(
       (step) => step.kind === "add_counter_to_all_installed_runner_icebreakers",
     )
   )
-    return "proteus_pattel_antibody_access_counters";
+    return "proteus_breaker_strength_penalty_access_counters";
   if (effect.effects.some((step) => step.kind === "shuffle_source_into_corp_rd"))
     return "proteus_antibody_shuffle_into_rd";
   if (
@@ -801,7 +801,7 @@ function executeCardImplementationAccessEffectStep(
               linkModifierAmount: -2 * remainingCounters,
             }
           : {}),
-        ...(step.counterType === "doppelganger_antibody"
+        ...(step.counterType === "link_reduction_counter"
           ? {
               doppelgangerCountersAfter: remainingCounters,
             }

@@ -731,10 +731,10 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
   }
 
   function runnerCounterDisplayName(counterType: CounterType): string {
-    if (counterType === "data_raven") return "Data-Raven-Counter";
+    if (counterType === "trace_tag_counter") return "Data-Raven-Counter";
     if (counterType === "cerberus") return "Cerberus-Counter";
     if (counterType === "mastiff") return "Mastiff-Counter";
-    if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
+    if (counterType === "link_reduction_counter") return "Doppelganger-Counter";
     return "Counter";
   }
 

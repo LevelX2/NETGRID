@@ -401,7 +401,7 @@ describe("encounter printed effects boundary", () => {
       successEffect: {
         type: "add_tag_and_counter",
         tagAmount: 1,
-        counterType: "data_raven",
+        counterType: "trace_tag_counter",
         amount: 1,
       },
     };
@@ -431,7 +431,7 @@ describe("encounter printed effects boundary", () => {
     expect(state.trace).toBeUndefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.tags).toBe(1);
-    expect(state.cardInstances.runner_identity?.counters?.data_raven).toBe(1);
+    expect(state.cardInstances.runner_identity?.counters?.trace_tag_counter).toBe(1);
     expect(state.run?.traceSuccessBySubroutineIndex).toEqual({ 0: true });
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.0.trace",
@@ -445,7 +445,7 @@ describe("encounter printed effects boundary", () => {
       traceSuccessful: true,
       tagsAdded: 1,
       addedCounterAmount: 1,
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       remainingCounters: 1,
       hackerTrackerCountersAdded: 1,
       traceHostedCreditsAdded: 1,

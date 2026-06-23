@@ -190,7 +190,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           amount,
           counterType: counterType as Extract<
             CounterType,
-            "militech" | "pattel_antibody"
+            "militech" | "breaker_strength_penalty"
           >,
           countersAfter: amount,
           publicPayload: {},

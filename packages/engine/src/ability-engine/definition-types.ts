@@ -352,7 +352,7 @@ export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
       kind: "add_runner_counter";
-      counterType: Extract<CounterType, "crying" | "doppelganger_antibody">;
+      counterType: Extract<CounterType, "crying" | "link_reduction_counter">;
       amount: number;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -1265,7 +1265,7 @@ export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
 
 export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
   kind: "add_counter_to_all_installed_runner_icebreakers";
-  counterType: Extract<CounterType, "militech" | "pattel_antibody">;
+  counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
@@ -1623,7 +1623,7 @@ export type CardTraceSuccessEffectImplementation =
   | {
       kind: "add_counter";
       recipient: "runner";
-      counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
+      counterType: Extract<CounterType, "trace_tag_counter" | "cerberus" | "mastiff">;
       amount: number;
       visibility: EventVisibilityClass;
     }
@@ -2349,7 +2349,7 @@ export type CardIceEncounterImplementation =
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<
     CounterType,
-    "data_raven" | "cerberus" | "mastiff" | "crying" | "doppelganger_antibody"
+    "trace_tag_counter" | "cerberus" | "mastiff" | "crying" | "link_reduction_counter"
   >;
   removeCost: number;
   startOfRunnerTurn?:
