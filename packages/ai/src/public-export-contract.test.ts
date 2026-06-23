@@ -111,6 +111,7 @@ describe("AI public export contract", () => {
       "./decision/target-choice-shadow",
       "./runtime/semantic-runtime-score-components",
       "./runtime/semantic-runtime-score-breakdown",
+      "./runtime/semantic-runtime-scope",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
