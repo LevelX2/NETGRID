@@ -737,7 +737,7 @@ export function createRunFlowRuntimeHosts(
         ...(state.run.runStartRandomStrengthBonusByBreaker ?? {}),
         [sourceCardId]: runStrength,
       };
-      state.run.aiBoonSourceCardId = sourceCardId;
+      state.run.runStartRandomStrengthSourceCardId = sourceCardId;
       state.run.runStartRandomStrengthBonus = runStrength;
       outcomes.push(`${sourceCardId}:${dieRoll}:${runStrength}`);
       if (legalAction) {
@@ -745,7 +745,7 @@ export function createRunFlowRuntimeHosts(
           ...(legalAction.payload ?? {}),
           v1921RunnerProgramAbility: "run_start_random_strength_bonus",
           sourceDefinitionId: definition.id,
-          aiBoonSourceCardId: sourceCardId,
+          runStartRandomStrengthSourceCardId: sourceCardId,
           randomPurpose,
           v1921DieRoll: dieRoll,
           runStartRandomStrengthBonus: runStrength,
