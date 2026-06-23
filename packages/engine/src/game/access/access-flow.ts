@@ -508,12 +508,12 @@ function stealAgenda(
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1919RunnerEventAbility: "arasaka_owns_you_future_agenda_forfeit",
+        v1919RunnerEventAbility: "future_agenda_point_forfeit",
         futureAgendaPointForfeitPaid: paidDebt,
         futureAgendaPointForfeitPending: host.state.runnerAgendaPointsToForfeit,
         specialZone: "removed_from_game",
         specialZoneVisibility: "public",
-        specialZoneReason: "v1919_arasaka_owns_you_future_agenda_forfeit",
+        specialZoneReason: "v1919_future_agenda_point_forfeit",
       };
     }
     if (host.state.run?.breach) {
