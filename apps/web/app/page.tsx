@@ -287,6 +287,12 @@ import {
   type EditableDeck
 } from "../features/decks/deck-table-model";
 import {
+  PROTEUS_DECK_FORMAT_PROFILE_ID,
+  catalogCardAllowedForDeckEditor,
+  editableDeckAllowedForMatchCardPool,
+  snapshotAllowedForMatchCardPool
+} from "../features/decks/deck-match-filters";
+import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
   visibleKnownCardIds,
@@ -408,7 +414,6 @@ const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const PROTEUS_DECK_CARD_POOL_VERSION = "private-local-onr-v1-plus-proteus-playtest";
-const PROTEUS_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
 const PROTEUS_DECK_FORMAT_PROFILE_VERSION = "1.0.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.22";
@@ -671,23 +676,6 @@ function summarizeCatalogStatuses(cards: CatalogCardSummary[]): Partial<Record<C
     }
   }
   return counts;
-}
-
-function snapshotAllowedForMatchCardPool(snapshot: DeckSnapshot, matchCardPool: MatchCardPoolSelection): boolean {
-  if (matchCardPool === "originalset_proteus") return true;
-  return snapshot.formatProfileId !== PROTEUS_DECK_FORMAT_PROFILE_ID && !snapshot.cards.some((entry) => entry.cardId.startsWith("onr_proteus_"));
-}
-
-function editableDeckAllowedForMatchCardPool(deck: EditableDeck, matchCardPool: MatchCardPoolSelection): boolean {
-  if (matchCardPool === "originalset_proteus") return true;
-  return deck.formatProfileId !== PROTEUS_DECK_FORMAT_PROFILE_ID && !deck.cards.some((entry) => entry.cardId.startsWith("onr_proteus_"));
-}
-
-function catalogCardAllowedForDeckEditor(card: CatalogCardSummary, deck: EditableDeck | null): boolean {
-  if (deck && card.side !== deck.side) return false;
-  if (card.type === "identity") return false;
-  if (deck?.formatProfileId === PROTEUS_DECK_FORMAT_PROFILE_ID) return card.statuses.catalog_ready;
-  return card.statuses.playable && card.statuses.deck_legal;
 }
 
 function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
