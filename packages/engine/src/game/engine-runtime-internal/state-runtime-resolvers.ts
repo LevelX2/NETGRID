@@ -781,7 +781,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     automaticTagEffect,
     automaticTrashCardEffect,
     awardRunnerEventAgendaPoint,
-    backupProgramsOnMicrotechBeforeTrash,
+    backupProgramsOnTrashBackupHardwareBeforeTrash,
     boardStateActionExecutionHost,
     breachStateHost,
     breakAbilityForLegalAction,
@@ -874,7 +874,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     hasCorpUtilityKind,
     hasHiddenResourceAccessStartActions,
     hasInstallCapabilityKindForDefinition,
-    hasInstalledMicrotechTrodeSet,
+    hasInstalledRunnerApDamageReducerHardware,
     hasInstalledUniqueCardDefinition,
     hiddenReplacementLongtailForDefinition,
     hiddenZoneArrangeChoiceHandlerHost,
@@ -924,7 +924,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     legalActionHostComposition,
     mainActionHostComposition,
     mergeRunnerDrawSummary,
-    microtechTrodeSetBreakAdditionalCost,
+    runnerHardwareBreakSubroutineAdditionalCost,
     movableAdvancementSourceIds,
     moveAdvancementOptions,
     mustInstallInsideSubsidiaryDataFort,
@@ -1723,7 +1723,7 @@ function resolveVirusCounterPurgePreserveChoice(
   delete state.pendingChoice;
 }
 
-function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
+function installedProgramTrashBackupHardwareIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.hardware
     .filter(
       (cardId) =>
@@ -2068,7 +2068,7 @@ function refreshRecurringCredits(
     parseVirusCounterPurgePreserveOption,
     restorePurgePreservedVirusCounters,
     resolveVirusCounterPurgePreserveChoice,
-    microtechBackupDriveIds,
+    installedProgramTrashBackupHardwareIds,
     availableRunnerProgramInstallCredits,
     runnerCanPayInstallCost,
     runnerCostPenaltySupportCreditCapacity,

@@ -297,7 +297,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         activeObligationCount: () => 0,
         addActiveObligation: () => undefined,
         applyRunnerForgoNextAction: () => undefined,
-        hasInstalledMicrotechTrodeSet: () => false,
+        hasInstalledRunnerApDamageReducerHardware: () => false,
         traceCounterEffectDefinitionFor: () => undefined,
         installedRunnerVirusSourceIds: () => [],
         virusCounterImplementationForCard: () => undefined,

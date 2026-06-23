@@ -397,7 +397,7 @@ export type RunFlowHost = {
     activeObligationCount: (state: GameState) => number;
     addActiveObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
-    hasInstalledMicrotechTrodeSet: (state: GameState) => boolean;
+    hasInstalledRunnerApDamageReducerHardware: (state: GameState) => boolean;
     traceCounterEffectDefinitionFor: Parameters<typeof isSupportedEncounterTraceSuccessEffect>[1];
     installedRunnerVirusSourceIds: (
       state: GameState,
@@ -977,8 +977,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       ensureRunnerTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
-      hasInstalledMicrotechTrodeSet: () =>
-        host.callbacks.hasInstalledMicrotechTrodeSet(state),
+      hasInstalledRunnerApDamageReducerHardware: () =>
+        host.callbacks.hasInstalledRunnerApDamageReducerHardware(state),
       corpTraceCounterPoolTotal: () => host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () => host.trace.recurringTraceCreditPoolTotal(state),
       openEventModificationWindow: (event, action) =>

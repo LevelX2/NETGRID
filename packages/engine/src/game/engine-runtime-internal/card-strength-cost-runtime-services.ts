@@ -772,7 +772,7 @@ export function createCardStrengthCostRuntimeServices(
     return Math.max(0, Math.floor(run.breakSubroutineAdditionalCost ?? 0));
   }
 
-  function microtechTrodeSetBreakAdditionalCost(state: GameState): number {
+  function runnerHardwareBreakSubroutineAdditionalCost(state: GameState): number {
     return state.runner.rig.hardware.some(
       (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
     )
@@ -791,7 +791,7 @@ export function createCardStrengthCostRuntimeServices(
       throw new Error("Break-Subroutine-Kosten brauchen ein encountered ICE.");
     const legacyRunAdditionalCost = runBreakSubroutineAdditionalCost(run);
     const runnerHardwareAdditionalCost =
-      microtechTrodeSetBreakAdditionalCost(state);
+      runnerHardwareBreakSubroutineAdditionalCost(state);
     const cardImplementationQuote = quoteBreakSubroutineCostModifiers(
       state,
       encounteredIceId,
@@ -823,7 +823,7 @@ export function createCardStrengthCostRuntimeServices(
               ...(runnerHardwareAdditionalCost > 0
                 ? {
                     runnerHardwareAbility:
-                      "microtech_trode_set_break_cost_modifier",
+                      "runner_hardware_break_cost_modifier",
                   }
                 : {}),
               ...cardImplementationQuote.publicPayload,
@@ -838,7 +838,7 @@ export function createCardStrengthCostRuntimeServices(
     iceStrengthFor,
     runRemainderStrengthBonusForBreaker,
     runBreakSubroutineAdditionalCost,
-    microtechTrodeSetBreakAdditionalCost,
+    runnerHardwareBreakSubroutineAdditionalCost,
     breakSubroutineCostBreakdown,
   };
 }

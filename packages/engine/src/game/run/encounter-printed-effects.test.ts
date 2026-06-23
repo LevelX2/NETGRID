@@ -186,7 +186,7 @@ function makeHost(
       legalAction?.payload && (legalAction.payload.finishedRun = successful);
       delete state.run;
     },
-    hasInstalledMicrotechTrodeSet: () => false,
+    hasInstalledRunnerApDamageReducerHardware: () => false,
     corpTraceCounterPoolTotal: () => 0,
     recurringTraceCreditPoolTotal: () => 0,
     openDamageResolutionWindow: () => false,

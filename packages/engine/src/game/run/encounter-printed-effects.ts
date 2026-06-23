@@ -41,7 +41,7 @@ export type EncounterPrintedEffectHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
     finishRun: (successful: boolean) => void;
-    hasInstalledMicrotechTrodeSet: () => boolean;
+    hasInstalledRunnerApDamageReducerHardware: () => boolean;
     corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
@@ -184,7 +184,7 @@ export function resolvePrintedDamageSubroutine(
     damageType === "net" &&
     printedAmount > 1 &&
     cardHasSubtype(definition, "ap") &&
-    host.callbacks.hasInstalledMicrotechTrodeSet();
+    host.callbacks.hasInstalledRunnerApDamageReducerHardware();
   const damageAmount = microtechApNetReduction ? 1 : printedAmount;
   const event = host.callbacks.createDamageImminentEvent({
     damageId: `${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
@@ -195,7 +195,7 @@ export function resolvePrintedDamageSubroutine(
   if (microtechApNetReduction && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
+      runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
       sourceDefinitionId: MICROTECH_TRODE_SET_ID,
       printedDamageAmount: printedAmount,
       damageAmount,

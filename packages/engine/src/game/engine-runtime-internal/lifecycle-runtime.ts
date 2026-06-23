@@ -41,7 +41,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     hostedCardsOn,
     leavePlayCleanupImplementationsForCard,
     mergeRunnerDrawSummary,
-    microtechBackupDriveIds,
+    installedProgramTrashBackupHardwareIds,
     mustArrayValue,
     nextRandom,
     publicCardTitle,
@@ -94,7 +94,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
   ): void {
     if (!state.runner.rig.programs.includes(cardId)) return;
     const hostedIds = hostedCardsOn(state, cardId);
-    const backedUpHostedIds = backupProgramsOnMicrotechBeforeTrash(
+    const backedUpHostedIds = backupProgramsOnTrashBackupHardwareBeforeTrash(
       state,
       hostedIds,
     );
@@ -123,11 +123,11 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     clearCardCounters(state, cardId);
   }
 
-  function backupProgramsOnMicrotechBeforeTrash(
+  function backupProgramsOnTrashBackupHardwareBeforeTrash(
     state: GameState,
     candidateProgramIds: CardInstanceId[],
   ): CardInstanceId[] {
-    const microtechId = microtechBackupDriveIds(state)[0];
+    const microtechId = installedProgramTrashBackupHardwareIds(state)[0];
     if (!microtechId) return [];
     const eligible = candidateProgramIds
       .filter((cardId) => state.runner.rig.programs.includes(cardId))
@@ -585,7 +585,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
   return {
     discardRandomCorpHqCards,
     trashRunnerInstalledProgram,
-    backupProgramsOnMicrotechBeforeTrash,
+    backupProgramsOnTrashBackupHardwareBeforeTrash,
     runnerProgramUsesMemory,
     trashRunnerInstalledCardToHeap,
     returnRunnerInstalledCardToGrip,

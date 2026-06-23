@@ -2918,7 +2918,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(breakAction.costs).toEqual([{ credits: 2 }]);
     expect(breakAction.payload).toMatchObject({
       breakSubroutineAdditionalCost: 1,
-      runnerHardwareAbility: "microtech_trode_set_break_cost_modifier",
+      runnerHardwareAbility: "runner_hardware_break_cost_modifier",
     });
 
     let damageState = toRunnerTurn(
@@ -2937,7 +2937,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     damageState = encounterIce(damageState, "rd", "onr_v1_224_bolter-cluster");
     damageState = apply(damageState, "runner", (action) => action.type === "continue_run");
     expect(damageState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
+      runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
       printedDamageAmount: 4,
       damageAmount: 1,
     });

@@ -265,10 +265,10 @@ export function runBreakSubroutineAdditionalCost(...args: any[]): any {
   )(...args);
 }
 
-export function microtechTrodeSetBreakAdditionalCost(...args: any[]): any {
+export function runnerHardwareBreakSubroutineAdditionalCost(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeServices",
-    "microtechTrodeSetBreakAdditionalCost",
+    "runnerHardwareBreakSubroutineAdditionalCost",
   )(...args);
 }
 
@@ -279,10 +279,10 @@ export function breakSubroutineCostBreakdown(...args: any[]): any {
   )(...args);
 }
 
-export function hasInstalledMicrotechTrodeSet(...args: any[]): any {
+export function hasInstalledRunnerApDamageReducerHardware(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeServices",
-    "hasInstalledMicrotechTrodeSet",
+    "hasInstalledRunnerApDamageReducerHardware",
   )(...args);
 }
 
@@ -487,10 +487,10 @@ export function trashRunnerInstalledProgram(...args: any[]): any {
   )(...args);
 }
 
-export function backupProgramsOnMicrotechBeforeTrash(...args: any[]): any {
+export function backupProgramsOnTrashBackupHardwareBeforeTrash(...args: any[]): any {
   return runtimeDelegate(
     "lifecycleRuntime",
-    "backupProgramsOnMicrotechBeforeTrash",
+    "backupProgramsOnTrashBackupHardwareBeforeTrash",
   )(...args);
 }
 
@@ -754,10 +754,10 @@ export function resolveVirusCounterPurgePreserveChoice(...args: any[]): any {
   )(...args);
 }
 
-export function microtechBackupDriveIds(...args: any[]): any {
+export function installedProgramTrashBackupHardwareIds(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "microtechBackupDriveIds",
+    "installedProgramTrashBackupHardwareIds",
   )(...args);
 }
 

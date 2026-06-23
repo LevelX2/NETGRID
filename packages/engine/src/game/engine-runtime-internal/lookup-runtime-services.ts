@@ -988,7 +988,7 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     return [...targets];
   }
 
-  function hasInstalledMicrotechTrodeSet(state: GameState): boolean {
+  function hasInstalledRunnerApDamageReducerHardware(state: GameState): boolean {
     return state.runner.rig.hardware.some(
       (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
     );
@@ -1132,7 +1132,7 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     canOverlayProgramOnZetatechSoftwareInstaller,
     rezzedCorpRootCardIds,
     visibleVirusCounterTargetIds,
-    hasInstalledMicrotechTrodeSet,
+    hasInstalledRunnerApDamageReducerHardware,
     runnerHasInstalledCardDefinition,
     runnerInstalledCardCountByDefinition,
     installedVirusCounterTotalForDefinition,
