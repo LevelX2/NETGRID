@@ -240,6 +240,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` vierzehnter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-self-damage-choice.ts` kapselt nun zusätzlich die Runner-Self-Damage-Survival-Exclusion inklusive Flatline-Risk-Reason.
+  - `packages/ai/src/index.ts` liefert auch dafür nur noch die bestehende `runnerSelfDamageSurvivalAssessment` als explizite Dependency.
+  - `packages/ai/src/index.ts` sank weiter von 35.491 auf 35.479 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

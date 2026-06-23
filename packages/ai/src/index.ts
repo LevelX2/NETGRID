@@ -177,6 +177,7 @@ import {
 } from "./runtime/runner-run-only-action-adjustment";
 import {
   runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
+  runnerSelfDamageSurvivalExclusion as buildRunnerSelfDamageSurvivalExclusion,
 } from "./runtime/runner-self-damage-choice";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
@@ -3544,8 +3545,10 @@ const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclu
     planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
     corpAdvancementCounterPlacementAssessment:
       semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    runnerSelfDamageSurvivalExclusion:
-      semanticRuntimeRunnerSelfDamageSurvivalExclusion,
+    runnerSelfDamageSurvivalExclusion: (runtimeInput, action) =>
+      buildRunnerSelfDamageSurvivalExclusion(runtimeInput, action, {
+        survivalAssessment: runnerSelfDamageSurvivalAssessment,
+      }),
     runnerEncounterActionExclusion: semanticRuntimeRunnerEncounterActionExclusion,
     runnerProgramSacrificeExclusion:
       semanticRuntimeRunnerProgramSacrificeExclusion,
@@ -4017,21 +4020,6 @@ function semanticRuntimeActionExclusion(
     action,
     SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES,
   );
-}
-
-function semanticRuntimeRunnerSelfDamageSurvivalExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  const assessment = runnerSelfDamageSurvivalAssessment(input, action);
-  if (!assessment) return undefined;
-  if (assessment.survivesSelfDamage || assessment.immediateWinByAction)
-    return undefined;
-  return {
-    key: "self_damage_flatline_risk",
-    label: "Self-Damage-Flatline-Risiko",
-    reason: sortedUnique(assessment.evidence).join("|"),
-  };
 }
 
 function semanticRuntimeRunnerBlinkRunExclusion(
