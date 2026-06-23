@@ -323,6 +323,43 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(0);
   });
 
+  it("shows Technician Lover private look on use and suppresses the confirmation cue", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event("evt_technician_use", "activated_card_ability", {
+          actor: "runner",
+          title: "Technician Lover",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "p3_33_private_look",
+          privateLookZone: "rd",
+          privateLookCount: 1,
+          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceTitle: "Technician Lover",
+          aiReasonCode: "runner_private_look"
+        }),
+        event("evt_technician_done", "resolve_choice", {
+          actor: "runner",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "p3_33_private_look",
+          privateLookZone: "rd",
+          privateLookCount: 1,
+          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceTitle: "Technician Lover",
+          aiReasonCode: "runner_private_look"
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.eventId).toBe("evt_technician_use");
+    expect(cues[0]?.title).toBe(
+      "Die Runner-KI hat Technician Lover genutzt und die oberste R&D-Karte angesehen.",
+    );
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("shows The Short Circuit program reveal in opponent action cues", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",

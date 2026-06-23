@@ -80,6 +80,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("keeps visible R&D trace pressure available when the runner can cover the base trace", () => {
     const input = aiInput({
       credits: 6,
+      opponentCredits: 0,
       servers: [
         server("rd", {
           ice: [aspTraceRunLockIce("rd-asp")],
@@ -99,6 +100,146 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       expect.arrayContaining([
         "unproductive_visible_run_path:false",
         "visible_trace_end_run_lock_unavoidable:false",
+        "visible_trace_base_covered:true",
+        "visible_corp_bid_capacity:0",
+        "visible_corp_max_trace_covered:true",
+      ]),
+    );
+  });
+
+  it("defers visible R&D trace pressure when visible Corp max is not covered", () => {
+    const input = aiInput({
+      credits: 6,
+      opponentCredits: 5,
+      servers: [
+        server("rd", {
+          ice: [hunterTraceTagIce("rd-hunter")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "gain_credits_first",
+      visibleTraceTagHazardUnavoidable: true,
+    });
+    expect(evaluation?.visibleIceRunHazards?.[0]).toMatchObject({
+      baseTraceCovered: true,
+      visibleCorpBidCapacity: 5,
+      visibleCorpMaxTraceCovered: false,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_trace_base_covered:true",
+        "visible_corp_bid_capacity:5",
+        "visible_corp_max_trace_covered:false",
+      ]),
+    );
+  });
+
+  it("defers visible R&D trace tag ICE until the tag can be avoided", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          ice: [hunterTraceTagIce("rd-hunter")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "gain_credits_first",
+      visibleTraceTagHazardUnavoidable: true,
+      expectedTagsFromVisibleIce: 1,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_ice_hazard:trace_tag",
+        "visible_ice_hazard_source:Hunter",
+        "visible_trace_tag_hazard_unavoidable:true",
+      ]),
+    );
+  });
+
+  it("does not price unrezzed R&D Hunter as a known trace tag hazard", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          ice: [{ ...hunterTraceTagIce("rd-hunter"), rezzed: false }],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      visibleTraceTagHazardUnavoidable: false,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_ice_hazard_penalty:0",
+        "visible_trace_tag_hazard_unavoidable:false",
+      ]),
+    );
+  });
+
+  it("keeps a visible remote agenda runnable through Hunter tag risk", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("remote_1", {
+          ice: [hunterTraceTagIce("remote-hunter")],
+          root: [
+            visibleCard("remote-agenda", {
+              definitionId: "simple_agenda",
+              title: "Simple Agenda",
+              type: "agenda",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-1", "remote_1"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "agenda",
+      recommendation: "run_now",
+      visibleTraceTagHazardUnavoidable: true,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_ice_hazard:trace_tag",
+        "visible_trace_tag_hazard_unavoidable:true",
       ]),
     );
   });
@@ -179,7 +320,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       immediateAccessValue: 90,
       multiaccessAvailable: true,
     });
-    expect(evaluation.evidence).toContain("installed_run_payoff:hq:multiaccess");
+    expect(evaluation.evidence).toContain(
+      "installed_run_payoff:hq:multiaccess",
+    );
   });
 
   it("recognizes R&D multiaccess from structured hints beyond the legacy fallback list", () => {
@@ -237,7 +380,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       accessPayoff: "access_bonus",
       recommendation: "run_now",
     });
-    expect(evaluation.installedRunPayoff.immediateAccessValue).toBeGreaterThan(0);
+    expect(evaluation.installedRunPayoff.immediateAccessValue).toBeGreaterThan(
+      0,
+    );
     expect(evaluation.evidence).toEqual(
       expect.arrayContaining([
         "installed_run_payoff:hq:access_trash",
@@ -279,7 +424,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       multiaccessAvailable: true,
       recommendation: "do_not_run_now",
     });
-    expect(evaluation.evidence).toContain("installed_run_payoff:rd:multiaccess");
+    expect(evaluation.evidence).toContain(
+      "installed_run_payoff:rd:multiaccess",
+    );
   });
 
   it("ranks HQ payoff above neutral R&D when only HQ Interface is installed", () => {
@@ -348,8 +495,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     const evaluations = evaluateRunnerRunTargets({ input });
-    const hq = evaluations.find((evaluation) => evaluation.targetServerId === "hq");
-    const rd = evaluations.find((evaluation) => evaluation.targetServerId === "rd");
+    const hq = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+    const rd = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
 
     expect(hq?.accessPayoff).toBe("access_bonus");
     expect(rd?.accessPayoff).toBe("access_bonus");
@@ -615,7 +766,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathPassability: "blocked_missing_coverage",
       recommendation: "find_breaker_first",
     });
-    expect(evaluation.evidence).toContain("installed_run_payoff:hq:multiaccess");
+    expect(evaluation.evidence).toContain(
+      "installed_run_payoff:hq:multiaccess",
+    );
   });
 
   it("evaluates Shredder as an Archives path with HQ access payoff", () => {
@@ -742,7 +895,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_if_free",
     });
     expect(hq.score).toBeLessThan(rd.score);
-    expect(evidenceNumber(hq.evidence, "access_payoff_score_adjustment")).toBeLessThan(0);
+    expect(
+      evidenceNumber(hq.evidence, "access_payoff_score_adjustment"),
+    ).toBeLessThan(0);
     expect(hq.evidence).toEqual(
       expect.arrayContaining([
         "hq_hand_known_count:4",
@@ -777,7 +932,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       knownAccessState: "unknown",
       recommendation: "run_if_free",
     });
-    expect(evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment")).toBe(0);
+    expect(
+      evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment"),
+    ).toBe(0);
     expect(evaluation.evidence).toEqual(
       expect.arrayContaining([
         "hq_known_fraction:0.2",
@@ -824,10 +981,16 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     }
 
     const noMultiPenalty = Math.abs(
-      evidenceNumber(withoutMultiaccess.evidence, "access_payoff_score_adjustment"),
+      evidenceNumber(
+        withoutMultiaccess.evidence,
+        "access_payoff_score_adjustment",
+      ),
     );
     const multiPenalty = Math.abs(
-      evidenceNumber(withMultiaccess.evidence, "access_payoff_score_adjustment"),
+      evidenceNumber(
+        withMultiaccess.evidence,
+        "access_payoff_score_adjustment",
+      ),
     );
 
     expect(withoutMultiaccess).toMatchObject({
@@ -894,7 +1057,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         structure: "direct_start_run",
       },
     });
-    expect(evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment")).toBeLessThan(0);
+    expect(
+      evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment"),
+    ).toBeLessThan(0);
     expect(evaluation.evidence).toEqual(
       expect.arrayContaining([
         "run_action_projection_status:concrete_target",
@@ -1077,7 +1242,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 6,
       servers: [server("hq"), server("rd")],
       legalActions: [
-        runEventAction("all-nighter-no-target", ALL_NIGHTER_DEFINITION_ID, "All-Nighter"),
+        runEventAction(
+          "all-nighter-no-target",
+          ALL_NIGHTER_DEFINITION_ID,
+          "All-Nighter",
+        ),
       ],
     });
 
@@ -1113,7 +1282,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         }),
       ],
       legalActions: [
-        runEventAction("blocked-all-hands", ALL_HANDS_DEFINITION_ID, "All-Hands"),
+        runEventAction(
+          "blocked-all-hands",
+          ALL_HANDS_DEFINITION_ID,
+          "All-Hands",
+        ),
       ],
     });
 
@@ -1388,7 +1561,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(remoteEvaluation?.evidence.join("\n")).not.toMatch(
       /privatePayload|cardInstances|decklist/i,
     );
-    expect(remoteEvaluation?.score).toBeLessThan(evaluations[0]?.score ?? -Infinity);
+    expect(remoteEvaluation?.score).toBeLessThan(
+      evaluations[0]?.score ?? -Infinity,
+    );
     expect(evaluations[0]?.targetServerId).toBe("rd");
   });
 
@@ -1880,6 +2055,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
 function aiInput(params: {
   credits: number;
+  opponentCredits?: number;
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
@@ -1907,7 +2083,7 @@ function aiInput(params: {
     },
     opponent: {
       identity: visibleIdentity("corp"),
-      credits: 5,
+      credits: params.opponentCredits ?? 5,
       clicks: 3,
       agendaPoints: 0,
       tags: 0,
@@ -1982,7 +2158,10 @@ function runAction(actionId: string, serverId: string): LegalAction {
   };
 }
 
-function wilsonRunAbilityAction(actionId: string, serverId: string): LegalAction {
+function wilsonRunAbilityAction(
+  actionId: string,
+  serverId: string,
+): LegalAction {
   return {
     actionId,
     side: "runner",
@@ -2168,6 +2347,32 @@ function aspTraceRunLockIce(instanceId: string): VisibleCard {
   });
 }
 
+function hunterTraceTagIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_v1_249_hunter",
+    title: "Hunter",
+    type: "ice",
+    subtypes: ["sentry", "bloodhound"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          amount: 5,
+        },
+      ],
+    },
+  });
+}
+
 function handDevelopmentEvaluation(
   overrides: Partial<RunnerHandDevelopmentEvaluation>,
 ): RunnerHandDevelopmentEvaluation {
@@ -2187,9 +2392,9 @@ function handDevelopmentEvaluation(
 
 function evidenceNumber(evidence: string[], key: string): number {
   const prefix = `${key}:`;
-  const raw = evidence.find((entry) => entry.startsWith(prefix))?.slice(
-    prefix.length,
-  );
+  const raw = evidence
+    .find((entry) => entry.startsWith(prefix))
+    ?.slice(prefix.length);
   const value = raw !== undefined ? Number(raw) : Number.NaN;
   if (!Number.isFinite(value)) {
     throw new Error(`Missing numeric evidence for ${key}`);
@@ -2276,7 +2481,8 @@ function beliefWithKnownHq(
     sourceEventIds: ["test-hq-look"],
   }));
   const handCount = options.handCount ?? knownDefinitions.length;
-  const unknownRestCount = options.unknownRestCount ??
+  const unknownRestCount =
+    options.unknownRestCount ??
     Math.max(0, handCount - knownDefinitions.length);
   return {
     side: "runner",

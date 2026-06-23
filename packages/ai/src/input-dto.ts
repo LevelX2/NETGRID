@@ -12,6 +12,7 @@ import {
   type ResolvedGameEffect,
   type Side,
   type TargetRequirement,
+  type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
   type VisibleEffectiveIceRunQuote,
@@ -514,6 +515,16 @@ function sanitizeVisibleEffectiveIceRunQuote(
       id: subroutine.id,
       type: subroutine.type,
       ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
+      ...(subroutine.baseTraceStrength !== undefined
+        ? { baseTraceStrength: subroutine.baseTraceStrength }
+        : {}),
+      ...(subroutine.traceSuccessEffect
+        ? {
+            traceSuccessEffect: sanitizeTraceSuccessEffect(
+              subroutine.traceSuccessEffect,
+            ),
+          }
+        : {}),
       ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
       ...(subroutine.sourceDefinitionId
         ? { sourceDefinitionId: subroutine.sourceDefinitionId }
@@ -602,6 +613,12 @@ function sanitizeVisibleEffectiveIceRunQuote(
         }
       : {}),
   };
+}
+
+function sanitizeTraceSuccessEffect(
+  effect: TraceSuccessEffect,
+): TraceSuccessEffect {
+  return { ...effect };
 }
 
 function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoiceRequest {

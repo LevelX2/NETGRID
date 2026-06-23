@@ -37,6 +37,15 @@ export type TraceBaseLinkChoiceQuote = {
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
+export type TraceBaseLinkCardImplementationQuote = {
+  sourceDefinitionId: CardDefinitionId;
+  label: string;
+  baseLinkValue: number;
+  creditCost: number;
+  forcesJackOutAfterEncounter: boolean;
+  rewardCreditsOnAvoidTrace?: number;
+};
+
 function mustInstance(
   source: Record<CardInstanceId, CardInstance>,
   id: CardInstanceId,
@@ -110,15 +119,18 @@ function useBaseLinkEffect(
   return effects[0];
 }
 
+function isSubmarineUplinkDefinition(definitionId: CardDefinitionId): boolean {
+  return (
+    cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
+      ?.kind === "submarine_uplink_trace_link_force_jack_out"
+  );
+}
+
 function isSubmarineUplinkSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
-  return (
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.runnerUtilityLongtail?.kind ===
-    "submarine_uplink_trace_link_force_jack_out"
-  );
+  return isSubmarineUplinkDefinition(definitionFor(state, cardId).id);
 }
 
 export function installedTraceBaseLinkCardImplementation(
@@ -135,18 +147,13 @@ export function traceBaseLinkChoicePublicPayload(
   return { ...quote.publicPayload };
 }
 
-function quoteForAbility(
-  state: GameState,
-  sourceCardInstanceId: CardInstanceId,
+function cardImplementationQuoteForAbility(
   definition: CardDefinition,
   ability: ActivatedCardAbilityImplementation,
-): TraceBaseLinkChoiceQuote | undefined {
+): TraceBaseLinkCardImplementationQuote | undefined {
   const effect = useBaseLinkEffect(ability);
   if (!effect) return undefined;
-  if (isSubmarineUplinkSource(state, sourceCardInstanceId) && !state.run)
-    return undefined;
   const creditCost = creditCostForTraceBaseLinkAbility(ability);
-  if (state.runner.credits < creditCost) return undefined;
   if (
     ability.limit?.kind !== "one_base_link_card_per_trace_attempt" ||
     ability.limit.scope !== "trace_attempt"
@@ -159,22 +166,67 @@ function quoteForAbility(
   )
     throw new Error("Base-link effect is invalid.");
   return {
-    sourceCardInstanceId,
     sourceDefinitionId: definition.id,
     label: definition.title,
     baseLinkValue: effect.baseLink,
     creditCost,
-    canUse: true,
+    forcesJackOutAfterEncounter: isSubmarineUplinkDefinition(definition.id),
     ...(effect.rewardCreditsOnAvoidTrace
       ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
       : {}),
+  };
+}
+
+export function traceBaseLinkCardImplementationQuotesForDefinition(
+  definitionId: CardDefinitionId,
+): TraceBaseLinkCardImplementationQuote[] {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  if (!definition) return [];
+  return activatedCardImplementationTraceBaseLinkAbilities(definition)
+    .map(({ ability }) => cardImplementationQuoteForAbility(definition, ability))
+    .filter(
+      (quote): quote is TraceBaseLinkCardImplementationQuote =>
+        quote !== undefined,
+    );
+}
+
+function quoteForAbility(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  definition: CardDefinition,
+  ability: ActivatedCardAbilityImplementation,
+): TraceBaseLinkChoiceQuote | undefined {
+  const implementationQuote = cardImplementationQuoteForAbility(
+    definition,
+    ability,
+  );
+  if (!implementationQuote) return undefined;
+  if (isSubmarineUplinkSource(state, sourceCardInstanceId) && !state.run)
+    return undefined;
+  if (state.runner.credits < implementationQuote.creditCost) return undefined;
+  return {
+    sourceCardInstanceId,
+    sourceDefinitionId: implementationQuote.sourceDefinitionId,
+    label: implementationQuote.label,
+    baseLinkValue: implementationQuote.baseLinkValue,
+    creditCost: implementationQuote.creditCost,
+    canUse: true,
+    ...(implementationQuote.rewardCreditsOnAvoidTrace
+      ? {
+          rewardCreditsOnAvoidTrace:
+            implementationQuote.rewardCreditsOnAvoidTrace,
+        }
+      : {}),
     publicPayload: {
       baseLinkUsed: true,
-      traceBaseLinkSourceDefinitionId: definition.id,
-      traceBaseLinkCostPaid: creditCost,
-      baseLinkValue: effect.baseLink,
-      ...(effect.rewardCreditsOnAvoidTrace
-        ? { traceAvoidRewardCredits: effect.rewardCreditsOnAvoidTrace }
+      traceBaseLinkSourceDefinitionId: implementationQuote.sourceDefinitionId,
+      traceBaseLinkCostPaid: implementationQuote.creditCost,
+      baseLinkValue: implementationQuote.baseLinkValue,
+      ...(implementationQuote.rewardCreditsOnAvoidTrace
+        ? {
+            traceAvoidRewardCredits:
+              implementationQuote.rewardCreditsOnAvoidTrace,
+          }
         : {}),
     },
   };

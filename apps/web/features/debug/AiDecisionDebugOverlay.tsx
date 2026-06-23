@@ -98,7 +98,7 @@ export function FloatingAiDecisionDebugOverlay({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
-  const statusText = preview ? "Nächster Schritt" : aiDecisionDebugStatusLabel(status, traceCount);
+  const statusText = preview ? aiDecisionDebugPreviewHeaderStatusLabel(preview) : aiDecisionDebugStatusLabel(status, traceCount);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
   const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
   const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
@@ -242,6 +242,11 @@ function aiDecisionPreviewAsTrace(preview: AiDecisionPreview): MaintenanceAiTrac
 function aiDecisionPreviewTitle(trace: MaintenanceAiTraceDetail): string {
   const side = trace.side === "runner" ? "Runner" : "Korp";
   return `Nächster KI-Schritt · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
+}
+
+function aiDecisionDebugPreviewHeaderStatusLabel(preview: AiDecisionPreview): string {
+  const currentStep = aiDecisionDebugPlanLayer(preview.detail).summaryRows.find(([label]) => label === "Aktueller Schritt")?.[1];
+  return preview.actionLabel || currentStep || String(preview.actionType);
 }
 
 function aiDecisionTraceSelectedActionLabel(trace: MaintenanceAiTraceDetail): string {

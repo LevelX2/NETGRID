@@ -183,6 +183,7 @@
 
 ## Teilweise umgesetzt
 
+- AI Replay Mistake Iteration v1 ist technisch integriert, aber fachlich nur teilweise abgeschlossen. Mining, DecisionCase-Extraktion, Kandidatenclusterung und ein erster Minimalfix für `draw_card|runner.obtain_breaker_coverage -> start_run|simple_hq_or_rnd_pressure` liegen vor; der vollständige Runtime-Export wurde aus dem aktuellen Repository-Baum entfernt und durch `docs/reviews/ai/ai-replay-decision-safe-summary-2026-06-23.json` ersetzt. Offen bleiben repository-seitige Same-State-Fixture-Portabilität, echte aktuelle Holdout-Auswertung, Full-Green-Abnahme des vollständigen `@netgrid/ai`-Testlaufs und separate Bearbeitung weiterer Cluster wie `gain_credit|runner.build_credit_base -> start_run|remote_contest`.
 - Primäre Quellen wurden nach `docs/source/` kopiert, soweit vorhanden.
 - Ergänzende Dokumente liegen weiterhin unter `docs/` und sind als zusätzliche Arbeitsgrundlagen bekannt.
 - Die Paketmanifeste, Framework-Abhängigkeiten und Workspace-Skripte sind für den aktuellen MVP-0.2-Stand funktionsfähig.

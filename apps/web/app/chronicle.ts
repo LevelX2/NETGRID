@@ -1501,6 +1501,23 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (hiddenZoneAction === "p3_33_private_look") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
+        category = "hidden";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt und ${privateLookActionText(payload)}`,
+        );
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, ...privateLookChips(payload));
+        break;
+      }
       if (
         hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
         hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
@@ -1566,6 +1583,21 @@ export function formatChronicleEvent(
         description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
+      if (hiddenZoneAction === "p3_33_private_look") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
+        const lookText = privateLookActionText(payload);
+        category = "hidden";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${source} genutzt und ${lookText}`);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, ...privateLookChips(payload));
         break;
       }
       if (
@@ -3074,6 +3106,11 @@ export function shouldSuppressChronicleEventItem(
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType === "decline_rez") return true;
+  if (
+    actionType === "resolve_choice" &&
+    stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
+  )
+    return true;
   if (actionType !== "continue_run" || payload.encounterContinue !== true)
     return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some(
@@ -4727,6 +4764,28 @@ function traceStartTitle(
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function privateLookActionText(payload: Record<string, unknown>): string {
+  const zone = stringValue(payload.privateLookZone);
+  const count = numberValue(payload.privateLookCount) ?? 1;
+  if (zone === "rd")
+    return count === 1
+      ? "die oberste R&D-Karte angesehen"
+      : `die obersten ${count} R&D-Karten angesehen`;
+  if (zone === "hq")
+    return count === 1
+      ? "eine HQ-Karte angesehen"
+      : `${count} HQ-Karten angesehen`;
+  return `${cardCountText(count)} angesehen`;
+}
+
+function privateLookChips(payload: Record<string, unknown>): string[] {
+  const zone = stringValue(payload.privateLookZone);
+  const count = numberValue(payload.privateLookCount) ?? 1;
+  const zoneChip =
+    zone === "rd" ? "R&D" : zone === "hq" ? "HQ" : "Private Look";
+  return [zoneChip, `${count} angesehen`];
 }
 
 function tagCountText(amount: number): string {

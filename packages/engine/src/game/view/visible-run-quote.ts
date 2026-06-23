@@ -121,6 +121,12 @@ function visibleEffectiveSubroutine(
     id: subroutine.id,
     type: subroutine.type,
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
+    ...(subroutine.baseTraceStrength !== undefined
+      ? { baseTraceStrength: subroutine.baseTraceStrength }
+      : {}),
+    ...(subroutine.traceSuccessEffect
+      ? { traceSuccessEffect: subroutine.traceSuccessEffect }
+      : {}),
     ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
     ...(dynamic
       ? {

@@ -1468,6 +1468,45 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
   });
 
+  it("describes Technician Lover private look in the use message and suppresses the confirmation event", () => {
+    const activated = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Technician Lover",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "rd",
+      privateLookCount: 1,
+      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceTitle: "Technician Lover",
+      aiReasonCode: "runner_private_look",
+    });
+    const resolved = makeEvent("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "rd",
+      privateLookCount: 1,
+      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceTitle: "Technician Lover",
+      aiReasonCode: "runner_private_look",
+    });
+
+    const activatedItem = formatChronicleEvent(activated, "corp");
+    const resolvedItem = formatChronicleEvent(resolved, "corp");
+
+    expect(activatedItem.title).toBe(
+      "Die Runner-KI hat Technician Lover genutzt und die oberste R&D-Karte angesehen.",
+    );
+    expect(activatedItem.category).toBe("hidden");
+    expect(activatedItem.visibility).toBe("public");
+    expect(activatedItem.chips).toEqual(
+      expect.arrayContaining(["Technician Lover", "R&D", "1 angesehen"]),
+    );
+    expect(resolvedItem.title).toBe(activatedItem.title);
+    expect(resolvedItem.title).not.toContain("Entscheidung beantwortet");
+    expect(shouldSuppressChronicleEventItem(resolved)).toBe(true);
+  });
+
   it("shows Schlaghund tag-check damage without internal state", () => {
     const item = formatChronicleEvent(
       makeEvent("gain_credit", {

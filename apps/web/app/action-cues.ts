@@ -1,5 +1,11 @@
 import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
-import { formatChronicleEffectItems, formatChronicleEvent, type ChronicleContext, type ChronicleImportance, type ChronicleVisibility } from "./chronicle";
+import {
+  formatChronicleEffectItems,
+  formatChronicleEvent,
+  type ChronicleContext,
+  type ChronicleImportance,
+  type ChronicleVisibility,
+} from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 
 export type OpponentActionCue = {
@@ -113,6 +119,11 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
     const forcedEffectCueItems = formatChronicleEffectItems(event, input.viewerSide).filter(isForcedAccessEffectCueItem);
     const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
+    if (
+      actionType === "resolve_choice" &&
+      stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
+    )
+      return [];
     if (!input.includeOwnActions && !opponent && !systemCue && !forcedPublicEffectCue && forcedEffectCueItems.length === 0) return [];
     if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
 

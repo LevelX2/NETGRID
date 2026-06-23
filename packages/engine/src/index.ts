@@ -33,6 +33,11 @@ export {
   CURRENT_RULES_BASELINE,
 } from "./game/engine-runtime";
 
+export {
+  traceBaseLinkCardImplementationQuotesForDefinition,
+  type TraceBaseLinkCardImplementationQuote,
+} from "./game/trace/base-link";
+
 export type {
   ActionType,
   ChoiceRequest,
