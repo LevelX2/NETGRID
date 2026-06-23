@@ -3234,7 +3234,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.v1918UpgradeAbility ===
-          "singapore_city_grid_hq_ice_swap",
+          "hq_ice_swap",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -3326,7 +3326,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       getLegalActions(state, "corp").some(
         (action) =>
           action.payload?.v1918UpgradeAbility ===
-          "singapore_city_grid_hq_ice_swap",
+          "hq_ice_swap",
       ),
     ).toBe(false);
     expect(validateGameState(state).ok).toBe(true);
@@ -3396,7 +3396,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.v1918UpgradeAbility ===
-          "singapore_city_grid_hq_ice_swap" &&
+          "hq_ice_swap" &&
         action.payload?.cardId === omniId,
     );
     state = apply(state, "corp", (action) => action.actionId === swapAction.actionId);

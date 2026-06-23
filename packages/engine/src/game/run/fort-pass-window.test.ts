@@ -11,12 +11,12 @@ import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   buildCorpFortPassWindowActions,
-  buildSingaporeCityGridRunActions,
+  buildHqIceSwapRunActions,
   buildStartRunIceRepositionActions,
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "./fort-pass-window";
 
@@ -295,7 +295,7 @@ describe("fort pass window", () => {
     const server = host.servers.mustServer("rd");
     const run = state.run!;
 
-    const actions = buildSingaporeCityGridRunActions(host, run, server);
+    const actions = buildHqIceSwapRunActions(host, run, server);
 
     expect(actions.map((candidate) => candidate.payload)).toEqual([
       expect.objectContaining({
@@ -303,7 +303,7 @@ describe("fort pass window", () => {
         targetIceId: "ice_inner",
         serverId: "rd",
         iceIndex: 0,
-        v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
+        v1918UpgradeAbility: "hq_ice_swap",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1918_singapore_city_grid_choice",
       }),
@@ -313,7 +313,7 @@ describe("fort pass window", () => {
       }),
     ]);
 
-    startSingaporeCityGridSwapChoice(host, actions[0]!);
+    startHqIceSwapChoice(host, actions[0]!);
 
     expect(state.pendingChoice).toMatchObject({
       source: "v1918.singapore_city_grid:source_root:rd:ice_inner:0:run_1",
@@ -329,7 +329,7 @@ describe("fort pass window", () => {
     expect(JSON.stringify(actions[0]!.payload)).not.toMatch(/"cardInstances"/);
 
     const resolveAction = action(state);
-    const result = resolveSingaporeCityGridSwapChoice(
+    const result = resolveHqIceSwapChoice(
       host,
       resolveAction,
       choiceAction("card_hq_ice"),

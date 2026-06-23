@@ -63,7 +63,7 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
   };
   run: {
-    resolveSingaporeCityGridSwapChoice: HostFn<void>;
+    resolveHqIceSwapChoice: HostFn<void>;
     fortPassWindowHostForState: HostFn<unknown>;
     resolveTooManyDoorsSecretSpendChoiceInRunModule: HostFn<void>;
     encounterSpecialWindowHostForState: HostFn<unknown>;
@@ -186,8 +186,8 @@ export function resolvePendingChoice(
   const scoredAgendaFlowHost = host.corp.scoredAgendaFlowHost;
   const resolveRunnerProgramTrashBeforeInstallChoice =
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
-  const resolveSingaporeCityGridSwapChoice =
-    host.run.resolveSingaporeCityGridSwapChoice;
+  const resolveHqIceSwapChoice =
+    host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
   const resolveTooManyDoorsSecretSpendChoiceInRunModule =
     host.run.resolveTooManyDoorsSecretSpendChoiceInRunModule;
@@ -370,7 +370,7 @@ export function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
-    resolveSingaporeCityGridSwapChoice(
+    resolveHqIceSwapChoice(
       fortPassWindowHostForState(state),
       legalAction,
       playerAction,

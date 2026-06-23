@@ -103,7 +103,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
     resolveSenatorialFieldTripChoice,
-    resolveSingaporeCityGridSwapChoice,
+    resolveHqIceSwapChoice,
     resolveSpeedTrapRezInterruptChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
     resolveSystematicLayoffsAdvancementChoice,
@@ -656,7 +656,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveRunnerProgramTrashBeforeInstallChoice,
       },
       run: {
-        resolveSingaporeCityGridSwapChoice,
+        resolveHqIceSwapChoice,
         fortPassWindowHostForState,
         resolveTooManyDoorsSecretSpendChoiceInRunModule,
         encounterSpecialWindowHostForState,

@@ -222,8 +222,8 @@ function pendingChoiceHost(
       ),
     },
     run: {
-      resolveSingaporeCityGridSwapChoice: unexpected(
-        "resolveSingaporeCityGridSwapChoice",
+      resolveHqIceSwapChoice: unexpected(
+        "resolveHqIceSwapChoice",
       ),
       fortPassWindowHostForState: () => ({}),
       resolveTooManyDoorsSecretSpendChoiceInRunModule: unexpected(

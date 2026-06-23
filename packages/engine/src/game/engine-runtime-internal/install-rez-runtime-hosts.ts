@@ -451,9 +451,9 @@ import {
 } from "../run/run-rez-window";
 import {
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "../run/fort-pass-window";
 import {

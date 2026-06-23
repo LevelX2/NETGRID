@@ -98,7 +98,7 @@ export function createHiddenZoneSearchRuntime(
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveSingaporeCityGridSwapChoice,
+    resolveHqIceSwapChoice,
     resolveSpeedTrapRezInterruptChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
     resolveSystematicLayoffsAdvancementChoice,

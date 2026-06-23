@@ -115,7 +115,7 @@ export function buildCorpFortPassWindowActions(
   return actions;
 }
 
-export function buildSingaporeCityGridRunActions(
+export function buildHqIceSwapRunActions(
   host: FortPassWindowHost,
   run: ActiveRun,
   server: CorpServer,
@@ -154,7 +154,7 @@ export function buildSingaporeCityGridRunActions(
             targetIceId,
             serverId: server.id,
             iceIndex,
-            v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
+            v1918UpgradeAbility: "hq_ice_swap",
             hiddenZoneBarrier: true,
             hiddenZoneAction: "v1918_singapore_city_grid_choice",
           },
@@ -420,7 +420,7 @@ export function resolveStartRunIceRepositionWindow(
   };
 }
 
-export function startSingaporeCityGridSwapChoice(
+export function startHqIceSwapChoice(
   host: FortPassWindowHost,
   legalAction: LegalAction,
 ): RunIceSwapChoiceResult {
@@ -508,7 +508,7 @@ export function startSingaporeCityGridSwapChoice(
   };
 }
 
-export function resolveSingaporeCityGridSwapChoice(
+export function resolveHqIceSwapChoice(
   host: FortPassWindowHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,

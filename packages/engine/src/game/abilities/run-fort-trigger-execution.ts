@@ -36,7 +36,7 @@ export type RunFortTriggerExecutionHost = {
     resolveApproachIceExposeViewingDecision: (
       legalAction: LegalAction,
     ) => void;
-    startSingaporeCityGridSwapChoice: (legalAction: LegalAction) => void;
+    startHqIceSwapChoice: (legalAction: LegalAction) => void;
   };
   constants: {
     MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: string;
@@ -101,9 +101,9 @@ export function handleRunFortTriggerExecution(
   }
   if (
     legalAction.payload?.v1918UpgradeAbility ===
-    "singapore_city_grid_hq_ice_swap"
+    "hq_ice_swap"
   ) {
-    host.run.startSingaporeCityGridSwapChoice(legalAction);
+    host.run.startHqIceSwapChoice(legalAction);
     return handled(legalAction);
   }
 

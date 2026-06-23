@@ -66,11 +66,11 @@ describe("run fort trigger execution", () => {
       fortRunWindowAbility: "move_self_to_different_position_on_same_fort",
     });
     const singaporeAction = triggerAction(state, {
-      v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
+      v1918UpgradeAbility: "hq_ice_swap",
     });
     const host = testHost(state, {
       resolveStartRunIceRepositionWindow: () => calls.push("reposition"),
-      startSingaporeCityGridSwapChoice: () => calls.push("singapore"),
+      startHqIceSwapChoice: () => calls.push("singapore"),
     });
 
     handleRunFortTriggerExecution(host, fortAction);
@@ -238,8 +238,8 @@ function testHost(
         overrides.resolveApproachIceExposeAbility ?? (() => undefined),
       resolveApproachIceExposeViewingDecision:
         overrides.resolveApproachIceExposeViewingDecision ?? (() => undefined),
-      startSingaporeCityGridSwapChoice:
-        overrides.startSingaporeCityGridSwapChoice ?? (() => undefined),
+      startHqIceSwapChoice:
+        overrides.startHqIceSwapChoice ?? (() => undefined),
     },
     constants: {
       MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID:

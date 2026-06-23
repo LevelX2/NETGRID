@@ -99,7 +99,7 @@ export function createCorpZoneRuntimeHosts(
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveSingaporeCityGridSwapChoice,
+    resolveHqIceSwapChoice,
     resolveSpeedTrapRezInterruptChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
     resolveSystematicLayoffsAdvancementChoice,
