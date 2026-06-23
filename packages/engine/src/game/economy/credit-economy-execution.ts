@@ -358,15 +358,15 @@ export function handleCreditEconomyExecution(
   }
   if (
     legalAction.payload?.v1951CorpUtilityAbility ===
-    "cowboy_sysop_uninstall_corp_card_to_hq"
+    "corp_installed_card_to_hq"
   ) {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Cowboy Sysop nutzen.");
+      throw new Error("Nur die Korp darf diese installierte Karte bewegen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
     if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error("Cowboy Sysop ist nicht rezzed installiert.");
+      throw new Error("Die Corp-Utility-Quelle ist nicht rezzed installiert.");
     if (
       !host.cards.hasCorpUtilityKind(
         state,
@@ -374,12 +374,12 @@ export function handleCreditEconomyExecution(
         "move_installed_corp_card_to_hq",
       )
     )
-      throw new Error("Die Cowboy-Sysop-Faehigkeit passt nicht zur Karte.");
+      throw new Error("Die Corp-Utility-Faehigkeit passt nicht zur Karte.");
     const targetCardId = String(
       legalAction.payload?.targetCardId ?? "",
     ) as CardInstanceId;
     if (!host.corp.installedCardIds(state).includes(targetCardId))
-      throw new Error("Das Cowboy-Sysop-Ziel ist nicht mehr installiert.");
+      throw new Error("Das Corp-Utility-Ziel ist nicht mehr installiert.");
     const targetDefinitionId = host.cards.definitionFor(state, targetCardId).id;
     const targetIdentityKnown = host.corp.publicInstalledCardIdentityKnown(
       state,
@@ -389,7 +389,7 @@ export function handleCreditEconomyExecution(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
+      hiddenZoneAction: "corp_installed_card_to_hq",
       movedCardCount: 1,
       ...(targetIdentityKnown
         ? { movedCardDefinitionId: targetDefinitionId }

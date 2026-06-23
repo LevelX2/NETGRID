@@ -1249,7 +1249,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.payload?.v1951CorpUtilityAbility ===
-          "cowboy_sysop_uninstall_corp_card_to_hq" &&
+          "corp_installed_card_to_hq" &&
         action.payload?.targetCardId === corpTargetId,
     );
 
@@ -1261,7 +1261,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     ).toBe(false);
     expect(cowboyState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
+      hiddenZoneAction: "corp_installed_card_to_hq",
     });
     expect(
       JSON.stringify(cowboyState.eventLog.at(-1)?.publicPayload),

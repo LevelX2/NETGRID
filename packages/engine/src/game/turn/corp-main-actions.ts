@@ -703,10 +703,7 @@ export function buildCorpMainActions(
         ),
       );
     }
-    if (
-      definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID ||
-      hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")
-    ) {
+    if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
       for (const targetCardId of corpInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
@@ -719,7 +716,7 @@ export function buildCorpMainActions(
             [{ clicks: 1 }],
             {
               cardId: assetId,
-              v1951CorpUtilityAbility: "cowboy_sysop_uninstall_corp_card_to_hq",
+              v1951CorpUtilityAbility: "corp_installed_card_to_hq",
               targetCardId,
             },
           ),
