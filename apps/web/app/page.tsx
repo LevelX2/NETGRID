@@ -299,15 +299,9 @@ import {
 import {
   scoreCardStateBadges
 } from "../features/cards/ScoredAgendaState";
-import { CardView } from "../features/cards/CardView";
 import { CardPreviewPanel } from "../features/cards/CardPreviewPanel";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { type AiSimulationSummary } from "../features/results/SimulationResult";
-import {
-  HandCardsRow,
-  SideZoneFrame,
-  zoneSideClass
-} from "../features/game-board/ZoneFrame";
 import {
   CARD_SCALE_PERCENT_MIN,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
@@ -341,6 +335,7 @@ import {
   type FieldChoiceCardProps
 } from "../features/game-board/RunnerBoardStrips";
 import { ActiveServerGrid } from "../features/game-board/ActiveServerGrid";
+import { ActiveRunnerZoneBoard } from "../features/game-board/ActiveRunnerZoneBoard";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
 import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
@@ -392,7 +387,6 @@ import {
 } from "../features/match-start/lobby-format";
 import {
   formatCardCount,
-  formatHandLimitCount,
   opponentSide,
   sideFromPublicPayload,
   sideLabel,
@@ -4023,173 +4017,28 @@ export default function Page() {
             onSelectActionContext={setSelectedActionContext}
           />
           <section className="section panel boardSection zoneBoardSection">
-            {activeView.side === "runner" ? (
-              <div className="runnerGripHeapLayout">
-                <SideZoneFrame
-                  side="runner"
-                  label="Grip"
-                  countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)}
-                  iconKind="grip"
-                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")}
-                  className="runnerGripZone"
-                  style={zoneCardsStyle}
-                  collapsed={boardZoneCollapsedFor("runner:grip")}
-                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:grip")}
-                >
-                  <HandCardsRow style={handCardsStyle} count={activeView.own.gripOrHq.length}>
-                    {activeView.own.gripOrHq.map((card) => {
-                      const displayCard = enrichCard(card);
-                      const discardOption = discardOptionForCard(card);
-                      return (
-                        <CardView
-                          key={card.instanceId}
-                          card={displayCard}
-                          displayMode={cardDisplayMode}
-                          hiddenSide={activeView.side}
-                          selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                          actions={cardActionsFor(card)}
-                          actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                          {...(discardOption
-                            ? {
-                                discardShortcut: {
-                                  selected: selectedDiscardOptionIdSet.has(discardOption.id),
-                                  disabled: Boolean(payload.winner) || connection !== "online",
-                                  onToggle: () => toggleDiscardOption(discardOption.id)
-                                }
-                              }
-                            : {})}
-                          onAction={submitAction}
-                          onFocus={focusCard}
-                          onActionContextSelect={selectActionCard}
-                        />
-                      );
-                    })}
-                  </HandCardsRow>
-                </SideZoneFrame>
-                <SideZoneFrame
-                  side="runner"
-                  label="Stack"
-                  countLabel={formatCardCount(activeView.own.stackOrRdCount)}
-                  iconKind="stack"
-                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")}
-                  className="runnerStackZone"
-                  style={zoneCardsStyle}
-                  collapsed={boardZoneCollapsedFor("runner:stack")}
-                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
-                >
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
-                    {activeView.own.stackOrRdCount > 0 ? (
-                      <div className="runnerStackBack" aria-hidden="true">
-                        <span />
-                      </div>
-                    ) : (
-                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
-                    )}
-                  </div>
-                </SideZoneFrame>
-                <SideZoneFrame
-                  side="runner"
-                  label="Heap"
-                  countLabel={formatCardCount(activeView.own.heapOrArchives.length)}
-                  iconKind="heap"
-                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")}
-                  className="runnerHeapZone"
-                  style={zoneCardsStyle}
-                  collapsed={boardZoneCollapsedFor("runner:heap")}
-                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:heap")}
-                  collapseLabel="Heap"
-                >
-                  {activeView.own.heapOrArchives.length > 0 ? (
-                    <div
-                      className="runnerHeapOverlapRow"
-                      style={{
-                        ...zoneCardsStyle,
-                        "--zone-stack-visible-steps": String(Math.max(0, activeView.own.heapOrArchives.length - 1))
-                      } as CSSProperties}
-                    >
-                      {activeView.own.heapOrArchives.map((card) => {
-                        const displayCard = enrichCard(card);
-                        return (
-                          <CardView
-                            key={card.instanceId}
-                            card={displayCard}
-                            compact
-                            displayMode={cardDisplayMode}
-                            inactiveZone="heap"
-                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                            actions={cardActionsFor(card)}
-                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                            onAction={submitAction}
-                            onFocus={focusCard}
-                            onActionContextSelect={selectActionCard}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
-                  )}
-                </SideZoneFrame>
-                {activeView.own.rig ? (
-                  <SideZoneFrame
-                    side="runner"
-                    label="Rig"
-                    countLabel={formatCardCount(activeView.own.rig.length)}
-                    iconKind="rig"
-                    highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "rig")}
-                    className="runnerRigZone"
-                    style={zoneCardsStyle}
-                    collapsed={boardZoneCollapsedFor("runner:rig")}
-                    onToggleCollapse={() => toggleBoardZoneCollapsed("runner:rig")}
-                    collapseLabel="Rig"
-                  >
-                    {ownRigGroups.length > 0 ? (
-                      <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
-                        {ownRigGroups.map((group) => (
-                          <div
-                            className="rigGroup rigGroupHorizontal"
-                            key={group.key}
-                            style={ownRigCardsStyle}
-                          >
-                            <div className="rigGroupLead">
-                              <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
-                              {group.key === "program" ? (
-                                <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
-                                  MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
-                                </span>
-                              ) : null}
-                            </div>
-                            <div className="cards rigGroupCards rigGroupCardsFull">
-                              {group.cards.map((card) => {
-                                const displayCard = enrichCard(card);
-                                return (
-                                  <CardView
-                                    key={card.instanceId}
-                                    card={displayCard}
-                                    displayMode={cardDisplayMode}
-                                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                    actions={cardActionsFor(card)}
-                                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                    {...fieldChoiceCardProps(card)}
-                                    onAction={submitAction}
-                                    onFocus={focusCard}
-                                    onActionContextSelect={selectActionCard}
-                                  />
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Rig.</p>
-                    )}
-                  </SideZoneFrame>
-                ) : null}
-              </div>
-            ) : (
-              null
-            )}
+            <ActiveRunnerZoneBoard
+              view={activeView}
+              actionDisabled={Boolean(payload.winner) || connection !== "online"}
+              activeHighlight={activeCueHighlight}
+              selectedActionContext={selectedActionContext}
+              selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
+              ownRigGroups={ownRigGroups}
+              ownRigCardsStyle={ownRigCardsStyle}
+              handCardsStyle={handCardsStyle}
+              zoneCardsStyle={zoneCardsStyle}
+              cardDisplayMode={cardDisplayMode}
+              boardZoneCollapsedFor={boardZoneCollapsedFor}
+              toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+              cardActionsFor={cardActionsFor}
+              enrichCard={enrichCard}
+              discardOptionForCard={discardOptionForCard}
+              toggleDiscardOption={toggleDiscardOption}
+              fieldChoiceCardProps={fieldChoiceCardProps}
+              onAction={submitAction}
+              onFocus={focusCard}
+              onActionContextSelect={selectActionCard}
+            />
           </section>
         </section>
 
