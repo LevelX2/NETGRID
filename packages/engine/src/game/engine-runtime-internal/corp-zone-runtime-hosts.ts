@@ -634,11 +634,11 @@ export function createCorpZoneRuntimeHosts(
     };
   }
 
-  function huntClubBbsExposeTargets(state: GameState): CardInstanceId[] {
+  function multiExposeInstalledCorpCardTargets(state: GameState): CardInstanceId[] {
     return exposeInstalledCorpCardTargets(state, "any_installed");
   }
 
-  function huntClubBbsExposeOptionLabel(
+  function multiExposeInstalledCorpCardOptionLabel(
     state: GameState,
     cardId: CardInstanceId,
   ): string {
@@ -695,25 +695,25 @@ export function createCorpZoneRuntimeHosts(
     ];
   }
 
-  function startHuntClubBbsExposeChoice(
+  function startMultiExposeInstalledCorpCardsChoice(
     state: GameState,
     legalAction: LegalAction,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const options = huntClubBbsExposeTargets(state).map((cardId) => ({
+    const options = multiExposeInstalledCorpCardTargets(state).map((cardId) => ({
       id: exposeInstalledCorpCardChoiceOptionId(cardId),
-      label: huntClubBbsExposeOptionLabel(state, cardId),
+      label: multiExposeInstalledCorpCardOptionLabel(state, cardId),
       value: cardId,
     }));
     if (options.length === 0)
       throw new Error(
-        "Hunt Club BBS findet keine installierte verdeckte Korp-Karte.",
+        "Die Multi-Expose-Choice findet keine installierte verdeckte Korp-Karte.",
       );
     state.pendingChoice = {
-      choiceId: `v1912_hunt_club_bbs_expose_${state.stateVersion + 1}`,
+      choiceId: `card_implementation_multi_expose_installed_corp_cards_${state.stateVersion + 1}`,
       side: "runner",
-      source: `v1912.hunt_club_bbs_expose:${state.stateVersion + 1}`,
+      source: `card_implementation.multi_expose_installed_corp_cards:${state.stateVersion + 1}`,
       prompt: "Bis zu drei installierte Korp-Karten exposen",
       kind: "select_cards",
       options,
@@ -725,7 +725,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose_choice",
+      hiddenZoneAction: "multi_expose_installed_corp_cards_choice",
       choiceVisibility: "runner_private",
     };
   }
@@ -813,7 +813,7 @@ export function createCorpZoneRuntimeHosts(
     };
     const payload = {
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose_choice",
+      hiddenZoneAction: "multi_expose_installed_corp_cards_choice",
       choiceVisibility: "runner_private",
       sourceDefinitionId,
     };
@@ -824,22 +824,22 @@ export function createCorpZoneRuntimeHosts(
     return { publicPayload: payload };
   }
 
-  function resolveHuntClubBbsExposeChoice(
+  function resolveMultiExposeInstalledCorpCardsChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1912.hunt_club_bbs_expose"))
-      throw new Error("Es ist keine Hunt-Club-BBS-Expose-Choice offen.");
+    if (!choice || !choice.source.startsWith("card_implementation.multi_expose_installed_corp_cards"))
+      throw new Error("Es ist keine Multi-Expose-Choice offen.");
     const selectedIds = selectedChoiceCardIds(choice, playerAction);
-    const legalTargets = new Set(huntClubBbsExposeTargets(state));
+    const legalTargets = new Set(multiExposeInstalledCorpCardTargets(state));
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
-        throw new Error("Hunt Club BBS darf dieses Ziel nicht exposen.");
+        throw new Error("Diese Multi-Expose-Choice darf dieses Ziel nicht exposen.");
     }
     const labels = selectedIds.map((cardId) =>
-      huntClubBbsExposeOptionLabel(state, cardId),
+      multiExposeInstalledCorpCardOptionLabel(state, cardId),
     );
     const definitionIds = selectedIds.map(
       (cardId) => definitionFor(state, cardId).id,
@@ -848,7 +848,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose",
+      hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       revealedCount: selectedIds.length,
       publicRevealDefinitionIds: definitionIds.join(","),
@@ -1051,7 +1051,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose",
+      hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       sourceDefinitionId,
       sourceTitle: sourceDefinition.title,
@@ -1195,19 +1195,19 @@ export function createCorpZoneRuntimeHosts(
     exposeInstalledCorpCardsChoiceOptions,
     exposeOutermostIceOfEachDataFort,
     exposedCorpCardInServer,
-    huntClubBbsExposeOptionLabel,
-    huntClubBbsExposeTargets,
+    multiExposeInstalledCorpCardOptionLabel,
+    multiExposeInstalledCorpCardTargets,
     installedCorpCardServerContext,
     installedRunnerIcebreakerIds,
     outermostIceExposures,
     resolveDealWithMilitech,
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
-    resolveHuntClubBbsExposeChoice,
+    resolveMultiExposeInstalledCorpCardsChoice,
     resolveV1911CorporateDownsizing,
     shuffleCorpCardIntoRd,
     startExposeInstalledCorpCardsChoice,
-    startHuntClubBbsExposeChoice,
+    startMultiExposeInstalledCorpCardsChoice,
     trashCorpInstalledCardsInScoredSourceServer,
   };
 }

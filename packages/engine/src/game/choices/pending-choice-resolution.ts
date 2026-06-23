@@ -27,7 +27,7 @@ export type PendingChoiceResolutionHost = {
     resolveP358HiddenReplacementChoice: HostFn<void>;
     handleHiddenZoneSearchChoice: HostFn<{ handled: boolean; deletePendingChoice?: boolean }>;
     hiddenZoneSearchChoiceHandlerHost: HostFn<unknown>;
-    resolveHuntClubBbsExposeChoice: HostFn<void>;
+    resolveMultiExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveInvestmentFirmCreditChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
@@ -129,8 +129,8 @@ export function resolvePendingChoice(
     host.hiddenZone.handleHiddenZoneSearchChoice;
   const hiddenZoneSearchChoiceHandlerHost =
     host.hiddenZone.hiddenZoneSearchChoiceHandlerHost;
-  const resolveHuntClubBbsExposeChoice =
-    host.hiddenZone.resolveHuntClubBbsExposeChoice;
+  const resolveMultiExposeInstalledCorpCardsChoice =
+    host.hiddenZone.resolveMultiExposeInstalledCorpCardsChoice;
   const resolveExposeInstalledCorpCardsChoice =
     host.hiddenZone.resolveExposeInstalledCorpCardsChoice;
   const resolveInvestmentFirmCreditChoice =
@@ -312,8 +312,8 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
-    resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.multi_expose_installed_corp_cards")) {
+    resolveMultiExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {

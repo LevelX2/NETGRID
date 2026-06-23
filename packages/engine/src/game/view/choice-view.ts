@@ -78,7 +78,7 @@ function choiceOptionValueIsHiddenInstalledCorpExposeTarget(
   if (
     !choice.source.startsWith("p3_36.expose_installed_card:") &&
     !choice.source.startsWith("p3_36.expose_installed_cards") &&
-    !choice.source.startsWith("v1912.hunt_club_bbs_expose")
+    !choice.source.startsWith("card_implementation.multi_expose_installed_corp_cards")
   )
     return false;
   if (typeof option.value !== "string") return false;

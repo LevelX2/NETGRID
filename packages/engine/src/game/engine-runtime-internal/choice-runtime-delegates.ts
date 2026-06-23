@@ -567,17 +567,17 @@ export function resolveDealWithMilitech(...args: any[]): any {
   )(...args);
 }
 
-export function huntClubBbsExposeTargets(...args: any[]): any {
+export function multiExposeInstalledCorpCardTargets(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "huntClubBbsExposeTargets",
+    "multiExposeInstalledCorpCardTargets",
   )(...args);
 }
 
-export function huntClubBbsExposeOptionLabel(...args: any[]): any {
+export function multiExposeInstalledCorpCardOptionLabel(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "huntClubBbsExposeOptionLabel",
+    "multiExposeInstalledCorpCardOptionLabel",
   )(...args);
 }
 
@@ -588,10 +588,10 @@ export function exposeInstalledCorpCardsChoiceOptions(...args: any[]): any {
   )(...args);
 }
 
-export function startHuntClubBbsExposeChoice(...args: any[]): any {
+export function startMultiExposeInstalledCorpCardsChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startHuntClubBbsExposeChoice",
+    "startMultiExposeInstalledCorpCardsChoice",
   )(...args);
 }
 
@@ -602,10 +602,10 @@ export function startExposeInstalledCorpCardsChoice(...args: any[]): any {
   )(...args);
 }
 
-export function resolveHuntClubBbsExposeChoice(...args: any[]): any {
+export function resolveMultiExposeInstalledCorpCardsChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveHuntClubBbsExposeChoice",
+    "resolveMultiExposeInstalledCorpCardsChoice",
   )(...args);
 }
 

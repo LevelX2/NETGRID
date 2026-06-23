@@ -154,7 +154,7 @@ function pendingChoiceHost(
       ),
       handleHiddenZoneSearchChoice: unhandled,
       hiddenZoneSearchChoiceHandlerHost: () => ({}),
-      resolveHuntClubBbsExposeChoice: unexpected("resolveHuntClubBbsExposeChoice"),
+      resolveMultiExposeInstalledCorpCardsChoice: unexpected("resolveMultiExposeInstalledCorpCardsChoice"),
       resolveExposeInstalledCorpCardsChoice: unexpected(
         "resolveExposeInstalledCorpCardsChoice",
       ),
