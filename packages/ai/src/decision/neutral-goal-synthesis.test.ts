@@ -28,7 +28,7 @@ describe("neutral goal synthesis", () => {
     ]);
 
     expect(synthesizeNeutralTacticalGoals(frame)[0]).toMatchObject({
-      goalId: "corp.neutral.score_agenda",
+      goalId: "corp.tactical.score_closeout",
       family: "corp_scoreline",
     });
   });

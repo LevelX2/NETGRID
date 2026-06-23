@@ -18,6 +18,7 @@ export type TacticalGoalLike = RunnerTacticalGoal | {
   family: string;
   priority: number;
   urgency?: string;
+  targetServerId?: string;
   source?: string;
   evidence?: readonly string[];
 };

@@ -1,4 +1,5 @@
 import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
+import { buildCorpTacticalGoals } from "./corp-tactical-goals";
 import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 
 export function synthesizeNeutralTacticalGoals(
@@ -99,41 +100,7 @@ function synthesizeRunnerNeutralGoals(
 function synthesizeCorpNeutralGoals(
   frame: SemanticDecisionFrame,
 ): TacticalGoalLike[] {
-  const goals: TacticalGoalLike[] = [];
-  const semantics = new Set(
-    frame.actionCandidates.map((candidate) => candidate.semanticActionType),
-  );
-
-  if (semantics.has("score.agenda")) {
-    goals.push(goal("corp.neutral.score_agenda", "corp_scoreline", 860, [
-      "neutral_goal:corp_scoreline",
-      "candidate_semantic:score.agenda",
-    ]));
-  }
-  if (semantics.has("corp_window.rez")) {
-    goals.push(goal("corp.neutral.ice_defense", "corp_ice_defense", 700, [
-      "neutral_goal:corp_ice_defense",
-      "candidate_semantic:corp_window.rez",
-    ]));
-  }
-  if (semantics.has("economy.gain_credit") || semantics.has("draw.card")) {
-    goals.push(goal("corp.neutral.economy", "economy", 620, [
-      "neutral_goal:economy",
-      "candidate_semantic:economy_or_draw",
-    ]));
-  }
-  if (semantics.has("install.card")) {
-    goals.push(goal("corp.neutral.remote_development", "corp_ice_defense", 560, [
-      "neutral_goal:remote_development",
-      "candidate_semantic:install.card",
-    ]));
-  }
-  if (goals.length === 0) {
-    goals.push(goal("corp.neutral.mandatory_draw_or_turn_flow", "setup", 500, [
-      "neutral_goal:mandatory_draw_or_turn_flow",
-    ]));
-  }
-  return goals;
+  return buildCorpTacticalGoals(frame);
 }
 
 function goal(

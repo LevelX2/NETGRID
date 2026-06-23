@@ -253,7 +253,7 @@ describe("SemanticShadowDecision", () => {
 
     expect(trace.rankedActions[0]).toMatchObject({
       actionId: "score-1",
-      primaryGoalId: "corp.neutral.score_agenda",
+      primaryGoalId: "corp.tactical.score_closeout",
     });
     expect(trace.rankedActions[0]?.score).toBeGreaterThan(
       trace.rankedActions.find((action) => action.actionId === "gain-1")?.score ?? 0,
