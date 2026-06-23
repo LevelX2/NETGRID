@@ -1,6 +1,6 @@
 # AI Post-Bid-Link Efficiency Process 2026-06-23
 
-Status: `in_progress`
+Status: `integration_verified`
 
 Quelle/Vorgabe: Playtest-Analyse zu `match_b05eb9010f32c761` vom 2026-06-23. Die Runner-KI nutzte im Data-Raven-Trace nach bereits abgewehrtem Trace viermal `Submarine Uplink: +1 Link`, gab dadurch alle Credits aus und löste den erzwungenen Jack-out nach dem Encounter aus.
 
@@ -182,3 +182,21 @@ Merge-Regeln:
 - Runner-KI nutzt Link weiterhin, wenn das Ergebnis dadurch erstmals verbessert wird.
 - `Submarine Uplink` wird nicht mehr unnötig ausgelöst und beendet dadurch keine aussichtsreichen Runs mehr.
 - Änderungen sind paketweise committed und lokal nach `main` gemerged.
+
+## Ergebnisstand 2026-06-23
+
+Umgesetzt:
+
+- `AI-PBL-1`: Repro- und Varianten-Tests für bereits abgewehrte Traces, minimal notwendige Link-Nutzung, Submarine-Uplink-Vermeidung und erneut geöffnetes Post-Bid-Fenster.
+- `AI-PBL-2`: Generische side-safe Post-Bid-Link-Policy in `packages/ai/src/trace-bid-efficiency.ts`.
+- `AI-PBL-3`: Runtime-Anbindung in `packages/ai/src/index.ts` über öffentlichen Trace-Kontext.
+
+Verifiziert:
+
+- `vitest run packages/ai/src/trace-bid-efficiency.test.ts packages/ai/src/index.test.ts -t "Trace bid efficiency|post-bid" --maxWorkers=1 --testTimeout=30000`: grün, 13 bestanden.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+Breiter Testlauf:
+
+- `vitest run packages/ai/src/trace-bid-efficiency.test.ts packages/ai/src/index.test.ts --maxWorkers=1 --testTimeout=30000`: Trace-Fälle grün, aber vier isoliert reproduzierbare bestehende Shell-Traders-Tests in `packages/ai/src/index.test.ts` fallen weiter, weil dort erwartete Shell-Traders-LegalActions fehlen. Separater Lauf `-t "Shell Traders"` zeigt denselben Blocker und ist nicht durch die Post-Bid-Link-Änderung verursacht.
