@@ -262,6 +262,7 @@ import {
   type ActiveMatchWorkspace,
   type ConnectionState
 } from "../features/app-shell/AppShell";
+import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
 import {
   ConfirmationDialog,
   type ConfirmationDialogRequest
@@ -680,7 +681,6 @@ export default function Page() {
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] = useState("");
   const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
   const [aiDecisionDebugTrace, setAiDecisionDebugTrace] = useState<MaintenanceAiTraceDetail | null>(null);
-  const [topbarHeightPx, setTopbarHeightPx] = useState(0);
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
@@ -727,10 +727,11 @@ export default function Page() {
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
-  const topbarRef = useRef<HTMLElement | null>(null);
   const statusPanelsRef = useRef<HTMLElement | null>(null);
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
   const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
+  const activeMatchIsGame = activeMatchWorkspace === "game";
+  const { elementRef: topbarRef, heightPx: topbarHeightPx } = useObservedElementHeight<HTMLElement>(`${activeMatchIsGame ? "game" : "entry"}:${payload?.matchId ?? ""}`);
 
   const selectStartTab = (nextMode: "host" | "join" | "resume") => {
     if (nextMode === "resume") {
@@ -1559,28 +1560,6 @@ export default function Page() {
           graceLabel: playerClockGraceDisplay(payload.playerClock, matchClockNowMs)
         }
       : null;
-  const activeMatchIsGame = activeMatchWorkspace === "game";
-  useEffect(() => {
-    const topbar = topbarRef.current;
-    if (!topbar) {
-      setTopbarHeightPx(0);
-      return;
-    }
-    const updateHeight = () => setTopbarHeightPx(Math.ceil(topbar.getBoundingClientRect().height));
-    updateHeight();
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateHeight);
-      return () => window.removeEventListener("resize", updateHeight);
-    }
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(topbar);
-    window.addEventListener("resize", updateHeight);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [activeMatchIsGame, payload?.matchId]);
-
   useEffect(() => {
     if (!activeMatchIsGame) {
       setStatusPanelsVisible(true);
