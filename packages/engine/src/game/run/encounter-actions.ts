@@ -725,8 +725,6 @@ function multiBreakSubroutineActions(
             subroutineIndexes: subroutineIndexes.join(","),
             breakSubroutineCount: subroutineIndexes.length,
             multiBreakSubroutines: true,
-            // Kept for PublicContext and older Pile Driver regression tests.
-            pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
             ...breakCost.publicPayload,

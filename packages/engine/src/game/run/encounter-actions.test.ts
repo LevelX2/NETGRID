@@ -340,7 +340,6 @@ describe("runner encounter action generation", () => {
         breakSubroutineBaseCost: 2,
         breakSubroutineCount: 2,
         multiBreakSubroutines: true,
-        pileDriverMultiBreak: true,
       },
       abilityRef: {
         sourceCardInstanceId: "breaker_1",
@@ -475,9 +474,7 @@ describe("runner encounter action generation", () => {
           breakerId: "breaker_1",
           iceId: "ice_1",
           breakSubroutineBaseCost: testCase.breakCost,
-          ...(breakIndexes
-            ? { multiBreakSubroutines: true, pileDriverMultiBreak: true }
-            : {}),
+          ...(breakIndexes ? { multiBreakSubroutines: true } : {}),
         },
       });
       expect(breakAction?.label, testCase.definitionId).toContain(

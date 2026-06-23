@@ -1469,7 +1469,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_047_pile-driver",
       breakSubroutineCount: 4,
-      pileDriverMultiBreak: true,
+      multiBreakSubroutines: true,
       postBreakStealthLoss: 3,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(

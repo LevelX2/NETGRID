@@ -2534,7 +2534,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        action.payload?.pileDriverMultiBreak === true &&
+        action.payload?.multiBreakSubroutines === true &&
         action.payload?.subroutineIndexes === "0,1,2,3",
     );
     expect(breakAction.costs).toEqual([{ credits: 7 }]);

@@ -365,12 +365,6 @@ export function publicContextForAction(
     context.multiBreakSubroutines = true;
   }
   if (
-    legalAction.type === "break_subroutine" &&
-    legalAction.payload?.pileDriverMultiBreak === true
-  ) {
-    context.pileDriverMultiBreak = true;
-  }
-  if (
     legalAction.type === "resolve_choice" &&
     typeof legalAction.payload?.postBreakStealthLoss === "number"
   ) {

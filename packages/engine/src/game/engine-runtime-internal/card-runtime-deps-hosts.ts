@@ -1002,10 +1002,7 @@ export function createCardRuntimeDepsHosts(
       multiBreakSubroutines: true,
       ...(ability.breakAllMatchingSubroutines
         ? { breakAllMatchingSubroutines: true }
-        : {
-            // Kept for PublicContext and older Pile Driver regression tests.
-            pileDriverMultiBreak: true,
-          }),
+        : {}),
       ...(ability.onUseEndRun ? { breakerEndsRunAfterBreak: true } : {}),
       sourceDefinitionId: breakerDefinition.id,
     };
