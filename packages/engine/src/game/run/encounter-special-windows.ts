@@ -315,7 +315,7 @@ export function resolveVacuumLinkRewindSubroutine(
   };
 }
 
-export function applyRioDeJaneiroCityGridPassedIceTrigger(
+export function applyPassedIceRunEndTrigger(
   host: EncounterSpecialWindowHost,
   passedIceId: CardInstanceId,
   legalAction?: LegalAction,
