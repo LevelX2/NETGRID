@@ -18,7 +18,6 @@ import {
   Pause,
   Play,
   Plus,
-  Route,
   Save,
   Search,
   Shield,
@@ -75,7 +74,6 @@ import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
-  actionButtonLabel,
   actionConsumesClick,
   actionContextStillVisible,
   actionCostChips,
@@ -90,7 +88,6 @@ import {
   installedCorpExposeReviewCardId,
   fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
-  iceModifierBadgesForServer,
   orderedCardContextActions,
   parseCuePositionPreference,
   isSingleInstalledCorpExposeChoice,
@@ -101,11 +98,8 @@ import {
   runAwareActionButtonLabel,
   runWindowActions,
   runnerRigMemorySummary,
-  runPositionStatusLabel,
   serializeCuePositionPreference,
-  showInstalledCorpState,
   shouldUseFieldCardChoice,
-  serverBoardRows,
   serverDisplayLabel,
   splitLegalActions,
   type ActionContext,
@@ -312,9 +306,6 @@ import { type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
   HandCardsRow,
   SideZoneFrame,
-  ZoneCollapseButton,
-  ZoneIdentityIcon,
-  serverZoneIdentityIconKind,
   zoneSideClass
 } from "../features/game-board/ZoneFrame";
 import {
@@ -344,17 +335,16 @@ import {
   type ResourceStripMode
 } from "../features/settings/settings-model";
 import { PlayerClockStrip, playerClockGraceDisplay } from "../features/game-board/PlayerClock";
-import { ArchivesDualStackLane } from "../features/game-board/ArchivesDualStackLane";
 import {
   RunnerOpponentZonesStrip,
   RunnerRigStrip,
   type FieldChoiceCardProps
 } from "../features/game-board/RunnerBoardStrips";
+import { ActiveServerGrid } from "../features/game-board/ActiveServerGrid";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
 import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
 import { ActionSlotMeter, ActiveMatchResourceStrip } from "../features/game-board/ResourceStrip";
-import { ServerCounterStrip } from "../features/game-board/CounterStrips";
 import { OpponentPanel, PlayerPanel } from "../features/game-board/SideStatusPanels";
 import {
   ActionPanelDockPlaceholder,
@@ -401,13 +391,9 @@ import {
   shouldForgetRecoveryStatus,
 } from "../features/match-start/lobby-format";
 import {
-  centralServerCountLabel,
   formatCardCount,
   formatHandLimitCount,
-  iceStackSlotClass,
   opponentSide,
-  serverHighlighted,
-  serverLanesForSide,
   sideFromPublicPayload,
   sideLabel,
   sideStatusLineForView,
@@ -417,7 +403,6 @@ import {
   zoneHighlighted
 } from "../features/game-board/board-view-helpers";
 
-const RunIcon = Route;
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.22";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
@@ -501,7 +486,6 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   program: false
 };
 
-const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
@@ -4010,229 +3994,34 @@ export default function Page() {
               </span>
             </div>
           ) : null}
-          <div className="serverGrid">
-            {serverBoardRows(activeView.servers, activeView.side).map((row) =>
-              row.servers.length > 0 ? (
-                <div className={`serverRow ${row.kind}`} key={row.kind} data-testid={`server-row-${row.kind}`}>
-                  {row.servers.map((server) => {
-                    const countLabel = centralServerCountLabel(activeView, server.id);
-                    const runAction = runActionForServer(server.id);
-                    const lanes = serverLanesForSide(activeView.side, server);
-                    const isOwnCorpHq = activeView.side === "corp" && server.id === "hq";
-                    const isOpponentCorpHq = activeView.side === "runner" && server.id === "hq";
-                    const isCorpHqComposite = isOwnCorpHq || isOpponentCorpHq;
-                    const opponentCorpHqCount = isOpponentCorpHq ? Math.max(0, Math.floor(activeView.opponent.handCount)) : 0;
-                    const opponentCorpHqPreviewCount = Math.min(opponentCorpHqCount, CORP_OPPONENT_HQ_PREVIEW_LIMIT);
-                    const opponentCorpHqPreviewCards = Array.from({ length: opponentCorpHqPreviewCount }, (_, index): DisplayVisibleCard => ({
-                      instanceId: `corp-opponent-hq-hidden-${index}`,
-                      known: false,
-                      rezzed: false,
-                      owner: "corp"
-                    }));
-                    const serverCollapsed = boardZoneCollapsedFor(`corp:${server.id}`);
-                    const laneClassName = (lane: { kind: "ice" | "root"; cards: VisibleCard[] }) =>
-                      `lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}${lane.kind === "ice" && lane.cards.length >= 7 ? " scrollableIceLane" : ""}`;
-                    const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
-                      if (server.id === "archives" && lane.kind === "root") {
-                        return (
-                          <ArchivesDualStackLane
-                            viewerSide={activeView.side}
-                            visibleCards={lane.cards}
-                            totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
-                            emptyLabel={lane.label}
-                            collapsed={false}
-                            displayMode={cardDisplayMode}
-                            selectedContext={selectedActionContext}
-                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                            cardActionsFor={cardActionsFor}
-                            onAction={submitAction}
-                            onFocus={focusCard}
-                            onActionContextSelect={selectActionCard}
-                            enrichCard={enrichCard}
-                          />
-                        );
-                      }
-                      if (lane.cards.length === 0) {
-                        return (
-                          <span className="laneEmptyPlaceholder" aria-label={`${lane.label} leer`}>
-                            {lane.label}
-                          </span>
-                        );
-                      }
-                      return lane.cards.map((card, index) => {
-                        const displayCard = enrichCard(card);
-                        return (
-                          <CardView
-                            key={card.instanceId}
-                            card={displayCard}
-                            compact
-                            displayMode={cardDisplayMode}
-                            hiddenSide="corp"
-                            installedCorpCard={showInstalledCorpState(server.id, lane.kind)}
-                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                            actions={cardActionsFor(card)}
-                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                            {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
-                            {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
-                            {...(lane.kind === "ice" ? { modifierBadges: iceModifierBadgesForServer(server) } : {})}
-                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
-                            runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
-                            {...(lane.kind === "ice" && activeRunIceId === card.instanceId
-                              ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
-                              : {})}
-                            viewMarkerActive={
-                              (lane.kind === "ice" && viewedApproachIceId === card.instanceId) ||
-                              viewedInstalledExposeCardId === card.instanceId
-                            }
-                            {...fieldChoiceCardProps(card)}
-                            onAction={submitAction}
-                            onFocus={focusCard}
-                            onActionContextSelect={selectActionCard}
-                          />
-                        );
-                      });
-                    };
-                    return (
-                      <article
-                        className={`server ${isCorpHqComposite ? "corpHqServer" : ""} ${serverCollapsed ? "serverCollapsed" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
-                        key={server.id}
-                        data-testid="server"
-                        data-server-id={server.id}
-                      >
-                        <div className="serverLayout">
-                          <div className="serverLead">
-                            <div className="serverLeadTop">
-                              <button className={`serverContextButton serverContextSideButton rigGroupSideLabel ${zoneSideClass("corp")}`} type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
-                                {serverDisplayLabel(server.id)}
-                              </button>
-                              {countLabel !== null ? <span className={`serverCount serverCountSideLabel ${zoneSideClass("corp")}`}>{countLabel}</span> : null}
-                            </div>
-                            {runAction ? (
-                              <button
-                                className="serverRunButton serverRunButtonSide serverRunButtonCorner"
-                                type="button"
-                                onClick={() => submitAction(runAction)}
-                                disabled={Boolean(payload.winner) || connection !== "online"}
-                                aria-label={`${actionButtonLabel(runAction)} starten`}
-                                data-tooltip={actionButtonLabel(runAction)}
-                                data-testid="server-run-action"
-                                data-server-id={server.id}
-                              >
-                                <span className="serverRunGlyph" aria-hidden="true">
-                                  <RunIcon size={14} />
-                                </span>
-                                <span className="serverRunActionIcon" aria-hidden="true">
-                                  <span className="costActionIcon" />
-                                </span>
-                              </button>
-                            ) : null}
-                            <div className="serverLeadBottom">
-                              <ZoneIdentityIcon side="corp" kind={serverZoneIdentityIconKind(server.id)} label={serverDisplayLabel(server.id)} />
-                              <ZoneCollapseButton
-                                side="corp"
-                                label={serverDisplayLabel(server.id)}
-                                collapsed={serverCollapsed}
-                                onToggle={() => toggleBoardZoneCollapsed(`corp:${server.id}`)}
-                              />
-                            </div>
-                          </div>
-                          {!serverCollapsed ? <div className="serverBody">
-                            <ServerCounterStrip displays={server.counterDisplays} serverLabel={serverDisplayLabel(server.id)} />
-                            <div className={isCorpHqComposite ? "corpHqComposite" : "pairedServerLanes"}>
-                              {isOwnCorpHq ? (
-                                <>
-                                  <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
-                                    <HandCardsRow className="corpHqHandCards" style={handCardsStyle} count={activeView.own.gripOrHq.length}>
-                                      {activeView.own.gripOrHq.map((card) => {
-                                        const displayCard = enrichCard(card);
-                                        const discardOption = discardOptionForCard(card);
-                                        return (
-                                          <CardView
-                                            key={card.instanceId}
-                                            card={displayCard}
-                                            displayMode={cardDisplayMode}
-                                            hiddenSide={activeView.side}
-                                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                            actions={cardActionsFor(card)}
-                                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
-                                            {...(discardOption
-                                              ? {
-                                                  discardShortcut: {
-                                                    selected: selectedDiscardOptionIdSet.has(discardOption.id),
-                                                    disabled: Boolean(payload.winner) || connection !== "online",
-                                                    onToggle: () => toggleDiscardOption(discardOption.id)
-                                                  }
-                                                }
-                                              : {})}
-                                            onAction={submitAction}
-                                            onFocus={focusCard}
-                                            onActionContextSelect={selectActionCard}
-                                          />
-                                        );
-                                      })}
-                                    </HandCardsRow>
-                                  </div>
-                                  <div className="pairedServerLanes corpHqServerLanes">
-                                    {lanes.map((lane) => (
-                                      <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className={laneClassName(lane)} style={boardLaneStyle}>
-                                          {renderLaneCards(lane)}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </>
-                              ) : isOpponentCorpHq ? (
-                                <>
-                                  <div className={`corpHqHandPanel corpOpponentHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
-                                    {opponentCorpHqPreviewCards.length > 0 ? (
-                                      <div
-                                        className="corpOpponentHqPreview"
-                                        style={{
-                                          ...zoneCardsStyle,
-                                          "--corp-hq-visible-steps": String(Math.max(0, opponentCorpHqPreviewCards.length - 1))
-                                        } as CSSProperties}
-                                        aria-label={`Korp-HQ: ${formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)}, verdeckte Karten`}
-                                      >
-                                        {opponentCorpHqPreviewCards.map((card) => (
-                                          <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />
-                                        ))}
-                                        {opponentCorpHqCount > CORP_OPPONENT_HQ_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{opponentCorpHqCount - CORP_OPPONENT_HQ_PREVIEW_LIMIT}</span> : null}
-                                      </div>
-                                    ) : (
-                                      <p className="archivesPileEmpty">Keine Karten in HQ.</p>
-                                    )}
-                                  </div>
-                                  <div className="pairedServerLanes corpHqServerLanes">
-                                    {lanes.map((lane) => (
-                                      <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className={laneClassName(lane)} style={boardLaneStyle}>
-                                          {renderLaneCards(lane)}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </>
-                              ) : (
-                                lanes.map((lane) => (
-                                  <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                    <div className={laneClassName(lane)} style={boardLaneStyle}>
-                                      {renderLaneCards(lane)}
-                                    </div>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          </div> : null}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : null
-            )}
-          </div>
+          <ActiveServerGrid
+            view={activeView}
+            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+            activeHighlight={activeCueHighlight}
+            activeRunTargetIds={activeRunTargetIds}
+            activeRunIceId={activeRunIceId}
+            viewedApproachIceId={viewedApproachIceId}
+            viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+            selectedActionContext={selectedActionContext}
+            selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
+            boardLaneStyle={boardLaneStyle}
+            handCardsStyle={handCardsStyle}
+            zoneCardsStyle={zoneCardsStyle}
+            cardDisplayMode={cardDisplayMode}
+            boardZoneCollapsedFor={boardZoneCollapsedFor}
+            toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+            runActionForServer={runActionForServer}
+            cardActionsFor={cardActionsFor}
+            enrichCard={enrichCard}
+            scoreAreaCardsBySide={scoreAreaCardsBySide}
+            discardOptionForCard={discardOptionForCard}
+            toggleDiscardOption={toggleDiscardOption}
+            fieldChoiceCardProps={fieldChoiceCardProps}
+            onAction={submitAction}
+            onFocus={focusCard}
+            onActionContextSelect={selectActionCard}
+            onSelectActionContext={setSelectedActionContext}
+          />
           <section className="section panel boardSection zoneBoardSection">
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
