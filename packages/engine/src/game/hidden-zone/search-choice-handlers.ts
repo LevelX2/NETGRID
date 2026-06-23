@@ -882,7 +882,7 @@ function handlePaidStackProgramInstallStackChoice(
   const cardId = plan.selectedCardId;
   if (plan.shouldOpenMemoryChoice) {
     if (plan.shuffleNeeded)
-      host.shuffleRunnerStack(`v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+      host.shuffleRunnerStack(`paid_stack_program_install:${choice.choiceId}:shuffle`);
     const opened = host.startRunnerProgramFreeMemoryChoice(cardId);
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
@@ -901,7 +901,7 @@ function handlePaidStackProgramInstallStackChoice(
     ? host.installRunnerProgramFromStackWithoutClick(cardId)
     : false;
   if (plan.shuffleNeeded)
-    host.shuffleRunnerStack(`v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+    host.shuffleRunnerStack(`paid_stack_program_install:${choice.choiceId}:shuffle`);
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...buildPaidStackProgramInstallResolvedPayload(plan, { installed }),
