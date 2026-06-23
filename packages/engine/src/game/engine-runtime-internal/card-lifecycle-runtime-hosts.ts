@@ -1070,7 +1070,7 @@ export function createCardLifecycleRuntimeHosts(
     }
   }
 
-  function resolveMitWestTier(
+  function resolveRunnerGripHeapStackShuffleDrawEvent(
     state: GameState,
     legalAction: LegalAction,
   ): void {
@@ -1357,7 +1357,7 @@ export function createCardLifecycleRuntimeHosts(
     rezCardHost,
     resolveRunnerTargetedEventImplementation,
     resolvePostOnPlayGenericFollowups,
-    resolveMitWestTier,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     shuffleGripTrashAndStackThenDrawForCardImplementation,
     startRunnerProgramTrashBeforeInstallChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,

@@ -995,7 +995,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     resolveIncubatorTransformChoice,
     resolveCorpInstalledEconomyCreditChoice,
     resolveManagementShakeUpOperation,
-    resolveMitWestTier,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,

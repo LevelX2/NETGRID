@@ -966,7 +966,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
-    resolveMitWestTier,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolveEndTurnTagIfRunnerReceivedTag,
     resolvePaidSourceReturnToGripChoice,

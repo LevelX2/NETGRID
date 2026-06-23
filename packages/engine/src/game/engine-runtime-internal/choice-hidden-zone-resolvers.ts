@@ -1012,7 +1012,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     resolveIncubatorTransformChoice,
     resolveCorpInstalledEconomyCreditChoice,
     resolveManagementShakeUpOperation,
-    resolveMitWestTier,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolveEndTurnTagIfRunnerReceivedTag,
     resolvePaidSourceReturnToGripChoice,

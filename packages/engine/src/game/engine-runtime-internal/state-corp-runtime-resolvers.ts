@@ -1018,7 +1018,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveIncubatorTransformChoice,
     resolveCorpInstalledEconomyCreditChoice,
     resolveManagementShakeUpOperation,
-    resolveMitWestTier,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolveEndTurnTagIfRunnerReceivedTag,
     resolvePaidSourceReturnToGripChoice,

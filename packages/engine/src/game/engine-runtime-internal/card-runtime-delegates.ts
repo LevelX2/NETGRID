@@ -280,8 +280,8 @@ export function resolvePostOnPlayGenericFollowups(...args: any[]): any {
   )(...args);
 }
 
-export function resolveMitWestTier(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "resolveMitWestTier"))(...args);
+export function resolveRunnerGripHeapStackShuffleDrawEvent(...args: any[]): any {
+  return (runtimeDelegate("cardRuntimeHosts", "resolveRunnerGripHeapStackShuffleDrawEvent"))(...args);
 }
 
 export function shuffleGripTrashAndStackThenDrawForCardImplementation(
