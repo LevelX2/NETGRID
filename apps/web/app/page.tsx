@@ -57,7 +57,6 @@ import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef,
 import { createPortal } from "react-dom";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
-  ApiAiPacingMode,
   ApiClientGameMode,
   ApiCreateMatchResponse,
   ApiGameResultSummary,
@@ -372,6 +371,36 @@ import {
   type ConfirmationDialogRequest
 } from "../features/app-shell/ConfirmationDialog";
 import { OptionsDialog } from "../features/app-shell/OptionsDialog";
+import {
+  CARD_SCALE_DEFAULT_PERCENT,
+  CARD_SCALE_PERCENT_MAX,
+  CARD_SCALE_PERCENT_MIN,
+  CARD_SCALE_PERCENT_STEP,
+  CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
+  CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
+  CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
+  CARD_TOOLTIP_PIN_EVENT,
+  normalizeActionPanelMode,
+  normalizeAiPacingMode,
+  normalizeCardDisplayMode,
+  normalizeCardScalePercent,
+  normalizeCardTooltipHoverDelayMs,
+  normalizeCardTooltipMode,
+  normalizeChronicleDetailMode,
+  normalizeCueAutoDismissMs,
+  normalizeResourceStripMode,
+  type ActionPanelMode,
+  type AiPacingMode,
+  type CardDisplayMode,
+  type CardScaleSettings,
+  type CardTooltipHoverDelayMs,
+  type CardTooltipMode,
+  type CardTooltipSettings,
+  type ChronicleDetailMode,
+  type ColorScheme,
+  type CueAutoDismissMs,
+  type ResourceStripMode
+} from "../features/settings/settings-model";
 import { PlayerClockStrip, playerClockGraceDisplay } from "../features/game-board/PlayerClock";
 import {
   ActionSlotMeter,
@@ -439,15 +468,6 @@ const APP_STATUS_LABEL = "V1.9.22";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
-const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
-const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
-const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
-const CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS = 450;
-const CARD_TOOLTIP_PIN_EVENT = "netgrid:card-tooltip-pin";
-const CARD_SCALE_PERCENT_MIN = 50;
-const CARD_SCALE_PERCENT_MAX = 170;
-const CARD_SCALE_PERCENT_STEP = 5;
-const CARD_SCALE_DEFAULT_PERCENT = 100;
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -459,37 +479,14 @@ type MatchFormat = ApiMatchFormat;
 type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
-type AiPacingMode = ApiAiPacingMode;
 type AiTraceStartMode = "off" | "detailed";
-type CardDisplayMode = "placeholder" | "text-card" | "compact";
-type ChronicleDetailMode = "simple" | "medium" | "full";
-type ColorScheme = "black" | "white";
-type ResourceStripMode = "auto" | "on" | "off";
-type ActionPanelMode = "docked" | "floating";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
-type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
-type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
-type CardTooltipMode = "simple" | "enhanced" | "image";
 type RunOverlayPositionPreference = OverlayPositionPreference;
-
-type CardTooltipSettings = {
-  hoverOpenDelayMs: CardTooltipHoverDelayMs;
-  mode: CardTooltipMode;
-};
 
 type CardImagePreferenceSettings = {
   preferGermanCardImages: boolean;
   showSetBadges: boolean;
-};
-
-type CardScaleSettings = {
-  tooltipPercent: number;
-  handPercent: number;
-  archivePercent: number;
-  zonePercent: number;
-  boardPercent: number;
-  rigPercent: number;
 };
 
 const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
@@ -946,47 +943,6 @@ type DeckTableViewSettings = {
   libraryCardWidth: number;
   libraryOverlapPercent: number;
 };
-
-function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
-  if (value === 0 || value === 1500 || value === 2500 || value === 4000 || value === 6000) return value;
-  return 2500;
-}
-
-function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHoverDelayMs {
-  return CARD_TOOLTIP_HOVER_DELAY_OPTIONS.includes(value as CardTooltipHoverDelayMs) ? (value as CardTooltipHoverDelayMs) : CARD_TOOLTIP_HOVER_OPEN_DELAY_MS;
-}
-
-function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
-  return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
-}
-
-function normalizeCardDisplayMode(value: unknown): CardDisplayMode {
-  return value === "placeholder" || value === "text-card" || value === "compact" ? value : "placeholder";
-}
-
-function normalizeChronicleDetailMode(value: unknown): ChronicleDetailMode {
-  return value === "simple" || value === "medium" || value === "full" ? value : "full";
-}
-
-function normalizeAiPacingMode(value: unknown): AiPacingMode {
-  return value === "manual" || value === "paced" || value === "fast" ? value : "paced";
-}
-
-function normalizeResourceStripMode(value: unknown): ResourceStripMode {
-  return value === "auto" || value === "on" || value === "off" ? value : "auto";
-}
-
-function normalizeActionPanelMode(value: unknown): ActionPanelMode {
-  return value === "floating" ? "floating" : "docked";
-}
-
-function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN, max = CARD_SCALE_PERCENT_MAX): number {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return CARD_SCALE_DEFAULT_PERCENT;
-  const clamped = Math.max(min, Math.min(max, Math.round(numeric)));
-  const snapped = Math.round(clamped / CARD_SCALE_PERCENT_STEP) * CARD_SCALE_PERCENT_STEP;
-  return Math.max(min, Math.min(max, snapped));
-}
 
 function usePersistentCardScaleSettings() {
   const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
