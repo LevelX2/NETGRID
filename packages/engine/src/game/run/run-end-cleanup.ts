@@ -785,7 +785,7 @@ function derezOliviaSalazarTemporaryIce(
   run: ActiveRun,
   legalAction?: LegalAction,
 ): RunDurationCleanupResult {
-  const iceIds = [...new Set(run.oliviaSalazarTemporaryRezzedIceIds ?? [])].sort();
+  const iceIds = [...new Set(run.temporaryDiscountedRezzedIceIds ?? [])].sort();
   const derezCardIds: CardInstanceId[] = [];
   for (const iceId of iceIds) {
     const instance = host.state.cardInstances[iceId];
@@ -806,7 +806,7 @@ function derezOliviaSalazarTemporaryIce(
   if (derezCardIds.length > 0 && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      oliviaSalazarRunEndDerez: true,
+      temporaryDiscountedRezRunEndDerez: true,
       derezzedCount: derezCardIds.length,
     };
   }

@@ -1180,8 +1180,8 @@ export type RunState = {
   >;
   hqIceSwapUsedSourceIdsThisRun?: CardInstanceId[];
   iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
-  oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
-  oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
+  discountedRezUsedSourceIdsThisRun?: CardInstanceId[];
+  temporaryDiscountedRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
   successfulRunInterventionWindowClosed?: boolean;
   secretSpendGuessRunAutoPassIceId?: CardInstanceId;

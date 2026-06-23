@@ -922,10 +922,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(oliviaRez.costs[0]?.credits).toBe(2);
     expect(oliviaRez.payload).toMatchObject({
       cardId: iceId,
-      oliviaSalazarRezSourceCardId: oliviaId,
-      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
-      oliviaSalazarRezCostBase: 4,
-      oliviaSalazarTemporaryDerez: true,
+      discountedRezSourceCardId: oliviaId,
+      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      discountedRezCostBase: 4,
+      temporaryDerezAfterRun: true,
       rezCostPaid: 2,
       rezCostReductionAmount: 2,
     });
@@ -942,13 +942,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const alreadyUsedThisRun = structuredClone(state);
     alreadyUsedThisRun.run = {
       ...alreadyUsedThisRun.run!,
-      oliviaSalazarUsedSourceIdsThisRun: [oliviaId],
+      discountedRezUsedSourceIdsThisRun: [oliviaId],
     };
     expect(
       getLegalActions(alreadyUsedThisRun, "corp").some(
         (action) =>
           action.type === "rez_ice" &&
-          action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+          action.payload?.discountedRezSourceCardId === oliviaId,
       ),
     ).toBe(false);
 
@@ -983,13 +983,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     expect(state.corp.credits).toBe(0);
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
-    expect(state.run?.oliviaSalazarUsedSourceIdsThisRun).toEqual([oliviaId]);
+    expect(state.run?.discountedRezUsedSourceIdsThisRun).toEqual([oliviaId]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_232_crystal-wall",
-      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
-      oliviaSalazarRezCostBase: 4,
-      oliviaSalazarTemporaryDerez: true,
+      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      discountedRezCostBase: 4,
+      temporaryDerezAfterRun: true,
       rezCostPaid: 2,
     });
 
@@ -998,7 +998,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[iceId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      oliviaSalazarRunEndDerez: true,
+      temporaryDiscountedRezRunEndDerez: true,
       derezzedCount: 1,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1054,7 +1054,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "rez_ice" &&
         action.payload?.cardId === iceId &&
-        action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+        action.payload?.discountedRezSourceCardId === oliviaId,
     );
 
     state = apply(
@@ -1118,7 +1118,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "rez_ice" &&
         action.payload?.cardId === iceId &&
-        !action.payload?.oliviaSalazarRezSourceCardId,
+        !action.payload?.discountedRezSourceCardId,
     );
     const oliviaRez = mustAction(
       state,
@@ -1126,15 +1126,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "rez_ice" &&
         action.payload?.cardId === iceId &&
-        action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+        action.payload?.discountedRezSourceCardId === oliviaId,
     );
     expect(actions).toHaveLength(2);
     expect(normalRez.costs[0]?.credits).toBe(4);
     expect(normalRez.payload?.rezCostPaid).toBeUndefined();
     expect(oliviaRez.costs[0]?.credits).toBe(2);
     expect(oliviaRez.payload).toMatchObject({
-      oliviaSalazarRezSourceCardId: oliviaId,
-      oliviaSalazarRezCostBase: 4,
+      discountedRezSourceCardId: oliviaId,
+      discountedRezCostBase: 4,
       rezCostPaid: 2,
     });
   });
@@ -1195,10 +1195,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(oliviaQuote.costs).toEqual([{ credits: 2 }]);
     expect(oliviaQuote.publicPayload).toMatchObject({
       cardId: iceId,
-      oliviaSalazarRezSourceCardId: oliviaId,
-      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
-      oliviaSalazarRezCostBase: 4,
-      oliviaSalazarTemporaryDerez: true,
+      discountedRezSourceCardId: oliviaId,
+      discountedRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      discountedRezCostBase: 4,
+      temporaryDerezAfterRun: true,
       rezCostPaid: 2,
       rezCostReductionAmount: 2,
     });

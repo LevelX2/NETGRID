@@ -114,17 +114,17 @@ export function rezCard(
     creditCost = quote.finalCredits;
     const quotePayload = costQuotePublicPayload(quote);
     const sourceId =
-      typeof quotePayload.oliviaSalazarRezSourceCardId === "string"
-        ? (quotePayload.oliviaSalazarRezSourceCardId as CardInstanceId)
+      typeof quotePayload.discountedRezSourceCardId === "string"
+        ? (quotePayload.discountedRezSourceCardId as CardInstanceId)
         : undefined;
     if (sourceId) {
       const run = host.run.mustRun();
-      run.oliviaSalazarUsedSourceIdsThisRun = [
-        ...(run.oliviaSalazarUsedSourceIdsThisRun ?? []),
+      run.discountedRezUsedSourceIdsThisRun = [
+        ...(run.discountedRezUsedSourceIdsThisRun ?? []),
         sourceId,
       ].sort();
-      run.oliviaSalazarTemporaryRezzedIceIds = [
-        ...new Set([...(run.oliviaSalazarTemporaryRezzedIceIds ?? []), iceId]),
+      run.temporaryDiscountedRezzedIceIds = [
+        ...new Set([...(run.temporaryDiscountedRezzedIceIds ?? []), iceId]),
       ].sort();
       quotePayload.serverId = run.attackedServerId;
     }

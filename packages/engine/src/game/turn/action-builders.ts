@@ -160,8 +160,8 @@ export function makeActionId(
     parts.push(String(payload.stealCostSourceDefinitionIds));
   if (payload?.stealCostPersistedForCurrentAccess !== undefined)
     parts.push(String(payload.stealCostPersistedForCurrentAccess));
-  if (payload?.oliviaSalazarRezSourceCardId)
-    parts.push(String(payload.oliviaSalazarRezSourceCardId));
+  if (payload?.discountedRezSourceCardId)
+    parts.push(String(payload.discountedRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.secondTargetCardId)
     parts.push(String(payload.secondTargetCardId));

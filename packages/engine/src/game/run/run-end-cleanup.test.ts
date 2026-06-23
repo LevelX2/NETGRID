@@ -757,7 +757,7 @@ describe("run end cleanup", () => {
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
-        oliviaSalazarTemporaryRezzedIceIds: ["ice_1"],
+        temporaryDiscountedRezzedIceIds: ["ice_1"],
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -767,7 +767,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.cardInstances.ice_1?.rezzed).toBe(false);
     expect(fixture.state.cardInstances.ice_1?.faceup).toBe(false);
     expect(fixture.legalAction.payload).toMatchObject({
-      oliviaSalazarRunEndDerez: true,
+      temporaryDiscountedRezRunEndDerez: true,
       derezzedCount: 1,
     });
   });

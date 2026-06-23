@@ -358,10 +358,10 @@ export function quoteCorpRezCost(
   if (discountedRezSourceCardId) {
     const sourceDefinitionId = discountedRezSourceDefinitionId!;
     publicPayload.serverId = corpServerIdForInstalledCard(state, iceId) ?? "";
-    publicPayload.oliviaSalazarRezSourceCardId = discountedRezSourceCardId;
-    publicPayload.oliviaSalazarRezSourceDefinitionId = sourceDefinitionId;
-    publicPayload.oliviaSalazarRezCostBase = regularFinalCredits;
-    publicPayload.oliviaSalazarTemporaryDerez = true;
+    publicPayload.discountedRezSourceCardId = discountedRezSourceCardId;
+    publicPayload.discountedRezSourceDefinitionId = sourceDefinitionId;
+    publicPayload.discountedRezCostBase = regularFinalCredits;
+    publicPayload.temporaryDerezAfterRun = true;
     publicPayload.rezCostReductionSourceDefinitionIds = [
       ...existingSourceDefinitionIds,
       sourceDefinitionId,
@@ -431,7 +431,7 @@ export function discountedRezSourceIdsForRunIce(
     return [];
   if (corpServerIdForInstalledCard(state, iceId) !== run.attackedServerId)
     return [];
-  const used = new Set(run.oliviaSalazarUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.discountedRezUsedSourceIdsThisRun ?? []);
   const server = mustServer(state, run.attackedServerId);
   return server.root
     .filter((sourceId) => {
@@ -464,20 +464,20 @@ export function assertCorpRezCostQuoteValid(
   )
     throw new Error("ICE ist nicht mehr im passenden Rez-Fenster.");
   const discountedRezSourceCardId =
-    typeof legalAction.payload?.oliviaSalazarRezSourceCardId === "string"
-      ? (legalAction.payload.oliviaSalazarRezSourceCardId as CardInstanceId)
+    typeof legalAction.payload?.discountedRezSourceCardId === "string"
+      ? (legalAction.payload.discountedRezSourceCardId as CardInstanceId)
       : undefined;
   if (discountedRezSourceCardId) {
     if (!state.cardInstances[discountedRezSourceCardId])
-      throw new Error("Olivia-Salazar-Quelle fehlt.");
+      throw new Error("Discounted-Rez-Quelle fehlt.");
     const availableSources = discountedRezSourceIdsForRunIce(state, iceId);
     if (!availableSources.includes(discountedRezSourceCardId))
-      throw new Error("Olivia Salazar ist fuer dieses ICE nicht aktiv.");
+      throw new Error("Die Discounted-Rez-Quelle ist fuer dieses ICE nicht aktiv.");
     if (
       corpServerIdForInstalledCard(state, discountedRezSourceCardId) !==
       run.attackedServerId
     )
-      throw new Error("Olivia Salazar gehoert nicht zu diesem Fort.");
+      throw new Error("Die Discounted-Rez-Quelle gehoert nicht zu diesem Fort.");
   }
   const quote = quoteCorpRezCost(state, iceId, {
     ...(discountedRezSourceCardId ? { discountedRezSourceCardId } : {}),
