@@ -3409,13 +3409,17 @@ export function chooseCorpAction(
   input: AiDecisionInput,
   options: AiDecisionRuntimeOptions = {},
 ): AiDecision {
-  const baselineDecision = chooseCorpBaselineAction(input);
-  const legacyDecision =
-    hasCorpPlanAction(input) &&
-    !isCorpReactiveBaselineDecision(baselineDecision)
-      ? chooseCorpPlanAction(input, baselineDecision)
-      : baselineDecision;
-  return chooseSemanticRuntimeAction(input, legacyDecision, options);
+  return chooseSemanticRuntimeAction(
+    input,
+    memoizeLegacyDecision(() => {
+      const baselineDecision = chooseCorpBaselineAction(input);
+      return hasCorpPlanAction(input) &&
+        !isCorpReactiveBaselineDecision(baselineDecision)
+        ? chooseCorpPlanAction(input, baselineDecision)
+        : baselineDecision;
+    }),
+    options,
+  );
 }
 
 export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
@@ -3429,23 +3433,25 @@ export function chooseRunnerAction(
   input: AiDecisionInput,
   options: AiDecisionRuntimeOptions = {},
 ): AiDecision {
-  const baselineDecision = chooseRunnerBaselineAction(input);
-  const baselineAction = input.legalActions.find(
-    (candidate) => candidate.actionId === baselineDecision.actionId,
-  );
-  const shouldUsePlanAction =
-    hasRunnerPlanAction(input) &&
-    (!isRunnerReactiveBaselineDecision(baselineDecision) ||
-      baselineShellTradersPlanIsVisible(input, baselineDecision)) &&
-    !runnerHasConditionalPaymentContinueDecision(input, baselineAction);
-  const legacyDecision = shouldUsePlanAction
-    ? chooseRunnerPlanAction(input, baselineDecision)
-    : baselineDecision;
-  const guardedLegacyDecision = runnerSelfDamageGuardedDecision(
+  return chooseSemanticRuntimeAction(
     input,
-    legacyDecision,
+    memoizeLegacyDecision(() => {
+      const baselineDecision = chooseRunnerBaselineAction(input);
+      const baselineAction = input.legalActions.find(
+        (candidate) => candidate.actionId === baselineDecision.actionId,
+      );
+      const shouldUsePlanAction =
+        hasRunnerPlanAction(input) &&
+        (!isRunnerReactiveBaselineDecision(baselineDecision) ||
+          baselineShellTradersPlanIsVisible(input, baselineDecision)) &&
+        !runnerHasConditionalPaymentContinueDecision(input, baselineAction);
+      const legacyDecision = shouldUsePlanAction
+        ? chooseRunnerPlanAction(input, baselineDecision)
+        : baselineDecision;
+      return runnerSelfDamageGuardedDecision(input, legacyDecision);
+    }),
+    options,
   );
-  return chooseSemanticRuntimeAction(input, guardedLegacyDecision, options);
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
@@ -3515,12 +3521,13 @@ const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
-  legacyDecision: AiDecision,
+  legacyDecisionProvider: () => AiDecision,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
+  const lazyLegacyDecision = memoizeLegacyDecision(legacyDecisionProvider);
   const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
     input,
-    legacyDecision,
+    lazyLegacyDecision,
     options,
     {
       semanticRuntimeChoices,
@@ -3549,6 +3556,7 @@ function chooseSemanticRuntimeAction(
       semanticRuntimeDecisionDebug,
     },
   );
+  const legacyDecision = lazyLegacyDecision();
   const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
     input,
     legacyDecision,
@@ -3557,6 +3565,14 @@ function chooseSemanticRuntimeAction(
     practicalMicroRuntimeCandidates(input, runtimeDecision),
   );
   return applyPracticalTacticOverlay(input, practicalMicroDecision, options);
+}
+
+function memoizeLegacyDecision(provider: () => AiDecision): () => AiDecision {
+  let cached: AiDecision | undefined;
+  return () => {
+    cached ??= provider();
+    return cached;
+  };
 }
 
 function practicalMicroRuntimeCandidates(

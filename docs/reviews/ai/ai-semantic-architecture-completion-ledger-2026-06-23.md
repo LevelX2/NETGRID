@@ -50,7 +50,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | ID | Ziel | Status | Ausgangsevidenz | Definition of Done |
 | --- | --- | --- | --- | --- |
 | AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
-| AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `PENDING` | Runtime-Pfade enthalten `legacyDecision` und `legacy_reference_*`. | Normaler semantischer Pfad berechnet unabhängig; Legacy nur lazy Notaus, No-Candidate-Fallback oder Diagnose. |
+| AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `PENDING` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Dünne Public-/Composition-Fassade; Boundary-Test verhindert neue Fachlogik. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `PENDING` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `PENDING` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
@@ -98,7 +98,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
-Nächstes aktives Ziel: `AI-COMPLETE-02`.
+- `AI-COMPLETE-02`:
+  - `packages/ai/src/index.ts` verschiebt Runner-/Corp-Baseline- und Legacy-Planberechnung hinter einen memoisierten Provider.
+  - `packages/ai/src/runtime/semantic-runtime.ts` akzeptiert einen Legacy-Provider und fordert Legacy erst bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Trace an.
+  - Die direkte Runtime-Test-API bleibt kompatibel mit fertigen Legacy-Decisions, normalisiert intern aber ebenfalls auf einen Provider.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 55 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+
+Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
 ## Audit-Ledger
 

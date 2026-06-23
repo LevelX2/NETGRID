@@ -161,11 +161,15 @@ export type SemanticRuntimeDependencies = {
 
 export function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
-  legacyDecision: AiDecision,
+  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
   options: AiDecisionRuntimeOptions,
   dependencies: SemanticRuntimeDependencies,
 ): AiDecision {
+  const legacyDecisionProvider = legacyDecisionProviderFrom(
+    legacyDecisionOrProvider,
+  );
   if (semanticRuntimeForcedLegacy()) {
+    const legacyDecision = legacyDecisionProvider();
     return {
       ...legacyDecision,
       evidence: [
@@ -293,6 +297,7 @@ export function chooseSemanticRuntimeAction(
         )
       : bestChoice);
   if (!initialChoice) {
+    const legacyDecision = legacyDecisionProvider();
     return {
       ...legacyDecision,
       evidence: [
@@ -349,6 +354,7 @@ export function chooseSemanticRuntimeAction(
       selectedChoice.action,
       effectivePlanRuntime,
     );
+  const legacyDecision = legacyDecisionProvider();
   const legacyActionType = input.legalActions.find(
     (action) => action.actionId === legacyDecision.actionId,
   )?.type;
@@ -418,6 +424,15 @@ export function chooseSemanticRuntimeAction(
     difficulty: input.difficulty,
     reason: selectedChoice.reasonCode,
   };
+}
+
+function legacyDecisionProviderFrom(
+  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
+): () => AiDecision {
+  if (typeof legacyDecisionOrProvider === "function") {
+    return legacyDecisionOrProvider;
+  }
+  return () => legacyDecisionOrProvider;
 }
 
 function visibleSourceDefinitionsByInstanceId(
