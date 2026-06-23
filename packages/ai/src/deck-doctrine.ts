@@ -21,6 +21,9 @@ export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 
 const AI_HINTS = createAiHintsByCard();
 
+// Legacy Doctrine v1 feeds old baseline/plan scorers and opening-hand heuristics.
+// New semantic decisions must use DeckDoctrine v2 diagnostics, capabilities and
+// TacticalGoals; support-only or anchorless decks stay neutral here.
 // Legacy fallback weights for the old baseline/plan scorers. The newer
 // Semantic Runtime/TacticalGoal layer uses DeckCapability-derived facts instead.
 const CORP_DOCTRINE_PLAN_WEIGHTS: Record<string, Record<string, number>> = {
@@ -116,7 +119,7 @@ export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHand
     `opening_agendas:${agendaCount}`,
     `opening_ice:${iceCount}`,
     `opening_economy:${economyCount}`,
-    ...(doctrine ? [`doctrine:${doctrine.archetypeTags.slice(0, 3).join(",")}`, `doctrine_confidence:${doctrine.confidence}`] : ["doctrine:neutral"])
+    ...doctrineOpeningEvidence(doctrine)
   ];
 
   score += iceCount >= 2 ? 25 : iceCount === 1 ? 16 : 0;
@@ -157,7 +160,7 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
     `opening_economy:${economyCount}`,
     `opening_setup:${setupCount}`,
     `opening_pressure:${pressureCount}`,
-    ...(doctrine ? [`doctrine:${tags.slice(0, 3).join(",")}`, `doctrine_confidence:${doctrine.confidence}`] : ["doctrine:neutral"])
+    ...doctrineOpeningEvidence(doctrine)
   ];
 
   score += breakerCount >= 2 ? 24 : breakerCount === 1 ? 18 : 0;
@@ -232,7 +235,7 @@ function corpArchetypes(roleCounts: Record<string, number>, totalCards: number):
     operation_economy: density(roleCounts, totalCards, ["economy_operation", "draw_operation"]) * 70,
     central_defense: density(roleCounts, totalCards, ["central_defense", "barrier_ice", "code_gate_ice", "sentry_ice", "etr_ice"]) * 32
   };
-  return topArchetypes(scores, "glacier");
+  return topArchetypes(scores);
 }
 
 function runnerArchetypes(roleCounts: Record<string, number>, totalCards: number): string[] {
@@ -244,7 +247,7 @@ function runnerArchetypes(roleCounts: Record<string, number>, totalCards: number
     tag_resilient: density(roleCounts, totalCards, ["tag_clear", "link", "tag_resilient"]) * 64,
     economy_dense: density(roleCounts, totalCards, ["economy", "draw"]) * 45
   };
-  return topArchetypes(scores, "rig_builder");
+  return topArchetypes(scores);
 }
 
 function planWeightsFor(side: Side, archetypeTags: string[]): Record<string, number> {
@@ -279,13 +282,13 @@ function density(roleCounts: Record<string, number>, totalCards: number, roles: 
   return count / Math.max(1, totalCards);
 }
 
-function topArchetypes(scores: Record<string, number>, fallback: string): string[] {
+function topArchetypes(scores: Record<string, number>): string[] {
   const selected = Object.entries(scores)
     .filter(([, score]) => score >= 8)
     .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
     .slice(0, 3)
     .map(([tag]) => tag);
-  return selected.length > 0 ? selected : [fallback];
+  return selected;
 }
 
 function isAgendaRole(role: string): boolean {
@@ -298,6 +301,18 @@ function isIceRole(role: string): boolean {
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values)].sort();
+}
+
+function doctrineOpeningEvidence(
+  doctrine: AiDeckDoctrineProfile | undefined,
+): string[] {
+  if (!doctrine || doctrine.archetypeTags.length === 0) {
+    return ["doctrine:neutral"];
+  }
+  return [
+    `doctrine:${doctrine.archetypeTags.slice(0, 3).join(",")}`,
+    `doctrine_confidence:${doctrine.confidence}`,
+  ];
 }
 
 function round(value: number): number {
