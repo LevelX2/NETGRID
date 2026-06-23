@@ -3477,6 +3477,104 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 
+  it("passes post-bid Trace Link choices when the Runner already avoided the trace", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-already-avoided",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 5,
+      runnerLink: 1,
+      runnerBid: 4,
+      runnerStrength: 5,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("chooses the cheapest post-bid Trace Link source that changes the outcome", () => {
+    const { state, input, springboardId } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-minimal-needed",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 1,
+      runnerLink: 0,
+      runnerBid: 0,
+      runnerStrength: 0,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: [`trace_link_${springboardId}`],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("does not spend Submarine Uplink post-bid link when the trace is already avoided", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-submarine-already-avoided",
+    );
+    const submarineInput = withPostBidChoiceOptions(input, [
+      { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
+      {
+        id: "trace_link_runner_onr_v1_182_submarine-uplink_1",
+        label: "Submarine Uplink: +1 Link",
+        publicLabel: "Trace Link",
+        value: "runner_onr_v1_182_submarine-uplink_1",
+      },
+    ]);
+    const contextualInput = withSyntheticPostBidTraceContext(submarineInput, {
+      traceStrength: 5,
+      runnerLink: 1,
+      runnerBid: 4,
+      runnerStrength: 5,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("passes a reopened post-bid Trace Link choice after a prior link boost already fixed the outcome", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-reopened-after-fixed",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 5,
+      runnerLink: 2,
+      runnerBid: 3,
+      runnerStrength: 5,
+      postBidTraceLinkBonus: 1,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
   it("keeps V0.97 breach queues hidden and chooses access from LegalActions", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -27291,6 +27389,125 @@ function traceCorpBidState(seed: string): GameState {
       sourceDefinition(state, action) === "v096_trace_probe_ice",
   );
   return apply(state, "runner", (action) => action.type === "continue_run");
+}
+
+function postBidTraceLinkChoiceFixture(seed: string): {
+  state: GameState;
+  input: AiDecisionInput;
+  signpostId: CardInstanceId;
+  springboardId: CardInstanceId;
+} {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `${seed}_runner`,
+        name: "AI Post-Bid Trace Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_063_signpost", quantity: 1 },
+          { id: "onr_v1_181_the-springboard", quantity: 1 },
+          { id: "simple_economy_event", quantity: 10 },
+        ],
+      },
+      corpDeck: {
+        id: `${seed}_corp`,
+        name: "AI Post-Bid Trace Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+          { id: "simple_agenda", quantity: 6 },
+          { id: "simple_economy_operation", quantity: 6 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 5;
+  state.corp.credits = 5;
+  const signpostId = moveRunnerProgramToRig(state, "onr_v1_063_signpost");
+  const springboardId = moveRunnerResourceToRig(
+    state,
+    "onr_v1_181_the-springboard",
+  );
+  const iceId = putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
+
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  state = apply(
+    state,
+    "corp",
+    (action) => action.type === "rez_ice" && action.source === iceId,
+  );
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  state = applyChoice(state, "corp", ["bid_0"]);
+  state = applyChoice(state, "runner", ["bid_0"]);
+
+  return {
+    state,
+    input: buildAiDecisionInput(state, "runner", { difficulty: "hard" }),
+    signpostId,
+    springboardId,
+  };
+}
+
+function withSyntheticPostBidTraceContext(
+  input: AiDecisionInput,
+  context: {
+    traceStrength: number;
+    runnerLink: number;
+    runnerBid: number;
+    runnerStrength: number;
+    postBidTraceLinkBonus?: number;
+  },
+): AiDecisionInput {
+  const event: PublicGameEvent = {
+    eventId: `synthetic_post_bid_trace_${input.eventTail.length}`,
+    type: "resolve_choice",
+    stateVersionBefore: 9000,
+    stateVersionAfter: 9001,
+    stateHashAfter: "fnv1a:synthetic",
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      traceStep: "runner_bid",
+      traceStrength: context.traceStrength,
+      runnerLink: context.runnerLink,
+      runnerBid: context.runnerBid,
+      runnerStrength: context.runnerStrength,
+      ...(context.postBidTraceLinkBonus !== undefined
+        ? { postBidTraceLinkBonus: context.postBidTraceLinkBonus }
+        : {}),
+    },
+  };
+  return { ...input, eventTail: [...input.eventTail, event] };
+}
+
+function withPostBidChoiceOptions(
+  input: AiDecisionInput,
+  options: NonNullable<
+    AiDecisionInput["playerView"]["pendingChoice"]
+  >["options"],
+): AiDecisionInput {
+  if (!input.playerView.pendingChoice)
+    throw new Error("Expected pending post-bid choice");
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      pendingChoice: {
+        ...input.playerView.pendingChoice,
+        options,
+      },
+    },
+  };
 }
 
 function corpActionPhaseInput(

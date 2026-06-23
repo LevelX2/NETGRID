@@ -2,13 +2,15 @@
 
 ## Status
 
-`prepared`
+`implemented_with_incomplete_acceptance`
 
 Arbeitsbranch: `codex/ai-replay-mistake-iteration`
 
 Arbeits-Worktree: `C:\Projekte\NETGRID_AI_REPLAY_MISTAKE_ITERATION`
 
 Hauptworkspace: `C:\Projekte\NETGRID`
+
+Nachtrag 2026-06-23: Der Arbeitsbranch wurde lokal nach `main` gemerged und anschließend nach GitHub gepusht. Die fachliche Abnahme war dabei zu stark formuliert. Korrekt ist: Mining und erster Minimalfix sind implementiert; Repro-Portabilität, echte aktuelle Holdout-Auswertung, Full-Green-Abnahme und Artefakthygiene werden durch `docs/architecture/ai/ai-replay-acceptance-hygiene-process-2026-06-23.md` nachgezogen.
 
 ## Quelle/Vorgabe
 

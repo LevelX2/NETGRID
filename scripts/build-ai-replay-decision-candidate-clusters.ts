@@ -1,5 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import {
   buildReplayDecisionCandidateClusterReport,
   type ReplayDecisionCandidateClusterReport,
@@ -7,9 +7,16 @@ import {
 import type { ReplayDecisionCaseExtractionReport } from "../packages/ai/src/evaluation/replay-decision-case-extraction";
 
 const repoRoot = findRepoRoot(process.cwd());
-const inputPath = resolve(repoRoot, "docs/reviews/ai/ai-replay-decision-cases-2026-06-23.json");
-const jsonOut = resolve(repoRoot, "docs/reviews/ai/ai-replay-decision-candidate-clusters-2026-06-23.json");
-const mdOut = resolve(repoRoot, "docs/reviews/ai/ai-replay-decision-candidate-clusters-2026-06-23.md");
+const runId = safeRunId(optionValue("--run-id") ?? "latest");
+const outputDir = resolve(
+  repoRoot,
+  optionValue("--out-dir") ?? `data/local/ai-replay/${runId}`,
+);
+const inputPath =
+  optionValue("--input") ??
+  resolve(outputDir, `${runId}-decision-cases.json`);
+const jsonOut = resolve(outputDir, `${runId}-candidate-clusters.json`);
+const mdOut = resolve(outputDir, `${runId}-candidate-clusters.md`);
 
 const source = JSON.parse(readFileSync(inputPath, "utf8")) as ReplayDecisionCaseExtractionReport;
 const report = buildReplayDecisionCandidateClusterReport(source);
@@ -29,7 +36,9 @@ function renderMarkdown(report: ReplayDecisionCandidateClusterReport): string {
     .join("\n");
   return `# KI-Replay-Kandidatencluster
 
-Stand: 2026-06-23
+Run-ID: \`${runId}\`
+
+Quelle: \`${safeDisplayPath(inputPath)}\`
 
 ## Ergebnis
 
@@ -83,3 +92,20 @@ function findRepoRoot(start: string): string {
   }
 }
 
+function optionValue(name: string): string | undefined {
+  const index = process.argv.indexOf(name);
+  if (index < 0) return undefined;
+  return process.argv[index + 1];
+}
+
+function safeRunId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_.-]/g, "-").slice(0, 80) || "latest";
+}
+
+function safeDisplayPath(path: string): string {
+  const resolved = resolve(path);
+  const relativePath = relative(repoRoot, resolved);
+  return relativePath && !relativePath.startsWith("..")
+    ? relativePath.replaceAll("\\", "/")
+    : "external_local_file";
+}

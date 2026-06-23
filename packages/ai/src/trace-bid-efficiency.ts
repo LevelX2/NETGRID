@@ -25,6 +25,33 @@ export type TraceBidEfficiencySelection = {
   reason: TraceBidEfficiencyReason;
 };
 
+export type PostBidTraceLinkOption = {
+  id: string;
+  label: string;
+};
+
+export type PostBidTraceLinkEfficiencyReason =
+  | "post_bid_link_already_avoided"
+  | "post_bid_link_minimal_outcome_delta"
+  | "post_bid_link_no_outcome_delta"
+  | "post_bid_link_existing_choice"
+  | "post_bid_link_unknown_context";
+
+export type PostBidTraceLinkEfficiencyInput = {
+  options: readonly PostBidTraceLinkOption[];
+  fallbackOptionId?: string;
+  traceStrength?: number;
+  runnerLink?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  postBidTraceLinkBonus?: number;
+};
+
+export type PostBidTraceLinkEfficiencySelection = {
+  option?: PostBidTraceLinkOption;
+  reason: PostBidTraceLinkEfficiencyReason;
+};
+
 export function selectEfficientTraceBidOption(
   input: TraceBidEfficiencyInput,
 ): TraceBidEfficiencySelection {
@@ -79,6 +106,74 @@ export function selectEfficientTraceBidOption(
   return { option: desiredOption, reason: "trace_bid_existing_choice" };
 }
 
+export function selectEfficientPostBidLinkOption(
+  input: PostBidTraceLinkEfficiencyInput,
+): PostBidTraceLinkEfficiencySelection {
+  const fallbackOption =
+    input.options.find((option) => option.id === input.fallbackOptionId) ??
+    input.options[0];
+  const passOption = input.options.find((option) => option.id === "pass");
+  const traceStrength = input.traceStrength;
+  const runnerBase = currentRunnerTraceStrength(input);
+  if (
+    typeof traceStrength !== "number" ||
+    !Number.isInteger(traceStrength) ||
+    typeof runnerBase !== "number" ||
+    !Number.isInteger(runnerBase)
+  ) {
+    return postBidTraceLinkSelection(
+      fallbackOption,
+      "post_bid_link_unknown_context",
+    );
+  }
+
+  const corpTotal = Math.max(0, traceStrength);
+  const currentRunnerTotal = Math.max(0, runnerBase);
+  if (currentRunnerTotal >= corpTotal) {
+    return postBidTraceLinkSelection(
+      passOption ?? fallbackOption,
+      passOption
+        ? "post_bid_link_already_avoided"
+        : "post_bid_link_existing_choice",
+    );
+  }
+
+  const improvingOptions = input.options
+    .flatMap((option) => {
+      if (!option.id.startsWith("trace_link_")) return [];
+      const delta = parseTraceLinkDelta(option.label);
+      return Number.isInteger(delta) && typeof delta === "number" && delta > 0
+        ? [{ option, delta }]
+        : [];
+    })
+    .filter((candidate) => currentRunnerTotal + candidate.delta >= corpTotal)
+    .sort(
+      (left, right) =>
+        left.delta - right.delta ||
+        left.option.label.localeCompare(right.option.label, "de") ||
+        left.option.id.localeCompare(right.option.id),
+    );
+  const minimalImprovingOption = improvingOptions[0]?.option;
+  if (!minimalImprovingOption) {
+    return postBidTraceLinkSelection(
+      passOption ?? fallbackOption,
+      passOption
+        ? "post_bid_link_no_outcome_delta"
+        : "post_bid_link_existing_choice",
+    );
+  }
+  if (minimalImprovingOption.id === input.fallbackOptionId) {
+    return postBidTraceLinkSelection(
+      minimalImprovingOption,
+      "post_bid_link_existing_choice",
+    );
+  }
+  return postBidTraceLinkSelection(
+    minimalImprovingOption,
+    "post_bid_link_minimal_outcome_delta",
+  );
+}
+
 function closestBidOptionAtOrBelow(
   bidOptions: readonly TraceBidOption[],
   desiredAmount: number,
@@ -98,4 +193,41 @@ function runnerAvoidsTrace(
   corpTotal: number,
 ): boolean {
   return runnerBase + runnerBid >= corpTotal;
+}
+
+function currentRunnerTraceStrength(
+  input: Pick<
+    PostBidTraceLinkEfficiencyInput,
+    "runnerStrength" | "runnerLink" | "runnerBid" | "postBidTraceLinkBonus"
+  >,
+): number | undefined {
+  if (Number.isInteger(input.runnerStrength)) return input.runnerStrength;
+  const runnerLink = input.runnerLink;
+  const runnerBid = input.runnerBid;
+  if (
+    typeof runnerLink === "number" &&
+    typeof runnerBid === "number" &&
+    Number.isInteger(runnerLink) &&
+    Number.isInteger(runnerBid)
+  ) {
+    return (
+      Math.max(0, runnerLink) +
+      Math.max(0, runnerBid) +
+      Math.max(0, input.postBidTraceLinkBonus ?? 0)
+    );
+  }
+  return undefined;
+}
+
+function parseTraceLinkDelta(label: string): number | undefined {
+  const match = /\+(\d+)\s+Link/.exec(label);
+  if (!match) return undefined;
+  return Number(match[1]);
+}
+
+function postBidTraceLinkSelection(
+  option: PostBidTraceLinkOption | undefined,
+  reason: PostBidTraceLinkEfficiencyReason,
+): PostBidTraceLinkEfficiencySelection {
+  return option ? { option, reason } : { reason };
 }

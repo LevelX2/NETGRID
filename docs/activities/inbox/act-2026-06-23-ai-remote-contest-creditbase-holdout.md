@@ -25,8 +25,8 @@ Das Holdout-Muster `gain_credit|runner.build_credit_base -> start_run|remote_con
 ## Kontext und Quellen
 
 - `docs/reviews/ai/ai-replay-decision-holdout-handoff-2026-06-23.md`
-- `docs/reviews/ai/ai-replay-decision-cases-2026-06-23.json`
-- `docs/reviews/ai/ai-replay-decision-candidate-clusters-2026-06-23.json`
+- `docs/reviews/ai/ai-replay-decision-safe-summary-2026-06-23.json`
+- Vollständige lokale Exports nur bei Bedarf neu unter `data/local/ai-replay/<run-id>` erzeugen.
 - Holdout-Befund: 11 Fälle mit `gain_credit|runner.build_credit_base -> start_run|remote_contest`.
 
 ## Scope
@@ -59,4 +59,3 @@ Das Holdout-Muster `gain_credit|runner.build_credit_base -> start_run|remote_con
 ## Ergebnisnotiz
 
 Noch offen.
-
