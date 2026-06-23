@@ -49,7 +49,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 
 | ID | Ziel | Status | Ausgangsevidenz | Definition of Done |
 | --- | --- | --- | --- | --- |
-| AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `PENDING` | `semanticRuntimeTypePriority` ist weiter produktiver Scorebestandteil. | Action-Type wirkt nur als letzter deterministischer Tie-Breaker; Pflichtszenarien beweisen, dass Goal-/Target-/Reachability-Fit gewinnt. |
+| AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `PENDING` | Runtime-Pfade enthalten `legacyDecision` und `legacy_reference_*`. | Normaler semantischer Pfad berechnet unabhängig; Legacy nur lazy Notaus, No-Candidate-Fallback oder Diagnose. |
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `PENDING` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Dünne Public-/Composition-Fassade; Boundary-Test verhindert neue Fachlogik. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `PENDING` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
@@ -87,7 +87,18 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
-Nächstes aktives Ziel: `AI-COMPLETE-01`.
+- `AI-COMPLETE-01`:
+  - `packages/ai/src/index.ts` ersetzt die produktive Score-Komponente `semantic_type_priority` durch den bounded `semantic_type_tie_breaker`.
+  - `packages/ai/src/index.ts` ergänzt Runner-Goal-Fit-Komponenten für `tag_removal`, `coverage_search`, `setup_card_search`, kartenbasierten Draw, Run-only-Aktionen und erreichbare Runs, damit Fachsignale statt Action-Type-Gewicht entscheiden.
+  - `packages/ai/src/runtime/semantic-choice-ranking.ts` bewahrt `planProgressionReason` und `whyPlanAbandoned`, wenn kein aktuelles Mapping ausgewählt ist; damit bleibt WhyNot/Planfortschritt im Debug sichtbar.
+  - Verifikation: `rg -n "semanticRuntimeTypePriority\\(|semanticRuntimeTypeTieBreakerScore\\(" packages/ai/src --glob '!**/*.json'` zeigt produktiv nur `semanticRuntimeTypeTieBreakerScore` in `packages/ai/src/index.ts`.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-score-components.test.ts` grün, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts src/runner-wilson-run-action.test.ts src/simulation/benchmark-reports.test.ts -t "Semantic AI runtime cutover|Runner Wilson|action alternatives scoped"` grün, 61 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+
+Nächstes aktives Ziel: `AI-COMPLETE-02`.
 
 ## Audit-Ledger
 

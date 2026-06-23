@@ -236,8 +236,6 @@ function tacticalPlanRuntimeWithoutSelectedMapping(
     selectedPlan: _selectedPlan,
     selectedStep: _selectedStep,
     selectedMapping: _selectedMapping,
-    planProgressionReason: _planProgressionReason,
-    whyPlanAbandoned: _whyPlanAbandoned,
     ...rest
   } = result;
   return rest;
