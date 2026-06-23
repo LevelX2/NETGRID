@@ -1659,7 +1659,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       maxSelections: 1,
     });
     expect(state.pendingChoice?.source).toContain(
-      "p3_38.mystery_box_corp_review",
+      "p3_38.revealed_stack_program_install_corp_review",
     );
     expect(state.pendingChoice?.options.map((option) => option.value)).toEqual(
       expect.arrayContaining([selectedProgram, secondProgram, "done"]),
@@ -1739,7 +1739,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     expect(noProgram.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("p3_38.mystery_box_corp_review"),
+      source: expect.stringContaining("p3_38.revealed_stack_program_install_corp_review"),
     });
     noProgram = applyChoice(noProgram, "corp", "done");
     expect(noProgram.pendingChoice).toBeUndefined();

@@ -38,10 +38,10 @@ import {
   executeFreeProgramInstallPlan,
 } from "./free-program-install-execution";
 import {
-  applyMysteryBoxOncePerRunPlan,
-  applyMysteryBoxSourceTrashPlan,
+  applySourceOncePerRunPostInstallPlan,
+  applySourceTrashPostInstallPlan,
   applyTemporaryProgramInstallReturnPlan,
-  createMysteryBoxPostInstallSideEffectPlan,
+  createSourceTrashPostInstallSideEffectPlan,
   createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
 
@@ -222,13 +222,13 @@ export function handleMysteryBoxChoice(
         }),
     },
   });
-  const postInstall = createMysteryBoxPostInstallSideEffectPlan(execution);
-  applyMysteryBoxSourceTrashPlan(postInstall, {
+  const postInstall = createSourceTrashPostInstallSideEffectPlan(execution);
+  applySourceTrashPostInstallPlan(postInstall, {
     trashSource: host.zones.trashRunnerInstalledCardToHeap,
   });
   if (execution.shuffleNeeded)
     host.shuffleRunnerStack(
-      `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
+      `v1915.revealed_stack_program_install.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -525,7 +525,7 @@ function handleTemporaryProgramInstallSourceChoice(
     sourceZone: selectedSource,
     sourcePrefix: isCardImplementationChoice
       ? "p3_38.stack_or_trash_program_install"
-      : "v1911.sneak_preview",
+      : "v1911.temporary_program_install",
     sourceCardId,
     sourceDefinitionId: sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
   });
@@ -534,7 +534,7 @@ function handleTemporaryProgramInstallSourceChoice(
     hiddenZoneBarrier: true,
     hiddenZoneAction: isCardImplementationChoice
       ? "p3_38_stack_or_trash_program_install_source_selected"
-      : "sneak_preview_source_selected",
+      : "temporary_program_install_source_selected",
     sourceDefinitionId: sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
     choiceVisibility: "runner_private",
   };
@@ -580,7 +580,7 @@ function handleTemporaryProgramInstallChoice(
     },
   });
   if (execution.shuffleNeeded)
-    host.shuffleRunnerStack(`v1911_sneak_preview:${choice.choiceId}:shuffle`);
+    host.shuffleRunnerStack(`v1911_temporary_program_install:${choice.choiceId}:shuffle`);
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     ...buildTemporaryProgramSearchInstallResolvedPayload(plan),
@@ -1031,21 +1031,21 @@ function isSelfModifyingCodeChoiceSource(source: string): boolean {
 function isSneakPreviewChoiceSource(source: string): boolean {
   return (
     isSneakPreviewSourceChoiceSource(source) ||
-    source.startsWith("v1911.sneak_preview_heap_install") ||
-    source.startsWith("v1911.sneak_preview_stack_install") ||
+    source.startsWith("v1911.temporary_program_install_heap_install") ||
+    source.startsWith("v1911.temporary_program_install_stack_install") ||
     source.startsWith("p3_38.stack_or_trash_program_install")
   );
 }
 
 function isSneakPreviewSourceChoiceSource(source: string): boolean {
   return (
-    source.startsWith("v1911.sneak_preview_source") ||
+    source.startsWith("v1911.temporary_program_install_source") ||
     source.startsWith("p3_38.stack_or_trash_program_install_source")
   );
 }
 
 function isMysteryBoxChoiceSource(source: string): boolean {
-  return source.startsWith("v1915.mystery_box");
+  return source.startsWith("v1915.revealed_stack_program_install");
 }
 
 function isP338SearchInstallChoiceSource(source: string): boolean {
@@ -1053,7 +1053,7 @@ function isP338SearchInstallChoiceSource(source: string): boolean {
 }
 
 function isP338MysteryBoxCorpReviewChoiceSource(source: string): boolean {
-  return source.startsWith("p3_38.mystery_box_corp_review");
+  return source.startsWith("p3_38.revealed_stack_program_install_corp_review");
 }
 
 function isP338LookTopStackShowInstallChoiceSource(source: string): boolean {

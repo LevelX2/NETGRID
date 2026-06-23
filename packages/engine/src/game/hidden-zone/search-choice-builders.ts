@@ -261,11 +261,11 @@ export function buildTemporaryProgramInstallSourceChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_sneak_preview_source_${nextStateVersion}`,
+    choiceId: `v1911_temporary_program_install_source_${nextStateVersion}`,
     side: "runner",
     source:
-      input.sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_source:${nextStateVersion}`
+      input.sourcePrefix === "v1911.temporary_program_install"
+        ? `v1911.temporary_program_install_source:${nextStateVersion}`
         : `${input.sourcePrefix}_source:${input.sourceCardId ?? ""}:${input.sourceDefinitionId}:${nextStateVersion}`,
     prompt: "Sneak-Preview-Quelle wählen",
     kind: "select_cards",
@@ -295,11 +295,11 @@ export function buildTemporaryProgramInstallChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_sneak_preview_${input.sourceZone}_install_${nextStateVersion}`,
+    choiceId: `v1911_temporary_program_install_${input.sourceZone}_install_${nextStateVersion}`,
     side: "runner",
     source:
-      input.sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_${input.sourceZone}_install:${nextStateVersion}`
+      input.sourcePrefix === "v1911.temporary_program_install"
+        ? `v1911.temporary_program_install_${input.sourceZone}_install:${nextStateVersion}`
         : `${input.sourcePrefix}:${input.sourceCardId ?? ""}:${input.sourceDefinitionId}:${input.sourceZone}:${nextStateVersion}`,
     prompt:
       input.sourceZone === "heap"
@@ -332,9 +332,9 @@ export function buildMysteryBoxInstallChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1915_mystery_box_${nextStateVersion}`,
+    choiceId: `v1915_revealed_stack_program_install_${nextStateVersion}`,
     side: "runner",
-    source: `v1915.mystery_box:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    source: `v1915.revealed_stack_program_install:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
     prompt: "Mystery-Box-Programm installieren",
     kind: "select_cards",
     options: input.options,
@@ -355,9 +355,9 @@ export function buildMysteryBoxCorpReviewChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `p3_38_mystery_box_corp_review_${nextStateVersion}`,
+    choiceId: `p3_38_revealed_stack_program_install_corp_review_${nextStateVersion}`,
     side: "corp",
-    source: `p3_38.mystery_box_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    source: `p3_38.revealed_stack_program_install_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
     prompt: input.programFound
       ? "Mystery Box: Stack-Spitze ansehen"
       : "Mystery Box: keine Programmkarte",

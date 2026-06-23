@@ -130,7 +130,7 @@ describe("hidden-zone search choice resolvers", () => {
 
     expect(resolveTemporaryProgramSearchInstallSelection({
       choice: choice({
-        source: "v1911.sneak_preview_stack_install:8",
+        source: "v1911.temporary_program_install_stack_install:8",
       }),
       selectedCardId: programId,
       legalTargetIds: [programId],
@@ -145,7 +145,7 @@ describe("hidden-zone search choice resolvers", () => {
 
     expect(resolveMysteryBoxInstallSelection({
       choice: choice({
-        source: "v1915.mystery_box:source_card:top_a,top_b:8",
+        source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
       }),
       selectedCardId: programId,
       currentTopCardIds: [programId],

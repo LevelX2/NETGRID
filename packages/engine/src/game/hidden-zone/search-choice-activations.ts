@@ -26,8 +26,8 @@ import {
   createRevealedStackNoProgramInstallIntent,
 } from "./search-install-intents";
 import {
-  applyMysteryBoxOncePerRunPlan,
-  createMysteryBoxOncePerRunPlan,
+  applySourceOncePerRunPostInstallPlan,
+  createSourceOncePerRunPostInstallPlan,
 } from "./post-install-side-effects";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
@@ -569,7 +569,7 @@ export function startTemporaryProgramInstallSourceActivation(
     );
   host.state.pendingChoice = buildTemporaryProgramInstallSourceChoice({
     stateVersion: host.state.stateVersion,
-    sourcePrefix: input.sourcePrefix ?? "v1911.sneak_preview",
+    sourcePrefix: input.sourcePrefix ?? "v1911.temporary_program_install",
     sourceCardId: input.sourceCardId,
     sourceDefinitionId:
       input.sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
@@ -594,7 +594,7 @@ export function handleTopFiveProgramInstallActivation(
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
-  const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
+  const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
     usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],
   });
@@ -603,14 +603,14 @@ export function handleTopFiveProgramInstallActivation(
   const programIds = topCards.filter(
     (cardId) => host.cards.definitionFor(cardId).type === "program",
   );
-  applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
+  applySourceOncePerRunPostInstallPlan(oncePerRunPlan, {
     markUsedThisRun: (usedSourceIds) => {
       run.hiddenStackInstallUsedSourceIdsThisRun = usedSourceIds;
     },
   });
   if (programIds.length === 0) {
     host.shuffleRunnerStack(
-      `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
+      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceCardId}.${run.runId}`,
     );
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),

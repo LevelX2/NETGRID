@@ -247,9 +247,9 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
 }): SneakPreviewProgramSelectionResult {
   const choice = input.choice;
   if (!choice) throw new Error("Es ist keine Sneak-Preview-Programmauswahl offen.");
-  const sourceZone = choice.source.startsWith("v1911.sneak_preview_heap_install")
+  const sourceZone = choice.source.startsWith("v1911.temporary_program_install_heap_install")
     ? "heap"
-    : choice.source.startsWith("v1911.sneak_preview_stack_install")
+    : choice.source.startsWith("v1911.temporary_program_install_stack_install")
       ? "stack"
       : choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? (choice.source.split(":")[3] as SearchSourceZone | undefined)
@@ -283,7 +283,7 @@ export function resolveMysteryBoxInstallSelection(input: {
   isSelectedProgram: boolean;
 }): MysteryBoxInstallSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1915.mystery_box"))
+  if (!choice || !choice.source.startsWith("v1915.revealed_stack_program_install"))
     throw new Error("Es ist keine Mystery-Box-Choice offen.");
   const sourceCardId = choice.source.split(":")[1] as CardInstanceId | undefined;
   if (!sourceCardId) throw new Error("Mystery Box ist nicht mehr installiert.");

@@ -167,10 +167,10 @@ function host(
     },
     constants: {
       topStackTakeMatchingSourceId: aujourdOuiId,
-      randomStackProgramInstallSourceId: "mystery_box" as CardDefinitionId,
+      randomStackProgramInstallSourceId: "revealed_stack_program_install" as CardDefinitionId,
       stackProgramFreeInstallSourceId,
       stackSearchGripSourceId: shortCircuitId,
-      temporaryProgramInstallSourceId: "sneak_preview" as CardDefinitionId,
+      temporaryProgramInstallSourceId: "temporary_program_install" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => {
@@ -337,7 +337,7 @@ describe("hidden-zone search choice handlers", () => {
   it("handles Sneak Preview source choices by opening a program choice", () => {
     const testHost = host(
       choice({
-        source: "v1911.sneak_preview_source:1",
+        source: "v1911.temporary_program_install_source:1",
         options: [{ id: "source_stack", label: "Stack", value: "stack" }],
       }),
       playerAction("source_stack"),
@@ -350,10 +350,10 @@ describe("hidden-zone search choice handlers", () => {
       stateChanged: true,
     });
     expect(testHost.state.pendingChoice?.source).toContain(
-      "v1911.sneak_preview_stack_install",
+      "v1911.temporary_program_install_stack_install",
     );
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_source_selected",
+      hiddenZoneAction: "temporary_program_install_source_selected",
       choiceVisibility: "runner_private",
     });
   });
@@ -362,7 +362,7 @@ describe("hidden-zone search choice handlers", () => {
     const installed: CardInstanceId[] = [];
     const testHost = host(
       choice({
-        source: "v1911.sneak_preview_stack_install:1",
+        source: "v1911.temporary_program_install_stack_install:1",
       }),
       playerAction(`card_${programId}`),
       {
@@ -383,7 +383,7 @@ describe("hidden-zone search choice handlers", () => {
     });
     expect(installed).toEqual([programId]);
     expect(testHost.state.temporaryProgramInstallReturns).toEqual([
-      { cardId: programId, sourceCardDefinitionId: "sneak_preview" },
+      { cardId: programId, sourceCardDefinitionId: "temporary_program_install" },
     ]);
     expect(testHost.legalAction.payload).toMatchObject({
       hiddenZoneAction: "temporary_program_install",
@@ -397,7 +397,7 @@ describe("hidden-zone search choice handlers", () => {
       stack: [hardwareId],
       definitions: {
         [sourceCardId]: definition(
-          "mystery_box" as CardDefinitionId,
+          "revealed_stack_program_install" as CardDefinitionId,
           "program",
         ),
       },
@@ -422,13 +422,13 @@ describe("hidden-zone search choice handlers", () => {
     const installed: CardInstanceId[] = [];
     const testHost = host(
       choice({
-        source: `v1915.mystery_box:${sourceCardId}:${programId}:1`,
+        source: `v1915.revealed_stack_program_install:${sourceCardId}:${programId}:1`,
       }),
       playerAction(`card_${programId}`),
       {
         definitions: {
           [sourceCardId]: definition(
-            "mystery_box" as CardDefinitionId,
+            "revealed_stack_program_install" as CardDefinitionId,
             "program",
           ),
         },
@@ -484,7 +484,7 @@ describe("hidden-zone search choice handlers", () => {
     const testHost = host(
       choice({
         side: "corp",
-        source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:1`,
+        source: `p3_38.revealed_stack_program_install_corp_review:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:1`,
         options: [
           {
             id: `shown_${programId}`,
@@ -570,7 +570,7 @@ describe("hidden-zone search choice handlers", () => {
     const testHost = host(
       choice({
         side: "corp",
-        source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${hardwareId}:1`,
+        source: `p3_38.revealed_stack_program_install_corp_review:${sourceCardId}:${sourceDefinitionId}:${hardwareId}:1`,
         options: [
           {
             id: `shown_${hardwareId}`,

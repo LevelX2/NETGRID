@@ -58,9 +58,9 @@ export type RevealedStackProgramInstallExecutionPlan = {
 function temporaryProgramInstallSourceZone(
   choice: ChoiceRequest | undefined,
 ): SearchInstallSourceZone | undefined {
-  return choice?.source.startsWith("v1911.sneak_preview_heap_install")
+  return choice?.source.startsWith("v1911.temporary_program_install_heap_install")
     ? "heap"
-    : choice?.source.startsWith("v1911.sneak_preview_stack_install")
+    : choice?.source.startsWith("v1911.temporary_program_install_stack_install")
       ? "stack"
       : choice?.source.startsWith("p3_38.stack_or_trash_program_install")
         ? (choice.source.split(":")[3] as SearchInstallSourceZone | undefined)
