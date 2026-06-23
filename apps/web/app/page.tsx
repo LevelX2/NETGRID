@@ -64,7 +64,6 @@ import type {
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
-  DeckPublicMetadata,
   LegalAction,
   PlayerView,
   Side,
@@ -274,6 +273,15 @@ import { CatalogPanel } from "../features/catalog/CatalogPanel";
 import type { CatalogCardDetail, CatalogCardSummary, CatalogListResponse } from "../features/catalog/catalog-types";
 import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
 import { DeckMetadataLine, DeckSlotSelect } from "../features/decks/DeckSelectionControls";
+import type {
+  DeckLibraryResponse,
+  DeckSnapshot,
+  DeckSnapshotsResponse,
+  DeckTemplate,
+  DeckTemplatesResponse,
+  DeckValidationResponse,
+  DeckValidationResult
+} from "../features/decks/deck-api-types";
 import {
   deckFingerprint,
   deckMetadataFromEditable,
@@ -485,65 +493,6 @@ type FocusedCard = {
   card: VisibleCard;
   matchId: string;
   hiddenSide?: Side;
-};
-
-type DeckTemplate = {
-  templateId: string;
-  sourceDeckId: string;
-  name: string;
-  side: Side;
-  identityCardId: string;
-  editableCopyAllowed: boolean;
-  cards: DeckCardEntry[];
-};
-
-type DeckValidationResult = {
-  ok: boolean;
-  errors: string[];
-  errorCodes?: string[];
-  warnings: string[];
-  totalCards: number;
-  agendaPoints: number | null;
-  influenceSpent?: number | null;
-};
-
-type DeckSnapshot = {
-  deckSnapshotId: string;
-  sourceDeckId: string;
-  deckVersion: string;
-  name: string;
-  side: Side;
-  identityCardId: string;
-  cardPoolSnapshotId: string;
-  cardPoolVersion?: string;
-  formatProfileId: string;
-  formatProfileVersion?: string;
-  rulesBaselineId: string;
-  immutable: boolean;
-  cards: DeckCardEntry[];
-  validation: DeckValidationResult;
-  publicMetadata: DeckPublicMetadata;
-  deckHash: string;
-};
-
-type DeckSnapshotsResponse = {
-  snapshots: DeckSnapshot[];
-};
-
-type DeckTemplatesResponse = {
-  templates: DeckTemplate[];
-};
-
-type DeckValidationResponse = {
-  validation: DeckValidationResult;
-  snapshot: DeckSnapshot | null;
-  error?: { message: string };
-};
-
-type DeckLibraryResponse = {
-  decks?: EditableDeck[];
-  storagePath?: string;
-  error?: { message: string };
 };
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
