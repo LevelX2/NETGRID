@@ -152,7 +152,6 @@ import {
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
-  identityCounterChipsForDisplays,
   newBloodReorderTargetLabel,
   newBloodReorderTargetSequenceHint,
   orderedCardContextActions,
@@ -177,7 +176,6 @@ import {
   shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
   serverBoardRows,
-  serverCounterChipsForDisplays,
   serverDisplayLabel,
   splitLegalActions,
   currentRunTimelineStep,
@@ -468,7 +466,7 @@ import {
   ScoreAreaStat,
   Stat
 } from "../features/game-board/ResourceStrip";
-import { CounterHelpTooltipTrigger } from "../features/game-board/CounterHelpTooltip";
+import { IdentityCounterStrip, ServerCounterStrip } from "../features/game-board/CounterStrips";
 import {
   ActionLeadIcon,
   ActionPanelDockPlaceholder,
@@ -10977,36 +10975,6 @@ function formatAiHintLabel(value: string): string {
     .replace(/_/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase();
-}
-
-function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["counterDisplays"]; side: Side }) {
-  const chips = identityCounterChipsForDisplays(displays);
-  if (chips.length === 0) return null;
-  return (
-    <div className="identityCounterStrip" role="list" aria-label={`${sideLabel(side)}-Counter`}>
-      {chips.map((chip) => (
-        <CounterHelpTooltipTrigger className="identityCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
-          <span className="identityCounterChipLabel">{chip.label}</span>
-          <strong>{chip.amount}</strong>
-        </CounterHelpTooltipTrigger>
-      ))}
-    </div>
-  );
-}
-
-function ServerCounterStrip({ displays, serverLabel }: { displays: VisibleCard["counterDisplays"]; serverLabel: string }) {
-  const chips = serverCounterChipsForDisplays(displays);
-  if (chips.length === 0) return null;
-  return (
-    <div className="serverCounterStrip" role="list" aria-label={`${serverLabel}-Counter`}>
-      {chips.map((chip) => (
-        <CounterHelpTooltipTrigger className="serverCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
-          <span className="serverCounterChipLabel">{chip.label}</span>
-          <strong>{chip.amount}</strong>
-        </CounterHelpTooltipTrigger>
-      ))}
-    </div>
-  );
 }
 
 function OpponentPanel({
