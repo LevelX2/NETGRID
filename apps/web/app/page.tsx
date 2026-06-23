@@ -229,7 +229,7 @@ import {
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
-import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
+import { type CatalogAiInspector } from "./ai-hint-inspector-ui";
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
@@ -330,6 +330,10 @@ import {
 import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { UndoPanel } from "../features/app-shell/UndoPanel";
 import { OptionsPanel } from "../features/settings/OptionsPanel";
+import {
+  CatalogAiHintPanel,
+  StatusBadges
+} from "../features/catalog/CatalogSupportPanels";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
 import {
   DECK_TABLE_CARD_WIDTH_DEFAULT,
@@ -8431,7 +8435,12 @@ function CatalogPanel({
               <span>
                 {card.side} · {formatCatalogTypeLine(card)}
               </span>
-              <StatusBadges statuses={card.statuses} compact showExpert={showExpertStatuses} />
+              <StatusBadges
+                statuses={card.statuses}
+                compact
+                labels={CATALOG_STATUS_LABELS}
+                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
+              />
             </button>
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">Keine Treffer.</p> : null}
@@ -8468,7 +8477,11 @@ function CatalogPanel({
                   ) : null}
                 </div>
               ) : null}
-              <StatusBadges statuses={detail.statuses} showExpert={showExpertStatuses} />
+              <StatusBadges
+                statuses={detail.statuses}
+                labels={CATALOG_STATUS_LABELS}
+                statusKeys={showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS}
+              />
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
                   <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
@@ -8497,7 +8510,13 @@ function CatalogPanel({
                   </span>
                 ) : null}
               </div>
-              {detail.aiInspector || detail.aiHints ? <CatalogAiHintPanel hints={detail.aiHints ?? null} inspector={detail.aiInspector ?? null} /> : null}
+              {detail.aiInspector || detail.aiHints ? (
+                <CatalogAiHintPanel
+                  hints={detail.aiHints ?? null}
+                  inspector={detail.aiInspector ?? null}
+                  aiSupportedLabel={CATALOG_STATUS_LABELS.ai_supported}
+                />
+              ) : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
             </>
           ) : (
@@ -10441,153 +10460,4 @@ function DeckValidationSummary({ validation, snapshot }: { validation: DeckValid
       ))}
     </div>
   );
-}
-
-function StatusBadges({ statuses, compact = false, showExpert = false }: { statuses: CatalogStatuses; compact?: boolean; showExpert?: boolean }) {
-  const statusKeys = showExpert ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
-  return (
-    <div className={`statusBadges ${compact ? "compact" : ""}`}>
-      {statusKeys
-        .filter((key) => statuses[key])
-        .map((key) => (
-          <span className={`statusBadge ${key}`} key={key}>
-            {CATALOG_STATUS_LABELS[key]}
-          </span>
-        ))}
-    </div>
-  );
-}
-
-function CatalogAiHintPanel({ hints, inspector }: { hints?: CatalogAiHints | null; inspector?: CatalogAiInspector | null }) {
-  if (inspector) return <CatalogAiHintInspectorPanel inspector={inspector} />;
-  if (!hints) return null;
-  return <CatalogLegacyAiHintPanel hints={hints} />;
-}
-
-function CatalogLegacyAiHintPanel({ hints }: { hints: CatalogAiHints }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const valueHintEntries = Object.entries(hints.valueHints).filter(([, value]) => Number.isFinite(value));
-  return (
-    <section className={`catalogAiHints catalogLegacyAiHints ${isOpen ? "" : "is-collapsed"}`}>
-      <div className="catalogAiHintsHead">
-        <button
-          className="catalogAiHintsHeadToggle"
-          type="button"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
-          title={isOpen ? "Legacy-/Migrationsdetails einklappen" : "Legacy-/Migrationsdetails öffnen"}
-        >
-          <strong>Legacy / Migration / KI-Hinweise</strong>
-          {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-        <span>Legacy-Daten vorhanden · {CATALOG_STATUS_LABELS.ai_supported}: {hints.aiSupportStatus === "ai_supported" ? "ja" : hints.aiSupportStatus}</span>
-      </div>
-      {isOpen ? (
-        <>
-          <p className="meta">Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.</p>
-          <AiHintChips title="Legacy roles" values={hints.roles} />
-          <AiHintChips title="Legacy planRoles" values={hints.planRoles} />
-          {valueHintEntries.length > 0 ? (
-            <div className="catalogAiValueGrid">
-              {valueHintEntries.map(([key, value]) => (
-                <span key={key}>
-                  <strong>{value}</strong>
-                  {formatAiHintLabel(key)}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <AiHintChips title="Risiken" values={hints.riskTags} quiet />
-          <AiHintChips title="Mechaniken" values={hints.requiredMechanics} quiet />
-          <AiHintChips title="Szenarien" values={hints.scenarioRefs.map((ref) => ref.split("#").at(-1) ?? ref)} quiet />
-        </>
-      ) : null}
-    </section>
-  );
-}
-
-function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspector }) {
-  const sections = useMemo(() => aiInspectorSections(inspector), [inspector]);
-  const defaultCollapsedSections = useMemo(() => defaultCollapsedAiInspectorSections(sections), [sections]);
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(defaultCollapsedSections);
-  useEffect(() => {
-    setCollapsedSections(defaultCollapsedSections);
-  }, [defaultCollapsedSections]);
-  return (
-    <section className="catalogAiHints catalogAiInspector" data-testid="catalog-ai-hint-inspector">
-      <div className="catalogAiHintsHead">
-        <strong>KI-Semantik Zielmodell</strong>
-        <span>AI Hint Inspector · {inspector.schemaVersion}</span>
-      </div>
-      <div className="catalogAiInspectorGrid">
-        {sections.map((section) => {
-          const isCollapsed = Boolean(collapsedSections[section.key]);
-          return (
-            <section className={`catalogAiInspectorSection section-${section.key} ${isCollapsed ? "is-collapsed" : ""}`} key={section.key}>
-              <h4>
-                <button
-                  className="catalogAiInspectorSectionToggle"
-                  type="button"
-                  aria-expanded={!isCollapsed}
-                  onClick={() =>
-                    setCollapsedSections((current) => ({
-                      ...current,
-                      [section.key]: !current[section.key],
-                    }))
-                  }
-                  aria-label={section.description ? `${section.title}: ${section.description}` : section.title}
-                  title={section.description ?? (isCollapsed ? "Abschnitt öffnen" : "Abschnitt einklappen")}
-                >
-                  <span>{section.title}</span>
-                  {isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                </button>
-              </h4>
-              {!isCollapsed && section.entries.length > 0 ? (
-                <div className="catalogAiInspectorEntries">
-                  {section.entries.map((entry, index) => (
-                    <CatalogAiInspectorEntryItem entry={entry} key={aiInspectorEntryKey(section.key, entry, index)} />
-                  ))}
-                </div>
-              ) : !isCollapsed && section.emptyText ? (
-                <p className="meta">{section.emptyText}</p>
-              ) : null}
-            </section>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function CatalogAiInspectorEntryItem({ entry }: { entry: AiInspectorEntry }) {
-  return (
-    <span className={`catalogAiInspectorEntry tone-${entry.tone}`}>
-      <span>{entry.label}</span>
-      {entry.value ? <strong>{entry.value}</strong> : null}
-      {entry.detail ? <small>{entry.detail}</small> : null}
-    </span>
-  );
-}
-
-function AiHintChips({ title, values, quiet = false }: { title: string; values: string[]; quiet?: boolean }) {
-  if (values.length === 0) return null;
-  return (
-    <div className="catalogAiHintRow">
-      <span>{title}</span>
-      <div>
-        {values.map((value) => (
-          <small className={quiet ? "quiet" : ""} key={value}>
-            {formatAiHintLabel(value)}
-          </small>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function formatAiHintLabel(value: string): string {
-  return value
-    .replace(/_/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .toLowerCase();
 }
