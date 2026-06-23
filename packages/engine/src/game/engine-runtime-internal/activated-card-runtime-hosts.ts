@@ -379,8 +379,8 @@ import {
 } from "../run/encounter-resolution";
 import {
   applyRioDeJaneiroCityGridPassedIceTrigger,
-  isSubmarineUplinkSource,
-  markSubmarineUplinkJackOutAfterEncounter,
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
@@ -744,8 +744,8 @@ export function createActivatedCardRuntimeHosts(
                 entry.ability.kind === "activated" &&
                 entry.ability.timing === timing,
             ) ?? [],
-        isSubmarineUplinkSource: (cardId) =>
-          isSubmarineUplinkSource(state, cardId),
+        isTraceLinkForceJackOutSource: (cardId) =>
+          isTraceLinkForceJackOutSource(state, cardId),
       },
       payment: {
         corpTracePaymentDeps,
@@ -783,8 +783,8 @@ export function createActivatedCardRuntimeHosts(
             : undefined,
       },
       run: {
-        markSubmarineUplinkJackOutAfterEncounter: (cardId, legalAction) =>
-          markSubmarineUplinkJackOutAfterEncounter(
+        markTraceLinkForceJackOutAfterEncounter: (cardId, legalAction) =>
+          markTraceLinkForceJackOutAfterEncounter(
             encounterSpecialWindowHostForState(state),
             cardId,
             legalAction,

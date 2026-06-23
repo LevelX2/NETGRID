@@ -393,8 +393,8 @@ import {
 } from "../run/encounter-resolution";
 import {
   applyRioDeJaneiroCityGridPassedIceTrigger,
-  isSubmarineUplinkSource,
-  markSubmarineUplinkJackOutAfterEncounter,
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,

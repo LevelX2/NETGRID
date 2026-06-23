@@ -9,7 +9,7 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   encounterSpecialWindowHost,
-  markSubmarineUplinkJackOutAfterEncounter,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
   resolveFullyBrokenPassedIceTrash,
   resolveSecretSpendCompareChoice,
@@ -350,7 +350,7 @@ describe("encounter special windows boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
 
-    const result = markSubmarineUplinkJackOutAfterEncounter(
+    const result = markTraceLinkForceJackOutAfterEncounter(
       encounterSpecialWindowHost(state),
       "submarine_1" as CardInstanceId,
       legalAction,
@@ -369,7 +369,7 @@ describe("encounter special windows boundary", () => {
     });
 
     const otherAction = { payload: {} } as LegalAction;
-    const other = markSubmarineUplinkJackOutAfterEncounter(
+    const other = markTraceLinkForceJackOutAfterEncounter(
       encounterSpecialWindowHost(state),
       "startup_1" as CardInstanceId,
       otherAction,

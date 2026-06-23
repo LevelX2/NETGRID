@@ -606,7 +606,7 @@ export function resolveFullyBrokenPassedIceTrash(
   };
 }
 
-export function isSubmarineUplinkSource(
+export function isTraceLinkForceJackOutSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
@@ -617,13 +617,13 @@ export function isSubmarineUplinkSource(
   );
 }
 
-export function markSubmarineUplinkJackOutAfterEncounter(
+export function markTraceLinkForceJackOutAfterEncounter(
   host: EncounterSpecialWindowHost,
   cardId: CardInstanceId,
   legalAction: LegalAction,
 ): SubmarinePostBidMarkerResult {
   const state = host.state;
-  if (!state.run || !isSubmarineUplinkSource(state, cardId))
+  if (!state.run || !isTraceLinkForceJackOutSource(state, cardId))
     return { handled: false };
   state.run.forceJackOutAfterEncounterSourceId = cardId;
   const sourceDefinitionId = definitionFor(state, cardId).id;

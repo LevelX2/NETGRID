@@ -684,7 +684,7 @@ function testHost(
         ];
       },
       hasCardImplementationForDefinition: () => false,
-      isSubmarineUplinkSource: (cardId) =>
+      isTraceLinkForceJackOutSource: (cardId) =>
         cardId === options.postBidLinkSourceId,
     },
     payment: {
@@ -718,7 +718,7 @@ function testHost(
       fortTraceBitPoolSource: () => undefined,
     },
     run: {
-      markSubmarineUplinkJackOutAfterEncounter: (cardId) => {
+      markTraceLinkForceJackOutAfterEncounter: (cardId) => {
         calls.submarineMarkers.push(cardId);
       },
       applyPrintedTraceSuccessFollowups: (input) => {

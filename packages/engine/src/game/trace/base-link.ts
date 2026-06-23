@@ -110,7 +110,7 @@ function useBaseLinkEffect(
   return effects[0];
 }
 
-function isSubmarineUplinkSource(
+function isTraceLinkForceJackOutSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
@@ -143,7 +143,7 @@ function quoteForAbility(
 ): TraceBaseLinkChoiceQuote | undefined {
   const effect = useBaseLinkEffect(ability);
   if (!effect) return undefined;
-  if (isSubmarineUplinkSource(state, sourceCardInstanceId) && !state.run)
+  if (isTraceLinkForceJackOutSource(state, sourceCardInstanceId) && !state.run)
     return undefined;
   const creditCost = creditCostForTraceBaseLinkAbility(ability);
   if (state.runner.credits < creditCost) return undefined;

@@ -74,7 +74,7 @@ export type TraceOrchestrationHost = {
         | "trace_success_cancel_window"
       >,
     ) => Array<{ ability: ActivatedCardAbilityImplementation; index: number }>;
-    isSubmarineUplinkSource: (cardId: CardInstanceId) => boolean;
+    isTraceLinkForceJackOutSource: (cardId: CardInstanceId) => boolean;
   };
   payment: {
     corpTracePaymentDeps: CorpTracePaymentDependencies;
@@ -108,7 +108,7 @@ export type TraceOrchestrationHost = {
       | undefined;
   };
   run: {
-    markSubmarineUplinkJackOutAfterEncounter: (
+    markTraceLinkForceJackOutAfterEncounter: (
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
@@ -489,7 +489,7 @@ function resolveTraceBaseLinkChoice(
   host.payment.recordRunActionSpendingCapSpend(candidate.creditCost);
   host.payment.spendRunnerCredits(candidate.creditCost);
   if (state.run)
-    host.run.markSubmarineUplinkJackOutAfterEncounter(
+    host.run.markTraceLinkForceJackOutAfterEncounter(
       candidate.sourceCardInstanceId,
       legalAction,
     );
@@ -639,7 +639,7 @@ function postBidTraceLinkCandidates(
     )) {
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
-      if (host.cards.isSubmarineUplinkSource(cardId) && !state.run) continue;
+      if (host.cards.isTraceLinkForceJackOutSource(cardId) && !state.run) continue;
       const traceCost = costForTraceAbility(ability);
       const creditCost = traceCost.creditCost;
       if (state.runner.credits + runnerTraceLinkCredits(host) < creditCost)
@@ -740,7 +740,7 @@ function resolveTracePostBidLinkChoice(
       ? tapTraceSource(host, candidate.cardId)
       : {};
     if (state.run)
-      host.run.markSubmarineUplinkJackOutAfterEncounter(
+      host.run.markTraceLinkForceJackOutAfterEncounter(
         candidate.cardId,
         legalAction,
       );

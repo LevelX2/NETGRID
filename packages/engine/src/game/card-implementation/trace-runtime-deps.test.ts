@@ -94,7 +94,7 @@ function host(): TraceRuntimeDepsHost {
           runnerInstalledCardIds: () => [],
           hasCardImplementationForDefinition: () => false,
           activatedTraceAbilities: () => [],
-          isSubmarineUplinkSource: () => false,
+          isTraceLinkForceJackOutSource: () => false,
         },
         payment: {
           corpTracePaymentDeps: {} as never,
@@ -119,7 +119,7 @@ function host(): TraceRuntimeDepsHost {
           fortTraceBitPoolSource: () => undefined,
         },
         run: {
-          markSubmarineUplinkJackOutAfterEncounter: () => undefined,
+          markTraceLinkForceJackOutAfterEncounter: () => undefined,
           applyPrintedTraceSuccessFollowups: () => ({
             handled: true,
             payload: {},
