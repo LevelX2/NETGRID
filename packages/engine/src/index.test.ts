@@ -1786,7 +1786,7 @@ describe("MVP 0.1 turns and cards", () => {
     moveRunnerCardToGrip(state, "simple_killer");
 
     const beforeCredits = state.runner.credits;
-    const creditsBeforeClearingFangLock = state.runner.credits;
+    const creditsBeforeClearingRunLock = state.runner.credits;
     state = apply(
       state,
       "runner",

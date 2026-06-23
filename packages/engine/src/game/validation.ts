@@ -345,11 +345,11 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerTurnFlags.runLockActionsPending must be a non-negative integer.",
       );
   }
-  if (state.runnerTurnFlags?.fangRunLockCreditCost !== undefined) {
-    const pending = state.runnerTurnFlags.fangRunLockCreditCost;
+  if (state.runnerTurnFlags?.runnerRunLockCreditCost !== undefined) {
+    const pending = state.runnerTurnFlags.runnerRunLockCreditCost;
     if (!Number.isInteger(pending) || pending < 0)
       errors.push(
-        "runnerTurnFlags.fangRunLockCreditCost must be a non-negative integer.",
+        "runnerTurnFlags.runnerRunLockCreditCost must be a non-negative integer.",
       );
   }
   if (state.runnerAgendaPointsToForfeit !== undefined) {

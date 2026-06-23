@@ -178,7 +178,7 @@ function makeHost(
         forgoNextActionPending: false,
         forgoNextActionsPending: 0,
         runLockActionsPending: 0,
-        fangRunLockCreditCost: 0,
+        runnerRunLockCreditCost: 0,
         valuPakProgramInstallActionsRemaining: 0,
         valuPakTemporaryProgramInstallCredits: 0,
       }),
@@ -484,7 +484,7 @@ describe("encounter printed effects boundary", () => {
     );
 
     expect(finished).toBe(false);
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.1.trace",
       traceStep: "post_bid_link",
@@ -492,7 +492,6 @@ describe("encounter printed effects boundary", () => {
       tagsAdded: 0,
       fangRunEnded: true,
       runnerRunEnded: true,
-      fangRunLockCreditCost: 2,
       runnerRunLockCreditCost: 2,
     });
   });

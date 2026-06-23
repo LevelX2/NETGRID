@@ -1448,7 +1448,7 @@ export type GameState = {
     forgoNextActionPending?: boolean;
     forgoNextActionsPending?: number;
     runLockActionsPending?: number;
-    fangRunLockCreditCost?: number;
+    runnerRunLockCreditCost?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];

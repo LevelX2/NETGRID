@@ -1130,9 +1130,9 @@ export function buildRunnerMainActions(
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
     );
-    const fangRunLockCreditCost = Math.max(
+    const runnerRunLockCreditCost = Math.max(
       0,
-      Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+      Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
     );
     const runCosts = [
       {
@@ -1153,7 +1153,7 @@ export function buildRunnerMainActions(
     if (
       hasClicks &&
       runLockActionsPending <= 0 &&
-      fangRunLockCreditCost <= 0 &&
+      runnerRunLockCreditCost <= 0 &&
       !rovingRunBlocked
     ) {
       if (
@@ -1242,27 +1242,26 @@ export function buildRunnerMainActions(
       );
     }
   }
-  const fangRunLockCreditCost = Math.max(
+  const runnerRunLockCreditCost = Math.max(
     0,
-    Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+    Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
   );
   if (
     hasClicks &&
-    fangRunLockCreditCost > 0 &&
-    state.runner.credits >= fangRunLockCreditCost
+    runnerRunLockCreditCost > 0 &&
+    state.runner.credits >= runnerRunLockCreditCost
   ) {
     actions.push(
       action(
         state,
         "runner",
         "trigger_ability",
-        `Run-Sperre für ${fangRunLockCreditCost} Credits entfernen`,
+        `Run-Sperre für ${runnerRunLockCreditCost} Credits entfernen`,
         "game_rule",
-        [{ clicks: 1, credits: fangRunLockCreditCost }],
+        [{ clicks: 1, credits: runnerRunLockCreditCost }],
         {
-          v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
-          fangRunLockCreditCost,
-          runnerRunLockCreditCost: fangRunLockCreditCost,
+          v1920RunnerRunLockAbility: "pay_to_remove_run_lock",
+          runnerRunLockCreditCost,
           gainCreditsAmount: 0,
         },
       ),

@@ -111,7 +111,7 @@ export function ensureRunnerTurnFlags(
     forgoNextActionPending: false,
     forgoNextActionsPending: 0,
     runLockActionsPending: 0,
-    fangRunLockCreditCost: 0,
+    runnerRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
     delayedInstallStartTurnResolvedSourceIds: [],
@@ -144,7 +144,7 @@ export function ensureRunnerTurnFlags(
   flags.forgoNextActionPending ??= false;
   flags.forgoNextActionsPending ??= 0;
   flags.runLockActionsPending ??= 0;
-  flags.fangRunLockCreditCost ??= 0;
+  flags.runnerRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   flags.delayedInstallStartTurnResolvedSourceIds ??= [];

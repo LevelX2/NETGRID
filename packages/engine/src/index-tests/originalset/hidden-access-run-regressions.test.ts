@@ -2817,16 +2817,16 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = applyChoice(state, "runner", "bid_0");
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(0);
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(false);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.fangRunLockCreditCost === 2,
+        action.payload?.runnerRunLockCreditCost === 2,
     );
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(0);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(0);
     expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

@@ -433,7 +433,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(0);
     expect(state.run).toBeUndefined();
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(1);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(1);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.trace).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -538,14 +538,14 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(0);
     expect(state.run).toBeUndefined();
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(cardCounterAmount(state, hackerTrackerId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "runner_bid",
       traceSuccessful: true,
       tagsAdded: 0,
       fangRunEnded: true,
-      fangRunLockCreditCost: 2,
+      runnerRunLockCreditCost: 2,
       hackerTrackerCountersAdded: 1,
     });
     expect(
@@ -554,16 +554,16 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ),
     ).toBe(false);
 
-    const creditsBeforeClearingFangLock = state.runner.credits;
+    const creditsBeforeClearingRunLock = state.runner.credits;
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1920RunnerRunLockAbility === "fang_2_0_pay_to_run",
+        action.payload?.v1920RunnerRunLockAbility === "pay_to_remove_run_lock",
     );
-    expect(state.runner.credits).toBe(creditsBeforeClearingFangLock - 2);
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(0);
+    expect(state.runner.credits).toBe(creditsBeforeClearingRunLock - 2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(0);
     expect(
       getLegalActions(state, "runner").some(
         (action) => action.type === "start_run",

@@ -285,23 +285,22 @@ export function handleTriggerAbilityExecution(
   }
   if (
     legalAction.payload?.v1920RunnerRunLockAbility ===
-    "fang_2_0_pay_to_run"
+    "pay_to_remove_run_lock"
   ) {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
     host.actions.spendClick(state, "runner");
-    const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
+    const cost = Number(legalAction.payload?.runnerRunLockCreditCost ?? 0);
     const pendingCost = Math.max(
       0,
-      Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+      Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
     );
     if (!Number.isInteger(cost) || cost <= 0 || cost !== pendingCost)
       throw new Error("Die Run-Sperre verlangt den aktuellen Betrag.");
     host.credits.spend(state, "runner", cost);
-    host.runner.ensureTurnFlags(state).fangRunLockCreditCost = 0;
+    host.runner.ensureTurnFlags(state).runnerRunLockCreditCost = 0;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      fangRunLockCleared: true,
       runnerRunLockCleared: true,
       runnerCreditsAfter: state.runner.credits,
     };

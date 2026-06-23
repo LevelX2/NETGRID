@@ -372,7 +372,7 @@ function testHost(): DamageCoreHost {
           forgoNextActionPending: false,
           forgoNextActionsPending: 0,
           runLockActionsPending: 0,
-          fangRunLockCreditCost: 0,
+          runnerRunLockCreditCost: 0,
           valuPakProgramInstallActionsRemaining: 0,
           valuPakTemporaryProgramInstallCredits: 0,
           delayedInstallStartTurnResolvedSourceIds: [],

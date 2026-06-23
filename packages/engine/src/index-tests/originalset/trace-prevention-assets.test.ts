@@ -543,7 +543,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       } else {
         expect(state.runner.tags, definitionId).toBe(0);
         expect(state.run, definitionId).toBeDefined();
-        expect(state.runnerTurnFlags?.fangRunLockCreditCost).not.toBe(2);
+        expect(state.runnerTurnFlags?.runnerRunLockCreditCost).not.toBe(2);
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           traceStep: "post_bid_link",
           traceSuccessful: false,

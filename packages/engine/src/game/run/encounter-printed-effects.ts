@@ -408,7 +408,7 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type === "end_run_trash_program_and_run_lock")
   ) {
     runnerRunLockCreditCost = trace.successEffect.amount;
-    host.callbacks.ensureRunnerTurnFlags().fangRunLockCreditCost =
+    host.callbacks.ensureRunnerTurnFlags().runnerRunLockCreditCost =
       runnerRunLockCreditCost;
     runnerRunEnded = true;
     if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
@@ -534,7 +534,6 @@ export function applyPrintedTraceSuccessFollowups(
       ? {
           fangRunEnded: true,
           runnerRunEnded: true,
-          fangRunLockCreditCost: runnerRunLockCreditCost,
           runnerRunLockCreditCost,
         }
       : {}),
