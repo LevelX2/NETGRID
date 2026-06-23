@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
 import { markScoredAgendaInstallRezCreditAvailableOnScore } from "./scored-agenda-install-rez-credit-sequence";
-import { resolveCorporateWarOnScore } from "./corporate-war-sequence";
+import { resolveScoreCreditSwingOnScore } from "./score-credit-swing-sequence";
 import { applyDirectScoreEconomyEffects } from "./direct-score-economy-effects";
 import { applyOveradvanceScoreEffects } from "./overadvance-score-effects";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
@@ -116,7 +116,7 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           "score_credit_swing_if_corp_credit_threshold_met"
         )
           return;
-        resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
+        resolveScoreCreditSwingOnScore(host, definition, legalAction, scoredAgenda);
       },
     },
   ];

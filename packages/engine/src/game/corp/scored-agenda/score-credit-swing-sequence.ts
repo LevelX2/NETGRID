@@ -7,16 +7,16 @@ import type { CardScoredAgendaImplementation } from "../../../ability-engine/def
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 
-type CorporateWarScoredAgenda = Extract<
+type ScoreCreditSwingScoredAgenda = Extract<
   CardScoredAgendaImplementation,
   { kind: "score_credit_swing_if_corp_credit_threshold_met" }
 >;
 
-export function resolveCorporateWarOnScore(
+export function resolveScoreCreditSwingOnScore(
   host: ScoredAgendaFlowHost,
   definition: CardDefinition,
   legalAction: LegalAction | undefined,
-  scoredAgenda: CorporateWarScoredAgenda,
+  scoredAgenda: ScoreCreditSwingScoredAgenda,
 ): void {
   const corpCreditsBefore = host.state.corp.credits;
   const threshold = scoredAgenda.threshold;
