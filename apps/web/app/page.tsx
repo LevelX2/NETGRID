@@ -67,7 +67,6 @@ import type {
   DeckPublicMetadata,
   LegalAction,
   PlayerView,
-  PublicGameEvent,
   Side,
   VisibleCard,
   Winner,
@@ -83,7 +82,6 @@ import {
   deriveDamageImpactCues,
   deriveOpponentActionCues,
   turnStartAudioCue,
-  type ActionSoundKind,
   type BoardHighlight,
   type DamageImpactCue,
   type OpponentActionCue,
@@ -387,6 +385,7 @@ import {
   retainedArchivesRevealEvent,
   revealedEventCardIds
 } from "../features/actions/access-review-derivation";
+import { eventActionType, localActionSoundKey, localActionSoundKind, publicEventsAfter } from "../features/actions/local-action-sounds";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { recentSessionHeadline, recentSessionStatusLabel } from "../features/recent/recent-session-labels";
 import { ChronicleCardTrigger } from "../features/chronicle/ChronicleCardTrigger";
@@ -654,11 +653,6 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
 
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
-
-function payloadString(payload: Record<string, unknown>, key: string): string | null {
-  const value = payload[key];
-  return typeof value === "string" && value.trim() ? value : null;
-}
 
 export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
@@ -5242,26 +5236,6 @@ export default function Page() {
     </CardImagePreferenceContext.Provider>
     </CardScaleSettingsContext.Provider>
   );
-}
-
-function publicEventsAfter(events: PublicGameEvent[], lastPresentedEventId: string | null): PublicGameEvent[] {
-  if (!lastPresentedEventId) return events;
-  const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
-  return index >= 0 ? events.slice(index + 1) : [];
-}
-
-function eventActionType(event: PublicGameEvent): string {
-  return payloadString(event.publicPayload, "actionType") ?? event.type;
-}
-
-function localActionSoundKey(side: Side, stateVersion: number, actionType: string): string {
-  return `${side}:${stateVersion}:${actionType}`;
-}
-
-function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined {
-  if (action.type === "end_turn") return undefined;
-  const visibility = action.side === "corp" && (action.type === "install_card" || action.type === "advance_card") ? "redacted" : "public";
-  return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
 
 function OpponentCueTitle({
