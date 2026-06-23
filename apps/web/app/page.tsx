@@ -307,6 +307,7 @@ import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfileP
 import { DeckAgendaStatusBadge } from "../features/decks/DeckAgendaStatusBadge";
 import { DeckCardThumb } from "../features/decks/DeckCardThumb";
 import { DeckCardTooltipTrigger } from "../features/decks/DeckCardTooltipTrigger";
+import { DeckMetadataLine, DeckSlotSelect } from "../features/decks/DeckSelectionControls";
 import {
   DeckBuilderPreview,
   DeckLibraryCard,
@@ -6731,75 +6732,6 @@ function CatalogPanel({
     </section>
   );
 }
-function DeckSlotSelect({
-  label,
-  snapshots,
-  localDecks,
-  source,
-  selectedSnapshotId,
-  selectedLocalDeckId,
-  disabled = false,
-  onSource,
-  onSnapshot,
-  onLocalDeck
-}: {
-  label: string;
-  snapshots: DeckSnapshot[];
-  localDecks: EditableDeck[];
-  source: "snapshot" | "local";
-  selectedSnapshotId: string;
-  selectedLocalDeckId: string;
-  disabled?: boolean;
-  onSource(value: "snapshot" | "local"): void;
-  onSnapshot(value: string): void;
-  onLocalDeck(value: string): void;
-}) {
-  return (
-    <label className="deckSlotSelect">
-      {label}
-      <select
-        value={source === "local" && selectedLocalDeckId ? `local:${selectedLocalDeckId}` : selectedSnapshotId}
-        disabled={disabled}
-        onChange={(event) => {
-          if (event.target.value.startsWith("local:")) {
-            onSource("local");
-            onLocalDeck(event.target.value.slice("local:".length));
-          }
-          else {
-            onSource("snapshot");
-            onSnapshot(event.target.value);
-          }
-        }}
-      >
-        {snapshots.map((snapshot) => (
-          <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
-            Projekt-Snapshot · {snapshot.name}
-          </option>
-        ))}
-        {localDecks.map((deck) => (
-          <option value={`local:${deck.deckId}`} key={deck.deckId}>
-            Deck-Editor · {deck.name}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function DeckMetadataLine({ entries }: { entries: Array<{ label: string; metadata: DeckPublicMetadata | undefined }> }) {
-  const visible = entries.filter((entry) => entry.metadata);
-  if (visible.length === 0) return null;
-  return (
-    <div className="deckMetadataLine">
-      {visible.map((entry) => (
-        <span key={entry.label}>
-          {entry.label}: {entry.metadata!.deckName}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function DeckEditorPanel({
   localDecks,
   selectedDeck,
