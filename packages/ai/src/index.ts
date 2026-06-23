@@ -200,6 +200,9 @@ import {
 import {
   runnerArchivesExclusion as buildRunnerArchivesExclusion,
 } from "./runtime/runner-archives-exclusion";
+import {
+  runnerSourceCardAnswerRole as buildRunnerSourceCardAnswerRole,
+} from "./runtime/runner-source-card-answer-role";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5427,48 +5430,15 @@ function semanticRuntimeRunnerSourceCardAnswerRole(
   input: AiDecisionInput,
   action: LegalAction,
 ): "search" | "draw" | undefined {
-  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
-  const sourceDefinitionId =
-    sourceCard?.definitionId || sourceDefinitionIdForAction(input, action);
-  const roles = rolesForCardId(sourceDefinitionId);
-  const definition = sourceDefinitionId
-    ? (RUNTIME_CARDS[sourceDefinitionId] ??
-      DEMO_CARDS_BY_ID[sourceDefinitionId])
-    : undefined;
-  const definitionDisplay = definition as
-    | {
-        title?: string;
-        type?: string;
-        subtypes?: string[];
-        rulesText?: string;
-        mechanics?: string[];
-      }
-    | undefined;
-  const text = [
-    sourceCard?.title,
-    sourceCard?.type,
-    ...(sourceCard?.subtypes ?? []),
-    sourceCard?.rulesText,
-    definitionDisplay?.title,
-    definitionDisplay?.type,
-    ...(definitionDisplay?.subtypes ?? []),
-    definitionDisplay?.rulesText,
-    ...(definitionDisplay?.mechanics ?? []),
-    ...roles,
-    action.label,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  if (
-    /runner\.search\.breaker|program_search|search_stack|stack_search|search|tutor/.test(
-      text,
-    )
-  ) {
-    return "search";
-  }
-  if (/draw|draw_card/.test(text)) return "draw";
-  return undefined;
+  return buildRunnerSourceCardAnswerRole(input, action, {
+    visibleSourceCard: semanticRuntimeVisibleSourceCard,
+    sourceDefinitionId: sourceDefinitionIdForAction,
+    rolesForCardId,
+    sourceDefinition: (definitionId) =>
+      definitionId
+        ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+        : undefined,
+  });
 }
 
 function semanticRuntimeBaseScore(
