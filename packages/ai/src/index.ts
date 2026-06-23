@@ -168,6 +168,10 @@ import {
   type SemanticRuntimeChoiceBuilderDependencies,
 } from "./runtime/semantic-runtime-choice-builder";
 import {
+  semanticRuntimeActionExclusion as buildSemanticRuntimeActionExclusion,
+  type SemanticRuntimeActionExclusionDependencies,
+} from "./runtime/semantic-runtime-action-exclusion";
+import {
   runnerRunActionSpendingCapAssessment,
   runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
 } from "./runtime/runner-run-only-action-adjustment";
@@ -3535,6 +3539,26 @@ const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES: SemanticRuntimeChoiceBuilder
     explanation: semanticRuntimeExplanation,
     compareAction,
   };
+const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclusionDependencies =
+  {
+    planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
+    corpAdvancementCounterPlacementAssessment:
+      semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+    runnerSelfDamageSurvivalExclusion:
+      semanticRuntimeRunnerSelfDamageSurvivalExclusion,
+    runnerEncounterActionExclusion: semanticRuntimeRunnerEncounterActionExclusion,
+    runnerProgramSacrificeExclusion:
+      semanticRuntimeRunnerProgramSacrificeExclusion,
+    runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
+    runnerRunTargetEvaluationForAction:
+      semanticRuntimeRunnerRunTargetEvaluationForAction,
+    runnerBlinkRunExclusion: semanticRuntimeRunnerBlinkRunExclusion,
+    knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
+    runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
+    runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
+    isRemoteServerTarget,
+    knownIcePathReason: semanticRuntimeKnownIcePathReason,
+  };
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -3988,85 +4012,11 @@ function semanticRuntimeActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const planMemoryExclusion = semanticRuntimePlanMemoryActionExclusion(
+  return buildSemanticRuntimeActionExclusion(
     input,
     action,
+    SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES,
   );
-  if (planMemoryExclusion) return planMemoryExclusion;
-  const corpAdvancementPlacement =
-    semanticRuntimeCorpAdvancementCounterPlacementAssessment(input, action);
-  if (corpAdvancementPlacement?.dominatedByBasicAdvance) {
-    return {
-      key: "corp_advancement_counter_placement_dominated_by_basic_advance",
-      label: "Basic-Advance-Dominanz",
-      reason: corpAdvancementPlacement.evidence.join("|"),
-    };
-  }
-  const selfDamageSurvivalExclusion =
-    semanticRuntimeRunnerSelfDamageSurvivalExclusion(input, action);
-  if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
-  const encounterExclusion = semanticRuntimeRunnerEncounterActionExclusion(
-    input,
-    action,
-  );
-  if (encounterExclusion) return encounterExclusion;
-  const programSacrificeExclusion =
-    semanticRuntimeRunnerProgramSacrificeExclusion(input, action);
-  if (programSacrificeExclusion) return programSacrificeExclusion;
-  const multiRunEventExclusion = semanticRuntimeRunnerMultiRunEventExclusion(
-    input,
-    action,
-  );
-  if (multiRunEventExclusion) return multiRunEventExclusion;
-  const runTargetEvaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
-    input,
-    action,
-  );
-  const serverId =
-    runTargetEvaluation?.targetServerId ?? semanticRuntimeServerId(action);
-  const accessServerId = runTargetEvaluation?.accessServerId ?? serverId;
-  if (input.side !== "runner" || !serverId || !runTargetEvaluation)
-    return undefined;
-  const blinkRunExclusion = semanticRuntimeRunnerBlinkRunExclusion(
-    input,
-    action,
-  );
-  if (blinkRunExclusion) return blinkRunExclusion;
-  const knownCentralPayoffExclusion =
-    semanticRuntimeKnownCentralPayoffExclusion(input, accessServerId);
-  if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
-  const server = input.playerView.servers.find(
-    (entry) => entry.id === serverId,
-  );
-  if (serverId === "archives" && accessServerId === "archives") {
-    const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(
-      input,
-      server,
-    );
-    if (archivesExclusion) return archivesExclusion;
-  }
-  if (!server) return undefined;
-  if (isRemoteServerTarget(serverId)) {
-    const emptyRemoteExclusion =
-      semanticRuntimeRunnerEmptyRemoteExclusion(server);
-    if (emptyRemoteExclusion) return emptyRemoteExclusion;
-  }
-  if (action.type !== "start_run") return undefined;
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
-  if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess)
-    return undefined;
-  return {
-    key: "known_ice_path_no_access",
-    label: assessment.knownPathBlockedByUnbreakableIce
-      ? "Run-Ziel nicht erreichbar"
-      : "Run-Ziel nicht bezahlbar",
-    reason: semanticRuntimeKnownIcePathReason(assessment, server.id),
-  };
 }
 
 function semanticRuntimeRunnerSelfDamageSurvivalExclusion(

@@ -113,6 +113,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-score-breakdown",
       "./runtime/semantic-runtime-scope",
       "./runtime/semantic-runtime-choice-builder",
+      "./runtime/semantic-runtime-action-exclusion",
       "./runtime/runner-run-only-action-adjustment",
       "./runtime/runner-self-damage-choice",
       "./runtime/runner-goal-fit-score",
