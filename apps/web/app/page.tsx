@@ -305,6 +305,7 @@ import {
 } from "../features/catalog/CatalogSupportPanels";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
 import { DeckCardThumb } from "../features/decks/DeckCardThumb";
+import { DeckValidationSummary } from "../features/decks/DeckValidationSummary";
 import {
   DECK_TABLE_CARD_WIDTH_DEFAULT,
   DECK_TABLE_CARD_WIDTH_MAX,
@@ -8586,21 +8587,5 @@ function DeckListCard({
         </button>
       </div>
     </DeckCardTooltipTrigger>
-  );
-}
-
-function DeckValidationSummary({ validation, snapshot }: { validation: DeckValidationResult | null; snapshot: DeckSnapshot | null }) {
-  if (!validation) return null;
-  return (
-    <div className={`deckValidation ${validation.ok ? "ok" : "bad"}`}>
-      <strong>{validation.ok ? "Validiert" : "Nicht valide"}</strong>
-      <span>
-        {validation.totalCards} Karten{validation.agendaPoints !== null ? ` · ${validation.agendaPoints} Agenda Points` : ""}
-      </span>
-      {snapshot ? <small>{snapshot.deckHash}</small> : null}
-      {[...validation.errors, ...validation.warnings].map((message) => (
-        <small key={message}>{message}</small>
-      ))}
-    </div>
   );
 }
