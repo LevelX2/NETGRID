@@ -5,6 +5,9 @@ export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
 export type CatalogRarityFilterKey = "all" | "common" | "uncommon" | "rare" | "vital";
 export type CatalogAiHintFilterKey = "all" | "new_facts" | "generated_facts" | "warnings" | "missing";
 export type CatalogBlockStatusFilterKey = "all" | "not_blocked" | "blocked";
+export type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
+
+export type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
 export type CatalogCardForTypeFilter = {
   catalogCardId: string;
@@ -58,6 +61,31 @@ export type CatalogCardForBlockStatusFilter = {
     blocked: boolean;
   };
 };
+
+export type CatalogCardForStatusSummary = {
+  type: string;
+  statuses: CatalogStatuses;
+};
+
+export const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
+  imported: "Importiert",
+  validated: "Geprüft",
+  catalog_ready: "Im Katalog",
+  implemented: "Implementiert",
+  engine_supported: "Engine",
+  playable: "Runtime spielbar",
+  human_playable: "Für Menschen spielbar",
+  ai_supported: "KI geeignet",
+  deck_legal: "Deckbau erlaubt",
+  format_legal: "Im lokalen Format",
+  blocked: "Blockiert"
+};
+
+export const PRIMARY_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["human_playable", "deck_legal", "format_legal", "ai_supported", "blocked"];
+
+export const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "engine_supported", "playable"];
+
+export const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
 
 export const CATALOG_RARITY_FILTERS: Array<{ key: CatalogRarityFilterKey; label: string }> = [
   { key: "all", label: "Alle Raritäten" },
@@ -150,6 +178,20 @@ export function summarizeCatalogTypeFilters(cards: CatalogCardForTypeFilter[]): 
   for (const card of cards) {
     for (const key of catalogTypeKeysForCard(card)) {
       counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+export function isCatalogVisibleCard(card: Pick<CatalogCardForStatusSummary, "type">): boolean {
+  return card.type !== "identity";
+}
+
+export function summarizeCatalogStatuses(cards: CatalogCardForStatusSummary[]): Partial<Record<CatalogStatusKey, number>> {
+  const counts: Partial<Record<CatalogStatusKey, number>> = {};
+  for (const card of cards) {
+    for (const key of CATALOG_STATUS_FILTER_KEYS) {
+      if (card.statuses[key]) counts[key] = (counts[key] ?? 0) + 1;
     }
   }
   return counts;

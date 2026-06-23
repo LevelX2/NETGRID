@@ -154,6 +154,8 @@ import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel }
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
+  CATALOG_STATUS_FILTER_KEYS,
+  CATALOG_STATUS_LABELS,
   CATALOG_AI_HINT_FILTERS,
   CATALOG_BLOCK_STATUS_FILTERS,
   CATALOG_RARITY_FILTERS,
@@ -166,7 +168,9 @@ import {
   filterCatalogCardsBySetId,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
+  isCatalogVisibleCard,
   nextCatalogSelection,
+  summarizeCatalogStatuses,
   summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
   summarizeCatalogTypeFilters,
@@ -177,6 +181,8 @@ import {
   type CatalogBlockStatusFilterKey,
   type CatalogSetIdFilterOption,
   type CatalogRarityFilterKey,
+  type CatalogStatusKey,
+  type CatalogStatuses,
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { type CatalogAiInspector } from "./ai-hint-inspector-ui";
@@ -496,10 +502,6 @@ type RetentionProtectionResponse =
   | { ok: true; payload: ClientPayload | LobbyClientPayload }
   | { ok?: false; error: { message: string } };
 
-type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
-
-type CatalogStatuses = Record<CatalogStatusKey, boolean>;
-
 type CatalogCardSummary = {
   catalogCardId: string;
   title: string;
@@ -624,26 +626,6 @@ type DeckLibraryResponse = {
   error?: { message: string };
 };
 
-const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
-  imported: "Importiert",
-  validated: "Geprüft",
-  catalog_ready: "Im Katalog",
-  implemented: "Implementiert",
-  engine_supported: "Engine",
-  playable: "Runtime spielbar",
-  human_playable: "Für Menschen spielbar",
-  ai_supported: "KI geeignet",
-  deck_legal: "Deckbau erlaubt",
-  format_legal: "Im lokalen Format",
-  blocked: "Blockiert"
-};
-
-const PRIMARY_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["human_playable", "deck_legal", "format_legal", "ai_supported", "blocked"];
-
-const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "engine_supported", "playable"];
-
-const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
-
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   ice: true,
   agenda: true,
@@ -676,20 +658,6 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 function payloadString(payload: Record<string, unknown>, key: string): string | null {
   const value = payload[key];
   return typeof value === "string" && value.trim() ? value : null;
-}
-
-function isCatalogVisibleCard(card: CatalogCardSummary): boolean {
-  return card.type !== "identity";
-}
-
-function summarizeCatalogStatuses(cards: CatalogCardSummary[]): Partial<Record<CatalogStatusKey, number>> {
-  const counts: Partial<Record<CatalogStatusKey, number>> = {};
-  for (const card of cards) {
-    for (const key of Object.keys(CATALOG_STATUS_LABELS) as CatalogStatusKey[]) {
-      if (card.statuses[key]) counts[key] = (counts[key] ?? 0) + 1;
-    }
-  }
-  return counts;
 }
 
 export default function Page() {
