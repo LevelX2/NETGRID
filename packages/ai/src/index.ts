@@ -215,6 +215,9 @@ import {
 import {
   runnerInstallScoreComponents,
 } from "./runtime/runner-install-score";
+import {
+  runnerStartRunScoreComponents,
+} from "./runtime/runner-start-run-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5663,68 +5666,19 @@ function semanticRuntimeRunnerScoreComponents(
       },
     ),
   );
-  if (action.type === "start_run") {
-    const serverId = semanticRuntimeServerId(action);
-    const doctrineWeight = semanticRuntimeRunnerDoctrineRunWeight(
-      input,
-      action,
-      serverId,
-    );
-    if (doctrineWeight) components.push(doctrineWeight);
-    const server = input.playerView.servers.find(
-      (entry) => entry.id === serverId,
-    );
-    if (serverId === "hq") {
-      components.push({
-        key: "runner_hq_pressure",
-        label: "HQ-Druck",
-        value: 480,
-        reason: "central:hq",
-      });
-      components.push(
-        ...semanticRuntimeRunnerHqMemoryComponents(input, action),
-      );
-    } else if (serverId === "rd") {
-      components.push({
-        key: "runner_rnd_pressure",
-        label: "R&D-Druck",
-        value: 640,
-        reason: "central:rd",
-      });
-      components.push(
-        ...semanticRuntimeRunnerRndMemoryComponents(input, action),
-      );
-    } else if (serverId === "archives") {
-      components.push({
-        key: "runner_archives_pressure",
-        label: "Archive-Druck",
-        value: 250,
-        reason: "central:archives",
-      });
-      components.push(
-        ...semanticRuntimeRunnerArchivesComponents(input, action, server),
-      );
-    }
-    if (isRemoteServerTarget(serverId)) {
-      components.push(
-        ...semanticRuntimeRunnerRemoteComponents(input, action, server),
-      );
-    }
-    components.push(
-      ...semanticRuntimeRunnerKnownIcePathComponents(input, action, server),
-    );
-    if ((server?.ice.length ?? 0) === 0) {
-      components.push({
-        key: "runner_free_server_path",
-        label: "Freier Server",
-        value: 350,
-        reason: serverId ?? "unknown",
-      });
-    }
-    components.push(
-      ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
-    );
-  }
+  components.push(
+    ...runnerStartRunScoreComponents(input, action, {
+      serverId: semanticRuntimeServerId,
+      doctrineRunWeight: semanticRuntimeRunnerDoctrineRunWeight,
+      hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
+      rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
+      archivesComponents: semanticRuntimeRunnerArchivesComponents,
+      isRemoteServerTarget,
+      remoteComponents: semanticRuntimeRunnerRemoteComponents,
+      knownIcePathComponents: semanticRuntimeRunnerKnownIcePathComponents,
+      repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
+    }),
+  );
   const runTargetGuidance = semanticRuntimeRunnerRunTargetGuidanceComponent(
     input,
     action,
