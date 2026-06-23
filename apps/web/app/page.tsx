@@ -312,43 +312,52 @@ import {
   type MaintenanceAiTraceDetail,
   type MaintenanceAiTraceIndexEntry
 } from "./maintenance";
+import {
+  ACTION_CUE_SETTINGS_STORAGE_KEY,
+  ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+  AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+  AI_PACING_MODE_STORAGE_KEY,
+  AUDIO_STORAGE_KEY,
+  CARD_DISPLAY_MODE_STORAGE_KEY,
+  CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+  CARD_SIZE_SETTINGS_STORAGE_KEY,
+  CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+  CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+  COLOR_SCHEME_STORAGE_KEY,
+  DECK_STORAGE_KEY,
+  DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
+  DISPLAY_NAME_STORAGE_KEY,
+  GAMEPLAY_SETTINGS_STORAGE_KEY,
+  LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
+  LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+  LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+  LEGACY_AI_PACING_MODE_STORAGE_KEY,
+  LEGACY_AUDIO_STORAGE_KEY,
+  LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
+  LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+  LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY,
+  LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+  LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+  LEGACY_DECK_STORAGE_KEY,
+  LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
+  LEGACY_DISPLAY_NAME_STORAGE_KEY,
+  LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
+  LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
+  LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
+  MATCH_START_SETTINGS_STORAGE_KEY,
+  RUN_OVERLAY_POSITION_STORAGE_KEY,
+  cardPreviewCollapsedStorageKeyFor
+} from "../lib/storage-keys";
+import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
+import {
+  clampOverlayPosition,
+  parseOverlayPositionPreference,
+  serializeOverlayPositionPreference,
+  type OverlayPositionPreference
+} from "../lib/overlay-position";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
-const DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
-const LEGACY_DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
-const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
-const LEGACY_AUDIO_STORAGE_KEY = "netgrid-s01-audio";
-const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
-const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
-const GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
-const LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
-const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
-const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
-const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
-const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
-const DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
-const LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
-const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
-const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
-const CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
-const LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
-const CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
-const LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
-const CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX = "netgrid.cardPreviewCollapsed.v1";
-const AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
-const LEGACY_AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
-const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
-const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
-const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
-const LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
-const ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
-const LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
-const AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
-const LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
-const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
-const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
-const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
@@ -405,7 +414,7 @@ type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 type CardTooltipMode = "simple" | "enhanced" | "image";
-type RunOverlayPositionPreference = { kind: "default" } | { kind: "custom"; xPercent: number; yPercent: number };
+type RunOverlayPositionPreference = OverlayPositionPreference;
 
 type ConfirmationDialogRequest = {
   title: string;
@@ -2408,12 +2417,12 @@ export default function Page() {
   const [actionPanelOverlayPosition, setActionPanelOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
   );
   const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
   );
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] = useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
@@ -2811,11 +2820,11 @@ export default function Page() {
   }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled]);
 
   useEffect(() => {
-    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(actionPanelOverlayPosition));
+    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(actionPanelOverlayPosition));
   }, [actionPanelOverlayPosition]);
 
   useEffect(() => {
-    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(aiDecisionDebugOverlayPosition));
+    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(aiDecisionDebugOverlayPosition));
   }, [aiDecisionDebugOverlayPosition]);
 
   useEffect(() => {
@@ -9120,10 +9129,10 @@ function RunTimelineOverlay({
   const [position, setPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
   );
   useEffect(() => {
-    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(position));
+    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(position));
   }, [position]);
   const run = view.run;
   if (!run) return null;
@@ -9141,7 +9150,7 @@ function RunTimelineOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     setPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9338,7 +9347,7 @@ function ScoredAgendaOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9461,7 +9470,7 @@ function FloatingActionPanelOverlay({
       const overlay = overlayRef.current;
       if (!overlay) return;
       const rect = overlay.getBoundingClientRect();
-      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      const next = clampOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
       if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
     };
     clampToViewport();
@@ -9482,7 +9491,7 @@ function FloatingActionPanelOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9569,7 +9578,7 @@ function FloatingAiDecisionDebugOverlay({
       const overlay = overlayRef.current;
       if (!overlay) return;
       const rect = overlay.getBoundingClientRect();
-      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      const next = clampOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
       if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
     };
     clampToViewport();
@@ -9595,7 +9604,7 @@ function FloatingAiDecisionDebugOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -17564,10 +17573,6 @@ function shortMatchId(matchId: string): string {
   return normalized.length > 10 ? normalized.slice(0, 10) : normalized;
 }
 
-function cardPreviewCollapsedStorageKeyFor(matchId: string, side: Side): string {
-  return `${CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX}.${matchId}.${side}`;
-}
-
 function openMatchAgeLabel(ageSeconds: number): string {
   if (!Number.isFinite(ageSeconds) || ageSeconds < 0) return "gerade erstellt";
   if (ageSeconds < 60) return `${ageSeconds}s`;
@@ -17575,80 +17580,6 @@ function openMatchAgeLabel(ageSeconds: number): string {
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   return `${hours} h`;
-}
-
-function parseRunOverlayPositionPreference(raw: string | null): RunOverlayPositionPreference {
-  if (!raw) return { kind: "default" };
-  try {
-    return normalizeRunOverlayPositionPreference(JSON.parse(raw));
-  } catch {
-    return { kind: "default" };
-  }
-}
-
-function normalizeRunOverlayPositionPreference(value: unknown): RunOverlayPositionPreference {
-  if (!value || typeof value !== "object") return { kind: "default" };
-  const candidate = value as { kind?: unknown; xPercent?: unknown; yPercent?: unknown };
-  if (candidate.kind !== "custom" || !finiteRunOverlayPercent(candidate.xPercent) || !finiteRunOverlayPercent(candidate.yPercent)) {
-    return { kind: "default" };
-  }
-  return { kind: "custom", xPercent: candidate.xPercent, yPercent: candidate.yPercent };
-}
-
-function serializeRunOverlayPositionPreference(position: RunOverlayPositionPreference): string {
-  return JSON.stringify(position);
-}
-
-function clampRunOverlayPosition(
-  xPercent: number,
-  yPercent: number,
-  viewportWidth: number,
-  viewportHeight: number,
-  overlayWidth: number,
-  overlayHeight: number
-): RunOverlayPositionPreference {
-  const margin = 8;
-  const safeWidth = Math.max(1, viewportWidth);
-  const safeHeight = Math.max(1, viewportHeight);
-  const maxLeft = Math.max(margin, safeWidth - overlayWidth - margin);
-  const maxTop = Math.max(margin, safeHeight - overlayHeight - margin);
-  const leftPx = clampRunOverlayValue((xPercent / 100) * safeWidth, margin, maxLeft);
-  const topPx = clampRunOverlayValue((yPercent / 100) * safeHeight, margin, maxTop);
-  return {
-    kind: "custom",
-    xPercent: roundRunOverlayPercent((leftPx / safeWidth) * 100),
-    yPercent: roundRunOverlayPercent((topPx / safeHeight) * 100)
-  };
-}
-
-function finiteRunOverlayPercent(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
-}
-
-function clampRunOverlayValue(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function roundRunOverlayPercent(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-function rememberDisplayName(name: string): void {
-  const trimmed = name.trim();
-  if (trimmed) window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, trimmed);
-}
-
-function readLocalStorageWithLegacy(key: string, legacyKey: string): string | null {
-  const current = window.localStorage.getItem(key);
-  if (current !== null) return current;
-  const legacy = window.localStorage.getItem(legacyKey);
-  if (legacy !== null) window.localStorage.setItem(key, legacy);
-  return legacy;
-}
-
-function removeLocalStorageKeys(key: string, legacyKey: string): void {
-  window.localStorage.removeItem(key);
-  window.localStorage.removeItem(legacyKey);
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
