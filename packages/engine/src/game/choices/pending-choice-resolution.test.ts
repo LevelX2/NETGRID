@@ -226,14 +226,14 @@ function pendingChoiceHost(
         "resolveHqIceSwapChoice",
       ),
       fortPassWindowHostForState: () => ({}),
-      resolveTooManyDoorsSecretSpendChoiceInRunModule: unexpected(
-        "resolveTooManyDoorsSecretSpendChoiceInRunModule",
+      resolveSecretSpendCompareChoiceInRunModule: unexpected(
+        "resolveSecretSpendCompareChoiceInRunModule",
       ),
       encounterSpecialWindowHostForState: () => ({}),
       resolveHammerStealthLossChoice: unexpected("resolveHammerStealthLossChoice"),
       fortRunSideFamiliesHostForState: () => ({}),
-      resolveViral15ProgramTrashChoiceInRunModule: unexpected(
-        "resolveViral15ProgramTrashChoiceInRunModule",
+      resolveActiveIceProgramTrashChoiceInRunModule: unexpected(
+        "resolveActiveIceProgramTrashChoiceInRunModule",
       ),
       encounterResolutionHostForState: () => ({}),
       resolvePassRezzedIceProgramTrashChoiceInRunModule: unexpected(

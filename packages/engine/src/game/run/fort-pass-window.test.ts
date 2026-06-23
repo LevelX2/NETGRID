@@ -162,7 +162,7 @@ function definitionsFor(state: GameState): Record<string, CardDefinition> {
     ),
     "onr_v1_369_singapore-city-grid": definition(
       "onr_v1_369_singapore-city-grid",
-      { title: "Singapore City Grid" },
+      { title: "HQ Ice Swap" },
     ),
     "onr_v1_364_omni-kismet-ph-d": definition(
       "onr_v1_364_omni-kismet-ph-d",
@@ -285,7 +285,7 @@ describe("fort pass window", () => {
     expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:server:rd"]);
   });
 
-  it("starts and resolves Singapore City Grid as a hidden-info-safe HQ ICE swap", () => {
+  it("starts and resolves HQ Ice Swap as a hidden-info-safe HQ ICE swap", () => {
     const state = makeState();
     state.cardInstances.source_root = {
       ...state.cardInstances.source_root!,
@@ -305,7 +305,7 @@ describe("fort pass window", () => {
         iceIndex: 0,
         v1918UpgradeAbility: "hq_ice_swap",
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1918_singapore_city_grid_choice",
+        hiddenZoneAction: "hq_ice_swap_choice",
       }),
       expect.objectContaining({
         targetIceId: "ice_outer",
@@ -316,7 +316,7 @@ describe("fort pass window", () => {
     startHqIceSwapChoice(host, actions[0]!);
 
     expect(state.pendingChoice).toMatchObject({
-      source: "v1918.singapore_city_grid:source_root:rd:ice_inner:0:run_1",
+      source: "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:run_1",
       kind: "select_cards",
       visibility: "hidden_info_barrier",
       options: [
@@ -355,7 +355,7 @@ describe("fort pass window", () => {
     });
     expect(resolveAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      hiddenZoneAction: "hq_ice_swap_swap",
       sourceDefinitionId: "onr_v1_369_singapore-city-grid",
       swappedIceCount: 1,
       oncePerRunConsumed: true,

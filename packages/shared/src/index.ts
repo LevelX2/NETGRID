@@ -218,7 +218,7 @@ export type SubroutineType =
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_end_the_run_subroutine"
-  | "set_run_viral_15"
+  | "set_run_active_ice_program_trash"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
@@ -1083,8 +1083,8 @@ export type RunState = {
   turbeauAccessTraceConsumedByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
   >;
-  viral15ActiveSourceIceId?: CardInstanceId;
-  viral15PendingPassedIceId?: CardInstanceId;
+  activeIceProgramTrashSourceIceId?: CardInstanceId;
+  activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
   passRezzedIceProgramTrashSourceIceId?: CardInstanceId;
   passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
   jackOutAdditionalCostForRun?: number;
@@ -1178,7 +1178,7 @@ export type RunState = {
   accessStealCostModifierSnapshotsByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, AccessStealCostModifierSnapshot[]>
   >;
-  singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
+  hqIceSwapUsedSourceIdsThisRun?: CardInstanceId[];
   iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
@@ -1369,7 +1369,7 @@ export type GameState = {
   run?: RunState;
   trace?: TraceState;
   secretSpendComparison?: {
-    source: "too_many_doors";
+    source: "secret_spend_compare";
     runId: string;
     sourceIceId: CardInstanceId;
     subroutineIndex: number;
@@ -2484,8 +2484,8 @@ function onrSetRunFutureEndTheRunSubroutine(id: string): SubroutineDefinition {
   return { id, type: "set_run_future_end_the_run_subroutine" };
 }
 
-function onrSetRunViral15(id: string): SubroutineDefinition {
-  return { id, type: "set_run_viral_15" };
+function onrSetRunActiveIceProgramTrash(id: string): SubroutineDefinition {
+  return { id, type: "set_run_active_ice_program_trash" };
 }
 
 function onrSetRunFutureStrengthBonus(
@@ -8425,8 +8425,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 3,
     rulesText:
-      "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Viral 15, unless Runner jacks out.",
-    subroutines: [onrSetRunViral15("onr_v1_276_viral_15_run_modifier")],
+      "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Active ICE Program Trash, unless Runner jacks out.",
+    subroutines: [onrSetRunActiveIceProgramTrash("onr_v1_276_active_ice_program_trash_run_modifier")],
     mechanics: [
       "run_modifier",
       "jack_out_tax",

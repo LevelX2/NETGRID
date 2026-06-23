@@ -367,7 +367,7 @@ export function recordRunnerRunCreditSpend(
 export function runJackOutAdditionalCost(run: ActiveRun): number {
   return (
     Math.max(0, Math.floor(run.jackOutAdditionalCostForRun ?? 0)) +
-    (run.viral15ActiveSourceIceId ? 1 : 0)
+    (run.activeIceProgramTrashSourceIceId ? 1 : 0)
   );
 }
 

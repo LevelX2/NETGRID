@@ -65,11 +65,11 @@ export type PendingChoiceResolutionHost = {
   run: {
     resolveHqIceSwapChoice: HostFn<void>;
     fortPassWindowHostForState: HostFn<unknown>;
-    resolveTooManyDoorsSecretSpendChoiceInRunModule: HostFn<void>;
+    resolveSecretSpendCompareChoiceInRunModule: HostFn<void>;
     encounterSpecialWindowHostForState: HostFn<unknown>;
     resolveHammerStealthLossChoice: HostFn<void>;
     fortRunSideFamiliesHostForState: HostFn<unknown>;
-    resolveViral15ProgramTrashChoiceInRunModule: HostFn<void>;
+    resolveActiveIceProgramTrashChoiceInRunModule: HostFn<void>;
     encounterResolutionHostForState: HostFn<unknown>;
     resolvePassRezzedIceProgramTrashChoiceInRunModule: HostFn<void>;
     resolveRezInterruptJackOutChoice: HostFn<void>;
@@ -189,16 +189,16 @@ export function resolvePendingChoice(
   const resolveHqIceSwapChoice =
     host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
-  const resolveTooManyDoorsSecretSpendChoiceInRunModule =
-    host.run.resolveTooManyDoorsSecretSpendChoiceInRunModule;
+  const resolveSecretSpendCompareChoiceInRunModule =
+    host.run.resolveSecretSpendCompareChoiceInRunModule;
   const encounterSpecialWindowHostForState =
     host.run.encounterSpecialWindowHostForState;
   const resolveHammerStealthLossChoice =
     host.run.resolveHammerStealthLossChoice;
   const fortRunSideFamiliesHostForState =
     host.run.fortRunSideFamiliesHostForState;
-  const resolveViral15ProgramTrashChoiceInRunModule =
-    host.run.resolveViral15ProgramTrashChoiceInRunModule;
+  const resolveActiveIceProgramTrashChoiceInRunModule =
+    host.run.resolveActiveIceProgramTrashChoiceInRunModule;
   const encounterResolutionHostForState =
     host.run.encounterResolutionHostForState;
   const resolvePassRezzedIceProgramTrashChoiceInRunModule =
@@ -369,7 +369,7 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
+  if (state.pendingChoice.source.startsWith("card_implementation.hq_ice_swap")) {
     resolveHqIceSwapChoice(
       fortPassWindowHostForState(state),
       legalAction,
@@ -451,9 +451,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
+    state.pendingChoice.source.startsWith("card_implementation.secret_spend_compare")
   ) {
-    resolveTooManyDoorsSecretSpendChoiceInRunModule(
+    resolveSecretSpendCompareChoiceInRunModule(
       encounterSpecialWindowHostForState(state),
       legalAction,
       playerAction,
@@ -477,9 +477,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
+    state.pendingChoice.source.startsWith("card_implementation.active_ice_program_trash")
   ) {
-    resolveViral15ProgramTrashChoiceInRunModule(
+    resolveActiveIceProgramTrashChoiceInRunModule(
       encounterResolutionHostForState(state),
       legalAction,
       playerAction,

@@ -397,7 +397,7 @@ describe("PublicContext golden payload gate", () => {
     });
   });
 
-  it("pins public choice, secret-spend and Too Many Doors fields", () => {
+  it("pins public choice, secret-spend and Secret Spend Compare fields", () => {
     const context = goldenContext(
       goldenState("public-context-secret-choice"),
       goldenAction({
@@ -406,7 +406,7 @@ describe("PublicContext golden payload gate", () => {
         type: "resolve_choice",
         label: "Reveal secret spend",
         payload: {
-          choiceId: "p3_56_too_many_doors_secret_spend_golden",
+          choiceId: "secret_spend_compare_golden",
           choiceKind: "select_option",
           choiceVisibility: "public",
           secretSpendCorp: 1,
@@ -419,7 +419,7 @@ describe("PublicContext golden payload gate", () => {
     );
 
     expectGoldenPayload(context, {
-      choiceId: "p3_56_too_many_doors_secret_spend_golden",
+      choiceId: "secret_spend_compare_golden",
       choiceKind: "select_option",
       secretSpendCorp: 1,
       secretSpendRevealed: true,

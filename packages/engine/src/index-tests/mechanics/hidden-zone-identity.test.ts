@@ -1426,7 +1426,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("opens Too Many Doors secret spend privately and resolves replay-safe", () => {
+  it("opens Secret Spend Compare secret spend privately and resolves replay-safe", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
     state.runner.credits = 20;
     state.corp.credits = 20;
@@ -1455,7 +1455,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.payload?.encounterContinue === true,
     );
     expect(state.pendingChoice?.source).toContain(
-      "p3_56.too_many_doors_secret_spend",
+      "card_implementation.secret_spend_compare",
     );
     expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(3);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();

@@ -555,7 +555,7 @@ function resolveCorpRdArrangeChoice(
     !sourceIceId ||
     host.cards.definitionFor(sourceIceId).id !== host.constants.tooManyDoorsId
   )
-    throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Too Many Doors.");
+    throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Secret Spend Compare.");
   const subroutineIndex = Number(subroutineIndexRaw);
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Die R&D-Arrange-Subroutine ist ungueltig.");

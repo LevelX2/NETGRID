@@ -3175,11 +3175,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("resolves Singapore City Grid as a hidden-info-safe once-per-run HQ ICE swap", () => {
+  it("resolves HQ Ice Swap as a hidden-info-safe once-per-run HQ ICE swap", () => {
     const singaporeCorpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       id: "spotcheck_singapore_city_grid_corp",
-      name: "Spotcheck Singapore City Grid Corp",
+      name: "Spotcheck HQ Ice Swap Corp",
       cards: [
         { id: "onr_v1_369_singapore-city-grid", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 1 },
@@ -3263,7 +3263,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "simple_code_gate_ice",
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v1918_singapore_city_grid_choice",
+      hiddenZoneAction: "hq_ice_swap_choice",
       choiceVisibility: "hidden_info_barrier",
       serverLabel: "Remote 1",
     });
@@ -3312,7 +3312,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(JSON.stringify(runnerServer)).not.toContain("simple_code_gate_ice");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      hiddenZoneAction: "hq_ice_swap_swap",
       sourceDefinitionId: "onr_v1_369_singapore-city-grid",
       serverLabel: "Remote 1",
       iceIndex: 0,
@@ -3411,7 +3411,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.corp.hq).toContain(installedIceId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      hiddenZoneAction: "hq_ice_swap_swap",
       sourceDefinitionId: "onr_v1_364_omni-kismet-ph-d",
       swappedIceCount: 1,
       oncePerRunConsumed: true,
@@ -3426,7 +3426,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 });
 
 describe("Originalset spotcheck: reorder, counters and run-lock hardening", () => {
-  it("keeps Too Many Doors private, rejects invalid choices and no-ops short R&D", () => {
+  it("keeps Secret Spend Compare private, rejects invalid choices and no-ops short R&D", () => {
     let state = toRunnerTurn(
       originalsetReorderCounterRunlockGame("spotcheck-too-many-doors"),
     );
@@ -3438,7 +3438,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     state = encounterIce(state, "rd", "onr_v1_272_too-many-doors");
     const opened = apply(state, "runner", (action) => action.type === "continue_run");
     expect(opened.pendingChoice?.source).toContain(
-      "p3_56.too_many_doors_secret_spend",
+      "card_implementation.secret_spend_compare",
     );
     expect(getPlayerView(opened, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(opened, "runner"))).not.toContain(

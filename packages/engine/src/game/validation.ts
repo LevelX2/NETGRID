@@ -170,15 +170,15 @@ export function validateGameState(state: GameState): ValidationResult {
   )
     errors.push("Run references missing approach expose source card.");
   if (
-    state.run?.viral15ActiveSourceIceId &&
-    !state.cardInstances[state.run.viral15ActiveSourceIceId]
+    state.run?.activeIceProgramTrashSourceIceId &&
+    !state.cardInstances[state.run.activeIceProgramTrashSourceIceId]
   )
-    errors.push("Run Viral 15 source references missing ice.");
+    errors.push("Run Active ICE Program Trash source references missing ice.");
   if (
-    state.run?.viral15PendingPassedIceId &&
-    !state.cardInstances[state.run.viral15PendingPassedIceId]
+    state.run?.activeIceProgramTrashPendingPassedIceId &&
+    !state.cardInstances[state.run.activeIceProgramTrashPendingPassedIceId]
   )
-    errors.push("Run Viral 15 pending passed ice references missing ice.");
+    errors.push("Run Active ICE Program Trash pending passed ice references missing ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
   if (state.run?.remainderStrengthBonusByBreaker) {

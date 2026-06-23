@@ -158,7 +158,7 @@ function visibleUnbrokenRunEffectForSubroutine(
       return { preventsJackOut: true };
     case "set_next_encounter_unless_fully_break_damage":
     case "set_run_pass_rezzed_ice_program_trash":
-    case "set_run_viral_15":
+    case "set_run_active_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
     case "trash_installed_program_unless_runner_pays":

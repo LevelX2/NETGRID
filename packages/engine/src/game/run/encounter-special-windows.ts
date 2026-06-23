@@ -40,7 +40,7 @@ export type EncounterSpecialWindowResult = {
   stateChanged?: boolean;
 };
 
-export type TooManyDoorsSecretBidResult = EncounterSpecialWindowResult & {
+export type SecretSpendCompareResult = EncounterSpecialWindowResult & {
   secretBidCorpAmount?: number;
   secretBidRunnerAmount?: number;
   revealed?: boolean;
@@ -103,7 +103,7 @@ export function resolveEncounterSpecialWindowSubroutine(
     "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
   ) {
     const run = mustRun(host.state);
-    startTooManyDoorsSecretSpendCorpChoice(
+    startSecretSpendCompareCorpChoice(
       host,
       mustEncounteredIce(run),
       subroutineIndex,
@@ -118,19 +118,19 @@ export function resolveEncounterSpecialWindowSubroutine(
   return { handled: false };
 }
 
-export function startTooManyDoorsSecretSpendCorpChoice(
+export function startSecretSpendCompareCorpChoice(
   host: EncounterSpecialWindowHost,
   sourceIceId: CardInstanceId,
   subroutineIndex: number,
   legalAction?: LegalAction,
-): TooManyDoorsSecretBidResult {
+): SecretSpendCompareResult {
   const state = host.state;
   if (state.pendingChoice || state.secretSpendComparison)
     throw new Error("Es ist bereits eine Secret-Spend-Choice offen.");
   const run = mustRun(state);
-  const source = `p3_56.too_many_doors_secret_spend:${run.runId}:${sourceIceId}:${subroutineIndex}`;
+  const source = `card_implementation.secret_spend_compare:${run.runId}:${sourceIceId}:${subroutineIndex}`;
   state.secretSpendComparison = {
-    source: "too_many_doors",
+    source: "secret_spend_compare",
     runId: run.runId,
     sourceIceId,
     subroutineIndex,
@@ -139,7 +139,7 @@ export function startTooManyDoorsSecretSpendCorpChoice(
     state,
     "corp",
     source,
-    "Too Many Doors: Korp geheim 0, 1 oder 2 Credits ausgeben.",
+    "Secret Spend Compare: Korp geheim 0, 1 oder 2 Credits ausgeben.",
     state.corp.credits,
   );
   state.activeSide = "corp";
@@ -151,23 +151,23 @@ export function startTooManyDoorsSecretSpendCorpChoice(
   return { handled: true, stateChanged: true };
 }
 
-export function resolveTooManyDoorsSecretSpendChoice(
+export function resolveSecretSpendCompareChoice(
   host: EncounterSpecialWindowHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
-): TooManyDoorsSecretBidResult {
+): SecretSpendCompareResult {
   const state = host.state;
   const choice = state.pendingChoice;
   const comparison = state.secretSpendComparison;
   if (
     !choice ||
     !comparison ||
-    !choice.source.startsWith("p3_56.too_many_doors_secret_spend")
+    !choice.source.startsWith("card_implementation.secret_spend_compare")
   )
-    throw new Error("Too-Many-Doors-Secret-Spend-Choice ist nicht offen.");
+    throw new Error("Secret-Spend-Compare-Choice ist nicht offen.");
   const selected = selectedBidAmount(choice, playerAction);
   if (selected < 0 || selected > 2)
-    throw new Error("Too Many Doors erlaubt nur 0, 1 oder 2 Credits.");
+    throw new Error("Secret Spend Compare erlaubt nur 0, 1 oder 2 Credits.");
   if (choice.side === "corp") {
     if (state.corp.credits < selected)
       throw new Error("Die Korp kann diesen Secret Spend nicht bezahlen.");
@@ -179,7 +179,7 @@ export function resolveTooManyDoorsSecretSpendChoice(
       state,
       "runner",
       choice.source,
-      "Too Many Doors: Runner geheim 0, 1 oder 2 Credits ausgeben.",
+      "Secret Spend Compare: Runner geheim 0, 1 oder 2 Credits ausgeben.",
       state.runner.credits,
     );
     state.activeSide = "runner";

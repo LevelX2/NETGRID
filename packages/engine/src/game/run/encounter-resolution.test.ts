@@ -15,7 +15,7 @@ import {
   preparePayOrEndRunSubroutinePayment,
   resolveFatalAttractorPostEncounter,
   resolveRunDurationMarkerSubroutine,
-  startViral15ProgramTrashChoice,
+  startActiveIceProgramTrashChoice,
   type DamageSummary,
 } from "./encounter-resolution";
 import {
@@ -137,7 +137,7 @@ describe("encounter resolution boundary", () => {
     const definition = DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]!;
     const viralSubroutine = {
       id: "viral15",
-      type: "set_run_viral_15",
+      type: "set_run_active_ice_program_trash",
     } as SubroutineDefinition;
     const passTrashSubroutine = {
       id: "viral15_pass",
@@ -155,10 +155,10 @@ describe("encounter resolution boundary", () => {
       legalAction,
     });
 
-    expect(state.run?.viral15ActiveSourceIceId).toBe("ice_1");
+    expect(state.run?.activeIceProgramTrashSourceIceId).toBe("ice_1");
     expect(state.run?.passRezzedIceProgramTrashSourceIceId).toBe("ice_1");
     expect(legalAction.payload).toMatchObject({
-      v1922CorpIceAbility: "viral_15_run_modifier",
+      v1922CorpIceAbility: "active_ice_program_trash_run_modifier",
       jackOutAdditionalCost: 1,
       passIceTrashProgramPrompt: true,
       sourceDefinitionId: "onr_v1_276_viral-15",
@@ -169,15 +169,15 @@ describe("encounter resolution boundary", () => {
       encounterResolutionHost(state),
     );
     expect(markers).toMatchObject({
-      viral15PendingPassedIceId: "ice_1",
+      activeIceProgramTrashPendingPassedIceId: "ice_1",
       passRezzedIceProgramTrashPendingPassedIceId: "ice_1",
     });
   });
 
   it("opens the stable Viral-15 post-pass program-trash choice only in the pass window", () => {
     const state = makeState();
-    state.run!.viral15ActiveSourceIceId = "ice_1" as CardInstanceId;
-    state.run!.viral15PendingPassedIceId = "ice_1" as CardInstanceId;
+    state.run!.activeIceProgramTrashSourceIceId = "ice_1" as CardInstanceId;
+    state.run!.activeIceProgramTrashPendingPassedIceId = "ice_1" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
 
     const result = handlePostPassProgramTrashChoices(
@@ -191,15 +191,15 @@ describe("encounter resolution boundary", () => {
       sourceDefinitionId: "onr_v1_276_viral-15",
     });
     expect(state.pendingChoice).toMatchObject({
-      choiceId: "choice_v1922_viral_15_program_trash_10",
-      source: "v1922.viral_15_program_trash:ice_1:ice_1:10",
+      choiceId: "active_ice_program_trash_10",
+      source: "card_implementation.active_ice_program_trash:ice_1:ice_1:10",
       kind: "select_cards",
       visibility: "hidden_info_barrier",
     });
     expect(legalAction.payload).toMatchObject({
-      v1922CorpIceAbility: "viral_15_program_trash",
-      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
-      viral15ProgramTrashChoiceOpened: true,
+      v1922CorpIceAbility: "active_ice_program_trash",
+      hiddenZoneAction: "active_ice_program_trash_choice",
+      activeIceProgramTrashChoiceOpened: true,
     });
   });
 
@@ -321,10 +321,10 @@ describe("encounter resolution boundary", () => {
 
   it("can start the Viral-15 choice directly with stable source and payload", () => {
     const state = makeState();
-    state.run!.viral15ActiveSourceIceId = "ice_1" as CardInstanceId;
+    state.run!.activeIceProgramTrashSourceIceId = "ice_1" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
 
-    const result = startViral15ProgramTrashChoice(
+    const result = startActiveIceProgramTrashChoice(
       encounterResolutionHost(state),
       "ice_1" as CardInstanceId,
       legalAction,
@@ -332,11 +332,11 @@ describe("encounter resolution boundary", () => {
 
     expect(result.choiceOpened).toBe(true);
     expect(state.pendingChoice?.source).toBe(
-      "v1922.viral_15_program_trash:ice_1:ice_1:10",
+      "card_implementation.active_ice_program_trash:ice_1:ice_1:10",
     );
     expect(legalAction.payload).toMatchObject({
       sourceDefinitionId: "onr_v1_276_viral-15",
-      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
+      hiddenZoneAction: "active_ice_program_trash_choice",
     });
   });
 });

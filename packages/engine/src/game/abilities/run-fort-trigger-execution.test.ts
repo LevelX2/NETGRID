@@ -59,7 +59,7 @@ describe("run fort trigger execution", () => {
     expect(calls).toEqual(["successful"]);
   });
 
-  it("delegates fort-window and Singapore City Grid triggers without rebuilding run flow", () => {
+  it("delegates fort-window and HQ Ice Swap triggers without rebuilding run flow", () => {
     const state = baseState();
     const calls: string[] = [];
     const fortAction = triggerAction(state, {

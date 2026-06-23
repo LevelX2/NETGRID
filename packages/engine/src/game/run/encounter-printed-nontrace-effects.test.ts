@@ -135,7 +135,7 @@ function makeHost(
     ),
     "onr_v1_272_too-many-doors": definition(
       "onr_v1_272_too-many-doors",
-      "Too Many Doors",
+      "Secret Spend Compare",
       "ice",
     ),
     cheap_program_def: definition("cheap_program_def", "Cheap Program", "program", {
@@ -447,7 +447,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
       definition: definition(
         "onr_v1_272_too-many-doors",
-        "Too Many Doors",
+        "Secret Spend Compare",
         "ice",
       ),
       subroutine: {

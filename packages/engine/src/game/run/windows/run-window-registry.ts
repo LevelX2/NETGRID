@@ -22,7 +22,7 @@ export type RunWindowActionResolver = {
 
 export const RUN_WINDOW_ACTION_RESOLVERS: readonly RunWindowActionResolver[] = [
   {
-    id: "singapore_city_grid_fort_ice_swap",
+    id: "hq_ice_swap_run_window",
     window: "corp_root_rez_window",
     buildActions: ({ host, run, server }) =>
       buildHqIceSwapRunActions(host, run, server),

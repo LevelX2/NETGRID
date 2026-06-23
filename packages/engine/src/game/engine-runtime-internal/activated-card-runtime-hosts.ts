@@ -374,7 +374,7 @@ import {
 } from "../run/run-duration-payment";
 import {
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
-  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  resolveActiveIceProgramTrashChoice as resolveActiveIceProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "../run/encounter-resolution";
 import {
@@ -383,7 +383,7 @@ import {
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
-  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
 import {

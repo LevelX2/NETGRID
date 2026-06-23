@@ -125,7 +125,7 @@ export function buildHqIceSwapRunActions(
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
     .sort();
   if (hqIceIds.length === 0) return [];
-  const used = new Set(run.singaporeCityGridUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.hqIceSwapUsedSourceIdsThisRun ?? []);
   const unrezzedIceTargets = server.ice
     .map((cardId, iceIndex) => ({ cardId, iceIndex }))
     .filter(({ cardId }) => !host.cards.cardInstanceFor(cardId).rezzed)
@@ -156,7 +156,7 @@ export function buildHqIceSwapRunActions(
             iceIndex,
             v1918UpgradeAbility: "hq_ice_swap",
             hiddenZoneBarrier: true,
-            hiddenZoneAction: "v1918_singapore_city_grid_choice",
+            hiddenZoneAction: "hq_ice_swap_choice",
           },
         ),
       );
@@ -425,13 +425,13 @@ export function startHqIceSwapChoice(
   legalAction: LegalAction,
 ): RunIceSwapChoiceResult {
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Singapore City Grid nutzen.");
+    throw new Error("Nur die Korp darf HQ Ice Swap nutzen.");
   const run = mustRun(host.state);
   if (
     host.state.timingPoint !== "run.approach_ice" &&
     host.state.timingPoint !== "run.jack_out_window"
   )
-    throw new Error("Singapore City Grid ist nur waehrend eines Runs legal.");
+    throw new Error("HQ Ice Swap ist nur waehrend eines Runs legal.");
   const sourceCardId = String(
     legalAction.payload?.cardId ?? "",
   ) as CardInstanceId;
@@ -444,36 +444,36 @@ export function startHqIceSwapChoice(
   ) as CardInstanceId;
   const iceIndex = Number(legalAction.payload?.iceIndex ?? -1);
   if (serverId !== run.attackedServerId)
-    throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
+    throw new Error("HQ Ice Swap ist nicht an diesen Run gebunden.");
   const server = host.servers.mustServer(serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht im angegriffenen Remote.");
+    throw new Error("HQ Ice Swap ist nicht im angegriffenen Remote.");
   const sourceInstance = host.cards.cardInstanceFor(sourceCardId);
   if (!sourceInstance.rezzed || !isFortIceSwapSource(host, sourceCardId))
-    throw new Error("Singapore City Grid ist nicht rezzed installiert.");
-  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
+    throw new Error("HQ Ice Swap ist nicht rezzed installiert.");
+  if (run.hqIceSwapUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error("HQ Ice Swap wurde in diesem Run bereits genutzt.");
   if (
     !Number.isInteger(iceIndex) ||
     iceIndex < 0 ||
     server.ice[iceIndex] !== targetIceId
   )
-    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist ungueltig.");
+    throw new Error("Das HQ-Ice-Swap-ICE-Ziel ist ungueltig.");
   const targetInstance = host.cards.cardInstanceFor(targetIceId);
   if (targetInstance.rezzed)
-    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
+    throw new Error("HQ Ice Swap darf nur unrezzed ICE austauschen.");
   const hqIceIds = host.state.corp.hq
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
     .sort();
   if (hqIceIds.length === 0)
-    throw new Error("In HQ liegt kein ICE fuer Singapore City Grid.");
+    throw new Error("In HQ liegt kein ICE fuer HQ Ice Swap.");
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
   host.state.pendingChoice = {
-    choiceId: `v1918_singapore_city_grid_${host.state.stateVersion + 1}`,
+    choiceId: `hq_ice_swap_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1918.singapore_city_grid:${sourceCardId}:${server.id}:${targetIceId}:${iceIndex}:${run.runId}`,
-    prompt: "Singapore City Grid: ICE aus HQ wählen.",
+    source: `card_implementation.hq_ice_swap:${sourceCardId}:${server.id}:${targetIceId}:${iceIndex}:${run.runId}`,
+    prompt: "HQ Ice Swap: ICE aus HQ wählen.",
     kind: "select_cards",
     options: hqIceIds.map((cardId) => ({
       id: `card_${cardId}`,
@@ -489,7 +489,7 @@ export function startHqIceSwapChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1918_singapore_city_grid_choice",
+    hiddenZoneAction: "hq_ice_swap_choice",
     choiceVisibility: "hidden_info_barrier",
     selectedCount: 1,
     serverLabel: server.label,
@@ -514,12 +514,12 @@ export function resolveHqIceSwapChoice(
   playerAction: PlayerAction,
 ): RunIceSwapChoiceResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1918.singapore_city_grid"))
-    throw new Error("Es ist keine Singapore-City-Grid-Choice offen.");
+  if (!choice || !choice.source.startsWith("card_implementation.hq_ice_swap"))
+    throw new Error("Es ist keine HQ-Ice-Swap-Choice offen.");
   const [, sourceCardIdRaw, serverIdRaw, targetIceIdRaw, iceIndexRaw, runId] =
     choice.source.split(":");
   if (!sourceCardIdRaw || !serverIdRaw || !targetIceIdRaw || !runId)
-    throw new Error("Die Singapore-City-Grid-Choice ist ungueltig.");
+    throw new Error("Die HQ-Ice-Swap-Choice ist ungueltig.");
   const sourceCardId = sourceCardIdRaw as CardInstanceId;
   const targetIceId = targetIceIdRaw as CardInstanceId;
   const serverId = serverIdRaw as Exclude<ServerId, "new_remote">;
@@ -527,34 +527,34 @@ export function resolveHqIceSwapChoice(
   const run = mustRun(host.state);
   if (run.runId !== runId || run.attackedServerId !== serverId)
     throw new Error(
-      "Die Singapore-City-Grid-Choice gehoert nicht zu diesem Run.",
+      "Die HQ-Ice-Swap-Choice gehoert nicht zu diesem Run.",
     );
   const server = host.servers.mustServer(serverId);
   if (!server.root.includes(sourceCardId))
     throw new Error(
-      "Singapore City Grid ist nicht mehr im angegriffenen Remote.",
+      "HQ Ice Swap ist nicht mehr im angegriffenen Remote.",
     );
   if (
     !isFortIceSwapSource(host, sourceCardId) ||
     !host.cards.cardInstanceFor(sourceCardId).rezzed
   )
-    throw new Error("Singapore City Grid ist nicht mehr rezzed installiert.");
-  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
+    throw new Error("HQ Ice Swap ist nicht mehr rezzed installiert.");
+  if (run.hqIceSwapUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error("HQ Ice Swap wurde in diesem Run bereits genutzt.");
   if (
     !Number.isInteger(iceIndex) ||
     iceIndex < 0 ||
     server.ice[iceIndex] !== targetIceId
   )
-    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist nicht mehr legal.");
+    throw new Error("Das HQ-Ice-Swap-ICE-Ziel ist nicht mehr legal.");
   const targetInstance = host.cards.cardInstanceFor(targetIceId);
   if (targetInstance.rezzed)
-    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
+    throw new Error("HQ Ice Swap darf nur unrezzed ICE austauschen.");
   const hqIceId = selectedChoiceCardIds(choice, playerAction)[0];
   if (!hqIceId || !host.state.corp.hq.includes(hqIceId))
-    throw new Error("Das Singapore-City-Grid-HQ-ICE ist nicht mehr in HQ.");
+    throw new Error("Das HQ-Ice-Swap-HQ-ICE ist nicht mehr in HQ.");
   if (host.cards.definitionFor(hqIceId).type !== "ice")
-    throw new Error("Singapore City Grid darf nur ICE aus HQ waehlen.");
+    throw new Error("HQ Ice Swap darf nur ICE aus HQ waehlen.");
   const hqIndex = host.state.corp.hq.indexOf(hqIceId);
   host.state.corp.hq[hqIndex] = targetIceId;
   server.ice[iceIndex] = hqIceId;
@@ -570,15 +570,15 @@ export function resolveHqIceSwapChoice(
     rezzed: false,
     zone: { side: "corp", zone: "serverIce", serverId },
   };
-  run.singaporeCityGridUsedSourceIdsThisRun = [
-    ...(run.singaporeCityGridUsedSourceIdsThisRun ?? []),
+  run.hqIceSwapUsedSourceIdsThisRun = [
+    ...(run.hqIceSwapUsedSourceIdsThisRun ?? []),
     sourceCardId,
   ];
   delete host.state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1918_singapore_city_grid_swap",
+    hiddenZoneAction: "hq_ice_swap_swap",
     sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
     serverLabel: server.label,
     iceIndex,

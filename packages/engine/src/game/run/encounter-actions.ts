@@ -585,12 +585,12 @@ export function buildRunnerMovementActions(
         jackOutAdditionalCost > 0 ? [{ credits: jackOutAdditionalCost }] : [],
         jackOutAdditionalCost > 0
           ? {
-              v1922CorpIceAbility: "viral_15_jack_out_tax",
+              v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
               jackOutAdditionalCost,
-              ...(run.viral15ActiveSourceIceId
+              ...(run.activeIceProgramTrashSourceIceId
                 ? {
                     sourceDefinitionId: host.cards.definitionFor(
-                      run.viral15ActiveSourceIceId,
+                      run.activeIceProgramTrashSourceIceId,
                     ).id,
                   }
                 : {}),

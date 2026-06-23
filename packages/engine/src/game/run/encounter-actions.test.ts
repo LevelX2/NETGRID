@@ -569,7 +569,7 @@ describe("runner encounter action generation", () => {
     state.run = {
       ...movementRun,
       jackOutAdditionalCostForRun: 2,
-      viral15ActiveSourceIceId: "ice_1" as CardInstanceId,
+      activeIceProgramTrashSourceIceId: "ice_1" as CardInstanceId,
     };
     const ice = iceDefinition();
 
@@ -584,7 +584,7 @@ describe("runner encounter action generation", () => {
     expect(result.legalActions[0]!.actionId).toBe("runner.jack_out");
     expect(result.legalActions[0]!.costs).toEqual([{ credits: 2 }]);
     expect(result.legalActions[0]!.payload).toMatchObject({
-      v1922CorpIceAbility: "viral_15_jack_out_tax",
+      v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
       jackOutAdditionalCost: 2,
       sourceDefinitionId: "test_sentry_ice",
     });

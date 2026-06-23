@@ -74,4 +74,4 @@ export const SECURITY_PURGE_PURGE_AGENDA_ID = "onr_v1_216_security-purge";
 export const EDGERUNNER_TEMPS_INSTALL_OPERATION_ID =
   "onr_v1_289_edgerunner-inc-temps";
 
-export const VIRAL_15_PROGRAM_TRASH_ICE_ID = "onr_v1_276_viral-15";
+export const ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID = "onr_v1_276_viral-15";

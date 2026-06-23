@@ -12,7 +12,7 @@ import {
   markSubmarineUplinkJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
   resolveFullyBrokenPassedIceTrash,
-  resolveTooManyDoorsSecretSpendChoice,
+  resolveSecretSpendCompareChoice,
   resolveVacuumLinkRewindSubroutine,
   fullyBrokenPassedIceTrashPostPassActions,
 } from "./encounter-special-windows";
@@ -123,7 +123,7 @@ function makeState(): GameState {
 }
 
 describe("encounter special windows boundary", () => {
-  it("runs Too Many Doors secret bid privately, then reveals and ends the run when Corp spent less", () => {
+  it("runs Secret Spend Compare secret bid privately, then reveals and ends the run when Corp spent less", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const subroutine = {
@@ -142,7 +142,7 @@ describe("encounter special windows boundary", () => {
     });
 
     const start = resolveEncounterSpecialWindowSubroutine(host, {
-      definition: { id: "onr_v1_272_too-many-doors", title: "Too Many Doors" } as never,
+      definition: { id: "onr_v1_272_too-many-doors", title: "Secret Spend Compare" } as never,
       subroutine,
       subroutineIndex: 2,
       legalAction,
@@ -151,7 +151,7 @@ describe("encounter special windows boundary", () => {
     expect(start).toMatchObject({ handled: true, suspended: true });
     expect(state.pendingChoice).toMatchObject({
       choiceId:
-        "p3_56.too_many_doors_secret_spend:run_1:ice_current:2.corp.10",
+        "card_implementation.secret_spend_compare:run_1:ice_current:2.corp.10",
       side: "corp",
       kind: "bid_amount",
       visibility: "hidden_info_barrier",
@@ -162,7 +162,7 @@ describe("encounter special windows boundary", () => {
       sourceDefinitionId: "onr_v1_272_too-many-doors",
     });
 
-    const corpStep = resolveTooManyDoorsSecretSpendChoice(
+    const corpStep = resolveSecretSpendCompareChoice(
       host,
       legalAction,
       playerChoice("bid_1"),
@@ -173,12 +173,12 @@ describe("encounter special windows boundary", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "p3_56.too_many_doors_secret_spend:run_1:ice_current:2",
+      source: "card_implementation.secret_spend_compare:run_1:ice_current:2",
       visibility: "hidden_info_barrier",
     });
     expect(legalAction.payload).not.toHaveProperty("secretSpendCorp");
 
-    const reveal = resolveTooManyDoorsSecretSpendChoice(
+    const reveal = resolveSecretSpendCompareChoice(
       host,
       legalAction,
       playerChoice("bid_2"),
