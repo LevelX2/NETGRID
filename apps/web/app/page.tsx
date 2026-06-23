@@ -141,11 +141,8 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   installedCorpExposeReviewCardId,
-  clampCuePosition,
   corpInstalledCardState,
   corpRootCardsForDisplay,
-  cuePositionClassName,
-  cuePositionStyle,
   encounterBreakerActions,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
@@ -476,6 +473,7 @@ import {
   PriorityWindowHoldToggle
 } from "../features/actions/ActionControls";
 import { DamageImpactOverlay } from "../features/actions/DamageImpactOverlay";
+import { OpponentActionOverlay } from "../features/actions/OpponentActionOverlay";
 import {
   AccessRevealModal,
   ExposeReviewModal,
@@ -5140,9 +5138,20 @@ export default function Page() {
         cardDetailsById={catalogDetailsById}
         displayMode={cardDisplayMode}
         canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
+        renderTitle={(cue) => {
+          const titleCard = cue.cardDefinitionId ? (catalogDetailsById[cue.cardDefinitionId] ?? null) : null;
+          return (
+            <OpponentCueTitle
+              cue={cue}
+              card={titleCard}
+              previewCard={titleCard ? visibleCardFromCatalogDetail(titleCard) : null}
+              displayMode={cardDisplayMode}
+              onFocusCard={focusCard}
+            />
+          );
+        }}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
-        onFocusCard={focusCard}
         onAdvanceAi={() => {
           setCurrentActionCue(null);
           advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
@@ -6098,136 +6107,6 @@ function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined 
   return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
 
-function OpponentActionOverlay({
-  cue,
-  queued,
-  position,
-  cardDetailsById,
-  displayMode,
-  canAdvanceAi = false,
-  onPosition,
-  onDismiss,
-  onFocusCard,
-  onAdvanceAi
-}: {
-  cue: OpponentActionCue | null;
-  queued: number;
-  position: CuePositionPreference;
-  cardDetailsById: Record<string, CatalogCardDetail>;
-  displayMode: CardDisplayMode;
-  canAdvanceAi?: boolean;
-  onPosition(position: CuePositionPreference): void;
-  onDismiss(): void;
-  onFocusCard(card: DisplayVisibleCard): void;
-  onAdvanceAi?(): void;
-}) {
-  const overlayRef = useRef<HTMLElement | null>(null);
-  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
-  if (!cue) return null;
-
-  const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
-  const titleCard = cue.cardDefinitionId ? (cardDetailsById[cue.cardDefinitionId] ?? null) : null;
-  const titlePreviewCard = titleCard ? visibleCardFromCatalogDetail(titleCard) : null;
-  const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
-  const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
-  const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
-  const dismissLabel = showAiAdvanceButton ? "Weiter" : "Ausblenden";
-  const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-    const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-  const dragCue = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const overlay = overlayRef.current;
-    const offset = dragOffsetRef.current;
-    if (!overlay || !offset) return;
-    const rect = overlay.getBoundingClientRect();
-    onPosition(
-      clampCuePosition(
-        ((event.clientX - offset.x) / window.innerWidth) * 100,
-        ((event.clientY - offset.y) / window.innerHeight) * 100,
-        window.innerWidth,
-        window.innerHeight,
-        rect.width,
-        rect.height
-      )
-    );
-  };
-  const stopDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-  };
-
-  return (
-    <aside
-      ref={overlayRef}
-      className={`opponentCueOverlay ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
-      style={cuePositionStyle(position)}
-      aria-live="polite"
-      data-testid="opponent-cue"
-    >
-      <div className="opponentCueHeader">
-        <div className="opponentCueIdentity">
-          <span className="opponentCueIcon" aria-hidden="true">
-            {cue.source === "ai" ? <Bot size={18} /> : cue.source === "human" ? <User size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
-          </span>
-          <span>{cue.actorLabel}</span>
-          {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue)}</span> : null}
-        </div>
-        <button
-          className="button iconOnly cueDragHandle"
-          onPointerDown={startDrag}
-          onPointerMove={dragCue}
-          onPointerUp={stopDrag}
-          onPointerCancel={stopDrag}
-          aria-label="Hinweis verschieben"
-          title="Hinweis verschieben"
-          type="button"
-        >
-          <Move size={15} />
-        </button>
-      </div>
-      <div className="opponentCueBody">
-        {relatedCard || showHiddenCardBack ? (
-          <div className="opponentCueVisual">
-            <span className="opponentCueActionBadge">{cueVisualLabel(cue)}</span>
-            {relatedCard ? (
-              <div className="opponentCueCard">
-                <CardView card={relatedCard} displayMode={cueCardDisplayMode} compact preview />
-              </div>
-            ) : (
-              <div className="opponentCueCardBack" aria-hidden="true">
-                <span>Verdeckte Karte</span>
-              </div>
-            )}
-          </div>
-        ) : null}
-        <div className="opponentCueText">
-          <strong>
-            <OpponentCueTitle
-              cue={cue}
-              card={titleCard}
-              previewCard={titlePreviewCard}
-              displayMode={displayMode}
-              onFocusCard={onFocusCard}
-            />
-          </strong>
-          {cue.description ? <p>{cue.description}</p> : null}
-        </div>
-      </div>
-      <div className="opponentCueFooter">
-        {queued > 0 ? <small>{queued} weitere {queued === 1 ? "Meldung" : "Meldungen"}</small> : <span aria-hidden="true" />}
-        <button className="button cueAdvanceButton" onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss} aria-label={dismissLabel} title={dismissLabel} type="button">
-          {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
-          {dismissLabel}
-        </button>
-      </div>
-    </aside>
-  );
-}
-
 function OpponentCueTitle({
   cue,
   card,
@@ -6275,38 +6154,6 @@ function OpponentCueTitle({
       {cue.title.slice(index + cue.cardTitle.length)}
     </>
   );
-}
-
-function cueActionUseLabel(cue: OpponentActionCue): string {
-  const actor = cue.actor === "corp" ? "Korp" : cue.actor === "runner" ? "Runner" : "Spiel";
-  if (!cue.actionUse) return actor;
-  return cue.actionUse.start === cue.actionUse.end ? `${cue.actionUse.start}. ${actor}-Aktion` : `${actor}-Aktionen ${cue.actionUse.start}-${cue.actionUse.end}`;
-}
-
-function cueVisualLabel(cue: OpponentActionCue): string {
-  if (cue.source === "system") return "Auto-Effekt";
-  switch (cue.actionType) {
-    case "install_card":
-      return cue.visibility === "redacted" ? "verdeckt installiert" : "installiert";
-    case "play_event":
-    case "play_operation":
-      return "gespielt";
-    case "access_card":
-      return "gezeigt";
-    case "rez_ice":
-      return "gerezzt";
-    case "score_agenda":
-      return "erzielt";
-    case "steal_agenda":
-      return "gestohlen";
-    case "advance_card":
-      return "entwickelt";
-    case "trash_accessed_card":
-    case "trash_resource":
-      return "getrasht";
-    default:
-      return "Karte";
-  }
 }
 
 function RunnerOpponentZonesStrip({
