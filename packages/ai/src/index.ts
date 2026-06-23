@@ -167,6 +167,7 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeConfidence,
   semanticRuntimeScoreFromComponents,
+  semanticRuntimeTypeTieBreakerScore,
   semanticRuntimeTypePriority,
 } from "./runtime/semantic-runtime-score-components";
 import {
@@ -4489,7 +4490,7 @@ function semanticRuntimeScoreBreakdown(
   exclusion?: SemanticRuntimeExclusion,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
-  const typePriority = semanticRuntimeTypePriority(action.type);
+  const typePriority = semanticRuntimeTypeTieBreakerScore(action.type);
   const contextComponents =
     input.side === "runner"
       ? semanticRuntimeRunnerScoreComponents(
@@ -4504,9 +4505,9 @@ function semanticRuntimeScoreBreakdown(
   return [
     buildSemanticDecisionDebugScoreComponent({
       key: "semantic_type_priority",
-      label: "Action-Typ-Priorität",
+      label: "Action-Typ-Tiebreaker",
       value: typePriority,
-      reason: action.type,
+      reason: `fallback_only:${action.type}`,
     }),
     ...(exclusion
       ? [

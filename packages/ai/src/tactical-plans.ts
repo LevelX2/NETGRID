@@ -110,6 +110,9 @@ export type {
 
 const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
 
+// TacticalPlans are a mapping layer: they organize TacticalGoals, capabilities,
+// memory and ActionSemanticCandidates onto existing LegalActions. New card
+// semantics belong in action/card semantic modules, not in plan matching.
 export function buildTacticalPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlan[] {

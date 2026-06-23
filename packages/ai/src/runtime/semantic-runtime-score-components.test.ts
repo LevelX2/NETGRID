@@ -6,6 +6,7 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeConfidence,
   semanticRuntimeScoreFromComponents,
+  semanticRuntimeTypeTieBreakerScore,
   semanticRuntimeTypePriority,
 } from "./semantic-runtime-score-components";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
@@ -112,6 +113,16 @@ describe("semantic runtime score components", () => {
     expect(
       semanticRuntimeTypePriority("unknown_action" as LegalAction["type"]),
     ).toBe(4000);
+  });
+
+  it("exposes action type priority only as a bounded score tie-breaker", () => {
+    expect(semanticRuntimeTypeTieBreakerScore("resolve_choice")).toBe(100);
+    expect(semanticRuntimeTypeTieBreakerScore("score_agenda")).toBe(94);
+    expect(semanticRuntimeTypeTieBreakerScore("gain_credit")).toBe(54);
+    expect(semanticRuntimeTypeTieBreakerScore("end_turn")).toBe(10);
+    expect(
+      semanticRuntimeTypeTieBreakerScore("unknown_action" as LegalAction["type"]),
+    ).toBe(40);
   });
 });
 

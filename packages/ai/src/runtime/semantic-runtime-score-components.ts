@@ -53,6 +53,15 @@ export function semanticRuntimeScoreFromComponents(
   return components.reduce((sum, component) => sum + component.value, 0);
 }
 
+// Historical action-type priority is order metadata. Runtime scoring should use
+// this only as a small fallback/tie-breaker after goals, gates, target context,
+// cost, timing and boardstate components have done the real work.
+export function semanticRuntimeTypeTieBreakerScore(
+  type: LegalAction["type"],
+): number {
+  return Math.round(semanticRuntimeTypePriority(type) / 100);
+}
+
 export function semanticRuntimeTypePriority(type: LegalAction["type"]): number {
   switch (type) {
     case "resolve_choice":
