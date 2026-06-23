@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-06-23-ai-replay-portable-same-state-fixture
-status: inbox
+status: done
 kind: test
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-23
-startedAt:
-completedAt:
+startedAt: 2026-06-23
+completedAt: 2026-06-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/evaluation/replay-portable-fixtures.ts
+  - packages/ai/src/evaluation/replay-portable-fixtures.test.ts
+  - docs/reviews/ai/ai-replay-portable-same-state-fixture-2026-06-23.md
+  - docs/codex/CODEX_STATUS.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/replay-portable-fixtures.test.ts --maxWorkers=1 --testTimeout=30000
+  - corepack pnpm --filter @netgrid/ai typecheck
 ---
 
 # AI-Replay: portables Same-State-Fixture erstellen
@@ -43,10 +51,10 @@ Der bestätigte Coverage-Mapping-Fall aus der ersten AI-Replay-Mistake-Iteration
 
 ## Akzeptanzkriterien
 
-- [ ] Das Fixture läuft in einem normalen `@netgrid/ai`-Test ohne lokale SQLite.
-- [ ] Die Eingabe enthält keine FullState-, Hidden-Info-, Decklisten- oder lokalen Pfad-Daten.
-- [ ] Der Test belegt die gewünschte `start_run`-Entscheidung und mindestens eine Negativkontrolle.
-- [ ] `corepack pnpm --filter @netgrid/ai typecheck` und der fokussierte Fixture-Test sind grün.
+- [x] Das Fixture läuft in einem normalen `@netgrid/ai`-Test ohne lokale SQLite.
+- [x] Die Eingabe enthält keine FullState-, Hidden-Info-, Decklisten- oder lokalen Pfad-Daten.
+- [x] Der Test belegt die gewünschte `start_run`-Entscheidung und mindestens eine Negativkontrolle.
+- [x] `corepack pnpm --filter @netgrid/ai typecheck` und der fokussierte Fixture-Test sind grün.
 
 ## Umsetzungshinweise
 
@@ -55,4 +63,4 @@ Der bestätigte Coverage-Mapping-Fall aus der ersten AI-Replay-Mistake-Iteration
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt mit `packages/ai/src/evaluation/replay-portable-fixtures.ts` und `packages/ai/src/evaluation/replay-portable-fixtures.test.ts`. Das Fixture `ai-replay-coverage-run-gap-portable-v1` ist bewusst ein redigiertes `synthetic_near_same_state`: Es enthält nur `PlayerView`, `LegalActions` und sichtbare Entscheidungsanker, nicht den lokalen SQLite-FullState. Der Test belegt die gewünschte `start_run`-Entscheidung und die Negativkontrolle ohne erfundenen Run. Dokumentiert in `docs/reviews/ai/ai-replay-portable-same-state-fixture-2026-06-23.md`.
