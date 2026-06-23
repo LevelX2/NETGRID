@@ -13,7 +13,7 @@ import {
   clearEncounterTemporaryTraceCredits,
   handleRunEndCleanup,
   recordDupreBreakUsage,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
@@ -806,10 +806,10 @@ describe("run end cleanup", () => {
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
 
     fixture.state.pendingChoice = {
-      choiceId: "v181_pattels_virus_8",
+      choiceId: "broken_ice_virus_counter_8",
       side: "runner",
-      source: "v181.pattels_virus:ice_1:8:amount=2",
-      prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
+      source: "broken_ice.virus_counter:ice_1:8:amount=2",
+      prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
       kind: "select_cards",
       options: [
         {
@@ -825,7 +825,7 @@ describe("run end cleanup", () => {
       visibility: "public",
     };
 
-    resolvePattelsVirusCounterChoice(
+    resolveBrokenIceVirusCounterChoice(
       fixture.host,
       fixture.legalAction,
       {
@@ -833,14 +833,14 @@ describe("run end cleanup", () => {
         actionId: "runner.resolve_choice",
         type: "resolve_choice",
         selectedChoices: { selectedOptionIds: ["card_ice_1"] },
-      } as unknown as Parameters<typeof resolvePattelsVirusCounterChoice>[2],
+      } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2],
     );
 
     expect(fixture.state.pendingChoice).toBeUndefined();
     expect(fixture.state.cardInstances.ice_1?.counters?.virus).toBe(2);
     expect(fixture.legalAction.payload).toMatchObject({
-      v181RunnerProgramAbility: "pattels_virus_counter",
-      pattelsVirusCounterAdded: 2,
+      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      brokenIceVirusCounterAdded: 2,
       targetCardDefinitionId: "ice_def",
       remainingCounters: 2,
       choiceVisibility: "public",

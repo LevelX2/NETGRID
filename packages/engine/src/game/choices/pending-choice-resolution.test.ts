@@ -239,11 +239,11 @@ function pendingChoiceHost(
       resolvePassRezzedIceProgramTrashChoiceInRunModule: unexpected(
         "resolvePassRezzedIceProgramTrashChoiceInRunModule",
       ),
-      resolveSpeedTrapRezInterruptChoice: unexpected(
-        "resolveSpeedTrapRezInterruptChoice",
+      resolveRezInterruptJackOutChoice: unexpected(
+        "resolveRezInterruptJackOutChoice",
       ),
       runRezWindowHostForState: () => ({}),
-      resolvePattelsVirusCounterChoice: unexpected("resolvePattelsVirusCounterChoice"),
+      resolveBrokenIceVirusCounterChoice: unexpected("resolveBrokenIceVirusCounterChoice"),
       runEndCleanupHost: () => ({}),
       resolveAardvarkInterceptionChoice: unexpected(
         "resolveAardvarkInterceptionChoice",
@@ -260,10 +260,10 @@ function pendingChoiceHost(
       ),
     },
     access: {
-      resolvePriorityWreckSpendChoice: unexpected("resolvePriorityWreckSpendChoice"),
+      resolveSuccessfulRunCreditLossSpendChoice: unexpected("resolveSuccessfulRunCreditLossSpendChoice"),
       runAccessTransitionHost: () => ({}),
-      resolveMicrotechAiInterfacePreAccessChoice: unexpected(
-        "resolveMicrotechAiInterfacePreAccessChoice",
+      resolvePreAccessTopRdReorderChoice: unexpected(
+        "resolvePreAccessTopRdReorderChoice",
       ),
     },
     cardImplementation: {

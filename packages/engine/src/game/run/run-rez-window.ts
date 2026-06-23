@@ -29,7 +29,7 @@ import type {
   RootRezEffectResult,
   RunRezWindowHost,
   RunRezWindowResult,
-  SpeedTrapRezWindowResult,
+  RezInterruptJackOutWindowResult,
 } from "./windows/run-window-host";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -60,7 +60,7 @@ export type {
   RunRezActionBuildResult,
   RunRezWindowHost,
   RunRezWindowResult,
-  SpeedTrapRezWindowResult,
+  RezInterruptJackOutWindowResult,
 } from "./windows/run-window-host";
 
 export function buildCorpApproachActions(
@@ -162,7 +162,7 @@ export function buildCorpRunRootRezActions(
         {
           cardId,
           rootRez: true,
-          speedTrapInterruptEligible: true,
+          rezInterruptJackOutEligible: true,
           serverId: server.id,
           ...(rezCostReductionSourceDefinitionIds.length > 0
             ? {
@@ -307,12 +307,12 @@ export function handleRunRootRezPostRez(
   rezzedCardId: CardInstanceId,
   legalAction?: LegalAction,
 ): RootRezContinuationResult {
-  const speedTrap = startSpeedTrapRezInterruptChoice(
+  const rezInterruptResult = startRezInterruptJackOutChoice(
     host,
     rezzedCardId,
     legalAction,
   );
-  if (speedTrap.handled) return speedTrap;
+  if (rezInterruptResult.handled) return rezInterruptResult;
   const rootEffect = resolveCorpRootRezEffect(host, rezzedCardId, legalAction);
   if (rootEffect.handled) return rootEffect;
   host.callbacks.continueAfterRootRez(legalAction);
@@ -367,19 +367,19 @@ export function resolveCorpRootRezEffect(
   };
 }
 
-export function startSpeedTrapRezInterruptChoice(
+export function startRezInterruptJackOutChoice(
   host: RunRezWindowHost,
   rezzedCardId: string,
   legalAction?: LegalAction,
-): SpeedTrapRezWindowResult {
+): RezInterruptJackOutWindowResult {
   const run = host.state.run;
   if (!run) return { handled: false };
   const rezzedCardInstanceId = rezzedCardId as CardInstanceId;
   const definition = host.cards.definitionFor(rezzedCardInstanceId);
   if (definition.type !== "asset" && definition.type !== "upgrade")
     return { handled: false };
-  const speedTrapId = installedSpeedTrapIds(host)[0];
-  if (!speedTrapId) return { handled: false };
+  const rezInterruptSourceId = installedRezInterruptJackOutSourceIds(host)[0];
+  if (!rezInterruptSourceId) return { handled: false };
   if (
     !host.servers
       .mustServer(run.attackedServerId)
@@ -388,26 +388,26 @@ export function startSpeedTrapRezInterruptChoice(
     return { handled: false };
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  run.speedTrapPendingRezCardId = rezzedCardInstanceId;
-  run.speedTrapPendingRezTimingPoint = host.state.timingPoint;
-  run.speedTrapPendingRezActiveSide = host.state.activeSide;
+  run.rezInterruptPendingRezCardId = rezzedCardInstanceId;
+  run.rezInterruptPendingRezTimingPoint = host.state.timingPoint;
+  run.rezInterruptPendingRezActiveSide = host.state.activeSide;
   host.state.pendingChoice = {
-    choiceId: `v1922_speed_trap_${host.state.stateVersion + 1}`,
+    choiceId: `rez_interrupt_jack_out_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v1922.speed_trap:${speedTrapId}:${rezzedCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Speed Trap: Nach dem Rez jack out?",
+    source: `rez_interrupt.jack_out:${rezInterruptSourceId}:${rezzedCardId}:${host.state.stateVersion + 1}`,
+    prompt: "Nach dem Rez jack out?",
     kind: "select_option",
     options: [
       {
         id: "jack_out",
         label: "Jack out",
-        publicLabel: "Speed Trap nutzen",
+        publicLabel: "Rez-Interrupt nutzen",
         value: "jack_out",
       },
       {
         id: "pass",
         label: "Nicht nutzen",
-        publicLabel: "Speed Trap nicht nutzen",
+        publicLabel: "Rez-Interrupt nicht nutzen",
         value: "pass",
       },
     ],
@@ -419,107 +419,107 @@ export function startSpeedTrapRezInterruptChoice(
   host.state.activeSide = "runner";
   if (legalAction) {
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
-    const speedTrapDefinitionId = host.cards.definitionFor(speedTrapId).id;
+    const rezInterruptSourceDefinitionId = host.cards.definitionFor(rezInterruptSourceId).id;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: speedTrapDefinitionId,
-      speedTrapSourceCardId: speedTrapId,
+      v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
+      sourceDefinitionId: rezInterruptSourceDefinitionId,
+      rezInterruptSourceCardId: rezInterruptSourceId,
       rezzedCardDefinitionId: definition.id,
       ...(serverLabel ? { serverLabel } : {}),
-      speedTrapChoiceOpened: true,
+      rezInterruptChoiceOpened: true,
     };
   }
   return {
     handled: true,
     rezzedCardId: rezzedCardInstanceId,
-    sourceDefinitionId: host.cards.definitionFor(speedTrapId).id,
-    sourceCardId: speedTrapId,
-    speedTrapChoiceStarted: true,
+    sourceDefinitionId: host.cards.definitionFor(rezInterruptSourceId).id,
+    sourceCardId: rezInterruptSourceId,
+    rezInterruptChoiceStarted: true,
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
 }
 
-export function resolveSpeedTrapRezInterruptChoice(
+export function resolveRezInterruptJackOutChoice(
   host: RunRezWindowHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
-): SpeedTrapRezWindowResult {
+): RezInterruptJackOutWindowResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.speed_trap"))
-    throw new Error("Speed-Trap-Choice ist nicht offen.");
-  const [, speedTrapId, rezzedCardId] = choice.source.split(":");
+  if (!choice || !choice.source.startsWith("rez_interrupt.jack_out"))
+    throw new Error("Rez-Interrupt-Choice ist nicht offen.");
+  const [, rezInterruptSourceId, rezzedCardId] = choice.source.split(":");
   if (
-    !speedTrapId ||
+    !rezInterruptSourceId ||
     !host.cards
       .runnerInstalledProgramIds()
-      .includes(speedTrapId as CardInstanceId)
+      .includes(rezInterruptSourceId as CardInstanceId)
   )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
-  const speedTrapCardId = speedTrapId as CardInstanceId;
-  const speedTrapDefinitionId = host.cards.definitionFor(speedTrapCardId).id;
+    throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
+  const rezInterruptSourceCardId = rezInterruptSourceId as CardInstanceId;
+  const rezInterruptSourceDefinitionId = host.cards.definitionFor(rezInterruptSourceCardId).id;
   if (
     !hasRunEncounterInterventionKind(
       host,
-      speedTrapCardId,
+      rezInterruptSourceCardId,
       "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
     ) &&
-    (cardImplementationForDefinitionId(speedTrapDefinitionId) ||
-      speedTrapDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
+    (cardImplementationForDefinitionId(rezInterruptSourceDefinitionId) ||
+      rezInterruptSourceDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
   )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
+    throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
   const run = mustRun(host.state);
   if (
     !rezzedCardId ||
-    run.speedTrapPendingRezCardId !== rezzedCardId ||
+    run.rezInterruptPendingRezCardId !== rezzedCardId ||
     !host.servers
       .mustServer(run.attackedServerId)
       .root.includes(rezzedCardId as CardInstanceId)
   )
-    throw new Error("Das Speed-Trap-Rezziel ist nicht mehr gueltig.");
+    throw new Error("Das Rez-Interrupt-Rezziel ist nicht mehr gueltig.");
   const rezzedCardInstanceId = rezzedCardId as CardInstanceId;
   const rezzedDefinition = host.cards.definitionFor(rezzedCardInstanceId);
   if (rezzedDefinition.type !== "asset" && rezzedDefinition.type !== "upgrade")
-    throw new Error("Speed Trap reagiert nur auf Nodes oder Upgrades.");
+    throw new Error("Der Rez-Interrupt reagiert nur auf Nodes oder Upgrades.");
   if (!host.cards.cardInstanceFor(rezzedCardInstanceId).rezzed)
-    throw new Error("Das Speed-Trap-Rezziel ist nicht gerezzt.");
+    throw new Error("Das Rez-Interrupt-Rezziel ist nicht gerezzt.");
   const selectedId =
     host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const useSpeedTrap = selectedId === "jack_out";
+  const useRezInterrupt = selectedId === "jack_out";
   const pass = selectedId === "pass";
-  if (!useSpeedTrap && !pass)
-    throw new Error("Die Speed-Trap-Auswahl ist ungueltig.");
+  if (!useRezInterrupt && !pass)
+    throw new Error("Die Rez-Interrupt-Auswahl ist ungueltig.");
   const successfulRunWithoutAccess =
-    useSpeedTrap && run.position.kind === "server";
+    useRezInterrupt && run.position.kind === "server";
   const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
-  const pendingTimingPoint = run.speedTrapPendingRezTimingPoint;
-  const pendingActiveSide = run.speedTrapPendingRezActiveSide;
-  delete run.speedTrapPendingRezCardId;
-  delete run.speedTrapPendingRezTimingPoint;
-  delete run.speedTrapPendingRezActiveSide;
+  const pendingTimingPoint = run.rezInterruptPendingRezTimingPoint;
+  const pendingActiveSide = run.rezInterruptPendingRezActiveSide;
+  delete run.rezInterruptPendingRezCardId;
+  delete run.rezInterruptPendingRezTimingPoint;
+  delete run.rezInterruptPendingRezActiveSide;
   delete host.state.pendingChoice;
 
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-    sourceDefinitionId: speedTrapDefinitionId,
-    speedTrapSourceCardId: speedTrapCardId,
+    v1922RunnerProgramAbility: "rez_interrupt_jack_out",
+    sourceDefinitionId: rezInterruptSourceDefinitionId,
+    rezInterruptSourceCardId: rezInterruptSourceCardId,
     rezzedCardDefinitionId: rezzedDefinition.id,
     ...(serverLabel ? { serverLabel } : {}),
-    speedTrapUsed: useSpeedTrap,
+    rezInterruptUsed: useRezInterrupt,
     successfulRunWithoutAccess,
   };
 
-  if (useSpeedTrap) {
+  if (useRezInterrupt) {
     host.callbacks.finishRun(successfulRunWithoutAccess, legalAction);
     return {
       handled: true,
       rezzedCardId: rezzedCardInstanceId,
-      sourceCardId: speedTrapCardId,
-      sourceDefinitionId: speedTrapDefinitionId,
+      sourceCardId: rezInterruptSourceCardId,
+      sourceDefinitionId: rezInterruptSourceDefinitionId,
       runnerJackedOut: true,
-      speedTrapResolved: true,
+      rezInterruptResolved: true,
       successfulRunWithoutAccess,
       resolvedPayload: legalAction.payload,
       stateChanged: true,
@@ -536,9 +536,9 @@ export function resolveSpeedTrapRezInterruptChoice(
   return {
     handled: true,
     rezzedCardId: rezzedCardInstanceId,
-    sourceCardId: speedTrapCardId,
-    sourceDefinitionId: speedTrapDefinitionId,
-    speedTrapResolved: true,
+    sourceCardId: rezInterruptSourceCardId,
+    sourceDefinitionId: rezInterruptSourceDefinitionId,
+    rezInterruptResolved: true,
     successfulRunWithoutAccess,
     resolvedPayload: legalAction.payload,
     stateChanged: true,
@@ -734,7 +734,7 @@ function isObligationDebtDefinition(definitionId: string): boolean {
   );
 }
 
-function installedSpeedTrapIds(host: RunRezWindowHost): CardInstanceId[] {
+function installedRezInterruptJackOutSourceIds(host: RunRezWindowHost): CardInstanceId[] {
   return host.cards
     .runnerInstalledProgramIds()
     .filter((cardId) => {

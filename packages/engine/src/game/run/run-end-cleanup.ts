@@ -655,14 +655,14 @@ export function recordDupreBreakUsage(
   run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
 }
 
-export function resolvePattelsVirusCounterChoice(
+export function resolveBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v181.pattels_virus"))
-    throw new Error("Es ist keine Pattel's-Virus-Choice offen.");
+  if (!choice || !choice.source.startsWith("broken_ice.virus_counter"))
+    throw new Error("Es ist keine Broken-ICE-Virus-Counter-Choice offen.");
   const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === selectedId);
   const targetIceId = typeof option?.value === "string" ? option.value : "";
@@ -671,7 +671,7 @@ export function resolvePattelsVirusCounterChoice(
     !choice.source.includes(targetIceId) ||
     !host.state.cardInstances[targetIceId]
   ) {
-    throw new Error("Die Pattel's-Virus-Auswahl ist ungültig.");
+    throw new Error("Die Broken-ICE-Virus-Counter-Auswahl ist ungueltig.");
   }
   const amount = Math.max(
     1,
@@ -684,8 +684,8 @@ export function resolvePattelsVirusCounterChoice(
   );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v181RunnerProgramAbility: "pattels_virus_counter",
-    pattelsVirusCounterAdded: added,
+    v181RunnerProgramAbility: "broken_ice_virus_counter",
+    brokenIceVirusCounterAdded: added,
     targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
     remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
     choiceVisibility: "public",
@@ -880,14 +880,14 @@ function applyV181SuccessfulRunCounterTriggers(
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          v181RunnerProgramAbility: "pattels_virus_counter",
-          pattelsVirusCounterAdded: added,
+          v181RunnerProgramAbility: "broken_ice_virus_counter",
+          brokenIceVirusCounterAdded: added,
           targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
           remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
         };
       }
     } else if (targetIceIds.length > 1) {
-      startPattelsVirusCounterChoice(
+      startBrokenIceVirusCounterChoice(
         host,
         targetIceIds,
         legalAction,
@@ -1161,7 +1161,7 @@ function successfulRunMatchesVirusTrigger(
   return false;
 }
 
-function startPattelsVirusCounterChoice(
+function startBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
@@ -1182,10 +1182,10 @@ function startPattelsVirusCounterChoice(
     });
   if (options.length === 0) return;
   host.state.pendingChoice = {
-    choiceId: `v181_pattels_virus_${host.state.stateVersion + 1}`,
+    choiceId: `broken_ice_virus_counter_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v181.pattels_virus:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
-    prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
+    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
+    prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
     kind: "select_cards",
     options,
     minSelections: 1,
@@ -1196,10 +1196,10 @@ function startPattelsVirusCounterChoice(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v181RunnerProgramAbility: "pattels_virus_counter_choice",
-      pattelsVirusCandidateCount: options.length,
-      pattelsVirusCounterAmount: amount,
-      pattelsVirusChoiceOpened: true,
+      v181RunnerProgramAbility: "broken_ice_virus_counter_choice",
+      brokenIceVirusCounterCandidateCount: options.length,
+      brokenIceVirusCounterAmount: amount,
+      brokenIceVirusCounterChoiceOpened: true,
       choiceVisibility: "public",
     };
   }

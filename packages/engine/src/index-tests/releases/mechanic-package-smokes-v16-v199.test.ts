@@ -4556,15 +4556,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
     continueUntilBreakOrAccess();
     state = apply(state, "runner", (action) => action.type === "access_card");
 
-    expect(state.pendingChoice?.source).toContain("v181.pattels_virus");
+    expect(state.pendingChoice?.source).toContain("broken_ice.virus_counter");
     expect(state.pendingChoice?.options).toHaveLength(2);
     state = applyChoice(state, "runner", `card_${innerIceId}`);
 
     expect(state.cardInstances[innerIceId]?.counters?.virus).toBe(1);
     expect(state.cardInstances[outerIceId]?.counters?.virus ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v181RunnerProgramAbility: "pattels_virus_counter",
-      pattelsVirusCounterAdded: 1,
+      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      brokenIceVirusCounterAdded: 1,
       targetCardDefinitionId: "onr_v1_279_wall-of-static",
     });
   });

@@ -221,8 +221,8 @@ export function publicContextForAction(
     context.v181RunnerProgramAbility =
       legalAction.payload.v181RunnerProgramAbility;
     for (const key of [
-      "pattelsVirusCandidateCount",
-      "pattelsVirusCounterAdded",
+      "brokenIceVirusCounterCandidateCount",
+      "brokenIceVirusCounterAdded",
       "poxCounterAdded",
       "poxCountersAfter",
       "faitCounterAdded",
@@ -234,9 +234,9 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.pattelsVirusChoiceOpened === "boolean")
-      context.pattelsVirusChoiceOpened =
-        legalAction.payload.pattelsVirusChoiceOpened;
+    if (typeof legalAction.payload.brokenIceVirusCounterChoiceOpened === "boolean")
+      context.brokenIceVirusCounterChoiceOpened =
+        legalAction.payload.brokenIceVirusCounterChoiceOpened;
     if (typeof legalAction.payload.targetCardDefinitionId === "string")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
@@ -318,10 +318,10 @@ export function publicContextForAction(
       "hostedCreditsAdded",
       "hostedCreditsAfter",
       "remainingCounters",
-      "speedTrapSourceCardId",
+      "rezInterruptSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
-      "speedTrapChoiceOpened",
+      "rezInterruptChoiceOpened",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -518,10 +518,10 @@ export function publicContextForAction(
       "sourceDefinitionId",
       "cardDefinitionId",
       "employeeEmpowermentStartDrawDecision",
-      "speedTrapSourceCardId",
+      "rezInterruptSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
-      "speedTrapUsed",
+      "rezInterruptUsed",
       "successfulRunWithoutAccess",
     ]) {
       const value = legalAction.payload?.[key];

@@ -69,8 +69,8 @@ export type RunRezWindowResult = {
   sourceDefinitionId?: string;
   serverId?: Exclude<ServerId, "new_remote"> | string;
   rootEffectResolved?: boolean;
-  speedTrapChoiceStarted?: boolean;
-  speedTrapResolved?: boolean;
+  rezInterruptChoiceStarted?: boolean;
+  rezInterruptResolved?: boolean;
   runnerJackedOut?: boolean;
   continueAfterRez?: boolean;
   resolvedPayload?: NonNullable<LegalAction["payload"]> | undefined;
@@ -79,7 +79,7 @@ export type RunRezWindowResult = {
 
 export type RootRezEffectResult = RunRezWindowResult;
 export type RootRezContinuationResult = RunRezWindowResult;
-export type SpeedTrapRezWindowResult = RunRezWindowResult & {
+export type RezInterruptJackOutWindowResult = RunRezWindowResult & {
   successfulRunWithoutAccess?: boolean;
 };
 export type RunRezActionBuildResult = {

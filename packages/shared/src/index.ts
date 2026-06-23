@@ -1048,7 +1048,7 @@ export type RunState = {
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
-  microtechAiInterfacePreAccessResolved?: boolean;
+  preAccessTopRdReorderResolved?: boolean;
   hiddenRunnerResourceAccessStartServerId?: Exclude<ServerId, "new_remote">;
   hiddenRunnerResourceAccessStartWindowClosed?: boolean;
   badPublicityCredits?: number;
@@ -1197,9 +1197,9 @@ export type RunState = {
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
   rootRezWindowPassedKeys?: string[];
-  speedTrapPendingRezCardId?: CardInstanceId;
-  speedTrapPendingRezTimingPoint?: string;
-  speedTrapPendingRezActiveSide?: Side;
+  rezInterruptPendingRezCardId?: CardInstanceId;
+  rezInterruptPendingRezTimingPoint?: string;
+  rezInterruptPendingRezActiveSide?: Side;
   runActionSpendingCap?: {
     sourceCardInstanceId: CardInstanceId;
     limit: number;

@@ -1177,7 +1177,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.payload?.serverId === "hq",
     );
     expect(priorityState.pendingChoice?.source).toContain(
-      "p3_33.priority_wreck",
+      "successful_run.credit_loss_spend",
     );
     expect(priorityState.run?.breach).toBeUndefined();
     priorityState = applyChoice(priorityState, "runner", "pay_3");
@@ -1435,7 +1435,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(microtechState.pendingChoice?.source).toContain(
-      "p3_33.microtech_ai_interface",
+      "pre_access.top_rd_reorder",
     );
     microtechState = applyChoice(microtechState, "runner", "cut_1");
     expect(microtechState.run?.breach?.queue[0]?.cardInstanceId).toBe(

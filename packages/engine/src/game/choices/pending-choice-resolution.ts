@@ -72,9 +72,9 @@ export type PendingChoiceResolutionHost = {
     resolveViral15ProgramTrashChoiceInRunModule: HostFn<void>;
     encounterResolutionHostForState: HostFn<unknown>;
     resolvePassRezzedIceProgramTrashChoiceInRunModule: HostFn<void>;
-    resolveSpeedTrapRezInterruptChoice: HostFn<void>;
+    resolveRezInterruptJackOutChoice: HostFn<void>;
     runRezWindowHostForState: HostFn<unknown>;
-    resolvePattelsVirusCounterChoice: HostFn<void>;
+    resolveBrokenIceVirusCounterChoice: HostFn<void>;
     runEndCleanupHost: HostFn<unknown>;
     resolveAardvarkInterceptionChoice: HostFn<void>;
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
@@ -83,9 +83,9 @@ export type PendingChoiceResolutionHost = {
     resolveStartOfRunFortUtilityChoice: HostFn<void>;
   };
   access: {
-    resolvePriorityWreckSpendChoice: HostFn<void>;
+    resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
     runAccessTransitionHost: HostFn<unknown>;
-    resolveMicrotechAiInterfacePreAccessChoice: HostFn<void>;
+    resolvePreAccessTopRdReorderChoice: HostFn<void>;
   };
   cardImplementation: {
     resolveCardImplementationAccessPaymentChoice: HostFn<void>;
@@ -203,11 +203,11 @@ export function resolvePendingChoice(
     host.run.encounterResolutionHostForState;
   const resolvePassRezzedIceProgramTrashChoiceInRunModule =
     host.run.resolvePassRezzedIceProgramTrashChoiceInRunModule;
-  const resolveSpeedTrapRezInterruptChoice =
-    host.run.resolveSpeedTrapRezInterruptChoice;
+  const resolveRezInterruptJackOutChoice =
+    host.run.resolveRezInterruptJackOutChoice;
   const runRezWindowHostForState = host.run.runRezWindowHostForState;
-  const resolvePattelsVirusCounterChoice =
-    host.run.resolvePattelsVirusCounterChoice;
+  const resolveBrokenIceVirusCounterChoice =
+    host.run.resolveBrokenIceVirusCounterChoice;
   const runEndCleanupHost = host.run.runEndCleanupHost;
   const resolveAardvarkInterceptionChoice =
     host.run.resolveAardvarkInterceptionChoice;
@@ -218,11 +218,11 @@ export function resolvePendingChoice(
     host.run.resolvePostMeatDamageHiddenResourceChoice;
   const resolveStartOfRunFortUtilityChoice =
     host.run.resolveStartOfRunFortUtilityChoice;
-  const resolvePriorityWreckSpendChoice =
-    host.access.resolvePriorityWreckSpendChoice;
+  const resolveSuccessfulRunCreditLossSpendChoice =
+    host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
-  const resolveMicrotechAiInterfacePreAccessChoice =
-    host.access.resolveMicrotechAiInterfacePreAccessChoice;
+  const resolvePreAccessTopRdReorderChoice =
+    host.access.resolvePreAccessTopRdReorderChoice;
   const resolveCardImplementationAccessPaymentChoice =
     host.cardImplementation.resolveCardImplementationAccessPaymentChoice;
   const resolveCardImplementationAdvancementDistributionChoice =
@@ -496,8 +496,8 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
-    resolveSpeedTrapRezInterruptChoice(
+  if (state.pendingChoice.source.startsWith("rez_interrupt.jack_out")) {
+    resolveRezInterruptJackOutChoice(
       runRezWindowHostForState(state),
       legalAction,
       playerAction,
@@ -512,8 +512,8 @@ export function resolvePendingChoice(
     resolveIncubatorTransformChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v181.pattels_virus")) {
-    resolvePattelsVirusCounterChoice(
+  if (state.pendingChoice.source.startsWith("broken_ice.virus_counter")) {
+    resolveBrokenIceVirusCounterChoice(
       runEndCleanupHost(state),
       legalAction,
       playerAction,
@@ -554,8 +554,8 @@ export function resolvePendingChoice(
     resolveCardImplementationAccessPaymentChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_33.priority_wreck")) {
-    resolvePriorityWreckSpendChoice(
+  if (state.pendingChoice.source.startsWith("successful_run.credit_loss_spend")) {
+    resolveSuccessfulRunCreditLossSpendChoice(
       runAccessTransitionHost(state),
       legalAction,
       playerAction,
@@ -566,8 +566,8 @@ export function resolvePendingChoice(
     resolveRunnerPrivateLookChoice(state, legalAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_33.microtech_ai_interface")) {
-    resolveMicrotechAiInterfacePreAccessChoice(
+  if (state.pendingChoice.source.startsWith("pre_access.top_rd_reorder")) {
+    resolvePreAccessTopRdReorderChoice(
       runAccessTransitionHost(state),
       legalAction,
       playerAction,

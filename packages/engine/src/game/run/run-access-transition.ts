@@ -57,10 +57,10 @@ export type RunAccessTransitionHost = {
     advanceArchivesBreachPastNonDecisionCards: (
       legalAction?: LegalAction,
     ) => void;
-    findMicrotechAiInterfacePreAccessSource: (
+    findPreAccessTopRdReorderSource: (
       run: ActiveRun,
     ) => CardInstanceId | undefined;
-    isMicrotechAiInterfacePreAccessSource: (cardId: CardInstanceId) => boolean;
+    isPreAccessTopRdReorderSource: (cardId: CardInstanceId) => boolean;
     startRunnerPrivateLookChoice: (
       sourceCardId: CardInstanceId,
       sourceDefinitionId: CardDefinitionId,
@@ -127,7 +127,7 @@ export function enterAccessFromSuccessfulRun(
     };
   }
   if (run.successfulRunAccessReplacement === "runner_spend_corp_lose_credits") {
-    startPriorityWreckSpendChoice(host, run, legalAction);
+    startSuccessfulRunCreditLossSpendChoice(host, run, legalAction);
     return {
       handled: true,
       accessSkipped: true,
@@ -176,9 +176,9 @@ export function enterAccessFromSuccessfulRun(
     };
   }
   const microtechSourceId =
-    host.access.findMicrotechAiInterfacePreAccessSource(run);
+    host.access.findPreAccessTopRdReorderSource(run);
   if (microtechSourceId) {
-    startMicrotechAiInterfacePreAccessChoice(
+    startPreAccessTopRdReorderChoice(
       host,
       run,
       microtechSourceId,
@@ -289,24 +289,24 @@ export function sourcePayloadForSuccessfulRunReplacement(
   };
 }
 
-export function resolvePriorityWreckSpendChoice(
+export function resolveSuccessfulRunCreditLossSpendChoice(
   host: RunAccessTransitionHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
   const choice = host.state.pendingChoice;
   const run = host.state.run;
-  if (!choice || !run || !choice.source.startsWith("p3_33.priority_wreck"))
-    throw new Error("Es ist keine Priority-Wreck-Choice offen.");
+  if (!choice || !run || !choice.source.startsWith("successful_run.credit_loss_spend"))
+    throw new Error("Es ist keine Successful-Run-Credit-Loss-Choice offen.");
   if (run.successfulRunAccessReplacement !== "runner_spend_corp_lose_credits")
-    throw new Error("Priority Wreck passt nicht zum aktuellen Run.");
+    throw new Error("Credit-Loss-Spend passt nicht zum aktuellen Run.");
   const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === selectedId);
   const amount = Number(option?.value ?? -1);
   if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Priority-Wreck-Betrag ist ungueltig.");
+    throw new Error("Credit-Loss-Betrag ist ungueltig.");
   if (amount > host.state.runner.credits)
-    throw new Error("Der Runner kann diesen Priority-Wreck-Betrag nicht zahlen.");
+    throw new Error("Der Runner kann diesen Credit-Loss-Betrag nicht zahlen.");
   host.state.runner.credits -= amount;
   host.state.corp.credits = Math.max(0, host.state.corp.credits - amount);
   delete host.state.pendingChoice;
@@ -323,25 +323,25 @@ export function resolvePriorityWreckSpendChoice(
   host.run.finishRun(true, legalAction);
 }
 
-export function resolveMicrotechAiInterfacePreAccessChoice(
+export function resolvePreAccessTopRdReorderChoice(
   host: RunAccessTransitionHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_33.microtech_ai_interface"))
-    throw new Error("Es ist keine Microtech-AI-Interface-Choice offen.");
+  if (!choice || !choice.source.startsWith("pre_access.top_rd_reorder"))
+    throw new Error("Es ist keine Pre-Access-R&D-Reorder-Choice offen.");
   const sourceCardId = choice.source.split(":")[2] as CardInstanceId | undefined;
   if (
     !sourceCardId ||
-    !host.access.isMicrotechAiInterfacePreAccessSource(sourceCardId)
+    !host.access.isPreAccessTopRdReorderSource(sourceCardId)
   )
-    throw new Error("Microtech AI Interface ist nicht mehr installiert.");
+    throw new Error("Die Pre-Access-R&D-Reorder-Quelle ist nicht mehr installiert.");
   const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === selectedId);
   const amount = Number(option?.value ?? -1);
   if (!Number.isInteger(amount) || amount < 0 || amount > host.state.corp.rd.length)
-    throw new Error("Die Microtech-Cut-Anzahl ist ungueltig.");
+    throw new Error("Die R&D-Cut-Anzahl ist ungueltig.");
   if (amount > 0) {
     const moved = host.state.corp.rd.slice(0, amount);
     host.state.corp.rd = [...host.state.corp.rd.slice(amount), ...moved];
@@ -350,7 +350,7 @@ export function resolveMicrotechAiInterfacePreAccessChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_33_microtech_ai_interface_pre_access",
+    hiddenZoneAction: "pre_access_top_rd_reorder",
     sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
     movedCount: amount,
   };
@@ -524,7 +524,7 @@ function applySuccessfulRunAccessReplacement(
   }
 }
 
-function startPriorityWreckSpendChoice(
+function startSuccessfulRunCreditLossSpendChoice(
   host: RunAccessTransitionHost,
   run: ActiveRun,
   legalAction?: LegalAction,
@@ -533,15 +533,15 @@ function startPriorityWreckSpendChoice(
   host.state.run = { ...run, phase: "access", successful: true };
   const maxSpend = Math.max(0, Math.floor(host.state.runner.credits));
   host.state.pendingChoice = {
-    choiceId: `p3_33_priority_wreck_${run.runId}_${host.state.stateVersion + 1}`,
+    choiceId: `successful_run_credit_loss_spend_${run.runId}_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_33.priority_wreck:${run.runId}:${host.state.stateVersion + 1}`,
-    prompt: "Priority Wreck: Betrag zahlen",
+    source: `successful_run.credit_loss_spend:${run.runId}:${host.state.stateVersion + 1}`,
+    prompt: "Betrag fuer Credit-Loss zahlen",
     kind: "select_option",
     options: Array.from({ length: maxSpend + 1 }, (_, amount) => ({
       id: `pay_${amount}`,
       label: `${amount} Credits zahlen`,
-      publicLabel: "Priority-Wreck-Zahlung",
+      publicLabel: "Credit-Loss-Zahlung",
       value: amount,
     })),
     minSelections: 1,
@@ -553,7 +553,7 @@ function startPriorityWreckSpendChoice(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       accessReplacement: "runner_spend_corp_lose_credits",
-      priorityWreckChoiceOpened: true,
+      successfulRunCreditLossSpendChoiceOpened: true,
       hiddenZoneBarrier: true,
       ...sourcePayloadForSuccessfulRunReplacement(run),
     };
@@ -598,20 +598,20 @@ function startSuccessfulRunPrivateLookChoice(
   };
 }
 
-function startMicrotechAiInterfacePreAccessChoice(
+function startPreAccessTopRdReorderChoice(
   host: RunAccessTransitionHost,
   run: ActiveRun,
   sourceCardId: CardInstanceId,
   legalAction?: LegalAction,
 ): void {
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  host.state.run = { ...run, microtechAiInterfacePreAccessResolved: true };
+  host.state.run = { ...run, preAccessTopRdReorderResolved: true };
   const maxCut = host.state.corp.rd.length;
   host.state.pendingChoice = {
-    choiceId: `p3_33_microtech_ai_interface_${run.runId}_${host.state.stateVersion + 1}`,
+    choiceId: `pre_access_top_rd_reorder_${run.runId}_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_33.microtech_ai_interface:${run.runId}:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Microtech AI Interface: R&D cutten",
+    source: `pre_access.top_rd_reorder:${run.runId}:${sourceCardId}:${host.state.stateVersion + 1}`,
+    prompt: "R&D vor Zugriff cutten",
     kind: "select_option",
     options: Array.from({ length: maxCut + 1 }, (_, amount) => ({
       id: `cut_${amount}`,
@@ -628,7 +628,7 @@ function startMicrotechAiInterfacePreAccessChoice(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_33_microtech_ai_interface_pre_access",
+      hiddenZoneAction: "pre_access_top_rd_reorder",
       sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
     };
   }

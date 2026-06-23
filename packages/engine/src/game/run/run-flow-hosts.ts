@@ -1264,8 +1264,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             host.access.accessFlowHost(state),
             legalAction,
           ),
-        findMicrotechAiInterfacePreAccessSource: (run) => {
-          if (run.microtechAiInterfacePreAccessResolved) return undefined;
+        findPreAccessTopRdReorderSource: (run) => {
+          if (run.preAccessTopRdReorderResolved) return undefined;
           const accessServerId = run.accessServerOverride ?? run.attackedServerId;
           if (accessServerId !== "rd") return undefined;
           return host.cards.runnerInstalledCardIds(state)
@@ -1277,7 +1277,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
               ).includes("pre_access_rd_cut"),
             );
         },
-        isMicrotechAiInterfacePreAccessSource: (cardId) =>
+        isPreAccessTopRdReorderSource: (cardId) =>
           host.cards.runnerInstalledCardIds(state).includes(cardId) &&
           host.cards.cardImplementationAccessHookKindsForDefinition(
             host.cards.definitionFor(state, cardId).id,

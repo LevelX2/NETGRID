@@ -351,8 +351,8 @@ import {
   type BreachStateHost,
 } from "../access/breach-state";
 import {
-  resolveMicrotechAiInterfacePreAccessChoice,
-  resolvePriorityWreckSpendChoice,
+  resolvePreAccessTopRdReorderChoice,
+  resolveSuccessfulRunCreditLossSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "../run/run-access-transition";
@@ -367,7 +367,7 @@ import {
   handleRunEndCleanup,
   recordDupreBreakUsage,
   resetBreakerStrength,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
@@ -455,7 +455,7 @@ import {
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
   resolveCorpRootRezEffect,
-  resolveSpeedTrapRezInterruptChoice,
+  resolveRezInterruptJackOutChoice,
   type RunRezWindowHost,
 } from "../run/run-rez-window";
 import {

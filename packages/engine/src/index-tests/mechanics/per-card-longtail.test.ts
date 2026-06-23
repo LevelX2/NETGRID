@@ -3726,12 +3726,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.payload?.rootRez === true &&
         action.payload?.cardId === upgradeId,
     );
-    expect(state.pendingChoice?.source).toContain("v1922.speed_trap");
+    expect(state.pendingChoice?.source).toContain("rez_interrupt.jack_out");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      speedTrapChoiceOpened: true,
+      v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
+      rezInterruptChoiceOpened: true,
       rezzedCardDefinitionId: "simple_upgrade",
     });
 
@@ -3740,8 +3740,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.phase).toBe("runner_action_phase");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-      speedTrapUsed: true,
+      v1922RunnerProgramAbility: "rez_interrupt_jack_out",
+      rezInterruptUsed: true,
       successfulRunWithoutAccess: true,
       rezzedCardDefinitionId: "simple_upgrade",
     });
@@ -3811,7 +3811,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ),
     ).toBe(true);
     expect(state.eventLog.at(-2)?.publicPayload).toMatchObject({
-      speedTrapUsed: false,
+      rezInterruptUsed: false,
       successfulRunWithoutAccess: false,
     });
   });
