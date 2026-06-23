@@ -10,7 +10,7 @@ describe("direct scored agenda effect modules", () => {
     ).toBe(true);
     expect(
       isScoredAgendaStartDrawChoiceSource(
-        "v162.scored_subtype_reveal:agenda_1:wall:2:8",
+        "scored_agenda.subtype_reveal:agenda_1:wall:2:8",
       ),
     ).toBe(false);
   });

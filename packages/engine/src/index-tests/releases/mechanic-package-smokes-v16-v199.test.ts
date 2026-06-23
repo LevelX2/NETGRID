@@ -7230,7 +7230,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(skipped.cardInstances[codeGateId]?.faceup).toBe(false);
     expect(skipped.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "superior_net_barriers_reveal_walls",
+      hiddenZoneAction: "scored_subtype_reveal_walls",
       revealedCount: 0,
       rezzedMatchingIceCount: 1,
       countedMatchingIceCount: 1,
@@ -7253,8 +7253,8 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "superior_net_barriers_reveal_walls",
-      agendaAbility: "superior_net_barriers",
+      hiddenZoneAction: "scored_subtype_reveal_walls",
+      agendaAbility: "scored_subtype_reveal",
       revealedCount: 2,
       rezzedMatchingIceCount: 1,
       countedMatchingIceCount: 3,

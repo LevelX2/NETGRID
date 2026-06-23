@@ -10,7 +10,7 @@ import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
 
 export function isScoredSubtypeRevealChoiceSource(source: string): boolean {
-  return source.startsWith("v162.scored_subtype_reveal");
+  return source.startsWith("scored_agenda.subtype_reveal");
 }
 
 export function startScoredSubtypeRevealChoiceOrResolve(
@@ -30,9 +30,9 @@ export function startScoredSubtypeRevealChoiceOrResolve(
     return;
   }
   host.state.pendingChoice = {
-    choiceId: `v162_scored_subtype_reveal_${subtype}_${host.state.stateVersion + 1}`,
+    choiceId: `scored_agenda_subtype_reveal_${subtype}_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v162.scored_subtype_reveal:${agendaId}:${subtype}:${creditPer}:${host.state.stateVersion + 1}`,
+    source: `scored_agenda.subtype_reveal:${agendaId}:${subtype}:${creditPer}:${host.state.stateVersion + 1}`,
     prompt: scoredSubtypeRevealPrompt(subtype),
     kind: "select_cards",
     options: hiddenCandidates.map((cardId) => ({
@@ -47,7 +47,7 @@ export function startScoredSubtypeRevealChoiceOrResolve(
     visibility: "hidden_info_barrier",
   };
   applySequencePayloadPatch(legalAction, {
-    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(),
     scoredSubtypeRevealChoiceOpened: true,
     scoredSubtypeRevealSubtype: subtype,
     scoredSubtypeRevealCandidateCount: hiddenCandidates.length,
@@ -105,30 +105,26 @@ export function resolveScoredSubtypeRevealChoice(
   resolveScoredSubtypeReveal(host, subtype, creditPer, selectedIds);
 }
 
-function scoredSubtypeRevealAgendaAbility(
-  subtype: ScoredSubtypeRevealSubtype,
-): "encryption_breakthrough" | "superior_net_barriers" {
-  return subtype === "wall"
-    ? "superior_net_barriers"
-    : "encryption_breakthrough";
+function scoredSubtypeRevealAgendaAbility(): "scored_subtype_reveal" {
+  return "scored_subtype_reveal";
 }
 
 function scoredSubtypeRevealHiddenZoneAction(
   subtype: ScoredSubtypeRevealSubtype,
 ):
-  | "encryption_breakthrough_reveal_code_gates"
-  | "superior_net_barriers_reveal_walls" {
+  | "scored_subtype_reveal_code_gates"
+  | "scored_subtype_reveal_walls" {
   return subtype === "wall"
-    ? "superior_net_barriers_reveal_walls"
-    : "encryption_breakthrough_reveal_code_gates";
+    ? "scored_subtype_reveal_walls"
+    : "scored_subtype_reveal_code_gates";
 }
 
 function scoredSubtypeRevealPrompt(
   subtype: ScoredSubtypeRevealSubtype,
 ): string {
   return subtype === "wall"
-    ? "Superior Net Barriers: Walls aufdecken"
-    : "Encryption Breakthrough: Code Gates aufdecken";
+    ? "Scored Agenda: Walls aufdecken"
+    : "Scored Agenda: Code Gates aufdecken";
 }
 
 function scoredSubtypeRevealOptionPublicLabel(
@@ -179,7 +175,7 @@ function resolveScoredSubtypeReveal(
     (iceId) => host.cards.definitionFor(iceId).id,
   );
   applySequencePayloadPatch(legalAction, {
-    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(),
     hiddenZoneBarrier: true,
     hiddenZoneAction: scoredSubtypeRevealHiddenZoneAction(subtype),
     revealedCount: selectedRevealIds.length,

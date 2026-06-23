@@ -346,7 +346,7 @@ describe("scored agenda flow", () => {
     });
     scoreAgenda(host, "code_agenda" as CardInstanceId);
     expect(host.state.pendingChoice?.source).toContain(
-      "v162.scored_subtype_reveal",
+      "scored_agenda.subtype_reveal",
     );
     const choice = host.state.pendingChoice!;
     const resolveHost = {
@@ -360,7 +360,7 @@ describe("scored agenda flow", () => {
     expect(host.state.pendingChoice).toBeUndefined();
     expect(host.state.cardInstances.code_gate_1?.faceup).toBe(true);
     expect(legalAction.payload).toMatchObject({
-      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
+      hiddenZoneAction: "scored_subtype_reveal_code_gates",
       revealedCount: 1,
       gainedCredits: 2,
       publicRevealDefinitionIds: "code_gate_1_def",

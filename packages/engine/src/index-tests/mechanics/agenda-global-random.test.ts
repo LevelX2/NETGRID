@@ -1351,8 +1351,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.cardInstances[codeGateId]?.faceup).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "encryption_breakthrough",
-      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
+      agendaAbility: "scored_subtype_reveal",
+      hiddenZoneAction: "scored_subtype_reveal_code_gates",
       revealedCount: 1,
       gainedCredits: 1,
     });

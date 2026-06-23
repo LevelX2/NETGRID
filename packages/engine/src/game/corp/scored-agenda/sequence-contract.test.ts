@@ -206,7 +206,7 @@ describe("scored agenda sequence contract matrix", () => {
   it("routes each registered scored-agenda flow choice source to exactly one resolver", () => {
     const cases: readonly { source: string; resolverId: string }[] = [
       {
-        source: "v162.scored_subtype_reveal:agenda_1:wall:2:8",
+        source: "scored_agenda.subtype_reveal:agenda_1:wall:2:8",
         resolverId: "subtype_reveal_flow_choice",
       },
       {
