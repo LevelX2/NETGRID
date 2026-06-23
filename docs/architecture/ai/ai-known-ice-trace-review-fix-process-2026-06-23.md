@@ -103,6 +103,12 @@ process_prepared
 | `TRACEFIX-4` | E2E- und Decision-Matrix | Echter Engine->PlayerView->DTO->AI-Test und Top-Level-Matrix für High-Payoff/Trace-Folgen bestehen | `test(ai): cover known trace hazard integration matrix` |
 | `TRACEFIX-5` | Reports und Final Green | Prozess, Final Report und Projektlog sind korrigiert; finale Checks sind dokumentiert | `docs(ai): correct known ice trace review reports` |
 
+## Paketstatus
+
+- `TRACEFIX-0`: abgeschlossen mit Commit `f40de7a8` (`docs(ai): define known ice trace review fix process`).
+- `TRACEFIX-1`: abgeschlossen. Base-Link-Kandidaten werden aus Engine-CardImplementation-Quotes bewertet; `Access through Alpha` zählt bei 0 Credits nicht mehr als vermeidbar, bei 1 Credit mit Kosten 1, und `Submarine Uplink` wird wegen Jack-out nicht als access-sichere Vermeidung gezählt.
+  - Checks: `packages/ai` `visible-run-analysis.test.ts` grün, `packages/ai` Typecheck grün, `packages/engine` Typecheck grün.
+
 ## Paketdetails
 
 ### TRACEFIX-0: Prozessartefakt und Preflight

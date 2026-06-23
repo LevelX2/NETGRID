@@ -1,12 +1,14 @@
 import {
   DEMO_CARDS_BY_ID,
   type CardDefinition,
+  type CardDefinitionId,
   type PublicGameEvent,
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
+import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
 
@@ -36,6 +38,7 @@ type BreakAssessment = {
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
 };
+type VisibleTraceSupportSideEffect = "forces_jack_out_after_encounter";
 export type VisibleIceRunHazardKind =
   | "trace_tag"
   | "trace_tag_counter"
@@ -54,6 +57,12 @@ export type VisibleIceRunHazard = {
   traceBaseStrength?: number;
   runnerTraceCapacity: number;
   traceAvoidanceCost?: number;
+  traceBidCost?: number;
+  baseLinkValue?: number;
+  baseLinkActivationCost?: number;
+  baseLinkSourceDefinitionId?: string;
+  baseLinkSourceTitle?: string;
+  baseLinkSideEffect?: VisibleTraceSupportSideEffect;
   breakAvoidanceCost?: number;
   minimumAvoidanceCost?: number;
   unavoidable: boolean;
@@ -634,15 +643,15 @@ function visibleIceRunHazardsForQuote(params: {
       subroutine,
       subroutineIndex,
     );
-    const traceAvoidanceCost =
+    const traceAvoidance =
       traceBaseStrength === undefined
         ? undefined
-        : Math.max(0, traceBaseStrength - traceSupport.baseLink);
+        : visibleTraceAvoidanceForBaseStrength(
+            traceBaseStrength,
+            traceSupport,
+          );
     const traceAvoidanceCandidate =
-      traceAvoidanceCost !== undefined &&
-      traceAvoidanceCost <= traceSupport.spendableTraceCredits
-        ? traceAvoidanceCost
-        : undefined;
+      traceAvoidance?.cheapestAffordableSafe?.creditCost;
     const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
       effectiveIceForQuote(params.ice, params.quote),
       params.rigCards,
@@ -669,6 +678,16 @@ function visibleIceRunHazardsForQuote(params: {
       subroutine.sourceTitle ??
       visibleRunCardDefinition(sourceDefinitionId)?.title ??
       sourceDefinitionId;
+    const cheapestTraceAvoidance = traceAvoidance?.cheapestSafe;
+    const unsafeTraceAvoidance =
+      traceAvoidance?.cheapestAffordableUnsafe ??
+      traceAvoidance?.cheapestUnsafe;
+    const baseLinkEvidenceSource =
+      cheapestTraceAvoidance?.baseLink
+        ? cheapestTraceAvoidance
+        : unsafeTraceAvoidance?.baseLink
+          ? unsafeTraceAvoidance
+          : undefined;
     const penalty = visibleIceHazardPenalty(
       baseHazard.kind,
       baseHazard.severity,
@@ -683,7 +702,32 @@ function visibleIceRunHazardsForQuote(params: {
       subroutineId: subroutine.id,
       ...(traceBaseStrength !== undefined ? { traceBaseStrength } : {}),
       runnerTraceCapacity: traceSupport.runnerTraceCapacity,
-      ...(traceAvoidanceCost !== undefined ? { traceAvoidanceCost } : {}),
+      ...(cheapestTraceAvoidance
+        ? {
+            traceAvoidanceCost: cheapestTraceAvoidance.creditCost,
+            traceBidCost: cheapestTraceAvoidance.traceBidCost,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.baseLink
+        ? { baseLinkValue: baseLinkEvidenceSource.baseLink }
+        : {}),
+      ...(baseLinkEvidenceSource?.activationCost !== undefined
+        ? {
+            baseLinkActivationCost: baseLinkEvidenceSource.activationCost,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.sourceDefinitionId
+        ? {
+            baseLinkSourceDefinitionId:
+              baseLinkEvidenceSource.sourceDefinitionId,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.sourceTitle
+        ? { baseLinkSourceTitle: baseLinkEvidenceSource.sourceTitle }
+        : {}),
+      ...(baseLinkEvidenceSource?.sideEffect
+        ? { baseLinkSideEffect: baseLinkEvidenceSource.sideEffect }
+        : {}),
       ...(breakAssessment ? { breakAvoidanceCost: breakAssessment.cost } : {}),
       ...(minimumAvoidanceCost !== undefined ? { minimumAvoidanceCost } : {}),
       unavoidable,
@@ -695,8 +739,25 @@ function visibleIceRunHazardsForQuote(params: {
           ? [`visible_ice_trace_base:${traceBaseStrength}`]
           : []),
         `visible_runner_trace_capacity:${traceSupport.runnerTraceCapacity}`,
-        ...(traceAvoidanceCost !== undefined
-          ? [`visible_trace_avoidance_cost:${traceAvoidanceCost}`]
+        ...(cheapestTraceAvoidance
+          ? [
+              `visible_trace_avoidance_cost:${cheapestTraceAvoidance.creditCost}`,
+              `visible_trace_bid_cost:${cheapestTraceAvoidance.traceBidCost}`,
+            ]
+          : []),
+        ...(baseLinkEvidenceSource?.baseLink
+          ? [
+              `visible_trace_base_link:${baseLinkEvidenceSource.baseLink}`,
+              `visible_trace_base_link_cost:${baseLinkEvidenceSource.activationCost}`,
+            ]
+          : []),
+        ...(baseLinkEvidenceSource?.sourceTitle
+          ? [`visible_trace_base_link_source:${baseLinkEvidenceSource.sourceTitle}`]
+          : []),
+        ...(baseLinkEvidenceSource?.sideEffect
+          ? [
+              `visible_trace_base_link_side_effect:${baseLinkEvidenceSource.sideEffect}`,
+            ]
           : []),
         ...(breakAssessment
           ? [`visible_trace_break_cost:${breakAssessment.cost}`]
@@ -719,6 +780,12 @@ function visibleIceRunHazardForTraceEffect(
   | "traceBaseStrength"
   | "runnerTraceCapacity"
   | "traceAvoidanceCost"
+  | "traceBidCost"
+  | "baseLinkValue"
+  | "baseLinkActivationCost"
+  | "baseLinkSourceDefinitionId"
+  | "baseLinkSourceTitle"
+  | "baseLinkSideEffect"
   | "breakAvoidanceCost"
   | "minimumAvoidanceCost"
   | "unavoidable"
@@ -805,23 +872,48 @@ function visibleIceHazardPenalty(
   return Math.min(650, 180 + Math.max(0, minimumAvoidanceCost ?? 0) * 90);
 }
 
+type VisibleRunnerTraceSupportOption = {
+  baseLink: number;
+  activationCost: number;
+  safeForAccess: boolean;
+  sourceDefinitionId?: string;
+  sourceTitle?: string;
+  sideEffect?: VisibleTraceSupportSideEffect;
+};
+
+type VisibleRunnerTraceSupport = {
+  availableCredits: number;
+  traceCreditPool: number;
+  runnerTraceCapacity: number;
+  baseLinkOptions: VisibleRunnerTraceSupportOption[];
+};
+
+type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
+  creditCost: number;
+  traceBidCost: number;
+  affordable: boolean;
+  runnerTraceCapacity: number;
+};
+
+type VisibleTraceAvoidanceAssessment = {
+  cheapestSafe?: VisibleTraceAvoidanceCandidate;
+  cheapestAffordableSafe?: VisibleTraceAvoidanceCandidate;
+  cheapestUnsafe?: VisibleTraceAvoidanceCandidate;
+  cheapestAffordableUnsafe?: VisibleTraceAvoidanceCandidate;
+};
+
 function visibleRunnerTraceSupport(
   rigCards: VisibleCard[],
   availableCredits: number,
-): {
-  baseLink: number;
-  spendableTraceCredits: number;
-  runnerTraceCapacity: number;
-} {
-  let baseLink = 0;
+): VisibleRunnerTraceSupport {
+  const normalizedCredits = Math.max(0, Math.floor(availableCredits));
   let traceCreditPool = 0;
+  const baseLinkOptions: VisibleRunnerTraceSupportOption[] = [
+    { baseLink: 0, activationCost: 0, safeForAccess: true },
+  ];
   for (const card of rigCards) {
     if (card.known === false) continue;
     const definition = visibleRunCardDefinition(card.definitionId);
-    baseLink = Math.max(
-      baseLink,
-      Math.max(0, Math.floor(card.baseLink ?? definition?.baseLink ?? 0)),
-    );
     for (const display of card.counterDisplays ?? []) {
       const uses = display.creditPool?.uses ?? [];
       if (uses.includes("increase_link")) {
@@ -834,14 +926,124 @@ function visibleRunnerTraceSupport(
     ) {
       traceCreditPool += Math.max(0, Math.floor(definition.recurringCredits));
     }
+    if (card.definitionId) {
+      const implementationQuotes =
+        traceBaseLinkCardImplementationQuotesForDefinition(
+          card.definitionId as CardDefinitionId,
+        );
+      for (const quote of implementationQuotes) {
+        const option: VisibleRunnerTraceSupportOption = {
+          baseLink: Math.max(0, Math.floor(quote.baseLinkValue)),
+          activationCost: Math.max(0, Math.floor(quote.creditCost)),
+          safeForAccess: !quote.forcesJackOutAfterEncounter,
+          sourceDefinitionId: quote.sourceDefinitionId,
+          sourceTitle: quote.label,
+        };
+        if (quote.forcesJackOutAfterEncounter) {
+          option.sideEffect = "forces_jack_out_after_encounter";
+        }
+        baseLinkOptions.push(option);
+      }
+      if (implementationQuotes.length > 0) continue;
+    }
+    const staticIdentityBaseLink =
+      card.type === "identity"
+        ? Math.max(0, Math.floor(card.baseLink ?? definition?.baseLink ?? 0))
+        : 0;
+    if (staticIdentityBaseLink > 0) {
+      baseLinkOptions.push({
+        baseLink: staticIdentityBaseLink,
+        activationCost: 0,
+        safeForAccess: true,
+        ...(card.definitionId
+          ? { sourceDefinitionId: card.definitionId }
+          : {}),
+        ...(card.title ? { sourceTitle: card.title } : {}),
+      });
+    }
   }
-  const spendableTraceCredits =
-    Math.max(0, Math.floor(availableCredits)) + traceCreditPool;
+  const runnerTraceCapacity = Math.max(
+    ...baseLinkOptions
+      .filter(
+        (option) =>
+          option.safeForAccess && option.activationCost <= normalizedCredits,
+      )
+      .map(
+        (option) =>
+          option.baseLink +
+          normalizedCredits -
+          option.activationCost +
+          traceCreditPool,
+      ),
+  );
   return {
-    baseLink,
-    spendableTraceCredits,
-    runnerTraceCapacity: baseLink + spendableTraceCredits,
+    availableCredits: normalizedCredits,
+    traceCreditPool,
+    runnerTraceCapacity,
+    baseLinkOptions,
   };
+}
+
+function visibleTraceAvoidanceForBaseStrength(
+  traceBaseStrength: number,
+  support: VisibleRunnerTraceSupport,
+): VisibleTraceAvoidanceAssessment {
+  const baseStrength = Math.max(0, Math.floor(traceBaseStrength));
+  const candidates = support.baseLinkOptions.map((option) => {
+    const traceBidCost = Math.max(0, baseStrength - option.baseLink);
+    const creditBidCost = Math.max(0, traceBidCost - support.traceCreditPool);
+    const creditCost = option.activationCost + creditBidCost;
+    const affordable =
+      option.activationCost <= support.availableCredits &&
+      traceBidCost <=
+        support.availableCredits - option.activationCost +
+          support.traceCreditPool;
+    return {
+      ...option,
+      creditCost,
+      traceBidCost,
+      affordable,
+      runnerTraceCapacity:
+        option.baseLink +
+        Math.max(0, support.availableCredits - option.activationCost) +
+        support.traceCreditPool,
+    };
+  });
+  const assessment: VisibleTraceAvoidanceAssessment = {};
+  const cheapestSafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter((candidate) => candidate.safeForAccess),
+  );
+  const cheapestAffordableSafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter(
+      (candidate) => candidate.safeForAccess && candidate.affordable,
+    ),
+  );
+  const cheapestUnsafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter((candidate) => !candidate.safeForAccess),
+  );
+  const cheapestAffordableUnsafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter(
+      (candidate) => !candidate.safeForAccess && candidate.affordable,
+    ),
+  );
+  if (cheapestSafe) assessment.cheapestSafe = cheapestSafe;
+  if (cheapestAffordableSafe)
+    assessment.cheapestAffordableSafe = cheapestAffordableSafe;
+  if (cheapestUnsafe) assessment.cheapestUnsafe = cheapestUnsafe;
+  if (cheapestAffordableUnsafe)
+    assessment.cheapestAffordableUnsafe = cheapestAffordableUnsafe;
+  return assessment;
+}
+
+function cheapestTraceAvoidanceCandidate(
+  candidates: VisibleTraceAvoidanceCandidate[],
+): VisibleTraceAvoidanceCandidate | undefined {
+  return candidates.sort(
+    (a, b) =>
+      a.creditCost - b.creditCost ||
+      a.activationCost - b.activationCost ||
+      b.baseLink - a.baseLink,
+  )[0];
 }
 
 function traceBaseStrengthForVisibleSubroutine(

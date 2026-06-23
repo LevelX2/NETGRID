@@ -112,26 +112,84 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
-  it("keeps a visible Hunter tag hazard avoidable with enough visible base link", () => {
+  it("treats visible Access through Alpha as unaffordable at zero credits", () => {
     const assessment = assessKnownRezzedIcePath(
       [hunterTraceTagIce("rd-hunter")],
-      [baseLinkCard("access-through-alpha", 9)],
+      [accessThroughAlpha("access-through-alpha")],
       0,
     );
 
     expect(assessment).toMatchObject({
       blocked: false,
       canReachAccess: true,
-      visibleIceHazardAvoidanceCost: 0,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+      creditsAfterAvoidingVisibleIceHazards: 0,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 0,
+      traceAvoidanceCost: 1,
+      traceBidCost: 0,
+      baseLinkValue: 9,
+      baseLinkActivationCost: 1,
+      baseLinkSourceTitle: "Access through Alpha",
+      unavoidable: true,
+    });
+  });
+
+  it("keeps a visible Hunter tag hazard avoidable when Access through Alpha can be paid", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [accessThroughAlpha("access-through-alpha")],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 1,
       creditsAfterAvoidingVisibleIceHazards: 0,
     });
     expect(assessment.visibleTraceTagHazardUnavoidable).toBeUndefined();
     expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
       kind: "trace_tag",
       runnerTraceCapacity: 9,
-      minimumAvoidanceCost: 0,
+      traceAvoidanceCost: 1,
+      traceBidCost: 0,
+      baseLinkValue: 9,
+      baseLinkActivationCost: 1,
+      minimumAvoidanceCost: 1,
       unavoidable: false,
     });
+  });
+
+  it("does not count Submarine Uplink as access-preserving trace avoidance", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [submarineUplink("runner-submarine")],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 1,
+      traceAvoidanceCost: 5,
+      baseLinkValue: 4,
+      baseLinkActivationCost: 0,
+      baseLinkSourceTitle: "Submarine Uplink",
+      baseLinkSideEffect: "forces_jack_out_after_encounter",
+      unavoidable: true,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]?.evidence).toContain(
+      "visible_trace_base_link_side_effect:forces_jack_out_after_encounter",
+    );
   });
 
   it("keeps a visible Hunter tag hazard avoidable through Replicator trace break", () => {
@@ -237,7 +295,7 @@ function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
   };
 }
 
-function baseLinkCard(instanceId: string, baseLink: number): VisibleCard {
+function accessThroughAlpha(instanceId: string): VisibleCard {
   return {
     instanceId,
     definitionId: "onr_v1_148_access-through-alpha",
@@ -245,7 +303,19 @@ function baseLinkCard(instanceId: string, baseLink: number): VisibleCard {
     type: "resource",
     subtypes: ["link"],
     known: true,
-    baseLink,
+    baseLink: 9,
+  };
+}
+
+function submarineUplink(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_182_submarine-uplink",
+    title: "Submarine Uplink",
+    type: "resource",
+    subtypes: ["link"],
+    known: true,
+    baseLink: 4,
   };
 }
 
