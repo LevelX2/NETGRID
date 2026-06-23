@@ -360,6 +360,7 @@ import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { CardDisplayModeSelector, OptionsPanel } from "../features/settings/OptionsPanel";
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
 import { GameOverModal } from "../features/results/GameOverModal";
+import { SimulationResult, type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
   CARD_SCALE_PERCENT_MAX,
@@ -568,16 +569,6 @@ type LifecycleActionResponse =
 type RetentionProtectionResponse =
   | { ok: true; payload: ClientPayload | LobbyClientPayload }
   | { ok?: false; error: { message: string } };
-
-type AiSimulationSummary = {
-  seed: string;
-  winner: Winner | "action_limit_reached";
-  actions: number;
-  turns: number;
-  finalStateHash: string;
-  replayOk: boolean;
-  errors: string[];
-};
 
 type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
 
@@ -11773,24 +11764,6 @@ function PlayerPanel({
       <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
       <p className="meta statusLine">{sideStatusLineForView(view, view.side)}</p>
     </section>
-  );
-}
-
-function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
-  return (
-    <div className="simulationResult">
-      <div className="stats">
-        <Stat label="Aktionen" value={summary.actions} />
-        <Stat label="Züge" value={summary.turns} />
-      </div>
-      <p className="meta statusLine">
-        {summary.winner === "action_limit_reached" ? "Limit erreicht" : `${summary.winner === "runner" ? "Runner" : summary.winner === "corp" ? "Korp" : "Draw"} gewinnt`}
-        {" · "}
-        {summary.replayOk ? "Replay ok" : "Replay prüfen"}
-      </p>
-      <p className="meta hashLine">{summary.finalStateHash}</p>
-      {summary.errors.length > 0 ? <p className="notice">{summary.errors.join(", ")}</p> : null}
-    </div>
   );
 }
 
