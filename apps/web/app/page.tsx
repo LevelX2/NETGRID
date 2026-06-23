@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Activity,
   Bot,
   Cable,
   Check,
@@ -128,16 +127,11 @@ import {
 import {
   deriveMatchStart,
   humanAiSideLabel,
-  matchCardPoolCardLabel,
-  matchFormatCardLabel,
   matchStartLobbyBlocksSetup,
   matchStartPlayerClockLabel,
   matchStartSummary,
   parseJoinLinkInput,
-  playModeCardLabel,
   sideSelectionLabel,
-  type MatchFormatSelection,
-  type MatchCardPoolSelection,
   type HumanAiSideSelection,
   type HumanSideSelection,
   type PlayMode
@@ -409,6 +403,7 @@ import {
 } from "../features/debug/AiDecisionDebugOverlay";
 import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
+import { MatchStartChoiceSections } from "../features/match-start/MatchStartChoiceSections";
 import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
 import {
   formatLobbyTime,
@@ -3482,79 +3477,14 @@ export default function Page() {
               </section>
             ) : activeStartTab === "host" ? (
               <div className="matchStartConsole">
-                <section className="matchStartSection" aria-label="Spielart">
-                  <p className="eyebrow">Spielart</p>
-                  <div className="choiceCardGrid playModeCards">
-                    {(["human_vs_human", "human_vs_ai", "ai_vs_ai"] as PlayMode[]).map((option) => {
-                      const label = playModeCardLabel(option);
-                      const Icon = option === "human_vs_human" ? Link2 : option === "human_vs_ai" ? Bot : Activity;
-                      return (
-                        <button
-                          key={option}
-                          className={`choiceCard ${playMode === option ? "active" : ""}`}
-                          onClick={() => setPlayMode(option)}
-                          type="button"
-                          aria-pressed={playMode === option}
-                          data-testid={`play-mode-${option.replaceAll("_", "-")}`}
-                        >
-                          <Icon size={18} />
-                          <span>
-                            <strong>{label.title}</strong>
-                            <small>{label.description}</small>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-                <section className="matchStartSection" aria-label="Spielziel">
-                  <p className="eyebrow">Format</p>
-                  <div className="choiceCardGrid formatCards">
-                    {(["rules_match", "two_game_side_swap"] as MatchFormatSelection[]).map((option) => {
-                      const label = matchFormatCardLabel(option);
-                      return (
-                        <button
-                          key={option}
-                          className={`choiceCard ${matchFormat === option ? "active" : ""}`}
-                          onClick={() => setMatchFormat(option)}
-                          type="button"
-                          aria-pressed={matchFormat === option}
-                          data-testid={option === "rules_match" ? "match-format-rules-match" : "match-format-series"}
-                        >
-                          <Flag size={18} />
-                          <span>
-                            <strong>{label.title}</strong>
-                            <small>{label.description}</small>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-                <section className="matchStartSection" aria-label="Kartenpool">
-                  <p className="eyebrow">Kartenpool</p>
-                  <div className="choiceCardGrid formatCards">
-                    {(["originalset", "originalset_proteus"] as MatchCardPoolSelection[]).map((option) => {
-                      const label = matchCardPoolCardLabel(option);
-                      return (
-                        <button
-                          key={option}
-                          className={`choiceCard ${matchCardPool === option ? "active" : ""}`}
-                          onClick={() => setMatchCardPool(option)}
-                          type="button"
-                          aria-pressed={matchCardPool === option}
-                          data-testid={option === "originalset" ? "match-card-pool-originalset" : "match-card-pool-originalset-proteus"}
-                        >
-                          <Layers3 size={18} />
-                          <span>
-                            <strong>{label.title}</strong>
-                            <small>{label.description}</small>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
+                <MatchStartChoiceSections
+                  playMode={playMode}
+                  matchFormat={matchFormat}
+                  matchCardPool={matchCardPool}
+                  onPlayMode={setPlayMode}
+                  onMatchFormat={setMatchFormat}
+                  onMatchCardPool={setMatchCardPool}
+                />
                 <div className="formGrid primaryStartGrid">
                 <label>
                   Name
