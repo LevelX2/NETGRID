@@ -54,7 +54,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeAllowedCount).toBe(45);
     expect(report.metrics.pilotWouldOverrideCount).toBe(45);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(19.32);
+    expect(report.metrics.averageScoreGap).toBe(18.52);
     expect(report.metrics.blockedByReason).toMatchObject({
       basic_setup_action_type_blocked: 30,
       corp_score_window_wrong_side: 27,
