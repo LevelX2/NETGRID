@@ -458,7 +458,7 @@ function testHost(
         (() => undefined),
     },
     constants: {
-      BUTCHER_BOY_ID: "butcher_boy",
+      BUTCHER_BOY_ID: "successful_hq_run_pair_credit",
       JUNKYARD_BBS_ID,
       SELF_MODIFYING_CODE_ID,
       SHELL_TRADERS_ID,

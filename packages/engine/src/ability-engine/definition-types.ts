@@ -682,7 +682,7 @@ export type CardRunnerEventLongtailImplementation =
 
 export type CardVirusCounterKindImplementation =
   | "boardwalk"
-  | "butcher_boy"
+  | "successful_hq_run_pair_credit"
   | "cockroach"
   | "cascade"
   | "crumble"

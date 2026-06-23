@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const butcherBoyImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_009_butcher-boy",
   virusCounter: {
-    counterKind: "butcher_boy",
+    counterKind: "successful_hq_run_pair_credit",
     addOnSuccessfulRun: {
       server: "hq",
       target: "source",
