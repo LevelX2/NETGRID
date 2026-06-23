@@ -110,6 +110,8 @@ process_prepared
   - Checks: `packages/ai` `visible-run-analysis.test.ts` grün, `packages/ai` Typecheck grün, `packages/engine` Typecheck grün.
 - `TRACEFIX-2`: abgeschlossen. Trace-Hazards unterscheiden jetzt Basisdeckung (`baseTraceCovered`) von garantierter Deckung gegen sichtbare Corp-Credits (`visibleCorpMaxTraceCovered`) und führen `visibleCorpBidCapacity` sowie garantierte Max-Kosten als Evidence.
   - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
+- `TRACEFIX-3`: abgeschlossen. Mehrere Trace-Subroutinen werden innerhalb desselben bekannten ICE gegen fortgeschriebene Credits bewertet; Break-Affordability nutzt das laufende Restbudget, damit Replicator-/Breaker-Kosten nicht mehrfach aus demselben Budget gezählt werden.
+  - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
 
 ## Paketdetails
 

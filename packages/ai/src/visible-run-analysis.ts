@@ -639,12 +639,13 @@ function visibleIceRunHazardsForQuote(params: {
 }): VisibleIceRunHazard[] {
   if (!params.quote) return [];
   const hazards: VisibleIceRunHazard[] = [];
-  const traceSupport = visibleRunnerTraceSupport(
-    params.rigCards,
-    params.availableCredits,
-  );
+  let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
   params.quote.subroutines.forEach((subroutine, subroutineIndex) => {
     if (subroutine.type !== "initiate_trace") return;
+    const traceSupport = visibleRunnerTraceSupport(
+      params.rigCards,
+      remainingHazardCredits,
+    );
     const successEffect = traceSuccessEffectForVisibleSubroutine(
       params.quote!,
       subroutine,
@@ -685,7 +686,7 @@ function visibleIceRunHazardsForQuote(params: {
       params.additionalBreakCostPerSubroutine,
     );
     const breakAvoidanceCandidate =
-      breakAssessment && breakAssessment.cost <= params.availableCredits
+      breakAssessment && breakAssessment.cost <= remainingHazardCredits
         ? breakAssessment.cost
         : undefined;
     const avoidanceCandidates = [
@@ -696,6 +697,11 @@ function visibleIceRunHazardsForQuote(params: {
       avoidanceCandidates.length > 0
         ? Math.min(...avoidanceCandidates)
         : undefined;
+    const usesBreakAvoidance =
+      breakAvoidanceCandidate !== undefined &&
+      minimumAvoidanceCost === breakAvoidanceCandidate &&
+      (traceAvoidanceCandidate === undefined ||
+        breakAvoidanceCandidate < traceAvoidanceCandidate);
     const unavoidable = minimumAvoidanceCost === undefined;
     const sourceDefinitionId =
       subroutine.sourceDefinitionId ?? params.quote!.iceDefinitionId;
@@ -827,6 +833,18 @@ function visibleIceRunHazardsForQuote(params: {
         `visible_ice_hazard_unavoidable:${unavoidable}`,
       ],
     });
+    if (!unavoidable && minimumAvoidanceCost !== undefined) {
+      remainingHazardCredits -= minimumAvoidanceCost;
+      if (
+        usesBreakAvoidance &&
+        breakAssessment?.carriesStrengthAcrossIce === true
+      ) {
+        params.breakerStrengths.set(
+          breakAssessment.breakerInstanceId,
+          breakAssessment.endingStrength,
+        );
+      }
+    }
   });
   return hazards;
 }

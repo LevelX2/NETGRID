@@ -170,6 +170,70 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
+  it("sequences runner trace credits across multiple trace subroutines", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [doubleTraceTagIce("rd-double-trace")],
+      [],
+      9,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 5,
+      creditsAfterAvoidingVisibleIceHazards: 4,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards).toHaveLength(2);
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 9,
+      baseTraceCovered: true,
+      visibleCorpMaxTraceCovered: true,
+      minimumAvoidanceCost: 5,
+      unavoidable: false,
+    });
+    expect(assessment.visibleIceRunHazards?.[1]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 4,
+      baseTraceCovered: false,
+      visibleCorpMaxTraceCovered: false,
+      unavoidable: true,
+    });
+  });
+
+  it("does not reuse Replicator break credits across multiple traces", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [doubleTraceTagIce("rd-double-trace")],
+      [replicator("runner-replicator")],
+      3,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 3,
+      creditsAfterAvoidingVisibleIceHazards: 0,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards).toHaveLength(2);
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 3,
+      breakAvoidanceCost: 3,
+      minimumAvoidanceCost: 3,
+      unavoidable: false,
+    });
+    expect(assessment.visibleIceRunHazards?.[1]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 0,
+      breakAvoidanceCost: 3,
+      unavoidable: true,
+    });
+  });
+
   it("treats visible Access through Alpha as unaffordable at zero credits", () => {
     const assessment = assessKnownRezzedIcePath(
       [hunterTraceTagIce("rd-hunter")],
@@ -322,6 +386,34 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           amount: 5,
         },
       ],
+    },
+  };
+}
+
+function doubleTraceTagIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_249_hunter",
+    title: "Double Hunter Trace",
+    type: "ice",
+    subtypes: ["sentry", "bloodhound"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [1, 2].map((index) => ({
+        id: `${instanceId}_trace_${index}`,
+        type: "initiate_trace",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceTitle: "Double Hunter Trace",
+        amount: 5,
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        breakTags: ["trace"],
+      })),
     },
   };
 }
