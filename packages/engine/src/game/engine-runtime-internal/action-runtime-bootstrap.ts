@@ -192,8 +192,8 @@ import {
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "../abilities/run-fort-trigger-execution";
 import {
@@ -925,10 +925,10 @@ export function configureActionRuntimeBootstrap({
       serverChoiceDisplayLabel,
       runnerMemoryLimit,
       exposedCorpCardInServer,
-      topHostedProgramOnMicrotech: (stateToRead, cardId) =>
-        topHostedProgramOnMicrotech(runFortTriggerExecutionHost(stateToRead), cardId),
-      microtechHostedProgramIds: (stateToRead, cardId) =>
-        microtechHostedProgramIds(runFortTriggerExecutionHost(stateToRead), cardId),
+      topHostedProgramOnHardware: (stateToRead, cardId) =>
+        topHostedProgramOnHardware(runFortTriggerExecutionHost(stateToRead), cardId),
+      hostedProgramIdsOnHardware: (stateToRead, cardId) =>
+        hostedProgramIdsOnHardware(runFortTriggerExecutionHost(stateToRead), cardId),
       topRunnerHeapCardId,
       constants: {
         CODE_VIRAL_CACHE_ID,

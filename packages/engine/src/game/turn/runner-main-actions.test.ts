@@ -268,8 +268,8 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     hiddenZone: {
       exposedCorpCardInServer: () => undefined,
-      topHostedProgramOnMicrotech: () => undefined,
-      microtechHostedProgramIds: () => [],
+      topHostedProgramOnHardware: () => undefined,
+      hostedProgramIdsOnHardware: () => [],
       topRunnerHeapCardId: () => undefined,
     },
     specialZones: {

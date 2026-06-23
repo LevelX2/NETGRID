@@ -4051,7 +4051,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.v1922RunnerHardwareAbility ===
-          "microtech_backup_drive_return_top_hosted",
+          "return_top_hosted_program",
     );
     const returnedId = String(returnAction.payload?.targetProgramId ?? "");
     state = apply(
@@ -4064,7 +4064,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.programs).not.toContain(returnedId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+      v1922RunnerHardwareAbility: "return_top_hosted_program",
       returnedToGrip: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

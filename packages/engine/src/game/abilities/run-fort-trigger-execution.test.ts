@@ -12,8 +12,8 @@ import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "./run-fort-trigger-execution";
 
@@ -108,14 +108,14 @@ describe("run fort trigger execution", () => {
     const action = triggerAction(state, {
       cardId: microtechId,
       targetProgramId: topHostedId,
-      v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+      v1922RunnerHardwareAbility: "return_top_hosted_program",
     });
 
-    expect(microtechHostedProgramIds(host, microtechId)).toEqual([
+    expect(hostedProgramIdsOnHardware(host, microtechId)).toEqual([
       olderHostedId,
       topHostedId,
     ]);
-    expect(topHostedProgramOnMicrotech(host, microtechId)).toBe(topHostedId);
+    expect(topHostedProgramOnHardware(host, microtechId)).toBe(topHostedId);
     handleRunFortTriggerExecution(host, action);
 
     expect(state.runner.clicks).toBe(1);
@@ -126,7 +126,7 @@ describe("run fort trigger execution", () => {
       zone: "grip",
     });
     expect(action.payload).toMatchObject({
-      v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+      v1922RunnerHardwareAbility: "return_top_hosted_program",
       sourceDefinitionId: MICROTECH_BACKUP_DRIVE_ID,
       returnedCardDefinitionId: "top_program",
       returnedToGrip: true,

@@ -72,9 +72,9 @@ export function handleRunFortTriggerExecution(
   }
   if (
     legalAction.payload?.v1922RunnerHardwareAbility ===
-    "microtech_backup_drive_return_top_hosted"
+    "return_top_hosted_program"
   ) {
-    resolveMicrotechBackupDriveReturnTopHosted(host, legalAction);
+    resolveTopHostedProgramReturn(host, legalAction);
     return handled(legalAction);
   }
   if (
@@ -110,7 +110,7 @@ export function handleRunFortTriggerExecution(
   return { handled: false };
 }
 
-export function microtechHostedProgramIds(
+export function hostedProgramIdsOnHardware(
   host: Pick<RunFortTriggerExecutionHost, "state" | "cards">,
   hostId: CardInstanceId,
 ): CardInstanceId[] {
@@ -119,14 +119,14 @@ export function microtechHostedProgramIds(
     .sort();
 }
 
-export function topHostedProgramOnMicrotech(
+export function topHostedProgramOnHardware(
   host: Pick<RunFortTriggerExecutionHost, "state" | "cards">,
   hostId: CardInstanceId,
 ): CardInstanceId | undefined {
-  return microtechHostedProgramIds(host, hostId).at(-1);
+  return hostedProgramIdsOnHardware(host, hostId).at(-1);
 }
 
-function resolveMicrotechBackupDriveReturnTopHosted(
+function resolveTopHostedProgramReturn(
   host: RunFortTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -142,7 +142,7 @@ function resolveMicrotechBackupDriveReturnTopHosted(
   )
     throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
   const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
-  const topHostedId = topHostedProgramOnMicrotech(host, sourceCardId);
+  const topHostedId = topHostedProgramOnHardware(host, sourceCardId);
   if (!targetProgramId || targetProgramId !== topHostedId)
     throw new Error("Nur das oberste Microtech-Programm darf genommen werden.");
   const targetDefinitionId = host.cards.definitionFor(state, targetProgramId).id;
@@ -160,12 +160,12 @@ function resolveMicrotechBackupDriveReturnTopHosted(
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+    v1922RunnerHardwareAbility: "return_top_hosted_program",
     sourceDefinitionId:
       host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     returnedCardDefinitionId: targetDefinitionId,
     returnedToGrip: true,
-    hostedProgramCountAfter: microtechHostedProgramIds(host, sourceCardId)
+    hostedProgramCountAfter: hostedProgramIdsOnHardware(host, sourceCardId)
       .length,
   };
 }

@@ -82,8 +82,8 @@ export type RunnerMainActionGenerationHost = {
   };
   hiddenZone: {
     exposedCorpCardInServer: HostFn<string | undefined>;
-    topHostedProgramOnMicrotech: HostFn<string | undefined>;
-    microtechHostedProgramIds: HostFn<string[]>;
+    topHostedProgramOnHardware: HostFn<string | undefined>;
+    hostedProgramIdsOnHardware: HostFn<string[]>;
     topRunnerHeapCardId: HostFn<string | undefined>;
   };
   specialZones: {
@@ -252,9 +252,9 @@ export function buildRunnerMainActions(
     host.cardImplementation.pushActivatedActions;
   const runnerDrawActionContext = host.runner.runnerDrawActionContext;
   const exposedCorpCardInServer = host.hiddenZone.exposedCorpCardInServer;
-  const topHostedProgramOnMicrotech =
-    host.hiddenZone.topHostedProgramOnMicrotech;
-  const microtechHostedProgramIds = host.hiddenZone.microtechHostedProgramIds;
+  const topHostedProgramOnHardware =
+    host.hiddenZone.topHostedProgramOnHardware;
+  const hostedProgramIdsOnHardware = host.hiddenZone.hostedProgramIdsOnHardware;
   const runnerUtilityLongtailKindForCard =
     host.runner.runnerUtilityLongtailKindForCard;
   const uniqueDirectLongtailImplementationForCard =
@@ -893,9 +893,9 @@ export function buildRunnerMainActions(
       );
       if (
         definition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID &&
-        topHostedProgramOnMicrotech(state, cardId)
+        topHostedProgramOnHardware(state, cardId)
       ) {
-        const topHostedId = topHostedProgramOnMicrotech(state, cardId);
+        const topHostedId = topHostedProgramOnHardware(state, cardId);
         if (!topHostedId) continue;
         actions.push(
           action(
@@ -909,8 +909,8 @@ export function buildRunnerMainActions(
               cardId,
               targetProgramId: topHostedId,
               v1922RunnerHardwareAbility:
-                "microtech_backup_drive_return_top_hosted",
-              hostedProgramCount: microtechHostedProgramIds(state, cardId)
+                "return_top_hosted_program",
+              hostedProgramCount: hostedProgramIdsOnHardware(state, cardId)
                 .length,
             },
           ),

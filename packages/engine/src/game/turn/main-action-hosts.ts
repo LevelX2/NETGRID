@@ -28,8 +28,8 @@ export type MainActionHostCompositionHost = {
     serverChoiceDisplayLabel: RunnerMainActionGenerationHost["servers"]["serverChoiceDisplayLabel"];
     runnerMemoryLimit: RunnerMainActionGenerationHost["memory"]["runnerMemoryLimit"];
     exposedCorpCardInServer: RunnerMainActionGenerationHost["hiddenZone"]["exposedCorpCardInServer"];
-    topHostedProgramOnMicrotech: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnMicrotech"];
-    microtechHostedProgramIds: RunnerMainActionGenerationHost["hiddenZone"]["microtechHostedProgramIds"];
+    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
+    hostedProgramIdsOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["hostedProgramIdsOnHardware"];
     topRunnerHeapCardId: RunnerMainActionGenerationHost["hiddenZone"]["topRunnerHeapCardId"];
     constants: CorpMainActionGenerationHost["constants"] &
       RunnerMainActionGenerationHost["constants"];
@@ -274,8 +274,8 @@ export function createMainActionHostComposition(
       },
       hiddenZone: {
         exposedCorpCardInServer: callbacks.exposedCorpCardInServer,
-        topHostedProgramOnMicrotech: callbacks.topHostedProgramOnMicrotech,
-        microtechHostedProgramIds: callbacks.microtechHostedProgramIds,
+        topHostedProgramOnHardware: callbacks.topHostedProgramOnHardware,
+        hostedProgramIdsOnHardware: callbacks.hostedProgramIdsOnHardware,
         topRunnerHeapCardId: callbacks.topRunnerHeapCardId,
       },
       specialZones: {

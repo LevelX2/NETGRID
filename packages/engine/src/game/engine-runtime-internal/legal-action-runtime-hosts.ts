@@ -183,8 +183,8 @@ import {
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "../abilities/run-fort-trigger-execution";
 import {

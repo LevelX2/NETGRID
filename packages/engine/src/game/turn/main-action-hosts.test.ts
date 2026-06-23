@@ -85,7 +85,7 @@ describe("main-action-hosts", () => {
     const composition = createMainActionHostComposition(
       hostFor(state, {
         specialZoneHarnessActions: () => [delegated],
-        topHostedProgramOnMicrotech: () => "program_1",
+        topHostedProgramOnHardware: () => "program_1",
       }),
     );
 
@@ -97,7 +97,7 @@ describe("main-action-hosts", () => {
     expect(
       composition
         .runnerMainActionGenerationHost(state)
-        .hiddenZone.topHostedProgramOnMicrotech(state, "hardware_1"),
+        .hiddenZone.topHostedProgramOnHardware(state, "hardware_1"),
     ).toBe("program_1");
   });
 
@@ -167,7 +167,7 @@ function hostFor(
   state: GameState,
   overrides: Partial<{
     specialZoneHarnessActions: CorpMainActionGenerationHost["specialZones"]["specialZoneHarnessActions"];
-    topHostedProgramOnMicrotech: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnMicrotech"];
+    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
   }> = {},
 ): MainActionHostCompositionHost {
   const unexpected = (name: string) => () => {
@@ -392,9 +392,9 @@ function hostFor(
         serverId,
       runnerMemoryLimit: () => state.runner.memoryLimit,
       exposedCorpCardInServer: () => undefined,
-      topHostedProgramOnMicrotech:
-        overrides.topHostedProgramOnMicrotech ?? (() => undefined),
-      microtechHostedProgramIds: () => [],
+      topHostedProgramOnHardware:
+        overrides.topHostedProgramOnHardware ?? (() => undefined),
+      hostedProgramIdsOnHardware: () => [],
       topRunnerHeapCardId: () => undefined,
       constants: {
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
