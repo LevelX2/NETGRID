@@ -2268,7 +2268,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     state = applyChoice(state, "runner", "bid_1");
     expect(cardCounterAmount(state, hellsRunId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hellsRunTraceCreditsSpent: 1,
+      bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 0,
       traceLinkCreditSourceDefinitionIds: "onr_v1_164_hells-run",
     });

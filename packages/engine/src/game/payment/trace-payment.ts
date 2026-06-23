@@ -26,7 +26,7 @@ export type RunnerTracePaymentSourceKind =
   | "runner_credits"
   | "runner_trace_link_credit";
 
-export type RunnerTracePaymentPublicKind = "hells_run_trace_credit";
+export type RunnerTracePaymentPublicKind = "runner_trace_link_bonus_credit";
 
 export type CorpTracePaymentBreakdown = {
   kind: CorpTracePaymentSourceKind;
@@ -76,14 +76,14 @@ export type RunnerTracePaymentQuote = {
   canPay: boolean;
   breakdown: RunnerTracePaymentBreakdown[];
   traceLinkCreditsToPay: number;
-  hellsRunCreditsToPay: number;
+  bonusTraceLinkCreditsToPay: number;
   normalCreditsToPay: number;
   sourceDefinitionIds: CardDefinitionId[];
 };
 
 export type RunnerTracePaymentReceipt = {
   traceLinkCreditsSpent: number;
-  hellsRunTraceCreditsSpent: number;
+  bonusTraceLinkCreditsSpent: number;
   runnerCreditsSpent: number;
   sourceDefinitionIds: CardDefinitionId[];
 };
@@ -252,7 +252,7 @@ function emptyRunnerTracePaymentQuote(
     canPay: false,
     breakdown: [],
     traceLinkCreditsToPay: 0,
-    hellsRunCreditsToPay: 0,
+    bonusTraceLinkCreditsToPay: 0,
     normalCreditsToPay: 0,
     sourceDefinitionIds: [],
   };
@@ -301,8 +301,8 @@ function quoteRunnerTracePayment(
     (sum, entry) => sum + entry.amount,
     0,
   );
-  const hellsRunCreditsToPay = traceLinkBreakdown
-    .filter((entry) => entry.publicKind === "hells_run_trace_credit")
+  const bonusTraceLinkCreditsToPay = traceLinkBreakdown
+    .filter((entry) => entry.publicKind === "runner_trace_link_bonus_credit")
     .reduce((sum, entry) => sum + entry.amount, 0);
   for (const entry of breakdown) {
     if (entry.sourceDefinitionId) {
@@ -332,7 +332,7 @@ function quoteRunnerTracePayment(
     canPay: remaining === 0,
     breakdown: positiveRunnerBreakdown(breakdown),
     traceLinkCreditsToPay,
-    hellsRunCreditsToPay,
+    bonusTraceLinkCreditsToPay,
     normalCreditsToPay,
     sourceDefinitionIds: [...sourceDefinitionIds].sort(),
   };
@@ -545,7 +545,7 @@ function runnerQuoteMatchesCurrent(
     left.amount === right.amount &&
     left.canPay === right.canPay &&
     left.traceLinkCreditsToPay === right.traceLinkCreditsToPay &&
-    left.hellsRunCreditsToPay === right.hellsRunCreditsToPay &&
+    left.bonusTraceLinkCreditsToPay === right.bonusTraceLinkCreditsToPay &&
     left.normalCreditsToPay === right.normalCreditsToPay &&
     sameDefinitionIds(left.sourceDefinitionIds, right.sourceDefinitionIds) &&
     sameRunnerBreakdown(left.breakdown, right.breakdown)
@@ -639,7 +639,7 @@ function payRunnerTracePaymentQuote(
   deps.spendRunnerCredits(state, quote.normalCreditsToPay);
   return {
     traceLinkCreditsSpent: quote.traceLinkCreditsToPay,
-    hellsRunTraceCreditsSpent: quote.hellsRunCreditsToPay,
+    bonusTraceLinkCreditsSpent: quote.bonusTraceLinkCreditsToPay,
     runnerCreditsSpent: quote.normalCreditsToPay,
     sourceDefinitionIds: quote.sourceDefinitionIds,
   };
@@ -675,8 +675,8 @@ export function runnerTracePaymentPublicPayload(
   return receipt.traceLinkCreditsSpent > 0
     ? {
         traceLinkCreditsSpent: receipt.traceLinkCreditsSpent,
-        ...(receipt.hellsRunTraceCreditsSpent > 0
-          ? { hellsRunTraceCreditsSpent: receipt.hellsRunTraceCreditsSpent }
+        ...(receipt.bonusTraceLinkCreditsSpent > 0
+          ? { bonusTraceLinkCreditsSpent: receipt.bonusTraceLinkCreditsSpent }
           : {}),
         runnerCreditsSpent: receipt.runnerCreditsSpent,
         traceLinkCreditSourceDefinitionIds:

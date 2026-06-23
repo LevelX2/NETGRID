@@ -539,7 +539,7 @@ export function publicContextForAction(
       "baseLinkValue",
       "runnerBid",
       "traceLinkCreditsSpent",
-      "hellsRunTraceCreditsSpent",
+      "bonusTraceLinkCreditsSpent",
       "runnerCreditsSpent",
       "traceLinkCreditSourceDefinitionIds",
       "runnerStrength",

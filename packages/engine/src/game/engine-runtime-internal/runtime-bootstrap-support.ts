@@ -1031,7 +1031,7 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
           sourceCardInstanceId: cardId,
           sourceDefinitionId,
           ...(sourceDefinitionId === HELLS_RUN_ID
-            ? { publicKind: "hells_run_trace_credit" as const }
+            ? { publicKind: "runner_trace_link_bonus_credit" as const }
             : {}),
         };
       }),
