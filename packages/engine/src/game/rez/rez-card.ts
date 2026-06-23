@@ -55,11 +55,11 @@ export type RezCardHost = {
     spendCredits: (side: Side, amount: number) => void;
   };
   corp: {
-    isAcmeSavingsAndLoanDefinition: (definitionId: CardDefinitionId) => boolean;
+    isObligationDebtDefinition: (definitionId: CardDefinitionId) => boolean;
     spendCorpAgendaPointCost: (
       requiredPoints: number,
     ) => CorpAgendaPointCostResult;
-    acmeSavingsAndLoanObligationCount: () => number;
+    activeObligationCount: () => number;
   };
   runner: {
     ensureTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
@@ -133,7 +133,7 @@ export function rezCard(
       ...quotePayload,
     };
   }
-  if (host.corp.isAcmeSavingsAndLoanDefinition(definition.id)) {
+  if (host.corp.isObligationDebtDefinition(definition.id)) {
     if (!legalAction)
       throw new Error("ACME Savings and Loan braucht eine LegalAction.");
     const agendaCost = Number(legalAction?.payload?.agendaPointCost ?? 0);
@@ -144,9 +144,9 @@ export function rezCard(
       ...(legalAction?.payload ?? {}),
       agendaPointCost: agendaCost,
       agendaPointCostPaid: costResult.paidPoints,
-      acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
-      acmeSavingsAndLoanObligationsBefore:
-        host.corp.acmeSavingsAndLoanObligationCount(),
+      obligationDebtAbility: "rez_with_agenda_point_cost",
+      obligationDebtCountBefore:
+        host.corp.activeObligationCount(),
       ...(costResult.bonusPointsSpent > 0
         ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
         : {}),
@@ -156,7 +156,7 @@ export function rezCard(
               costResult.forfeitedAgendaDefinitionIds.join(","),
             specialZone: "removed_from_game",
             specialZoneVisibility: "public",
-            specialZoneReason: "acme_savings_and_loan_rez_cost",
+            specialZoneReason: "obligation_debt_rez_cost",
           }
         : {}),
     };

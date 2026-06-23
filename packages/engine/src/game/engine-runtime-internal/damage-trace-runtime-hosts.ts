@@ -826,7 +826,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     return remainingReplacementLongtailImplementationForCard(state, cardId)?.kind;
   }
 
-  function isAcmeSavingsAndLoanDefinition(definitionId: CardDefinitionId): boolean {
+  function isObligationDebtDefinition(definitionId: CardDefinitionId): boolean {
     return (
       remainingReplacementLongtailKindForDefinition(definitionId) ===
       "acme_savings_and_loan_debt"
@@ -995,7 +995,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     remainingReplacementLongtailKindForDefinition,
     remainingReplacementLongtailImplementationForCard,
     remainingReplacementLongtailKindForCard,
-    isAcmeSavingsAndLoanDefinition,
+    isObligationDebtDefinition,
     isCitySurveillanceCard,
     isInvestmentFirmCard,
     isHackerTrackerCentralCard,

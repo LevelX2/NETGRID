@@ -241,8 +241,8 @@ function hostFor(calls: string[]): RunFlowHost {
     callbacks: {
       finishRun: (_state, successful) => calls.push(`finishRun:${successful}`),
       drawCorpCards: () => calls.push("drawCorpCards"),
-      acmeSavingsAndLoanObligationCount: () => 0,
-      addAcmeSavingsAndLoanObligation: () => undefined,
+      activeObligationCount: () => 0,
+      addActiveObligation: () => undefined,
       applyRunnerForgoNextAction: () => undefined,
       hasInstalledMicrotechTrodeSet: () => false,
       traceCounterEffectDefinitionFor: () => undefined,

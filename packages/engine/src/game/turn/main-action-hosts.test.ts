@@ -286,7 +286,7 @@ function hostFor(
     },
     corp: {
       corpActionDebtPending: () => 0,
-      acmeSavingsAndLoanObligationCount: () => 0,
+      activeObligationCount: () => 0,
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
@@ -357,7 +357,7 @@ function hostFor(
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),
-      isAcmeSavingsAndLoanDefinition: () => false,
+      isObligationDebtDefinition: () => false,
     },
     cardImplementation: {
       corpTraceDamageAbilityHost: () => ({}),

@@ -294,8 +294,8 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       },
       misc: {
         drawCorpCards: () => calls.push("drawCorpCards"),
-        acmeSavingsAndLoanObligationCount: () => 0,
-        addAcmeSavingsAndLoanObligation: () => undefined,
+        activeObligationCount: () => 0,
+        addActiveObligation: () => undefined,
         applyRunnerForgoNextAction: () => undefined,
         hasInstalledMicrotechTrodeSet: () => false,
         traceCounterEffectDefinitionFor: () => undefined,

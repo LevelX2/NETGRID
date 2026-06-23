@@ -394,8 +394,8 @@ export type RunFlowHost = {
       legalAction: LegalAction,
       sourceDefinitionId: CardDefinitionId,
     ) => void;
-    acmeSavingsAndLoanObligationCount: (state: GameState) => number;
-    addAcmeSavingsAndLoanObligation: (state: GameState, amount: number) => void;
+    activeObligationCount: (state: GameState) => number;
+    addActiveObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
     hasInstalledMicrotechTrodeSet: (state: GameState) => boolean;
     traceCounterEffectDefinitionFor: Parameters<typeof isSupportedEncounterTraceSuccessEffect>[1];
@@ -724,10 +724,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
         canReplaceFortCardsFromHq: (serverId) =>
           host.cards.canReplaceFortCardsFromHq(state, serverId),
-        acmeSavingsAndLoanObligationCount: () =>
-          host.callbacks.acmeSavingsAndLoanObligationCount(state),
-        addAcmeSavingsAndLoanObligation: (amount) =>
-          host.callbacks.addAcmeSavingsAndLoanObligation(state, amount),
+        activeObligationCount: () =>
+          host.callbacks.activeObligationCount(state),
+        addActiveObligation: (amount) =>
+          host.callbacks.addActiveObligation(state, amount),
       },
     };
   }

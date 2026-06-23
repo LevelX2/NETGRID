@@ -35,7 +35,7 @@ export function buildLegalAction(
     payload?.resourceAbility ||
     payload?.runnerAbility ||
     payload?.delayedInstallAbility ||
-    payload?.acmeSavingsAndLoanAbility ||
+    payload?.obligationDebtAbility ||
     (side === "runner" && type === "install_card")
       ? "public"
       : "private_to_actor";

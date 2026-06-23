@@ -110,8 +110,8 @@ export function createMainActionHostComposition(
       },
       corp: {
         corpActionDebtPending: corp.corpActionDebtPending,
-        acmeSavingsAndLoanObligationCount:
-          corp.acmeSavingsAndLoanObligationCount,
+        activeObligationCount:
+          corp.activeObligationCount,
         canPlayCorpOperation: corp.canPlayCorpOperation,
         cardImplementationOperationLegalActions:
           corp.cardImplementationOperationLegalActions,
@@ -157,7 +157,7 @@ export function createMainActionHostComposition(
         rezCostForCard: rez.rezCostForCard,
         rezCostReductionSourceDefinitionIdsFor:
           rez.rezCostReductionSourceDefinitionIdsFor,
-        isAcmeSavingsAndLoanDefinition: rez.isAcmeSavingsAndLoanDefinition,
+        isObligationDebtDefinition: rez.isObligationDebtDefinition,
       },
       abilities: {
         corpTraceDamageAbilityHost:

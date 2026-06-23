@@ -707,7 +707,7 @@ export function createLegalActionRuntimeHosts(
   const {
     cardImplementationRuntimeDeps,
     corpAgendaPointTotal,
-    isAcmeSavingsAndLoanDefinition,
+    isObligationDebtDefinition,
     runCardImplementationActionHost,
   } = deps;
 
@@ -725,16 +725,16 @@ export function createLegalActionRuntimeHosts(
         const rezCost = rezCostForCard(state, id);
         if (state.corp.credits < rezCost) continue;
         if (
-          isAcmeSavingsAndLoanDefinition(definition.id) &&
+          isObligationDebtDefinition(definition.id) &&
           corpAgendaPointTotal(state) < 1
         )
           continue;
         const rezCostReductionSourceDefinitionIds =
           rezCostReductionSourceDefinitionIdsFor(state, id, definition);
-        const acmeRezCost = isAcmeSavingsAndLoanDefinition(definition.id)
+        const acmeRezCost = isObligationDebtDefinition(definition.id)
           ? {
               agendaPointCost: 1,
-              acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+              obligationDebtAbility: "rez_with_agenda_point_cost",
             }
           : {};
         actions.push(

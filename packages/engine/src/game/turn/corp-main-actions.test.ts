@@ -196,7 +196,7 @@ function testCorpMainHost(
     },
     corp: {
       corpActionDebtPending: overrides.corpActionDebtPending ?? (() => 0),
-      acmeSavingsAndLoanObligationCount: () => 0,
+      activeObligationCount: () => 0,
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
@@ -240,7 +240,7 @@ function testCorpMainHost(
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),
-      isAcmeSavingsAndLoanDefinition: () => false,
+      isObligationDebtDefinition: () => false,
     },
     abilities: {
       corpTraceDamageAbilityHost: () => ({}),

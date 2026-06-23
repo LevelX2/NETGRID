@@ -48,7 +48,7 @@ export type CorpMainActionGenerationHost = {
   corp: {
     corpActionDebtPending: HostFn<number>;
     filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
-    acmeSavingsAndLoanObligationCount: HostFn<number>;
+    activeObligationCount: HostFn<number>;
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<{ kind?: string } | undefined>;
@@ -80,7 +80,7 @@ export type CorpMainActionGenerationHost = {
     rootInstallRezzesOnInstall: HostFn<boolean>;
     rezCostForCard: HostFn<number>;
     rezCostReductionSourceDefinitionIdsFor: HostFn<string[]>;
-    isAcmeSavingsAndLoanDefinition: HostFn<boolean>;
+    isObligationDebtDefinition: HostFn<boolean>;
   };
   abilities: {
     corpTraceDamageAbilityHost: HostFn<unknown>;
@@ -161,8 +161,8 @@ export function buildCorpMainActions(
     host.corp.filterActionsForRestrictedExtraActions ??
     ((_state: GameState, _side: "corp", candidateActions: LegalAction[]) =>
       candidateActions);
-  const acmeSavingsAndLoanObligationCount =
-    host.corp.acmeSavingsAndLoanObligationCount;
+  const activeObligationCount =
+    host.corp.activeObligationCount;
   const canPlayCorpOperation = host.corp.canPlayCorpOperation;
   const corpUtilityImplementationForDefinition =
     host.corp.corpUtilityImplementationForDefinition;
@@ -197,8 +197,8 @@ export function buildCorpMainActions(
   const rezCostForCard = host.rez.rezCostForCard;
   const rezCostReductionSourceDefinitionIdsFor =
     host.rez.rezCostReductionSourceDefinitionIdsFor;
-  const isAcmeSavingsAndLoanDefinition =
-    host.rez.isAcmeSavingsAndLoanDefinition;
+  const isObligationDebtDefinition =
+    host.rez.isObligationDebtDefinition;
   const corpTraceDamageAbilityHost = host.abilities.corpTraceDamageAbilityHost;
   const corpSpecialDamageAbilityHost =
     host.abilities.corpSpecialDamageAbilityHost;
@@ -345,7 +345,7 @@ export function buildCorpMainActions(
     }
   }
   actions.push(buildCorpGainCreditAction(state));
-  if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
+  if (activeObligationCount(state) > 0 && state.corp.credits >= 12) {
     actions.push(
       action(
         state,
@@ -355,11 +355,11 @@ export function buildCorpMainActions(
         "game_rule",
         [{ clicks: 1, credits: 12 }],
         {
-          acmeSavingsAndLoanAbility: "remove_obligation",
-          acmeSavingsAndLoanCreditCost: 12,
-          acmeSavingsAndLoanScoreAgendaPoints: 1,
-          acmeSavingsAndLoanObligationsBefore:
-            acmeSavingsAndLoanObligationCount(state),
+          obligationDebtAbility: "remove_obligation",
+          obligationDebtCreditCost: 12,
+          obligationDebtScoreAgendaPoints: 1,
+          obligationDebtCountBefore:
+            activeObligationCount(state),
         },
       ),
     );
@@ -602,14 +602,14 @@ export function buildCorpMainActions(
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
         state.corp.credits >= rezCost &&
-        (!isAcmeSavingsAndLoanDefinition(definition.id) ||
+        (!isObligationDebtDefinition(definition.id) ||
           corpAgendaPointTotal(state) >= 1)
       ) {
         const acmeRezCost =
-          isAcmeSavingsAndLoanDefinition(definition.id)
+          isObligationDebtDefinition(definition.id)
             ? {
                 agendaPointCost: 1,
-                acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+                obligationDebtAbility: "rez_with_agenda_point_cost",
               }
             : {};
         actions.push(

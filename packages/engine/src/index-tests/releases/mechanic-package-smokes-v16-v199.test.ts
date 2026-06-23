@@ -7107,15 +7107,15 @@ describe("V1.9.5 Mechanikpaket N", () => {
       agendaPointCost: 1,
       gainedCredits: 12,
       selfTrashed: true,
-      acmeSavingsAndLoanObligationsAfter: 1,
+      obligationDebtCountAfter: 1,
     });
 
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(21);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanPaymentPaid: 1,
+      obligationDebtAbility: "end_of_turn_payment",
+      obligationDebtPaymentPaid: 1,
       corpCreditsAfter: 21,
     });
   });
@@ -7325,12 +7325,12 @@ describe("V1.9.5 Mechanikpaket N", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
     expect(state.winner).toBe("runner");
-    expect(state.gameEndReason).toBe("acme_savings_and_loan_unpaid");
+    expect(state.gameEndReason).toBe("obligation_debt_unpaid");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanPaymentFailed: true,
-      gameEndReason: "acme_savings_and_loan_unpaid",
+      obligationDebtAbility: "end_of_turn_payment",
+      obligationDebtPaymentFailed: true,
+      gameEndReason: "obligation_debt_unpaid",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -7369,7 +7369,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+        action.payload?.obligationDebtAbility === "remove_obligation",
     );
 
     expect(state.corp.credits).toBe(creditsBefore - 12);
@@ -7378,10 +7378,10 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(agendaPoints(state, "corp")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      acmeSavingsAndLoanAbility: "remove_obligation",
-      acmeSavingsAndLoanPaymentPaid: 12,
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtPaymentPaid: 12,
       gainedAgendaPoints: 1,
-      acmeSavingsAndLoanObligationsAfter: 0,
+      obligationDebtCountAfter: 0,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -7416,7 +7416,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+        action.payload?.obligationDebtAbility === "remove_obligation",
     );
 
     const wrongSide = applyAction(state, {

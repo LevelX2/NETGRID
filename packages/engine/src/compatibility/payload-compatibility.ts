@@ -23,7 +23,7 @@ export const ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "resourceAbility",
   "runnerAbility",
   "delayedInstallAbility",
-  "acmeSavingsAndLoanAbility",
+  "obligationDebtAbility",
   "agendaAbility",
 ] as const satisfies readonly LegacyAbilityPayloadField[];
 

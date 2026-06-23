@@ -260,9 +260,9 @@ function hostFor(state: GameState): {
             zone: { side: "corp", zone: "archives" },
           };
         },
-        acmeSavingsAndLoanObligationCount: () =>
+        activeObligationCount: () =>
           Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)),
-        addAcmeSavingsAndLoanObligation: (amount) => {
+        addActiveObligation: (amount) => {
           state.acmeSavingsAndLoanObligations =
             Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)) +
             amount;

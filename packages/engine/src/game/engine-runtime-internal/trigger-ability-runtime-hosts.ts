@@ -705,7 +705,7 @@ export function createTriggerAbilityRuntimeHosts(
   runtime: Record<string, unknown>,
 ) {
   const {
-    acmeSavingsAndLoanObligationCount,
+    activeObligationCount,
     encounterEntryHostForState,
     encounterSpecialWindowHostForState,
     fortPassWindowHostForState,
@@ -715,7 +715,7 @@ export function createTriggerAbilityRuntimeHosts(
     isUniqueCard,
     publicCardTitle,
     remainingReplacementLongtailKindForCard,
-    removeAcmeSavingsAndLoanObligation,
+    removeActiveObligation,
     acceptExtraActionOffer,
     declineExtraActionOffer,
     resolvePdcaCounterAction,
@@ -901,8 +901,8 @@ export function createTriggerAbilityRuntimeHosts(
         ensureTurnFlags: ensureRunnerTurnFlags,
       },
       corp: {
-        acmeSavingsAndLoanObligationCount,
-        removeAcmeSavingsAndLoanObligation,
+        activeObligationCount,
+        removeActiveObligation,
       },
       actionEconomy: {
         acceptExtraActionOffer,

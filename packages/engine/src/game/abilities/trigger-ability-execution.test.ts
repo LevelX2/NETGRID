@@ -233,8 +233,8 @@ function testHost(
         }),
     },
     corp: {
-      acmeSavingsAndLoanObligationCount: () => 0,
-      removeAcmeSavingsAndLoanObligation: () => undefined,
+      activeObligationCount: () => 0,
+      removeActiveObligation: () => undefined,
     },
     runnerSpecial: {
       handleRunnerSpecialTriggerExecution:

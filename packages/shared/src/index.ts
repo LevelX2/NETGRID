@@ -132,7 +132,7 @@ export type StateHash = string;
 export type Winner = Side | "draw";
 export type GameEndReason =
   | "agenda_points"
-  | "acme_savings_and_loan_unpaid"
+  | "obligation_debt_unpaid"
   | "bad_publicity_7"
   | "corp_deck_empty"
   | "flatline"

@@ -1150,7 +1150,7 @@ export function publicContextForAction(
     "citySurveillanceTagsAdded",
     "citySurveillanceTags",
     "citySurveillanceProjectedDrawCount",
-    "acmeDebtActive",
+    "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
     "traceHostedCreditBoost",
@@ -1382,9 +1382,8 @@ export function publicContextForAction(
       context.chimeraDaemonDefinitionId =
         legalAction.payload.chimeraDaemonDefinitionId;
   }
-  if (typeof legalAction.payload?.acmeSavingsAndLoanAbility === "string") {
-    context.acmeSavingsAndLoanAbility =
-      legalAction.payload.acmeSavingsAndLoanAbility;
+  if (typeof legalAction.payload?.obligationDebtAbility === "string") {
+    context.obligationDebtAbility = legalAction.payload.obligationDebtAbility;
     for (const key of [
       "agendaPointCost",
       "agendaPointCostPaid",
@@ -1393,13 +1392,13 @@ export function publicContextForAction(
       "gainedCredits",
       "selfTrashed",
       "acmeSavingsAndLoanObligations",
-      "acmeSavingsAndLoanObligationsBefore",
-      "acmeSavingsAndLoanObligationsAfter",
-      "acmeSavingsAndLoanCreditCost",
-      "acmeSavingsAndLoanPaymentDue",
-      "acmeSavingsAndLoanPaymentPaid",
-      "acmeSavingsAndLoanPaymentFailed",
-      "acmeSavingsAndLoanScoreAgendaPoints",
+      "obligationDebtCountBefore",
+      "obligationDebtCountAfter",
+      "obligationDebtCreditCost",
+      "obligationDebtPaymentDue",
+      "obligationDebtPaymentPaid",
+      "obligationDebtPaymentFailed",
+      "obligationDebtScoreAgendaPoints",
       "gainedAgendaPoints",
       "corpBonusAgendaPointsAfter",
       "corpCreditsBefore",

@@ -57,8 +57,8 @@ export type RunRezWindowHost = {
       cardId: CardInstanceId,
       legalAction?: LegalAction,
     ) => void;
-    acmeSavingsAndLoanObligationCount: () => number;
-    addAcmeSavingsAndLoanObligation: (amount: number) => void;
+    activeObligationCount: () => number;
+    addActiveObligation: (amount: number) => void;
   };
 };
 

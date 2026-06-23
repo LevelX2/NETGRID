@@ -883,7 +883,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     installedRunnerProgramTrashOptionsForInstall,
     installedRunnerVirusSourceIds,
     installedVirusCounterTotalForDefinition,
-    isAcmeSavingsAndLoanDefinition,
+    isObligationDebtDefinition,
     isCitySurveillanceCard,
     isCorpInstallableCardType,
     isHackerTrackerCentralCard,
@@ -949,7 +949,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     remainingReplacementLongtailKindForDefinition,
     requireRunnerTagged,
     requiresDataFortInstallTarget,
-    resolveAcmeSavingsAndLoanEndOfCorpTurn,
+    resolveCorpObligationEndOfTurn,
     resolveAnonymousTipDerezBlackIceChoice,
     resolveDelayedAccessEffects,
     resolveBlinkBreakSubroutineAction,
@@ -1195,22 +1195,22 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function acmeSavingsAndLoanObligationCount(state: GameState): number {
+  function activeObligationCount(state: GameState): number {
     return Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0));
   }
 
-  function addAcmeSavingsAndLoanObligation(
+  function addActiveObligation(
     state: GameState,
     amount: number,
   ): void {
     if (!Number.isInteger(amount) || amount <= 0)
       throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
     state.acmeSavingsAndLoanObligations =
-      acmeSavingsAndLoanObligationCount(state) + amount;
+      activeObligationCount(state) + amount;
   }
 
-  function removeAcmeSavingsAndLoanObligation(state: GameState): void {
-    const current = acmeSavingsAndLoanObligationCount(state);
+  function removeActiveObligation(state: GameState): void {
+    const current = activeObligationCount(state);
     if (current <= 0)
       throw new Error("Es gibt keine ACME-Savings-and-Loan-Verpflichtung.");
     state.acmeSavingsAndLoanObligations = current - 1;
@@ -2042,9 +2042,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   return {
     forfeitRunnerAgendaForPointCost,
     forfeitCorpAgendaForPointCost,
-    acmeSavingsAndLoanObligationCount,
-    addAcmeSavingsAndLoanObligation,
-    removeAcmeSavingsAndLoanObligation,
+    activeObligationCount,
+    addActiveObligation,
+    removeActiveObligation,
     spendCorpAgendaPointCost,
     installedAgendaOperationTarget,
     corpAgendaCounterOperationTarget,

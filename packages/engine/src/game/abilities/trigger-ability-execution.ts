@@ -45,8 +45,8 @@ export type TriggerAbilityExecutionHost = {
     ) => NonNullable<GameState["runnerTurnFlags"]>;
   };
   corp: {
-    acmeSavingsAndLoanObligationCount: (state: GameState) => number;
-    removeAcmeSavingsAndLoanObligation: (state: GameState) => void;
+    activeObligationCount: (state: GameState) => number;
+    removeActiveObligation: (state: GameState) => void;
   };
   actionEconomy?: {
     acceptExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
@@ -307,36 +307,36 @@ export function handleTriggerAbilityExecution(
     };
     return handled(legalAction);
   }
-  if (legalAction.payload?.acmeSavingsAndLoanAbility === "remove_obligation") {
+  if (legalAction.payload?.obligationDebtAbility === "remove_obligation") {
     if (legalAction.side !== "corp")
       throw new Error("Nur die Korp darf ACME Savings and Loan abloesen.");
-    const obligationsBefore = host.corp.acmeSavingsAndLoanObligationCount(state);
+    const obligationsBefore = host.corp.activeObligationCount(state);
     if (obligationsBefore <= 0)
       throw new Error(
         "Es gibt keine aktive ACME-Savings-and-Loan-Verpflichtung.",
       );
     const creditCost = Number(
-      legalAction.payload?.acmeSavingsAndLoanCreditCost ?? 0,
+      legalAction.payload?.obligationDebtCreditCost ?? 0,
     );
     if (!Number.isInteger(creditCost) || creditCost !== 12)
       throw new Error("ACME Savings and Loan verlangt genau 12 Credits.");
     const scorePoints = Number(
-      legalAction.payload?.acmeSavingsAndLoanScoreAgendaPoints ?? 0,
+      legalAction.payload?.obligationDebtScoreAgendaPoints ?? 0,
     );
     if (!Number.isInteger(scorePoints) || scorePoints !== 1)
       throw new Error("ACME Savings and Loan scored genau 1 Agenda-Punkt.");
     host.actions.spendClick(state, "corp");
     host.credits.spend(state, "corp", creditCost);
-    host.corp.removeAcmeSavingsAndLoanObligation(state);
+    host.corp.removeActiveObligation(state);
     state.corpBonusAgendaPoints =
       Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) + scorePoints;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      acmeSavingsAndLoanObligationsBefore: obligationsBefore,
-      acmeSavingsAndLoanObligationsAfter:
-        host.corp.acmeSavingsAndLoanObligationCount(state),
-      acmeDebtActive: host.corp.acmeSavingsAndLoanObligationCount(state) > 0,
-      acmeSavingsAndLoanPaymentPaid: creditCost,
+      obligationDebtCountBefore: obligationsBefore,
+      obligationDebtCountAfter:
+        host.corp.activeObligationCount(state),
+      obligationDebtActive: host.corp.activeObligationCount(state) > 0,
+      obligationDebtPaymentPaid: creditCost,
       gainedAgendaPoints: scorePoints,
       corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
       corpCreditsAfter: state.corp.credits,

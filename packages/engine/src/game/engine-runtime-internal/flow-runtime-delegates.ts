@@ -133,10 +133,10 @@ export function remainingReplacementLongtailKindForCard(...args: any[]): any {
   )(...args);
 }
 
-export function isAcmeSavingsAndLoanDefinition(...args: any[]): any {
+export function isObligationDebtDefinition(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "isAcmeSavingsAndLoanDefinition",
+    "isObligationDebtDefinition",
   )(...args);
 }
 

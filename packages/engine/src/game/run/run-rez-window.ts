@@ -336,23 +336,23 @@ export function resolveCorpRootRezEffect(
     CORP_ROOT_REZ_RESOLVERS[definition.id];
   if (!resolver) return { handled: false, rezzedCardId: cardId };
   resolver.resolve(host.state);
-  if (isAcmeSavingsAndLoanDefinition(definition.id)) {
+  if (isObligationDebtDefinition(definition.id)) {
     const acmeLongtail =
       remainingReplacementLongtailImplementationForDefinition(definition.id);
     const gainedCredits =
       acmeLongtail?.kind === "acme_savings_and_loan_debt"
         ? acmeLongtail.gainCreditsOnRez
         : 12;
-    host.callbacks.addAcmeSavingsAndLoanObligation(1);
+    host.callbacks.addActiveObligation(1);
     host.callbacks.trashCorpInstalledCardToArchives(cardId, legalAction);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         gainedCredits,
         selfTrashed: true,
-        acmeDebtActive: host.callbacks.acmeSavingsAndLoanObligationCount() > 0,
-        acmeSavingsAndLoanObligationsAfter:
-          host.callbacks.acmeSavingsAndLoanObligationCount(),
+        obligationDebtActive: host.callbacks.activeObligationCount() > 0,
+        obligationDebtCountAfter:
+          host.callbacks.activeObligationCount(),
         corpCreditsAfter: host.state.corp.credits,
       };
     }
@@ -727,7 +727,7 @@ function remainingReplacementLongtailImplementationForDefinition(
     ?.remainingReplacementLongtail;
 }
 
-function isAcmeSavingsAndLoanDefinition(definitionId: string): boolean {
+function isObligationDebtDefinition(definitionId: string): boolean {
   return (
     remainingReplacementLongtailImplementationForDefinition(definitionId)
       ?.kind === "acme_savings_and_loan_debt"

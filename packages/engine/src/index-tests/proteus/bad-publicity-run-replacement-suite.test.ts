@@ -349,14 +349,14 @@ function executeRunScopedBlackOpsRezHook(
         spendCredits: () => undefined,
       },
       corp: {
-        isAcmeSavingsAndLoanDefinition: () => false,
+        isObligationDebtDefinition: () => false,
         spendCorpAgendaPointCost: () => ({
           paidPoints: 0,
           bonusPointsSpent: 0,
           forfeitedAgendaIds: [],
           forfeitedAgendaDefinitionIds: [],
         }),
-        acmeSavingsAndLoanObligationCount: () => 0,
+        activeObligationCount: () => 0,
       },
       runner: {
         ensureTurnFlags: () =>

@@ -62,10 +62,10 @@ export function resolveSneakPreviewTemporaryInstallReturns(
   )(...args);
 }
 
-export function resolveAcmeSavingsAndLoanEndOfCorpTurn(...args: any[]): any {
+export function resolveCorpObligationEndOfTurn(...args: any[]): any {
   return runtimeDelegate(
     "turnRuntimeResolvers",
-    "resolveAcmeSavingsAndLoanEndOfCorpTurn",
+    "resolveCorpObligationEndOfTurn",
   )(...args);
 }
 
@@ -338,24 +338,24 @@ export function forfeitCorpAgendaForPointCost(...args: any[]): any {
   )(...args);
 }
 
-export function acmeSavingsAndLoanObligationCount(...args: any[]): any {
+export function activeObligationCount(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "acmeSavingsAndLoanObligationCount",
+    "activeObligationCount",
   )(...args);
 }
 
-export function addAcmeSavingsAndLoanObligation(...args: any[]): any {
+export function addActiveObligation(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "addAcmeSavingsAndLoanObligation",
+    "addActiveObligation",
   )(...args);
 }
 
-export function removeAcmeSavingsAndLoanObligation(...args: any[]): any {
+export function removeActiveObligation(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "removeAcmeSavingsAndLoanObligation",
+    "removeActiveObligation",
   )(...args);
 }
 

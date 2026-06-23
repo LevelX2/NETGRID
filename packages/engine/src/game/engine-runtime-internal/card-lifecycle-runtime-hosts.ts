@@ -708,7 +708,7 @@ export function createCardLifecycleRuntimeHosts(
 ) {
   const {
     PROTEUS_ARMAGEDDON_ID,
-    acmeSavingsAndLoanObligationCount,
+    activeObligationCount,
     applyRunnerDrawSummaryPayload,
     assertCorpIceInstallCostValid,
     availableRunnerProgramInstallCredits,
@@ -731,7 +731,7 @@ export function createCardLifecycleRuntimeHosts(
     hasCardImplementationMemoryUnitModifier,
     hasInstalledUniqueCardDefinition,
     installedRunnerProgramTrashOptionsForInstall,
-    isAcmeSavingsAndLoanDefinition,
+    isObligationDebtDefinition,
     isRegionUpgrade,
     isUniqueCard,
     openRunnerCostPenaltySupportWindow,
@@ -960,11 +960,11 @@ export function createCardLifecycleRuntimeHosts(
             : spendCredits(state, side, amount),
       },
       corp: {
-        isAcmeSavingsAndLoanDefinition,
+        isObligationDebtDefinition,
         spendCorpAgendaPointCost: (requiredPoints) =>
           spendCorpAgendaPointCost(state, requiredPoints),
-        acmeSavingsAndLoanObligationCount: () =>
-          acmeSavingsAndLoanObligationCount(state),
+        activeObligationCount: () =>
+          activeObligationCount(state),
       },
       runner: {
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),

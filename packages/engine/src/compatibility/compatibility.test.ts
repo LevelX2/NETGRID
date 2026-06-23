@@ -37,7 +37,7 @@ describe("P3.71 PendingChoice replay compatibility marker stability", () => {
       "resourceAbility",
       "runnerAbility",
       "delayedInstallAbility",
-      "acmeSavingsAndLoanAbility",
+      "obligationDebtAbility",
       "agendaAbility",
     ]);
   });

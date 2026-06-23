@@ -743,10 +743,10 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     accessEffectHandlerHost,
     accessFlow,
     accessFlowHost,
-    acmeSavingsAndLoanObligationCount,
+    activeObligationCount,
     activatedCardImplementationExecutionHost,
     activeCrashEverettSourceId,
-    addAcmeSavingsAndLoanObligation,
+    addActiveObligation,
     addCounterToAllInstalledRunnerIcebreakers,
     addCurrentRunAccessCount,
     addHackerTrackerTraceCounters,
@@ -904,7 +904,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     installedRunnerProgramTrashOptionsForInstall,
     installedRunnerVirusSourceIds,
     installedVirusCounterTotalForDefinition,
-    isAcmeSavingsAndLoanDefinition,
+    isObligationDebtDefinition,
     isCitySurveillanceCard,
     isCorpInstallableCardType,
     isHackerTrackerCentralCard,
@@ -972,7 +972,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     remainingReplacementLongtailImplementationForDefinition,
     remainingReplacementLongtailKindForCard,
     remainingReplacementLongtailKindForDefinition,
-    removeAcmeSavingsAndLoanObligation,
+    removeActiveObligation,
     requireRunnerTagged,
     requiresDataFortInstallTarget,
     resolveAgendaCounterOperation,
@@ -1323,7 +1323,7 @@ function endTurn(
     corpFlags.scoredBlackOpsAgendaLastTurn =
       corpFlags.scoredBlackOpsAgendaThisTurn;
     corpFlags.scoredBlackOpsAgendaThisTurn = false;
-    resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
+    resolveCorpObligationEndOfTurn(state, legalAction);
     if (state.winner) return;
     ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   }
@@ -1377,27 +1377,27 @@ function resolveSneakPreviewTemporaryInstallReturns(
   }
 }
 
-function resolveAcmeSavingsAndLoanEndOfCorpTurn(
+function resolveCorpObligationEndOfTurn(
   state: GameState,
   legalAction: LegalAction,
 ): void {
-  const obligations = acmeSavingsAndLoanObligationCount(state);
+  const obligations = activeObligationCount(state);
   if (obligations <= 0) return;
   const creditsBefore = state.corp.credits;
   if (creditsBefore < obligations) {
     state.winner = "runner";
-    state.gameEndReason = "acme_savings_and_loan_unpaid";
+    state.gameEndReason = "obligation_debt_unpaid";
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
     delete state.pendingChoice;
     delete state.run;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
+      obligationDebtAbility: "end_of_turn_payment",
       acmeSavingsAndLoanObligations: obligations,
       acmeSavingsAndLoanPaymentDue: obligations,
-      acmeSavingsAndLoanPaymentPaid: 0,
-      acmeSavingsAndLoanPaymentFailed: true,
+      obligationDebtPaymentPaid: 0,
+      obligationDebtPaymentFailed: true,
       corpCreditsBefore: creditsBefore,
       corpCreditsAfter: state.corp.credits,
     };
@@ -1406,10 +1406,10 @@ function resolveAcmeSavingsAndLoanEndOfCorpTurn(
   state.corp.credits -= obligations;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    acmeSavingsAndLoanAbility: "end_of_turn_payment",
+    obligationDebtAbility: "end_of_turn_payment",
     acmeSavingsAndLoanObligations: obligations,
     acmeSavingsAndLoanPaymentDue: obligations,
-    acmeSavingsAndLoanPaymentPaid: obligations,
+    obligationDebtPaymentPaid: obligations,
     corpCreditsBefore: creditsBefore,
     corpCreditsAfter: state.corp.credits,
   };
@@ -3144,7 +3144,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     resolveDelayedEndTurnDamageEffects,
     endTurn,
     resolveSneakPreviewTemporaryInstallReturns,
-    resolveAcmeSavingsAndLoanEndOfCorpTurn,
+    resolveCorpObligationEndOfTurn,
     startDiscardPhase,
     processDiscardStep,
     completeDiscardPhase,
