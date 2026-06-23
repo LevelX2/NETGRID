@@ -1128,7 +1128,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         "new_remote"
       >;
       startRun(state, serverId, undefined, 1, {
-        grantAllNighterBonusRunOnFinish: true,
+        grantBonusRunOnFinish: true,
       });
       legalAction.payload = {
         ...(legalAction.payload ?? {}),

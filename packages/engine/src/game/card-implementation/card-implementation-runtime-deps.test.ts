@@ -396,7 +396,7 @@ describe("game card implementation runtime deps root", () => {
       bypassFirstIce: true,
       runTraceLinkBonus: 3,
       runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
-      v1922RunnerEventAbility: "lucidrine_booster_drug_run_temporary_credits",
+      v1922RunnerEventAbility: "run_temporary_credits",
       temporaryRunCredits: 4,
       temporaryRunCreditsRemaining: 4,
       afterRunUnpreventableCoreDamage: 1,

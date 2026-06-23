@@ -20,7 +20,7 @@ import { approachOrEncounterIce, type RunMovementHost } from "./run-movement";
 export type StartRunOptions = Pick<
   RunState,
   | "freeTrashAccessZones"
-  | "grantAllNighterBonusRunOnFinish"
+  | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
   | "successfulRunCreditLoss"
@@ -137,8 +137,8 @@ export function startRun(
     ...(options?.freeTrashAccessZones?.length
       ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
       : {}),
-    ...(options?.grantAllNighterBonusRunOnFinish
-      ? { grantAllNighterBonusRunOnFinish: true }
+    ...(options?.grantBonusRunOnFinish
+      ? { grantBonusRunOnFinish: true }
       : {}),
     ...(options?.accessServerOverride
       ? { accessServerOverride: options.accessServerOverride }

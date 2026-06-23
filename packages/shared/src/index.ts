@@ -985,7 +985,7 @@ export type RunState = {
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
-  grantAllNighterBonusRunOnFinish?: boolean;
+  grantBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"

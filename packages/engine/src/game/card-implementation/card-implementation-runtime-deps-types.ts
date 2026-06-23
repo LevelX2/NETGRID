@@ -28,7 +28,7 @@ export type RuntimePublicPayload = Record<string, string | number | boolean>;
 export type CardImplementationStartRunOptions = Pick<
   RunState,
   | "freeTrashAccessZones"
-  | "grantAllNighterBonusRunOnFinish"
+  | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
   | "successfulRunCreditLoss"

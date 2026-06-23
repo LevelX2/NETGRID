@@ -443,7 +443,7 @@ describe("run end cleanup", () => {
           attackedServerId: "remote_1",
           phase: "movement",
           position: { kind: "server", serverId: "remote_1" },
-          grantAllNighterBonusRunOnFinish: true,
+          grantBonusRunOnFinish: true,
         } as unknown as NonNullable<GameState["run"]>,
       });
 

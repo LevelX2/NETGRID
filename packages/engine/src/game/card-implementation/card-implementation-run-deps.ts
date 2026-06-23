@@ -73,7 +73,7 @@ export function startRunForCardImplementation(
           }
         : {}),
       ...(options.followupRunOnEnd === "optional"
-        ? { grantAllNighterBonusRunOnFinish: true }
+        ? { grantBonusRunOnFinish: true }
         : {}),
       ...(options.bypassFirstIce ? { bypassFirstIceRemaining: true } : {}),
       ...(options.runTraceLinkBonus !== undefined
@@ -169,7 +169,7 @@ export function startRunForCardImplementation(
     ...(options.runTemporaryCredits !== undefined
       ? {
           v1922RunnerEventAbility:
-            "lucidrine_booster_drug_run_temporary_credits",
+            "run_temporary_credits",
           temporaryRunCredits: options.runTemporaryCredits.amount,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,

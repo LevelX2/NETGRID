@@ -323,7 +323,7 @@ export function handleRunEndCleanup(
     ? applyMultiServerSuccessSequenceRunResult(host, run, successful, legalAction)
     : { handled: false };
   const bonusRunOnFinish =
-    run?.grantAllNighterBonusRunOnFinish === true;
+    run?.grantBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
