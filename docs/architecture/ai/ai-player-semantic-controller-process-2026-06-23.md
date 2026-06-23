@@ -2,7 +2,7 @@
 
 ## Status
 
-`semctrl_3_complete`
+`semctrl_4_complete`
 
 Arbeitsbranch: `codex/ai-player-semantic-controller`
 

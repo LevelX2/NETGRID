@@ -7,6 +7,7 @@ export type ActionGoalHardGate =
   | "cannot_pay"
   | "wrong_timing"
   | "target_context_missing_for_target_profile"
+  | "target_context_blocked"
   | "risk_unacceptable"
   | "plan_step_mismatch";
 
@@ -109,6 +110,7 @@ function timingGate(
 function targetContextGate(
   params: EvaluateActionGoalHardGatesParams,
 ): ActionGoalHardGateResult {
+  const targetContext = params.candidate.targetContext;
   const requiresTargetContext =
     params.utility.family === "target_resolution" ||
     ((params.utility.family === "run_access" ||
@@ -116,7 +118,32 @@ function targetContextGate(
       params.candidate.projectionIssues.includes("target_context_unavailable") &&
       (params.candidate.semanticActionType.startsWith("run.") ||
         params.candidate.semanticActionType.startsWith("access.")));
-  const hasTargetContext = Boolean(params.candidate.targetContext);
+  const hasTargetContext = Boolean(targetContext);
+  const contextBlocked =
+    targetContext?.hiddenInfoPolicy === "hidden_info_blocked" ||
+    targetContext?.targetProfileMatches.some(
+      (match) =>
+        match.status !== "matched" &&
+        match.issues.some(
+          (issue) =>
+            issue === "hidden_info_blocked" ||
+            issue === "target_context_unavailable",
+        ),
+    ) === true ||
+    targetContext?.targetConstraintResults.some(
+      (constraint) => constraint.status === "block",
+    ) === true;
+  if (contextBlocked) {
+    return {
+      gate: "target_context_blocked",
+      status: "block",
+      evidence: [
+        `hidden_info_policy:${targetContext?.hiddenInfoPolicy ?? "missing"}`,
+        `target_profile_blocked:${targetContext?.targetProfileMatches.some((match) => match.status !== "matched") === true}`,
+        `target_constraint_blocked:${targetContext?.targetConstraintResults.some((constraint) => constraint.status === "block") === true}`,
+      ],
+    };
+  }
   return {
     gate: "target_context_missing_for_target_profile",
     status: requiresTargetContext && !hasTargetContext ? "block" : "pass",

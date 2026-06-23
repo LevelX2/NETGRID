@@ -132,6 +132,47 @@ describe("ActionGoalFit", () => {
     );
   });
 
+  it("blocks target-profile goals when side-safe target constraints reject the option", () => {
+    const base = candidateFor("choice-1", "resolve_choice");
+    const blocked = {
+      ...base,
+      targetContext: {
+        selectedTargets: [],
+        targetKind: "card",
+        targetZones: [],
+        targetSide: "unknown",
+        hiddenInfoPolicy: "engine_provided_targets_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [
+          {
+            status: "unknown",
+            issues: ["target_context_unavailable"],
+            evidence: ["target_profile:unresolved"],
+          },
+        ],
+        targetConstraintResults: [
+          {
+            status: "block",
+            reason: "unresolved_target_context",
+            evidence: ["constraint:unresolved_target_context"],
+          },
+        ],
+      },
+    } satisfies ActionSemanticCandidate;
+
+    const fit = scoreActionGoalFit({
+      candidate: blocked,
+      utility: utility("runner.resolve_target", "target_resolution"),
+      legalActionIds: ["choice-1"],
+    });
+
+    expect(fit.fitStatus).toBe("blocked");
+    expect(fit.blockers).toContain("target_context_blocked");
+    expect(
+      fit.components.flatMap((component) => component.evidence),
+    ).toEqual(expect.arrayContaining(["hard_gate:target_context_blocked"]));
+  });
+
   it("keeps the not_in_legal_actions gate as a defensive blocker", () => {
     const fit = scoreActionGoalFit({
       candidate: candidateFor("gain-1", "gain_credit"),
