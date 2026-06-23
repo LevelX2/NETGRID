@@ -11744,6 +11744,40 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("keeps affordable remote contest ahead of creditbase gain in holdout-shaped fixtures", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-remote-contest-creditbase-holdout",
+      (state) => {
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(remoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !gainCredit)
+      throw new Error("Missing remote contest creditbase fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, remoteRun],
+    });
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("recovers economy before low-reserve central pressure through visible ICE", () => {
     const input = runnerActionPhaseInput(
       "ai-v141-low-reserve-rd-ice",
