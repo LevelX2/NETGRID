@@ -160,10 +160,10 @@ export function installRunnerProgramFromZoneWithoutClick(...args: any[]): any {
   )(...args);
 }
 
-export function startSelfModifyingCodeFreeMuChoice(...args: any[]): any {
+export function startRunnerProgramFreeMemoryChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startSelfModifyingCodeFreeMuChoice",
+    "startRunnerProgramFreeMemoryChoice",
   )(...args);
 }
 

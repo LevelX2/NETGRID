@@ -234,7 +234,7 @@ export function createPendingChoiceRuntimeHosts(
     startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
     trashCorpInstalledCardsInScoredSourceServer,
   } = runtimeProxy<Record<string, unknown>>(runtime);

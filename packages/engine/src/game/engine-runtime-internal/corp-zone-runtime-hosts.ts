@@ -208,7 +208,7 @@ export function createCorpZoneRuntimeHosts(
     startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
     takeSetupMulligan,
   } = runtimeProxy<Record<string, unknown>>(runtime);

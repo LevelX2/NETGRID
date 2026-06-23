@@ -192,7 +192,7 @@ export function createHiddenZoneNonSearchRuntime(
     shuffleRunnerStack,
     startExposeInstalledCorpCardsChoice,
     startMultiExposeInstalledCorpCardsChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
   } = runtimeProxy<Record<string, unknown>>(runtime);

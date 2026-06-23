@@ -1118,7 +1118,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerProgramTrashBeforeInstallChoice,
     startRunnerTurn,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startAdvancementPlacementChoice,
     startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,

@@ -200,7 +200,7 @@ function host(
     },
     installRunnerProgramFromStackWithoutClick:
       overrides.installFromStack ?? (() => true),
-    startSelfModifyingCodeFreeMuChoice: () => false,
+    startRunnerProgramFreeMemoryChoice: () => false,
     availableRunnerProgramInstallCredits: () => 5,
     runnerMemoryLimit: () => 4,
     install: {

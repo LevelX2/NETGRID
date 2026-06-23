@@ -83,7 +83,7 @@ export type HiddenZoneSearchChoiceHandlerHost = {
   shuffleRunnerStack: (purpose: string) => void;
   spendRunnerCredits: (amount: number) => void;
   installRunnerProgramFromStackWithoutClick: (cardId: CardInstanceId) => boolean;
-  startSelfModifyingCodeFreeMuChoice: (cardId: CardInstanceId) => boolean;
+  startRunnerProgramFreeMemoryChoice: (cardId: CardInstanceId) => boolean;
   availableRunnerProgramInstallCredits: () => number;
   runnerMemoryLimit: () => number;
   install: {
@@ -883,7 +883,7 @@ function handleSelfModifyingCodeStackChoice(
   if (plan.shouldOpenMemoryChoice) {
     if (plan.shuffleNeeded)
       host.shuffleRunnerStack(`v1911_self_modifying_code:${choice.choiceId}:shuffle`);
-    const opened = host.startSelfModifyingCodeFreeMuChoice(cardId);
+    const opened = host.startRunnerProgramFreeMemoryChoice(cardId);
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       ...buildSelfModifyingCodeMemoryDeferredPayload(plan, { installDeferredForMemory: opened }),

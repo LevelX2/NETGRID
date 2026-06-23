@@ -1125,7 +1125,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerProgramTrashBeforeInstallChoice,
     startRunnerTurn,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startAdvancementPlacementChoice,
     startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,

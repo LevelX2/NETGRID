@@ -1157,7 +1157,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerProgramTrashBeforeInstallChoice,
     startRunnerTurn,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startAdvancementPlacementChoice,
     startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,

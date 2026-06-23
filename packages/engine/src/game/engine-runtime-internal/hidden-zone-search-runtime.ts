@@ -255,8 +255,8 @@ export function createHiddenZoneSearchRuntime(
       spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
       installRunnerProgramFromStackWithoutClick: (cardId) =>
         installRunnerProgramFromStackWithoutClick(state, cardId, legalAction),
-      startSelfModifyingCodeFreeMuChoice: (cardId) =>
-        startSelfModifyingCodeFreeMuChoice(state, cardId),
+      startRunnerProgramFreeMemoryChoice: (cardId) =>
+        startRunnerProgramFreeMemoryChoice(state, cardId),
       availableRunnerProgramInstallCredits: () =>
         availableRunnerProgramInstallCredits(state),
       runnerMemoryLimit: () => runnerMemoryLimit(state),
@@ -508,7 +508,7 @@ export function createHiddenZoneSearchRuntime(
     return true;
   }
 
-  function startSelfModifyingCodeFreeMuChoice(
+  function startRunnerProgramFreeMemoryChoice(
     state: GameState,
     selectedProgramId: CardInstanceId,
   ): boolean {
@@ -755,6 +755,6 @@ export function createHiddenZoneSearchRuntime(
     revealCorpRdTop,
     revealRunnerStackTop,
     shuffleRunnerStack,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
   };
 }

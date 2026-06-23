@@ -1150,7 +1150,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     startRunnerProgramTrashBeforeInstallChoice,
     startRunnerTurn,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startAdvancementPlacementChoice,
     startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,

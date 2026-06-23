@@ -1128,7 +1128,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerPrivateLookChoice,
     startRunnerProgramTrashBeforeInstallChoice,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startAdvancementPlacementChoice,
     startRandomDiceSplitChoice,
     subroutinesForCurrentEncounter,

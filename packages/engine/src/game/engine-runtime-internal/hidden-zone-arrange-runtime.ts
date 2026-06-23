@@ -228,7 +228,7 @@ export function createHiddenZoneArrangeRuntime(
     startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
