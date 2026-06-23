@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createHiddenZoneNonSearchRuntime(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_CARD_ID,
@@ -195,10 +195,7 @@ export function createHiddenZoneNonSearchRuntime(
     startSelfModifyingCodeFreeMuChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   function hiddenZoneNonSearchChoiceHandlerHost(
     state: GameState,
@@ -471,10 +468,7 @@ export function createHiddenZoneNonSearchRuntime(
         "Es ist keine V1.9.22-Forged-Activation-Orders-Ziel-Choice offen.",
       );
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (
-      !selectedId ||
-      !unrezzedInstalledIceIds(state).includes(selectedId)
-    )
+    if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId))
       throw new Error(
         "Das Forged-Activation-Orders-Ziel ist keine installierte unrezzte ICE.",
       );
@@ -598,7 +592,9 @@ export function createHiddenZoneNonSearchRuntime(
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       corpDecision: "trash_ice",
       trashedCount: 1,
-      ...(targetWasKnownToRunner ? { targetCardDefinitionId: definition.id } : {}),
+      ...(targetWasKnownToRunner
+        ? { targetCardDefinitionId: definition.id }
+        : {}),
       targetServerLabel: serverLabel,
       targetIcePositionLabel: icePositionLabel,
       targetVisibility: targetWasKnownToRunner
@@ -1159,12 +1155,16 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error("Die gewaehlte Karte liegt nicht im Grip.");
     const definition = definitionFor(state, cardId);
     if (definition.type !== "program" && definition.type !== "hardware")
-      throw new Error("Die gewaehlte Karte ist kein Programm oder keine Hardware.");
+      throw new Error(
+        "Die gewaehlte Karte ist kein Programm oder keine Hardware.",
+      );
     if (
       isUniqueCard(definition) &&
       hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
-      throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+      throw new Error(
+        "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+      );
     if (
       definition.type === "program" &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) >
@@ -1175,7 +1175,9 @@ export function createHiddenZoneNonSearchRuntime(
     const temporarySpent = Math.min(temporaryCredits, installCost);
     const runnerPaid = installCost - temporarySpent;
     if (state.runner.credits < runnerPaid)
-      throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+      throw new Error(
+        "Der Runner kann die Installationskosten nicht bezahlen.",
+      );
     if (runnerPaid > 0) spendCredits(state, "runner", runnerPaid);
     removeFromAllZones(state, cardId);
     if (definition.type === "program") {
@@ -1216,7 +1218,9 @@ export function createHiddenZoneNonSearchRuntime(
       )
     )
       throw new Error("Es ist keine PRO018-Grip-Install-Choice offen.");
-    const { sourceDefinitionId, value } = parsePro018ChoiceSource(choice.source);
+    const { sourceDefinitionId, value } = parsePro018ChoiceSource(
+      choice.source,
+    );
     const temporaryCredits = Math.max(0, Math.floor(Number(value)));
     const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
     if (selectedIds.length !== 1)
@@ -1256,8 +1260,11 @@ export function createHiddenZoneNonSearchRuntime(
       )
     )
       throw new Error("Es ist keine PRO018-Stack-Install-Choice offen.");
-    const { sourceCardId, sourceDefinitionId, value: serverIdRaw } =
-      parsePro018ChoiceSource(choice.source);
+    const {
+      sourceCardId,
+      sourceDefinitionId,
+      value: serverIdRaw,
+    } = parsePro018ChoiceSource(choice.source);
     const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
     if (selectedIds.length !== 1)
       throw new Error("Genau ein Programm muss gewaehlt werden.");
@@ -1271,7 +1278,8 @@ export function createHiddenZoneNonSearchRuntime(
       "free",
       legalAction,
     );
-    if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
+    if (!installed)
+      throw new Error("Das Programm kann nicht installiert werden.");
     shuffleRunnerStack(state, `pro018_test_spin:${choice.choiceId}:shuffle`);
     delete state.pendingChoice;
     const serverId = (serverIdRaw || "hq") as Exclude<ServerId, "new_remote">;

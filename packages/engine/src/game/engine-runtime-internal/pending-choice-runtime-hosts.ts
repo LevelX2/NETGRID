@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_CARD_ID,
@@ -237,10 +237,7 @@ export function createPendingChoiceRuntimeHosts(
     startSelfModifyingCodeFreeMuChoice,
     startV1921PlayfulAiChoice,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
     runnerInstalledConnectionTrashBadPublicityChoiceSource ??
@@ -283,7 +280,9 @@ export function createPendingChoiceRuntimeHosts(
     sourceCardId: CardInstanceId,
   ):
     | Extract<
-        NonNullable<NonNullable<GameState["run"]>["runStartInterventions"]>[number],
+        NonNullable<
+          NonNullable<GameState["run"]>["runStartInterventions"]
+        >[number],
         { kind: "start_run_redirect_to_source_fort" }
       >
     | undefined {
@@ -304,7 +303,9 @@ export function createPendingChoiceRuntimeHosts(
     const source = mustInstance(state.cardInstances, sourceCardId);
     const serverId = source.zone.serverId;
     if (serverId !== run.attackedServerId)
-      throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
+      throw new Error(
+        "Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.",
+      );
     if (
       source.rezzed !== true ||
       corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
@@ -346,8 +347,11 @@ export function createPendingChoiceRuntimeHosts(
   ): void {
     const choice = state.pendingChoice;
     const run = state.run;
-    if (choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")) {
-      if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
+    if (
+      choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")
+    ) {
+      if (!run)
+        throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
       if (run.runId !== runId || run.attackedServerId !== serverId)
@@ -392,8 +396,8 @@ export function createPendingChoiceRuntimeHosts(
           startOfRunRedirectDecision: "pass",
           originalServerId: originalRunStartServerId(run),
         };
-        const spendCap = mustServer(state, run.attackedServerId).root
-          .slice()
+        const spendCap = mustServer(state, run.attackedServerId)
+          .root.slice()
           .sort()
           .find(
             (cardId) =>
@@ -408,12 +412,15 @@ export function createPendingChoiceRuntimeHosts(
         continueRunAfterStartOfRunFortUtility(state, legalAction);
         return;
       }
-      const option = choice.options.find((candidate) => candidate.id === selected);
+      const option = choice.options.find(
+        (candidate) => candidate.id === selected,
+      );
       const sourceCardId =
         typeof option?.value === "string"
           ? (option.value as CardInstanceId)
           : undefined;
-      if (!sourceCardId) throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
+      if (!sourceCardId)
+        throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
       if (selected.startsWith("herman_")) {
         const server = mustServer(state, run.attackedServerId);
         const selectedSource = mustInstance(state.cardInstances, sourceCardId);
@@ -444,7 +451,8 @@ export function createPendingChoiceRuntimeHosts(
           kind: "select_cards",
           options: server.ice.map((cardId, index) => ({
             id: `card_${cardId}`,
-            label: exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
+            label:
+              exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
             publicLabel: `ICE ${index + 1}`,
             value: cardId,
           })),
@@ -467,7 +475,11 @@ export function createPendingChoiceRuntimeHosts(
         )
           throw new Error("Die Spend-Cap-Quelle kann nicht gerezzt werden.");
         state.corp.credits -= cost;
-        state.cardInstances[sourceCardId] = { ...source, rezzed: true, faceup: true };
+        state.cardInstances[sourceCardId] = {
+          ...source,
+          rezzed: true,
+          faceup: true,
+        };
         delete state.pendingChoice;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -493,7 +505,8 @@ export function createPendingChoiceRuntimeHosts(
         openRunSpendCapChoice(state, sourceCardId, legalAction);
         return;
       }
-      const targetServerId = mustInstance(state.cardInstances, sourceCardId).zone.serverId;
+      const targetServerId = mustInstance(state.cardInstances, sourceCardId)
+        .zone.serverId;
       const source = mustInstance(state.cardInstances, sourceCardId);
       const intervention = startRunRedirectInterventionForSource(
         run,
@@ -511,7 +524,10 @@ export function createPendingChoiceRuntimeHosts(
       const availableCredits = Math.max(
         0,
         state.corp.credits -
-          Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+          Math.max(
+            0,
+            Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+          ),
       );
       if (availableCredits < intervention.costCredits)
         throw new Error("Die Korp kann den Redirect nicht bezahlen.");
@@ -531,7 +547,9 @@ export function createPendingChoiceRuntimeHosts(
       continueRunAfterStartOfRunFortUtility(state, legalAction);
       return;
     }
-    if (choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")) {
+    if (
+      choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")
+    ) {
       if (!run) throw new Error("Es laeuft kein Run fuer Fort-Reorder.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");

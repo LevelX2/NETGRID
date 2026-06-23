@@ -64,5 +64,15 @@ export function runtimeBinding<T extends RuntimeFunction = RuntimeFunction>(
   const key = property as string;
   const value = runtime[key];
   if (value !== undefined && typeof value !== "function") return value as T;
-  return ((...args: unknown[]) => (runtime[key] as RuntimeFunction)(...args)) as T;
+  return ((...args: unknown[]) =>
+    (runtime[key] as RuntimeFunction)(...args)) as T;
+}
+
+export function runtimeProxy<T extends object>(
+  runtime: Record<string, unknown>,
+): T {
+  return new Proxy(
+    {},
+    { get: (_target, property) => runtimeBinding(runtime, property) },
+  ) as T;
 }

@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_CARD_ID,
@@ -221,10 +221,7 @@ export function createHiddenZoneSearchRuntime(
     startV1921PlayfulAiChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   function hiddenZoneSearchHandlerHostBase(
     state: GameState,

@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_CARD_ID,
@@ -211,10 +211,7 @@ export function createCorpZoneRuntimeHosts(
     startSelfModifyingCodeFreeMuChoice,
     startV1921PlayfulAiChoice,
     takeSetupMulligan,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   function corpZoneChoiceHandlerHost(
     state: GameState,
@@ -652,20 +649,20 @@ export function createCorpZoneRuntimeHosts(
     state: GameState,
     scope: "inside_data_fort" | "any_installed" = "any_installed",
   ) {
-    return exposeInstalledCorpCardTargets(state, scope).map(
-      (cardId) => ({
-        id: exposeInstalledCorpCardChoiceOptionId(cardId),
-        label: exposeInstalledCorpCardLabel(state, cardId),
-        value: cardId,
-      }),
-    );
+    return exposeInstalledCorpCardTargets(state, scope).map((cardId) => ({
+      id: exposeInstalledCorpCardChoiceOptionId(cardId),
+      label: exposeInstalledCorpCardLabel(state, cardId),
+      value: cardId,
+    }));
   }
 
   function installedCorpCardIdsInFort(
     state: GameState,
     serverId: string,
   ): CardInstanceId[] {
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) return [];
     return [...server.root, ...server.ice]
       .filter((cardId) =>
@@ -686,7 +683,9 @@ export function createCorpZoneRuntimeHosts(
     return [
       { id: "fort_none", label: "Keine Karten exposen", value: "none" },
       ...state.corp.servers
-        .filter((server) => installedCorpCardIdsInFort(state, server.id).length > 0)
+        .filter(
+          (server) => installedCorpCardIdsInFort(state, server.id).length > 0,
+        )
         .sort((left, right) => left.id.localeCompare(right.id))
         .map((server) => ({
           id: `fort_${server.id}`,
@@ -770,7 +769,8 @@ export function createCorpZoneRuntimeHosts(
       };
       return { publicPayload: payload };
     }
-    const targetScope = scope === "inside_data_fort" ? "inside_data_fort" : "any_installed";
+    const targetScope =
+      scope === "inside_data_fort" ? "inside_data_fort" : "any_installed";
     const options = exposeInstalledCorpCardsChoiceOptions(state, targetScope);
     if (options.length === 0)
       throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
@@ -862,9 +862,7 @@ export function createCorpZoneRuntimeHosts(
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (
-      choice?.source.startsWith("p3_36.expose_installed_card_review:")
-    ) {
+    if (choice?.source.startsWith("p3_36.expose_installed_card_review:")) {
       const [, targetCardId = "", sourceCardId = "", sourceDefinitionId = ""] =
         choice.source.split(":");
       if (!targetCardId || !state.cardInstances[targetCardId])
@@ -892,8 +890,12 @@ export function createCorpZoneRuntimeHosts(
     )
       throw new Error("Es ist keine Expose-Choice offen.");
     if (choice.source.startsWith("p3_36.expose_installed_card:")) {
-      const [, sourceCardId = "", sourceDefinitionId = "", scopeText = "any_installed"] =
-        choice.source.split(":");
+      const [
+        ,
+        sourceCardId = "",
+        sourceDefinitionId = "",
+        scopeText = "any_installed",
+      ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
       const sourceDefinition = definitionFor(state, sourceCardId);
@@ -901,13 +903,19 @@ export function createCorpZoneRuntimeHosts(
         throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
       if (selectedIds.length !== 1)
-        throw new Error("Es muss genau eine installierte Korp-Karte gewählt werden.");
+        throw new Error(
+          "Es muss genau eine installierte Korp-Karte gewählt werden.",
+        );
       const scope =
         scopeText === "inside_data_fort" ? "inside_data_fort" : "any_installed";
       const targetCardId = selectedIds[0];
-      const legalTargets = new Set(exposeInstalledCorpCardTargets(state, scope));
+      const legalTargets = new Set(
+        exposeInstalledCorpCardTargets(state, scope),
+      );
       if (!targetCardId || !legalTargets.has(targetCardId))
-        throw new Error("Diese installierte Korp-Karte darf nicht exposed werden.");
+        throw new Error(
+          "Diese installierte Korp-Karte darf nicht exposed werden.",
+        );
       delete state.pendingChoice;
       exposeInstalledCorpCardForImplementation(
         state,
@@ -920,8 +928,13 @@ export function createCorpZoneRuntimeHosts(
       return;
     }
     if (choice.source.startsWith("p3_36.expose_installed_cards_fort_select")) {
-      const [, sourceCardId = "", sourceDefinitionId = "", minText = "0", maxText = "0"] =
-        choice.source.split(":");
+      const [
+        ,
+        sourceCardId = "",
+        sourceDefinitionId = "",
+        minText = "0",
+        maxText = "0",
+      ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
       const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
@@ -967,7 +980,9 @@ export function createCorpZoneRuntimeHosts(
       };
       return;
     }
-    if (choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")) {
+    if (
+      choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")
+    ) {
       const [, , serverId = "", sourceCardId = "", sourceDefinitionId = ""] =
         choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
@@ -1064,9 +1079,7 @@ export function createCorpZoneRuntimeHosts(
       exposeSourceCardId = "",
       exposeSourceDefinitionId = "",
       scopeText = "any_installed",
-    ] = choice.source
-      .slice("corp.expose_prevention:".length)
-      .split(":");
+    ] = choice.source.slice("corp.expose_prevention:".length).split(":");
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "pass") {
       delete state.pendingChoice;
@@ -1088,12 +1101,15 @@ export function createCorpZoneRuntimeHosts(
       };
       return;
     }
-    const option = choice.options.find((candidate) => candidate.id === selected);
+    const option = choice.options.find(
+      (candidate) => candidate.id === selected,
+    );
     const sourceCardId =
       typeof option?.value === "string"
         ? (option.value as CardInstanceId)
         : undefined;
-    if (!sourceCardId) throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
+    if (!sourceCardId)
+      throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
     const source = state.cardInstances[sourceCardId];
     const utility = corpUtilityImplementationForCard(state, sourceCardId);
     if (!source || utility?.kind !== "expose_prevention")
