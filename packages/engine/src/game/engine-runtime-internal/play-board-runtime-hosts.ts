@@ -546,7 +546,7 @@ import {
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  ADVANCEMENT_PLACEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -716,15 +716,15 @@ export function createPlayBoardRuntimeHosts(
     installedAgendaOperationTarget,
     isCorpInstallableCardType,
     moveAdvancementOptions,
-    powerGridOverloadEligibleHardwareIds,
+    hardwareTrashByCounterEligibleHardwareIds,
     requireRunnerTagged,
     resolveAgendaCounterOperation,
     resolveManagementShakeUpOperation,
     resolvePostOnPlayGenericFollowups,
-    resolvePowerGridOverloadOperation,
+    resolveHardwareTrashByCounterOperation,
     resolveRunnerLastTurnInstalledResourceTargetId,
     resolveRunnerTargetedEventImplementation,
-    resolveSystematicLayoffsAdvancementOperation,
+    resolveAdvancementPlacementOperation,
     runnerLastTurnInstalledResourceIds,
     runnerStoleAgendaLastTurn,
     runnerStolenAgendaAdvancementCountersLastTurn,
@@ -908,14 +908,14 @@ export function createPlayBoardRuntimeHosts(
           resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
         resolveManagementShakeUpOperation: (legalAction) =>
           resolveManagementShakeUpOperation(state, legalAction),
-        resolveSystematicLayoffsAdvancementOperation: (legalAction) =>
-          resolveSystematicLayoffsAdvancementOperation(state, legalAction),
+        resolveAdvancementPlacementOperation: (legalAction) =>
+          resolveAdvancementPlacementOperation(state, legalAction),
       },
       operations: {
-        powerGridOverloadEligibleHardwareIds: () =>
-          powerGridOverloadEligibleHardwareIds(state),
-        resolvePowerGridOverloadOperation: (legalAction) =>
-          resolvePowerGridOverloadOperation(state, legalAction),
+        hardwareTrashByCounterEligibleHardwareIds: () =>
+          hardwareTrashByCounterEligibleHardwareIds(state),
+        resolveHardwareTrashByCounterOperation: (legalAction) =>
+          resolveHardwareTrashByCounterOperation(state, legalAction),
       },
       cardImplementation: {
         canPlayPrintedCostOnPlay: (definition) =>

@@ -3,7 +3,7 @@ import { createPendingChoiceRuntimeHosts } from "./pending-choice-runtime-hosts"
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
 import { createHiddenZoneArrangeRuntime } from "./hidden-zone-arrange-runtime";
 import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtime";
-import { createHiddenZoneNonSearchPlayfulAiRuntime } from "./hidden-zone-nonsearch-playful-ai-runtime";
+import { createHiddenZoneNonSearchDiceLoopRuntime } from "./hidden-zone-nonsearch-dice-loop-runtime";
 import { createCorpZoneRuntimeHosts } from "./corp-zone-runtime-hosts";
 
 export function createChoiceHiddenZoneRuntime(deps: RuntimeDeps) {
@@ -13,7 +13,7 @@ export function createChoiceHiddenZoneRuntime(deps: RuntimeDeps) {
     createHiddenZoneSearchRuntime(deps, runtime),
     createHiddenZoneArrangeRuntime(deps, runtime),
     createHiddenZoneNonSearchRuntime(deps, runtime),
-    createHiddenZoneNonSearchPlayfulAiRuntime(deps),
+    createHiddenZoneNonSearchDiceLoopRuntime(deps),
     createCorpZoneRuntimeHosts(deps, runtime),
     createPendingChoiceRuntimeHosts(deps, runtime),
   );

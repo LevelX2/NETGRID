@@ -88,7 +88,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "installed_hardware_trash_by_power_counters";
+      kind: "installed_hardware_trash_by_counter";
       excludesSubtype: "cybernetics";
       visibility: Extract<EventVisibilityClass, "public">;
     }

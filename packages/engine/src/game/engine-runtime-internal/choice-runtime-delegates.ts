@@ -396,17 +396,17 @@ export function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
   )(...args);
 }
 
-export function resolvePlayfulAiDiceLoopEvent(...args: any[]): any {
+export function resolveRandomDiceLoopEvent(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolvePlayfulAiDiceLoopEvent",
+    "resolveRandomDiceLoopEvent",
   )(...args);
 }
 
-export function startV1921PlayfulAiChoice(...args: any[]): any {
+export function startRandomDiceSplitChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startV1921PlayfulAiChoice",
+    "startRandomDiceSplitChoice",
   )(...args);
 }
 
@@ -421,38 +421,38 @@ export function diePromptText(...args: any[]): any {
   return runtimeDelegate("choiceHiddenZoneRuntime", "diePromptText")(...args);
 }
 
-export function playfulAiSplitOptions(...args: any[]): any {
+export function randomDiceSplitOptions(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "playfulAiSplitOptions",
+    "randomDiceSplitOptions",
   )(...args);
 }
 
-export function parsePlayfulAiChoiceSource(...args: any[]): any {
+export function parseRandomDiceSplitChoiceSource(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "parsePlayfulAiChoiceSource",
+    "parseRandomDiceSplitChoiceSource",
   )(...args);
 }
 
-export function parsePlayfulAiSplit(...args: any[]): any {
+export function parseRandomDiceSplit(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "parsePlayfulAiSplit",
+    "parseRandomDiceSplit",
   )(...args);
 }
 
-export function continueV1921PlayfulAiLoop(...args: any[]): any {
+export function continueRandomDiceLoop(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "continueV1921PlayfulAiLoop",
+    "continueRandomDiceLoop",
   )(...args);
 }
 
-export function resolveV1921PlayfulAiChoice(...args: any[]): any {
+export function resolveRandomDiceSplitChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveV1921PlayfulAiChoice",
+    "resolveRandomDiceSplitChoice",
   )(...args);
 }
 

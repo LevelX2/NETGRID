@@ -208,12 +208,12 @@ function hostFor(
       resolveAgendaCounterOperation: (_legalAction, sourceDefinitionId) =>
         calls.push(`agendaCounter:${sourceDefinitionId}`),
       resolveManagementShakeUpOperation: () => calls.push("managementShakeUp"),
-      resolveSystematicLayoffsAdvancementOperation: () =>
+      resolveAdvancementPlacementOperation: () =>
         calls.push("systematicLayoffs"),
     },
     operations: {
-      powerGridOverloadEligibleHardwareIds: () => [RESOURCE_ID],
-      resolvePowerGridOverloadOperation: () => calls.push("powerGridOverload"),
+      hardwareTrashByCounterEligibleHardwareIds: () => [RESOURCE_ID],
+      resolveHardwareTrashByCounterOperation: () => calls.push("hardwareTrashByCounter"),
     },
     cardImplementation: {
       canPlayPrintedCostOnPlay: () => true,

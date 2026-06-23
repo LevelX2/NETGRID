@@ -387,68 +387,68 @@ export function corpScoredAgendaForfeitTargets(...args: any[]): any {
   )(...args);
 }
 
-export function powerGridOverloadEligibleHardwareIds(...args: any[]): any {
+export function hardwareTrashByCounterEligibleHardwareIds(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "powerGridOverloadEligibleHardwareIds",
+    "hardwareTrashByCounterEligibleHardwareIds",
   )(...args);
 }
 
-export function powerGridOverloadLegalActions(...args: any[]): any {
+export function hardwareTrashByCounterLegalActions(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "powerGridOverloadLegalActions",
+    "hardwareTrashByCounterLegalActions",
   )(...args);
 }
 
-export function powerGridOverloadTrashCountFromPayload(...args: any[]): any {
+export function hardwareTrashByCounterTrashCountFromPayload(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "powerGridOverloadTrashCountFromPayload",
+    "hardwareTrashByCounterTrashCountFromPayload",
   )(...args);
 }
 
-export function resolvePowerGridOverloadOperation(...args: any[]): any {
+export function resolveHardwareTrashByCounterOperation(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolvePowerGridOverloadOperation",
+    "resolveHardwareTrashByCounterOperation",
   )(...args);
 }
 
-export function startPowerGridOverloadChoice(...args: any[]): any {
+export function startHardwareTrashByCounterChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "startPowerGridOverloadChoice",
+    "startHardwareTrashByCounterChoice",
   )(...args);
 }
 
-export function powerGridOverloadTrashCountFromChoiceSource(
+export function hardwareTrashByCounterTrashCountFromChoiceSource(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "powerGridOverloadTrashCountFromChoiceSource",
+    "hardwareTrashByCounterTrashCountFromChoiceSource",
   )(...args);
 }
 
-export function resolvePowerGridOverloadChoice(...args: any[]): any {
+export function resolveHardwareTrashByCounterChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolvePowerGridOverloadChoice",
+    "resolveHardwareTrashByCounterChoice",
   )(...args);
 }
 
-export function trashPowerGridOverloadHardware(...args: any[]): any {
+export function trashHardwareByCounter(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "trashPowerGridOverloadHardware",
+    "trashHardwareByCounter",
   )(...args);
 }
 
-export function systematicLayoffsLegalActions(...args: any[]): any {
+export function advancementPlacementLegalActions(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "systematicLayoffsLegalActions",
+    "advancementPlacementLegalActions",
   )(...args);
 }
 
@@ -459,42 +459,42 @@ export function resolveAgendaCounterOperation(...args: any[]): any {
   )(...args);
 }
 
-export function resolveSystematicLayoffsAdvancementOperation(
+export function resolveAdvancementPlacementOperation(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolveSystematicLayoffsAdvancementOperation",
+    "resolveAdvancementPlacementOperation",
   )(...args);
 }
 
-export function systematicLayoffsPlacementOptions(...args: any[]): any {
+export function advancementPlacementOptions(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "systematicLayoffsPlacementOptions",
+    "advancementPlacementOptions",
   )(...args);
 }
 
-export function startSystematicLayoffsAdvancementChoice(...args: any[]): any {
+export function startAdvancementPlacementChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "startSystematicLayoffsAdvancementChoice",
+    "startAdvancementPlacementChoice",
   )(...args);
 }
 
-export function resolveSystematicLayoffsAdvancementChoice(...args: any[]): any {
+export function resolveAdvancementPlacementChoice(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolveSystematicLayoffsAdvancementChoice",
+    "resolveAdvancementPlacementChoice",
   )(...args);
 }
 
-export function applySystematicLayoffsAdvancementPlacement(
+export function applyAdvancementCounterPlacement(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "applySystematicLayoffsAdvancementPlacement",
+    "applyAdvancementCounterPlacement",
   )(...args);
 }
 

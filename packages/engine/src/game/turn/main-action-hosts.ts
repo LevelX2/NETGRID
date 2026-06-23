@@ -117,8 +117,8 @@ export function createMainActionHostComposition(
           corp.cardImplementationOperationLegalActions,
         corpUtilityImplementationForDefinition:
           corp.corpUtilityImplementationForDefinition,
-        powerGridOverloadLegalActions: corp.powerGridOverloadLegalActions,
-        systematicLayoffsLegalActions: corp.systematicLayoffsLegalActions,
+        hardwareTrashByCounterLegalActions: corp.hardwareTrashByCounterLegalActions,
+        advancementPlacementLegalActions: corp.advancementPlacementLegalActions,
         corpAgendaPointTotal: corp.corpAgendaPointTotal,
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
         uniqueDirectLongtailKindForDefinition:

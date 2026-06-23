@@ -28,7 +28,7 @@ import { createInstallRezRuntimeHosts } from "./install-rez-runtime-hosts";
 import { createRunFlowRuntimeHosts } from "./run-flow-runtime-hosts";
 import { runMovementHostForState as delegatedRunMovementHostForState } from "./flow-runtime-delegates";
 import { createHiddenZoneArrangeRuntime } from "./hidden-zone-arrange-runtime";
-import { createHiddenZoneNonSearchPlayfulAiRuntime } from "./hidden-zone-nonsearch-playful-ai-runtime";
+import { createHiddenZoneNonSearchDiceLoopRuntime } from "./hidden-zone-nonsearch-dice-loop-runtime";
 import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtime";
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
@@ -80,7 +80,7 @@ describe("engine runtime internal domains", () => {
       "./run-flow-runtime-hosts.ts",
       "./flow-runtime-delegates.ts",
       "./hidden-zone-arrange-runtime.ts",
-      "./hidden-zone-nonsearch-playful-ai-runtime.ts",
+      "./hidden-zone-nonsearch-dice-loop-runtime.ts",
       "./hidden-zone-nonsearch-runtime.ts",
       "./hidden-zone-search-runtime.ts",
       "./lifecycle-runtime.ts",
@@ -140,8 +140,8 @@ describe("engine runtime internal domains", () => {
         .hiddenZoneNonSearchChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneNonSearchPlayfulAiRuntime({})
-        .resolvePlayfulAiDiceLoopEvent,
+      typeof createHiddenZoneNonSearchDiceLoopRuntime({})
+        .resolveRandomDiceLoopEvent,
     ).toBe("function");
     expect(
       typeof createCorpZoneRuntimeHosts({}, {}).corpZoneChoiceHandlerHost,
@@ -191,7 +191,7 @@ describe("engine runtime internal domains", () => {
       typeof createChoiceHiddenZoneResolvers({}).startRunnerPrivateLookChoice,
     ).toBe("function");
     expect(
-      typeof createCorpRuntimeResolvers({}).resolvePowerGridOverloadOperation,
+      typeof createCorpRuntimeResolvers({}).resolveHardwareTrashByCounterOperation,
     ).toBe("function");
     expect(typeof createFlowRuntimeHosts({}).runMovementHostForState).toBe(
       "function",

@@ -52,8 +52,8 @@ export type CorpMainActionGenerationHost = {
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<{ kind?: string } | undefined>;
-    powerGridOverloadLegalActions: HostFn<LegalAction[]>;
-    systematicLayoffsLegalActions: HostFn<LegalAction[]>;
+    hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
+    advancementPlacementLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
     uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
@@ -106,7 +106,7 @@ export type CorpMainActionGenerationHost = {
     COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
     INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID: string;
     ACTION_ASSET_CARD_IDS: ReadonlySet<string>;
-    SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID: string;
+    ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
   };
 };
 
@@ -166,8 +166,8 @@ export function buildCorpMainActions(
   const canPlayCorpOperation = host.corp.canPlayCorpOperation;
   const corpUtilityImplementationForDefinition =
     host.corp.corpUtilityImplementationForDefinition;
-  const powerGridOverloadLegalActions = host.corp.powerGridOverloadLegalActions;
-  const systematicLayoffsLegalActions = host.corp.systematicLayoffsLegalActions;
+  const hardwareTrashByCounterLegalActions = host.corp.hardwareTrashByCounterLegalActions;
+  const advancementPlacementLegalActions = host.corp.advancementPlacementLegalActions;
   const corpAgendaPointTotal = host.corp.corpAgendaPointTotal;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
@@ -226,8 +226,8 @@ export function buildCorpMainActions(
   const INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID =
     host.constants.INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID;
   const ACTION_ASSET_CARD_IDS = host.constants.ACTION_ASSET_CARD_IDS;
-  const SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID =
-    host.constants.SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID;
+  const ADVANCEMENT_PLACEMENT_OPERATION_ID =
+    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
 
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
@@ -467,13 +467,13 @@ export function buildCorpMainActions(
     ) {
       if (
         corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "installed_hardware_trash_by_power_counters"
+        "installed_hardware_trash_by_counter"
       ) {
-        actions.push(...powerGridOverloadLegalActions(state, id, definition));
+        actions.push(...hardwareTrashByCounterLegalActions(state, id, definition));
         continue;
       }
-      if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
-        actions.push(...systematicLayoffsLegalActions(state, id, definition));
+      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_ID) {
+        actions.push(...advancementPlacementLegalActions(state, id, definition));
         continue;
       }
       const implementationActions =

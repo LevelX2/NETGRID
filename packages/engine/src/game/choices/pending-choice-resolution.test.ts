@@ -162,9 +162,9 @@ function pendingChoiceHost(
         "resolveCorpInstalledEconomyCreditChoice",
       ),
       resolveCrashEverettDrawChoice: unexpected("resolveCrashEverettDrawChoice"),
-      resolvePowerGridOverloadChoice: unexpected("resolvePowerGridOverloadChoice"),
-      resolveSystematicLayoffsAdvancementChoice: unexpected(
-        "resolveSystematicLayoffsAdvancementChoice",
+      resolveHardwareTrashByCounterChoice: unexpected("resolveHardwareTrashByCounterChoice"),
+      resolveAdvancementPlacementChoice: unexpected(
+        "resolveAdvancementPlacementChoice",
       ),
       resolveDerezRezzedBlackIceChoice: unexpected(
         "resolveDerezRezzedBlackIceChoice",
@@ -181,7 +181,7 @@ function pendingChoiceHost(
       resolveTrashUnrezzedIceChoice: unexpected(
         "resolveTrashUnrezzedIceChoice",
       ),
-      resolveV1921PlayfulAiChoice: unexpected("resolveV1921PlayfulAiChoice"),
+      resolveRandomDiceSplitChoice: unexpected("resolveRandomDiceSplitChoice"),
       resolveRunnerInstalledConnectionTrashBadPublicityChoice: unexpected(
         "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
       ),

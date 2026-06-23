@@ -16,7 +16,7 @@ import {
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  ADVANCEMENT_PLACEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
 } from "../../mechanics/agenda-operation-effects";
 import {
@@ -125,13 +125,13 @@ export type CorpOperationResolutionHost = {
       sourceDefinitionId: CardDefinitionId,
     ) => void;
     resolveManagementShakeUpOperation: (legalAction: LegalAction) => void;
-    resolveSystematicLayoffsAdvancementOperation: (
+    resolveAdvancementPlacementOperation: (
       legalAction: LegalAction,
     ) => void;
   };
   operations: {
-    powerGridOverloadEligibleHardwareIds: () => CardInstanceId[];
-    resolvePowerGridOverloadOperation: (legalAction: LegalAction) => void;
+    hardwareTrashByCounterEligibleHardwareIds: () => CardInstanceId[];
+    resolveHardwareTrashByCounterOperation: (legalAction: LegalAction) => void;
   };
   cardImplementation: {
     canPlayPrintedCostOnPlay: (definition: CardDefinition) => boolean;
@@ -325,11 +325,11 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID]: {
+  [ADVANCEMENT_PLACEMENT_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_two_advancement_counters",
     canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
     resolve: (host, legalAction) =>
-      host.board.resolveSystematicLayoffsAdvancementOperation(legalAction),
+      host.board.resolveAdvancementPlacementOperation(legalAction),
   },
   [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_power_counter",
@@ -434,11 +434,11 @@ export function canPlayCorpUtilityOperation(
       return host.corp.runnerStoleAgendaLastTurn();
     case "trash_runner_resources_if_tagged":
       return host.state.runner.tags > 0;
-    case "installed_hardware_trash_by_power_counters":
+    case "installed_hardware_trash_by_counter":
       return (
         host.state.runner.tags > 0 &&
         host.state.corp.credits > 0 &&
-        host.operations.powerGridOverloadEligibleHardwareIds().length > 0
+        host.operations.hardwareTrashByCounterEligibleHardwareIds().length > 0
       );
     default:
       return false;
@@ -578,12 +578,12 @@ export function resolveCorpUtilityOperation(
       };
       return;
     }
-    case "installed_hardware_trash_by_power_counters": {
+    case "installed_hardware_trash_by_counter": {
       host.runner.requireRunnerTagged();
-      host.operations.resolvePowerGridOverloadOperation(legalAction);
+      host.operations.resolveHardwareTrashByCounterOperation(legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "installed_hardware_trash_by_power_counters",
+        v1951CorpUtilityAbility: "installed_hardware_trash_by_counter",
       };
       return;
     }

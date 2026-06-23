@@ -43,7 +43,7 @@ describe("engine runtime module size gates", () => {
       "hidden-zone-search-runtime.ts",
       "hidden-zone-arrange-runtime.ts",
       "hidden-zone-nonsearch-runtime.ts",
-      "hidden-zone-nonsearch-playful-ai-runtime.ts",
+      "hidden-zone-nonsearch-dice-loop-runtime.ts",
       "corp-zone-runtime-hosts.ts",
     ]) {
       expect(

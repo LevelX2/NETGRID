@@ -550,7 +550,7 @@ import {
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  ADVANCEMENT_PLACEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -786,7 +786,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     consumeRunnerFutureActionDebt,
     consumeValuPakProgramInstallAction,
     continueRun,
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     corpAgendaPointTotal,
     corpIceInstallAdditionalCost,
     corpIceInstallBaseCost,
@@ -910,15 +910,15 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     outermostIceExposures,
     outermostIceIndex,
     parseVirusCounterPurgePreserveOption,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
     parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
     passCurrentEncounteredIce,
     pendingChoiceResolutionHost,
     permanentIcebreakerStrengthCounterBonus,
     pickRunnerAgendaForAgendaPointCost,
     playCardExecutionHost,
-    playfulAiSplitOptions,
+    randomDiceSplitOptions,
     postMeatDamageHiddenResourceCandidates,
     poxCountersForServer,
     poxInstallTax,
@@ -971,7 +971,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveEndTurnTagIfRunnerReceivedTag,
     resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolvePlayfulAiDiceLoopEvent,
+    resolveRandomDiceLoopEvent,
     resolvePostMeatDamageHiddenResourceChoice,
     resolvePostOnPlayGenericFollowups,
     resolveDelayedEndTurnDamageEffects,
@@ -990,7 +990,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
     resolveV1911CorporateDownsizing,
     resolveV1911RunnerHiddenZoneAbility,
-    resolveV1921PlayfulAiChoice,
+    resolveRandomDiceSplitChoice,
     restorePurgePreservedVirusCounters,
     returnRunnerInstalledCardToGrip,
     returnRunnerInstalledProgramsToGripForAccess,
@@ -1097,7 +1097,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerTurn,
     startTrashUnrezzedIceChoice,
     startSelfModifyingCodeFreeMuChoice,
-    startV1921PlayfulAiChoice,
+    startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,
     subroutinesForCurrentEncounter,
     successfulRunInterventionHost,
@@ -1304,7 +1304,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
   }
 
-  function powerGridOverloadEligibleHardwareIds(
+  function hardwareTrashByCounterEligibleHardwareIds(
     state: GameState,
   ): CardInstanceId[] {
     return state.runner.rig.hardware
@@ -1327,12 +1327,12 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       });
   }
 
-  function powerGridOverloadLegalActions(
+  function hardwareTrashByCounterLegalActions(
     state: GameState,
     cardId: CardInstanceId,
     definition: CardDefinition,
   ): LegalAction[] {
-    const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
     const maxTrashCount = Math.min(
       eligibleHardwareIds.length,
       state.corp.credits,
@@ -1349,7 +1349,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
           [{ clicks: 1, credits: trashCount }],
           {
             cardId,
-            powerGridOverloadTrashCount: trashCount,
+            hardwareTrashByCounterTrashCount: trashCount,
             eligibleHardwareCount: eligibleHardwareIds.length,
           },
         ),
@@ -1358,29 +1358,29 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     return actions;
   }
 
-  function powerGridOverloadTrashCountFromPayload(
+  function hardwareTrashByCounterTrashCountFromPayload(
     legalAction: LegalAction,
   ): number {
     const trashCount = Number(
-      legalAction.payload?.powerGridOverloadTrashCount ?? 1,
+      legalAction.payload?.hardwareTrashByCounterTrashCount ?? 1,
     );
     if (!Number.isInteger(trashCount) || trashCount <= 0)
-      throw new Error("Power Grid Overload braucht eine gueltige X-Auswahl.");
+      throw new Error("Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.");
     return trashCount;
   }
 
-  function resolvePowerGridOverloadOperation(
+  function resolveHardwareTrashByCounterOperation(
     state: GameState,
     legalAction: LegalAction,
   ): void {
-    const trashCount = powerGridOverloadTrashCountFromPayload(legalAction);
-    const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+    const trashCount = hardwareTrashByCounterTrashCountFromPayload(legalAction);
+    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
     if (eligibleHardwareIds.length < trashCount)
       throw new Error(
-        "Power Grid Overload findet nicht genug nicht-Cybernetics-Hardware.",
+        "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
       );
     if (eligibleHardwareIds.length > trashCount) {
-      startPowerGridOverloadChoice(
+      startHardwareTrashByCounterChoice(
         state,
         eligibleHardwareIds,
         trashCount,
@@ -1388,10 +1388,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       );
       return;
     }
-    trashPowerGridOverloadHardware(state, eligibleHardwareIds, legalAction);
+    trashHardwareByCounter(state, eligibleHardwareIds, legalAction);
   }
 
-  function startPowerGridOverloadChoice(
+  function startHardwareTrashByCounterChoice(
     state: GameState,
     eligibleHardwareIds: CardInstanceId[],
     trashCount: number,
@@ -1400,10 +1400,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     state.pendingChoice = {
-      choiceId: `v1914_installed_hardware_trash_by_power_counters_${state.stateVersion + 1}`,
+      choiceId: `installed_hardware_trash_by_counter_${state.stateVersion + 1}`,
       side: "corp",
-      source: `v1914.installed_hardware_trash_by_power_counters:${trashCount}:${state.stateVersion + 1}`,
-      prompt: `Power Grid Overload: ${trashCount} Hardware trashen`,
+      source: `card_implementation.installed_hardware_trash_by_counter:${trashCount}:${state.stateVersion + 1}`,
+      prompt: `Hardware-Trash-by-Counter: ${trashCount} Hardware trashen`,
       kind: "select_cards",
       options: eligibleHardwareIds.map((cardId) => {
         const definition = definitionFor(state, cardId);
@@ -1421,31 +1421,31 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      powerGridOverloadChoiceOpened: true,
+      hardwareTrashByCounterChoiceOpened: true,
       eligibleHardwareCount: eligibleHardwareIds.length,
-      powerGridOverloadTrashCount: trashCount,
+      hardwareTrashByCounterTrashCount: trashCount,
     };
   }
 
-  function powerGridOverloadTrashCountFromChoiceSource(source: string): number {
+  function hardwareTrashByCounterTrashCountFromChoiceSource(source: string): number {
     const [, rawTrashCount] = source.split(":");
     const trashCount = Number(rawTrashCount);
     if (!Number.isInteger(trashCount) || trashCount <= 0)
       throw new Error(
-        "Power-Grid-Overload-Choice hat keine gueltige X-Auswahl.",
+        "Hardware-Trash-by-Counter-Choice hat keine gueltige X-Auswahl.",
       );
     return trashCount;
   }
 
-  function resolvePowerGridOverloadChoice(
+  function resolveHardwareTrashByCounterChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1914.installed_hardware_trash_by_power_counters"))
-      throw new Error("Es ist keine Power-Grid-Overload-Choice offen.");
-    const trashCount = powerGridOverloadTrashCountFromChoiceSource(
+    if (!choice || !choice.source.startsWith("card_implementation.installed_hardware_trash_by_counter"))
+      throw new Error("Es ist keine Hardware-Trash-by-Counter-Choice offen.");
+    const trashCount = hardwareTrashByCounterTrashCountFromChoiceSource(
       choice.source,
     );
     const selectedIds = selectedChoiceCardIds(
@@ -1453,19 +1453,19 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       playerAction,
     ) as CardInstanceId[];
     if (selectedIds.length !== trashCount)
-      throw new Error("Power Grid Overload braucht genau X Hardware-Ziele.");
-    const legalTargets = new Set(powerGridOverloadEligibleHardwareIds(state));
+      throw new Error("Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.");
+    const legalTargets = new Set(hardwareTrashByCounterEligibleHardwareIds(state));
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
         throw new Error(
-          "Power Grid Overload darf dieses Hardware-Ziel nicht trashen.",
+          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht trashen.",
         );
     }
     delete state.pendingChoice;
-    trashPowerGridOverloadHardware(state, selectedIds, legalAction);
+    trashHardwareByCounter(state, selectedIds, legalAction);
   }
 
-  function trashPowerGridOverloadHardware(
+  function trashHardwareByCounter(
     state: GameState,
     hardwareIds: CardInstanceId[],
     legalAction: LegalAction,
@@ -1478,26 +1478,26 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         state,
         legalAction,
         hardwareIds,
-        "installed_hardware_trash_by_power_counters",
+        "installed_hardware_trash_by_counter",
       )
     )
       return;
     for (const cardId of hardwareIds) {
-      if (!powerGridOverloadEligibleHardwareIds(state).includes(cardId))
+      if (!hardwareTrashByCounterEligibleHardwareIds(state).includes(cardId))
         throw new Error(
-          "Power Grid Overload darf dieses Hardware-Ziel nicht mehr trashen.",
+          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht mehr trashen.",
         );
       trashRunnerInstalledCardToHeap(state, cardId);
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      powerGridOverloadTrashCount: hardwareIds.length,
+      hardwareTrashByCounterTrashCount: hardwareIds.length,
       trashedHardwareCount: hardwareIds.length,
       trashedHardwareDefinitionIds: definitionIds.join(","),
     };
   }
 
-  function systematicLayoffsLegalActions(
+  function advancementPlacementLegalActions(
     state: GameState,
     cardId: CardInstanceId,
     definition: CardDefinition,
@@ -1536,17 +1536,17 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function resolveSystematicLayoffsAdvancementOperation(
+  function resolveAdvancementPlacementOperation(
     state: GameState,
     legalAction: LegalAction,
   ): void {
-    const options = systematicLayoffsPlacementOptions(state);
+    const options = advancementPlacementOptions(state);
     if (options.length === 0)
-      throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
-    startSystematicLayoffsAdvancementChoice(state, options, legalAction);
+      throw new Error("Advancement-Placement findet kein advancebares Ziel.");
+    startAdvancementPlacementChoice(state, options, legalAction);
   }
 
-  function systematicLayoffsPlacementOptions(state: GameState): Array<{
+  function advancementPlacementOptions(state: GameState): Array<{
     firstTargetId: CardInstanceId;
     secondTargetId?: CardInstanceId;
     id: string;
@@ -1567,7 +1567,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       const firstTargetId = mustArrayValue(
         targets,
         firstIndex,
-        "Systematic-Layoffs-Ziel fehlt.",
+        "Advancement-Placement-Ziel fehlt.",
       );
       for (
         let secondIndex = firstIndex;
@@ -1577,7 +1577,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         const secondTargetId = mustArrayValue(
           targets,
           secondIndex,
-          "Systematic-Layoffs-Ziel fehlt.",
+          "Advancement-Placement-Ziel fehlt.",
         );
         const splitTargets = firstTargetId !== secondTargetId;
         const firstTitle = definitionFor(state, firstTargetId).title;
@@ -1600,18 +1600,18 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     return options;
   }
 
-  function startSystematicLayoffsAdvancementChoice(
+  function startAdvancementPlacementChoice(
     state: GameState,
-    options: ReturnType<typeof systematicLayoffsPlacementOptions>,
+    options: ReturnType<typeof advancementPlacementOptions>,
     legalAction: LegalAction,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     state.pendingChoice = {
-      choiceId: `v1919_systematic_layoffs_advancement_${state.stateVersion + 1}`,
+      choiceId: `advancement_placement_${state.stateVersion + 1}`,
       side: "corp",
-      source: `v1919.systematic_layoffs_advancement:${state.stateVersion + 1}`,
-      prompt: "Systematic Layoffs: Advancement-Counter legen",
+      source: `card_implementation.advancement_placement:${state.stateVersion + 1}`,
+      prompt: "Advancement-Placement: Advancement-Counter legen",
       kind: "select_option",
       options: options.map((option) => ({
         id: option.id,
@@ -1631,7 +1631,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function resolveSystematicLayoffsAdvancementChoice(
+  function resolveAdvancementPlacementChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
@@ -1639,10 +1639,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     const choice = state.pendingChoice;
     if (
       !choice ||
-      !choice.source.startsWith("v1919.systematic_layoffs_advancement")
+      !choice.source.startsWith("card_implementation.advancement_placement")
     )
       throw new Error(
-        "Es ist keine Systematic-Layoffs-Advancement-Choice offen.",
+        "Es ist keine Advancement-Placement-Advancement-Choice offen.",
       );
     const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
     const selectedOption = choice.options.find(
@@ -1650,7 +1650,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     );
     if (!selectedOption || typeof selectedOption.value !== "string")
       throw new Error(
-        "Systematic Layoffs braucht genau eine Placement-Auswahl.",
+        "Advancement-Placement braucht genau eine Placement-Auswahl.",
       );
     const [firstTargetId, secondTargetId] = selectedOption.value.split("|") as [
       CardInstanceId | undefined,
@@ -1658,9 +1658,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     ];
     if (!firstTargetId || !secondTargetId)
       throw new Error(
-        "Systematic Layoffs hat keine gueltige Placement-Auswahl.",
+        "Advancement-Placement hat keine gueltige Placement-Auswahl.",
       );
-    applySystematicLayoffsAdvancementPlacement(
+    applyAdvancementCounterPlacement(
       state,
       firstTargetId,
       secondTargetId === firstTargetId ? undefined : secondTargetId,
@@ -1669,7 +1669,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     delete state.pendingChoice;
   }
 
-  function applySystematicLayoffsAdvancementPlacement(
+  function applyAdvancementCounterPlacement(
     state: GameState,
     firstTargetId: CardInstanceId,
     secondTargetId: CardInstanceId | undefined,
@@ -1679,10 +1679,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       advanceableInstalledCardTargets(state) as CardInstanceId[],
     );
     if (!firstTargetId || !eligibleTargets.has(firstTargetId))
-      throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
+      throw new Error("Advancement-Placement findet kein advancebares Ziel.");
     if (secondTargetId && !eligibleTargets.has(secondTargetId))
       throw new Error(
-        "Systematic Layoffs findet kein zweites advancebares Ziel.",
+        "Advancement-Placement findet kein zweites advancebares Ziel.",
       );
 
     const placements: Record<CardInstanceId, number> = {
@@ -1696,7 +1696,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     const targetCount = placementEntries.length;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+      sourceDefinitionId: ADVANCEMENT_PLACEMENT_OPERATION_ID,
       v1919OperationAbility: "add_advancement_counters",
       targetCardId: firstTargetId,
       targetCardDefinitionId: definitionFor(state, firstTargetId).id,
@@ -1705,7 +1705,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         .join(","),
       addedAdvancementCounters: 2,
       targetCount,
-      systematicLayoffsDistribution: placementEntries
+      advancementPlacementDistribution: placementEntries
         .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
         .join(","),
       ...(targetCount === 1
@@ -2049,21 +2049,21 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     installedAgendaOperationTarget,
     corpAgendaCounterOperationTarget,
     corpScoredAgendaForfeitTargets,
-    powerGridOverloadEligibleHardwareIds,
-    powerGridOverloadLegalActions,
-    powerGridOverloadTrashCountFromPayload,
-    resolvePowerGridOverloadOperation,
-    startPowerGridOverloadChoice,
-    powerGridOverloadTrashCountFromChoiceSource,
-    resolvePowerGridOverloadChoice,
-    trashPowerGridOverloadHardware,
-    systematicLayoffsLegalActions,
+    hardwareTrashByCounterEligibleHardwareIds,
+    hardwareTrashByCounterLegalActions,
+    hardwareTrashByCounterTrashCountFromPayload,
+    resolveHardwareTrashByCounterOperation,
+    startHardwareTrashByCounterChoice,
+    hardwareTrashByCounterTrashCountFromChoiceSource,
+    resolveHardwareTrashByCounterChoice,
+    trashHardwareByCounter,
+    advancementPlacementLegalActions,
     resolveAgendaCounterOperation,
-    resolveSystematicLayoffsAdvancementOperation,
-    systematicLayoffsPlacementOptions,
-    startSystematicLayoffsAdvancementChoice,
-    resolveSystematicLayoffsAdvancementChoice,
-    applySystematicLayoffsAdvancementPlacement,
+    resolveAdvancementPlacementOperation,
+    advancementPlacementOptions,
+    startAdvancementPlacementChoice,
+    resolveAdvancementPlacementChoice,
+    applyAdvancementCounterPlacement,
     advanceableInstalledCardTargets,
     isInstalledCorpCardAdvanceable,
     advancementDistributionOptions,

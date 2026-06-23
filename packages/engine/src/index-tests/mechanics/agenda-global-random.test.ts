@@ -547,7 +547,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
-  it("offers Systematic Layoffs advancement placements for installed advanceable cards", () => {
+  it("offers Advancement-Placement advancement placements for installed advanceable cards", () => {
     let state = MECHANIC_SMOKE_GAMES.agendaScoring(
       "v1919-systematic-layoffs-choice",
     );
@@ -628,11 +628,11 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("opens one Systematic Layoffs placement option for a single Corporate War", () => {
+  it("opens one Advancement-Placement placement option for a single Corporate War", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
       id: "onr_v1_corp_systematic_layoffs_corporate_war",
-      name: "O:NR V1.9.19 Systematic Layoffs Corporate War",
+      name: "O:NR V1.9.19 Advancement-Placement Corporate War",
       cards: [
         { id: "onr_v1_196_corporate-war", quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
@@ -3417,7 +3417,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         seed: "playful-ai-probe-0",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1921_playful_ai_high_roll",
+          id: "onr_v1_runner_random_dice_split_high_roll",
           name: "O:NR V1.9.21 Playful AI High Roll Runner",
           cards: [
             { id: "onr_v1_104_playful-ai", quantity: 1 },
@@ -3468,9 +3468,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       actionType: "play_event",
       v1921RunnerEventAbility: "random_dice_loop",
       v1921DieRoll: 4,
-      playfulAiChoiceOpened: false,
-      playfulAiComplete: true,
-      playfulAiRemainingDice: 0,
+      randomDiceSplitChoiceOpened: false,
+      randomDiceLoopComplete: true,
+      randomDiceLoopRemainingDice: 0,
       randomCounterAfter: randomBefore + 1,
     });
     expect(state.runner.credits).toBe(creditsBeforePlay - 1);
@@ -3495,7 +3495,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         seed: "playful-ai-probe-3",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1921_playful_ai_split_loop",
+          id: "onr_v1_runner_random_dice_split_split_loop",
           name: "O:NR V1.9.21 Playful AI Split Loop Runner",
           cards: [
             { id: "onr_v1_104_playful-ai", quantity: 1 },
@@ -3529,9 +3529,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       actionType: "play_event",
       v1921RunnerEventAbility: "random_dice_loop",
       v1921DieRoll: 3,
-      playfulAiChoiceOpened: true,
-      playfulAiComplete: false,
-      playfulAiRemainingDice: 0,
+      randomDiceSplitChoiceOpened: true,
+      randomDiceLoopComplete: false,
+      randomDiceLoopRemainingDice: 0,
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "gain_0_set_aside_3",
@@ -3544,7 +3544,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state = applyChoice(state, "runner", "gain_1_set_aside_2");
     const firstResolvePayload = state.eventLog.at(-1)?.publicPayload;
     const firstFollowupRolls = String(
-      firstResolvePayload?.playfulAiDieRolls ?? "",
+      firstResolvePayload?.randomDiceLoopRolls ?? "",
     )
       .split(",")
       .filter(Boolean)
@@ -3553,22 +3553,22 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(firstResolvePayload).toMatchObject({
       actionType: "resolve_choice",
       v1921RunnerEventAbility: "random_dice_loop",
-      playfulAiGainedCredits: 1,
-      playfulAiSetAsideDice: 2,
-      playfulAiDiceQueuedBeforeRolls: 2,
+      randomDiceSplitGainedCredits: 1,
+      randomDiceSplitSetAsideDice: 2,
+      randomDiceLoopQueuedBeforeRolls: 2,
     });
     expect(firstFollowupRolls.length).toBeGreaterThan(0);
     expect(firstFollowupRolls.length).toBeLessThanOrEqual(2);
     expect(firstFollowupRolls.every((roll) => roll >= 1 && roll <= 6)).toBe(
       true,
     );
-    if (firstResolvePayload?.playfulAiChoiceOpened === true) {
-      expect(firstResolvePayload.playfulAiRemainingDice).toBe(
+    if (firstResolvePayload?.randomDiceSplitChoiceOpened === true) {
+      expect(firstResolvePayload.randomDiceLoopRemainingDice).toBe(
         2 - firstFollowupRolls.length,
       );
-      expect(state.pendingChoice?.source).toContain("v1921.playful_ai");
+      expect(state.pendingChoice?.source).toContain("card_implementation.random_dice_split");
     } else {
-      expect(firstResolvePayload?.playfulAiRemainingDice).toBe(0);
+      expect(firstResolvePayload?.randomDiceLoopRemainingDice).toBe(0);
     }
 
     let guard = 0;

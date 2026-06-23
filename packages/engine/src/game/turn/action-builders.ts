@@ -165,8 +165,8 @@ export function makeActionId(
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.secondTargetCardId)
     parts.push(String(payload.secondTargetCardId));
-  if (payload?.powerGridOverloadTrashCount)
-    parts.push(String(payload.powerGridOverloadTrashCount));
+  if (payload?.hardwareTrashByCounterTrashCount)
+    parts.push(String(payload.hardwareTrashByCounterTrashCount));
   if (payload?.drawTaxDecision)
     parts.push(String(payload.drawTaxDecision));
   if (payload?.approachIceExposeDecision)

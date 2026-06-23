@@ -665,8 +665,8 @@ export function publicContextForAction(
       "runnerTagsAfter",
       "trashedResourceCount",
       "trashedResourceDefinitionIds",
-      "powerGridOverloadTrashCount",
-      "powerGridOverloadChoiceOpened",
+      "hardwareTrashByCounterTrashCount",
+      "hardwareTrashByCounterChoiceOpened",
       "eligibleHardwareCount",
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
@@ -1158,8 +1158,8 @@ export function publicContextForAction(
     "runSpendingCap",
     "runSpendingCapSpent",
     "runActionSpendingCapActive",
-    "powerGridOverloadTrashCount",
-    "powerGridOverloadChoiceOpened",
+    "hardwareTrashByCounterTrashCount",
+    "hardwareTrashByCounterChoiceOpened",
     "eligibleHardwareCount",
     "trashedHardwareCount",
     "trashedHardwareDefinitionIds",
@@ -1833,26 +1833,26 @@ export function publicContextForAction(
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (
-      Array.isArray(legalAction.payload.playfulAiDieRolls) ||
-      typeof legalAction.payload.playfulAiDieRolls === "string"
+      Array.isArray(legalAction.payload.randomDiceLoopRolls) ||
+      typeof legalAction.payload.randomDiceLoopRolls === "string"
     )
-      context.playfulAiDieRolls = legalAction.payload.playfulAiDieRolls;
+      context.randomDiceLoopRolls = legalAction.payload.randomDiceLoopRolls;
     for (const key of [
-      "playfulAiGainedCredits",
-      "playfulAiSetAsideDice",
-      "playfulAiRolledDice",
-      "playfulAiDiceQueuedBeforeRolls",
-      "playfulAiDiceQueuedAfterRolls",
-      "playfulAiRemainingDice",
+      "randomDiceSplitGainedCredits",
+      "randomDiceSplitSetAsideDice",
+      "randomDiceLoopRolledDice",
+      "randomDiceLoopQueuedBeforeRolls",
+      "randomDiceLoopQueuedAfterRolls",
+      "randomDiceLoopRemainingDice",
       "runnerCreditsAfter",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.playfulAiChoiceOpened === "boolean")
-      context.playfulAiChoiceOpened = legalAction.payload.playfulAiChoiceOpened;
-    if (typeof legalAction.payload.playfulAiComplete === "boolean")
-      context.playfulAiComplete = legalAction.payload.playfulAiComplete;
+    if (typeof legalAction.payload.randomDiceSplitChoiceOpened === "boolean")
+      context.randomDiceSplitChoiceOpened = legalAction.payload.randomDiceSplitChoiceOpened;
+    if (typeof legalAction.payload.randomDiceLoopComplete === "boolean")
+      context.randomDiceLoopComplete = legalAction.payload.randomDiceLoopComplete;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")

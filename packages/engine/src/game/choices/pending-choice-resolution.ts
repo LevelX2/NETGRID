@@ -31,14 +31,14 @@ export type PendingChoiceResolutionHost = {
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveCorpInstalledEconomyCreditChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
-    resolvePowerGridOverloadChoice: HostFn<void>;
-    resolveSystematicLayoffsAdvancementChoice: HostFn<void>;
+    resolveHardwareTrashByCounterChoice: HostFn<void>;
+    resolveAdvancementPlacementChoice: HostFn<void>;
     resolveDerezRezzedBlackIceChoice: HostFn<void>;
     resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
     resolveCorpChoiceRezOrTrashIceTargetChoice: HostFn<void>;
     resolveCorpChoiceRezOrTrashIceDecisionChoice: HostFn<void>;
     resolveTrashUnrezzedIceChoice: HostFn<void>;
-    resolveV1921PlayfulAiChoice: HostFn<void>;
+    resolveRandomDiceSplitChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
     resolveGripInstallTemporaryCreditChoice: HostFn<void>;
     resolveStackInstallRunCleanupChoice: HostFn<void>;
@@ -137,10 +137,10 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCorpInstalledEconomyCreditChoice;
   const resolveCrashEverettDrawChoice =
     host.hiddenZone.resolveCrashEverettDrawChoice;
-  const resolvePowerGridOverloadChoice =
-    host.hiddenZone.resolvePowerGridOverloadChoice;
-  const resolveSystematicLayoffsAdvancementChoice =
-    host.hiddenZone.resolveSystematicLayoffsAdvancementChoice;
+  const resolveHardwareTrashByCounterChoice =
+    host.hiddenZone.resolveHardwareTrashByCounterChoice;
+  const resolveAdvancementPlacementChoice =
+    host.hiddenZone.resolveAdvancementPlacementChoice;
   const resolveDerezRezzedBlackIceChoice =
     host.hiddenZone.resolveDerezRezzedBlackIceChoice;
   const resolvePayRezCostToTrashRezzedIceChoice =
@@ -151,8 +151,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCorpChoiceRezOrTrashIceDecisionChoice;
   const resolveTrashUnrezzedIceChoice =
     host.hiddenZone.resolveTrashUnrezzedIceChoice;
-  const resolveV1921PlayfulAiChoice =
-    host.hiddenZone.resolveV1921PlayfulAiChoice;
+  const resolveRandomDiceSplitChoice =
+    host.hiddenZone.resolveRandomDiceSplitChoice;
   const resolveRunnerInstalledConnectionTrashBadPublicityChoice =
     host.hiddenZone.resolveRunnerInstalledConnectionTrashBadPublicityChoice;
   const resolveGripInstallTemporaryCreditChoice =
@@ -353,16 +353,16 @@ export function resolvePendingChoice(
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1914.installed_hardware_trash_by_power_counters")) {
-    resolvePowerGridOverloadChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.installed_hardware_trash_by_counter")) {
+    resolveHardwareTrashByCounterChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith(
-      "v1919.systematic_layoffs_advancement",
+      "card_implementation.advancement_placement",
     )
   ) {
-    resolveSystematicLayoffsAdvancementChoice(
+    resolveAdvancementPlacementChoice(
       state,
       legalAction,
       playerAction,
@@ -415,8 +415,8 @@ export function resolvePendingChoice(
     resolveTrashUnrezzedIceChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
-    resolveV1921PlayfulAiChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.random_dice_split")) {
+    resolveRandomDiceSplitChoice(state, legalAction, playerAction);
     return;
   }
   if (

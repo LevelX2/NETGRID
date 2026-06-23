@@ -200,8 +200,8 @@ function testCorpMainHost(
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
-      powerGridOverloadLegalActions: () => [],
-      systematicLayoffsLegalActions: () => [],
+      hardwareTrashByCounterLegalActions: () => [],
+      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
@@ -267,7 +267,7 @@ function testCorpMainHost(
       INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
         "information_laundering",
       ACTION_ASSET_CARD_IDS: new Set(),
-      SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID: "systematic_layoffs",
+      ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
     },
   };
 }
