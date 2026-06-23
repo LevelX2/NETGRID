@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`abgeschlossen`
 
 ## Quelle/Vorgabe
 
@@ -114,6 +114,8 @@ process_prepared
   - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
 - `TRACEFIX-4`: abgeschlossen. Ein echter Engine-`getPlayerView()`-zu-DTO-zu-Runner-AI-Test sichert `baseTraceStrength` und `traceSuccessEffect`; Top-Level-Entscheidungen decken Remote-Agenda-Override sowie `add_counter`, `net_damage`, `end_run_and_run_lock`, `end_run_trash_program_and_run_lock` und `trash_runner_resource_and_add_tag` ab.
   - Checks: `packages/ai` `known-ice-run-risk.test.ts` + `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` + `runner-run-target-guidance.test.ts` grün, `packages/ai` Typecheck grün.
+- `TRACEFIX-5`: abgeschlossen. Abschlussreport, Vorgänger-Report-Addendum und Juni-Projektlog ordnen Feature-spezifisches Grün und vollständiges AI-Baseline-Rot sauber ein; `tactical-plans.test.ts` wurde separat ausgeführt.
+  - Checks: `packages/ai` `tactical-plans.test.ts` grün; `@netgrid/ai test` baseline-rot mit ausschließlich vier bekannten Shell-Traders-Fixture-Fehlern; `git diff --check` vor Paketcommit.
 
 ## Paketdetails
 
@@ -259,3 +261,16 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Keine Engine-Regeländerung, keine neue LegalAction-Erzeugung, keine Hidden-Info-Ausweitung.
 - Paketcommits liegen auf `codex/ai-known-ice-trace-review-fix`.
 - Arbeitsbranch ist lokal nach `main` integriert und der Worktree entfernt.
+
+## Abschlussstand 2026-06-23
+
+TRACEFIX-0 bis TRACEFIX-5 sind umgesetzt. Der Fix bleibt AI-intern beziehungsweise DTO-/Engine-Quote-read-only:
+
+- `Access through Alpha` wird bei 0 Credits nicht mehr als kostenlose Trace-Vermeidung gewertet und kostet bei 1 Credit korrekt 1.
+- `Submarine Uplink` wird wegen öffentlicher Jack-out-Nebenwirkung nicht als access-sichere Vermeidung gezählt.
+- `visibleCorpBidCapacity` trennt Basisdeckung von garantierter Deckung gegen sichtbares Corp-Maximum.
+- Mehrere Trace-Subroutinen teilen das Restbudget innerhalb desselben ICE.
+- Engine-`getPlayerView()` -> DTO -> Runner-AI ist für rezzed `Hunter` gegen Verlust von `baseTraceStrength` und `traceSuccessEffect` abgesichert.
+- Top-Level-Decision-Regressionen decken High-Payoff-Remote-Agenda und generische Trace-Erfolgseffekte ab.
+
+Feature-spezifische Checks sind grün. Der vollständige `@netgrid/ai`-Paketlauf bleibt baseline-rot mit vier bekannten Shell-Traders-Fixture-Tests in `packages/ai/src/index.test.ts`; das ist außerhalb dieses Review-Fixes dokumentiert.

@@ -42,3 +42,17 @@ Eingeordnet:
 ## Vertragslage
 
 Keine Engine-Regeländerung, keine neue LegalAction-Erzeugung, keine Änderung an `applyAction`, Replay, StateHash oder Randomness. Hidden Info bleibt geschützt: CardDefinition-Fallbacks werden nur für bereits bekannte/rezzed sichtbare ICE genutzt.
+
+## Nachprüfung 2026-06-23
+
+Die Review-Nacharbeit liegt separat unter `docs/reviews/ai/ai-known-ice-trace-review-fix-final-report-2026-06-23.md`.
+
+Präzisierung zur Verifikation: Die grüne Aussage dieses Reports bezieht sich auf die feature-spezifischen Known-ICE-/Trace-Risk-Checks und die zugehörigen Typechecks. Der vollständige `@netgrid/ai`-Pakettestlauf bleibt baseline-rot wegen vier bekannten Shell-Traders-Fixture-Tests in `packages/ai/src/index.test.ts`; diese Fehler liegen außerhalb des Known-ICE-Trace-Fixes und wurden im Review-Fix erneut reproduziert.
+
+Zusätzliche grüne Nachweise der Review-Nacharbeit:
+
+- Base-Link-Kosten und Side-Effects werden aus Engine-CardImplementation-Quotes bewertet.
+- Sichtbare Corp-Bid-Kapazität wird als Garantie-Spanne dokumentiert.
+- Mehrere Trace-Subroutinen teilen Credits und Break-Affordability sequenziell.
+- Ein echter Engine-`getPlayerView()` -> DTO -> Runner-AI-Test sichert `baseTraceStrength` und `traceSuccessEffect`.
+- `tactical-plans.test.ts` wurde separat grün ausgeführt.
