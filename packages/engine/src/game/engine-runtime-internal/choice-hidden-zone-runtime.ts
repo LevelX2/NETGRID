@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps } from "./runtime-shared";
 import { createPendingChoiceRuntimeHosts } from "./pending-choice-runtime-hosts";
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
@@ -8,7 +7,7 @@ import { createHiddenZoneNonSearchPlayfulAiRuntime } from "./hidden-zone-nonsear
 import { createCorpZoneRuntimeHosts } from "./corp-zone-runtime-hosts";
 
 export function createChoiceHiddenZoneRuntime(deps: RuntimeDeps) {
-  const runtime: Record<string, any> = {};
+  const runtime: Record<string, unknown> = {};
   Object.assign(
     runtime,
     createHiddenZoneSearchRuntime(deps, runtime),

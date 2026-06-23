@@ -1,14 +1,37 @@
-// @ts-nocheck
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  CardRunnerEventLongtailImplementation,
+  ChoiceRequest,
+  GameState,
+  LegalAction,
+  PlayerAction,
+  RuntimeDeps,
+  Side,
+} from "./runtime-shared";
+
+type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
+  credits: (state: GameState, side: Side, amount: number) => void;
+  definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
+  rollDeterministicDie: (state: GameState, purpose: string) => number;
+  runnerEventLongtailKindForDefinition: (
+    definition: CardDefinition,
+  ) => CardRunnerEventLongtailImplementation["kind"] | undefined;
+  selectedChoiceIds: (
+    selectedChoices: PlayerAction["selectedChoices"],
+  ) => string[];
+};
 
 export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
+  const typedDeps = deps as HiddenZoneNonSearchDiceLoopRuntimeDeps;
   const {
     credits,
     definitionFor,
     rollDeterministicDie,
     runnerEventLongtailKindForDefinition,
     selectedChoiceIds,
-  } = deps;
+  } = typedDeps;
 
   function resolvePlayfulAiDiceLoopEvent(
     state: GameState,
