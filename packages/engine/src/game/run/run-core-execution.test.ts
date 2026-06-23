@@ -218,7 +218,7 @@ function hostFor(state: GameState): {
           calls.push("cardImplementationRunStart"),
         applyRunnerTraceCounterRunStartEffects: () =>
           calls.push("traceCounterRunStart"),
-        applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+        applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
         openStartOfRunFortUtilityWindow: () => false,
       },
     },
@@ -274,7 +274,7 @@ describe("run-core-execution", () => {
     expect(calls).toEqual([
       "cardImplementationRunStart",
       "traceCounterRunStart",
-      "aiBoonRunStart",
+      "runStartRandomStrengthBonus",
       `beginEncounter:${OUTER_ICE_ID}`,
     ]);
   });

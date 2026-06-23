@@ -759,7 +759,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     agendaPointsForScoredCard,
     appendRegionReplacementTrashEffect,
     applyActionHostComposition,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     applyEffectCommands,
     applyRunnerDrawSummaryPayload,
     applyRunnerTraceCounterRunStartEffects,

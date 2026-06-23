@@ -129,7 +129,7 @@ export function createRunAccessLegalActionHostComposition(
         run.executeCardImplementationRunnerRunStartEffects,
       applyRunnerTraceCounterRunStartEffects:
         run.applyRunnerTraceCounterRunStartEffects,
-      applyAiBoonRunStart: run.applyAiBoonRunStart,
+      applyRunStartRandomStrengthBonus: run.applyRunStartRandomStrengthBonus,
       openStartOfRunFortUtilityWindow: run.openStartOfRunFortUtilityWindow,
     },
     trace: callbacks.trace,

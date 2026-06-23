@@ -147,7 +147,7 @@ function hostFor(calls: string[]): RunFlowHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
       openStartOfRunFortUtilityWindow: () => false,
     },
     trace: {

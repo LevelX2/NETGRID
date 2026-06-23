@@ -711,7 +711,7 @@ export function createRunFlowRuntimeHosts(
     );
   }
 
-  function applyAiBoonRunStart(
+  function applyRunStartRandomStrengthBonus(
     state: GameState,
     legalAction?: LegalAction,
   ): void {
@@ -722,7 +722,7 @@ export function createRunFlowRuntimeHosts(
         runtime.icebreakerHasSpecial(
           state,
           cardId,
-          "ai_boon_run_start_random_strength",
+          "run_start_random_strength_bonus",
         ),
       );
     if (sourceCardIds.length === 0 || !state.run) return;
@@ -733,22 +733,22 @@ export function createRunFlowRuntimeHosts(
       const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
       const baseStrength = definition.strength ?? 0;
       const runStrength = baseStrength + dieRoll;
-      state.run.aiBoonRunStrengthByBreaker = {
-        ...(state.run.aiBoonRunStrengthByBreaker ?? {}),
+      state.run.runStartRandomStrengthBonusByBreaker = {
+        ...(state.run.runStartRandomStrengthBonusByBreaker ?? {}),
         [sourceCardId]: runStrength,
       };
       state.run.aiBoonSourceCardId = sourceCardId;
-      state.run.aiBoonRunStrength = runStrength;
+      state.run.runStartRandomStrengthBonus = runStrength;
       outcomes.push(`${sourceCardId}:${dieRoll}:${runStrength}`);
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          v1921RunnerProgramAbility: "ai_boon_run_start_strength",
+          v1921RunnerProgramAbility: "run_start_random_strength_bonus",
           sourceDefinitionId: definition.id,
           aiBoonSourceCardId: sourceCardId,
           randomPurpose,
           v1921DieRoll: dieRoll,
-          aiBoonRunStrength: runStrength,
+          runStartRandomStrengthBonus: runStrength,
           randomCounterAfter: state.randomCounter,
         };
       }
@@ -756,8 +756,8 @@ export function createRunFlowRuntimeHosts(
     if (legalAction && outcomes.length > 1) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1921RunnerProgramAbility: "ai_boon_run_start_strength",
-        aiBoonRunStrengthOutcomes: outcomes.join(","),
+        v1921RunnerProgramAbility: "run_start_random_strength_bonus",
+        runStartRandomStrengthBonusOutcomes: outcomes.join(","),
         randomCounterAfter: state.randomCounter,
       };
     }
@@ -878,7 +878,7 @@ export function createRunFlowRuntimeHosts(
 
   return {
     startRun,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     continueRun,
     addCurrentRunAccessCount,
     passCurrentEncounteredIce,

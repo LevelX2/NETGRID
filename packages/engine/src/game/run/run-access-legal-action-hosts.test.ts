@@ -133,7 +133,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
       finishRun: (_state: GameState, successful: boolean) =>
         calls.push(`finishRun:${successful}`),
       successfulRunInterventionHost: (targetState: GameState) =>

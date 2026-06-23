@@ -754,7 +754,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     agendaPointsForScoredCard,
     appendResolvedEffectsToPayload,
     applyActionHostComposition,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     applyCorpStartOfTurnEffects,
     applyEffectCommands,
     applyPurgeableRunnerVirusCorpStartEffects,

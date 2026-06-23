@@ -75,7 +75,7 @@ export type RunCoreExecutionHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
-    applyAiBoonRunStart: (
+    applyRunStartRandomStrengthBonus: (
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
@@ -260,7 +260,7 @@ export function startRun(
         : {}),
     };
   }
-  host.callbacks.applyAiBoonRunStart(state, legalAction);
+  host.callbacks.applyRunStartRandomStrengthBonus(state, legalAction);
   if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
     return;
   if (server.ice.length > 0) {

@@ -1703,8 +1703,8 @@ export function publicContextForAction(
       legalAction.payload.v1921RunnerProgramAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
-    if (typeof legalAction.payload.aiBoonRunStrength === "number")
-      context.aiBoonRunStrength = legalAction.payload.aiBoonRunStrength;
+    if (typeof legalAction.payload.runStartRandomStrengthBonus === "number")
+      context.runStartRandomStrengthBonus = legalAction.payload.runStartRandomStrengthBonus;
     if (typeof legalAction.payload.sourceDefinitionId === "string")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")

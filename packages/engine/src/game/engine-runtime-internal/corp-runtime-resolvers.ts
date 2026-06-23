@@ -731,7 +731,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     appendRegionReplacementTrashEffect,
     appendResolvedEffectsToPayload,
     applyActionHostComposition,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     applyCorpStartOfTurnEffects,
     applyEffectCommands,
     applyPurgeableRunnerVirusCorpStartEffects,

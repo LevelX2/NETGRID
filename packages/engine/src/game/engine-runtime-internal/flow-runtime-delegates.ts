@@ -162,8 +162,8 @@ export function applyRunnerTraceCounterRunStartEffects(...args: any[]): any {
   )(...args);
 }
 
-export function applyAiBoonRunStart(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "applyAiBoonRunStart")(...args);
+export function applyRunStartRandomStrengthBonus(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "applyRunStartRandomStrengthBonus")(...args);
 }
 
 export function continueRun(...args: any[]): any {

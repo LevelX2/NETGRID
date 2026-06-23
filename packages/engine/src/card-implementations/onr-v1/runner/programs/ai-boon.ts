@@ -9,7 +9,7 @@ export const aiBoonImplementation: CardImplementationDefinition = {
       kind: "break_subroutine",
       cost: { kind: "credit", amount: 1 },
       matches: { kind: "ice_subtype", subtype: "sentry" },
-      special: { kind: "ai_boon_run_start_random_strength" },
+      special: { kind: "run_start_random_strength_bonus" },
       visibility: "public",
     },
     {

@@ -759,7 +759,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     appendRegionReplacementTrashEffect,
     appendResolvedEffectsToPayload,
     applyActionHostComposition,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     applyCorpStartOfTurnEffects,
     applyEffectCommands,
     applyPurgeableRunnerVirusCorpStartEffects,

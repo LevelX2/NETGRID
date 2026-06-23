@@ -219,7 +219,7 @@ export type RunFlowHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
-    applyAiBoonRunStart: (state: GameState, legalAction?: LegalAction) => void;
+    applyRunStartRandomStrengthBonus: (state: GameState, legalAction?: LegalAction) => void;
     openStartOfRunFortUtilityWindow: (
       state: GameState,
       legalAction?: LegalAction,
@@ -505,7 +505,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.run.executeCardImplementationRunnerRunStartEffects,
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
-        applyAiBoonRunStart: host.run.applyAiBoonRunStart,
+        applyRunStartRandomStrengthBonus: host.run.applyRunStartRandomStrengthBonus,
         openStartOfRunFortUtilityWindow:
           host.run.openStartOfRunFortUtilityWindow,
       },

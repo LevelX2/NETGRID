@@ -3369,12 +3369,12 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
       "v1921.die.onr_v1_002_ai-boon.run_start_strength",
     );
-    expect(state.run?.aiBoonRunStrength).toBe(
-      Number(state.eventLog.at(-1)?.publicPayload.aiBoonRunStrength),
+    expect(state.run?.runStartRandomStrengthBonus).toBe(
+      Number(state.eventLog.at(-1)?.publicPayload.runStartRandomStrengthBonus),
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      v1921RunnerProgramAbility: "ai_boon_run_start_strength",
+      v1921RunnerProgramAbility: "run_start_random_strength_bonus",
       sourceDefinitionId: "onr_v1_002_ai-boon",
       randomPurpose: "v1921.die.onr_v1_002_ai-boon.run_start_strength",
       randomCounterAfter: randomBefore + 1,
@@ -3408,7 +3408,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(withoutAiBoon.randomDrawRecords).toHaveLength(noSourceRandomBefore);
-    expect(withoutAiBoon.run?.aiBoonRunStrength).toBeUndefined();
+    expect(withoutAiBoon.run?.runStartRandomStrengthBonus).toBeUndefined();
   });
 
   it("ends Playful AI without a choice or credits on a high roll", () => {

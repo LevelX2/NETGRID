@@ -1136,8 +1136,8 @@ export type RunState = {
     gainCredits?: number;
   };
   aiBoonSourceCardId?: CardInstanceId;
-  aiBoonRunStrength?: number;
-  aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
+  runStartRandomStrengthBonus?: number;
+  runStartRandomStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;

@@ -172,11 +172,11 @@ export function buildRunnerEncounterActions(
       }
     }
     const breakerBaseStrength =
-      typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
-        ? run.aiBoonRunStrengthByBreaker[breakerId]
+      typeof run.runStartRandomStrengthBonusByBreaker?.[breakerId] === "number"
+        ? run.runStartRandomStrengthBonusByBreaker[breakerId]
         : breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
-            typeof run.aiBoonRunStrength === "number"
-          ? run.aiBoonRunStrength
+            typeof run.runStartRandomStrengthBonus === "number"
+          ? run.runStartRandomStrengthBonus
           : (breaker.strength ?? 0);
     const breakerStrength =
       breakerBaseStrength +
