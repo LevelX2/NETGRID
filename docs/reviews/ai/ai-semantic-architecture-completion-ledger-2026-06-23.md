@@ -125,6 +125,11 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` Boundary-Guard:
+  - `packages/ai/src/public-export-contract.test.ts` verbietet öffentliche Re-Exports der neuen internen Runtime-Module `runner-goal-fit-score`, `legacy-decision-provider` und `reactive-action`.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts` grün, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
