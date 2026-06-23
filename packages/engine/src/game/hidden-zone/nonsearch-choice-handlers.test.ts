@@ -310,7 +310,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.archives).toEqual([discard]);
     expect(host.state.corp.credits).toBe(4);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       retainedCount: 1,
       discardedCount: 1,
       paidCredits: 2,

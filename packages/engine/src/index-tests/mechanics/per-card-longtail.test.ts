@@ -1822,7 +1822,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       cardDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
       v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"cardInstances"|"privatePayload"|"simple_economy_operation"/,
@@ -1850,7 +1850,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       choiceKind: "select_cards",
       v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       retainedCount: 2,
       discardedCount: 1,
       paidCredits: 4,

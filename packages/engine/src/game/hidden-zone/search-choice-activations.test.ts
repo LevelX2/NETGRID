@@ -296,7 +296,7 @@ describe("hidden-zone search choice activations", () => {
       "v1911.sneak_preview_source:11",
     );
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_source_choice",
+      hiddenZoneAction: "temporary_program_install_source_choice",
       choiceVisibility: "runner_private",
     });
   });

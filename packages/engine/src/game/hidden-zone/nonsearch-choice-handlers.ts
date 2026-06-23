@@ -183,7 +183,7 @@ export function startCorpDiscardHqWithRetainPaymentChoice(
       ...(host.legalAction.payload ?? {}),
       v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       retainedCount: 0,
       discardedCount: 0,
       paidCredits: 0,
@@ -197,7 +197,7 @@ export function startCorpDiscardHqWithRetainPaymentChoice(
     ...(host.legalAction.payload ?? {}),
     v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+    hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
     sourceDefinitionId: host.cards.definitionFor(input.sourceCardId).id,
   };
   return { publicPayload: host.legalAction.payload ?? {} };
@@ -471,7 +471,7 @@ function resolveSynchronizedAttackOnHqRetainChoice(
   const payload = {
     v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+    hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
     retainedCount: retainedIds.length,
     discardedCount: discardedIds.length,
     paidCredits: cost,

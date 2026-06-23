@@ -250,7 +250,7 @@ describe("hidden-zone search choice builders", () => {
     });
     expect(buildTemporaryProgramInstallSourceChoicePayload()).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_source_choice",
+      hiddenZoneAction: "temporary_program_install_source_choice",
       choiceVisibility: "runner_private",
     });
     expect(sneakProgram).toMatchObject({

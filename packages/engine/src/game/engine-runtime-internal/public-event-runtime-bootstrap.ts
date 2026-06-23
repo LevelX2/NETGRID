@@ -1034,7 +1034,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         ...(legalAction.payload ?? {}),
         v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+        hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       };
     },
   },
@@ -1063,7 +1063,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [SNEAK_PREVIEW_ID]: {
-    name: "onr_v1911_runner_event_sneak_preview_temporary_program_install",
+    name: "runner_event_temporary_program_install",
     canPlay: (state) =>
       temporaryProgramInstallSourceOptions(hiddenZoneSearchActivationTargetHost(state))
         .length > 0,
@@ -1074,12 +1074,12 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "sneak_preview_source_choice",
+        hiddenZoneAction: "temporary_program_install_source_choice",
       };
     },
   },
   [DEAL_WITH_MILITECH_ID]: {
-    name: "onr_v1912_runner_event_deal_with_militech_counters",
+    name: "runner_event_research_agenda_icebreaker_counters",
     canPlay: (state) => runnerStoleAgendaSubtypeThisTurn(state, "research"),
     resolve: (state, legalAction) => {
       resolveRunnerIcebreakerCounterEvent(state, legalAction);
@@ -1098,7 +1098,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [TERRORIST_REPRISAL_ID]: {
-    name: "onr_runner_event_terrorist_reprisal_hq_random_discard",
+    name: "runner_event_hq_random_discard",
     canPlay: (state) => corpScoredBlackOpsAgendaLastTurn(state),
     resolve: (state, legalAction) => {
       if (!corpScoredBlackOpsAgendaLastTurn(state)) {
@@ -1120,7 +1120,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [ALL_NIGHTER_ID]: {
-    name: "onr_runner_event_all_nighter_bonus_run",
+    name: "runner_event_bonus_run",
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1154,7 +1154,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [RUN_ACCESS_PRESSURE_EVENT_CARD_ID]: {
-    name: "onr_v1958_runner_event_social_engineering_secret_guess",
+    name: "runner_event_secret_spend_guess_targeted_bypass_run",
     canPlay: (state) => state.runner.credits >= 2,
     resolve: (state, legalAction) => {
       if (state.runner.credits < 2)
