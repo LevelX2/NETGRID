@@ -103,6 +103,32 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("documents the current gap for visible R&D trace tag ICE", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          ice: [hunterTraceTagIce("rd-hunter")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).not.toEqual(
+      expect.arrayContaining(["visible_trace_tag_hazard_unavoidable:true"]),
+    );
+  });
+
   it("does not treat unrezzed trace ice as an unavoidable visible R&D run lock", () => {
     const input = aiInput({
       credits: 4,
@@ -2162,6 +2188,32 @@ function aspTraceRunLockIce(instanceId: string): VisibleCard {
           unbrokenRunEffect: {
             createsRunLockOrActionTax: 1,
           },
+        },
+      ],
+    },
+  });
+}
+
+function hunterTraceTagIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_v1_249_hunter",
+    title: "Hunter",
+    type: "ice",
+    subtypes: ["sentry", "bloodhound"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          amount: 5,
         },
       ],
     },
