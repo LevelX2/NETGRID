@@ -156,15 +156,18 @@ import { applyPracticalTacticOverlay } from "./runtime/practical-tactic-overlay"
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
-  semanticRuntimeConfidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import {
-  semanticRuntimeScopeForAction,
   semanticRuntimeServerId,
   type SemanticRuntimeScopeDependencies,
 } from "./runtime/semantic-runtime-scope";
+import {
+  buildSemanticRuntimeChoices,
+  sortSemanticRuntimeChoices,
+  type SemanticRuntimeChoiceBuilderDependencies,
+} from "./runtime/semantic-runtime-choice-builder";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -3516,6 +3519,16 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
 };
+const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES: SemanticRuntimeChoiceBuilderDependencies =
+  {
+    scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
+    actionExclusion: semanticRuntimeActionExclusion,
+    scoreBreakdown: semanticRuntimeScoreBreakdown,
+    actionCreditCost,
+    evidence: semanticRuntimeEvidence,
+    explanation: semanticRuntimeExplanation,
+    compareAction,
+  };
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -3528,7 +3541,12 @@ function chooseSemanticRuntimeAction(
     lazyLegacyDecision,
     options,
     {
-      semanticRuntimeChoices,
+      semanticRuntimeChoices: (runtimeInput, actionSemanticCandidates) =>
+        buildSemanticRuntimeChoices(
+          runtimeInput,
+          actionSemanticCandidates,
+          SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES,
+        ),
       semanticRuntimeChoiceIsReactive,
       buildActionSemanticCandidates,
       getTacticalPlanMemorySnapshot,
@@ -3904,6 +3922,7 @@ function replaceSemanticRuntimeChoice(
     choices.map((choice) =>
       choice.action.actionId === adjusted.action.actionId ? adjusted : choice,
     ),
+    compareAction,
   );
 }
 
@@ -3943,40 +3962,6 @@ function runnerRunActionSpendingCapAssessment(
   return { ok: true, reason: "visible_cost_within_cap", visibleBreakCost };
 }
 
-function semanticRuntimeChoices(
-  input: AiDecisionInput,
-  actionSemanticCandidates: readonly ActionSemanticCandidate[] = [],
-): SemanticRuntimeChoice[] {
-  const candidatesByActionId = new Map(
-    actionSemanticCandidates.map((candidate) => [
-      candidate.actionId,
-      candidate,
-    ]),
-  );
-  return sortSemanticRuntimeChoices(
-    input.legalActions.map((action) =>
-      scoreSemanticRuntimeAction(
-        input,
-        action,
-        candidatesByActionId.get(action.actionId),
-      ),
-    ),
-  );
-}
-
-function sortSemanticRuntimeChoices(
-  choices: readonly SemanticRuntimeChoice[],
-): SemanticRuntimeChoice[] {
-  return choices
-    .slice()
-    .sort(
-      (left, right) =>
-        Number(Boolean(left.exclusion)) - Number(Boolean(right.exclusion)) ||
-        right.score - left.score ||
-        compareAction(left.action, right.action),
-    );
-}
-
 function deckCapabilitiesForInput(
   input: AiDecisionInput,
 ): DeckCapabilityProfile {
@@ -3994,65 +3979,6 @@ function runnerStrategicIntentForInput(
     (input as AiDecisionInputWithDeckCapabilities).ownRunnerStrategicIntent ??
     buildRunnerStrategicIntentProfile({ deckCapabilities })
   );
-}
-
-function chooseSemanticRuntimeChoice(
-  input: AiDecisionInput,
-): SemanticRuntimeChoice | undefined {
-  return semanticRuntimeChoices(input).find(
-    (candidate) => !candidate.exclusion && candidate.score > 0,
-  );
-}
-
-function scoreSemanticRuntimeAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  actionSemanticCandidate?: ActionSemanticCandidate,
-): SemanticRuntimeChoice {
-  const scopeId = semanticRuntimeScopeForAction(
-    input,
-    action,
-    actionSemanticCandidate,
-    SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
-  );
-  const exclusion = semanticRuntimeActionExclusion(input, action);
-  const scoreBreakdown = semanticRuntimeScoreBreakdown(
-    input,
-    action,
-    scopeId,
-    exclusion,
-    actionSemanticCandidate,
-  );
-  const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
-  return {
-    action,
-    scopeId,
-    ...(exclusion ? { exclusion } : {}),
-    reasonCode: `${input.side}.semantic.${scopeId}`,
-    explanation: semanticRuntimeExplanation(input.side, scopeId),
-    score,
-    evidence: [
-      `action_type:${action.type}`,
-      `semantic_scope:${scopeId}`,
-      `semantic_score:${score}`,
-      `credit_cost:${actionCreditCost(action)}`,
-      ...(actionSemanticCandidate
-        ? [
-            `action_semantic_candidate:${actionSemanticCandidate.semanticActionType}`,
-            `action_semantic_projection:${actionSemanticCandidate.primaryProjectionStatus}`,
-          ]
-        : []),
-      ...(exclusion
-        ? [
-            "semantic_excluded:true",
-            `semantic_exclusion:${exclusion.key}`,
-            `semantic_exclusion_reason:${exclusion.reason}`,
-          ]
-        : []),
-      ...semanticRuntimeEvidence(input, action, scopeId),
-    ],
-    confidence: semanticRuntimeConfidence(scopeId, score),
-  };
 }
 
 function semanticRuntimeDecisionDebug(

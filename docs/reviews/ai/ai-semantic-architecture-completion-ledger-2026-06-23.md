@@ -199,6 +199,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` zehnter Struktur-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-choice-builder.ts` kapselt Semantic-Runtime-Choice-Building, Candidate-Lookup, Score-Aggregation, Evidence-Basisfelder und Choice-Sortierung.
+  - `packages/ai/src/index.ts` liefert nur noch explizite ChoiceBuilder-Dependencies für Scope, Exclusion, ScoreBreakdown, Kosten, Evidence, Explanation und Action-Vergleich.
+  - `packages/ai/src/runtime/semantic-choice-ranking.ts` nutzt `semanticRuntimeServerId` aus dem neuen Scope-Modul statt einer lokalen Duplikation.
+  - `packages/ai/src/public-export-contract.test.ts` verbietet den öffentlichen Re-Export des neuen Runtime-Moduls.
+  - `packages/ai/src/index.ts` sank weiter von 35.748 auf 35.674 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts` grün, 65 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

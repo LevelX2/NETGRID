@@ -14,6 +14,7 @@ import type {
   SemanticRuntimeChoice,
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
+import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 
 // Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
 const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
@@ -239,11 +240,6 @@ function tacticalPlanRuntimeWithoutSelectedMapping(
     ...rest
   } = result;
   return rest;
-}
-
-function semanticRuntimeServerId(action: LegalAction): string | undefined {
-  const serverId = action.payload?.serverId;
-  return typeof serverId === "string" ? serverId : undefined;
 }
 
 function semanticRuntimeRecentRunnerStartRunsOnServer(
