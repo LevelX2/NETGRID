@@ -81,9 +81,9 @@ describe("visible run analysis known-path classification", () => {
         knownPathAssessment({ knownPathBlockedByMissingCoverage: true }),
       ),
     ).toBe(true);
-    expect(runnerKnownPathAssessmentIsKnownNoAccess(knownPathAssessment())).toBe(
-      false,
-    );
+    expect(
+      runnerKnownPathAssessmentIsKnownNoAccess(knownPathAssessment()),
+    ).toBe(false);
   });
 });
 
@@ -156,6 +156,31 @@ describe("visible run analysis trace hazards", () => {
       unavoidable: false,
     });
   });
+
+  it("projects Data Raven style visible trace tag and counter pressure", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [dataRavenTraceTagCounterIce("rd-data-raven")],
+      [],
+      2,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleTraceTagHazardUnavoidable: true,
+      expectedTagsFromVisibleIce: 1,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag_counter",
+      sourceTitle: "Data Raven",
+      traceBaseStrength: 5,
+      runnerTraceCapacity: 2,
+      expectedTags: 1,
+      expectedCounters: 1,
+      unavoidable: true,
+    });
+  });
 });
 
 function hunterTraceTagIce(instanceId: string): VisibleCard {
@@ -178,6 +203,33 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
+          amount: 5,
+        },
+      ],
+    },
+  };
+}
+
+function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_236_data-raven",
+    title: "Data Raven",
+    type: "ice",
+    subtypes: ["sentry"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_236_data-raven",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_236_data-raven",
+          sourceTitle: "Data Raven",
           amount: 5,
         },
       ],

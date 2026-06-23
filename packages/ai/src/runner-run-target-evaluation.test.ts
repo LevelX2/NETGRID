@@ -136,6 +136,73 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not price unrezzed R&D Hunter as a known trace tag hazard", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          ice: [{ ...hunterTraceTagIce("rd-hunter"), rezzed: false }],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      visibleTraceTagHazardUnavoidable: false,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_ice_hazard_penalty:0",
+        "visible_trace_tag_hazard_unavoidable:false",
+      ]),
+    );
+  });
+
+  it("keeps a visible remote agenda runnable through Hunter tag risk", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("remote_1", {
+          ice: [hunterTraceTagIce("remote-hunter")],
+          root: [
+            visibleCard("remote-agenda", {
+              definitionId: "simple_agenda",
+              title: "Simple Agenda",
+              type: "agenda",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-1", "remote_1"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "agenda",
+      recommendation: "run_now",
+      visibleTraceTagHazardUnavoidable: true,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_ice_hazard:trace_tag",
+        "visible_trace_tag_hazard_unavoidable:true",
+      ]),
+    );
+  });
+
   it("does not treat unrezzed trace ice as an unavoidable visible R&D run lock", () => {
     const input = aiInput({
       credits: 4,
