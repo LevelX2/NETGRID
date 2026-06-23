@@ -11606,9 +11606,10 @@ function baselineShellTradersPlanIsVisible(
     (candidate) => candidate.actionId === decision.actionId,
   );
   if (!action || action.type !== "trigger_ability") return false;
+  const ability = shellTradersAbility(action);
   if (
-    action.payload?.shellTradersAbility !== "set_aside_from_grip" &&
-    action.payload?.shellTradersAbility !== "remove_shell_counter"
+    ability !== "set_aside_from_grip" &&
+    ability !== "remove_shell_counter"
   )
     return false;
   if (action.source === "basic_action" || action.source === "game_rule")
@@ -16039,9 +16040,10 @@ function scoreRunnerAction(
       evidence.push("own_event_role_known", ...publicRoleEvidence(roles));
       break;
     case "trigger_ability":
-      if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+      const ability = shellTradersAbility(action);
+      if (ability === "set_aside_from_grip") {
         const counterAmount =
-          typeof action.payload.shellCounterAmount === "number"
+          typeof action.payload?.shellCounterAmount === "number"
             ? action.payload.shellCounterAmount
             : 0;
         const targetRoles = shellTradersTargetRoles(input, action);
@@ -16086,11 +16088,9 @@ function scoreRunnerAction(
           `shell_traders_direct_install_penalty:${directInstallPenalty}`,
           `shell_traders_immediate_remove:${immediateRemoveAvailable}`,
         );
-      } else if (
-        action.payload?.shellTradersAbility === "remove_shell_counter"
-      ) {
+      } else if (ability === "remove_shell_counter") {
         const remaining =
-          typeof action.payload.remainingCounters === "number"
+          typeof action.payload?.remainingCounters === "number"
             ? action.payload.remainingCounters
             : 1;
         score = remaining <= 1 ? 650 : 360;
@@ -18102,10 +18102,20 @@ function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
   return input.legalActions.some(
     (action) =>
       action.type === "trigger_ability" &&
-      action.payload?.shellTradersAbility === "remove_shell_counter" &&
-      typeof action.payload.remainingCountersBefore === "number" &&
+      shellTradersAbility(action) === "remove_shell_counter" &&
+      typeof action.payload?.remainingCountersBefore === "number" &&
       action.payload.remainingCountersBefore <= 1,
   );
+}
+
+function shellTradersAbility(action: LegalAction): string | undefined {
+  const payload = action.payload;
+  if (!payload) return undefined;
+  return typeof payload.delayedInstallAbility === "string"
+    ? payload.delayedInstallAbility
+    : typeof payload.shellTradersAbility === "string"
+      ? payload.shellTradersAbility
+      : undefined;
 }
 
 function shellTradersPrepareBaselinePenalty(
