@@ -914,7 +914,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-open-ended-mileage-program",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_open_ended_mileage_program",
+          id: "onr_v1_runner_card_implementation_paid_source_return_to_grip_program",
           name: "O:NR V1.9.22 Open-Ended Mileage Program",
           cards: [
             { id: "onr_v1_102_open-ended-mileage-program", quantity: 1 },
@@ -973,7 +973,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.runner.tags).toBe(0);
     expect(state.pendingChoice?.source).toContain(
-      "v1922.open_ended_mileage_return",
+      "card_implementation.paid_source_return_to_grip",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(state.runner.heap).toContain(eventCardId);

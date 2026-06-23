@@ -284,7 +284,7 @@ function startReturnSourceToGripIfPaidChoice(
       },
     };
   }
-  host.callbacks.startOpenEndedMileageProgramReturnChoice(state, sourceCardId);
+  host.callbacks.startPaidSourceReturnToGripChoice(state, sourceCardId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerEventAbility: "remove_tag_optional_return",

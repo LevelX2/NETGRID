@@ -586,7 +586,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.actionId === legal.actionId);
     expect(state.runner.tags).toBe(0);
-    expect(state.pendingChoice?.source).toContain("v1922.open_ended_mileage_return");
+    expect(state.pendingChoice?.source).toContain("card_implementation.paid_source_return_to_grip");
     state = applyChoice(state, "runner", "pay_1_return_to_grip");
     expect(state.runner.grip).toContain(eventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({

@@ -255,7 +255,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         publicPayload: { trashedCardsCount: 2 },
       }),
       rezCostForCard: () => 0,
-      startOpenEndedMileageProgramReturnChoice: () => {
+      startPaidSourceReturnToGripChoice: () => {
         calls.push("return_choice");
       },
       startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {

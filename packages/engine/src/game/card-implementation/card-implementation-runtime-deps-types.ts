@@ -120,7 +120,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     trashTopCorpRdCards: CardImplementationRuntimeDependencies["trashTopCorpRdCards"];
     rezCostForCard: CardImplementationRuntimeDependencies["rezCostForCard"];
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: CardImplementationRuntimeDependencies["startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice"];
-    startOpenEndedMileageProgramReturnChoice: (
+    startPaidSourceReturnToGripChoice: (
       state: RuntimeState,
       sourceCardId: CardInstanceId,
     ) => void;

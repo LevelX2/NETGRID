@@ -669,17 +669,17 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
-  function startOpenEndedMileageProgramReturnChoice(
+  function startPaidSourceReturnToGripChoice(
     state: GameState,
     sourceCardId: string,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     state.pendingChoice = {
-      choiceId: `v1922_open_ended_mileage_${state.stateVersion + 1}`,
+      choiceId: `card_implementation_paid_source_return_to_grip_${state.stateVersion + 1}`,
       side: "runner",
-      source: `v1922.open_ended_mileage_return:${sourceCardId}`,
-      prompt: "Open-Ended Mileage Program zuruecknehmen?",
+      source: `card_implementation.paid_source_return_to_grip:${sourceCardId}`,
+      prompt: "Quelle zuruecknehmen?",
       kind: "select_option",
       options: [
         {
@@ -702,17 +702,17 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
-  function resolveOpenEndedMileageProgramReturnChoice(
+  function resolvePaidSourceReturnToGripChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1922.open_ended_mileage_return"))
-      throw new Error("Es ist keine V1.9.22-Open-Ended-Mileage-Choice offen.");
+    if (!choice || !choice.source.startsWith("card_implementation.paid_source_return_to_grip"))
+      throw new Error("Es ist keine Ruecknahme-Choice offen.");
     const [, sourceCardId] = choice.source.split(":");
     if (!sourceCardId)
-      throw new Error("Open-Ended Mileage Program hat keine Quellkarte.");
+      throw new Error("Die Ruecknahme-Choice hat keine Quellkarte.");
     const selectedOptionIds = Array.isArray(
       playerAction.selectedChoices?.selectedOptionIds,
     )
@@ -723,10 +723,10 @@ export function createHiddenZoneNonSearchRuntime(
     const selectedOptionId = selectedOptionIds[0] ?? "";
     if (selectedOptionId === "pay_1_return_to_grip") {
       if (!state.runner.heap.includes(sourceCardId))
-        throw new Error("Open-Ended Mileage Program liegt nicht im Heap.");
+        throw new Error("Die Quellkarte liegt nicht im Heap.");
       if (state.runner.credits < 1)
         throw new Error(
-          "Der Runner kann Open-Ended Mileage Program nicht bezahlen.",
+          "Der Runner kann die Ruecknahme nicht bezahlen.",
         );
       spendCredits(state, "runner", 1);
       removeFromAllZones(state, sourceCardId);
@@ -1417,7 +1417,7 @@ export function createHiddenZoneNonSearchRuntime(
     resolveForgedActivationOrdersTargetChoice,
     resolveGripInstallTemporaryCreditChoice,
     resolveIncubatorTransformChoice,
-    resolveOpenEndedMileageProgramReturnChoice,
+    resolvePaidSourceReturnToGripChoice,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
@@ -1429,7 +1429,7 @@ export function createHiddenZoneNonSearchRuntime(
     startAnonymousTipDerezBlackIceChoice,
     startCoreCommandJettisonIceChoice,
     startForgedActivationOrdersTargetChoice,
-    startOpenEndedMileageProgramReturnChoice,
+    startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
     startSecurityCodeWormChipTrashIceChoice,
   };

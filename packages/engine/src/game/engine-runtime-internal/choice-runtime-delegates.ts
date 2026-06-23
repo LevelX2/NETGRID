@@ -251,19 +251,19 @@ export function resolveSecurityCodeWormChipTrashIceChoice(...args: any[]): any {
   )(...args);
 }
 
-export function startOpenEndedMileageProgramReturnChoice(...args: any[]): any {
+export function startPaidSourceReturnToGripChoice(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "startOpenEndedMileageProgramReturnChoice",
+    "startPaidSourceReturnToGripChoice",
   )(...args);
 }
 
-export function resolveOpenEndedMileageProgramReturnChoice(
+export function resolvePaidSourceReturnToGripChoice(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveOpenEndedMileageProgramReturnChoice",
+    "resolvePaidSourceReturnToGripChoice",
   )(...args);
 }
 

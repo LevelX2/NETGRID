@@ -191,8 +191,8 @@ function pendingChoiceHost(
       resolveStackInstallRunCleanupChoice: unexpected(
         "resolveStackInstallRunCleanupChoice",
       ),
-      resolveOpenEndedMileageProgramReturnChoice: unexpected(
-        "resolveOpenEndedMileageProgramReturnChoice",
+      resolvePaidSourceReturnToGripChoice: unexpected(
+        "resolvePaidSourceReturnToGripChoice",
       ),
       resolveRunnerHostingChoice: unexpected("resolveRunnerHostingChoice"),
       resolveIncubatorTransformChoice: unexpected("resolveIncubatorTransformChoice"),

@@ -42,7 +42,7 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
     resolveGripInstallTemporaryCreditChoice: HostFn<void>;
     resolveStackInstallRunCleanupChoice: HostFn<void>;
-    resolveOpenEndedMileageProgramReturnChoice: HostFn<void>;
+    resolvePaidSourceReturnToGripChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
     resolveCodeViralCachePurgeChoice: HostFn<void>;
@@ -159,8 +159,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveGripInstallTemporaryCreditChoice;
   const resolveStackInstallRunCleanupChoice =
     host.hiddenZone.resolveStackInstallRunCleanupChoice;
-  const resolveOpenEndedMileageProgramReturnChoice =
-    host.hiddenZone.resolveOpenEndedMileageProgramReturnChoice;
+  const resolvePaidSourceReturnToGripChoice =
+    host.hiddenZone.resolvePaidSourceReturnToGripChoice;
   const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
   const resolveIncubatorTransformChoice =
     host.hiddenZone.resolveIncubatorTransformChoice;
@@ -461,9 +461,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")
+    state.pendingChoice.source.startsWith("card_implementation.paid_source_return_to_grip")
   ) {
-    resolveOpenEndedMileageProgramReturnChoice(state, legalAction, playerAction);
+    resolvePaidSourceReturnToGripChoice(state, legalAction, playerAction);
     return;
   }
   if (
