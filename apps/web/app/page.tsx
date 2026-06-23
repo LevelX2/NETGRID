@@ -170,15 +170,12 @@ import {
   summarizeCatalogBlockStatusFilters,
   summarizeCatalogAiHintFilters,
   type CatalogAiHintFilterKey,
-  type CatalogAiInspectorSummary,
   type CatalogBlockStatusFilterKey,
   type CatalogSetIdFilterOption,
   type CatalogRarityFilterKey,
   type CatalogStatusKey,
-  type CatalogStatuses,
   type CatalogTypeFilterState
 } from "./catalog-ui";
-import { type CatalogAiInspector } from "./ai-hint-inspector-ui";
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
@@ -274,6 +271,7 @@ import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { UndoPanel } from "../features/app-shell/UndoPanel";
 import { OptionsPanel } from "../features/settings/OptionsPanel";
 import { CatalogPanel } from "../features/catalog/CatalogPanel";
+import type { CatalogCardDetail, CatalogCardSummary, CatalogListResponse } from "../features/catalog/catalog-types";
 import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
 import { DeckMetadataLine, DeckSlotSelect } from "../features/decks/DeckSelectionControls";
 import {
@@ -479,62 +477,6 @@ type LifecycleActionResponse =
 type RetentionProtectionResponse =
   | { ok: true; payload: ClientPayload | LobbyClientPayload }
   | { ok?: false; error: { message: string } };
-
-type CatalogCardSummary = {
-  catalogCardId: string;
-  title: string;
-  side: Side;
-  type: string;
-  subtypes: string[];
-  faction: string;
-  setId: string;
-  rarity?: {
-    code: string;
-    labelDe: string;
-    labelEn?: string;
-    sourceValue?: string;
-    sourceId?: string;
-  };
-  statuses: CatalogStatuses;
-  blockReasons: string[];
-  aiInspectorSummary?: CatalogAiInspectorSummary | null;
-};
-
-type CatalogCardDetail = CatalogCardSummary & {
-  setName: string;
-  collectorNumber: string;
-  text: string;
-  numeric: Record<string, number | null>;
-  engineCardId: string | null;
-  aiHints?: CatalogAiHints | null;
-  aiInspector?: CatalogAiInspector | null;
-};
-
-type DeckBuilderCardDetail = CatalogCardDetail & {
-  definitionId?: string;
-};
-
-type CatalogAiHints = {
-  roles: string[];
-  planRoles: string[];
-  requiredMechanics: string[];
-  valueHints: Record<string, number>;
-  riskTags: string[];
-  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
-  scenarioRefs: string[];
-};
-
-type CatalogListResponse = {
-  snapshotId: string;
-  snapshotHash: string;
-  cards: CatalogCardSummary[];
-  filters: {
-    sides: Side[];
-    types: string[];
-    statuses: CatalogStatusKey[];
-  };
-  summary: Partial<Record<CatalogStatusKey, number>>;
-};
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
