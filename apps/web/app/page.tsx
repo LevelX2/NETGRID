@@ -71,10 +71,7 @@ import type {
   VisibleCard,
   Winner,
 } from "@netgrid/shared";
-import {
-  formatChronicleEvent,
-  type ChronicleItem
-} from "./chronicle";
+import { formatChronicleEvent } from "./chronicle";
 import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-ui";
 import {
   actionSoundCountForAction,
@@ -370,6 +367,7 @@ import {
 import { LegalActionsPanel } from "../features/actions/LegalActionsPanel";
 import { DamageImpactOverlay } from "../features/actions/DamageImpactOverlay";
 import { OpponentActionOverlay } from "../features/actions/OpponentActionOverlay";
+import { OpponentCueTitle } from "../features/actions/OpponentCueTitle";
 import { FloatingActionPanelOverlay } from "../features/actions/FloatingActionPanelOverlay";
 import {
   AccessRevealModal,
@@ -387,7 +385,6 @@ import { eventActionType, localActionSoundKey, localActionSoundKind, publicEvent
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { recentSessionHeadline, recentSessionStatusLabel } from "../features/recent/recent-session-labels";
-import { ChronicleCardTrigger } from "../features/chronicle/ChronicleCardTrigger";
 import { ChroniclePanel, chronicleContextByEventId } from "../features/chronicle/ChroniclePanel";
 import {
   FloatingAiDecisionDebugOverlay,
@@ -5234,53 +5231,5 @@ export default function Page() {
     </CardTooltipSettingsContext.Provider>
     </CardImagePreferenceContext.Provider>
     </CardScaleSettingsContext.Provider>
-  );
-}
-function OpponentCueTitle({
-  cue,
-  card,
-  previewCard,
-  displayMode,
-  onFocusCard
-}: {
-  cue: OpponentActionCue;
-  card: CatalogCardDetail | null;
-  previewCard: DisplayVisibleCard | null;
-  displayMode: CardDisplayMode;
-  onFocusCard(card: DisplayVisibleCard): void;
-}) {
-  if (!cue.cardTitle) return <>{cue.title}</>;
-  const index = cue.title.indexOf(cue.cardTitle);
-  if (index < 0) return <>{cue.title}</>;
-  const item: ChronicleItem = {
-    id: cue.eventId,
-    category: cue.actionType === "continue_run" ? "run" : "card",
-    importance: cue.importance,
-    visibility: cue.visibility,
-    ...(cue.actor ? { actor: cue.actor } : {}),
-    title: cue.title,
-    ...(cue.description ? { description: cue.description } : {}),
-    chips: [],
-    ...(cue.cardDefinitionId ? { cardDefinitionId: cue.cardDefinitionId } : {}),
-    cardTitle: cue.cardTitle,
-    cardDetailLines: [],
-    groupLabel: cue.actorLabel
-  };
-  return (
-    <>
-      {cue.title.slice(0, index)}
-      <ChronicleCardTrigger
-        className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`}
-        card={card}
-        item={item}
-        displayMode={displayMode}
-        disabled={!previewCard}
-        title={cue.cardTitle}
-        onClick={() => previewCard && onFocusCard(previewCard)}
-      >
-        {cue.cardTitle}
-      </ChronicleCardTrigger>
-      {cue.title.slice(index + cue.cardTitle.length)}
-    </>
   );
 }
