@@ -727,7 +727,7 @@ function trashAccessedCard(
     cardId as CardInstanceId,
   );
   if (legalAction && overrideCost === undefined) {
-    const scatterShotSpent =
+    const upgradeTrashRecurringCreditsSpent =
       definition.type === "upgrade" ? trashPayment.recurringSpent : 0;
     const poltergeistSpent =
       definition.type === "asset" ? trashPayment.recurringSpent : 0;
@@ -743,11 +743,11 @@ function trashAccessedCard(
             accessTrashCostSourceTitles: effectiveCost.sourceTitles.join(","),
           }
         : {}),
-      ...(scatterShotSpent > 0
+      ...(upgradeTrashRecurringCreditsSpent > 0
         ? {
             v1922RunnerProgramAbility:
-              "scatter_shot_upgrade_trash_recurring_credit",
-            scatterShotRecurringCreditsSpent: scatterShotSpent,
+              "upgrade_trash_recurring_credit",
+            upgradeTrashRecurringCreditsSpent: upgradeTrashRecurringCreditsSpent,
             runnerCreditsSpent: trashPayment.runnerCreditsSpent,
           }
         : {}),

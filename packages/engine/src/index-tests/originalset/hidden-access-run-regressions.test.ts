@@ -1580,14 +1580,14 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(state, "runner", (action) => action.type === "access_card");
     const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
     expect(trash.payload).toMatchObject({
-      v1922RunnerProgramAbility: "scatter_shot_upgrade_trash_recurring_credit",
-      scatterShotRecurringCreditsAvailable: 2,
+      v1922RunnerProgramAbility: "upgrade_trash_recurring_credit",
+      upgradeTrashRecurringCreditsAvailable: 2,
     });
     state = apply(state, "runner", (action) => action.actionId === trash.actionId);
     expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(1);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      scatterShotRecurringCreditsSpent: 1,
+      upgradeTrashRecurringCreditsSpent: 1,
       runnerCreditsSpent: 0,
     });
     expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(true);
