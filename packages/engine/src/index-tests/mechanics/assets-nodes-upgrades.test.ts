@@ -2725,9 +2725,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       traceStep: "corp_bid",
       corpBid: 6,
       corpCreditBid: 3,
-      parisCityGridPoolSpent: 3,
-      parisCityGridPoolRemaining: 0,
-      parisCityGridPoolServerId: "remote_1",
+      fortTraceBitPoolSpent: 3,
+      fortTraceBitPoolRemaining: 0,
+      fortTraceBitPoolServerId: "remote_1",
     });
     traceState = applyChoice(traceState, "runner", "bid_0");
     expect(traceState.runner.tags).toBe(1);

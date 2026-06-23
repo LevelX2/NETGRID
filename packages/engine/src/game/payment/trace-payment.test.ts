@@ -76,9 +76,9 @@ describe("trace payment pools", () => {
     expect(payload).toMatchObject({
       corpBid: 6,
       corpCreditBid: 2,
-      parisCityGridPoolSpent: 2,
-      parisCityGridPoolRemaining: 0,
-      parisCityGridPoolServerId: "remote_1",
+      fortTraceBitPoolSpent: 2,
+      fortTraceBitPoolRemaining: 0,
+      fortTraceBitPoolServerId: "remote_1",
       recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
       traceHostedCreditBoost: 1,

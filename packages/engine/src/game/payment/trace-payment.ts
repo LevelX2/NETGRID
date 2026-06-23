@@ -839,9 +839,9 @@ export function corpTracePaymentPublicPayload(
     corpCreditBid: receipt.corpCreditsSpent,
     ...(receipt.fortTraceBitPoolSpent > 0
       ? {
-          parisCityGridPoolSpent: receipt.fortTraceBitPoolSpent,
-          parisCityGridPoolRemaining: receipt.fortTraceBitPoolRemaining ?? 0,
-          parisCityGridPoolServerId: receipt.fortTraceBitPoolServerId,
+          fortTraceBitPoolSpent: receipt.fortTraceBitPoolSpent,
+          fortTraceBitPoolRemaining: receipt.fortTraceBitPoolRemaining ?? 0,
+          fortTraceBitPoolServerId: receipt.fortTraceBitPoolServerId,
         }
       : {}),
     ...(receipt.corpTraceBitsSpent > 0

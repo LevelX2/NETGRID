@@ -200,11 +200,11 @@ export function startTraceFromOperation(
     ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
-          parisCityGridPoolAvailable: host.counters.cardCounter(
+          fortTraceBitPoolAvailable: host.counters.cardCounter(
             fortTraceBitPoolSource.cardId,
             "bit",
           ),
-          parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
+          fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
   };

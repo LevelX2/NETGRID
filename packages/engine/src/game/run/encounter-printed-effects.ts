@@ -333,8 +333,8 @@ export function startTraceFromPrintedSubroutine(
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(fortTraceBitPoolSource
         ? {
-            parisCityGridPoolAvailable: fortTraceBits,
-            parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
+            fortTraceBitPoolAvailable: fortTraceBits,
+            fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
             sourceDefinitionId: sourceDefinition.id,
           }
         : {}),
