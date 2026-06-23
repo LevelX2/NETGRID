@@ -14,7 +14,6 @@ import {
   FlaskConical,
   Award,
   Image,
-  Keyboard,
   Layers3,
   Link2,
   ListFilter,
@@ -403,18 +402,16 @@ import {
 } from "../features/debug/AiDecisionDebugOverlay";
 import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
+import { MatchJoinConsole } from "../features/match-start/MatchJoinConsole";
 import { MatchStartChoiceSections } from "../features/match-start/MatchStartChoiceSections";
 import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
 import {
-  formatLobbyTime,
   isInvalidatingTerminalStatus,
   matchFormatLabel,
-  openMatchAgeLabel,
   playerSlotForSide,
   resultReasonLabel,
   seriesStatusText,
   shouldForgetRecoveryStatus,
-  shortMatchId
 } from "../features/match-start/lobby-format";
 import {
   centralServerCountLabel,
@@ -3710,98 +3707,41 @@ export default function Page() {
                 {simulation ? <SimulationResult summary={simulation} /> : null}
               </div>
             ) : (
-              <div className="matchStartConsole joinConsole">
-                <section className="openLanMatchesPanel" aria-label="Offene Spiele im LAN" data-testid="open-lan-panel">
-                  <div className="openLanMatchesHeader">
-                    <p className="eyebrow">Offene Spiele im LAN</p>
-                    <button className="button" onClick={() => void refreshOpenLanMatches()} type="button" disabled={openLanLoading} data-testid="refresh-open-lan">
-                      <RotateCcw size={14} />
-                      Aktualisieren
-                    </button>
-                  </div>
-                  <p className="openLanNotice" data-testid="open-lan-scope-note">
-                    Hier erscheinen nur private Duelle (Mensch gegen Mensch) mit aktivierter LAN-Sichtbarkeit.
-                  </p>
-                  {openLanError ? (
-                    <p className="notice openLanNotice" role="status">
-                      {openLanError}
-                    </p>
-                  ) : null}
-                  {openLanMatches.length === 0 ? (
-                    <p className="openLanEmpty">{openLanLoading ? "Lade offene Spiele ..." : "Keine offenen Spiele gefunden."}</p>
-                  ) : (
-                    <ul className="openLanList" data-testid="open-lan-list">
-                      {openLanMatches.map((entry) => (
-                        <li key={entry.matchId}>
-                          <button
-                            className={`openLanEntry ${joinMatchIdTrimmed === entry.matchId && joinTokenTrimmed.length === 0 ? "selected" : ""}`}
-                            onClick={() => selectOpenLanMatch(entry.matchId)}
-                            type="button"
-                          >
-                            <strong>{shortMatchId(entry.matchId)}</strong>
-                            <small>
-                              {entry.hostDisplayName} · Mensch vs Mensch · Status: wartend · Alter: {openMatchAgeLabel(entry.ageSeconds)}
-                            </small>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {openLanUpdatedAt ? <p className="openLanTimestamp">Zuletzt aktualisiert: {formatLobbyTime(openLanUpdatedAt)}</p> : null}
-                </section>
-                <label className="joinLinkField">
-                  Join-Link
-                  <input value={joinLinkInput} onChange={(event) => updateJoinLinkInput(event.target.value)} data-testid="join-link-input" />
-                </label>
-                <label>
-                  Name
-                  <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
-                </label>
-                <div className="deckSlotGrid">
-                  <DeckSlotSelect
-                    label="Dein Runner-Deck"
-                    snapshots={runnerSnapshots}
-                    localDecks={matchStartLocalDecks.filter((deck) => deck.side === "runner")}
-                    source={participantBRunnerDeckSource}
-                    selectedSnapshotId={selectedParticipantBRunnerSnapshotId}
-                    selectedLocalDeckId={selectedParticipantBRunnerLocalDeckId}
-                    onSource={setParticipantBRunnerDeckSource}
-                    onSnapshot={setSelectedParticipantBRunnerSnapshotId}
-                    onLocalDeck={setSelectedParticipantBRunnerLocalDeckId}
-                  />
-                  <DeckSlotSelect
-                    label="Dein Korp-Deck"
-                    snapshots={corpSnapshots}
-                    localDecks={matchStartLocalDecks.filter((deck) => deck.side === "corp")}
-                    source={participantBCorpDeckSource}
-                    selectedSnapshotId={selectedParticipantBCorpSnapshotId}
-                    selectedLocalDeckId={selectedParticipantBCorpLocalDeckId}
-                    onSource={setParticipantBCorpDeckSource}
-                    onSnapshot={setSelectedParticipantBCorpSnapshotId}
-                    onLocalDeck={setSelectedParticipantBCorpLocalDeckId}
-                  />
-                </div>
-                <details className="advancedMatchOptions" data-testid="manual-join-options">
-                  <summary>
-                    <Keyboard size={15} />
-                    Manuell eingeben
-                  </summary>
-                  <div className="formGrid advancedMatchGrid">
-                    <label>
-                      Match
-                      <input value={joinMatchId} onChange={(event) => setJoinMatchId(event.target.value)} />
-                    </label>
-                    <label>
-                      Token
-                      <input value={joinToken} onChange={(event) => setJoinToken(event.target.value)} />
-                    </label>
-                  </div>
-                </details>
-                <button className="button primary wide" onClick={joinMatch} disabled={!canSubmitJoin} data-testid="join-match">
-                  <Link2 size={16} />
-                  Mit Decks beitreten
-                </button>
-              </div>
+              <MatchJoinConsole
+                openLanMatches={openLanMatches}
+                openLanLoading={openLanLoading}
+                openLanError={openLanError}
+                openLanUpdatedAt={openLanUpdatedAt}
+                joinMatchIdTrimmed={joinMatchIdTrimmed}
+                joinTokenTrimmed={joinTokenTrimmed}
+                joinLinkInput={joinLinkInput}
+                displayName={displayName}
+                runnerSnapshots={runnerSnapshots}
+                corpSnapshots={corpSnapshots}
+                localDecks={matchStartLocalDecks}
+                participantBRunnerDeckSource={participantBRunnerDeckSource}
+                participantBCorpDeckSource={participantBCorpDeckSource}
+                selectedParticipantBRunnerSnapshotId={selectedParticipantBRunnerSnapshotId}
+                selectedParticipantBCorpSnapshotId={selectedParticipantBCorpSnapshotId}
+                selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
+                selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
+                joinMatchId={joinMatchId}
+                joinToken={joinToken}
+                canSubmitJoin={canSubmitJoin}
+                onRefreshOpenLanMatches={() => void refreshOpenLanMatches()}
+                onSelectOpenLanMatch={selectOpenLanMatch}
+                onJoinLinkInput={updateJoinLinkInput}
+                onDisplayName={updateDisplayName}
+                onParticipantBRunnerDeckSource={setParticipantBRunnerDeckSource}
+                onParticipantBCorpDeckSource={setParticipantBCorpDeckSource}
+                onSelectedParticipantBRunnerSnapshotId={setSelectedParticipantBRunnerSnapshotId}
+                onSelectedParticipantBCorpSnapshotId={setSelectedParticipantBCorpSnapshotId}
+                onSelectedParticipantBRunnerLocalDeckId={setSelectedParticipantBRunnerLocalDeckId}
+                onSelectedParticipantBCorpLocalDeckId={setSelectedParticipantBCorpLocalDeckId}
+                onJoinMatchId={setJoinMatchId}
+                onJoinToken={setJoinToken}
+                onJoinMatch={joinMatch}
+              />
             )}
           </section>
           ) : null}
