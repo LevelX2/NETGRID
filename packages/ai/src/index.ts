@@ -171,6 +171,9 @@ import {
   runnerRunActionSpendingCapAssessment,
   runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
 } from "./runtime/runner-run-only-action-adjustment";
+import {
+  runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
+} from "./runtime/runner-self-damage-choice";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -3563,7 +3566,10 @@ function chooseSemanticRuntimeAction(
       bestSemanticRuntimeChoice,
       bestSemanticRuntimeChoiceForTacticalPlanOverride,
       tacticalPlanMappedChoice,
-      runnerSelfDamageImmediateWinSemanticChoice,
+      runnerSelfDamageImmediateWinSemanticChoice: (runtimeInput, choices) =>
+        buildRunnerSelfDamageImmediateWinSemanticChoice(runtimeInput, choices, {
+          survivalAssessment: runnerSelfDamageSurvivalAssessment,
+        }),
       semanticRuntimeChoiceWithEvidence,
       tacticalPlanMappingOverrideEvidence,
       tacticalPlanRuntimeAlignedToChoice,
@@ -3821,27 +3827,6 @@ function runnerRunPayoffCompletionCandidate(
       `credits_after_run:${evaluation.creditsAfterRun}`,
     ],
   };
-}
-
-function runnerSelfDamageImmediateWinSemanticChoice(
-  input: AiDecisionInput,
-  choices: readonly SemanticRuntimeChoice[],
-): SemanticRuntimeChoice | undefined {
-  if (input.side !== "runner") return undefined;
-  const choice = bestSemanticRuntimeChoice(
-    choices.filter((candidate) => {
-      if (candidate.exclusion) return false;
-      return runnerSelfDamageSurvivalAssessment(input, candidate.action)
-        ?.immediateWinByAction;
-    }),
-  );
-  if (!choice) return undefined;
-  return semanticRuntimeChoiceWithEvidence(choice, {
-    reasonCode: "runner.self_damage.immediate_win",
-    explanation:
-      "Der Runner darf eine Self-Damage-Aktion waehlen, wenn dieselbe Aktion sofort gewinnt.",
-    evidence: ["self_damage_immediate_win_selected:true"],
-  });
 }
 
 function deckCapabilitiesForInput(
