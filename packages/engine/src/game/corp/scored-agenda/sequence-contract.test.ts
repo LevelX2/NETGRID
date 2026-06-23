@@ -39,8 +39,8 @@ describe("scored agenda sequence contract matrix", () => {
       "corporate_downsizing_score_start",
       "hq_to_new_remote_install_rez_score_start",
       "scored_agenda_free_rez_score_start",
+      "scored_fort_ice_strength_bonus_score_start",
       "scored_rezzed_ice_mark_modifier_score_start",
-      "security_net_optimization_score_start",
       "subtype_reveal_economy_score_start",
     ]);
     expect(
@@ -80,7 +80,7 @@ describe("scored agenda sequence contract matrix", () => {
       },
       {
         kind: "choose_fort_ice_strength_bonus",
-        id: "security_net_optimization_score_start",
+        id: "scored_fort_ice_strength_bonus_score_start",
       },
     ] as const;
 

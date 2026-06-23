@@ -1270,9 +1270,11 @@ export function publicContextForAction(
     context.ambushSkippedReason = legalAction.payload.ambushSkippedReason;
   if (typeof legalAction.payload?.onScoreGainCredits === "number")
     context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
-  if (typeof legalAction.payload?.securityNetOptimizationServerId === "string")
-    context.securityNetOptimizationServerId =
-      legalAction.payload.securityNetOptimizationServerId;
+  if (
+    typeof legalAction.payload?.scoredFortIceStrengthBonusServerId === "string"
+  )
+    context.scoredFortIceStrengthBonusServerId =
+      legalAction.payload.scoredFortIceStrengthBonusServerId;
   if (typeof legalAction.payload?.selectedServerId === "string")
     context.selectedServerId = legalAction.payload.selectedServerId;
   if (typeof legalAction.payload?.selectedServerLabel === "string")

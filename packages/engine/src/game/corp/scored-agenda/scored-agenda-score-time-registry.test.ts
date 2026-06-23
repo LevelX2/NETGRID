@@ -31,7 +31,7 @@ describe("scored agenda score-time registry", () => {
       scored_rezzed_ice_mark_modifier_score_start: "choice_start",
       scored_agenda_free_rez_score_start: "delegated_host_choice",
       agenda_purge_score_start: "immediate_effect",
-      security_net_optimization_score_start: "immediate_effect",
+      scored_fort_ice_strength_bonus_score_start: "immediate_effect",
       subtype_reveal_economy_score_start: "choice_start",
     });
   });
@@ -61,7 +61,7 @@ describe("scored agenda score-time registry", () => {
       findScoredAgendaScoreTimeResolver({
         kind: "choose_fort_ice_strength_bonus",
       } as never)?.id,
-    ).toBe("security_net_optimization_score_start");
+    ).toBe("scored_fort_ice_strength_bonus_score_start");
     expect(findScoredAgendaScoreTimeResolver(undefined)).toBeUndefined();
   });
 });

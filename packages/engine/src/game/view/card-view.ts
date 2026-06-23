@@ -30,7 +30,6 @@ import { serverChoiceDisplayLabel } from "./server-view";
 
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
-const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
   COCKROACH_ID,
@@ -1133,12 +1132,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       continue;
     }
     if (!scoredAgenda) {
-      if (
-        agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
-        iceServerId &&
-        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
-      )
-        bonus += 1;
       if (
         agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
         iceSubtypes.includes("code_gate")
