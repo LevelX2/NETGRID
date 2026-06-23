@@ -26,9 +26,9 @@ type PublicEffectPayload = Record<string, string | number | boolean>;
 
 type RunnerDrawSummaryForCardImplementation = {
   drawnCount: number;
-  citySurveillanceSourceCount: number;
-  citySurveillanceCreditsPaid: number;
-  citySurveillanceTagsAdded: number;
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
 };
 
 export type CardImplementationEffectAdapterHost = {

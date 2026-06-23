@@ -12,7 +12,7 @@ import {
   addCorpActionDebt,
   handleTurnBasicExecution,
   purgeVirusCounters,
-  type CitySurveillanceDrawDecision,
+  type DrawTaxDecision,
   type TurnBasicExecutionHost,
   type TurnBasicRunnerDrawSummary,
 } from "./turn-basic-execution";
@@ -369,7 +369,7 @@ function drawCorpCardForTest(state: GameState): void {
 function drawRunnerCardsForTest(
   state: GameState,
   amount: number,
-  _decision?: CitySurveillanceDrawDecision,
+  _decision?: DrawTaxDecision,
 ): TurnBasicRunnerDrawSummary {
   const drawnCardIds: CardInstanceId[] = [];
   for (let index = 0; index < amount; index += 1) {
@@ -385,9 +385,9 @@ function drawRunnerCardsForTest(
   return {
     drawnCount: drawnCardIds.length,
     drawnCardIds,
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
+    drawTaxSourceCount: 0,
+    drawTaxCreditsPaid: 0,
+    drawTaxTagsAdded: 0,
   };
 }
 

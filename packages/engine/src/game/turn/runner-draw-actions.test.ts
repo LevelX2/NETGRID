@@ -11,7 +11,7 @@ describe("runner draw main actions", () => {
     });
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 0,
+      drawTaxSourceCount: 0,
       projectedDrawCount: 1,
     });
 
@@ -39,7 +39,7 @@ describe("runner draw main actions", () => {
     state.runner.credits = 3;
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 1,
+      drawTaxSourceCount: 1,
       projectedDrawCount: 2,
     });
 
@@ -80,7 +80,7 @@ describe("runner draw main actions", () => {
     state.runner.credits = 1;
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 2,
+      drawTaxSourceCount: 2,
       projectedDrawCount: 1,
     });
 

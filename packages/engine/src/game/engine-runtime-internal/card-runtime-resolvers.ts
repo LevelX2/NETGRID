@@ -125,9 +125,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -206,10 +204,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -244,9 +239,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -402,9 +395,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -420,18 +411,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -628,9 +611,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -1179,232 +1160,313 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     virusCounterImplementationForCard,
     virusCounterImplementationForDefinition,
     visibleVirusCounterTargetIds,
-    withoutVariableIceState
+    withoutVariableIceState,
   } = deps;
 
-function openPostMeatDamageReactionWindow(
-  state: GameState,
-  summary: DamageSummary,
-): boolean {
-  if (
-    summary.damageType !== "meat" ||
-    summary.cardsTrashed <= 0 ||
-    state.winner ||
-    state.pendingChoice
-  )
-    return false;
-  const candidates = postMeatDamageHiddenResourceCandidates(state);
-  if (candidates.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `hidden_resource_post_meat_damage_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `hidden_resource.post_meat_damage:${summary.cardsTrashed}`,
-    prompt: "Hidden Resource nach Meat Damage nutzen",
-    kind: "select_option",
-    options: [
-      { id: "pass", label: "Keine Hidden Resource nutzen" },
-      ...candidates.map((candidate) => ({
-        id: `post_meat_damage_${candidate.cardId}`,
-        label: `${candidate.title}: Korp wirft ${candidate.amount} HQ-Karten ab`,
-        publicLabel: "Hidden Resource",
-        value: candidate.cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "runner";
-  return true;
-}
+  function openPostMeatDamageReactionWindow(
+    state: GameState,
+    summary: DamageSummary,
+  ): boolean {
+    if (
+      summary.damageType !== "meat" ||
+      summary.cardsTrashed <= 0 ||
+      state.winner ||
+      state.pendingChoice
+    )
+      return false;
+    const candidates = postMeatDamageHiddenResourceCandidates(state);
+    if (candidates.length === 0) return false;
+    state.pendingChoice = {
+      choiceId: `hidden_resource_post_meat_damage_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `hidden_resource.post_meat_damage:${summary.cardsTrashed}`,
+      prompt: "Hidden Resource nach Meat Damage nutzen",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Keine Hidden Resource nutzen" },
+        ...candidates.map((candidate) => ({
+          id: `post_meat_damage_${candidate.cardId}`,
+          label: `${candidate.title}: Korp wirft ${candidate.amount} HQ-Karten ab`,
+          publicLabel: "Hidden Resource",
+          value: candidate.cardId,
+        })),
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    state.activeSide = "runner";
+    return true;
+  }
 
-function postMeatDamageHiddenResourceCandidates(
-  state: GameState,
-): Array<{
-  cardId: CardInstanceId;
-  definitionId: CardDefinitionId;
-  title: string;
-  amount: number;
-}> {
-  return state.runner.rig.resources
-    .slice()
-    .sort()
-    .flatMap((cardId) => {
-      const instance = state.cardInstances[cardId];
-      if (!instance || instance.tapped === true) return [];
-      const definition = definitionFor(state, cardId);
-      const implementation = runnerUtilityLongtailImplementationForCard(
-        state,
-        cardId,
-      );
-      if (
-        implementation?.kind !==
-        "hidden_resource_post_meat_damage_random_hq_discard"
-      )
-        return [];
-      const amount = Math.max(0, Math.floor(implementation.amount));
-      if (amount <= 0) return [];
-      return [{ cardId, definitionId: definition.id, title: definition.title, amount }];
-    });
-}
+  function postMeatDamageHiddenResourceCandidates(state: GameState): Array<{
+    cardId: CardInstanceId;
+    definitionId: CardDefinitionId;
+    title: string;
+    amount: number;
+  }> {
+    return state.runner.rig.resources
+      .slice()
+      .sort()
+      .flatMap((cardId) => {
+        const instance = state.cardInstances[cardId];
+        if (!instance || instance.tapped === true) return [];
+        const definition = definitionFor(state, cardId);
+        const implementation = runnerUtilityLongtailImplementationForCard(
+          state,
+          cardId,
+        );
+        if (
+          implementation?.kind !==
+          "hidden_resource_post_meat_damage_random_hq_discard"
+        )
+          return [];
+        const amount = Math.max(0, Math.floor(implementation.amount));
+        if (amount <= 0) return [];
+        return [
+          {
+            cardId,
+            definitionId: definition.id,
+            title: definition.title,
+            amount,
+          },
+        ];
+      });
+  }
 
-function resolvePostMeatDamageHiddenResourceChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("hidden_resource.post_meat_damage"))
-    throw new Error("Es ist kein Hidden-Resource-Meat-Damage-Fenster offen.");
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selected === "pass") {
+  function resolvePostMeatDamageHiddenResourceChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (
+      !choice ||
+      !choice.source.startsWith("hidden_resource.post_meat_damage")
+    )
+      throw new Error("Es ist kein Hidden-Resource-Meat-Damage-Fenster offen.");
+    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    if (selected === "pass") {
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenResourcePostMeatDamageDecision: "pass",
+      };
+      return;
+    }
+    const option = choice.options.find(
+      (candidate) => candidate.id === selected,
+    );
+    const sourceCardId =
+      typeof option?.value === "string"
+        ? (option.value as CardInstanceId)
+        : undefined;
+    const candidate = postMeatDamageHiddenResourceCandidates(state).find(
+      (item) => item.cardId === sourceCardId,
+    );
+    if (!candidate)
+      throw new Error("Diese Hidden-Resource-Reaktion ist nicht legal.");
+    const sourceInstance = mustInstance(state.cardInstances, candidate.cardId);
+    const revealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      candidate.cardId,
+    );
+    state.cardInstances[candidate.cardId] = {
+      ...sourceInstance,
+      faceup: true,
+      rezzed: true,
+      tapped: true,
+    };
+    const discardedIds = randomCorpHqDiscard(
+      state,
+      candidate.amount,
+      `hidden_resource.post_meat_damage.${candidate.definitionId}.${choice.choiceId}`,
+    );
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hiddenResourcePostMeatDamageDecision: "pass",
+      hiddenResourcePostMeatDamageDecision: "apply",
+      sourceDefinitionId: candidate.definitionId,
+      ...revealPayload,
+      sourceTapped: true,
+      discardedHqCount: discardedIds.length,
+      corpHqAfter: state.corp.hq.length,
+      randomCounterAfter: state.randomCounter,
     };
-    return;
   }
-  const option = choice.options.find((candidate) => candidate.id === selected);
-  const sourceCardId =
-    typeof option?.value === "string"
-      ? (option.value as CardInstanceId)
-      : undefined;
-  const candidate = postMeatDamageHiddenResourceCandidates(state).find(
-    (item) => item.cardId === sourceCardId,
-  );
-  if (!candidate)
-    throw new Error("Diese Hidden-Resource-Reaktion ist nicht legal.");
-  const sourceInstance = mustInstance(state.cardInstances, candidate.cardId);
-  const revealPayload = hiddenRunnerResourceRevealPayload(state, candidate.cardId);
-  state.cardInstances[candidate.cardId] = {
-    ...sourceInstance,
-    faceup: true,
-    rezzed: true,
-    tapped: true,
-  };
-  const discardedIds = randomCorpHqDiscard(
-    state,
-    candidate.amount,
-    `hidden_resource.post_meat_damage.${candidate.definitionId}.${choice.choiceId}`,
-  );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenResourcePostMeatDamageDecision: "apply",
-    sourceDefinitionId: candidate.definitionId,
-    ...revealPayload,
-    sourceTapped: true,
-    discardedHqCount: discardedIds.length,
-    corpHqAfter: state.corp.hq.length,
-    randomCounterAfter: state.randomCounter,
-  };
-}
 
-function randomCorpHqDiscard(
-  state: GameState,
-  amount: number,
-  purposePrefix: string,
-): CardInstanceId[] {
-  const discarded: CardInstanceId[] = [];
-  const discardCount = Math.min(Math.max(0, Math.floor(amount)), state.corp.hq.length);
-  for (let index = 0; index < discardCount; index += 1) {
-    const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
-    const selectedIndex = Math.floor(value * state.corp.hq.length);
-    const cardId = mustArrayValue(
-      state.corp.hq,
-      selectedIndex,
-      "HQ-Discard-Auswahl fehlt.",
+  function randomCorpHqDiscard(
+    state: GameState,
+    amount: number,
+    purposePrefix: string,
+  ): CardInstanceId[] {
+    const discarded: CardInstanceId[] = [];
+    const discardCount = Math.min(
+      Math.max(0, Math.floor(amount)),
+      state.corp.hq.length,
     );
-    removeFromAllZones(state, cardId);
-    state.corp.archives.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "archives" },
-    };
-    discarded.push(cardId);
+    for (let index = 0; index < discardCount; index += 1) {
+      const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
+      const selectedIndex = Math.floor(value * state.corp.hq.length);
+      const cardId = mustArrayValue(
+        state.corp.hq,
+        selectedIndex,
+        "HQ-Discard-Auswahl fehlt.",
+      );
+      removeFromAllZones(state, cardId);
+      state.corp.archives.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "corp", zone: "archives" },
+      };
+      discarded.push(cardId);
+    }
+    return discarded;
   }
-  return discarded;
-}
 
-function installTargetBindingForDefinition(definition: CardDefinition) {
-  return cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
-}
+  function installTargetBindingForDefinition(definition: CardDefinition) {
+    return cardImplementationForDefinitionId(definition.id)
+      ?.installTargetBinding;
+  }
 
-function requiresDataFortInstallTarget(definition: CardDefinition): boolean {
-  return (
-    installTargetBindingForDefinition(definition)?.kind ===
-    "choose_data_fort_on_install"
-  );
-}
+  function requiresDataFortInstallTarget(definition: CardDefinition): boolean {
+    return (
+      installTargetBindingForDefinition(definition)?.kind ===
+      "choose_data_fort_on_install"
+    );
+  }
 
-function runnerEventLongtailForDefinition(
-  definition: CardDefinition,
-): CardRunnerEventLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)?.runnerEventLongtail;
-}
+  function runnerEventLongtailForDefinition(
+    definition: CardDefinition,
+  ): CardRunnerEventLongtailImplementation | undefined {
+    return cardImplementationForDefinitionId(definition.id)
+      ?.runnerEventLongtail;
+  }
 
-function variableRezForDefinition(
-  definition: CardDefinition,
-): CardVariableRezImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)?.variableRez;
-}
+  function variableRezForDefinition(
+    definition: CardDefinition,
+  ): CardVariableRezImplementation | undefined {
+    return cardImplementationForDefinitionId(definition.id)?.variableRez;
+  }
 
-function runnerEventLongtailKindForDefinition(
-  definition: CardDefinition,
-): CardRunnerEventLongtailImplementation["kind"] | undefined {
-  return runnerEventLongtailForDefinition(definition)?.kind;
-}
+  function runnerEventLongtailKindForDefinition(
+    definition: CardDefinition,
+  ): CardRunnerEventLongtailImplementation["kind"] | undefined {
+    return runnerEventLongtailForDefinition(definition)?.kind;
+  }
 
-function pro018GripInstallCandidates(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  longtail: CardRunnerEventLongtailImplementation,
-): CardInstanceId[] {
-  const temporaryCredits = Math.max(0, Math.floor(longtail.temporaryCredits ?? 0));
-  return state.runner.grip.filter((cardId) => {
-    if (cardId === sourceCardId) return false;
-    const definition = definitionFor(state, cardId);
-    if (!(longtail.allowedTypes ?? []).includes(definition.type)) return false;
-    if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
-    )
-      return false;
-    if (
-      definition.type === "program" &&
-      state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-        runnerMemoryLimit(state)
-    )
-      return false;
-    return state.runner.credits + temporaryCredits >= (definition.installCost ?? 0);
-  });
-}
+  function pro018GripInstallCandidates(
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    longtail: CardRunnerEventLongtailImplementation,
+  ): CardInstanceId[] {
+    const temporaryCredits = Math.max(
+      0,
+      Math.floor(longtail.temporaryCredits ?? 0),
+    );
+    return state.runner.grip.filter((cardId) => {
+      if (cardId === sourceCardId) return false;
+      const definition = definitionFor(state, cardId);
+      if (!(longtail.allowedTypes ?? []).includes(definition.type))
+        return false;
+      if (
+        isUniqueCard(definition) &&
+        hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      )
+        return false;
+      if (
+        definition.type === "program" &&
+        state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+          runnerMemoryLimit(state)
+      )
+        return false;
+      return (
+        state.runner.credits + temporaryCredits >= (definition.installCost ?? 0)
+      );
+    });
+  }
 
-function startPro018GripInstallChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  definition: CardDefinition,
-  longtail: CardRunnerEventLongtailImplementation,
-): void {
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const candidates = pro018GripInstallCandidates(state, sourceCardId, longtail);
-  if (candidates.length === 0)
-    throw new Error("Im Grip liegt keine legal installierbare Programm- oder Hardware-Karte.");
-  state.pendingChoice = {
-    choiceId: `pro018_grip_install_temporary_credits_${state.stateVersion + 1}`,
-    stateVersion: state.stateVersion + 1,
-    side: "runner",
-    source: `card_implementation.pro018_grip_install_temporary_credits:${sourceCardId}:${definition.id}:${longtail.temporaryCredits}:${state.stateVersion + 1}`,
-    prompt: "Programm oder Hardware installieren",
-    minSelections: 1,
-    maxSelections: 1,
-    options: state.runner.grip
-      .filter((cardId) => cardId !== sourceCardId)
-      .map((cardId) => {
+  function startPro018GripInstallChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    definition: CardDefinition,
+    longtail: CardRunnerEventLongtailImplementation,
+  ): void {
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
+    const candidates = pro018GripInstallCandidates(
+      state,
+      sourceCardId,
+      longtail,
+    );
+    if (candidates.length === 0)
+      throw new Error(
+        "Im Grip liegt keine legal installierbare Programm- oder Hardware-Karte.",
+      );
+    state.pendingChoice = {
+      choiceId: `pro018_grip_install_temporary_credits_${state.stateVersion + 1}`,
+      stateVersion: state.stateVersion + 1,
+      side: "runner",
+      source: `card_implementation.pro018_grip_install_temporary_credits:${sourceCardId}:${definition.id}:${longtail.temporaryCredits}:${state.stateVersion + 1}`,
+      prompt: "Programm oder Hardware installieren",
+      minSelections: 1,
+      maxSelections: 1,
+      options: state.runner.grip
+        .filter((cardId) => cardId !== sourceCardId)
+        .map((cardId) => {
+          const candidateDefinition = definitionFor(state, cardId);
+          return {
+            id: `card_${cardId}`,
+            label: candidateDefinition.title,
+            value: cardId,
+            ...(!candidates.includes(cardId) ? { selectable: false } : {}),
+          };
+        }),
+      visibility: "runner_private",
+      cardSearchPresentation: {
+        sourceZone: "grip",
+        selectableFilter: "program_or_hardware",
+        destination: "install",
+        showNonMatchingCards: true,
+      },
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pro018_grip_install_temporary_credits",
+      sourceDefinitionId: definition.id,
+      choiceVisibility: "runner_private",
+    };
+  }
+
+  function startPro018StackInstallRunCleanupChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    definition: CardDefinition,
+  ): void {
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
+    const candidates = searchStackInstallTargets(
+      hiddenZoneSearchActivationTargetHost(state),
+      "program",
+      "free",
+    );
+    if (candidates.length === 0)
+      throw new Error("Im Stack liegt kein legal installierbares Programm.");
+    state.pendingChoice = {
+      choiceId: `pro018_stack_install_run_cleanup_${state.stateVersion + 1}`,
+      stateVersion: state.stateVersion + 1,
+      side: "runner",
+      source: `card_implementation.pro018_stack_install_run_cleanup:${sourceCardId}:${definition.id}:${String(legalAction.payload?.serverId ?? "hq")}:${state.stateVersion + 1}`,
+      prompt: "Programm aus dem Stack installieren",
+      minSelections: 1,
+      maxSelections: 1,
+      options: state.runner.stack.map((cardId) => {
         const candidateDefinition = definitionFor(state, cardId);
         return {
           id: `card_${cardId}`,
@@ -1413,278 +1475,238 @@ function startPro018GripInstallChoice(
           ...(!candidates.includes(cardId) ? { selectable: false } : {}),
         };
       }),
-    visibility: "runner_private",
-    cardSearchPresentation: {
-      sourceZone: "grip",
-      selectableFilter: "program_or_hardware",
-      destination: "install",
-      showNonMatchingCards: true,
-    },
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "pro018_grip_install_temporary_credits",
-    sourceDefinitionId: definition.id,
-    choiceVisibility: "runner_private",
-  };
-}
-
-function startPro018StackInstallRunCleanupChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  definition: CardDefinition,
-): void {
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const candidates = searchStackInstallTargets(
-    hiddenZoneSearchActivationTargetHost(state),
-    "program",
-    "free",
-  );
-  if (candidates.length === 0)
-    throw new Error("Im Stack liegt kein legal installierbares Programm.");
-  state.pendingChoice = {
-    choiceId: `pro018_stack_install_run_cleanup_${state.stateVersion + 1}`,
-    stateVersion: state.stateVersion + 1,
-    side: "runner",
-    source: `card_implementation.pro018_stack_install_run_cleanup:${sourceCardId}:${definition.id}:${String(legalAction.payload?.serverId ?? "hq")}:${state.stateVersion + 1}`,
-    prompt: "Programm aus dem Stack installieren",
-    minSelections: 1,
-    maxSelections: 1,
-    options: state.runner.stack.map((cardId) => {
-      const candidateDefinition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: candidateDefinition.title,
-        value: cardId,
-        ...(!candidates.includes(cardId) ? { selectable: false } : {}),
-      };
-    }),
-    visibility: "runner_private",
-    cardSearchPresentation: {
-      sourceZone: "stack",
-      selectableFilter: "program",
-      destination: "install_program",
-      shuffleAfter: true,
-      showNonMatchingCards: true,
-    },
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "pro018_stack_install_run_cleanup",
-    sourceDefinitionId: definition.id,
-    choiceVisibility: "runner_private",
-  };
-}
-
-function hiddenReplacementLongtailForDefinition(
-  definition: CardDefinition,
-): CardHiddenReplacementLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)
-    ?.hiddenReplacementLongtail;
-}
-
-function cardImplementationRunnerEventResolver(
-  definition: CardDefinition,
-): RunnerEventResolver | undefined {
-  const longtail = runnerEventLongtailForDefinition(definition);
-  if (longtail) {
-    switch (longtail.kind) {
-      case "playful_ai_dice_loop":
-        return {
-          name: "card_implementation_runner_event_playful_ai_dice_loop",
-          resolve: (state, legalAction) =>
-            resolvePlayfulAiDiceLoopEvent(
-              state,
-              legalAction,
-              definition.id,
-              longtail,
-            ),
-        };
-      case "trash_installed_runner_connections_then_add_bad_publicity":
-        return {
-          name: "card_implementation_runner_event_trash_installed_runner_connections_then_add_bad_publicity",
-          canPlay: (state) =>
-            canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
-              state,
-              longtail,
-            ),
-          resolve: (state, legalAction) =>
-            resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
-              state,
-              legalAction,
-              definition.id,
-              longtail,
-            ),
-        };
-      case "grip_install_program_or_hardware_with_temporary_credits":
-        return {
-          name: "card_implementation_runner_event_grip_install_program_or_hardware_with_temporary_credits",
-          canPlay: (state) =>
-            pro018GripInstallCandidates(
-              state,
-              "" as CardInstanceId,
-              longtail,
-            ).length > 0,
-          resolve: (state, legalAction) =>
-            startPro018GripInstallChoice(state, legalAction, definition, longtail),
-        };
-      case "search_stack_install_program_free_then_run_return_or_penalty":
-        return {
-          name: "card_implementation_runner_event_search_stack_install_program_free_then_run_return_or_penalty",
-          requiresServer: true,
-          canPlay: (state) =>
-            searchStackInstallTargets(
-              hiddenZoneSearchActivationTargetHost(state),
-              "program",
-              "free",
-            ).length > 0,
-          canPlayForServer: () => true,
-          resolve: (state, legalAction) =>
-            startPro018StackInstallRunCleanupChoice(
-              state,
-              legalAction,
-              definition,
-            ),
-        };
-      default: {
-        const unknown = longtail as { kind?: string };
-        throw new Error(
-          `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
-        );
-      }
-    }
-  }
-  const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
-  if (hiddenLongtail?.kind === "successful_run_fort_ice_reorder") {
-    return {
-      name: "card_implementation_runner_event_successful_run_fort_ice_reorder",
-      canPlay: (state) => hasSuccessfulRunThisTurn(state),
-      resolve: (state, legalAction) => {
-        if (!hasSuccessfulRunThisTurn(state))
-          throw new Error(
-            "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
-          );
-        startSuccessfulRunFortIceReorderChoice(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-          String(legalAction.payload?.cardId ?? ""),
-        );
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenZoneBarrier: true,
-          hiddenZoneAction: "successful_run_fort_ice_reorder",
-        };
+      visibility: "runner_private",
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        selectableFilter: "program",
+        destination: "install_program",
+        shuffleAfter: true,
+        showNonMatchingCards: true,
       },
     };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pro018_stack_install_run_cleanup",
+      sourceDefinitionId: definition.id,
+      choiceVisibility: "runner_private",
+    };
   }
-  return undefined;
-}
 
-function printedCostCardImplementationMakeRunEffect(
-  definition: CardDefinition,
-): MakeRunEffectImplementation | undefined {
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-    (candidate) => candidate.kind === "on_play" && candidate.costs === "printed",
-  );
-  return ability?.effects.find(
-    (effect): effect is MakeRunEffectImplementation => effect.kind === "make_run",
-  );
-}
+  function hiddenReplacementLongtailForDefinition(
+    definition: CardDefinition,
+  ): CardHiddenReplacementLongtailImplementation | undefined {
+    return cardImplementationForDefinitionId(definition.id)
+      ?.hiddenReplacementLongtail;
+  }
 
-function scoredAgendaImplementationForDefinitionId(
-  definitionId: CardDefinitionId,
-): CardScoredAgendaImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.scoredAgenda;
-}
-
-function scoredAgendaImplementationForDefinition(
-  definition: CardDefinition,
-): CardScoredAgendaImplementation | undefined {
-  return scoredAgendaImplementationForDefinitionId(definition.id);
-}
-
-function scoredAgendaKindForDefinition(
-  definition: CardDefinition,
-): CardScoredAgendaImplementation["kind"] | undefined {
-  return scoredAgendaImplementationForDefinition(definition)?.kind;
-}
-
-function emptyRunnerDrawSummary(): RunnerDrawSummary {
-  return {
-    drawnCount: 0,
-    drawnCardIds: [],
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
-  };
-}
-
-function mergeRunnerDrawSummary(
-  left: RunnerDrawSummary,
-  right: RunnerDrawSummary,
-): RunnerDrawSummary {
-  return {
-    drawnCount: left.drawnCount + right.drawnCount,
-    drawnCardIds: [...(left.drawnCardIds ?? []), ...(right.drawnCardIds ?? [])],
-    citySurveillanceSourceCount: Math.max(
-      left.citySurveillanceSourceCount,
-      right.citySurveillanceSourceCount,
-    ),
-    citySurveillanceCreditsPaid:
-      left.citySurveillanceCreditsPaid + right.citySurveillanceCreditsPaid,
-    citySurveillanceTagsAdded:
-      left.citySurveillanceTagsAdded + right.citySurveillanceTagsAdded,
-    crashEverettChoiceOpened:
-      left.crashEverettChoiceOpened === true ||
-      right.crashEverettChoiceOpened === true,
-    ...((left.crashEverettSourceCardId ?? right.crashEverettSourceCardId)
-      ? {
-          crashEverettSourceCardId:
-            left.crashEverettSourceCardId ?? right.crashEverettSourceCardId,
+  function cardImplementationRunnerEventResolver(
+    definition: CardDefinition,
+  ): RunnerEventResolver | undefined {
+    const longtail = runnerEventLongtailForDefinition(definition);
+    if (longtail) {
+      switch (longtail.kind) {
+        case "playful_ai_dice_loop":
+          return {
+            name: "card_implementation_runner_event_playful_ai_dice_loop",
+            resolve: (state, legalAction) =>
+              resolvePlayfulAiDiceLoopEvent(
+                state,
+                legalAction,
+                definition.id,
+                longtail,
+              ),
+          };
+        case "trash_installed_runner_connections_then_add_bad_publicity":
+          return {
+            name: "card_implementation_runner_event_trash_installed_runner_connections_then_add_bad_publicity",
+            canPlay: (state) =>
+              canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
+                state,
+                longtail,
+              ),
+            resolve: (state, legalAction) =>
+              resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
+                state,
+                legalAction,
+                definition.id,
+                longtail,
+              ),
+          };
+        case "grip_install_program_or_hardware_with_temporary_credits":
+          return {
+            name: "card_implementation_runner_event_grip_install_program_or_hardware_with_temporary_credits",
+            canPlay: (state) =>
+              pro018GripInstallCandidates(state, "" as CardInstanceId, longtail)
+                .length > 0,
+            resolve: (state, legalAction) =>
+              startPro018GripInstallChoice(
+                state,
+                legalAction,
+                definition,
+                longtail,
+              ),
+          };
+        case "search_stack_install_program_free_then_run_return_or_penalty":
+          return {
+            name: "card_implementation_runner_event_search_stack_install_program_free_then_run_return_or_penalty",
+            requiresServer: true,
+            canPlay: (state) =>
+              searchStackInstallTargets(
+                hiddenZoneSearchActivationTargetHost(state),
+                "program",
+                "free",
+              ).length > 0,
+            canPlayForServer: () => true,
+            resolve: (state, legalAction) =>
+              startPro018StackInstallRunCleanupChoice(
+                state,
+                legalAction,
+                definition,
+              ),
+          };
+        default: {
+          const unknown = longtail as { kind?: string };
+          throw new Error(
+            `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
+          );
         }
-      : {}),
-  };
-}
+      }
+    }
+    const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
+    if (hiddenLongtail?.kind === "successful_run_fort_ice_reorder") {
+      return {
+        name: "card_implementation_runner_event_successful_run_fort_ice_reorder",
+        canPlay: (state) => hasSuccessfulRunThisTurn(state),
+        resolve: (state, legalAction) => {
+          if (!hasSuccessfulRunThisTurn(state))
+            throw new Error(
+              "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
+            );
+          startSuccessfulRunFortIceReorderChoice(
+            hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+            String(legalAction.payload?.cardId ?? ""),
+          );
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            hiddenZoneBarrier: true,
+            hiddenZoneAction: "successful_run_fort_ice_reorder",
+          };
+        },
+      };
+    }
+    return undefined;
+  }
 
-function applyRunnerDrawSummaryPayload(
-  state: GameState,
-  legalAction: LegalAction,
-  summary: RunnerDrawSummary,
-): void {
-  if (summary.drawnCount <= 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...runnerDrawSummaryPublicPayload(state, summary),
-  };
-}
+  function printedCostCardImplementationMakeRunEffect(
+    definition: CardDefinition,
+  ): MakeRunEffectImplementation | undefined {
+    const ability = cardImplementationForDefinitionId(
+      definition.id,
+    )?.abilities?.find(
+      (candidate) =>
+        candidate.kind === "on_play" && candidate.costs === "printed",
+    );
+    return ability?.effects.find(
+      (effect): effect is MakeRunEffectImplementation =>
+        effect.kind === "make_run",
+    );
+  }
 
-function runnerDrawSummaryPublicPayload(
-  state: GameState,
-  summary: RunnerDrawSummary,
-): Record<string, string | number | boolean> {
-  if (summary.drawnCount <= 0) return {};
-  return {
-    drawnCount: summary.drawnCount,
-    ...(summary.crashEverettChoiceOpened && summary.crashEverettSourceCardId
-      ? {
-          drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
-          drawReplacementExtraDrawn: 1,
-          crashEverettChoiceOpened: true,
-        }
-      : {}),
-    ...(summary.citySurveillanceSourceCount > 0
-      ? {
-          citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
-          citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
-          citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
-          citySurveillanceTags: summary.citySurveillanceTagsAdded,
-          runnerCreditsAfter: state.runner.credits,
-          runnerTagsAfter: state.runner.tags,
-        }
-      : {}),
-  };
-}
+  function scoredAgendaImplementationForDefinitionId(
+    definitionId: CardDefinitionId,
+  ): CardScoredAgendaImplementation | undefined {
+    return cardImplementationForDefinitionId(definitionId)?.scoredAgenda;
+  }
+
+  function scoredAgendaImplementationForDefinition(
+    definition: CardDefinition,
+  ): CardScoredAgendaImplementation | undefined {
+    return scoredAgendaImplementationForDefinitionId(definition.id);
+  }
+
+  function scoredAgendaKindForDefinition(
+    definition: CardDefinition,
+  ): CardScoredAgendaImplementation["kind"] | undefined {
+    return scoredAgendaImplementationForDefinition(definition)?.kind;
+  }
+
+  function emptyRunnerDrawSummary(): RunnerDrawSummary {
+    return {
+      drawnCount: 0,
+      drawnCardIds: [],
+      drawTaxSourceCount: 0,
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 0,
+    };
+  }
+
+  function mergeRunnerDrawSummary(
+    left: RunnerDrawSummary,
+    right: RunnerDrawSummary,
+  ): RunnerDrawSummary {
+    return {
+      drawnCount: left.drawnCount + right.drawnCount,
+      drawnCardIds: [
+        ...(left.drawnCardIds ?? []),
+        ...(right.drawnCardIds ?? []),
+      ],
+      drawTaxSourceCount: Math.max(
+        left.drawTaxSourceCount,
+        right.drawTaxSourceCount,
+      ),
+      drawTaxCreditsPaid: left.drawTaxCreditsPaid + right.drawTaxCreditsPaid,
+      drawTaxTagsAdded: left.drawTaxTagsAdded + right.drawTaxTagsAdded,
+      crashEverettChoiceOpened:
+        left.crashEverettChoiceOpened === true ||
+        right.crashEverettChoiceOpened === true,
+      ...((left.crashEverettSourceCardId ?? right.crashEverettSourceCardId)
+        ? {
+            crashEverettSourceCardId:
+              left.crashEverettSourceCardId ?? right.crashEverettSourceCardId,
+          }
+        : {}),
+    };
+  }
+
+  function applyRunnerDrawSummaryPayload(
+    state: GameState,
+    legalAction: LegalAction,
+    summary: RunnerDrawSummary,
+  ): void {
+    if (summary.drawnCount <= 0) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...runnerDrawSummaryPublicPayload(state, summary),
+    };
+  }
+
+  function runnerDrawSummaryPublicPayload(
+    state: GameState,
+    summary: RunnerDrawSummary,
+  ): Record<string, string | number | boolean> {
+    if (summary.drawnCount <= 0) return {};
+    return {
+      drawnCount: summary.drawnCount,
+      ...(summary.crashEverettChoiceOpened && summary.crashEverettSourceCardId
+        ? {
+            drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
+            drawReplacementExtraDrawn: 1,
+            crashEverettChoiceOpened: true,
+          }
+        : {}),
+      ...(summary.drawTaxSourceCount > 0
+        ? {
+            citySurveillanceSourceCount: summary.drawTaxSourceCount,
+            citySurveillanceCreditsPaid: summary.drawTaxCreditsPaid,
+            citySurveillanceTagsAdded: summary.drawTaxTagsAdded,
+            citySurveillanceTags: summary.drawTaxTagsAdded,
+            runnerCreditsAfter: state.runner.credits,
+            runnerTagsAfter: state.runner.tags,
+          }
+        : {}),
+    };
+  }
 
   return {
     openPostMeatDamageReactionWindow,
@@ -1705,6 +1727,6 @@ function runnerDrawSummaryPublicPayload(
     emptyRunnerDrawSummary,
     mergeRunnerDrawSummary,
     applyRunnerDrawSummaryPayload,
-    runnerDrawSummaryPublicPayload
+    runnerDrawSummaryPublicPayload,
   };
 }

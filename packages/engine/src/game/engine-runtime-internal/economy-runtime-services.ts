@@ -130,9 +130,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -211,10 +209,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -249,9 +244,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -407,9 +400,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -425,18 +416,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -633,9 +616,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -728,7 +709,6 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
 export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   const {
     activeCrashEverettSourceId,
@@ -740,7 +720,9 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
   } = deps;
 
-  function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
+  function expireCorporateRetreatInstallCreditAbilities(
+    state: GameState,
+  ): void {
     for (const agendaId of state.corp.scoreArea) {
       const definition = definitionFor(state, agendaId);
       if (
@@ -948,8 +930,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
         )
       : Math.max(0, remainingBefore - 1);
     flags.valuPakProgramInstallActionsRemaining = remainingAfter;
-    if (remainingAfter <= 0)
-      flags.valuPakTemporaryProgramInstallCredits = 0;
+    if (remainingAfter <= 0) flags.valuPakTemporaryProgramInstallCredits = 0;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerEventAbility: "program_install_action_bundle",
@@ -963,7 +944,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
 
   function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
     return {
-      citySurveillanceSourceCount: citySurveillanceSourceIds(state).length,
+      drawTaxSourceCount: citySurveillanceSourceIds(state).length,
       projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
     };
   }

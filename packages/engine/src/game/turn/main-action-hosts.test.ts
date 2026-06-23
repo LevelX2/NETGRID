@@ -308,7 +308,7 @@ function hostFor(
       availableRunnerProgramInstallCredits: () => state.runner.credits,
       availableRunnerRunStartCredits: () => state.runner.credits,
       runnerDrawActionContext: () => ({
-        citySurveillanceSourceCount: 0,
+        drawTaxSourceCount: 0,
         projectedDrawCount: 1,
       }),
       runnerUtilityLongtailKindForCard: () => undefined,

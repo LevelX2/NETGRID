@@ -48,10 +48,12 @@ describe("credit economy execution", () => {
     state.corp.credits = 5;
     const action = gainCreditAction(state, "corp");
 
-    expect(handleCreditEconomyExecution(testHost(state), action)).toMatchObject({
-      handled: true,
-      actionType: "gain_credit",
-    });
+    expect(handleCreditEconomyExecution(testHost(state), action)).toMatchObject(
+      {
+        handled: true,
+        actionType: "gain_credit",
+      },
+    );
 
     expect(state.corp.clicks).toBe(2);
     expect(state.corp.credits).toBe(6);
@@ -222,10 +224,20 @@ function testHost(
           counterType
         ] ?? 0,
       addCardCounter: (stateToMutate, cardId, counterType, amount) => {
-        setCardCounter(stateToMutate, cardId, counterType, cardCounter(stateToMutate, cardId, counterType) + amount);
+        setCardCounter(
+          stateToMutate,
+          cardId,
+          counterType,
+          cardCounter(stateToMutate, cardId, counterType) + amount,
+        );
       },
       spendCardCounter: (stateToMutate, cardId, counterType, amount) => {
-        setCardCounter(stateToMutate, cardId, counterType, cardCounter(stateToMutate, cardId, counterType) - amount);
+        setCardCounter(
+          stateToMutate,
+          cardId,
+          counterType,
+          cardCounter(stateToMutate, cardId, counterType) - amount,
+        );
       },
       visibleVirusCounterTargetIds: () => [],
     },
@@ -242,9 +254,9 @@ function testHost(
         action.payload = {
           ...(action.payload ?? {}),
           drawnCount: summary.drawnCount,
-          citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
-          citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
-          citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
+          citySurveillanceSourceCount: summary.drawTaxSourceCount,
+          citySurveillanceCreditsPaid: summary.drawTaxCreditsPaid,
+          citySurveillanceTagsAdded: summary.drawTaxTagsAdded,
         };
       },
       ensureTurnFlags: (stateToMutate) =>
@@ -322,9 +334,9 @@ function runnerDrawSummary(): CreditEconomyRunnerDrawSummary {
   return {
     drawnCount: 1,
     drawnCardIds: ["drawn_card" as CardInstanceId],
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
+    drawTaxSourceCount: 0,
+    drawTaxCreditsPaid: 0,
+    drawTaxTagsAdded: 0,
   };
 }
 
