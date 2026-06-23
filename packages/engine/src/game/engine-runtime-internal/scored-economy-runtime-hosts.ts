@@ -1031,6 +1031,8 @@ export function createScoredEconomyRuntimeHosts(
       ...(legalAction ? { legalAction } : {}),
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
+        implementationForDefinition: (definition) =>
+          cardImplementationForDefinitionId(definition.id),
       },
       callbacks: {
         pushActivatedCardImplementationActions: (actions, cardId, definition) =>
