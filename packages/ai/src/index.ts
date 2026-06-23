@@ -185,6 +185,9 @@ import {
 import {
   runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
 } from "./runtime/runner-blink-run-exclusion";
+import {
+  runnerEncounterActionExclusion as buildRunnerEncounterActionExclusion,
+} from "./runtime/runner-encounter-action-exclusion";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -3555,7 +3558,12 @@ const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclu
       buildRunnerSelfDamageSurvivalExclusion(runtimeInput, action, {
         survivalAssessment: runnerSelfDamageSurvivalAssessment,
       }),
-    runnerEncounterActionExclusion: semanticRuntimeRunnerEncounterActionExclusion,
+    runnerEncounterActionExclusion: (runtimeInput, action) =>
+      buildRunnerEncounterActionExclusion(runtimeInput, action, {
+        blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+        pumpViabilityAssessment,
+        breakAccessPathAssessment,
+      }),
     runnerProgramSacrificeExclusion: (runtimeInput, action) =>
       buildRunnerProgramSacrificeExclusion(runtimeInput, action, {
         assessmentForAction: runnerProgramInstallTrashAssessmentForAction,
@@ -4038,57 +4046,6 @@ function semanticRuntimeActionExclusion(
     action,
     SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES,
   );
-}
-
-function semanticRuntimeRunnerEncounterActionExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  if (input.side !== "runner") return undefined;
-  if (action.type === "pump_breaker") {
-    const assessment = pumpViabilityAssessment(input, action);
-    if (assessment.canLeadToBreak) return undefined;
-    const remotePayoffBlocked = assessment.evidence.includes(
-      "encounter_remote_payoff_blocked:true",
-    );
-    return {
-      key: remotePayoffBlocked
-        ? "encounter_remote_payoff_unaffordable"
-        : "pump_cannot_lead_to_useful_break",
-      label: remotePayoffBlocked
-        ? "Encounter-Kosten machen Remote-Ziel unbezahlbar"
-        : "Pumpen ohne Zugriffspfad",
-      reason: sortedUnique([
-        "encounter_action:pump_breaker",
-        ...assessment.evidence,
-      ]).join("|"),
-    };
-  }
-  if (action.type === "break_subroutine") {
-    const blinkExclusion = semanticRuntimeRunnerBlinkBreakExclusion(
-      input,
-      action,
-    );
-    if (blinkExclusion) return blinkExclusion;
-    const assessment = breakAccessPathAssessment(input, action);
-    if (assessment.canPreserveAccessPath) return undefined;
-    const remotePayoffBlocked = assessment.evidence.includes(
-      "encounter_remote_payoff_blocked:true",
-    );
-    return {
-      key: remotePayoffBlocked
-        ? "encounter_remote_payoff_unaffordable"
-        : "break_cannot_preserve_access_path",
-      label: remotePayoffBlocked
-        ? "Break macht Remote-Ziel unbezahlbar"
-        : "Break ohne Zugriffspfad",
-      reason: sortedUnique([
-        "encounter_action:break_subroutine",
-        ...assessment.evidence,
-      ]).join("|"),
-    };
-  }
-  return undefined;
 }
 
 type VisibleEncounterSubroutine = NonNullable<
