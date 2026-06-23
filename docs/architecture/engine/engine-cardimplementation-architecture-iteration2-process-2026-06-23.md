@@ -110,13 +110,31 @@ Checks:
 
 ### Paket 4: Mechanics, Registry, RuntimeDeps und Helper
 
-Status: geplant
+Status: abgeschlossen
 
 Ziel:
 
 - Einfache ID-Sets weiter aus CardImplementation-Profilen ableiten.
 - Registry substantiell weiter entlasten.
 - Typisierte RuntimeDeps-Slices und naheliegende Helper dort fortfuehren, wo der Scope sicher bleibt.
+
+Umgesetzt:
+
+- Registry um `proteus-runner-programs.ts` und `proteus-runner-hardware.ts` erweitert.
+- Hauptregistry nutzt jetzt drei Proteus-Runner-Subregistries fuer Hardware, Programme und Resources.
+- `TRACE_ASSET_CARD_IDS`, `RUN_TAX_UPGRADE_CARD_IDS` und `TAG_CONDITION_UPGRADE_CARD_IDS` werden aus CardImplementation-Profilen abgeleitet.
+- `action-runtime-hosts.ts` und `card-runtime-hosts.ts` brauchen kein `@ts-nocheck` mehr und nutzen `Record<string, unknown>`.
+- Helper-/Profilpotenzial der beruehrten Karten wurde geprueft; dieser Schnitt bewegt Katalog-, Mechanics- und Bootstrap-Grenzen, aber keine wiederholten Kartenimplementierungen, deshalb wurde kein zusaetzlicher CardImplementation-Helper eingefuehrt.
+
+Bewusste Restgrenze:
+
+- Im Runtime-Internal-Bereich verbleiben 41 `@ts-nocheck`-Dateien. Die naechsten Kandidaten sind groessere Resolver-/Bootstrap-Dateien mit breiten Host-Deps; sie brauchen einen eigenen RuntimeDeps-Schnitt, damit keine Regeln oder Hidden-Info-Callbacks versehentlich umtypisiert werden.
+- Weitere Registry-Subregistries sind moeglich, aber fuer diese Iteration wurden die zusammenhaengenden Proteus-Runner-Gruppen ohne Verhaltensrisiko herausgezogen. Der naechste Registry-Schnitt sollte vorzugsweise mechanisch generiert oder pro Set/Faction geplant werden.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
+- `corepack pnpm --filter @netgrid/engine test -- card-implementations/coverage.test.ts game/engine-runtime-internal/runtime-module-size.test.ts mechanics` -> bestanden.
 
 ### Paket 5: Abschlussreview
 
