@@ -386,7 +386,7 @@ describe("hidden-zone search choice handlers", () => {
       { cardId: programId, sourceCardDefinitionId: "sneak_preview" },
     ]);
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "temporary_program_install",
       temporaryInstall: true,
       publicRevealKind: "reveal",
     });
@@ -450,7 +450,7 @@ describe("hidden-zone search choice handlers", () => {
     });
     expect(installed).toEqual([programId]);
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "mystery_box_program_install",
+      hiddenZoneAction: "revealed_stack_program_install",
       installedProgramDefinitionId: "program_definition",
       installedProgramCount: 1,
       selfTrashed: true,

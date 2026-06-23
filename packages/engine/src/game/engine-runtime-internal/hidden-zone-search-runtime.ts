@@ -548,7 +548,7 @@ export function createHiddenZoneSearchRuntime(
     const definition = definitionFor(state, cardId);
     if (definition.type !== "program")
       throw new Error(
-        options.typeError ?? "Sneak Preview darf nur Programme installieren.",
+        options.typeError ?? "Die temporaere Programminstallation darf nur Programme installieren.",
       );
     if (
       (options.checkUnique ?? true) &&
@@ -563,7 +563,7 @@ export function createHiddenZoneSearchRuntime(
       runnerMemoryLimit(state)
     )
       throw new Error(
-        options.memoryError ?? "Nicht genug Memory fuer Sneak Preview.",
+        options.memoryError ?? "Nicht genug Memory fuer die temporaere Programminstallation.",
       );
     removeFromAllZones(state, cardId);
     state.runner.rig.programs.push(cardId);

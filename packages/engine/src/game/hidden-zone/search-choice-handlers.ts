@@ -13,9 +13,9 @@ import {
 } from "./search-choice-builders";
 import {
   buildSelfModifyingCodeMemoryDeferredPayload,
-  buildMysteryBoxSearchInstallResolvedPayload,
+  buildRevealedStackProgramInstallResolvedPayload,
   buildTemporaryProgramSearchInstallResolvedPayload,
-  resolveMysteryBoxSearchInstallIntent,
+  resolveRevealedStackProgramInstallIntent,
   buildSelfModifyingCodeResolvedPayload,
   resolveTemporaryProgramSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
@@ -33,7 +33,7 @@ import {
   toTopNSelectedCardMove,
 } from "./topn-move-intents";
 import {
-  createMysteryBoxFreeProgramInstallInput,
+  createRevealedStackFreeProgramInstallInput,
   createTemporaryProgramFreeInstallInput,
   executeFreeProgramInstallPlan,
 } from "./free-program-install-execution";
@@ -200,7 +200,7 @@ export function handleMysteryBoxChoice(
   const selectedDefinition = selectedId
     ? host.cards.definitionFor(selectedId)
     : undefined;
-  const plan = resolveMysteryBoxSearchInstallIntent({
+  const plan = resolveRevealedStackProgramInstallIntent({
     choice,
     selectedCardId: selectedId,
     topCardIds: currentTopCards,
@@ -212,12 +212,12 @@ export function handleMysteryBoxChoice(
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
   const execution = executeFreeProgramInstallPlan({
-    plan: createMysteryBoxFreeProgramInstallInput(plan),
+    plan: createRevealedStackFreeProgramInstallInput(plan),
     callbacks: {
       installProgramForFree: (programId) =>
         host.install.installRunnerProgramForFree(programId, {
           checkUnique: false,
-          typeError: "Mystery Box kann nur ein Programm installieren.",
+          typeError: "Der offengelegte Stack-Plan kann nur ein Programm installieren.",
           memoryError: "Nicht genug Memory fuer das Mystery-Box-Programm.",
         }),
     },
@@ -232,7 +232,7 @@ export function handleMysteryBoxChoice(
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    ...buildMysteryBoxSearchInstallResolvedPayload(plan, {
+    ...buildRevealedStackProgramInstallResolvedPayload(plan, {
       randomCounterAfter: state.randomCounter,
     }),
   };

@@ -1,14 +1,14 @@
 import type { CardDefinitionId, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  createMysteryBoxFreeProgramInstallInput,
+  createRevealedStackFreeProgramInstallInput,
   createTemporaryProgramFreeInstallInput,
   executeFreeProgramInstallPlan,
   type FreeProgramInstallExecutionInput,
 } from "./free-program-install-execution";
 import type {
-  MysteryBoxSearchInstallExecutionPlan,
-  SneakPreviewSearchInstallExecutionPlan,
+  RevealedStackProgramInstallExecutionPlan,
+  TemporaryProgramSearchInstallExecutionPlan,
 } from "./search-install-intents";
 
 const programId = "program_1" as CardInstanceId;
@@ -17,8 +17,8 @@ const programDefinitionId = "program_definition" as CardDefinitionId;
 const sourceDefinitionId = "source_definition" as CardDefinitionId;
 
 function sneakPlan(
-  overrides: Partial<SneakPreviewSearchInstallExecutionPlan> = {},
-): SneakPreviewSearchInstallExecutionPlan {
+  overrides: Partial<TemporaryProgramSearchInstallExecutionPlan> = {},
+): TemporaryProgramSearchInstallExecutionPlan {
   return {
     selectedCardId: programId,
     selectedCardDefinitionId: programDefinitionId,
@@ -35,8 +35,8 @@ function sneakPlan(
 }
 
 function mysteryPlan(
-  overrides: Partial<MysteryBoxSearchInstallExecutionPlan> = {},
-): MysteryBoxSearchInstallExecutionPlan {
+  overrides: Partial<RevealedStackProgramInstallExecutionPlan> = {},
+): RevealedStackProgramInstallExecutionPlan {
   return {
     sourceCardId,
     topCardIds: [programId],
@@ -117,7 +117,7 @@ describe("free program install execution", () => {
   });
 
   it("carries Mystery Box source-trash and shuffle metadata", () => {
-    const plan = createMysteryBoxFreeProgramInstallInput(mysteryPlan());
+    const plan = createRevealedStackFreeProgramInstallInput(mysteryPlan());
 
     expect(plan).toEqual({
       selectedProgramId: programId,
@@ -132,7 +132,7 @@ describe("free program install execution", () => {
 
   it("rejects Mystery Box plans without an install target", () => {
     expect(() =>
-      createMysteryBoxFreeProgramInstallInput(
+      createRevealedStackFreeProgramInstallInput(
         mysteryPlan({
           selectedCardId: undefined,
           selectedCardDefinitionId: undefined,
@@ -142,7 +142,7 @@ describe("free program install execution", () => {
           selfTrashed: false,
         }),
       ),
-    ).toThrow("Mystery Box hat kein installiertes Programm im Plan.");
+    ).toThrow("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
   });
 
   it("fails when the install callback does not return an installed id", () => {

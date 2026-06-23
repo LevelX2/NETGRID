@@ -35,11 +35,11 @@ export type SearchInstallExecutionPlan = SearchInstallIntent & {
   canAttemptInstall: boolean;
 };
 
-export type SneakPreviewSearchInstallExecutionPlan = SearchInstallIntent & {
+export type TemporaryProgramSearchInstallExecutionPlan = SearchInstallIntent & {
   isCardImplementationChoice: boolean;
 };
 
-export type MysteryBoxSearchInstallExecutionPlan = {
+export type RevealedStackProgramInstallExecutionPlan = {
   sourceCardId: CardInstanceId;
   topCardIds: readonly CardInstanceId[];
   programCandidateIds: readonly CardInstanceId[];
@@ -55,7 +55,7 @@ export type MysteryBoxSearchInstallExecutionPlan = {
   selfTrashed: boolean;
 };
 
-function sneakPreviewSourceZone(
+function temporaryProgramInstallSourceZone(
   choice: ChoiceRequest | undefined,
 ): SearchInstallSourceZone | undefined {
   return choice?.source.startsWith("v1911.sneak_preview_heap_install")
@@ -134,8 +134,8 @@ export function resolveTemporaryProgramSearchInstallIntent(input: {
       }
     | undefined;
   defaultSourceDefinitionId: CardDefinitionId;
-}): SneakPreviewSearchInstallExecutionPlan {
-  const sourceZone = sneakPreviewSourceZone(input.choice);
+}): TemporaryProgramSearchInstallExecutionPlan {
+  const sourceZone = temporaryProgramInstallSourceZone(input.choice);
   const selection = resolveTemporaryProgramSearchInstallSelection({
     choice: input.choice,
     selectedCardId: input.selectedCardId,
@@ -146,7 +146,7 @@ export function resolveTemporaryProgramSearchInstallIntent(input: {
   });
   const selectedDefinition = input.selectedCardDefinition;
   if (!selectedDefinition || selectedDefinition.type !== "program")
-    throw new Error("Sneak Preview darf nur Programme installieren.");
+    throw new Error("Die temporaere Programminstallation darf nur Programme installieren.");
   const sourceCardId = selection.isCardImplementationChoice
     ? (input.choice?.source.split(":")[1] as CardInstanceId | undefined)
     : undefined;
@@ -166,13 +166,13 @@ export function resolveTemporaryProgramSearchInstallIntent(input: {
 }
 
 export function buildTemporaryProgramSearchInstallResolvedPayload(
-  plan: SneakPreviewSearchInstallExecutionPlan,
+  plan: TemporaryProgramSearchInstallExecutionPlan,
 ): HiddenZonePayload {
   return {
     hiddenZoneBarrier: true,
     hiddenZoneAction: plan.isCardImplementationChoice
       ? "p3_38_stack_or_trash_program_install"
-      : "sneak_preview_program_install",
+      : "temporary_program_install",
     sourceDefinitionId: plan.sourceDefinitionId,
     searchReveal: plan.sourceZone === "stack" ? "public" : "hidden",
     searchDestination: plan.destination,
@@ -190,13 +190,13 @@ export function buildTemporaryProgramSearchInstallResolvedPayload(
   };
 }
 
-export function createMysteryBoxNoInstallIntent(input: {
+export function createRevealedStackNoProgramInstallIntent(input: {
   sourceCardId: CardInstanceId;
   topCardIds: readonly CardInstanceId[];
   programCandidateIds: readonly CardInstanceId[];
-}): MysteryBoxSearchInstallExecutionPlan {
+}): RevealedStackProgramInstallExecutionPlan {
   if (input.programCandidateIds.length > 0)
-    throw new Error("Mystery Box hat installierbare Programme gefunden.");
+    throw new Error("Der offengelegte Stack-Plan hat installierbare Programme gefunden.");
   return {
     sourceCardId: input.sourceCardId,
     topCardIds: [...input.topCardIds],
@@ -212,7 +212,7 @@ export function createMysteryBoxNoInstallIntent(input: {
   };
 }
 
-export function resolveMysteryBoxSearchInstallIntent(input: {
+export function resolveRevealedStackProgramInstallIntent(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   topCardIds: readonly CardInstanceId[];
@@ -223,7 +223,7 @@ export function resolveMysteryBoxSearchInstallIntent(input: {
         type: string;
       }
     | undefined;
-}): MysteryBoxSearchInstallExecutionPlan {
+}): RevealedStackProgramInstallExecutionPlan {
   const programCandidateIds =
     input.programCandidateIds ??
     input.choice?.options.map((option) => option.value as CardInstanceId) ??
@@ -236,11 +236,11 @@ export function resolveMysteryBoxSearchInstallIntent(input: {
   });
   if (!programCandidateIds.includes(selection.selectedCardId))
     throw new Error(
-      "Das gewaehlte Programm liegt nicht im Mystery-Box-Kandidatenpool.",
+      "Das gewaehlte Programm liegt nicht im offengelegten Stack-Kandidatenpool.",
     );
   const selectedDefinition = input.selectedCardDefinition;
   if (!selectedDefinition)
-    throw new Error("Mystery Box kann nur ein Programm installieren.");
+    throw new Error("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
   return {
     sourceCardId: selection.sourceCardId,
     topCardIds: [...input.topCardIds],
@@ -258,8 +258,8 @@ export function resolveMysteryBoxSearchInstallIntent(input: {
   };
 }
 
-export function buildMysteryBoxNoInstallResolvedPayload(
-  plan: MysteryBoxSearchInstallExecutionPlan,
+export function buildRevealedStackNoProgramInstallResolvedPayload(
+  plan: RevealedStackProgramInstallExecutionPlan,
   input: {
     randomCounterAfter: number;
   },
@@ -272,18 +272,18 @@ export function buildMysteryBoxNoInstallResolvedPayload(
   };
 }
 
-export function buildMysteryBoxSearchInstallResolvedPayload(
-  plan: MysteryBoxSearchInstallExecutionPlan,
+export function buildRevealedStackProgramInstallResolvedPayload(
+  plan: RevealedStackProgramInstallExecutionPlan,
   input: {
     randomCounterAfter: number;
   },
 ): HiddenZonePayload {
   if (!plan.selectedCardDefinitionId)
-    throw new Error("Mystery Box hat kein installiertes Programm im Plan.");
+    throw new Error("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
   return {
     v1915RunnerProgramAbility: "top5_program_install",
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "mystery_box_program_install",
+    hiddenZoneAction: "revealed_stack_program_install",
     installedProgramDefinitionId: plan.selectedCardDefinitionId,
     installedProgramCount: plan.installedProgramCount,
     selfTrashed: plan.selfTrashed,

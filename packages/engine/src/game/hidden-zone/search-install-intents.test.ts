@@ -5,13 +5,13 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  buildMysteryBoxNoInstallResolvedPayload,
-  buildMysteryBoxSearchInstallResolvedPayload,
+  buildRevealedStackNoProgramInstallResolvedPayload,
+  buildRevealedStackProgramInstallResolvedPayload,
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
   buildTemporaryProgramSearchInstallResolvedPayload,
-  createMysteryBoxNoInstallIntent,
-  resolveMysteryBoxSearchInstallIntent,
+  createRevealedStackNoProgramInstallIntent,
+  resolveRevealedStackProgramInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
   resolveTemporaryProgramSearchInstallIntent,
 } from "./search-install-intents";
@@ -203,7 +203,7 @@ describe("hidden-zone search/install intents", () => {
     });
     expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "temporary_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
       searchReveal: "public",
       searchDestination: "install_program",
@@ -245,7 +245,7 @@ describe("hidden-zone search/install intents", () => {
     });
     expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "temporary_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
       searchReveal: "hidden",
       searchDestination: "install_program",
@@ -280,7 +280,7 @@ describe("hidden-zone search/install intents", () => {
       "top_event_2",
       "top_event_3",
     ] as CardInstanceId[];
-    const plan = createMysteryBoxNoInstallIntent({
+    const plan = createRevealedStackNoProgramInstallIntent({
       sourceCardId: mysterySourceCardId,
       topCardIds,
       programCandidateIds: [],
@@ -300,7 +300,7 @@ describe("hidden-zone search/install intents", () => {
       selfTrashed: false,
     });
     expect(
-      buildMysteryBoxNoInstallResolvedPayload(plan, {
+      buildRevealedStackNoProgramInstallResolvedPayload(plan, {
         randomCounterAfter: 4,
       }),
     ).toEqual({
@@ -317,7 +317,7 @@ describe("hidden-zone search/install intents", () => {
       "top_event",
       "second_program",
     ] as CardInstanceId[];
-    const plan = resolveMysteryBoxSearchInstallIntent({
+    const plan = resolveRevealedStackProgramInstallIntent({
       choice: choice({
         source: `v1915.mystery_box:${mysterySourceCardId}:${topCardIds.join(",")}:8`,
       }),
@@ -346,13 +346,13 @@ describe("hidden-zone search/install intents", () => {
       selfTrashed: true,
     });
     expect(
-      buildMysteryBoxSearchInstallResolvedPayload(plan, {
+      buildRevealedStackProgramInstallResolvedPayload(plan, {
         randomCounterAfter: 5,
       }),
     ).toEqual({
       v1915RunnerProgramAbility: "top5_program_install",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "mystery_box_program_install",
+      hiddenZoneAction: "revealed_stack_program_install",
       installedProgramDefinitionId: selectedDefinitionId,
       installedProgramCount: 1,
       selfTrashed: true,
@@ -362,7 +362,7 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid Mystery Box top-five install selections", () => {
     expect(() =>
-      resolveMysteryBoxSearchInstallIntent({
+      resolveRevealedStackProgramInstallIntent({
         choice: choice({
           source: `v1915.mystery_box:${mysterySourceCardId}:top_event:8`,
         }),
@@ -377,7 +377,7 @@ describe("hidden-zone search/install intents", () => {
     ).toThrow("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
 
     expect(() =>
-      resolveMysteryBoxSearchInstallIntent({
+      resolveRevealedStackProgramInstallIntent({
         choice: choice({
           source: `v1915.mystery_box:${mysterySourceCardId}:${selectedCardId}:8`,
         }),
@@ -389,6 +389,6 @@ describe("hidden-zone search/install intents", () => {
           type: "event",
         },
       }),
-    ).toThrow("Mystery Box kann nur ein Programm installieren.");
+    ).toThrow("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
   });
 });

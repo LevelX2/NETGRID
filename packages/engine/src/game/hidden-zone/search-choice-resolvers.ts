@@ -290,7 +290,7 @@ export function resolveMysteryBoxInstallSelection(input: {
   if (!input.selectedCardId || !input.currentTopCardIds.includes(input.selectedCardId))
     throw new Error("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
   if (!input.isSelectedProgram)
-    throw new Error("Mystery Box kann nur ein Programm installieren.");
+    throw new Error("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
   return {
     sourceCardId,
     selectedCardId: input.selectedCardId,

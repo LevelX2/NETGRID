@@ -22,8 +22,8 @@ import {
   buildTemporaryProgramInstallSourceChoicePayload,
 } from "./search-choice-builders";
 import {
-  buildMysteryBoxNoInstallResolvedPayload,
-  createMysteryBoxNoInstallIntent,
+  buildRevealedStackNoProgramInstallResolvedPayload,
+  createRevealedStackNoProgramInstallIntent,
 } from "./search-install-intents";
 import {
   applyMysteryBoxOncePerRunPlan,
@@ -565,7 +565,7 @@ export function startTemporaryProgramInstallSourceActivation(
   const options = temporaryProgramInstallSourceOptions(host);
   if (options.length === 0)
     throw new Error(
-      "Sneak Preview findet kein legal installierbares Programm.",
+      "Die temporaere Programminstallation findet kein legal installierbares Programm.",
     );
   host.state.pendingChoice = buildTemporaryProgramInstallSourceChoice({
     stateVersion: host.state.stateVersion,
@@ -591,7 +591,7 @@ export function handleTopFiveProgramInstallActivation(
     host.legalAction.payload?.cardId ?? "",
   ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Mystery Box ist nicht installiert.");
+    throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
   const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
@@ -614,8 +614,8 @@ export function handleTopFiveProgramInstallActivation(
     );
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-      ...buildMysteryBoxNoInstallResolvedPayload(
-        createMysteryBoxNoInstallIntent({
+      ...buildRevealedStackNoProgramInstallResolvedPayload(
+        createRevealedStackNoProgramInstallIntent({
           sourceCardId,
           topCardIds: topCards,
           programCandidateIds: programIds,
