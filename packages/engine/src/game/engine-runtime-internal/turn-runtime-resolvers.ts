@@ -1370,7 +1370,7 @@ function resolveTemporaryProgramInstallReturns(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_end_turn_return",
+      hiddenZoneAction: "temporary_program_install_end_turn_return",
       returnedCount: returnedDefinitionIds.length,
       returnedCardDefinitionIds: returnedDefinitionIds.join(","),
     };

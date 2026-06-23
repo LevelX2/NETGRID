@@ -881,7 +881,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.rig.programs).not.toContain(targetProgramId);
     expect(state.runner.grip).toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_end_turn_return",
+      hiddenZoneAction: "temporary_program_install_end_turn_return",
       returnedCount: 1,
     });
 
