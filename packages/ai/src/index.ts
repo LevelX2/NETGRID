@@ -118,7 +118,6 @@ import { buildAiDecisionInputDto } from "./input-dto";
 import {
   buildActionSemanticCandidates,
   type ActionSemanticCandidate,
-  type ActionTagEffectProfile,
 } from "./action-semantic-candidate";
 import { delayedInstallAbilityForAction } from "./actions/delayed-install-action";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
@@ -206,6 +205,10 @@ import {
 import {
   runnerHandBufferNeedScoreComponent,
 } from "./runtime/runner-hand-buffer-need";
+import {
+  runnerDirectTagCleanupFallbackScoreComponent,
+  runnerTagCleanupScoreComponent,
+} from "./runtime/runner-tag-cleanup-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5537,36 +5540,6 @@ type RunnerLoanLiabilityAssessment = {
   evidence: string[];
 };
 
-function runnerTagCleanupScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-): AiDecisionScoreComponent | undefined {
-  const currentTags = input.playerView.own.tags;
-  if (currentTags <= 0) return undefined;
-  const profile = actionSemanticCandidate?.tagEffectProfile;
-  const acuteTagRemoval =
-    profile?.acuteTagRemoval === true || action.type === "remove_tag";
-  if (!acuteTagRemoval) return undefined;
-  const reduction = tagCleanupReduction(profile?.currentTagReduction, currentTags);
-  const value = 900 + Math.max(0, reduction - 1) * 150;
-  return {
-    key: "runner_tags_present",
-    label: "Tags entfernen",
-    value,
-    reason: `tags:${currentTags};reduction:${reduction}`,
-  };
-}
-
-function tagCleanupReduction(
-  reduction: ActionTagEffectProfile["currentTagReduction"] | undefined,
-  currentTags: number,
-): number {
-  if (reduction === "all") return currentTags;
-  if (typeof reduction === "number") return Math.min(reduction, currentTags);
-  return 1;
-}
-
 function semanticRuntimeRunnerScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
@@ -5603,14 +5576,12 @@ function semanticRuntimeRunnerScoreComponents(
   if (goalFit) {
     components.push(goalFit);
   }
-  if (action.type === "remove_tag" && input.playerView.own.tags > 0 && !tagCleanup) {
-    components.push({
-      key: "runner_tags_present",
-      label: "Tags entfernen",
-      value: 900,
-      reason: `tags:${input.playerView.own.tags}`,
-    });
-  }
+  const tagCleanupFallback = runnerDirectTagCleanupFallbackScoreComponent(
+    input,
+    action,
+    tagCleanup,
+  );
+  if (tagCleanupFallback) components.push(tagCleanupFallback);
   if (action.type === "gain_credit" && credits < 5) {
     components.push({
       key: "runner_low_credits",
