@@ -104,7 +104,6 @@ import {
   automaticEndTurnAction,
   baseActionSlotCapacity,
   installedCorpExposeReviewCardId,
-  encounterBreakerActions,
   fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
@@ -117,7 +116,6 @@ import {
   runTargetServerIds,
   runAwareActionButtonLabel,
   runWindowActions,
-  runCurrentIceLabel,
   runnerRigMemorySummary,
   runPositionStatusLabel,
   serializeCuePositionPreference,
@@ -386,6 +384,7 @@ import {
   revealedEventCardIds
 } from "../features/actions/access-review-derivation";
 import { eventActionType, localActionSoundKey, localActionSoundKind, publicEventsAfter } from "../features/actions/local-action-sounds";
+import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { recentSessionHeadline, recentSessionStatusLabel } from "../features/recent/recent-session-labels";
 import { ChronicleCardTrigger } from "../features/chronicle/ChronicleCardTrigger";
@@ -5237,7 +5236,6 @@ export default function Page() {
     </CardScaleSettingsContext.Provider>
   );
 }
-
 function OpponentCueTitle({
   cue,
   card,
@@ -5285,29 +5283,4 @@ function OpponentCueTitle({
       {cue.title.slice(index + cue.cardTitle.length)}
     </>
   );
-}
-
-function serverLabelFromId(serverId: string): string {
-  return serverDisplayLabel(serverId);
-}
-
-function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAction[]): string | null {
-  if (view.run?.phase !== "encounter_ice") return null;
-  const breakerActions = encounterBreakerActions(view, contextualActions);
-  if (breakerActions.length === 0) return null;
-  const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
-  const breakerIds = new Set(
-    breakerActions
-      .map((action) => (typeof action.payload?.breakerId === "string" ? action.payload.breakerId : action.source))
-      .filter((id): id is string => typeof id === "string" && id !== "basic_action" && id !== "game_rule")
-  );
-  const breakerNames = runnerRig
-    .filter((card) => breakerIds.has(card.instanceId))
-    .map((card) => card.title)
-    .filter((title): title is string => Boolean(title));
-  const uniqueNames = Array.from(new Set(breakerNames));
-  const target = runCurrentIceLabel(view) ?? "dieses ICE";
-  if (uniqueNames.length === 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames[0]} im Rig für Aktionen gegen ${target}.`;
-  if (uniqueNames.length > 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames.slice(0, 2).join(" oder ")} im Rig für Aktionen gegen ${target}.`;
-  return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
 }
