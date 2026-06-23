@@ -128,7 +128,6 @@ import {
   matchStartPlayerClockLabel,
   matchStartSummary,
   parseJoinLinkInput,
-  sideSelectionLabel,
   type HumanAiSideSelection,
   type HumanSideSelection,
   type PlayMode
@@ -399,6 +398,7 @@ import {
 } from "../features/debug/AiDecisionDebugOverlay";
 import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
+import { MatchStartAdvancedOptions } from "../features/match-start/MatchStartAdvancedOptions";
 import { MatchJoinConsole } from "../features/match-start/MatchJoinConsole";
 import { MatchResumePanel } from "../features/match-start/MatchResumePanel";
 import { MatchStartChoiceSections } from "../features/match-start/MatchStartChoiceSections";
@@ -3508,148 +3508,53 @@ export default function Page() {
                     {simulationStatusText}
                   </p>
                 ) : null}
-                <details className="advancedMatchOptions" data-testid="advanced-match-options">
-                  <summary>
-                    <SlidersHorizontal size={15} />
-                    Erweiterte Optionen
-                  </summary>
-                  <div className="formGrid advancedMatchGrid">
-                    {isHumanVsHuman ? (
-                      <label>
-                        Seitenzuteilung
-                        <select value={humanSideSelection} onChange={(event) => setHumanSideSelection(event.target.value as HumanSideSelection)}>
-                          <option value="random">{sideSelectionLabel("random")}</option>
-                          <option value="runner">{sideSelectionLabel("runner")}</option>
-                          <option value="corp">{sideSelectionLabel("corp")}</option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {isHumanVsHuman ? (
-                      <label>
-                        Countdown
-                        <select value={countdownSeconds} onChange={(event) => setCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)}>
-                          <option value={3}>3 Sekunden</option>
-                          <option value={5}>5 Sekunden</option>
-                          <option value={10}>10 Sekunden</option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {isHumanVsHuman ? (
-                      <label className={`deckBuilderToggle ${discoverableInLan ? "checked" : ""}`}>
-                        <input checked={discoverableInLan} onChange={(event) => setDiscoverableInLan(event.target.checked)} type="checkbox" />
-                        In LAN-Liste sichtbar
-                      </label>
-                    ) : null}
-                    <label>
-                      Spielerzeit
-                      <select value={playerClockMode} onChange={(event) => setPlayerClockMode(event.target.value as MatchStartPlayerClockMode)}>
-                        <option value="none">Keine Zeitbegrenzung</option>
-                        <option value="player_clock">Zeitbegrenzung aktiv</option>
-                      </select>
-                    </label>
-                    <label>
-                      Zeit pro Seite
-                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>
-                        <option value={5}>5 Minuten</option>
-                        <option value={10}>10 Minuten</option>
-                        <option value={15}>15 Minuten</option>
-                        <option value={20}>20 Minuten</option>
-                        <option value={30}>30 Minuten</option>
-                        <option value={45}>45 Minuten</option>
-                      </select>
-                    </label>
-                    <label>
-                      Kulanz je Entscheidung
-                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockDetailControlsDisabled}>
-                        <option value={0}>0 Sekunden</option>
-                        <option value={5}>5 Sekunden</option>
-                        <option value={10}>10 Sekunden</option>
-                        <option value={15}>15 Sekunden</option>
-                        <option value={30}>30 Sekunden</option>
-                      </select>
-                    </label>
-                    <label>
-                      Seed
-                      <input value={seed} onChange={(event) => setSeed(event.target.value)} />
-                    </label>
-                    {hasAiOpponent ? (
-                      <label>
-                        Diagnose
-                        <select value={aiTraceStartMode} onChange={(event) => setAiTraceStartMode(event.target.value as AiTraceStartMode)}>
-                          <option value="off">Keine KI-Aufzeichnung</option>
-                          <option value="detailed">KI-Trace ab Start</option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {isHumanVsHuman ? (
-                      <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
-                        <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />
-                        Testkonstellation · beide Teilnehmer festlegen
-                      </label>
-                    ) : null}
-                    {(isHumanVsAi && humanAiSideSelection !== "runner") ? (
-                      <label>
-                        Runner-KI
-                        <select value={runnerDifficulty} onChange={(event) => setRunnerDifficulty(event.target.value as AiDifficulty)}>
-                          <option value="easy">Easy</option>
-                          <option value="normal">Normal</option>
-                          <option value="hard">Hard</option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {(isHumanVsAi && humanAiSideSelection !== "corp") ? (
-                      <label>
-                        Korp-KI
-                        <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
-                          <option value="easy">Easy</option>
-                          <option value="normal">Normal</option>
-                          <option value="hard">Hard</option>
-                        </select>
-                      </label>
-                    ) : null}
-                    {hasAiOpponent ? (
-                      <label>
-                        KI-Decks
-                        <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
-                          <option value="selected">Explizit gewählte KI-Decks</option>
-                          <option value="same_as_participant_a">Gleiche Decks wie Teilnehmer A</option>
-                          <option value="fixed">Feste Standard-Decks</option>
-                          <option value="seeded_random">Deterministisch zufällig</option>
-                        </select>
-                      </label>
-                    ) : null}
-                  </div>
-                  {(isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected") ? (
-                    <div className="deckSlotGrid advancedDeckSlots">
-                    <>
-                      <DeckSlotSelect
-                        label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
-                        snapshots={runnerSnapshots}
-                        localDecks={matchStartLocalDecks.filter((deck) => deck.side === "runner")}
-                        source={participantBRunnerDeckSource}
-                        selectedSnapshotId={selectedParticipantBRunnerSnapshotId}
-                        selectedLocalDeckId={selectedParticipantBRunnerLocalDeckId}
-                        disabled={aiSlotDisabled}
-                        onSource={setParticipantBRunnerDeckSource}
-                        onSnapshot={setSelectedParticipantBRunnerSnapshotId}
-                        onLocalDeck={setSelectedParticipantBRunnerLocalDeckId}
-                      />
-                      <DeckSlotSelect
-                        label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
-                        snapshots={corpSnapshots}
-                        localDecks={matchStartLocalDecks.filter((deck) => deck.side === "corp")}
-                        source={participantBCorpDeckSource}
-                        selectedSnapshotId={selectedParticipantBCorpSnapshotId}
-                        selectedLocalDeckId={selectedParticipantBCorpLocalDeckId}
-                        disabled={aiSlotDisabled}
-                        onSource={setParticipantBCorpDeckSource}
-                        onSnapshot={setSelectedParticipantBCorpSnapshotId}
-                        onLocalDeck={setSelectedParticipantBCorpLocalDeckId}
-                      />
-                    </>
-                    </div>
-                  ) : null}
-                </details>
+                <MatchStartAdvancedOptions
+                  isHumanVsHuman={isHumanVsHuman}
+                  isHumanVsAi={isHumanVsAi}
+                  hasAiOpponent={hasAiOpponent}
+                  humanSideSelection={humanSideSelection}
+                  humanAiSideSelection={humanAiSideSelection}
+                  countdownSeconds={countdownSeconds}
+                  discoverableInLan={discoverableInLan}
+                  playerClockMode={playerClockMode}
+                  playerClockMinutes={playerClockMinutes}
+                  playerClockGraceSeconds={playerClockGraceSeconds}
+                  playerClockDetailControlsDisabled={playerClockDetailControlsDisabled}
+                  seed={seed}
+                  aiTraceStartMode={aiTraceStartMode}
+                  testSetupMode={testSetupMode}
+                  runnerDifficulty={runnerDifficulty}
+                  corpDifficulty={corpDifficulty}
+                  aiDeckPolicy={aiDeckPolicy}
+                  runnerSnapshots={runnerSnapshots}
+                  corpSnapshots={corpSnapshots}
+                  localDecks={matchStartLocalDecks}
+                  participantBRunnerDeckSource={participantBRunnerDeckSource}
+                  participantBCorpDeckSource={participantBCorpDeckSource}
+                  selectedParticipantBRunnerSnapshotId={selectedParticipantBRunnerSnapshotId}
+                  selectedParticipantBCorpSnapshotId={selectedParticipantBCorpSnapshotId}
+                  selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
+                  selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
+                  aiSlotDisabled={aiSlotDisabled}
+                  onHumanSideSelection={setHumanSideSelection}
+                  onCountdownSeconds={setCountdownSeconds}
+                  onDiscoverableInLan={setDiscoverableInLan}
+                  onPlayerClockMode={setPlayerClockMode}
+                  onPlayerClockMinutes={setPlayerClockMinutes}
+                  onPlayerClockGraceSeconds={setPlayerClockGraceSeconds}
+                  onSeed={setSeed}
+                  onAiTraceStartMode={setAiTraceStartMode}
+                  onTestSetupMode={setTestSetupMode}
+                  onRunnerDifficulty={setRunnerDifficulty}
+                  onCorpDifficulty={setCorpDifficulty}
+                  onAiDeckPolicy={setAiDeckPolicy}
+                  onParticipantBRunnerDeckSource={setParticipantBRunnerDeckSource}
+                  onParticipantBCorpDeckSource={setParticipantBCorpDeckSource}
+                  onSelectedParticipantBRunnerSnapshotId={setSelectedParticipantBRunnerSnapshotId}
+                  onSelectedParticipantBCorpSnapshotId={setSelectedParticipantBCorpSnapshotId}
+                  onSelectedParticipantBRunnerLocalDeckId={setSelectedParticipantBRunnerLocalDeckId}
+                  onSelectedParticipantBCorpLocalDeckId={setSelectedParticipantBCorpLocalDeckId}
+                />
                 <DeckMetadataLine entries={visibleDeckMetadataEntries} />
                 {simulation ? <SimulationResult summary={simulation} /> : null}
               </div>
