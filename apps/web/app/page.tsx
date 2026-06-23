@@ -306,6 +306,11 @@ import {
 import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfilePanel";
 import { DeckCardThumb } from "../features/decks/DeckCardThumb";
 import { DeckCardTooltipTrigger } from "../features/decks/DeckCardTooltipTrigger";
+import {
+  DeckLibraryCard,
+  DeckListCard,
+  DeckTableLibraryCard
+} from "../features/decks/DeckBuilderCards";
 import { DeckValidationSummary } from "../features/decks/DeckValidationSummary";
 import {
   DECK_TABLE_CARD_WIDTH_DEFAULT,
@@ -1031,7 +1036,6 @@ function exposeReviewDefinitionIds(event: PublicGameEvent): string[] {
     )
   );
 }
-
 function exposeReviewDescription(actorSide: Side, viewerSide: Side, count: number, serverLabels: string[]): string {
   const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
   const object = count === 1 ? "eine Karte" : `${count} Karten`;
@@ -6726,7 +6730,6 @@ function CatalogPanel({
     </section>
   );
 }
-
 function DeckSlotSelect({
   label,
   snapshots,
@@ -8192,170 +8195,5 @@ function DeckTablePileView({
         {pile.entries.length === 0 ? <p className="meta deckTablePileEmpty">Karte hier ablegen</p> : null}
       </div>
     </section>
-  );
-}
-
-function DeckTableLibraryCard({
-  card,
-  detail,
-  overlapped,
-  quantity,
-  selected,
-  stackIndex,
-  onAddToFirstPile,
-  onSelect
-}: {
-  card: CatalogCardSummary;
-  detail: DeckBuilderCardDetail | undefined;
-  overlapped: boolean;
-  quantity: number;
-  selected: boolean;
-  stackIndex: number;
-  onAddToFirstPile(): void;
-  onSelect(): void;
-}) {
-  return (
-    <DeckCardTooltipTrigger
-      card={card}
-      detail={detail}
-      cardId={card.catalogCardId}
-      className={`deckTableLibraryCard ${overlapped ? "overlapped" : ""} ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`}
-      onSelect={onSelect}
-      style={{ "--deck-table-card-z": stackIndex } as CSSProperties}
-    >
-      <div
-        draggable
-        onDoubleClick={(event) => {
-          event.stopPropagation();
-          onAddToFirstPile();
-        }}
-        onDragStart={(event) => {
-          event.dataTransfer.setData("application/x-netgrid-card", JSON.stringify({ cardId: card.catalogCardId }));
-          event.dataTransfer.effectAllowed = "copy";
-        }}
-      >
-        <DeckCardThumb
-          cardId={card.catalogCardId}
-          title={card.title}
-          cardType={card.type}
-          {...(detail?.text ? { rulesText: detail.text } : {})}
-          {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-          {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
-        />
-        <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
-        {quantity > 0 ? <b>x{quantity}</b> : null}
-      </div>
-    </DeckCardTooltipTrigger>
-  );
-}
-
-function DeckLibraryCard({
-  card,
-  detail,
-  quantity,
-  selected,
-  onAdd,
-  onRemove,
-  onSelect
-}: {
-  card: CatalogCardSummary;
-  detail: DeckBuilderCardDetail | undefined;
-  quantity: number;
-  selected: boolean;
-  onAdd(): void;
-  onRemove(): void;
-  onSelect(): void;
-}) {
-  const metrics = deckBuilderMetricLine(detail);
-  return (
-    <DeckCardTooltipTrigger
-      card={card}
-      detail={detail}
-      cardId={card.catalogCardId}
-      className={`deckLibraryCard ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`}
-      onSelect={onSelect}
-    >
-      <DeckCardThumb
-        cardId={card.catalogCardId}
-        title={card.title}
-        cardType={card.type}
-        {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
-      />
-      <div className="deckBuilderCardText">
-        <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
-        {metrics ? <small>{metrics}</small> : null}
-        {detail?.text ? <p>{detail.text}</p> : null}
-      </div>
-      <div className="deckQuantityControls" aria-label={`${card.title} Menge`}>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onRemove(); }} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
-          -
-        </button>
-        <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onAdd(); }} type="button" aria-label={`${card.title} hinzufügen`}>
-          +
-        </button>
-      </div>
-    </DeckCardTooltipTrigger>
-  );
-}
-
-function DeckListCard({
-  card,
-  cardId,
-  detail,
-  quantity,
-  onIncrement,
-  onDecrement,
-  onRemove,
-  onSelect
-}: {
-  card: CatalogCardSummary | null;
-  cardId: string;
-  detail: DeckBuilderCardDetail | undefined;
-  quantity: number;
-  onIncrement(): void;
-  onDecrement(): void;
-  onRemove(): void;
-  onSelect(): void;
-}) {
-  const metrics = deckBuilderMetricLine(detail);
-  return (
-    <DeckCardTooltipTrigger
-      card={card}
-      detail={detail}
-      cardId={cardId}
-      className="deckListCard"
-      onSelect={onSelect}
-    >
-      <DeckCardThumb
-        cardId={card?.catalogCardId ?? cardId}
-        title={card?.title ?? cardId}
-        {...(card?.type ? { cardType: card.type } : {})}
-        {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
-      />
-      <div className="deckBuilderCardText">
-        <strong>{card?.title ?? cardId}</strong>
-        <span>{card ? formatCatalogTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
-        {metrics ? <small>{metrics}</small> : null}
-      </div>
-      <div className="deckQuantityControls">
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onDecrement(); }} type="button" aria-label={`${card?.title ?? cardId} reduzieren`}>
-          -
-        </button>
-        <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onIncrement(); }} type="button" aria-label={`${card?.title ?? cardId} erhöhen`}>
-          +
-        </button>
-        <button className="deckQtyButton remove" onClick={(event) => { event.stopPropagation(); onRemove(); }} type="button" aria-label={`${card?.title ?? cardId} entfernen`}>
-          <Trash2 size={13} />
-        </button>
-      </div>
-    </DeckCardTooltipTrigger>
   );
 }
