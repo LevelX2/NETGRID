@@ -307,6 +307,7 @@ import { DeckStrategyProfilePanel } from "../features/decks/DeckStrategyProfileP
 import { DeckCardThumb } from "../features/decks/DeckCardThumb";
 import { DeckCardTooltipTrigger } from "../features/decks/DeckCardTooltipTrigger";
 import {
+  DeckBuilderPreview,
   DeckLibraryCard,
   DeckListCard,
   DeckTableLibraryCard
@@ -7774,39 +7775,6 @@ function DeckEditorPanel({
             </p>
           )}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card: CatalogCardSummary; detail: CatalogCardDetail | undefined; quantity: number; onAdd(): void; onRemove(): void }) {
-  const metrics = deckBuilderMetricLine(detail);
-  return (
-    <section className="deckBuilderPreview" aria-label="Kartenpreview">
-      <DeckCardThumb
-        cardId={card.catalogCardId}
-        title={card.title}
-        cardType={card.type}
-        preview
-        {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
-      />
-      <div className="deckBuilderPreviewText">
-        <span>{deckBuilderCardGroup(card)}</span>
-        <strong>{card.title}</strong>
-        <small>{formatCatalogTypeLine(card)}</small>
-        {metrics ? <small>{metrics}</small> : null}
-        <p>{detail?.text ?? "Kartentext wird geladen."}</p>
-      </div>
-      <div className="deckQuantityControls preview">
-        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
-          -
-        </button>
-        <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={`${card.title} hinzufügen`}>
-          +
-        </button>
       </div>
     </section>
   );

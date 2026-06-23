@@ -143,6 +143,51 @@ export function DeckLibraryCard({
   );
 }
 
+export function DeckBuilderPreview({
+  card,
+  detail,
+  quantity,
+  onAdd,
+  onRemove
+}: {
+  card: DeckBuilderCard;
+  detail: DeckBuilderDetail | undefined;
+  quantity: number;
+  onAdd(): void;
+  onRemove(): void;
+}) {
+  const metrics = deckBuilderMetricLine(detail);
+  return (
+    <section className="deckBuilderPreview" aria-label="Kartenpreview">
+      <DeckCardThumb
+        cardId={card.catalogCardId}
+        title={card.title}
+        cardType={card.type}
+        preview
+        {...(detail?.text ? { rulesText: detail.text } : {})}
+        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+      />
+      <div className="deckBuilderPreviewText">
+        <span>{deckBuilderCardGroup(card)}</span>
+        <strong>{card.title}</strong>
+        <small>{formatCatalogTypeLine(card)}</small>
+        {metrics ? <small>{metrics}</small> : null}
+        <p>{detail?.text ?? "Kartentext wird geladen."}</p>
+      </div>
+      <div className="deckQuantityControls preview">
+        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
+          -
+        </button>
+        <output>{quantity}</output>
+        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={`${card.title} hinzufügen`}>
+          +
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function DeckListCard({
   card,
   cardId,
@@ -198,6 +243,11 @@ export function DeckListCard({
       </div>
     </DeckCardTooltipTrigger>
   );
+}
+
+function deckBuilderCardGroup(card: DeckBuilderCard | null): string {
+  if (!card) return "Unbekannt";
+  return [formatCatalogTerm(card.type), card.subtypes.map(formatCatalogTerm).join(" / ")].filter(Boolean).join(" - ");
 }
 
 function deckBuilderMetricLine(detail: DeckBuilderDetail | undefined): string {
