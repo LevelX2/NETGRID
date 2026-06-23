@@ -212,6 +212,9 @@ import {
 import {
   runnerCreditNeedScoreComponents,
 } from "./runtime/runner-credit-need-score";
+import {
+  runnerInstallScoreComponents,
+} from "./runtime/runner-install-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5639,72 +5642,27 @@ function semanticRuntimeRunnerScoreComponents(
   components.push(
     ...runnerNoRunEconomyCommitmentScoreComponents(input, action),
   );
-  if (action.type === "install_card") {
-    const roles = rolesForAction(input, action);
-    const sourceCard = findVisibleCard(input, action.source);
-    const sacrificeAssessment = runnerProgramInstallTrashAssessmentForAction(
+  components.push(
+    ...runnerInstallScoreComponents(
       input,
       action,
-    );
-    const muPressureMemorySupport = runnerMuPressureInstallScoreComponent(
-      input,
-      action,
-    );
-    const persistentInstallFit = runnerPersistentInstallFitScoreComponent(
-      input,
-      action,
-    );
-    if (muPressureMemorySupport) components.push(muPressureMemorySupport);
-    if (persistentInstallFit) components.push(persistentInstallFit);
-    if (roles.some((role) => role.startsWith("breaker_"))) {
-      components.push({
-        key: "runner_install_breaker",
-        label: "Breaker-Aufbau",
-        value: 750,
-        reason: "breaker_role",
-      });
-    }
-    if (
-      roles.some((role) => isRunnerEconomyRole(role)) &&
-      !loanLiabilityAssessment?.loanInstallAction
-    ) {
-      components.push({
-        key: "runner_install_economy",
-        label: "Economy-Aufbau",
-        value: 500,
-        reason: "economy_role",
-      });
-    }
-    if (roles.some((role) => isRunnerPressureRole(role))) {
-      components.push({
-        key: "runner_install_pressure",
-        label: "Druck-Aufbau",
-        value: 650,
-        reason: "pressure_role",
-      });
-    }
-    if (runnerBadPublicityOrTraceTechCard(sourceCard, roles)) {
-      components.push({
-        key: "runner_install_bad_publicity_trace_tech",
-        label: "Bad-Publicity-/Trace-Tech",
-        value: 520,
-        reason: "bad_publicity_or_trace",
-      });
-    }
-    if (sacrificeAssessment?.memoryRequired) {
-      const sacrificePenalty =
-        runnerProgramInstallDisplacementPenalty(sacrificeAssessment);
-      components.push({
-        key: "runner_program_sacrifice_penalty",
-        label: "Programm-Opfer",
-        value: -sacrificePenalty,
-        reason: [
-          `category:${sacrificeAssessment.selectedCandidates[0]?.category ?? sacrificeAssessment.candidates[0]?.category ?? "none"}`,
-          `can_free:${sacrificeAssessment.canFreeRequiredMemory}`,
-        ].join("|"),
-      });
-    }
-  }
+      { loanInstallAction: loanLiabilityAssessment?.loanInstallAction === true },
+      {
+        rolesForAction,
+        sourceCard: (input, action) => findVisibleCard(input, action.source),
+        muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
+        persistentInstallFitScoreComponent:
+          runnerPersistentInstallFitScoreComponent,
+        isRunnerEconomyRole,
+        isRunnerPressureRole,
+        badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+        programInstallTrashAssessmentForAction:
+          runnerProgramInstallTrashAssessmentForAction,
+        programInstallDisplacementPenalty:
+          runnerProgramInstallDisplacementPenalty,
+      },
+    ),
+  );
   if (action.type === "start_run") {
     const serverId = semanticRuntimeServerId(action);
     const doctrineWeight = semanticRuntimeRunnerDoctrineRunWeight(
