@@ -194,6 +194,9 @@ import {
 import {
   knownCentralPayoffExclusion as buildKnownCentralPayoffExclusion,
 } from "./runtime/known-central-payoff-exclusion";
+import {
+  semanticRuntimePlanMemoryActionExclusion as buildSemanticRuntimePlanMemoryActionExclusion,
+} from "./runtime/semantic-runtime-plan-memory-exclusion";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -4440,41 +4443,12 @@ function semanticRuntimePlanMemoryActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const previousPlan = getTacticalPlanMemorySnapshot(input);
-  if (
-    input.side === "runner" &&
-    previousPlan?.type === "runner.build_credit_bank" &&
-    input.playerView.own.credits > 3 &&
-    action.type === "trigger_ability" &&
-    /von broker nehmen|take.*bank|cash.*bank/i.test(action.label)
-  ) {
-    return {
-      key: "bank_cashout_deferred_after_build",
-      label: "Bank-Auszahlung verschoben",
-      reason:
-        "previous build_credit_bank plan is still stable and no concrete funding need is visible",
-    };
-  }
-  if (
-    input.side === "runner" &&
-    isRunnerBankCashOutAction(input, action) &&
-    !runnerBankCashOutIsUsefulNow(input, action)
-  ) {
-    return {
-      key: "bank_cashout_without_funding_need",
-      label: "Bank-Auszahlung ohne Bedarf",
-      reason: runnerBankInvestmentCommitmentEvidence(input, action)
-        .filter(
-          (entry) =>
-            entry.startsWith("bankCommitmentStatus:") ||
-            entry.startsWith("bankStoredCredits:") ||
-            entry.startsWith("cashOutPriority:") ||
-            entry.startsWith("why_cashout_now:"),
-        )
-        .join("|"),
-    };
-  }
-  return undefined;
+  return buildSemanticRuntimePlanMemoryActionExclusion(input, action, {
+    previousPlan: getTacticalPlanMemorySnapshot,
+    isRunnerBankCashOutAction,
+    runnerBankCashOutIsUsefulNow,
+    runnerBankInvestmentCommitmentEvidence,
+  });
 }
 
 type RunnerBankInvestmentCommitmentStatus =
