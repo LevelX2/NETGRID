@@ -89,8 +89,8 @@ export function handleHiddenZoneNonSearchChoice(
   const source = host.state.pendingChoice?.source ?? "";
   if (source.startsWith("v1922.corp_archives_to_hq"))
     return resolveCorpArchivesToHqChoice(host);
-  if (source.startsWith("v1922.synchronized_attack_on_hq"))
-    return resolveSynchronizedAttackOnHqRetainChoice(host);
+  if (source.startsWith("runner.successful_hq_run_corp_pay_to_retain_hq"))
+    return resolveCorpHqRetainPaymentChoice(host);
   if (
     source.startsWith("v1922.runner_grip_trash_gain_credits") ||
     source.startsWith("p3_47.runner_grip_trash_for_credits")
@@ -148,11 +148,11 @@ export function startCorpHqRetainPaymentChoice(
 ): void {
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   if (host.state.corp.hq.length === 0)
-    throw new Error("HQ enthaelt keine Karten fuer Synchronized Attack on HQ.");
+    throw new Error("HQ enthaelt keine Karten fuer die Retain-Zahlung.");
   host.state.pendingChoice = {
-    choiceId: `v1922_synchronized_attack_on_hq_${host.state.stateVersion + 1}`,
+    choiceId: `runner_successful_hq_run_corp_pay_to_retain_hq_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1922.synchronized_attack_on_hq:${sourceCardId}:${host.state.stateVersion + 1}`,
+    source: `runner.successful_hq_run_corp_pay_to_retain_hq:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "HQ-Karten fuer je 2 Credits behalten",
     kind: "select_cards",
     options: host.state.corp.hq.map((cardId) => {
@@ -177,7 +177,7 @@ export function startCorpDiscardHqWithRetainPaymentChoice(
   },
 ): { publicPayload: HiddenZonePayload } {
   if (input.retainCostPerCard !== 2)
-    throw new Error("Synchronized Attack on HQ retain cost must be 2.");
+    throw new Error("Corp-HQ-Retain-Zahlung muss 2 Credits pro Karte kosten.");
   if (host.state.corp.hq.length === 0) {
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
@@ -431,17 +431,17 @@ function resolveCorpArchivesToHqChoice(
   };
 }
 
-function resolveSynchronizedAttackOnHqRetainChoice(
+function resolveCorpHqRetainPaymentChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.synchronized_attack_on_hq"))
+  if (!choice || !choice.source.startsWith("runner.successful_hq_run_corp_pay_to_retain_hq"))
     throw new Error(
-      "Es ist keine V1.9.22-Synchronized-Attack-on-HQ-Choice offen.",
+      "Es ist keine HQ-Retain-Zahlungs-Choice offen.",
     );
   if (!host.callbacks.hasSuccessfulHqRunThisTurn())
     throw new Error(
-      "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
+      "Die HQ-Retain-Zahlung benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
     );
   const retainedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   const retainedSet = new Set(retainedIds);

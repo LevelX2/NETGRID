@@ -1024,7 +1024,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       if (!hasSuccessfulHqRunThisTurn(state))
         throw new Error(
-          "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
+          "Die HQ-Retain-Zahlung benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
       startCorpHqRetainPaymentChoice(
         hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),

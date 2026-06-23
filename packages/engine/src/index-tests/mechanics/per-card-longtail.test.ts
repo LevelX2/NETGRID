@@ -1728,7 +1728,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-synchronized-attack-on-hq",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_synchronized_attack_on_hq",
+          id: "onr_v1_runner_runner_successful_hq_run_corp_pay_to_retain_hq",
           name: "O:NR V1.9.22 Synchronized Attack on HQ",
           cards: [
             { id: "onr_v1_113_synchronized-attack-on-hq", quantity: 1 },
@@ -1811,7 +1811,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "onr_v1_113_synchronized-attack-on-hq",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.synchronized_attack_on_hq",
+      "runner.successful_hq_run_corp_pay_to_retain_hq",
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
