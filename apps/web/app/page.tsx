@@ -100,15 +100,12 @@ import {
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   actionMatchesContext,
-  actionSlotCapacityForTurn,
   activeRunIceInstanceId,
   approachIceExposeViewingIceId,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   installedCorpExposeReviewCardId,
-  corpInstalledCardState,
-  corpRootCardsForDisplay,
   encounterBreakerActions,
   fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
@@ -405,6 +402,22 @@ import {
   shouldForgetRecoveryStatus,
   shortMatchId
 } from "../features/match-start/lobby-format";
+import {
+  centralServerCountLabel,
+  formatCardCount,
+  formatHandLimitCount,
+  iceStackSlotClass,
+  opponentSide,
+  serverHighlighted,
+  serverLanesForSide,
+  sideFromPublicPayload,
+  sideLabel,
+  sideStatusLineForView,
+  turnActionHeaderLabel,
+  turnSideForView,
+  updateActionSlotCapacity,
+  zoneHighlighted
+} from "../features/game-board/board-view-helpers";
 
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
@@ -678,25 +691,6 @@ function summarizeCatalogStatuses(cards: CatalogCardSummary[]): Partial<Record<C
   return counts;
 }
 
-function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
-  const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
-  const rootLane = { kind: "root" as const, label: "Root" as const, cards: corpRootCardsForDisplay(_side, server.id, server.root) };
-  return [rootLane, iceLane];
-}
-
-function iceStackSlotClass(card: VisibleCard): string {
-  const installedState = corpInstalledCardState(card);
-  return installedState === "rezzed" ? "iceCardSlot rezzedIceStackSlot" : "iceCardSlot unrezzedIceStackSlot";
-}
-
-function opponentSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
-}
-
-function sideLabel(side: Side): string {
-  return side === "corp" ? "Korp" : "Runner";
-}
-
 function recentSessionHeadline(session: RecentSessionInfo): string {
   return session.opponentDisplayName ? `${sideLabel(session.side)} gegen ${session.opponentDisplayName}` : `${sideLabel(session.side)}-Spiel`;
 }
@@ -726,102 +720,6 @@ function recentSessionStatusLabel(status: RecentSessionInfo["matchStatus"]): str
     default:
       return "Gespeichert";
   }
-}
-
-function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
-  return null;
-}
-
-function turnActionHeaderLabel(view: PlayerView, side: Side, activeAiSide?: Side): string {
-  const actorLabel = `${sideLabel(side)}${activeAiSide === side ? "-KI" : ""}`;
-  return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
-}
-
-function sideStatusLineForView(view: PlayerView, side: Side): string {
-  if (view.pendingChoice?.side === side) return "Entscheidet";
-  const turnSide = turnSideForView(view);
-  if (turnSide !== side) return "Wartet";
-  const choiceOwner = view.pendingChoice?.side;
-  if (choiceOwner && choiceOwner !== side) return `Am Zug · ${sideLabel(choiceOwner)} entscheidet`;
-  return "Am Zug";
-}
-
-function currentTurnNumberForView(view: PlayerView): number {
-  let activeSide: Side = "corp";
-  let activeTurnNumber = 1;
-
-  for (const event of view.publicEvents) {
-    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
-    const actor = sideFromPublicPayload(event.publicPayload.actor);
-    if (!actor) continue;
-
-    if (actionType === "mandatory_draw" && actor === "corp") {
-      if (activeSide !== "corp") {
-        activeSide = "corp";
-        activeTurnNumber += 1;
-      }
-      continue;
-    }
-
-    if (actionType === "end_turn") {
-      if (activeSide !== actor) activeSide = actor;
-      activeSide = actor === "corp" ? "runner" : "corp";
-      activeTurnNumber += 1;
-    }
-  }
-
-  return activeTurnNumber;
-}
-
-function sideFromPublicPayload(value: unknown): Side | null {
-  return value === "corp" || value === "runner" ? value : null;
-}
-
-function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean, events: PublicGameEvent[]): void {
-  const baseCapacity = baseActionSlotCapacity(side);
-  const safeClicks = Math.max(0, Math.floor(currentClicks));
-  const turnCapacity = active ? actionSlotCapacityForTurn(side, safeClicks, events) : safeClicks;
-  if (active && resetActiveSide) {
-    capacities[side] = Math.max(baseCapacity, turnCapacity);
-    return;
-  }
-  if (active) {
-    capacities[side] = Math.max(capacities[side] ?? baseCapacity, turnCapacity);
-    return;
-  }
-  if (safeClicks > (capacities[side] ?? baseCapacity)) capacities[side] = safeClicks;
-}
-
-function centralServerCountLabel(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): string | null {
-  switch (serverId) {
-    case "hq":
-      return formatHandLimitCount(view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount, view.side === "corp" ? view.own.maxHandSize : view.opponent.maxHandSize);
-    case "rd":
-      return formatCardCount(view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount);
-    case "archives":
-      return formatCardCount(view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0));
-    default:
-      return null;
-  }
-}
-function serverHighlighted(highlight: BoardHighlight | null, serverId: string): boolean {
-  if (!highlight) return false;
-  if (highlight.kind === "server" || highlight.kind === "run") return Boolean(highlight.serverId && highlight.serverId === serverId);
-  return false;
-}
-
-function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq" | "rd" | "archives" | "grip" | "stack" | "heap" | "rig" | "scoreArea"): boolean {
-  return Boolean(highlight?.kind === "zone" && highlight.side === side && highlight.zone === zone);
-}
-
-function formatCardCount(count: number): string {
-  return `${count} ${count === 1 ? "Karte" : "Karten"}`;
-}
-
-function formatHandLimitCount(count: number, limit: number): string {
-  return `${count} von ${limit} Karten`;
 }
 
 export default function Page() {
