@@ -560,10 +560,10 @@ export function trashCorpInstalledCardsInScoredSourceServer(
   )(...args);
 }
 
-export function resolveDealWithMilitech(...args: any[]): any {
+export function resolveRunnerIcebreakerCounterEvent(...args: any[]): any {
   return runtimeDelegate(
     "choiceHiddenZoneRuntime",
-    "resolveDealWithMilitech",
+    "resolveRunnerIcebreakerCounterEvent",
   )(...args);
 }
 

@@ -1002,7 +1002,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveCorpInstalledEconomyAction,
     resolveCrashEverettDrawChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveFieldReporterEndOfRunnerTurn,

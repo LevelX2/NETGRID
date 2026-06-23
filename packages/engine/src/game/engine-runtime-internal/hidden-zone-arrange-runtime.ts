@@ -195,7 +195,7 @@ export function createHiddenZoneArrangeRuntime(
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,

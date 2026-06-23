@@ -614,7 +614,7 @@ export function createCorpZoneRuntimeHosts(
     };
   }
 
-  function resolveDealWithMilitech(
+  function resolveRunnerIcebreakerCounterEvent(
     state: GameState,
     legalAction: LegalAction,
   ): void {
@@ -1200,7 +1200,7 @@ export function createCorpZoneRuntimeHosts(
     installedCorpCardServerContext,
     installedRunnerIcebreakerIds,
     outermostIceExposures,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveMultiExposeInstalledCorpCardsChoice,

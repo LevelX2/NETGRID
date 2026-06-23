@@ -958,7 +958,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolveVirusCounterPurgePreserveChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveCrashEverettDrawChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveFieldReporterEndOfRunnerTurn,

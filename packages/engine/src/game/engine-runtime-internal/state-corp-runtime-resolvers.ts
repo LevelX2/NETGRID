@@ -1008,7 +1008,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveCorpInstalledEconomyAction,
     resolveCrashEverettDrawChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveFieldReporterEndOfRunnerTurn,

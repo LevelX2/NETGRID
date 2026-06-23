@@ -188,7 +188,7 @@ export function createHiddenZoneSearchRuntime(
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,

@@ -200,7 +200,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveExposeInstalledCorpCardsChoice,
     resolveExposePreventionChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,

@@ -177,7 +177,7 @@ export function createHiddenZoneNonSearchRuntime(
     installedRunnerIcebreakerIds,
     outermostIceExposures,
     pendingChoiceResolutionHost,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveMultiExposeInstalledCorpCardsChoice,

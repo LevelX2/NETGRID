@@ -986,7 +986,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveCorpInstalledEconomyAction,
     resolveCrashEverettDrawChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
