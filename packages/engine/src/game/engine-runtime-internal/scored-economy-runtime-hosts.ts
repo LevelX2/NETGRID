@@ -291,9 +291,9 @@ import {
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
   handleCorpInstallRezSequenceChoice,
-  resolveSecurityPurgeAgendaPurge,
-  startDataFortReclamationChoice,
-  startPriorityRequisitionChoice,
+  resolveAgendaPurgeInstallTargets,
+  startHqToNewRemoteInstallRezChoice,
+  startScoredAgendaFreeRezChoice,
   type CorpInstallRezSequenceHandlerHost,
 } from "../corp/install-rez-sequence-handlers";
 import {
@@ -755,7 +755,7 @@ export function createScoredEconomyRuntimeHosts(
         isRegionUpgrade,
         rootInstallRezzesOnInstall,
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-        isPriorityRequisitionCandidate: (cardId) => {
+        isScoredAgendaFreeRezCandidate: (cardId) => {
           const instance = state.cardInstances[cardId];
           return (
             instance?.zone.side === "corp" &&
@@ -890,18 +890,18 @@ export function createScoredEconomyRuntimeHosts(
         drawCorpCard: () => drawCorpCard(state),
       },
       choices: {
-        startDataFortReclamation: (cardId) => {
+        startHqToNewRemoteInstallRez: (cardId) => {
           if (!legalAction)
             throw new Error("Data Fort Reclamation braucht eine LegalAction.");
-          startDataFortReclamationChoice(
+          startHqToNewRemoteInstallRezChoice(
             corpInstallRezSequenceHandlerHost(state, legalAction),
             cardId,
           );
         },
-        startPriorityRequisition: (cardId) => {
+        startScoredAgendaFreeRez: (cardId) => {
           if (!legalAction)
             throw new Error("Priority Requisition braucht eine LegalAction.");
-          startPriorityRequisitionChoice(
+          startScoredAgendaFreeRezChoice(
             corpInstallRezSequenceHandlerHost(state, legalAction),
             cardId,
           );
@@ -914,10 +914,10 @@ export function createScoredEconomyRuntimeHosts(
             { sourceCardId: cardId, creditPerAgendaPoint },
           );
         },
-        resolveSecurityPurge: (cardId) => {
+        resolveAgendaPurge: (cardId) => {
           if (!legalAction)
             throw new Error("Security Purge braucht eine LegalAction.");
-          resolveSecurityPurgeAgendaPurge(
+          resolveAgendaPurgeInstallTargets(
             corpInstallRezSequenceHandlerHost(state, legalAction),
             cardId,
           );

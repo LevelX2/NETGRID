@@ -4478,7 +4478,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("scores Data Fort Reclamation as a private HQ install sequence", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-      id: "onr_v1_corp_v1922_data_fort_reclamation",
+      id: "onr_v1_corp_v1922_hq_to_new_remote_install_rez",
       name: "O:NR V1.9.22 Data Fort Reclamation",
       cards: [
         { id: "onr_v1_197_data-fort-reclamation", quantity: 1 },
@@ -4590,14 +4590,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      hiddenZoneAction: "hq_to_new_remote_install_sequence",
       selectedCount: 2,
       installedCount: 2,
       temporaryCreditsProvided: 10,
       temporaryCreditsSpent: 0,
       temporaryCreditsRemaining: 10,
-      dataFortReclamationRezChoiceOpened: true,
-      dataFortReclamationRezCandidateCount: 2,
+      hqToNewRemoteInstallRezRezChoiceOpened: true,
+      hqToNewRemoteInstallRezRezCandidateCount: 2,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
@@ -4633,7 +4633,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.cardInstances[assetId]?.rezzed).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+      hiddenZoneAction: "hq_to_new_remote_rez_sequence",
       selectedCount: 1,
       rezzedCount: 1,
       rezzedIceCount: 1,
@@ -4859,7 +4859,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("scores Security Purge as a side-safe R&D top-three install and trash resolver", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-      id: "onr_v1_corp_v1922_security_purge",
+      id: "onr_v1_corp_agenda_purge",
       name: "O:NR V1.9.22 Security Purge",
       cards: [
         { id: "onr_v1_216_security-purge", quantity: 1 },
@@ -4973,15 +4973,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
       cardDefinitionId: "onr_v1_216_security-purge",
-      agendaAbility: "v1922_security_purge",
-      hiddenZoneAction: "v1922_security_purge_rd_top3_target_choice",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
       revealedCount: 3,
       revealedIceCount: 2,
       pendingTrashCount: 1,
       installedIceCount: 0,
       trashedCount: 0,
-      securityPurgeInstallContract: "corp_server_choice_per_ice",
-      securityPurgeTargetChoiceOpened: true,
+      agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      agendaPurgeTargetChoiceOpened: true,
       publicRevealDefinitionIds:
         "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
     });
@@ -5067,14 +5067,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "v1922_security_purge",
-      hiddenZoneAction: "v1922_security_purge_install_targets",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_install_targets",
       revealedCount: 3,
       revealedIceCount: 2,
       installedIceCount: 2,
       trashedCount: 1,
-      securityPurgeInstallContract: "corp_server_choice_per_ice",
-      securityPurgeTargetChoiceResolved: true,
+      agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      agendaPurgeTargetChoiceResolved: true,
       publicRevealDefinitionIds:
         "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
       installedIceDefinitionIds: "simple_barrier_ice,simple_code_gate_ice",

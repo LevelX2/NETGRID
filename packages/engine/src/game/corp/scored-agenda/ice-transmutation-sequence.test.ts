@@ -15,7 +15,7 @@ describe("ice transmutation sequence routing", () => {
     ).toBe(true);
     expect(
       isScoredIceMarkModifierChoiceSource(
-        "v162.priority_requisition:priority_agenda:8",
+        "card_implementation.scored_agenda_free_rez:priority_agenda:8",
       ),
     ).toBe(false);
   });

@@ -1437,8 +1437,8 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(skipped.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(skipped.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      priorityRequisitionFreeRez: false,
-      priorityRequisitionDeclined: true,
+      scoredAgendaFreeRezFreeRez: false,
+      scoredAgendaFreeRezDeclined: true,
     });
     expect(
       skipped.eventLog.at(-1)?.publicPayload.hiddenZoneAction,
@@ -1448,9 +1448,9 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(state.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(state.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v162_priority_requisition_free_rez",
-      priorityRequisitionFreeRez: true,
-      priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+      hiddenZoneAction: "scored_agenda_free_rez",
+      scoredAgendaFreeRezFreeRez: true,
+      scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
       rezCostPaid: 0,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1498,8 +1498,8 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(noTarget.pendingChoice).toBeUndefined();
     expect(noTarget.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      priorityRequisitionChoiceOpened: false,
-      priorityRequisitionCandidateCount: 0,
+      scoredAgendaFreeRezChoiceOpened: false,
+      scoredAgendaFreeRezCandidateCount: 0,
     });
   });
 

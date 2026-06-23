@@ -10,11 +10,11 @@ import { startScoredSubtypeRevealChoiceOrResolve } from "./subtype-reveal-econom
 export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeResolver[] =
   [
     {
-      id: "data_fort_reclamation_score_start",
+      id: "hq_to_new_remote_install_rez_score_start",
       kind: "score_install_hq_cards_into_new_remote_then_rez",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.startDataFortReclamation(cardId);
+        host.choices.startHqToNewRemoteInstallRez(cardId);
       },
     },
     {
@@ -33,19 +33,19 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       },
     },
     {
-      id: "priority_requisition_score_start",
+      id: "scored_agenda_free_rez_score_start",
       kind: "score_rez_installed_ice_at_no_cost",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.startPriorityRequisition(cardId);
+        host.choices.startScoredAgendaFreeRez(cardId);
       },
     },
     {
-      id: "security_purge_score_start",
+      id: "agenda_purge_score_start",
       kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
       mode: "immediate_effect",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.resolveSecurityPurge(cardId);
+        host.choices.resolveAgendaPurge(cardId);
       },
     },
     {

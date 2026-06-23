@@ -1703,9 +1703,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(priority.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(priority.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(priority.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v162_priority_requisition_free_rez",
-      priorityRequisitionFreeRez: true,
-      priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+      hiddenZoneAction: "scored_agenda_free_rez",
+      scoredAgendaFreeRezFreeRez: true,
+      scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
       rezCostPaid: 0,
     });
   });

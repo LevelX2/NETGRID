@@ -24,28 +24,28 @@ import { applySequenceResolution } from "./scored-agenda-sequence-types";
  * resolved target and free-rez outcome only after resolution.
  */
 
-export function isPriorityRequisitionChoiceSource(source: string): boolean {
-  return source.startsWith("v162.priority_requisition");
+export function isScoredAgendaFreeRezChoiceSource(source: string): boolean {
+  return source.startsWith("card_implementation.scored_agenda_free_rez");
 }
 
-export function startPriorityRequisitionChoice(
+export function startScoredAgendaFreeRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
-  const candidates = priorityRequisitionCandidates(host);
+  const candidates = scoredAgendaFreeRezCandidates(host);
   if (candidates.length === 0) {
     return applySequenceResolution(host.legalAction, {
       result: { handled: true },
       payloadPatch: {
-        priorityRequisitionChoiceOpened: false,
-        priorityRequisitionCandidateCount: 0,
+        scoredAgendaFreeRezChoiceOpened: false,
+        scoredAgendaFreeRezCandidateCount: 0,
       },
     });
   }
   host.state.pendingChoice = {
-    choiceId: `v162_priority_requisition_${host.state.stateVersion + 1}`,
+    choiceId: `v162_scored_agenda_free_rez_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v162.priority_requisition:${agendaId}:${host.state.stateVersion + 1}`,
+    source: `card_implementation.scored_agenda_free_rez:${agendaId}:${host.state.stateVersion + 1}`,
     prompt: "Priority Requisition: ICE kostenlos rezzen",
     kind: "select_cards",
     options: [
@@ -71,13 +71,13 @@ export function startPriorityRequisitionChoice(
     result: { handled: true },
     stateChanged: true,
     payloadPatch: {
-      priorityRequisitionChoiceOpened: true,
-      priorityRequisitionCandidateCount: candidates.length,
+      scoredAgendaFreeRezChoiceOpened: true,
+      scoredAgendaFreeRezCandidateCount: candidates.length,
     },
   });
 }
 
-export function resolvePriorityRequisitionChoice(
+export function resolveScoredAgendaFreeRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
   const choice = requireChoice(
@@ -106,8 +106,8 @@ export function resolvePriorityRequisitionChoice(
       result: { handled: true, deletePendingChoice: true },
       stateChanged: true,
       payloadPatch: {
-        priorityRequisitionFreeRez: false,
-        priorityRequisitionDeclined: true,
+        scoredAgendaFreeRezFreeRez: false,
+        scoredAgendaFreeRezDeclined: true,
       },
     });
   }
@@ -121,8 +121,8 @@ export function resolvePriorityRequisitionChoice(
       result: { handled: true, deletePendingChoice: true },
       stateChanged: true,
       payloadPatch: {
-        priorityRequisitionFreeRez: false,
-        priorityRequisitionDeclined: true,
+        scoredAgendaFreeRezFreeRez: false,
+        scoredAgendaFreeRezDeclined: true,
       },
     });
   }
@@ -133,7 +133,7 @@ export function resolvePriorityRequisitionChoice(
   );
   if (
     !optionValues.has(targetId) ||
-    !host.cards.isPriorityRequisitionCandidate(targetId)
+    !host.cards.isScoredAgendaFreeRezCandidate(targetId)
   )
     throw new Error("Das Priority-Requisition-Ziel ist nicht mehr gueltig.");
   const instance = host.cards.mustInstance(targetId);
@@ -151,22 +151,22 @@ export function resolvePriorityRequisitionChoice(
     },
     stateChanged: true,
     payloadPatch: {
-      ...hiddenZoneChoicePayload("v162_priority_requisition_free_rez"),
-      priorityRequisitionFreeRez: true,
-      priorityRequisitionTarget: targetId,
-      priorityRequisitionTargetDefinitionId:
+      ...hiddenZoneChoicePayload("scored_agenda_free_rez"),
+      scoredAgendaFreeRezFreeRez: true,
+      scoredAgendaFreeRezTarget: targetId,
+      scoredAgendaFreeRezTargetDefinitionId:
         host.cards.definitionFor(targetId).id,
       rezCostPaid: 0,
     },
   });
 }
 
-function priorityRequisitionCandidates(
+function scoredAgendaFreeRezCandidates(
   host: CorpInstallRezSequenceHandlerHost,
 ): CardInstanceId[] {
   return Object.keys(host.state.cardInstances)
     .filter((cardId): cardId is CardInstanceId =>
-      host.cards.isPriorityRequisitionCandidate(cardId as CardInstanceId),
+      host.cards.isScoredAgendaFreeRezCandidate(cardId as CardInstanceId),
     )
     .sort((left, right) => {
       const leftCost = host.cards.definitionFor(left).rezCost ?? 0;

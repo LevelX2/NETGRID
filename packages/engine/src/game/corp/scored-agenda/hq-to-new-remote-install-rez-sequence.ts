@@ -44,7 +44,7 @@ type PrevalidatedHqToNewRemoteInstall = {
   destination: "ice" | "root";
 };
 
-export type DataFortReclamationStep =
+export type HqToNewRemoteInstallRezStep =
   | "select_hq_cards"
   | "install_selected_cards"
   | "required_rez_on_install"
@@ -57,12 +57,12 @@ const DATA_FORT_RECLAMATION_STEPS = {
   installSelectedCards: "install_selected_cards",
   optionalRezBatch: "optional_rez_batch",
   returnUnusedCredits: "return_unused_credits",
-} satisfies Record<string, DataFortReclamationStep>;
+} satisfies Record<string, HqToNewRemoteInstallRezStep>;
 
 export function isHqToNewRemoteInstallRezChoiceSource(source: string): boolean {
   return (
     source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_SOURCE}:`) ||
-    source.startsWith("v1922.data_fort_reclamation:")
+    source.startsWith("card_implementation.hq_to_new_remote_install_rez:")
   );
 }
 
@@ -71,7 +71,7 @@ export function isHqToNewRemoteInstallRezRezChoiceSource(
 ): boolean {
   return (
     source.startsWith(`${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:`) ||
-    source.startsWith("v1922.data_fort_reclamation_rez")
+    source.startsWith("card_implementation.hq_to_new_remote_rez")
   );
 }
 
@@ -99,7 +99,7 @@ function requireHqToNewRemoteInstallRezSequence(
   return sequence;
 }
 
-export function startDataFortReclamationChoice(
+export function startHqToNewRemoteInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
@@ -130,10 +130,10 @@ export function startDataFortReclamationChoice(
         ...primitivePayload,
         ...corpSequenceContextPayload({
           step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-          v1922CorpAgendaAbility: "data_fort_reclamation",
+          v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
           sourceAgendaId: agendaId,
-          dataFortReclamationChoiceOpened: false,
-          dataFortReclamationCandidateCount: 0,
+          hqToNewRemoteInstallRezChoiceOpened: false,
+          hqToNewRemoteInstallRezCandidateCount: 0,
         }),
       },
     });
@@ -157,7 +157,7 @@ export function startDataFortReclamationChoice(
       ...primitivePayload,
       ...corpSequenceContextPayload({
         step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-        v1922CorpAgendaAbility: "data_fort_reclamation",
+        v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
         sourceAgendaId: agendaId,
         cardImplementationSourceZone: sequence.sourceZone,
         cardImplementationTargetServer: sequence.targetServer,
@@ -165,14 +165,14 @@ export function startDataFortReclamationChoice(
         cardImplementationMaxCards: sequence.maxCards,
         cardImplementationTemporaryCreditBudget:
           sequence.temporaryCredits.amount,
-        dataFortReclamationChoiceOpened: true,
-        dataFortReclamationCandidateCount: options.length,
-        dataFortReclamationMaxSelections: Math.min(
+        hqToNewRemoteInstallRezChoiceOpened: true,
+        hqToNewRemoteInstallRezCandidateCount: options.length,
+        hqToNewRemoteInstallRezMaxSelections: Math.min(
           sequence.maxCards,
           options.length,
         ),
       }),
-      ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_hq_choice"),
+      ...hiddenZoneChoicePayload("hq_to_new_remote_install_rez_hq_choice"),
     },
   });
 }
@@ -233,7 +233,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
     const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
       ...primitivePayload,
       ...hiddenZoneChoicePayload(
-        "v1922_data_fort_reclamation_install_sequence",
+        "hq_to_new_remote_install_sequence",
       ),
       ...corpSequenceContextPayload({
         step: DATA_FORT_RECLAMATION_STEPS.returnUnusedCredits,
@@ -248,8 +248,8 @@ export function resolveHqToNewRemoteInstallRezChoice(
         corpCreditsSpent: 0,
         temporaryCreditsRemaining: temporaryCreditAmount,
         temporaryCreditsReturned: temporaryCreditAmount,
-        dataFortReclamationRezChoiceOpened: false,
-        dataFortReclamationRezCandidateCount: 0,
+        hqToNewRemoteInstallRezRezChoiceOpened: false,
+        hqToNewRemoteInstallRezRezCandidateCount: 0,
       }),
     });
     return {
@@ -289,7 +289,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
       definition,
     );
     if (rootRezOnInstall) {
-      const payment = spendDataFortReclamationRezCost(
+      const payment = spendHqToNewRemoteInstallRezRezCost(
         host,
         cardId,
         temporaryCreditsRemaining,
@@ -321,12 +321,12 @@ export function resolveHqToNewRemoteInstallRezChoice(
   ).length;
   const installedRootCount = selectedCards.length - installedIceCount;
   const rezCandidates = installedIds.filter((cardId) =>
-    isDataFortReclamationRezCandidate(host, cardId, server.id),
+    isHqToNewRemoteInstallRezRezCandidate(host, cardId, server.id),
   );
   delete host.state.pendingChoice;
   const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
-    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_install_sequence"),
+    ...hiddenZoneChoicePayload("hq_to_new_remote_install_sequence"),
     ...corpSequenceContextPayload({
       step: DATA_FORT_RECLAMATION_STEPS.installSelectedCards,
       sourceAgendaId: agendaId,
@@ -342,8 +342,8 @@ export function resolveHqToNewRemoteInstallRezChoice(
       corpCreditsSpent,
       temporaryCreditsRemaining,
       immediateRezzedCount: immediateRezzedIds.length,
-      dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
-      dataFortReclamationRezCandidateCount: rezCandidates.length,
+      hqToNewRemoteInstallRezRezChoiceOpened: rezCandidates.length > 0,
+      hqToNewRemoteInstallRezRezCandidateCount: rezCandidates.length,
       ...(rezCandidates.length === 0
         ? { temporaryCreditsReturned: temporaryCreditsRemaining }
         : {}),
@@ -495,7 +495,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     throw new Error("Eine Rez-Karte wurde doppelt gewaehlt.");
   if (
     selectedIds.some(
-      (cardId) => !isDataFortReclamationRezCandidate(host, cardId, serverId),
+      (cardId) => !isHqToNewRemoteInstallRezRezCandidate(host, cardId, serverId),
     )
   )
     throw new Error("Eine gewaehlte Karte kann nicht gerezzed werden.");
@@ -505,7 +505,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   let rezzedIceCount = 0;
   let rezzedRootCount = 0;
   for (const cardId of selectedIds) {
-    const payment = spendDataFortReclamationRezCost(
+    const payment = spendHqToNewRemoteInstallRezRezCost(
       host,
       cardId,
       temporaryCreditsRemaining,
@@ -530,7 +530,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   delete host.state.pendingChoice;
   const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
-    ...hiddenZoneChoicePayload("v1922_data_fort_reclamation_rez_sequence"),
+    ...hiddenZoneChoicePayload("hq_to_new_remote_rez_sequence"),
     ...corpSequenceContextPayload({
       step: DATA_FORT_RECLAMATION_STEPS.optionalRezBatch,
       sourceAgendaId: agendaId,
@@ -558,7 +558,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   };
 }
 
-function spendDataFortReclamationRezCost(
+function spendHqToNewRemoteInstallRezRezCost(
   host: CorpInstallRezSequenceHandlerHost,
   cardId: CardInstanceId,
   temporaryCreditsRemaining: number,
@@ -583,7 +583,7 @@ function spendDataFortReclamationRezCost(
   };
 }
 
-function isDataFortReclamationRezCandidate(
+function isHqToNewRemoteInstallRezRezCandidate(
   host: CorpInstallRezSequenceHandlerHost,
   cardId: CardInstanceId,
   serverId: string,

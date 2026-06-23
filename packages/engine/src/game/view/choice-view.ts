@@ -234,8 +234,8 @@ export function visibleChoiceCardForOption(
     choice.source.startsWith("v1911.sneak_preview_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
       choice.source.includes(":heap:"));
-  const isPriorityRequisitionChoice = choice.source.startsWith(
-    "v162.priority_requisition",
+  const isScoredAgendaFreeRezChoice = choice.source.startsWith(
+    "card_implementation.scored_agenda_free_rez",
   );
   const isP333PrivateLookChoice =
     choice.source.startsWith("p3_33.private_look");
@@ -245,7 +245,7 @@ export function visibleChoiceCardForOption(
     !isRunnerArrangeChoice &&
     !isCorpArrangeChoice &&
     !isSneakHeapChoice &&
-    !isPriorityRequisitionChoice &&
+    !isScoredAgendaFreeRezChoice &&
     !isP333PrivateLookChoice
   )
     return undefined;
@@ -254,7 +254,7 @@ export function visibleChoiceCardForOption(
     if (!instance || instance.owner !== "corp") return undefined;
     return visibleOwnCard(state, cardId);
   }
-  if (isPriorityRequisitionChoice) {
+  if (isScoredAgendaFreeRezChoice) {
     const instance = state.cardInstances[cardId];
     if (
       !instance ||

@@ -84,13 +84,13 @@ export type ScoredAgendaFlowHost = {
     drawCorpCard: () => void;
   };
   choices: {
-    startDataFortReclamation: (cardId: CardInstanceId) => void;
-    startPriorityRequisition: (cardId: CardInstanceId) => void;
+    startHqToNewRemoteInstallRez: (cardId: CardInstanceId) => void;
+    startScoredAgendaFreeRez: (cardId: CardInstanceId) => void;
     startCorporateDownsizing: (
       cardId: CardInstanceId,
       creditPerAgendaPoint: number,
     ) => void;
-    resolveSecurityPurge: (cardId: CardInstanceId) => void;
+    resolveAgendaPurge: (cardId: CardInstanceId) => void;
   };
 };
 

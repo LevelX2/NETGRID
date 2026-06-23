@@ -151,7 +151,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       cardId: CardInstanceId;
       creditPerAgendaPoint: number;
     }>,
-    securityPurge: 0,
+    agendaPurge: 0,
     cleanup: 0,
   };
   const state = {
@@ -233,12 +233,12 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       },
     },
     choices: {
-      startDataFortReclamation: (cardId) => callbacks.dataFort.push(cardId),
-      startPriorityRequisition: (cardId) => callbacks.priority.push(cardId),
+      startHqToNewRemoteInstallRez: (cardId) => callbacks.dataFort.push(cardId),
+      startScoredAgendaFreeRez: (cardId) => callbacks.priority.push(cardId),
       startCorporateDownsizing: (cardId, creditPerAgendaPoint) =>
         callbacks.downsizing.push({ cardId, creditPerAgendaPoint }),
-      resolveSecurityPurge: () => {
-        callbacks.securityPurge += 1;
+      resolveAgendaPurge: () => {
+        callbacks.agendaPurge += 1;
       },
     },
   };

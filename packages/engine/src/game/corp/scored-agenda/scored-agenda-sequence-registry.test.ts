@@ -10,10 +10,10 @@ describe("scored agenda sequence registry", () => {
 
   it("routes known sequence choice sources to exactly one resolver", () => {
     const sources = [
-      "v162.priority_requisition:priority_agenda:8",
+      "card_implementation.scored_agenda_free_rez:priority_agenda:8",
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
-      "v1922.security_purge_install_targets:security_purge_agenda:ice_1,asset_1:8",
+      "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1,asset_1:8",
     ];
 
     for (const source of sources) {

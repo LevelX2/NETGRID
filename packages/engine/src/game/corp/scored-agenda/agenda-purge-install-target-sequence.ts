@@ -28,9 +28,9 @@ import {
 
 type SequencePayload = Record<string, string | number | boolean>;
 const SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE =
-  "v1922.security_purge_install_targets";
+  "card_implementation.agenda_purge_install_targets";
 
-export type SecurityPurgeStep =
+export type AgendaPurgeStep =
   | "reveal_top_rd"
   | "choose_install_targets"
   | "install_and_rez_ice"
@@ -43,15 +43,15 @@ const SECURITY_PURGE_STEPS = {
   installAndRezIce: "install_and_rez_ice",
   trashNonIce: "trash_non_ice",
   complete: "complete",
-} satisfies Record<string, SecurityPurgeStep>;
+} satisfies Record<string, AgendaPurgeStep>;
 
-export function isSecurityPurgeInstallTargetChoiceSource(
+export function isAgendaPurgeInstallTargetChoiceSource(
   source: string,
 ): boolean {
   return source.startsWith(`${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:`);
 }
 
-export function resolveSecurityPurgeAgendaPurge(
+export function resolveAgendaPurgeInstallTargets(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
@@ -64,19 +64,19 @@ export function resolveSecurityPurgeAgendaPurge(
   )
     throw new Error("Security Purge ist nicht mehr in der Korp-ScoreArea.");
   const revealedIds = host.state.corp.rd.slice(0, 3);
-  const revealedIceIds = securityPurgeIceIds(host, revealedIds);
+  const revealedIceIds = agendaPurgeIceIds(host, revealedIds);
   const pendingTrashIds = revealedIds.filter(
     (cardId) => !revealedIceIds.includes(cardId),
   );
-  const basePayload = securityPurgeBasePayload(host, agendaId, revealedIds);
+  const basePayload = agendaPurgeBasePayload(host, agendaId, revealedIds);
   if (revealedIceIds.length > 0) {
     host.state.pendingChoice = {
-      choiceId: `choice_security_purge_install_targets_${host.state.stateVersion + 1}`,
+      choiceId: `choice_agenda_purge_install_targets_${host.state.stateVersion + 1}`,
       side: "corp",
       source: `${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${host.state.stateVersion + 1}`,
       prompt: "Security Purge: Zielserver fuer aufgedeckte ICE waehlen.",
       kind: "select_option",
-      options: securityPurgeInstallTargetOptions(host, revealedIceIds),
+      options: agendaPurgeInstallTargetOptions(host, revealedIceIds),
       minSelections: revealedIceIds.length,
       maxSelections: revealedIceIds.length,
       stateVersion: host.state.stateVersion + 1,
@@ -84,15 +84,15 @@ export function resolveSecurityPurgeAgendaPurge(
     };
     applySequencePayloadPatch(host.legalAction, {
       ...basePayload,
-      ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3_target_choice"),
+      ...hiddenZoneChoicePayload("agenda_purge_rd_top3_target_choice"),
       ...corpSequenceContextPayload({
         step: SECURITY_PURGE_STEPS.chooseInstallTargets,
         revealedIceCount: revealedIceIds.length,
         pendingTrashCount: pendingTrashIds.length,
         installedIceCount: 0,
         trashedCount: 0,
-        securityPurgeTargetChoiceOpened: true,
-        securityPurgeTargetChoiceCount: revealedIceIds.length,
+        agendaPurgeTargetChoiceOpened: true,
+        agendaPurgeTargetChoiceCount: revealedIceIds.length,
       }),
     });
     return {
@@ -124,14 +124,14 @@ export function resolveSecurityPurgeAgendaPurge(
     stateChanged: true,
     payloadPatch: {
       ...basePayload,
-      ...hiddenZoneChoicePayload("v1922_security_purge_rd_top3"),
+      ...hiddenZoneChoicePayload("agenda_purge_rd_top3"),
       ...corpSequenceContextPayload({
         step: SECURITY_PURGE_STEPS.trashNonIce,
         revealedIceCount: 0,
         pendingTrashCount: 0,
         installedIceCount: 0,
         trashedCount: trashedIds.length,
-        securityPurgeTargetChoiceOpened: false,
+        agendaPurgeTargetChoiceOpened: false,
         trashedDefinitionIds: trashedIds
           .map((id) => host.cards.definitionFor(id).id)
           .join(","),
@@ -140,7 +140,7 @@ export function resolveSecurityPurgeAgendaPurge(
   });
 }
 
-export function resolveSecurityPurgeInstallTargetChoice(
+export function resolveAgendaPurgeInstallTargetChoice(
   host: CorpInstallRezSequenceHandlerHost,
 ): CorpInstallRezSequenceHandlerResult {
   const choice = requireChoice(
@@ -164,11 +164,11 @@ export function resolveSecurityPurgeInstallTargetChoice(
         .filter(Boolean)
         .map((id) => id as CardInstanceId)
     : [];
-  validateSecurityPurgeRevealedCards(host, revealedIds);
-  const revealedIceIds = securityPurgeIceIds(host, revealedIds);
+  validateAgendaPurgeRevealedCards(host, revealedIds);
+  const revealedIceIds = agendaPurgeIceIds(host, revealedIds);
   if (revealedIceIds.length === 0)
     throw new Error("Security Purge hat keine ICE-Zielwahl offen.");
-  const targetByCardId = selectedSecurityPurgeTargets(
+  const targetByCardId = selectedAgendaPurgeTargets(
     host,
     choice,
     revealedIceIds,
@@ -217,16 +217,16 @@ export function resolveSecurityPurgeInstallTargetChoice(
     },
     stateChanged: true,
     payloadPatch: {
-      ...securityPurgeBasePayload(host, agendaId, revealedIds),
-      ...hiddenZoneChoicePayload("v1922_security_purge_install_targets"),
+      ...agendaPurgeBasePayload(host, agendaId, revealedIds),
+      ...hiddenZoneChoicePayload("agenda_purge_install_targets"),
       ...corpSequenceContextPayload({
         step: SECURITY_PURGE_STEPS.installAndRezIce,
         revealedIceCount: installedIce.length,
         pendingTrashCount: 0,
         installedIceCount: installedIce.length,
         trashedCount: trashedIds.length,
-        securityPurgeTargetChoiceOpened: false,
-        securityPurgeTargetChoiceResolved: true,
+        agendaPurgeTargetChoiceOpened: false,
+        agendaPurgeTargetChoiceResolved: true,
         installedIceDefinitionIds: installedIce
           .map((entry) => host.cards.definitionFor(entry.cardId).id)
           .join(","),
@@ -241,21 +241,21 @@ export function resolveSecurityPurgeInstallTargetChoice(
   });
 }
 
-function securityPurgeBasePayload(
+function agendaPurgeBasePayload(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
   revealedIds: readonly CardInstanceId[],
 ): SequencePayload {
   return {
-    ...hiddenZoneChoicePayload("v1922_security_purge"),
+    ...hiddenZoneChoicePayload("agenda_purge"),
     ...corpSequenceContextPayload({
       step: SECURITY_PURGE_STEPS.revealTopRd,
-      agendaAbility: "v1922_security_purge",
+      agendaAbility: "agenda_purge",
       sourceDefinitionId: host.cards.definitionFor(agendaId).id,
       publicRevealKind: "reveal",
       revealedCount: revealedIds.length,
-      securityPurgeInstallContract: "corp_server_choice_per_ice",
-      securityPurgeWaivesPrintedRezCosts: true,
+      agendaPurgeInstallContract: "corp_server_choice_per_ice",
+      agendaPurgeWaivesPrintedRezCosts: true,
       publicRevealDefinitionIds: revealedIds
         .map((id) => host.cards.definitionFor(id).id)
         .join(","),
@@ -263,7 +263,7 @@ function securityPurgeBasePayload(
   };
 }
 
-function securityPurgeIceIds(
+function agendaPurgeIceIds(
   host: CorpInstallRezSequenceHandlerHost,
   revealedIds: readonly CardInstanceId[],
 ): CardInstanceId[] {
@@ -273,7 +273,7 @@ function securityPurgeIceIds(
   });
 }
 
-function securityPurgeInstallTargetOptions(
+function agendaPurgeInstallTargetOptions(
   host: CorpInstallRezSequenceHandlerHost,
   iceIds: readonly CardInstanceId[],
 ): ChoiceRequest["options"] {
@@ -290,15 +290,15 @@ function securityPurgeInstallTargetOptions(
   return iceIds.flatMap((cardId) => {
     const title = host.cards.definitionFor(cardId).title;
     return serverTargets.map((target) => ({
-      id: `security_purge_${cardId}_${target.serverId}`,
-      label: `${title}: ${securityPurgeTargetLabel(target)}`,
+      id: `agenda_purge_${cardId}_${target.serverId}`,
+      label: `${title}: ${agendaPurgeTargetLabel(target)}`,
       publicLabel: "Security-Purge-Zielserver",
       value: `${cardId}|${target.serverId}`,
     }));
   });
 }
 
-function securityPurgeTargetLabel(target: {
+function agendaPurgeTargetLabel(target: {
   serverId: ServerId;
   label: string;
 }): string {
@@ -307,7 +307,7 @@ function securityPurgeTargetLabel(target: {
     : `vor ${target.label} installieren`;
 }
 
-function validateSecurityPurgeRevealedCards(
+function validateAgendaPurgeRevealedCards(
   host: CorpInstallRezSequenceHandlerHost,
   revealedIds: readonly CardInstanceId[],
 ): void {
@@ -319,7 +319,7 @@ function validateSecurityPurgeRevealedCards(
   }
 }
 
-function selectedSecurityPurgeTargets(
+function selectedAgendaPurgeTargets(
   host: CorpInstallRezSequenceHandlerHost,
   choice: ChoiceRequest,
   iceIds: readonly CardInstanceId[],

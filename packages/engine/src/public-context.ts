@@ -750,6 +750,27 @@ export function publicContextForAction(
       legalAction.payload?.corpActionDebtTotalAfter;
     context.corpClicksAfter = legalAction.payload?.corpClicksAfter;
   }
+  if (typeof legalAction.payload?.scoredAgendaFreeRezFreeRez === "boolean")
+    context.scoredAgendaFreeRezFreeRez =
+      legalAction.payload.scoredAgendaFreeRezFreeRez;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezChoiceOpened === "boolean")
+    context.scoredAgendaFreeRezChoiceOpened =
+      legalAction.payload.scoredAgendaFreeRezChoiceOpened;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezCandidateCount === "number")
+    context.scoredAgendaFreeRezCandidateCount =
+      legalAction.payload.scoredAgendaFreeRezCandidateCount;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezDeclined === "boolean")
+    context.scoredAgendaFreeRezDeclined =
+      legalAction.payload.scoredAgendaFreeRezDeclined;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezTarget === "string")
+    context.scoredAgendaFreeRezTarget =
+      legalAction.payload.scoredAgendaFreeRezTarget;
+  if (
+    typeof legalAction.payload?.scoredAgendaFreeRezTargetDefinitionId ===
+    "string"
+  )
+    context.scoredAgendaFreeRezTargetDefinitionId =
+      legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
@@ -833,17 +854,38 @@ export function publicContextForAction(
     if (typeof legalAction.payload.corpCreditsSpent === "number")
       context.corpCreditsSpent = legalAction.payload.corpCreditsSpent;
     if (
-      typeof legalAction.payload.dataFortReclamationRezChoiceOpened ===
+      typeof legalAction.payload.hqToNewRemoteInstallRezRezChoiceOpened ===
       "boolean"
     )
-      context.dataFortReclamationRezChoiceOpened =
-        legalAction.payload.dataFortReclamationRezChoiceOpened;
+      context.hqToNewRemoteInstallRezRezChoiceOpened =
+        legalAction.payload.hqToNewRemoteInstallRezRezChoiceOpened;
     if (
-      typeof legalAction.payload.dataFortReclamationRezCandidateCount ===
+      typeof legalAction.payload.hqToNewRemoteInstallRezRezCandidateCount ===
       "number"
     )
-      context.dataFortReclamationRezCandidateCount =
-        legalAction.payload.dataFortReclamationRezCandidateCount;
+      context.hqToNewRemoteInstallRezRezCandidateCount =
+        legalAction.payload.hqToNewRemoteInstallRezRezCandidateCount;
+    if (typeof legalAction.payload.scoredAgendaFreeRezChoiceOpened === "boolean")
+      context.scoredAgendaFreeRezChoiceOpened =
+        legalAction.payload.scoredAgendaFreeRezChoiceOpened;
+    if (typeof legalAction.payload.scoredAgendaFreeRezCandidateCount === "number")
+      context.scoredAgendaFreeRezCandidateCount =
+        legalAction.payload.scoredAgendaFreeRezCandidateCount;
+    if (typeof legalAction.payload.scoredAgendaFreeRezFreeRez === "boolean")
+      context.scoredAgendaFreeRezFreeRez =
+        legalAction.payload.scoredAgendaFreeRezFreeRez;
+    if (typeof legalAction.payload.scoredAgendaFreeRezDeclined === "boolean")
+      context.scoredAgendaFreeRezDeclined =
+        legalAction.payload.scoredAgendaFreeRezDeclined;
+    if (typeof legalAction.payload.scoredAgendaFreeRezTarget === "string")
+      context.scoredAgendaFreeRezTarget =
+        legalAction.payload.scoredAgendaFreeRezTarget;
+    if (
+      typeof legalAction.payload.scoredAgendaFreeRezTargetDefinitionId ===
+      "string"
+    )
+      context.scoredAgendaFreeRezTargetDefinitionId =
+        legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
     if (typeof legalAction.payload.temporaryCreditsRemaining === "number")
       context.temporaryCreditsRemaining =
         legalAction.payload.temporaryCreditsRemaining;
@@ -1279,13 +1321,13 @@ export function publicContextForAction(
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
   }
-  if (legalAction.payload?.agendaAbility === "v1922_security_purge") {
-    context.agendaAbility = "v1922_security_purge";
+  if (legalAction.payload?.agendaAbility === "agenda_purge") {
+    context.agendaAbility = "agenda_purge";
     context.hiddenZoneBarrier = true;
     for (const key of [
       "hiddenZoneAction",
       "sourceDefinitionId",
-      "securityPurgeInstallContract",
+      "agendaPurgeInstallContract",
       "publicRevealDefinitionIds",
       "installedIceDefinitionIds",
       "installedIceServerLabels",
@@ -1300,15 +1342,15 @@ export function publicContextForAction(
       "pendingTrashCount",
       "installedIceCount",
       "trashedCount",
-      "securityPurgeTargetChoiceCount",
+      "agendaPurgeTargetChoiceCount",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "number") context[key] = value;
     }
     for (const key of [
-      "securityPurgeWaivesPrintedRezCosts",
-      "securityPurgeTargetChoiceOpened",
-      "securityPurgeTargetChoiceResolved",
+      "agendaPurgeWaivesPrintedRezCosts",
+      "agendaPurgeTargetChoiceOpened",
+      "agendaPurgeTargetChoiceResolved",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "boolean") context[key] = value;

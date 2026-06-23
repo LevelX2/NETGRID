@@ -3,9 +3,9 @@ import type {
   CorpInstallRezSequenceHandlerResult,
 } from "./scored-agenda/scored-agenda-sequence-host";
 import { resolveScoredAgendaSequenceChoice } from "./scored-agenda/scored-agenda-sequence-registry";
-export { startDataFortReclamationChoice } from "./scored-agenda/data-fort-reclamation-sequence";
-export { startPriorityRequisitionChoice } from "./scored-agenda/priority-requisition-sequence";
-export { resolveSecurityPurgeAgendaPurge } from "./scored-agenda/security-purge-sequence";
+export { startHqToNewRemoteInstallRezChoice } from "./scored-agenda/hq-to-new-remote-install-rez-sequence";
+export { startScoredAgendaFreeRezChoice } from "./scored-agenda/scored-agenda-free-rez-sequence";
+export { resolveAgendaPurgeInstallTargets } from "./scored-agenda/agenda-purge-install-target-sequence";
 export type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
