@@ -213,7 +213,6 @@ import {
   AUDIO_STORAGE_KEY,
   CARD_DISPLAY_MODE_STORAGE_KEY,
   CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-  CARD_SIZE_SETTINGS_STORAGE_KEY,
   CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
   CHRONICLE_DETAIL_MODE_STORAGE_KEY,
   COLOR_SCHEME_STORAGE_KEY,
@@ -227,7 +226,6 @@ import {
   LEGACY_AUDIO_STORAGE_KEY,
   LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
   LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-  LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY,
   LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
   LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
   LEGACY_DECK_STORAGE_KEY,
@@ -303,6 +301,7 @@ import {
   useCardScaleSettings,
   usePreferredCardImageSource
 } from "../features/cards/card-display-settings";
+import { usePersistentCardScaleSettings } from "../features/cards/usePersistentCardScaleSettings";
 import {
   cardDetailLines,
   cardWithoutDevelopmentCounters
@@ -323,10 +322,7 @@ import {
   zoneSideClass
 } from "../features/game-board/ZoneFrame";
 import {
-  CARD_SCALE_DEFAULT_PERCENT,
-  CARD_SCALE_PERCENT_MAX,
   CARD_SCALE_PERCENT_MIN,
-  CARD_SCALE_PERCENT_STEP,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
@@ -334,7 +330,6 @@ import {
   normalizeActionPanelMode,
   normalizeAiPacingMode,
   normalizeCardDisplayMode,
-  normalizeCardScalePercent,
   normalizeCardTooltipHoverDelayMs,
   normalizeCardTooltipMode,
   normalizeChronicleDetailMode,
@@ -688,71 +683,6 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
 
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
-function usePersistentCardScaleSettings() {
-  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
-
-  useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as {
-          tooltipPercent?: unknown;
-          handPercent?: unknown;
-          archivePercent?: unknown;
-          zonePercent?: unknown;
-          boardPercent?: unknown;
-          rigPercent?: unknown;
-          opponentPercent?: unknown;
-        };
-        setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
-        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
-        setCardArchiveScalePercent(normalizeCardScalePercent(parsed.archivePercent ?? parsed.zonePercent));
-        setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
-        setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
-        setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
-      } catch {
-        removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
-      }
-    }
-    setCardSizeSettingsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!cardSizeSettingsLoaded) return;
-    window.localStorage.setItem(
-      CARD_SIZE_SETTINGS_STORAGE_KEY,
-      JSON.stringify({
-        tooltipPercent: cardTooltipScalePercent,
-        handPercent: cardHandScalePercent,
-        archivePercent: cardArchiveScalePercent,
-        zonePercent: cardZoneScalePercent,
-        boardPercent: cardBoardScalePercent,
-        rigPercent: cardRigScalePercent
-      })
-    );
-  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent]);
-
-  return {
-    cardTooltipScalePercent,
-    cardHandScalePercent,
-    cardArchiveScalePercent,
-    cardZoneScalePercent,
-    cardBoardScalePercent,
-    cardRigScalePercent,
-    setCardTooltipScalePercent,
-    setCardHandScalePercent,
-    setCardArchiveScalePercent,
-    setCardZoneScalePercent,
-    setCardBoardScalePercent,
-    setCardRigScalePercent
-  };
-}
 
 function formatCatalogTerm(value: string): string {
   const normalized = value.toLowerCase();
