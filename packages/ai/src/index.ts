@@ -139,7 +139,7 @@ import {
 } from "./diagnostics/decision-debug";
 import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "./diagnostics/coverage-selection-debug";
 import {
-  buildSemanticRuntimeDebugPlanContext,
+  buildSemanticRuntimePlanSelectionDisplayContext,
   semanticRuntimeDebugActionDisplayScore,
   semanticRuntimeDebugActionWhyChosen,
   semanticRuntimeDebugActionWhyNot,
@@ -153,7 +153,6 @@ import {
   semanticRuntimeDebugShadowTopItems,
   semanticRuntimeDebugTacticalPlanItems,
   semanticRuntimeDebugTargetChoiceShadowItems,
-  type SemanticRuntimeDebugPlanContext,
 } from "./diagnostics/semantic-runtime-debug";
 import { semanticRuntimeMemoryDebug } from "./diagnostics/semantic-runtime-memory-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
@@ -4128,12 +4127,14 @@ function semanticRuntimeDecisionDebug(
       selected.evidence,
     ),
   });
-  const selectedPlanSelection = semanticRuntimePlanSelectionDisplayContext(
-    input,
+  const selectedPlanSelection = buildSemanticRuntimePlanSelectionDisplayContext({
     planRuntime,
-    selected.action.actionId,
-    selected,
-  );
+    selectedActionId: selected.action.actionId,
+    selectedChoice: selected,
+    ...(coverageSelectionDebug
+      ? { coverageSelection: coverageSelectionDebug }
+      : {}),
+  });
   const selectedDisplayScore = semanticRuntimeDebugActionDisplayScore(
     selected,
     true,
@@ -4244,12 +4245,19 @@ function semanticRuntimeActionAlternatives(
   const selectedChoice = rankedChoices.find(
     (choice) => choice.action.actionId === selectedActionId,
   );
-  const planSelection = semanticRuntimePlanSelectionDisplayContext(
-    input,
+  const coverageSelection = selectedChoice
+    ? semanticRuntimeCoverageSelectionDebug(
+        input,
+        selectedChoice.action,
+        planRuntime,
+      )
+    : undefined;
+  const planSelection = buildSemanticRuntimePlanSelectionDisplayContext({
     planRuntime,
     selectedActionId,
-    selectedChoice,
-  );
+    ...(selectedChoice ? { selectedChoice } : {}),
+    ...(coverageSelection ? { coverageSelection } : {}),
+  });
   const orderedChoices = rankedChoices.slice().sort((left, right) => {
     const leftSelected = left.action.actionId === selectedActionId;
     const rightSelected = right.action.actionId === selectedActionId;
@@ -4324,34 +4332,6 @@ function semanticRuntimeCoverageSelectionDebug(
 ): SemanticRuntimeCoverageSelectionDebug | undefined {
   return buildSemanticRuntimeCoverageSelectionDebug(input, action, planRuntime, {
     visibleSourceCard: semanticRuntimeVisibleSourceCard,
-  });
-}
-
-function semanticRuntimePlanSelectionDisplayContext(
-  input: AiDecisionInput,
-  planRuntime: TacticalPlanRuntimeResult,
-  selectedActionId: string,
-  selectedChoice: SemanticRuntimeChoice | undefined,
-): SemanticRuntimeDebugPlanContext {
-  const mappedActions = planRuntime.selectedMapping?.legalActions ?? [];
-  const coverageSelection = selectedChoice
-    ? semanticRuntimeCoverageSelectionDebug(
-        input,
-        selectedChoice.action,
-        planRuntime,
-      )
-    : undefined;
-  return buildSemanticRuntimeDebugPlanContext({
-    selectedActionId,
-    ...(selectedChoice ? { selectedChoice } : {}),
-    mappedActionIds: mappedActions.map((action) => action.actionId),
-    ...(coverageSelection ? { coverageSelection } : {}),
-    ...(planRuntime.selectedPlan?.planId
-      ? { selectedPlanId: planRuntime.selectedPlan.planId }
-      : {}),
-    ...(planRuntime.selectedPlan?.type
-      ? { selectedPlanType: planRuntime.selectedPlan.type }
-      : {}),
   });
 }
 

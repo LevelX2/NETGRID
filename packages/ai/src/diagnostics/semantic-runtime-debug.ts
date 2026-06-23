@@ -67,6 +67,29 @@ export function buildSemanticRuntimeDebugPlanContext({
   };
 }
 
+export function buildSemanticRuntimePlanSelectionDisplayContext(params: {
+  planRuntime: TacticalPlanRuntimeResult;
+  selectedActionId: string;
+  selectedChoice?: SemanticRuntimeChoice;
+  coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
+}): SemanticRuntimeDebugPlanContext {
+  const mappedActions = params.planRuntime.selectedMapping?.legalActions ?? [];
+  return buildSemanticRuntimeDebugPlanContext({
+    selectedActionId: params.selectedActionId,
+    ...(params.selectedChoice ? { selectedChoice: params.selectedChoice } : {}),
+    mappedActionIds: mappedActions.map((action) => action.actionId),
+    ...(params.coverageSelection
+      ? { coverageSelection: params.coverageSelection }
+      : {}),
+    ...(params.planRuntime.selectedPlan?.planId
+      ? { selectedPlanId: params.planRuntime.selectedPlan.planId }
+      : {}),
+    ...(params.planRuntime.selectedPlan?.type
+      ? { selectedPlanType: params.planRuntime.selectedPlan.type }
+      : {}),
+  });
+}
+
 export function semanticRuntimeDebugCoverageScoreBreakdown(
   choice: SemanticRuntimeChoice,
   selected: boolean,
