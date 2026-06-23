@@ -236,6 +236,7 @@ import {
   type ActiveMatchWorkspace,
   type ConnectionState
 } from "../features/app-shell/AppShell";
+import { ActiveMatchWorkspaceArea } from "../features/app-shell/ActiveMatchWorkspaceArea";
 import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
 import {
@@ -4075,142 +4076,135 @@ export default function Page() {
         </aside>
       </div>
       ) : (
-        <div className={`activeMatchWorkspace ${activeMatchWorkspace === "decks" ? "deckWorkspaceView" : ""}`} data-testid={`active-match-${activeMatchWorkspace}`}>
-          {activeMatchWorkspace === "catalog" ? (
-            <CatalogPanel
-              cards={filteredCatalogCards}
-              detail={catalogDetail}
-              filters={catalogFilters}
-              search={catalogSearch}
-              side={catalogSide}
-              status={catalogStatus}
-              summary={filteredCatalogSummary}
-              setFilter={catalogSetFilter}
-              setOptions={catalogSetOptions}
-              selectedId={selectedCatalogId}
-              filtersOpen={catalogFiltersOpen}
-              showExpertStatuses={catalogExpertStatuses}
-              blockStatusCounts={catalogBlockStatusCounts}
-              blockStatusFilter={catalogBlockStatusFilter}
-              aiHintCounts={catalogAiHintCounts}
-              aiHintFilter={catalogAiHintFilter}
-              rarityCounts={catalogRarityCounts}
-              rarityFilter={catalogRarityFilter}
-              typeCounts={catalogTypeCounts}
-              typeFilters={catalogTypeFilters}
-              onSearch={setCatalogSearch}
-              onSide={setCatalogSide}
-              onStatus={setCatalogStatus}
-              onSetFilter={setCatalogSetFilter}
-              onSelect={setSelectedCatalogId}
-              onFiltersOpen={setCatalogFiltersOpen}
-              onToggleExpertStatuses={setCatalogExpertStatuses}
-              onBlockStatusFilter={setCatalogBlockStatusFilter}
-              onAiHintFilter={setCatalogAiHintFilter}
-              onRarity={setCatalogRarityFilter}
-              onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
-              onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
-              onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
-            />
-          ) : null}
-          {activeMatchWorkspace === "decks" ? (
-            <DeckEditorPanel
-              localDecks={localDecks}
-              selectedDeck={selectedLocalDeck}
-              selectedDeckDirty={selectedDeckDirty}
-              storagePath={deckLibraryStoragePath}
-              validation={deckValidation}
-              validatedSnapshot={validatedSnapshot}
-              playableCards={playableCatalogCards}
-              cardDetailsById={catalogDetailsById}
-              importText={deckImportText}
-              exportText={deckExportText}
-              onCreateEmpty={createEmptyDeck}
-              onSelectDeck={setSelectedLocalDeckId}
-              onUpdateDeck={updateSelectedDeck}
-              onSave={saveSelectedDeck}
-              onUpdateQuantity={updateDeckCardQuantity}
-              onDuplicate={duplicateSelectedDeck}
-              onDelete={deleteSelectedDeck}
-              onValidate={validateSelectedDeck}
-              onUseForMatch={useValidatedDeckForNextMatch}
-              useForMatchLabel="Für nächsten Start vormerken"
-              onExport={exportSelectedDeck}
-              onImportText={setDeckImportText}
-              onImport={importLocalDeck}
-            />
-          ) : null}
-          {activeMatchWorkspace === "recent" ? (
-            <RecentGamesPanel
-              results={recentGameResults}
-              loading={recentGameResultsLoading}
-              error={recentGameResultsError}
-              updatedAt={recentGameResultsUpdatedAt}
-              onRefresh={refreshRecentGameResults}
-            />
-          ) : null}
-          {activeMatchWorkspace === "options" ? (
-            <OptionsPanel
-              actionCueAutoDismissMs={actionCueAutoDismissMs}
-              actionCuesEnabled={actionCuesEnabled}
-              automaticEffectCuesEnabled={automaticEffectCuesEnabled}
-              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
-              autoDiscardEnabled={autoDiscardEnabled}
-              autoEndTurnEnabled={autoEndTurnEnabled}
-              topbarStickyEnabled={topbarStickyEnabled}
-              resourceStripMode={resourceStripMode}
-              actionPanelMode={actionPanelMode}
-              aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
-              audioEnabled={audioEnabled}
-              audioVolume={audioVolume}
-              cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
-              cardTooltipMode={cardTooltipMode}
-              cardTooltipScalePercent={cardTooltipScalePercent}
-              cardHandScalePercent={cardHandScalePercent}
-              cardArchiveScalePercent={cardArchiveScalePercent}
-              cardZoneScalePercent={cardZoneScalePercent}
-              cardBoardScalePercent={cardBoardScalePercent}
-              cardRigScalePercent={cardRigScalePercent}
-              cardDisplayMode={cardDisplayMode}
-              preferGermanCardImages={preferGermanCardImages}
-              showSetBadges={showSetBadges}
-              chronicleDetailMode={chronicleDetailMode}
-              colorScheme={colorScheme}
-              cuePosition={cuePosition}
-              aiPacingMode={localAiPacingMode}
-              session={session}
-              onActionCueAutoDismissMs={setActionCueAutoDismissMs}
-              onActionCuesEnabled={setActionCuesEnabled}
-              onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
-              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
-              onAutoDiscardEnabled={setAutoDiscardEnabled}
-              onAutoEndTurnEnabled={setAutoEndTurnEnabled}
-              onTopbarStickyEnabled={setTopbarStickyEnabled}
-              onResourceStripMode={setResourceStripMode}
-              onActionPanelMode={setActionPanelMode}
-              onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
-              onAudioEnabled={updateAudioEnabled}
-              onAudioVolume={setAudioVolume}
-              onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
-              onCardTooltipMode={setCardTooltipMode}
-              onCardTooltipScalePercent={setCardTooltipScalePercent}
-              onCardHandScalePercent={setCardHandScalePercent}
-              onCardArchiveScalePercent={setCardArchiveScalePercent}
-              onCardZoneScalePercent={setCardZoneScalePercent}
-              onCardBoardScalePercent={setCardBoardScalePercent}
-              onCardRigScalePercent={setCardRigScalePercent}
-              onCardDisplayMode={setCardDisplayMode}
-              onPreferGermanCardImages={setPreferGermanCardImages}
-              onShowSetBadges={setShowSetBadges}
-              onChronicleDetailMode={setChronicleDetailMode}
-              onColorScheme={setColorScheme}
-              onCuePosition={setCuePosition}
-              onAiPacingMode={updateLocalAiPacingMode}
-              onCopyReconnectLink={copyReconnectLink}
-              onDiscardLocalSession={discardLocalActiveSession}
-            />
-          ) : null}
-        </div>
+        <ActiveMatchWorkspaceArea
+          workspace={activeMatchWorkspace}
+          catalogPanelProps={{
+            cards: filteredCatalogCards,
+            detail: catalogDetail,
+            filters: catalogFilters,
+            search: catalogSearch,
+            side: catalogSide,
+            status: catalogStatus,
+            summary: filteredCatalogSummary,
+            setFilter: catalogSetFilter,
+            setOptions: catalogSetOptions,
+            selectedId: selectedCatalogId,
+            filtersOpen: catalogFiltersOpen,
+            showExpertStatuses: catalogExpertStatuses,
+            blockStatusCounts: catalogBlockStatusCounts,
+            blockStatusFilter: catalogBlockStatusFilter,
+            aiHintCounts: catalogAiHintCounts,
+            aiHintFilter: catalogAiHintFilter,
+            rarityCounts: catalogRarityCounts,
+            rarityFilter: catalogRarityFilter,
+            typeCounts: catalogTypeCounts,
+            typeFilters: catalogTypeFilters,
+            onSearch: setCatalogSearch,
+            onSide: setCatalogSide,
+            onStatus: setCatalogStatus,
+            onSetFilter: setCatalogSetFilter,
+            onSelect: setSelectedCatalogId,
+            onFiltersOpen: setCatalogFiltersOpen,
+            onToggleExpertStatuses: setCatalogExpertStatuses,
+            onBlockStatusFilter: setCatalogBlockStatusFilter,
+            onAiHintFilter: setCatalogAiHintFilter,
+            onRarity: setCatalogRarityFilter,
+            onTypeFilter: (key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected })),
+            onSelectAllTypes: () => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS }),
+            onClearTypeFilters: () => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })
+          }}
+          deckEditorPanelProps={{
+            localDecks,
+            selectedDeck: selectedLocalDeck,
+            selectedDeckDirty,
+            storagePath: deckLibraryStoragePath,
+            validation: deckValidation,
+            validatedSnapshot,
+            playableCards: playableCatalogCards,
+            cardDetailsById: catalogDetailsById,
+            importText: deckImportText,
+            exportText: deckExportText,
+            onCreateEmpty: createEmptyDeck,
+            onSelectDeck: setSelectedLocalDeckId,
+            onUpdateDeck: updateSelectedDeck,
+            onSave: saveSelectedDeck,
+            onUpdateQuantity: updateDeckCardQuantity,
+            onDuplicate: duplicateSelectedDeck,
+            onDelete: deleteSelectedDeck,
+            onValidate: validateSelectedDeck,
+            onUseForMatch: useValidatedDeckForNextMatch,
+            useForMatchLabel: "Für nächsten Start vormerken",
+            onExport: exportSelectedDeck,
+            onImportText: setDeckImportText,
+            onImport: importLocalDeck
+          }}
+          recentGamesPanelProps={{
+            results: recentGameResults,
+            loading: recentGameResultsLoading,
+            error: recentGameResultsError,
+            updatedAt: recentGameResultsUpdatedAt,
+            onRefresh: refreshRecentGameResults
+          }}
+          optionsPanelProps={{
+            actionCueAutoDismissMs,
+            actionCuesEnabled,
+            automaticEffectCuesEnabled,
+            autoCorpMandatoryDrawEnabled,
+            autoDiscardEnabled,
+            autoEndTurnEnabled,
+            topbarStickyEnabled,
+            resourceStripMode,
+            actionPanelMode,
+            aiDecisionDebugOverlayEnabled,
+            audioEnabled,
+            audioVolume,
+            cardTooltipHoverDelayMs,
+            cardTooltipMode,
+            cardTooltipScalePercent,
+            cardHandScalePercent,
+            cardArchiveScalePercent,
+            cardZoneScalePercent,
+            cardBoardScalePercent,
+            cardRigScalePercent,
+            cardDisplayMode,
+            preferGermanCardImages,
+            showSetBadges,
+            chronicleDetailMode,
+            colorScheme,
+            cuePosition,
+            aiPacingMode: localAiPacingMode,
+            session,
+            onActionCueAutoDismissMs: setActionCueAutoDismissMs,
+            onActionCuesEnabled: setActionCuesEnabled,
+            onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
+            onAutoCorpMandatoryDrawEnabled: setAutoCorpMandatoryDrawEnabled,
+            onAutoDiscardEnabled: setAutoDiscardEnabled,
+            onAutoEndTurnEnabled: setAutoEndTurnEnabled,
+            onTopbarStickyEnabled: setTopbarStickyEnabled,
+            onResourceStripMode: setResourceStripMode,
+            onActionPanelMode: setActionPanelMode,
+            onAiDecisionDebugOverlayEnabled: setAiDecisionDebugOverlayEnabled,
+            onAudioEnabled: updateAudioEnabled,
+            onAudioVolume: setAudioVolume,
+            onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
+            onCardTooltipMode: setCardTooltipMode,
+            onCardTooltipScalePercent: setCardTooltipScalePercent,
+            onCardHandScalePercent: setCardHandScalePercent,
+            onCardArchiveScalePercent: setCardArchiveScalePercent,
+            onCardZoneScalePercent: setCardZoneScalePercent,
+            onCardBoardScalePercent: setCardBoardScalePercent,
+            onCardRigScalePercent: setCardRigScalePercent,
+            onCardDisplayMode: setCardDisplayMode,
+            onPreferGermanCardImages: setPreferGermanCardImages,
+            onShowSetBadges: setShowSetBadges,
+            onChronicleDetailMode: setChronicleDetailMode,
+            onColorScheme: setColorScheme,
+            onCuePosition: setCuePosition,
+            onAiPacingMode: updateLocalAiPacingMode,
+            onCopyReconnectLink: copyReconnectLink,
+            onDiscardLocalSession: discardLocalActiveSession
+          }}
+        />
       )}
       {activeMatchIsGame && showResultModal && resultSummary ? (
         <GameOverModal
