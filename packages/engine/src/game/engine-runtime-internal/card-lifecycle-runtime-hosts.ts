@@ -702,11 +702,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-import { runtimeBinding } from "./runtime-shared";
-
 export function createCardLifecycleRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     PROTEUS_ARMAGEDDON_ID,
@@ -939,9 +937,9 @@ export function createCardLifecycleRuntimeHosts(
           const run = state.run;
           return Boolean(
             state.timingPoint === "run.approach_ice" &&
-              run?.phase === "approach_ice" &&
-              run.approachedIceId === cardId &&
-              corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
+            run?.phase === "approach_ice" &&
+            run.approachedIceId === cardId &&
+            corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
           );
         },
         beginEncounter: (cardId, legalAction) =>
@@ -998,8 +996,7 @@ export function createCardLifecycleRuntimeHosts(
             cardId,
           ),
       },
-      constants: {
-      },
+      constants: {},
     };
   }
 

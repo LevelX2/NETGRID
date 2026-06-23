@@ -121,9 +121,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -202,10 +200,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -240,9 +235,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -398,9 +391,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -416,18 +407,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -624,9 +607,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -719,8 +700,10 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
-export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<string, any> = {}) {
+export function createPlayBoardRuntimeHosts(
+  deps: RuntimeDeps,
+  runtime: Record<string, unknown> = {},
+) {
   const {
     RUNNER_EVENT_RESOLVERS,
     advanceableInstalledCardTargets,
@@ -789,11 +772,16 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
             cardId,
           ),
         resolveRunnerTargetedEventImplementation: (definition, legalAction) =>
-          resolveRunnerTargetedEventImplementation(state, definition, legalAction),
+          resolveRunnerTargetedEventImplementation(
+            state,
+            definition,
+            legalAction,
+          ),
         resolvePostOnPlayGenericFollowups: (definition, legalAction) =>
           resolvePostOnPlayGenericFollowups(state, definition, legalAction),
         hasPrintedCostOnPlay: hasPrintedCostOnPlayCardImplementation,
-        additionalOperationCost: onPlayCardImplementationAdditionalOperationCost,
+        additionalOperationCost:
+          onPlayCardImplementationAdditionalOperationCost,
         needsLastTurnResourceTarget:
           onPlayCardImplementationNeedsLastTurnResourceTarget,
       },
@@ -870,7 +858,12 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
           trashRunnerInstalledCardToHeap(state, cardId),
       },
       damage: {
-        resolveDamageOperation: (legalAction, damageType, amount, sourceDefinitionId) =>
+        resolveDamageOperation: (
+          legalAction,
+          damageType,
+          amount,
+          sourceDefinitionId,
+        ) =>
           resolveDamageOperation(
             state,
             legalAction,
@@ -898,12 +891,19 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
           ),
       },
       board: {
-        installedAgendaOperationTarget: () => installedAgendaOperationTarget(state),
-        advanceableInstalledCardTargets: () => advanceableInstalledCardTargets(state),
+        installedAgendaOperationTarget: () =>
+          installedAgendaOperationTarget(state),
+        advanceableInstalledCardTargets: () =>
+          advanceableInstalledCardTargets(state),
         advancementDistributionOptions: (amount, distribution) =>
           advancementDistributionOptions(state, amount, distribution as never),
         moveAdvancementOptions: (sourceCardId, source, maxAmount) =>
-          moveAdvancementOptions(state, sourceCardId, source as never, maxAmount),
+          moveAdvancementOptions(
+            state,
+            sourceCardId,
+            source as never,
+            maxAmount,
+          ),
         resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
           resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
         resolveManagementShakeUpOperation: (legalAction) =>

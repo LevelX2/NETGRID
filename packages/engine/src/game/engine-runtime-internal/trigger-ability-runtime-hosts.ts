@@ -700,11 +700,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-import { runtimeBinding } from "./runtime-shared";
-
 export function createTriggerAbilityRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     acmeSavingsAndLoanObligationCount,

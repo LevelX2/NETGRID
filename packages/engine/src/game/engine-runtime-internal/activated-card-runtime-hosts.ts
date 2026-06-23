@@ -700,11 +700,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-import { runtimeBinding } from "./runtime-shared";
-
 export function createActivatedCardRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     cardImplementationRuntimeDeps,
@@ -753,11 +751,16 @@ export function createActivatedCardRuntimeHosts(
         corpTracePaymentDeps,
         runnerTracePaymentDeps,
         runnerTraceLinkCreditSourceIds: () =>
-          runnerTracePaymentDeps.runnerTraceLinkCreditSources(state).map((source) => source.sourceCardInstanceId),
+          runnerTracePaymentDeps
+            .runnerTraceLinkCreditSources(state)
+            .map((source) => source.sourceCardInstanceId),
         hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
         spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
         recordRunActionSpendingCapSpend: (amount) =>
-          recordRunActionSpendingCapSpend(runDurationPaymentHost(state), amount),
+          recordRunActionSpendingCapSpend(
+            runDurationPaymentHost(state),
+            amount,
+          ),
       },
       runner: {
         identityModifierAmount: (side, kind, duration) =>
@@ -770,7 +773,8 @@ export function createActivatedCardRuntimeHosts(
         cardCounter: (cardId, counterType) =>
           cardCounter(state, cardId, counterType as CounterType),
         hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
-        recurringTraceCreditPoolTotal: () => recurringTraceCreditPoolTotal(state),
+        recurringTraceCreditPoolTotal: () =>
+          recurringTraceCreditPoolTotal(state),
       },
       fort: {
         fortTraceBitPoolSource: () =>

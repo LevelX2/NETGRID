@@ -121,9 +121,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -202,10 +200,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -240,9 +235,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -398,9 +391,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -416,18 +407,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -624,9 +607,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -719,25 +700,27 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
 export function createCardStrengthCostRuntimeServices(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
-  const {
-    scoredAgendaImplementationForDefinition,
-  } = deps;
+  const { scoredAgendaImplementationForDefinition } = deps;
 
-  function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
+  function iceStrengthBonusFor(
+    state: GameState,
+    iceId: CardInstanceId,
+  ): number {
     const iceServerId = corpServerIdForInstalledCard(state, iceId);
     let bonus = 0;
     for (const agendaId of scoredCorpAgendaIds(state)) {
       const agendaDefinition = definitionFor(state, agendaId);
-      const scoredAgenda = scoredAgendaImplementationForDefinition(agendaDefinition);
+      const scoredAgenda =
+        scoredAgendaImplementationForDefinition(agendaDefinition);
       if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
         if (
           iceServerId &&
-          mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
+          mustInstance(state.cardInstances, agendaId).selectedServerId ===
+            iceServerId
         )
           bonus += scoredAgenda.amount;
       }
@@ -752,7 +735,10 @@ export function createCardStrengthCostRuntimeServices(
     const instance = mustInstance(state.cardInstances, iceId);
     const runEncounterBonus =
       state.run?.encounteredIceId === iceId
-        ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
+        ? Math.max(
+            0,
+            Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0),
+          )
         : 0;
     const pattelsReduction = cardCounter(state, iceId, "virus");
     const baseStrength =

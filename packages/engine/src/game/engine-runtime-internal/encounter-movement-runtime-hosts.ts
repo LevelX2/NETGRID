@@ -121,9 +121,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -202,10 +200,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -240,9 +235,7 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerShellTradersRemoveCounterAction,
@@ -398,9 +391,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -416,18 +407,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -624,9 +607,7 @@ import {
   CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -719,10 +700,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
 export function createEncounterMovementRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     accessFlow,
@@ -818,7 +798,13 @@ export function createEncounterMovementRuntimeHosts(
   ): void {
     const run = state.run;
     if (!run || run.phase !== "encounter_ice") return;
-    if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
+    if (
+      !icebreakerHasSpecial(
+        state,
+        breakerId,
+        "bartmoss_post_encounter_self_trash_check",
+      )
+    )
       return;
     const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter ?? [];
     if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
@@ -830,7 +816,14 @@ export function createEncounterMovementRuntimeHosts(
     breakerId: CardInstanceId,
   ): void {
     const run = state.run;
-    if (!run || !icebreakerHasSpecial(state, breakerId, "snowball_run_strength_per_successful_break"))
+    if (
+      !run ||
+      !icebreakerHasSpecial(
+        state,
+        breakerId,
+        "snowball_run_strength_per_successful_break",
+      )
+    )
       return;
     const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
     run.remainderStrengthBonusByBreaker = {
@@ -845,9 +838,9 @@ export function createEncounterMovementRuntimeHosts(
     special: NonNullable<RuntimeIcebreakerAbility["special"]>,
   ): boolean {
     if (!state.cardInstances[breakerId]) return false;
-    return icebreakerAbilitiesForDefinition(definitionFor(state, breakerId)).some(
-      (ability) => ability.special === special,
-    );
+    return icebreakerAbilitiesForDefinition(
+      definitionFor(state, breakerId),
+    ).some((ability) => ability.special === special);
   }
 
   function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
@@ -879,7 +872,8 @@ export function createEncounterMovementRuntimeHosts(
   }
 
   function encounterEntryHostForState(state: GameState): EncounterEntryHost {
-    return runFlow.encounterEntryHostForState(state);}
+    return runFlow.encounterEntryHostForState(state);
+  }
 
   function successfulRunInterventionHost(
     state: GameState,
@@ -887,7 +881,9 @@ export function createEncounterMovementRuntimeHosts(
     return runFlow.successfulRunInterventionHost(state);
   }
 
-  function encounterResolutionHostForState(state: GameState): EncounterResolutionHost {
+  function encounterResolutionHostForState(
+    state: GameState,
+  ): EncounterResolutionHost {
     return runFlow.encounterResolutionHostForState(state);
   }
 
@@ -931,7 +927,8 @@ export function createEncounterMovementRuntimeHosts(
         currentEncounterSubroutines: (iceDefinition) =>
           subroutinesForCurrentEncounter(state, iceDefinition),
         runRemainderStrengthBonusForBreaker,
-        finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
+        finishRun: (successful, legalAction) =>
+          finishRun(state, successful, legalAction),
       },
       breaker: {
         pumpAbilityForLegalAction: (legalAction) =>
@@ -980,7 +977,11 @@ export function createEncounterMovementRuntimeHosts(
       },
       payment: {
         spendRunnerRunCredits: (amount, breakerId) =>
-          spendRunnerRunCredits(runDurationPaymentHost(state), amount, breakerId),
+          spendRunnerRunCredits(
+            runDurationPaymentHost(state),
+            amount,
+            breakerId,
+          ),
       },
       fort: {
         shouldOpenAardvarkInterception: (breakerId) =>
@@ -1003,7 +1004,8 @@ export function createEncounterMovementRuntimeHosts(
           ),
       },
       effects: {
-        executeEffectCommands: (commands) => executeEffectCommands(state, commands),
+        executeEffectCommands: (commands) =>
+          executeEffectCommands(state, commands),
         addRunnerFutureActionDebt: (amount) =>
           addRunnerFutureActionDebt(state, amount),
       },
@@ -1058,8 +1060,12 @@ export function createEncounterMovementRuntimeHosts(
       },
       run: {
         passCorpRunRootRezWindow: (legalAction) =>
-          passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction),
-        passApproachedIce: () => passApproachedIce(runMovementHostForState(state)),
+          passCorpRunRootRezWindow(
+            runRezWindowHostForState(state),
+            legalAction,
+          ),
+        passApproachedIce: () =>
+          passApproachedIce(runMovementHostForState(state)),
       },
     };
   }

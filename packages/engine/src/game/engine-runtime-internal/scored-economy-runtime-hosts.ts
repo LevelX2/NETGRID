@@ -703,7 +703,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createScoredEconomyRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any> = {},
+  runtime: Record<string, unknown> = {},
 ) {
   const {
     agendaPoints,
