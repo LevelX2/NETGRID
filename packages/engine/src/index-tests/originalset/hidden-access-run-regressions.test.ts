@@ -207,12 +207,12 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     );
     remoteState.runner.credits = 10;
     drawRunnerCardsForTest(remoteState, 4);
-    const virusTestSiteId = putCorpRootInRemote(
+    const advancementNetDamageAssetId = putCorpRootInRemote(
       remoteState,
       "onr_v1_348_virus-test-site",
     );
-    remoteState.cardInstances[virusTestSiteId] = {
-      ...remoteState.cardInstances[virusTestSiteId]!,
+    remoteState.cardInstances[advancementNetDamageAssetId] = {
+      ...remoteState.cardInstances[advancementNetDamageAssetId]!,
       advancementCounters: 3,
     };
     const gripBefore = remoteState.runner.grip.length;

@@ -783,12 +783,12 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     state.runner.credits = 20;
     state.corp.credits = 4;
     const blinkId = installRunnerProgramForTest(state, "onr_v1_007_blink");
-    const experimentalAiId = putCorpRootInRemote(
+    const programTrashByAdvancementAssetId = putCorpRootInRemote(
       state,
       "onr_v1_323_experimental-ai",
     );
-    state.cardInstances[experimentalAiId] = {
-      ...state.cardInstances[experimentalAiId]!,
+    state.cardInstances[programTrashByAdvancementAssetId] = {
+      ...state.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 1,
     };
 
@@ -809,7 +809,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
           type: "rez_ice",
           costs: [{ credits: 2 }],
           payload: expect.objectContaining({
-            cardId: experimentalAiId,
+            cardId: programTrashByAdvancementAssetId,
             rootRez: true,
             serverId: "remote_1",
           }),
@@ -828,7 +828,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "decline_rez" &&
         action.payload?.runRootRezPass === true,
     );
-    expect(state.cardInstances[experimentalAiId]?.rezzed).toBe(false);
+    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(false);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.timingPoint).toBe("access.resolve_card");
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -864,12 +864,12 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     state.runner.credits = 20;
     state.corp.credits = 4;
     const blinkId = installRunnerProgramForTest(state, "onr_v1_007_blink");
-    const experimentalAiId = putCorpRootInRemote(
+    const programTrashByAdvancementAssetId = putCorpRootInRemote(
       state,
       "onr_v1_323_experimental-ai",
     );
-    state.cardInstances[experimentalAiId] = {
-      ...state.cardInstances[experimentalAiId]!,
+    state.cardInstances[programTrashByAdvancementAssetId] = {
+      ...state.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 1,
     };
 
@@ -887,7 +887,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
 
-    expect(state.cardInstances[experimentalAiId]?.rezzed).toBe(true);
+    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_323_experimental-ai",
@@ -907,7 +907,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) => action.type === "trash_accessed_card",
     );
 
-    expect(state.corp.archives).toContain(experimentalAiId);
+    expect(state.corp.archives).toContain(programTrashByAdvancementAssetId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trash_accessed_card",
       cardDefinitionId: "onr_v1_323_experimental-ai",
@@ -920,12 +920,12 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     installRunnerProgramForTest(state, "simple_decoder");
     installRunnerProgramForTest(state, "simple_fracter");
-    const experimentalAiId = putCorpRootInRemote(
+    const programTrashByAdvancementAssetId = putCorpRootInRemote(
       state,
       "onr_v1_323_experimental-ai",
     );
-    state.cardInstances[experimentalAiId] = {
-      ...state.cardInstances[experimentalAiId]!,
+    state.cardInstances[programTrashByAdvancementAssetId] = {
+      ...state.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 2,
     };
     state = apply(

@@ -33,13 +33,13 @@ type AccessEffectDefinitionIds = {
   setup: CardDefinitionId;
   trap: CardDefinitionId;
   crybaby: CardDefinitionId;
-  dedicatedResponseTeam: CardDefinitionId;
-  dieterEsslin: CardDefinitionId;
-  turbeauDelacroix: CardDefinitionId;
-  corprunnersShatteredRemains: CardDefinitionId;
-  experimentalAi: CardDefinitionId;
-  vacantSoulkiller: CardDefinitionId;
-  virusTestSite: CardDefinitionId;
+  taggedRunnerMeatDamageUpgrade: CardDefinitionId;
+  accessNetDamageUpgrade: CardDefinitionId;
+  oncePerRunAccessTraceUpgrade: CardDefinitionId;
+  hardwareTrashByAdvancementAsset: CardDefinitionId;
+  programTrashByAdvancementAsset: CardDefinitionId;
+  advancementCoreDamageAsset: CardDefinitionId;
+  advancementNetDamageAsset: CardDefinitionId;
   chimera: CardDefinitionId;
 };
 
@@ -1201,9 +1201,9 @@ function resolveUpgradeAccessEffect(
   if (cardHasImplementationAccessEffects(host, definition)) return;
   if (
     definition.id !== ids.crybaby &&
-    definition.id !== ids.dedicatedResponseTeam &&
-    definition.id !== ids.dieterEsslin &&
-    definition.id !== ids.turbeauDelacroix
+    definition.id !== ids.taggedRunnerMeatDamageUpgrade &&
+    definition.id !== ids.accessNetDamageUpgrade &&
+    definition.id !== ids.oncePerRunAccessTraceUpgrade
   )
     return;
   if (
@@ -1232,7 +1232,7 @@ function resolveUpgradeAccessEffect(
     return;
   }
 
-  if (definition.id === ids.turbeauDelacroix) {
+  if (definition.id === ids.oncePerRunAccessTraceUpgrade) {
     const run = host.state.run!;
     const serverId = run.attackedServerId;
     const consumed = run.turbeauAccessTraceConsumedByServer?.[serverId] ?? [];
@@ -1265,19 +1265,19 @@ function resolveUpgradeAccessEffect(
     return;
   }
 
-  const damageType = definition.id === ids.dedicatedResponseTeam ? "meat" : "net";
-  const damageAmount = definition.id === ids.dedicatedResponseTeam ? 3 : 1;
+  const damageType = definition.id === ids.taggedRunnerMeatDamageUpgrade ? "meat" : "net";
+  const damageAmount = definition.id === ids.taggedRunnerMeatDamageUpgrade ? 3 : 1;
   const runnerTagsBefore = host.state.runner.tags;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ambushDefinitionId: definition.id,
     damageType,
     damageAmount,
-    ...(definition.id === ids.dedicatedResponseTeam
+    ...(definition.id === ids.taggedRunnerMeatDamageUpgrade
       ? { runnerTagsBefore, tagConditionMet: runnerTagsBefore >= 1 }
       : {}),
   };
-  if (definition.id === ids.dedicatedResponseTeam && runnerTagsBefore < 1) {
+  if (definition.id === ids.taggedRunnerMeatDamageUpgrade && runnerTagsBefore < 1) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       damageSkippedReason: "runner_not_tagged",
@@ -1304,10 +1304,10 @@ function resolveAssetAccessEffect(
   const ids = host.definitions;
   if (cardHasImplementationAccessEffects(host, definition)) return;
   if (
-    definition.id !== ids.corprunnersShatteredRemains &&
-    definition.id !== ids.experimentalAi &&
-    definition.id !== ids.vacantSoulkiller &&
-    definition.id !== ids.virusTestSite
+    definition.id !== ids.hardwareTrashByAdvancementAsset &&
+    definition.id !== ids.programTrashByAdvancementAsset &&
+    definition.id !== ids.advancementCoreDamageAsset &&
+    definition.id !== ids.advancementNetDamageAsset
   ) {
     return;
   }
@@ -1324,7 +1324,7 @@ function resolveAssetAccessEffect(
   const accessedFromArchives =
     accessServerId === "archives" ||
     host.cards.mustInstance(cardId).zone.zone === "archives";
-  if (accessedFromArchives && definition.id === ids.virusTestSite) {
+  if (accessedFromArchives && definition.id === ids.advancementNetDamageAsset) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
@@ -1336,8 +1336,8 @@ function resolveAssetAccessEffect(
   }
 
   if (
-    definition.id === ids.corprunnersShatteredRemains ||
-    definition.id === ids.experimentalAi
+    definition.id === ids.hardwareTrashByAdvancementAsset ||
+    definition.id === ids.programTrashByAdvancementAsset
   ) {
     resolveInstalledTrashAssetAccessEffect(host, cardId, definition);
     return;
@@ -1348,7 +1348,7 @@ function resolveAssetAccessEffect(
     Math.floor(host.cards.mustInstance(cardId).advancementCounters),
   );
   const damageAmount =
-    definition.id === ids.virusTestSite
+    definition.id === ids.advancementNetDamageAsset
       ? advancementCounterCount > 0
         ? advancementCounterCount * 2
         : 1
@@ -1370,7 +1370,7 @@ function resolveAssetAccessEffect(
   if (damageAmount <= 0) return;
   const summary = host.damage.doDamage(
     `v1919.asset_access.${host.state.run!.runId}.${cardId}.${host.state.stateVersion + 1}`,
-    definition.id === ids.vacantSoulkiller ? "core" : "net",
+    definition.id === ids.advancementCoreDamageAsset ? "core" : "net",
     damageAmount,
     definition.id,
   );
@@ -1385,7 +1385,7 @@ function resolveInstalledTrashAssetAccessEffect(
   const legalAction = requireLegalAction(host);
   const ids = host.definitions;
   const candidates =
-    definition.id === ids.corprunnersShatteredRemains
+    definition.id === ids.hardwareTrashByAdvancementAsset
       ? host.state.runner.rig.hardware
       : host.state.runner.rig.programs;
   const targetCardIds = candidates.slice().sort((left, right) => {
@@ -1421,7 +1421,7 @@ function resolveInstalledTrashAssetAccessEffect(
     ambushDefinitionId: definition.id,
     advancementCounterCount: trashLimit,
     trashedCardType:
-      definition.id === ids.corprunnersShatteredRemains ? "hardware" : "program",
+      definition.id === ids.hardwareTrashByAdvancementAsset ? "hardware" : "program",
     trashedCount: selectedTargetIds.length,
   };
   if (selectedTargetIds.length === 0) {

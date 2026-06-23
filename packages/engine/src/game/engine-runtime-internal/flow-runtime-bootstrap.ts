@@ -1252,14 +1252,14 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
       trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
       crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
-      dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-      dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-      turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
-      corprunnersShatteredRemains:
+      taggedRunnerMeatDamageUpgrade: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+      accessNetDamageUpgrade: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+      oncePerRunAccessTraceUpgrade: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+      hardwareTrashByAdvancementAsset:
         CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-      experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-      vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-      virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+      programTrashByAdvancementAsset: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+      advancementCoreDamageAsset: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+      advancementNetDamageAsset: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
       chimera: CHIMERA_ID,
     },
     callbacks: {

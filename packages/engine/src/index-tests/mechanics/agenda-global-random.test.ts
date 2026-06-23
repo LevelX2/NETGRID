@@ -403,12 +403,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       accessState,
       "simple_decoder",
     );
-    const experimentalAiId = putCorpRootInRemote(
+    const programTrashByAdvancementAssetId = putCorpRootInRemote(
       accessState,
       "onr_v1_323_experimental-ai",
     );
-    accessState.cardInstances[experimentalAiId] = {
-      ...accessState.cardInstances[experimentalAiId]!,
+    accessState.cardInstances[programTrashByAdvancementAssetId] = {
+      ...accessState.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 1,
     };
     accessState = apply(
@@ -433,7 +433,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(accessState.eventLog.at(-1)?.visibilityClass).toBe(
       "hidden_info_barrier",
     );
-    expect(accessState.run?.accessedCardId).toBe(experimentalAiId);
+    expect(accessState.run?.accessedCardId).toBe(programTrashByAdvancementAssetId);
   });
 
   it("uses V1.9.19 operation advance, counter and forfeit-cost paths through play-operation actions", () => {
@@ -729,12 +729,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     coreDamageState.runner.credits = 20;
     const coreBefore = coreDamageState.runner.coreDamage;
-    const vacantSoulkillerId = putCorpRootInRemote(
+    const advancementCoreDamageAssetId = putCorpRootInRemote(
       coreDamageState,
       "onr_v1_346_vacant-soulkiller",
     );
-    coreDamageState.cardInstances[vacantSoulkillerId] = {
-      ...coreDamageState.cardInstances[vacantSoulkillerId]!,
+    coreDamageState.cardInstances[advancementCoreDamageAssetId] = {
+      ...coreDamageState.cardInstances[advancementCoreDamageAssetId]!,
       advancementCounters: 1,
     };
     coreDamageState = apply(

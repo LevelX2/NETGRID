@@ -2,7 +2,7 @@ import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Vacant Soulkiller
 // text: You may advance Vacant Soulkiller before and after you rez it. When Runner accesses Vacant Soulkiller, it does 1 brain damage for each advancement counter on it.
-export const vacantSoulkillerImplementation: CardImplementationDefinition = {
+export const advancementCoreDamageAssetImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_346_vacant-soulkiller",
   advanceable: { while: "installed_before_and_after_rez" },
   accessEffects: [

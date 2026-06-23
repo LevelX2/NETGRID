@@ -2,7 +2,7 @@ import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Dieter Esslin
 // text: When Runner accesses Dieter Esslin, Dieter does 1 Net damage.
-export const dieterEsslinImplementation: CardImplementationDefinition = {
+export const accessNetDamageUpgradeImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_357_dieter-esslin",
   accessEffects: [
     {

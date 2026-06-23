@@ -38,7 +38,7 @@ import { acmeSavingsAndLoanImplementation } from "../onr-v1/corp/assets/acme-sav
 import { chicagoBranchImplementation } from "../onr-v1/corp/assets/chicago-branch";
 import { citySurveillanceImplementation } from "../onr-v1/corp/assets/city-surveillance";
 import { corporateNegotiatingCenterImplementation } from "../onr-v1/corp/assets/corporate-negotiating-center";
-import { corprunnersShatteredRemainsImplementation } from "../onr-v1/corp/assets/corprunners-shattered-remains";
+import { hardwareTrashByAdvancementAssetImplementation } from "../onr-v1/corp/assets/corprunners-shattered-remains";
 import { cowboySysopImplementation } from "../onr-v1/corp/assets/cowboy-sysop";
 import { dataMasonsHostingImplementation } from "../onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "../onr-v1/corp/assets/department-of-truth-enhancement";
@@ -46,7 +46,7 @@ import { disinfectantIncImplementation } from "../onr-v1/corp/assets/disinfectan
 import { encoderIncImplementation } from "../onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "../onr-v1/corp/assets/esa-contract";
 import { euromarketConsortiumImplementation } from "../onr-v1/corp/assets/euromarket-consortium";
-import { experimentalAiImplementation } from "../onr-v1/corp/assets/experimental-ai";
+import { programTrashByAdvancementAssetImplementation } from "../onr-v1/corp/assets/experimental-ai";
 import { fortressArchitectsImplementation } from "../onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "../onr-v1/corp/assets/holovid-campaign";
 import { hackerTrackerCentralImplementation } from "../onr-v1/corp/assets/hacker-tracker-central";
@@ -70,8 +70,8 @@ import { rustbeltHqBranchImplementation } from "../onr-v1/corp/assets/rustbelt-h
 import { setupImplementation } from "../onr-v1/corp/assets/setup";
 import { vaporOpsImplementation } from "../onr-v1/corp/assets/vapor-ops";
 import { trapImplementation } from "../onr-v1/corp/assets/trap";
-import { vacantSoulkillerImplementation } from "../onr-v1/corp/assets/vacant-soulkiller";
-import { virusTestSiteImplementation } from "../onr-v1/corp/assets/virus-test-site";
+import { advancementCoreDamageAssetImplementation } from "../onr-v1/corp/assets/vacant-soulkiller";
+import { advancementNetDamageAssetImplementation } from "../onr-v1/corp/assets/virus-test-site";
 import { aspImplementation } from "../onr-v1/corp/ice/asp";
 import { ballAndChainImplementation } from "../onr-v1/corp/ice/ball-and-chain";
 import { banpeiImplementation } from "../onr-v1/corp/ice/banpei";
@@ -166,8 +166,8 @@ import { chesterMixImplementation } from "../onr-v1/corp/upgrades/chester-mix";
 import { chimeraImplementation } from "../onr-v1/corp/upgrades/chimera";
 import { crybabyImplementation } from "../onr-v1/corp/upgrades/crybaby";
 import { crystalPalaceStationGridImplementation } from "../onr-v1/corp/upgrades/crystal-palace-station-grid";
-import { dedicatedResponseTeamImplementation } from "../onr-v1/corp/upgrades/dedicated-response-team";
-import { dieterEsslinImplementation } from "../onr-v1/corp/upgrades/dieter-esslin";
+import { taggedRunnerMeatDamageUpgradeImplementation } from "../onr-v1/corp/upgrades/dedicated-response-team";
+import { accessNetDamageUpgradeImplementation } from "../onr-v1/corp/upgrades/dieter-esslin";
 import { drDreffImplementation } from "../onr-v1/corp/upgrades/dr-dreff";
 import { jennyJettImplementation } from "../onr-v1/corp/upgrades/jenny-jett";
 import { jerusalemCityGridImplementation } from "../onr-v1/corp/upgrades/jerusalem-city-grid";
@@ -183,7 +183,7 @@ import { singaporeCityGridImplementation } from "../onr-v1/corp/upgrades/singapo
 import { tesseractFortConstructionImplementation } from "../onr-v1/corp/upgrades/tesseract-fort-construction";
 import { twentyFourHourSurveillanceImplementation } from "../onr-v1/corp/upgrades/twenty-four-hour-surveillance";
 import { tokyoChibaInfightingImplementation } from "../onr-v1/corp/upgrades/tokyo-chiba-infighting";
-import { turbeauDelacroixImplementation } from "../onr-v1/corp/upgrades/turbeau-delacroix";
+import { oncePerRunAccessTraceUpgradeImplementation } from "../onr-v1/corp/upgrades/turbeau-delacroix";
 import { washingtonDcCityGridImplementation } from "../onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { arasakaOwnsYouImplementation } from "../onr-v1/runner/preps/arasaka-owns-you";
 import { allNighterImplementation } from "../onr-v1/runner/preps/all-nighter";
@@ -733,7 +733,7 @@ export const ALL_CARD_IMPLEMENTATIONS = [
   chicagoBranchImplementation,
   citySurveillanceImplementation,
   corporateNegotiatingCenterImplementation,
-  corprunnersShatteredRemainsImplementation,
+  hardwareTrashByAdvancementAssetImplementation,
   cowboySysopImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,
@@ -741,7 +741,7 @@ export const ALL_CARD_IMPLEMENTATIONS = [
   encoderIncImplementation,
   esaContractImplementation,
   euromarketConsortiumImplementation,
-  experimentalAiImplementation,
+  programTrashByAdvancementAssetImplementation,
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
   hackerTrackerCentralImplementation,
@@ -763,8 +763,8 @@ export const ALL_CARD_IMPLEMENTATIONS = [
   setupImplementation,
   vaporOpsImplementation,
   trapImplementation,
-  vacantSoulkillerImplementation,
-  virusTestSiteImplementation,
+  advancementCoreDamageAssetImplementation,
+  advancementNetDamageAssetImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
   aspImplementation,
@@ -837,8 +837,8 @@ export const ALL_CARD_IMPLEMENTATIONS = [
   chimeraImplementation,
   crybabyImplementation,
   crystalPalaceStationGridImplementation,
-  dedicatedResponseTeamImplementation,
-  dieterEsslinImplementation,
+  taggedRunnerMeatDamageUpgradeImplementation,
+  accessNetDamageUpgradeImplementation,
   drDreffImplementation,
   jennyJettImplementation,
   jerusalemCityGridImplementation,
@@ -854,7 +854,7 @@ export const ALL_CARD_IMPLEMENTATIONS = [
   tesseractFortConstructionImplementation,
   twentyFourHourSurveillanceImplementation,
   tokyoChibaInfightingImplementation,
-  turbeauDelacroixImplementation,
+  oncePerRunAccessTraceUpgradeImplementation,
   washingtonDcCityGridImplementation,
   proteusBrainWashImplementation,
   proteusChihuahuaImplementation,
