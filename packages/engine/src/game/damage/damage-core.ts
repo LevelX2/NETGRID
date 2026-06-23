@@ -29,10 +29,7 @@ import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
   EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import type {
@@ -52,6 +49,9 @@ export type DamageSummary = {
   coreDamageAfter?: number;
   runnerMaxHandSizeAfter?: number;
 };
+
+const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX =
+  "damage_prevention_bypass_pay_";
 
 export type DamageCoreHost = {
   cards: {
@@ -941,73 +941,6 @@ function collectRuntimeDamagePreventionCandidates(
       );
       continue;
     }
-    if (
-      definition.id === DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-      damageType === "meat"
-    ) {
-      candidates.push({
-        candidateId: `v1920_diplomatic_immunity_prevent_${sanitizeId(cardId)}_${amount}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: corpAgendaPointTotal(state) >= 1 ? "corp" : "runner",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 140,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: amount,
-      });
-      continue;
-    }
-    if (definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID) {
-      const remainingCounters = cardCounter(state, cardId, "power");
-      if (remainingCounters <= 0) continue;
-      candidates.push({
-        candidateId: `v1913_armored_fridge_prevent_${sanitizeId(cardId)}_${remainingCounters}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: "runner",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 120,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: 1,
-      });
-      continue;
-    }
-    if (
-      definition.id === FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
-      damageType === "meat"
-    ) {
-      candidates.push({
-        candidateId: `v1922_full_body_conversion_prevent_${sanitizeId(cardId)}_${amount}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: "corp",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 119,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: amount,
-        bypassCostPerDamage: 1,
-        bypassPaymentSide: "corp",
-      });
-      continue;
-    }
     const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
     if (!profile || !profile.damageTypes.includes(damageType)) continue;
     const used = damagePreventionUsedThisTurn(state, cardId);
@@ -1576,21 +1509,16 @@ function eventModificationChoice(
     "Event-Modification-Kandidat fehlt.",
   );
   const amount = numberPayload(event, "amount");
-  const diplomaticImmunityCancel =
-    candidate.sourceRef.definitionId ===
-      DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-    candidate.controller === "corp";
-  if (
-    candidate.sourceRef.definitionId ===
-      FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
-    candidate.bypassPaymentSide === "corp" &&
-    candidate.bypassCostPerDamage === 1
-  ) {
+  const corpDamagePreventionCancel = isCorpDamagePreventionCancelCandidate(
+    state,
+    candidate,
+  );
+  if (isCorpDamagePreventionBypassCandidate(state, candidate)) {
     const maxBypass = Math.min(amount, state.corp.credits);
     const options: ChoiceRequest["options"] = [];
     for (let paid = 0; paid <= maxBypass; paid += 1) {
       options.push({
-        id: `full_body_conversion_pay_${paid}`,
+        id: `${DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX}${paid}`,
         label:
           paid === 0
             ? "0 Credits zahlen: 0 Meat Damage durchlassen"
@@ -1603,7 +1531,7 @@ function eventModificationChoice(
       choiceId: `v120_choice_${window.windowId}`,
       side: window.side,
       source: `v120.event_modification.${window.kind}`,
-      prompt: "Full Body Conversion",
+      prompt: "Damage Prevention",
       kind: "select_option",
       options,
       minSelections: 1,
@@ -1615,7 +1543,7 @@ function eventModificationChoice(
   const options = [
     {
       id: "pass",
-      label: diplomaticImmunityCancel
+      label: corpDamagePreventionCancel
         ? "1 Agenda-Punkt zahlen und Prevention canceln"
         : event.eventType === "add_tag"
           ? "Tag nicht vermeiden"
@@ -1629,8 +1557,8 @@ function eventModificationChoice(
     {
       id: candidate.candidateId,
       label:
-        diplomaticImmunityCancel
-          ? "Diplomatic Immunity wirken lassen"
+        corpDamagePreventionCancel
+          ? "Prevention wirken lassen"
           : event.eventType === "add_tag"
             ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
             : event.eventType === "runner_installed_trash"
@@ -1709,26 +1637,36 @@ export function resolveEventModificationChoice(
       clearEventModificationState(state);
       return;
     }
-    const diplomaticImmunityCancel =
-      window.candidates[0]?.sourceRef.definitionId ===
-        DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-      window.side === "corp";
+    const cancelCandidate = window.candidates[0];
+    const corpDamagePreventionCancel =
+      !!cancelCandidate &&
+      window.side === "corp" &&
+      isCorpDamagePreventionCancelCandidate(state, cancelCandidate);
+    let agendaPointCost = 0;
     let agendaPointCostPaid = 0;
     let forfeitedAgendaDefinitionIds = "";
-    if (diplomaticImmunityCancel) {
-      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(state, 1);
+    if (corpDamagePreventionCancel) {
+      agendaPointCost =
+        damagePreventionSourceForEventCandidate(
+          state,
+          cancelCandidate,
+        )?.corpMayCancelUntilEndOfTurn?.agendaPointCost ?? 1;
+      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(
+        state,
+        agendaPointCost,
+      );
       agendaPointCostPaid = forfeitedAgendaIds.reduce(
         (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
         0,
       );
-      if (agendaPointCostPaid < 1)
-        throw new Error("Diplomatic Immunity kann nicht gecancelt werden.");
+      if (agendaPointCostPaid < agendaPointCost)
+        throw new Error("Damage Prevention kann nicht gecancelt werden.");
       forfeitedAgendaDefinitionIds = forfeitedAgendaIds
         .map((cardId) => definitionFor(state, cardId).id)
         .join(",");
       for (const agendaId of forfeitedAgendaIds)
         forfeitCorpAgendaForPointCost(state, agendaId);
-      const sourceInstanceId = window.candidates[0]?.sourceRef.instanceId;
+      const sourceInstanceId = cancelCandidate.sourceRef.instanceId;
       if (sourceInstanceId) {
         state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [
           ...new Set([
@@ -1740,18 +1678,18 @@ export function resolveEventModificationChoice(
     }
     legalAction.payload = {
       ...basePayload,
-      eventModificationDecision: diplomaticImmunityCancel ? "cancel" : "pass",
+      eventModificationDecision: corpDamagePreventionCancel ? "cancel" : "pass",
       eventModificationOutcome: "original_resolved",
       originalAmount: numberPayload(event, "amount"),
-      ...(diplomaticImmunityCancel
+      ...(corpDamagePreventionCancel
         ? {
-            sourceDefinitionId: DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
-            agendaPointCost: 1,
+            sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
+            agendaPointCost,
             agendaPointCostPaid,
             forfeitedAgendaDefinitionIds,
             specialZone: "removed_from_game",
             specialZoneVisibility: "public",
-            specialZoneReason: "diplomatic_immunity_cancel",
+            specialZoneReason: "damage_prevention_cancel",
           }
         : {}),
     };
@@ -1761,22 +1699,21 @@ export function resolveEventModificationChoice(
     setDamagePayload(legalAction, summary);
     return;
   }
-  if (selected.startsWith("full_body_conversion_pay_")) {
+  if (selected.startsWith(DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX)) {
     const candidate = window.candidates[0];
     if (
       !candidate ||
-      candidate.sourceRef.definitionId !==
-        FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID ||
-      candidate.bypassPaymentSide !== "corp" ||
-      candidate.bypassCostPerDamage !== 1 ||
+      !isCorpDamagePreventionBypassCandidate(state, candidate) ||
       window.side !== "corp" ||
       event.eventType !== "damage" ||
       event.affectedSide !== "runner" ||
       damageTypePayload(event) !== "meat"
     ) {
-      throw new Error("Full Body Conversion passt nicht zum Fenster.");
+      throw new Error("Damage-Prevention-Bypass passt nicht zum Fenster.");
     }
-    const bypassPaid = Number(selected.replace("full_body_conversion_pay_", ""));
+    const bypassPaid = Number(
+      selected.replace(DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX, ""),
+    );
     const originalAmount = numberPayload(event, "amount");
     if (
       !Number.isInteger(bypassPaid) ||
@@ -1784,9 +1721,10 @@ export function resolveEventModificationChoice(
       bypassPaid > originalAmount ||
       bypassPaid > state.corp.credits
     ) {
-      throw new Error("Full Body Conversion-Bypass ist nicht bezahlbar.");
+      throw new Error("Damage-Prevention-Bypass ist nicht bezahlbar.");
     }
     revalidateDamagePreventionCandidateSource(state, candidate);
+    const bypassCostPerDamage = candidate.bypassCostPerDamage ?? 0;
     spendCredits(state, "corp", bypassPaid);
     const preventedAmount = Math.max(0, originalAmount - bypassPaid);
     const finalAmount = bypassPaid;
@@ -1808,9 +1746,11 @@ export function resolveEventModificationChoice(
       preventedAmount,
       finalAmount,
       sourceKind: candidate.sourceRef.kind,
-      sourceDefinitionId: FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
-      fullBodyConversionCorpBypassPaid: bypassPaid,
-      fullBodyConversionBypassCostPerDamage: 1,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      damagePreventionBypassPaid: bypassPaid,
+      damagePreventionBypassCostPerDamage: bypassCostPerDamage,
     };
     clearEventModificationState(state);
     if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
@@ -1998,6 +1938,44 @@ export function resolveEventModificationChoice(
   if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, finalEvent);
   setDamagePayload(legalAction, summary);
+}
+
+function isCorpDamagePreventionCancelCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): boolean {
+  return (
+    candidate.controller === "corp" &&
+    damagePreventionSourceForEventCandidate(state, candidate)
+      ?.corpMayCancelUntilEndOfTurn !== undefined
+  );
+}
+
+function isCorpDamagePreventionBypassCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): boolean {
+  const source = damagePreventionSourceForEventCandidate(
+    state,
+    candidate,
+  );
+  return (
+    source?.corpMayPayToBypass !== undefined &&
+    candidate.bypassPaymentSide === "corp" &&
+    candidate.bypassCostPerDamage === source.corpMayPayToBypass.costPerDamage
+  );
+}
+
+function damagePreventionSourceForEventCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): CardDamagePreventionSourceImplementation | undefined {
+  const sourceCardId = candidate.sourceRef.instanceId;
+  if (!sourceCardId || !state.cardInstances[sourceCardId]) return undefined;
+  return cardImplementationDamagePreventionSourceForCandidate(
+    definitionFor(state, sourceCardId),
+    candidate,
+  );
 }
 
 export function resolveReplacementChoice(
@@ -2653,22 +2631,7 @@ function applyRuntimeDamagePreventionCost(
       ...(sourceTrashed ? { trashedCardDefinitionId: definition.id } : {}),
     };
   }
-  if (candidate.sourceRef.definitionId !== ABLATIVE_COUNTER_HARDWARE_CARD_ID)
-    return {};
-  if (!state.runner.rig.hardware.includes(sourceCardId))
-    throw new Error("Armored Fridge ist nicht mehr installiert.");
-  if (cardCounter(state, sourceCardId, "power") <= 0)
-    throw new Error("Armored Fridge hat keine Ablative Counter mehr.");
-  spendCardCounter(state, sourceCardId, "power", 1);
-  const remainingCounters = cardCounter(state, sourceCardId, "power");
-  const sourceTrashed = remainingCounters <= 0;
-  if (sourceTrashed) trashRunnerInstalledCardToHeap(state, sourceCardId);
-  return {
-    counterType: "power",
-    removedCounterAmount: 1,
-    remainingCounters,
-    sourceTrashed,
-  };
+  return {};
 }
 
 function applyRuntimeTagPreventionCost(

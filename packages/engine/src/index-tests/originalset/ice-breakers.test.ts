@@ -1790,12 +1790,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       source: "v120.event_modification.prevent",
-      prompt: "Full Body Conversion",
+      prompt: "Damage Prevention",
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "full_body_conversion_pay_0",
-      "full_body_conversion_pay_1",
-      "full_body_conversion_pay_2",
+      "damage_prevention_bypass_pay_0",
+      "damage_prevention_bypass_pay_1",
+      "damage_prevention_bypass_pay_2",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
       "0 Credits zahlen: 0 Meat Damage durchlassen",
@@ -1809,12 +1809,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: ["full_body_conversion_pay_1"],
+        selectedOptionIds: ["damage_prevention_bypass_pay_1"],
       },
       idempotencyKey: "spotcheck-full-body-wrong-side",
     });
     expect(wrongSide.ok).toBe(false);
-    state = applyChoice(state, "corp", "full_body_conversion_pay_1");
+    state = applyChoice(state, "corp", "damage_prevention_bypass_pay_1");
     expect(state.corp.credits).toBe(1);
     expect(state.runner.grip.length).toBe(gripBefore - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1825,8 +1825,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       originalAmount: 2,
       preventedAmount: 1,
       finalAmount: 1,
-      fullBodyConversionCorpBypassPaid: 1,
-      fullBodyConversionBypassCostPerDamage: 1,
+      damagePreventionBypassPaid: 1,
+      damagePreventionBypassCostPerDamage: 1,
       damageType: "meat",
       damageAmount: 1,
     });
@@ -1881,12 +1881,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           "onr_v1_301_punitive-counterstrike",
     );
     expect(preventAll.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "full_body_conversion_pay_0",
+      "damage_prevention_bypass_pay_0",
     ]);
     expect(preventAll.pendingChoice?.options.map((option) => option.label)).toEqual([
       "0 Credits zahlen: 0 Meat Damage durchlassen",
     ]);
-    preventAll = applyChoice(preventAll, "corp", "full_body_conversion_pay_0");
+    preventAll = applyChoice(
+      preventAll,
+      "corp",
+      "damage_prevention_bypass_pay_0",
+    );
     expect(preventAll.runner.grip.length).toBe(preventAllGrip);
     expect(preventAll.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "prevented",
