@@ -107,8 +107,8 @@ export function handleRunnerSpecialTriggerExecution(
     resolveSelfModifyingCodeAbility(host, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.resourceAbility === "junkyard_bbs_return_top_heap") {
-    resolveJunkyardBbsAbility(host, legalAction);
+  if (legalAction.payload?.resourceAbility === "return_top_heap_card") {
+    resolveTopHeapCardReturnAbility(host, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.delayedInstallAbility === "set_aside_from_grip") {
@@ -230,7 +230,7 @@ export function applyShellTradersStartOfTurn(
   }
 }
 
-function resolveJunkyardBbsAbility(
+function resolveTopHeapCardReturnAbility(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {

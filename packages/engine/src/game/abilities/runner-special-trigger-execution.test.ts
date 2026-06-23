@@ -65,7 +65,7 @@ describe("runner special trigger execution", () => {
     });
     const action = triggerAction(state, {
       cardId: sourceId,
-      resourceAbility: "junkyard_bbs_return_top_heap",
+      resourceAbility: "return_top_heap_card",
       targetCardId: heapId,
       targetCardDefinitionId: "heap_card",
     }, [{ clicks: 1, credits: 1 }]);

@@ -1029,7 +1029,7 @@ export function buildRunnerMainActions(
               [{ clicks: 1, credits: 1 }],
               {
                 cardId: resourceId,
-                resourceAbility: "junkyard_bbs_return_top_heap",
+                resourceAbility: "return_top_heap_card",
                 targetCardId,
                 targetCardDefinitionId: definitionFor(state, targetCardId).id,
                 sourceDefinitionId: JUNKYARD_BBS_ID,
