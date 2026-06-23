@@ -1387,7 +1387,7 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     resolveAt: "runner_start_turn";
   }>;
-  acmeSavingsAndLoanObligations?: number;
+  activeObligationDebtCount?: number;
   corpTemporaryInstallRezCredits?: {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;

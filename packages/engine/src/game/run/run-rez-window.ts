@@ -340,7 +340,7 @@ export function resolveCorpRootRezEffect(
     const acmeLongtail =
       remainingReplacementLongtailImplementationForDefinition(definition.id);
     const gainedCredits =
-      acmeLongtail?.kind === "acme_savings_and_loan_debt"
+      acmeLongtail?.kind === "obligation_debt"
         ? acmeLongtail.gainCreditsOnRez
         : 12;
     host.callbacks.addActiveObligation(1);
@@ -709,9 +709,9 @@ function cardImplementationCorpRootRezResolver(
   const longtail = remainingReplacementLongtailImplementationForDefinition(
     definition.id,
   );
-  if (longtail?.kind === "acme_savings_and_loan_debt") {
+  if (longtail?.kind === "obligation_debt") {
     return {
-      name: "card_implementation_corp_root_rez_acme_savings_and_loan_debt",
+      name: "card_implementation_corp_root_rez_obligation_debt",
       resolve: (state) => {
         state.corp.credits += longtail.gainCreditsOnRez;
       },
@@ -730,7 +730,7 @@ function remainingReplacementLongtailImplementationForDefinition(
 function isObligationDebtDefinition(definitionId: string): boolean {
   return (
     remainingReplacementLongtailImplementationForDefinition(definitionId)
-      ?.kind === "acme_savings_and_loan_debt"
+      ?.kind === "obligation_debt"
   );
 }
 

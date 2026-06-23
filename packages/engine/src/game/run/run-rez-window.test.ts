@@ -261,10 +261,10 @@ function hostFor(state: GameState): {
           };
         },
         activeObligationCount: () =>
-          Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)),
+          Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)),
         addActiveObligation: (amount) => {
-          state.acmeSavingsAndLoanObligations =
-            Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)) +
+          state.activeObligationDebtCount =
+            Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)) +
             amount;
         },
       },

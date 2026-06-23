@@ -1196,7 +1196,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   }
 
   function activeObligationCount(state: GameState): number {
-    return Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0));
+    return Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0));
   }
 
   function addActiveObligation(
@@ -1205,7 +1205,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): void {
     if (!Number.isInteger(amount) || amount <= 0)
       throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
-    state.acmeSavingsAndLoanObligations =
+    state.activeObligationDebtCount =
       activeObligationCount(state) + amount;
   }
 
@@ -1213,7 +1213,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     const current = activeObligationCount(state);
     if (current <= 0)
       throw new Error("Es gibt keine ACME-Savings-and-Loan-Verpflichtung.");
-    state.acmeSavingsAndLoanObligations = current - 1;
+    state.activeObligationDebtCount = current - 1;
   }
 
   function spendCorpAgendaPointCost(

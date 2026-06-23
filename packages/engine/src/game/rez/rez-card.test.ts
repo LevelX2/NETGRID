@@ -94,7 +94,7 @@ describe("rez card execution", () => {
         [assetId]: instance(assetId, assetDefinition.id, "serverRoot"),
       },
     });
-    state.acmeSavingsAndLoanObligations = 2;
+    state.activeObligationDebtCount = 2;
     state.corpBonusAgendaPoints = 1;
     const action = rezAction(assetId, { agendaPointCost: 1 });
 
@@ -339,7 +339,7 @@ function testHost(
         };
       },
       activeObligationCount: () =>
-        Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)),
+        Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)),
     },
     runner: {
       ensureTurnFlags: () =>

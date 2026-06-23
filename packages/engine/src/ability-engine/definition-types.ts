@@ -1120,7 +1120,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "acme_savings_and_loan_debt";
+      kind: "obligation_debt";
       agendaPointRezCost: 1;
       gainCreditsOnRez: 12;
       endTurnCreditDebt: 1;

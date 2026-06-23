@@ -829,7 +829,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
   function isObligationDebtDefinition(definitionId: CardDefinitionId): boolean {
     return (
       remainingReplacementLongtailKindForDefinition(definitionId) ===
-      "acme_savings_and_loan_debt"
+      "obligation_debt"
     );
   }
 

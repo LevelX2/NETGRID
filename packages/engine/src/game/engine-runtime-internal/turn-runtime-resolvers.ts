@@ -1394,8 +1394,8 @@ function resolveCorpObligationEndOfTurn(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       obligationDebtAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanObligations: obligations,
-      acmeSavingsAndLoanPaymentDue: obligations,
+      activeObligationDebtCount: obligations,
+      obligationDebtPaymentDue: obligations,
       obligationDebtPaymentPaid: 0,
       obligationDebtPaymentFailed: true,
       corpCreditsBefore: creditsBefore,
@@ -1407,8 +1407,8 @@ function resolveCorpObligationEndOfTurn(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     obligationDebtAbility: "end_of_turn_payment",
-    acmeSavingsAndLoanObligations: obligations,
-    acmeSavingsAndLoanPaymentDue: obligations,
+    activeObligationDebtCount: obligations,
+    obligationDebtPaymentDue: obligations,
     obligationDebtPaymentPaid: obligations,
     corpCreditsBefore: creditsBefore,
     corpCreditsAfter: state.corp.credits,

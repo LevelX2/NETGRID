@@ -1391,7 +1391,7 @@ export function publicContextForAction(
       "forfeitedAgendaDefinitionIds",
       "gainedCredits",
       "selfTrashed",
-      "acmeSavingsAndLoanObligations",
+      "activeObligationDebtCount",
       "obligationDebtCountBefore",
       "obligationDebtCountAfter",
       "obligationDebtCreditCost",

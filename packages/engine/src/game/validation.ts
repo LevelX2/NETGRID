@@ -359,11 +359,11 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerAgendaPointsToForfeit must be a non-negative integer.",
       );
   }
-  if (state.acmeSavingsAndLoanObligations !== undefined) {
-    const obligations = state.acmeSavingsAndLoanObligations;
+  if (state.activeObligationDebtCount !== undefined) {
+    const obligations = state.activeObligationDebtCount;
     if (!Number.isInteger(obligations) || obligations < 0)
       errors.push(
-        "acmeSavingsAndLoanObligations must be a non-negative integer.",
+        "activeObligationDebtCount must be a non-negative integer.",
       );
   }
   if (state.corpBonusAgendaPoints !== undefined) {

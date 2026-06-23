@@ -7100,7 +7100,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.corp.credits).toBe(22);
     expect(state.corp.scoreArea).not.toContain(scoredAgendaId);
     expect(state.corp.archives).toContain(acmeId);
-    expect(state.acmeSavingsAndLoanObligations).toBe(1);
+    expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
@@ -7373,7 +7373,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     );
 
     expect(state.corp.credits).toBe(creditsBefore - 12);
-    expect(state.acmeSavingsAndLoanObligations).toBe(0);
+    expect(state.activeObligationDebtCount).toBe(0);
     expect(state.corpBonusAgendaPoints).toBe(1);
     expect(agendaPoints(state, "corp")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -7440,7 +7440,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
     const noObligation = structuredClone(state);
-    noObligation.acmeSavingsAndLoanObligations = 0;
+    noObligation.activeObligationDebtCount = 0;
     const missingObligation = applyAction(noObligation, {
       matchId: noObligation.matchId,
       side: "corp",
