@@ -80,6 +80,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("keeps visible R&D trace pressure available when the runner can cover the base trace", () => {
     const input = aiInput({
       credits: 6,
+      opponentCredits: 0,
       servers: [
         server("rd", {
           ice: [aspTraceRunLockIce("rd-asp")],
@@ -99,6 +100,46 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       expect.arrayContaining([
         "unproductive_visible_run_path:false",
         "visible_trace_end_run_lock_unavoidable:false",
+        "visible_trace_base_covered:true",
+        "visible_corp_bid_capacity:0",
+        "visible_corp_max_trace_covered:true",
+      ]),
+    );
+  });
+
+  it("defers visible R&D trace pressure when visible Corp max is not covered", () => {
+    const input = aiInput({
+      credits: 6,
+      opponentCredits: 5,
+      servers: [
+        server("rd", {
+          ice: [hunterTraceTagIce("rd-hunter")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "gain_credits_first",
+      visibleTraceTagHazardUnavoidable: true,
+    });
+    expect(evaluation?.visibleIceRunHazards?.[0]).toMatchObject({
+      baseTraceCovered: true,
+      visibleCorpBidCapacity: 5,
+      visibleCorpMaxTraceCovered: false,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_trace_base_covered:true",
+        "visible_corp_bid_capacity:5",
+        "visible_corp_max_trace_covered:false",
       ]),
     );
   });
@@ -2014,6 +2055,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
 function aiInput(params: {
   credits: number;
+  opponentCredits?: number;
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
@@ -2041,7 +2083,7 @@ function aiInput(params: {
     },
     opponent: {
       identity: visibleIdentity("corp"),
-      credits: 5,
+      credits: params.opponentCredits ?? 5,
       clicks: 3,
       agendaPoints: 0,
       tags: 0,

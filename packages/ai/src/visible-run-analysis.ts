@@ -56,7 +56,11 @@ export type VisibleIceRunHazard = {
   subroutineId: string;
   traceBaseStrength?: number;
   runnerTraceCapacity: number;
+  baseTraceCovered?: boolean;
+  visibleCorpBidCapacity?: number;
+  visibleCorpMaxTraceCovered?: boolean;
   traceAvoidanceCost?: number;
+  visibleCorpMaxTraceAvoidanceCost?: number;
   traceBidCost?: number;
   baseLinkValue?: number;
   baseLinkActivationCost?: number;
@@ -174,12 +178,14 @@ export function assessKnownRezzedIcePath(
   rigCards: VisibleCard[],
   runnerCredits: number,
   rootCards: RootCardLike[] = [],
+  visibleCorpBidCapacity = 0,
 ): KnownRezzedIcePathAssessment {
   return assessKnownRezzedIcePathInternal(
     iceCards,
     rigCards,
     runnerCredits,
     rootCards,
+    normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
     [],
     { allowBreakingRunPathEffects: true },
   );
@@ -190,6 +196,7 @@ function assessKnownRezzedIcePathInternal(
   rigCards: VisibleCard[],
   runnerCredits: number,
   rootCards: RootCardLike[],
+  visibleCorpBidCapacity: number,
   initialRunPathEffects: RunPathProjectionEffect[],
   options: { allowBreakingRunPathEffects: boolean },
   initialBreakerStrengths?: Map<string, number>,
@@ -359,6 +366,7 @@ function assessKnownRezzedIcePathInternal(
       iceIndex,
       rigCards,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
+      visibleCorpBidCapacity,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     });
@@ -448,6 +456,7 @@ function assessKnownRezzedIcePathInternal(
               rigCards,
               rootCards,
               remainingCredits,
+              visibleCorpBidCapacity,
               breakerStrengths,
               additionalBreakCostPerSubroutine,
             })
@@ -498,6 +507,7 @@ function runPathEffectBreakAssessment(params: {
   rigCards: VisibleCard[];
   rootCards: RootCardLike[];
   remainingCredits: number;
+  visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
 }): BreakAssessment | undefined {
@@ -519,6 +529,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
@@ -528,6 +539,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
@@ -544,6 +556,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits - breakAssessment.cost,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     breakerStrengthsAfterBreak,
@@ -620,6 +633,7 @@ function visibleIceRunHazardsForQuote(params: {
   iceIndex: number;
   rigCards: VisibleCard[];
   availableCredits: number;
+  visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
 }): VisibleIceRunHazard[] {
@@ -650,8 +664,19 @@ function visibleIceRunHazardsForQuote(params: {
             traceBaseStrength,
             traceSupport,
           );
+    const visibleCorpBidCapacity = Math.max(
+      0,
+      Math.floor(params.visibleCorpBidCapacity),
+    );
+    const visibleCorpMaxTraceAvoidance =
+      traceBaseStrength === undefined
+        ? undefined
+        : visibleTraceAvoidanceForBaseStrength(
+            traceBaseStrength + visibleCorpBidCapacity,
+            traceSupport,
+          );
     const traceAvoidanceCandidate =
-      traceAvoidance?.cheapestAffordableSafe?.creditCost;
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
     const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
       effectiveIceForQuote(params.ice, params.quote),
       params.rigCards,
@@ -679,15 +704,29 @@ function visibleIceRunHazardsForQuote(params: {
       visibleRunCardDefinition(sourceDefinitionId)?.title ??
       sourceDefinitionId;
     const cheapestTraceAvoidance = traceAvoidance?.cheapestSafe;
+    const cheapestCorpMaxTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestSafe;
     const unsafeTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableUnsafe ??
+      visibleCorpMaxTraceAvoidance?.cheapestUnsafe ??
       traceAvoidance?.cheapestAffordableUnsafe ??
       traceAvoidance?.cheapestUnsafe;
+    const guaranteedTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe;
     const baseLinkEvidenceSource =
-      cheapestTraceAvoidance?.baseLink
-        ? cheapestTraceAvoidance
-        : unsafeTraceAvoidance?.baseLink
-          ? unsafeTraceAvoidance
-          : undefined;
+      guaranteedTraceAvoidance?.baseLink
+        ? guaranteedTraceAvoidance
+        : cheapestCorpMaxTraceAvoidance?.baseLink
+          ? cheapestCorpMaxTraceAvoidance
+          : cheapestTraceAvoidance?.baseLink
+            ? cheapestTraceAvoidance
+            : unsafeTraceAvoidance?.baseLink
+              ? unsafeTraceAvoidance
+              : undefined;
+    const baseTraceCovered =
+      traceAvoidance?.cheapestAffordableSafe !== undefined;
+    const visibleCorpMaxTraceCovered =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe !== undefined;
     const penalty = visibleIceHazardPenalty(
       baseHazard.kind,
       baseHazard.severity,
@@ -702,10 +741,21 @@ function visibleIceRunHazardsForQuote(params: {
       subroutineId: subroutine.id,
       ...(traceBaseStrength !== undefined ? { traceBaseStrength } : {}),
       runnerTraceCapacity: traceSupport.runnerTraceCapacity,
+      ...(traceBaseStrength !== undefined ? { baseTraceCovered } : {}),
+      visibleCorpBidCapacity,
+      ...(traceBaseStrength !== undefined
+        ? { visibleCorpMaxTraceCovered }
+        : {}),
       ...(cheapestTraceAvoidance
         ? {
             traceAvoidanceCost: cheapestTraceAvoidance.creditCost,
             traceBidCost: cheapestTraceAvoidance.traceBidCost,
+          }
+        : {}),
+      ...(cheapestCorpMaxTraceAvoidance
+        ? {
+            visibleCorpMaxTraceAvoidanceCost:
+              cheapestCorpMaxTraceAvoidance.creditCost,
           }
         : {}),
       ...(baseLinkEvidenceSource?.baseLink
@@ -739,10 +789,22 @@ function visibleIceRunHazardsForQuote(params: {
           ? [`visible_ice_trace_base:${traceBaseStrength}`]
           : []),
         `visible_runner_trace_capacity:${traceSupport.runnerTraceCapacity}`,
+        ...(traceBaseStrength !== undefined
+          ? [
+              `visible_trace_base_covered:${baseTraceCovered}`,
+              `visible_corp_bid_capacity:${visibleCorpBidCapacity}`,
+              `visible_corp_max_trace_covered:${visibleCorpMaxTraceCovered}`,
+            ]
+          : []),
         ...(cheapestTraceAvoidance
           ? [
               `visible_trace_avoidance_cost:${cheapestTraceAvoidance.creditCost}`,
               `visible_trace_bid_cost:${cheapestTraceAvoidance.traceBidCost}`,
+            ]
+          : []),
+        ...(cheapestCorpMaxTraceAvoidance
+          ? [
+              `visible_corp_max_trace_avoidance_cost:${cheapestCorpMaxTraceAvoidance.creditCost}`,
             ]
           : []),
         ...(baseLinkEvidenceSource?.baseLink
@@ -779,7 +841,11 @@ function visibleIceRunHazardForTraceEffect(
   | "subroutineId"
   | "traceBaseStrength"
   | "runnerTraceCapacity"
+  | "baseTraceCovered"
+  | "visibleCorpBidCapacity"
+  | "visibleCorpMaxTraceCovered"
   | "traceAvoidanceCost"
+  | "visibleCorpMaxTraceAvoidanceCost"
   | "traceBidCost"
   | "baseLinkValue"
   | "baseLinkActivationCost"
@@ -870,6 +936,10 @@ function visibleIceHazardPenalty(
     severity === "high" ? 350 : severity === "medium" ? 120 : 0;
   if (unavoidable) return base + severityBonus;
   return Math.min(650, 180 + Math.max(0, minimumAvoidanceCost ?? 0) * 90);
+}
+
+function normalizeVisibleCorpBidCapacity(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
 type VisibleRunnerTraceSupportOption = {

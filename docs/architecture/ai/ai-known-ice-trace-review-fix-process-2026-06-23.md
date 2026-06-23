@@ -108,6 +108,8 @@ process_prepared
 - `TRACEFIX-0`: abgeschlossen mit Commit `f40de7a8` (`docs(ai): define known ice trace review fix process`).
 - `TRACEFIX-1`: abgeschlossen. Base-Link-Kandidaten werden aus Engine-CardImplementation-Quotes bewertet; `Access through Alpha` zählt bei 0 Credits nicht mehr als vermeidbar, bei 1 Credit mit Kosten 1, und `Submarine Uplink` wird wegen Jack-out nicht als access-sichere Vermeidung gezählt.
   - Checks: `packages/ai` `visible-run-analysis.test.ts` grün, `packages/ai` Typecheck grün, `packages/engine` Typecheck grün.
+- `TRACEFIX-2`: abgeschlossen. Trace-Hazards unterscheiden jetzt Basisdeckung (`baseTraceCovered`) von garantierter Deckung gegen sichtbare Corp-Credits (`visibleCorpMaxTraceCovered`) und führen `visibleCorpBidCapacity` sowie garantierte Max-Kosten als Evidence.
+  - Checks: `packages/ai` `visible-run-analysis.test.ts` + `runner-run-target-evaluation.test.ts` grün, `packages/ai` Typecheck grün.
 
 ## Paketdetails
 

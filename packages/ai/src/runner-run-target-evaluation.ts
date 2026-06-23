@@ -370,6 +370,7 @@ function evaluateRunnerRunTarget(
     params.input.playerView.own.rig ?? [],
     params.input.playerView.own.credits,
     server?.root ?? [],
+    params.input.playerView.opponent.credits,
   );
   const payoff = payoffForTarget(params, accessServerId, accessTargetKind);
   const installedRunPayoff = installedRunPayoffForTarget(

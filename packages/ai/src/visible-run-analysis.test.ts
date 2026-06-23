@@ -107,8 +107,66 @@ describe("visible run analysis trace hazards", () => {
       sourceTitle: "Hunter",
       traceBaseStrength: 5,
       runnerTraceCapacity: 2,
+      baseTraceCovered: false,
+      visibleCorpBidCapacity: 0,
+      visibleCorpMaxTraceCovered: false,
       traceAvoidanceCost: 5,
+      visibleCorpMaxTraceAvoidanceCost: 5,
       unavoidable: true,
+    });
+  });
+
+  it("distinguishes base trace coverage from visible Corp max coverage", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [],
+      6,
+      [],
+      5,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 6,
+      baseTraceCovered: true,
+      visibleCorpBidCapacity: 5,
+      visibleCorpMaxTraceCovered: false,
+      traceAvoidanceCost: 5,
+      visibleCorpMaxTraceAvoidanceCost: 10,
+      unavoidable: true,
+    });
+  });
+
+  it("keeps a trace hazard avoidable when visible Corp max is covered", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [],
+      10,
+      [],
+      5,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 10,
+      creditsAfterAvoidingVisibleIceHazards: 0,
+    });
+    expect(assessment.visibleTraceTagHazardUnavoidable).toBeUndefined();
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 10,
+      baseTraceCovered: true,
+      visibleCorpBidCapacity: 5,
+      visibleCorpMaxTraceCovered: true,
+      minimumAvoidanceCost: 10,
+      unavoidable: false,
     });
   });
 
