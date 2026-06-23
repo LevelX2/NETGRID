@@ -1085,7 +1085,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,

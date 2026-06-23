@@ -1058,7 +1058,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,

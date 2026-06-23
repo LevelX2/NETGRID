@@ -459,10 +459,10 @@ export function assertCorpIceInstallCostValid(...args: any[]): any {
   )(...args);
 }
 
-export function serverDifficultyIncreaseFromFaitAccompli(...args: any[]): any {
+export function serverDifficultyIncreaseFromRunCounters(...args: any[]): any {
   return runtimeDelegate(
     "stateCorpRuntimeResolvers",
-    "serverDifficultyIncreaseFromFaitAccompli",
+    "serverDifficultyIncreaseFromRunCounters",
   )(...args);
 }
 

@@ -40,7 +40,7 @@ const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  serverDifficultyIncreaseFromFaitAccompli,
+  serverDifficultyIncreaseFromRunCounters,
   serverDifficultyReductionFromUpgrades,
 };
 
@@ -1008,7 +1008,7 @@ function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
   return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
-function serverDifficultyIncreaseFromFaitAccompli(
+function serverDifficultyIncreaseFromRunCounters(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {

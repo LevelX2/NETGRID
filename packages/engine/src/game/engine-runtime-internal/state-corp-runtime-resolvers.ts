@@ -1202,7 +1202,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     withoutVariableIceState
   } = deps;
 
-function serverDifficultyIncreaseFromFaitAccompli(
+function serverDifficultyIncreaseFromRunCounters(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {
@@ -1273,7 +1273,7 @@ function spendRecurringTraceCreditPool(state: GameState, amount: number): number
 }
 
   return {
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     swapCorpHqAndRdTop,
     spendRecurringTraceCreditPool

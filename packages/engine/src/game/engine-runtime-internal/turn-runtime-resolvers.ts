@@ -1089,7 +1089,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,

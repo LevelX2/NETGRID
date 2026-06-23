@@ -1073,7 +1073,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     scoredAgendaFlowHost,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,
