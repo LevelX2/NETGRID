@@ -1,31 +1,68 @@
-export type RuntimeDeps = Record<string, any>;
-export type GameState = any;
-export type LegalAction = any;
-export type PlayerAction = any;
-export type ChoiceRequest = any;
-export type Side = any;
-export type CardDefinition = any;
+import type {
+  CardDefinition,
+  ChoiceRequest,
+  CounterType,
+  CorpServer,
+  GameState,
+  LegalAction,
+  PlayerAction,
+  ResolvedGameEffect,
+  Side,
+} from "@netgrid/shared";
+import type { DamageSummary } from "../damage/damage-core";
+import type { CorpZoneChoiceHandlerHost } from "../hidden-zone/corp-zone-choice-handlers";
+import type { HiddenZoneArrangeChoiceHandlerHost } from "../hidden-zone/arrange-choice-handlers";
+import type { HiddenZoneNonSearchChoiceHandlerHost } from "../hidden-zone/nonsearch-choice-handlers";
+import type {
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+} from "../hidden-zone/search-choice-handlers";
+import type { PendingChoiceResolutionHost } from "../choices/pending-choice-resolution";
+import type { CardRunnerEventLongtailImplementation } from "../../ability-engine/definition-types";
+
+type RuntimeFunction = (...args: any[]) => any;
+
+// This is the first named slice of the staged RuntimeDeps surface. Keep adding
+// domain-specific keys here as bootstrap files lose their broad any bindings.
+export type CardRuntimeDeps = {
+  cardImplementationRuntimeDeps?: unknown;
+  executeEffectCommands?: RuntimeFunction;
+  hiddenZoneArrangeChoiceHandlerHost?: RuntimeFunction;
+  hiddenZoneNonSearchChoiceHandlerHost?: RuntimeFunction;
+  hiddenZoneSearchActivationHandlerHost?: RuntimeFunction;
+  hiddenZoneSearchChoiceHandlerHost?: RuntimeFunction;
+  pendingChoiceResolutionHost?: RuntimeFunction;
+};
+
+export type RuntimeDeps = CardRuntimeDeps & Record<string, unknown>;
+export type {
+  GameState,
+  LegalAction,
+  PlayerAction,
+  ChoiceRequest,
+  Side,
+  CardDefinition,
+};
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
-export type CorpServer = any;
-export type CounterType = any;
-export type DamageSummary = any;
-export type ResolvedGameEffect = any;
+export type { CorpServer, CounterType, DamageSummary, ResolvedGameEffect };
 export type ServerId = "hq" | "rd" | "archives" | "new_remote" | (string & {});
-export type PendingChoiceResolutionHost = any;
-export type HiddenZoneSearchActivationHandlerHost = any;
-export type HiddenZoneSearchChoiceHandlerHost = any;
-export type HiddenZoneArrangeChoiceHandlerHost = any;
-export type HiddenZoneNonSearchChoiceHandlerHost = any;
-export type CorpZoneChoiceHandlerHost = any;
-export type CardRunnerEventLongtailImplementation = any;
+export type {
+  PendingChoiceResolutionHost,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  HiddenZoneArrangeChoiceHandlerHost,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  CorpZoneChoiceHandlerHost,
+  CardRunnerEventLongtailImplementation,
+};
 
-export function runtimeBinding(
-  runtime: Record<string, any>,
+export function runtimeBinding<T extends RuntimeFunction = RuntimeFunction>(
+  runtime: Record<string, unknown>,
   property: string | symbol,
-): any {
+): T {
   const key = property as string;
   const value = runtime[key];
-  if (value !== undefined && typeof value !== "function") return value;
-  return (...args: any[]) => runtime[key](...args);
+  if (value !== undefined && typeof value !== "function") return value as T;
+  return ((...args: unknown[]) => (runtime[key] as RuntimeFunction)(...args)) as T;
 }
