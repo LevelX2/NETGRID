@@ -4,8 +4,8 @@ import type {
   ChoiceRequest,
 } from "@netgrid/shared";
 import {
-  resolveMysteryBoxInstallSelection,
-  resolveSelfModifyingCodeSearchInstallSelection,
+  resolveRevealedStackProgramInstallSelection,
+  resolvePaidStackProgramInstallSelection,
   resolveTemporaryProgramSearchInstallSelection,
 } from "./search-choice-resolvers";
 
@@ -67,7 +67,7 @@ function temporaryProgramInstallSourceZone(
         : undefined;
 }
 
-export function resolveSelfModifyingCodeSearchInstallIntent(input: {
+export function resolvePaidStackProgramInstallIntent(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   stackCardIds: readonly CardInstanceId[];
@@ -85,7 +85,7 @@ export function resolveSelfModifyingCodeSearchInstallIntent(input: {
   uniqueBlocked: boolean;
   sourceDefinitionId: CardDefinitionId;
 }): SearchInstallExecutionPlan {
-  const selection = resolveSelfModifyingCodeSearchInstallSelection({
+  const selection = resolvePaidStackProgramInstallSelection({
     choice: input.choice,
     selectedCardId: input.selectedCardId,
     stackCardIds: input.stackCardIds,
@@ -228,7 +228,7 @@ export function resolveRevealedStackProgramInstallIntent(input: {
     input.programCandidateIds ??
     input.choice?.options.map((option) => option.value as CardInstanceId) ??
     [];
-  const selection = resolveMysteryBoxInstallSelection({
+  const selection = resolveRevealedStackProgramInstallSelection({
     choice: input.choice,
     selectedCardId: input.selectedCardId,
     currentTopCardIds: input.topCardIds,
@@ -291,7 +291,7 @@ export function buildRevealedStackProgramInstallResolvedPayload(
   };
 }
 
-export function buildSelfModifyingCodeMemoryDeferredPayload(
+export function buildPaidStackProgramInstallMemoryDeferredPayload(
   plan: SearchInstallExecutionPlan,
   input: {
     installDeferredForMemory: boolean;
@@ -311,7 +311,7 @@ export function buildSelfModifyingCodeMemoryDeferredPayload(
   };
 }
 
-export function buildSelfModifyingCodeResolvedPayload(
+export function buildPaidStackProgramInstallResolvedPayload(
   plan: SearchInstallExecutionPlan,
   input: {
     installed: boolean;

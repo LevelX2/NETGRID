@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   buildLookTopStackTakeMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
-  buildMysteryBoxInstallChoice,
+  buildRevealedStackProgramInstallChoice,
   buildSearchStackInstallChoice,
   buildSearchStackInstallPayload,
   buildSearchStackToGripChoice,
   buildSearchStackToGripPayload,
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
-  buildSelfModifyingCodeSearchInstallChoice,
+  buildPaidStackProgramInstallChoice,
   buildTemporaryProgramInstallChoice,
   buildTemporaryProgramInstallSourceChoice,
   buildTemporaryProgramInstallSourceChoicePayload,
@@ -203,7 +203,7 @@ describe("hidden-zone search choice builders", () => {
   });
 
   it("builds SMC, Sneak Preview and Mystery Box search choices with stable sources", () => {
-    const smc = buildSelfModifyingCodeSearchInstallChoice({
+    const smc = buildPaidStackProgramInstallChoice({
       stateVersion: 7,
       sourceCardId,
       options: [{ id: "card_program", label: "Program", value: "program" }],
@@ -222,7 +222,7 @@ describe("hidden-zone search choice builders", () => {
       sourceDefinitionId,
       options: [{ id: "card_program", label: "Program", value: "program" }],
     });
-    const mystery = buildMysteryBoxInstallChoice({
+    const mystery = buildRevealedStackProgramInstallChoice({
       stateVersion: 7,
       sourceCardId,
       topCards: ["top_a", "top_b"] as CardInstanceId[],
@@ -271,7 +271,7 @@ describe("hidden-zone search choice builders", () => {
     expect(mystery).toMatchObject({
       choiceId: "v1915_revealed_stack_program_install_8",
       source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
-      prompt: "Mystery-Box-Programm installieren",
+      prompt: "Programm aus offengelegtem Stack installieren",
       visibility: "public",
     });
   });

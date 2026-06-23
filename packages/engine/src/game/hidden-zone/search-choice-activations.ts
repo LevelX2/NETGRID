@@ -9,15 +9,15 @@ import type {
 import {
   buildLookTopStackTakeMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
-  buildMysteryBoxCorpReviewChoice,
-  buildMysteryBoxInstallChoice,
+  buildRevealedStackProgramInstallCorpReviewChoice,
+  buildRevealedStackProgramInstallChoice,
   buildSearchStackInstallChoice,
   buildSearchStackInstallPayload,
   buildSearchStackToGripChoice,
   buildSearchStackToGripPayload,
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
-  buildSelfModifyingCodeSearchInstallChoice,
+  buildPaidStackProgramInstallChoice,
   buildTemporaryProgramInstallSourceChoice,
   buildTemporaryProgramInstallSourceChoicePayload,
 } from "./search-choice-builders";
@@ -411,7 +411,7 @@ export function startLookTopStackShowToCorpThenInstallMatchingActivation(
     choiceVisibility: "corp_review",
     shufflePerformed: false,
   };
-  host.state.pendingChoice = buildMysteryBoxCorpReviewChoice({
+  host.state.pendingChoice = buildRevealedStackProgramInstallCorpReviewChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId: input.sourceCardId,
     sourceDefinitionId: input.sourceDefinitionId,
@@ -502,7 +502,7 @@ export function startHiddenStackProgramInstallActivation(
   );
   if (!hasSearchableCard)
     throw new Error("Keine suchbare Programmkarte im Stack.");
-  host.state.pendingChoice = buildSelfModifyingCodeSearchInstallChoice({
+  host.state.pendingChoice = buildPaidStackProgramInstallChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId,
     options: host.state.runner.stack.map((cardId) => {
@@ -593,7 +593,7 @@ export function handleTopFiveProgramInstallActivation(
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
-    throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
+    throw new Error("Die Revealed-Stack-Program-Install-Faehigkeit passt nicht zur Karte.");
   const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
     usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],
@@ -630,7 +630,7 @@ export function handleTopFiveProgramInstallActivation(
       shufflePerformed: true,
     };
   }
-  host.state.pendingChoice = buildMysteryBoxInstallChoice({
+  host.state.pendingChoice = buildRevealedStackProgramInstallChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId,
     topCards,

@@ -217,7 +217,7 @@ export function buildSearchStackInstallPayload(input: {
   };
 }
 
-export function buildSelfModifyingCodeSearchInstallChoice(input: {
+export function buildPaidStackProgramInstallChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   options: ChoiceOptions;
@@ -324,7 +324,7 @@ export function buildTemporaryProgramInstallChoice(input: {
   };
 }
 
-export function buildMysteryBoxInstallChoice(input: {
+export function buildRevealedStackProgramInstallChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   topCards: readonly CardInstanceId[];
@@ -335,7 +335,7 @@ export function buildMysteryBoxInstallChoice(input: {
     choiceId: `v1915_revealed_stack_program_install_${nextStateVersion}`,
     side: "runner",
     source: `v1915.revealed_stack_program_install:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
-    prompt: "Mystery-Box-Programm installieren",
+    prompt: "Programm aus offengelegtem Stack installieren",
     kind: "select_cards",
     options: input.options,
     minSelections: 1,
@@ -345,7 +345,7 @@ export function buildMysteryBoxInstallChoice(input: {
   };
 }
 
-export function buildMysteryBoxCorpReviewChoice(input: {
+export function buildRevealedStackProgramInstallCorpReviewChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
@@ -359,8 +359,8 @@ export function buildMysteryBoxCorpReviewChoice(input: {
     side: "corp",
     source: `p3_38.revealed_stack_program_install_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
     prompt: input.programFound
-      ? "Mystery Box: Stack-Spitze ansehen"
-      : "Mystery Box: keine Programmkarte",
+      ? "Stack-Spitze ansehen"
+      : "Keine Programmkarte im offengelegten Stack",
     kind: "select_cards",
     options: [
       ...input.options,

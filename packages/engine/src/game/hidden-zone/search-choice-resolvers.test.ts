@@ -2,10 +2,10 @@ import type { CardInstanceId, ChoiceRequest } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   resolveLookTopStackTakeMatchingSelection,
-  resolveMysteryBoxInstallSelection,
+  resolveRevealedStackProgramInstallSelection,
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
-  resolveSelfModifyingCodeSearchInstallSelection,
+  resolvePaidStackProgramInstallSelection,
   resolveTemporaryProgramSearchInstallSelection,
 } from "./search-choice-resolvers";
 
@@ -116,7 +116,7 @@ describe("hidden-zone search choice resolvers", () => {
 
   it("validates SMC, Sneak Preview and Mystery Box install selections", () => {
     const programId = "program" as CardInstanceId;
-    expect(resolveSelfModifyingCodeSearchInstallSelection({
+    expect(resolvePaidStackProgramInstallSelection({
       choice: choice({
         source: "v1911.hidden_stack_program_install:source_card:8",
       }),
@@ -143,7 +143,7 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveMysteryBoxInstallSelection({
+    expect(resolveRevealedStackProgramInstallSelection({
       choice: choice({
         source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
       }),
@@ -156,7 +156,7 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
     expect(() =>
-      resolveSelfModifyingCodeSearchInstallSelection({
+      resolvePaidStackProgramInstallSelection({
         choice: choice({
           source: "v1911.hidden_stack_program_install:source_card:8",
         }),

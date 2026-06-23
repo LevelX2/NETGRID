@@ -7,12 +7,12 @@ import { describe, expect, it } from "vitest";
 import {
   buildRevealedStackNoProgramInstallResolvedPayload,
   buildRevealedStackProgramInstallResolvedPayload,
-  buildSelfModifyingCodeMemoryDeferredPayload,
-  buildSelfModifyingCodeResolvedPayload,
+  buildPaidStackProgramInstallMemoryDeferredPayload,
+  buildPaidStackProgramInstallResolvedPayload,
   buildTemporaryProgramSearchInstallResolvedPayload,
   createRevealedStackNoProgramInstallIntent,
   resolveRevealedStackProgramInstallIntent,
-  resolveSelfModifyingCodeSearchInstallIntent,
+  resolvePaidStackProgramInstallIntent,
   resolveTemporaryProgramSearchInstallIntent,
 } from "./search-install-intents";
 
@@ -40,7 +40,7 @@ function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
 
 describe("hidden-zone search/install intents", () => {
   it("builds an SMC search/install plan for a legal stack program", () => {
-    const plan = resolveSelfModifyingCodeSearchInstallIntent({
+    const plan = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -75,7 +75,7 @@ describe("hidden-zone search/install intents", () => {
       canAttemptInstall: true,
     });
     expect(
-      buildSelfModifyingCodeResolvedPayload(plan, {
+      buildPaidStackProgramInstallResolvedPayload(plan, {
         installed: true,
       }),
     ).toEqual({
@@ -92,7 +92,7 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("marks SMC memory deferral without installing or mutating", () => {
-    const plan = resolveSelfModifyingCodeSearchInstallIntent({
+    const plan = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -111,7 +111,7 @@ describe("hidden-zone search/install intents", () => {
 
     expect(plan.shouldOpenMemoryChoice).toBe(true);
     expect(
-      buildSelfModifyingCodeMemoryDeferredPayload(plan, {
+      buildPaidStackProgramInstallMemoryDeferredPayload(plan, {
         installDeferredForMemory: true,
       }),
     ).toEqual({
@@ -130,7 +130,7 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid SMC selections and reports blocked install plans", () => {
     expect(() =>
-      resolveSelfModifyingCodeSearchInstallIntent({
+      resolvePaidStackProgramInstallIntent({
         choice: choice(),
         selectedCardId,
         stackCardIds: ["other_card" as CardInstanceId],
@@ -146,7 +146,7 @@ describe("hidden-zone search/install intents", () => {
       }),
     ).toThrow("Die gewählte Karte liegt nicht im Stack.");
 
-    const blocked = resolveSelfModifyingCodeSearchInstallIntent({
+    const blocked = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -164,7 +164,7 @@ describe("hidden-zone search/install intents", () => {
 
     expect(blocked.canAttemptInstall).toBe(false);
     expect(
-      buildSelfModifyingCodeResolvedPayload(blocked, {
+      buildPaidStackProgramInstallResolvedPayload(blocked, {
         installed: false,
       }),
     ).toMatchObject({
