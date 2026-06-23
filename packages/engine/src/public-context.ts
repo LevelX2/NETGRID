@@ -1203,8 +1203,8 @@ export function publicContextForAction(
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
   }
-  if (legalAction.payload?.allNighterBonusRunOnFinish === true)
-    context.allNighterBonusRunOnFinish = true;
+  if (legalAction.payload?.bonusRunOnFinish === true)
+    context.bonusRunOnFinish = true;
   if (legalAction.payload?.sourceVisibility === "redacted") {
     delete context.sourceDefinitionId;
     delete context.sourceTitle;

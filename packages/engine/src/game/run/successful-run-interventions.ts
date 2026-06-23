@@ -1031,7 +1031,7 @@ export function applyBodyweightDataCrecheSuccessfulRun(
     return { handled: false };
   flags.bodyweightDataCrecheExtraRunPending = true;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = true;
-  flags.allNighterBonusRunPending = true;
+  flags.bonusRunPending = true;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

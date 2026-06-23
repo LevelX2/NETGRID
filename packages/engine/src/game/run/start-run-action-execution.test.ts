@@ -33,7 +33,7 @@ function state(): GameState {
       servers: [],
     },
     runnerTurnFlags: {
-      allNighterBonusRunPending: true,
+      bonusRunPending: true,
       bodyweightDataCrecheExtraRunPending: true,
     },
     cardInstances: {},
@@ -165,7 +165,7 @@ describe("start-run-action-execution", () => {
     );
 
     expect(gameState.runner.clicks).toBe(3);
-    expect(gameState.runnerTurnFlags?.allNighterBonusRunPending).toBe(false);
+    expect(gameState.runnerTurnFlags?.bonusRunPending).toBe(false);
     expect(gameState.runnerTurnFlags?.bodyweightDataCrecheExtraRunPending).toBe(
       false,
     );

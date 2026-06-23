@@ -174,7 +174,7 @@ function makeHost(
         runnerActionsTakenThisTurn: 0,
         abilityUsedSourceIdsByLimitKey: {},
         startOfTurnFloatingCreditsApplied: false,
-        allNighterBonusRunPending: false,
+        bonusRunPending: false,
         forgoNextActionPending: false,
         forgoNextActionsPending: 0,
         runLockActionsPending: 0,

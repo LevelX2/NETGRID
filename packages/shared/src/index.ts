@@ -1444,7 +1444,7 @@ export type GameState = {
     restrictedActionGrants?: RestrictedActionGrantBucket;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
-    allNighterBonusRunPending?: boolean;
+    bonusRunPending?: boolean;
     forgoNextActionPending?: boolean;
     forgoNextActionsPending?: number;
     runLockActionsPending?: number;

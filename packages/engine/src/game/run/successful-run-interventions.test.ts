@@ -800,7 +800,7 @@ describe("successful run interventions", () => {
     expect(fixture.state.runnerTurnFlags).toMatchObject({
       bodyweightDataCrecheExtraRunPending: true,
       bodyweightDataCrecheExtraRunUsedThisTurn: true,
-      allNighterBonusRunPending: true,
+      bonusRunPending: true,
     });
     expect(legalAction.payload).toMatchObject({
       karlSuccessfulRunCreditGain: 1,

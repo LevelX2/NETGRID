@@ -277,7 +277,7 @@ function testHost(
           runnerActionsTakenThisTurn: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
-          allNighterBonusRunPending: false,
+          bonusRunPending: false,
         }),
     },
     corp: {

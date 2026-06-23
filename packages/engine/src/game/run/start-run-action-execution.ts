@@ -99,7 +99,7 @@ export function executeStartRunAction(
   }
   if (legalAction.payload?.bonusRunNoClick === true) {
     if (legalAction.payload?.multiServerSuccessSequenceRun !== true) {
-      flags.allNighterBonusRunPending = false;
+      flags.bonusRunPending = false;
       flags.bodyweightDataCrecheExtraRunPending = false;
     }
   } else {

@@ -454,7 +454,7 @@ describe("run end cleanup", () => {
       );
 
       expect(result.followupRunChoiceStarted).toBe(true);
-      expect(fixture.state.runnerTurnFlags?.allNighterBonusRunPending).toBe(true);
+      expect(fixture.state.runnerTurnFlags?.bonusRunPending).toBe(true);
     }
   });
 

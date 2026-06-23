@@ -195,7 +195,7 @@ export function applyDelayedInstallStartOfTurn(
     runnerActionsTakenThisTurn: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false,
+    bonusRunPending: false,
   } as NonNullable<GameState["runnerTurnFlags"]>);
   const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {

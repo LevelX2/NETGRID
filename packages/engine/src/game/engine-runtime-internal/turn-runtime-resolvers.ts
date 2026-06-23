@@ -2191,7 +2191,7 @@ function startRunnerTurn(
   flags.damagePreventionUsage = {};
   flags.abilityUsedSourceIdsByLimitKey = {};
   flags.startOfTurnFloatingCreditsApplied = false;
-  flags.allNighterBonusRunPending = false;
+  flags.bonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
   flags.delayedInstallStartTurnResolvedSourceIds = [];

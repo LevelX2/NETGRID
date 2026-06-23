@@ -392,7 +392,7 @@ describe("game card implementation runtime deps root", () => {
       returnUnusedAtRunEnd: true,
     });
     expect(result.publicPayload).toMatchObject({
-      allNighterBonusRunOnFinish: true,
+      bonusRunOnFinish: true,
       bypassFirstIce: true,
       runTraceLinkBonus: 3,
       runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,

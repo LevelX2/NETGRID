@@ -322,7 +322,7 @@ export function handleRunEndCleanup(
   const sequenceRun = run
     ? applyMultiServerSuccessSequenceRunResult(host, run, successful, legalAction)
     : { handled: false };
-  const allNighterBonusRunOnFinish =
+  const bonusRunOnFinish =
     run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
@@ -365,8 +365,8 @@ export function handleRunEndCleanup(
     ];
   }
   let postRunBridge: PostRunBridgeResult = { handled: false };
-  if (allNighterBonusRunOnFinish && !host.state.winner) {
-    host.runner.ensureTurnFlags().allNighterBonusRunPending = true;
+  if (bonusRunOnFinish && !host.state.winner) {
+    host.runner.ensureTurnFlags().bonusRunPending = true;
     postRunBridge = { handled: true, followupRunChoiceStarted: true };
   }
   const temporary = applyRunnerRunTemporaryCreditCleanupAndDamage(

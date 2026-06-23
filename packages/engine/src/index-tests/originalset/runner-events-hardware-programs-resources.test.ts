@@ -608,7 +608,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         "onr_v1_076_all-nighter",
         v192CardReleaseGame("spotcheck-all-nighter"),
         "rd",
-        { allNighterBonusRunOnFinish: true },
+        { bonusRunOnFinish: true },
       ],
       [
         "onr_v1_081_custodial-position",

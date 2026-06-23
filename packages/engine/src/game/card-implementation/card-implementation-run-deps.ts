@@ -151,7 +151,7 @@ export function startRunForCardImplementation(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...(options.followupRunOnEnd === "optional"
-      ? { allNighterBonusRunOnFinish: true }
+      ? { bonusRunOnFinish: true }
       : {}),
     ...(options.bypassFirstIce ? { bypassFirstIce: true } : {}),
     ...(options.runTraceLinkBonus !== undefined

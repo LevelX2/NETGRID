@@ -326,7 +326,7 @@ export function buildRunnerMainActions(
     ];
   }
   const bonusRunPending =
-    flags.allNighterBonusRunPending === true ||
+    flags.bonusRunPending === true ||
     nextSequenceServerId !== undefined;
   if (
     !hasClicks &&

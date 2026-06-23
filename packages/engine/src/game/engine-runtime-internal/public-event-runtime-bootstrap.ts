@@ -1133,7 +1133,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         serverId,
-        allNighterBonusRunOnFinish: true,
+        bonusRunOnFinish: true,
       };
     },
   },

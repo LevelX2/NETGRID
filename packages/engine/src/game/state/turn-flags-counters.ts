@@ -107,7 +107,7 @@ export function ensureRunnerTurnFlags(
     runnerActionsTakenThisTurn: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false,
+    bonusRunPending: false,
     forgoNextActionPending: false,
     forgoNextActionsPending: 0,
     runLockActionsPending: 0,
@@ -140,7 +140,7 @@ export function ensureRunnerTurnFlags(
   flags.runnerActionsTakenThisTurn ??= 0;
   flags.abilityUsedSourceIdsByLimitKey ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
-  flags.allNighterBonusRunPending ??= false;
+  flags.bonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;
   flags.forgoNextActionsPending ??= 0;
   flags.runLockActionsPending ??= 0;
