@@ -182,6 +182,9 @@ import {
 import {
   runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
 } from "./runtime/runner-program-sacrifice-exclusion";
+import {
+  runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
+} from "./runtime/runner-blink-run-exclusion";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -3564,7 +3567,13 @@ const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclu
     runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
     runnerRunTargetEvaluationForAction:
       semanticRuntimeRunnerRunTargetEvaluationForAction,
-    runnerBlinkRunExclusion: semanticRuntimeRunnerBlinkRunExclusion,
+    runnerBlinkRunExclusion: (runtimeInput, action) =>
+      buildRunnerBlinkRunExclusion(runtimeInput, action, {
+        multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
+        runRiskAssessment: assessBlinkRiskForRunAction,
+        shouldAvoidRun: (assessment) =>
+          blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+      }),
     knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
     runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
     runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
@@ -4029,35 +4038,6 @@ function semanticRuntimeActionExclusion(
     action,
     SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES,
   );
-}
-
-function semanticRuntimeRunnerBlinkRunExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  if (input.side !== "runner" || action.type !== "start_run") {
-    return undefined;
-  }
-  const targetServerId = semanticRuntimeServerId(action);
-  if (!targetServerId) return undefined;
-  const evaluation = runnerMultiRunTargetEvaluation(
-    input,
-    action,
-    targetServerId,
-  );
-  const assessment =
-    evaluation?.blinkRiskAssessment ??
-    assessBlinkRiskForRunAction(input, action);
-  if (!blinkRiskShouldAvoidRun(assessment)) return undefined;
-  return {
-    key: "blink_run_self_net_damage_risk",
-    label: "Blink-Run mit Self-Net-Damage-Risiko",
-    reason: sortedUnique([
-      ...(assessment?.evidence ?? []),
-      ...(evaluation?.evidence.slice(0, 16) ?? []),
-      "why_blink_run_blocked:self_net_damage_buffer_too_low",
-    ]).join("|"),
-  };
 }
 
 function semanticRuntimeRunnerEncounterActionExclusion(

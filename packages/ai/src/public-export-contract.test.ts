@@ -117,6 +117,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-run-only-action-adjustment",
       "./runtime/runner-self-damage-choice",
       "./runtime/runner-program-sacrifice-exclusion",
+      "./runtime/runner-blink-run-exclusion",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
