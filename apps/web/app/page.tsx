@@ -355,6 +355,13 @@ import {
   serializeOverlayPositionPreference,
   type OverlayPositionPreference
 } from "../lib/overlay-position";
+import {
+  ActiveMatchWorkspaceNav,
+  AppBrand,
+  ConnectionBadge,
+  type ActiveMatchWorkspace,
+  type ConnectionState
+} from "../features/app-shell/AppShell";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
@@ -409,7 +416,6 @@ type ResourceStripMode = "auto" | "on" | "off";
 type ActionPanelMode = "docked" | "floating";
 type AiDecisionDebugOverlayStatus = "off" | "activating" | "waiting" | "live" | "error";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
-type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
@@ -2316,7 +2322,7 @@ export default function Page() {
   const [lobbyChatText, setLobbyChatText] = useState("");
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [simulationPending, setSimulationPending] = useState(false);
-  const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
+  const [connection, setConnection] = useState<ConnectionState>("offline");
   const [notice, setNotice] = useState("");
   const [undoNotice, setUndoNotice] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -5119,7 +5125,7 @@ export default function Page() {
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
           <div className="topbarStatusGroup">
-            <Brand />
+            <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
             <div className="topbarMeta">
               <span className="topbarVersion">{APP_STATUS_LABEL}</span>
               <ConnectionBadge text={statusText} state={connection} />
@@ -5801,7 +5807,7 @@ export default function Page() {
     <main className={activeMatchClassName} data-theme={colorScheme}>
       <header className="topbar" ref={topbarRef}>
         <div className="topbarStatusGroup">
-          <Brand />
+          <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
           <div className="topbarMeta">
             <span className="topbarVersion">{APP_STATUS_LABEL}</span>
             <ConnectionBadge text={statusText} state={connection} />
@@ -6865,63 +6871,6 @@ function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined 
   if (action.type === "end_turn") return undefined;
   const visibility = action.side === "corp" && (action.type === "install_card" || action.type === "advance_card") ? "redacted" : "public";
   return actionSoundForActionType(action.type, visibility) ?? "choice";
-}
-
-function Brand() {
-  return (
-    <div className="brand">
-      <div className="mark">
-        <img className="brandLogo" src={APP_ICON_SRC} alt="" aria-hidden="true" />
-      </div>
-      <div className="brandLockup">
-        <img className="brandWordmark" src={APP_WORDMARK_SRC} alt="" aria-hidden="true" />
-        <h1 className="srOnly">{APP_NAME}</h1>
-      </div>
-    </div>
-  );
-}
-
-function ActiveMatchWorkspaceNav({
-  workspace,
-  onWorkspace
-}: {
-  workspace: ActiveMatchWorkspace;
-  onWorkspace(workspace: ActiveMatchWorkspace): void;
-}) {
-  const items: Array<{ id: ActiveMatchWorkspace; label: string; title: string; icon: ReactNode }> =
-    workspace === "game"
-      ? [
-          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
-          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
-          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
-          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
-        ]
-      : [
-          { id: "game", label: "Aktives Spiel", title: "Zurück zum aktiven Spiel", icon: <Play size={16} /> },
-          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
-          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
-          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
-          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
-        ];
-
-  return (
-    <nav className={`activeWorkspaceNav ${workspace === "game" ? "compact" : ""}`} aria-label="Aktives Spiel und Werkzeuge">
-      {items.map((item) => (
-        <button
-          className={`button activeWorkspaceButton ${workspace === item.id ? "active" : ""} ${item.id === "game" && workspace !== "game" ? "runningGame" : ""}`}
-          key={item.id}
-          onClick={() => onWorkspace(item.id)}
-          type="button"
-          title={item.title}
-          aria-label={item.title}
-          aria-current={workspace === item.id ? "page" : undefined}
-        >
-          {item.icon}
-          <span className="workspaceLabel">{item.label}</span>
-        </button>
-      ))}
-    </nav>
-  );
 }
 
 function StartLobbyPanel({
@@ -15389,10 +15338,6 @@ function formatAiHintLabel(value: string): string {
     .replace(/_/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase();
-}
-
-function ConnectionBadge({ text, state }: { text: string; state: "offline" | "connecting" | "online" }) {
-  return <span className={`connection ${state}`}>{text}</span>;
 }
 
 function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["counterDisplays"]; side: Side }) {
