@@ -481,37 +481,10 @@ import { proteusSenatorialFieldTripImplementation } from "./proteus/runner/event
 import { proteusSubliminalCorruptionImplementation } from "./proteus/runner/events/subliminal-corruption";
 import { proteusTestSpinImplementation } from "./proteus/runner/events/test-spin";
 import { proteusWeefleInitiationImplementation } from "./proteus/runner/events/weefle-initiation";
-import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
-import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
-import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
-import { proteusEurocorpseTmSpinChipImplementation } from "./proteus/runner/hardware/eurocorpse-tm-spin-chip";
-import { proteusLucidrineDripFeedImplementation } from "./proteus/runner/hardware/lucidrinetm-drip-feed";
-import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusStakeoutImplementation } from "./proteus/runner/events/stakeout";
-import { proteusArmageddonImplementation } from "./proteus/runner/programs/armageddon";
-import { proteusBlackWidowImplementation } from "./proteus/runner/programs/black-widow";
-import { proteusBigFrackinGunImplementation } from "./proteus/runner/programs/big-frackin-gun";
-import { proteusBoringBitImplementation } from "./proteus/runner/programs/boring-bit";
-import { proteusBulldozerImplementation } from "./proteus/runner/programs/bulldozer";
-import { proteusCorrosionImplementation } from "./proteus/runner/programs/corrosion";
-import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
-import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
-import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
-import { proteusForwardsLegacyImplementation } from "./proteus/runner/programs/forwards-legacy";
-import { proteusFubarImplementation } from "./proteus/runner/programs/fubar";
-import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
-import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
-import { proteusLockjawImplementation } from "./proteus/runner/programs/lockjaw";
-import { proteusMorphingToolImplementation } from "./proteus/runner/programs/morphing-tool";
-import { proteusRedecoratorImplementation } from "./proteus/runner/programs/redecorator";
-import { proteusScaldanImplementation } from "./proteus/runner/programs/scaldan";
-import { proteusSkeletonPasskeysImplementation } from "./proteus/runner/programs/skeleton-passkeys";
-import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullcap";
-import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
-import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
-import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
-import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
+import { PROTEUS_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./subregistries/proteus-runner-hardware";
+import { PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./subregistries/proteus-runner-programs";
 import { PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./subregistries/proteus-runner-resources";
 import type { CardImplementationDefinition } from "./types";
 
@@ -991,37 +964,10 @@ export const CARD_IMPLEMENTATIONS = [
   proteusSubliminalCorruptionImplementation,
   proteusTestSpinImplementation,
   proteusWeefleInitiationImplementation,
-  proteusCorticalCybermodemImplementation,
-  proteusCorticalStimulatorsImplementation,
-  proteusDeckTheImplementation,
-  proteusEurocorpseTmSpinChipImplementation,
-  proteusLucidrineDripFeedImplementation,
-  proteusSunburstCranialInterfaceImplementation,
+  ...PROTEUS_RUNNER_HARDWARE_IMPLEMENTATIONS,
   proteusPoisonedWaterSupplyImplementation,
   proteusStakeoutImplementation,
-  proteusArmageddonImplementation,
-  proteusBlackWidowImplementation,
-  proteusBigFrackinGunImplementation,
-  proteusBoringBitImplementation,
-  proteusBulldozerImplementation,
-  proteusCorrosionImplementation,
-  proteusCrumbleImplementation,
-  proteusDisintegratorImplementation,
-  proteusEnterpriseIncShieldsImplementation,
-  proteusForwardsLegacyImplementation,
-  proteusFubarImplementation,
-  proteusGarbageInImplementation,
-  proteusHighlighterImplementation,
-  proteusLockjawImplementation,
-  proteusMorphingToolImplementation,
-  proteusRedecoratorImplementation,
-  proteusScaldanImplementation,
-  proteusSkeletonPasskeysImplementation,
-  proteusSkullcapImplementation,
-  proteusTaxmanImplementation,
-  proteusVienna22Implementation,
-  proteusViralPipelineImplementation,
-  proteusWreckingBallImplementation,
+  ...PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS,
   ...PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS,
 ] as const satisfies readonly CardImplementationDefinition[];
 

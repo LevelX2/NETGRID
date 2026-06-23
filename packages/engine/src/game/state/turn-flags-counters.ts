@@ -114,7 +114,7 @@ export function ensureRunnerTurnFlags(
     fangRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
-    shellTradersStartTurnResolvedSourceIds: [],
+    delayedInstallStartTurnResolvedSourceIds: [],
     bodyweightDataCrecheExtraRunPending: false,
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
   });
@@ -147,7 +147,7 @@ export function ensureRunnerTurnFlags(
   flags.fangRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
-  flags.shellTradersStartTurnResolvedSourceIds ??= [];
+  flags.delayedInstallStartTurnResolvedSourceIds ??= [];
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
   flags.delayedEndTurnEffects ??= [];

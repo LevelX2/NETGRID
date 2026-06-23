@@ -115,7 +115,7 @@ describe("runner special zone install action builders", () => {
       costs: [{ clicks: 1 }],
       payload: {
         cardId: sourceCardId,
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId,
         targetCardDefinitionId: targetDefinition.id,
         shellCounterAmount: 3,
@@ -148,7 +148,7 @@ describe("runner special zone install action builders", () => {
       costs: [{ credits: 1 }],
       payload: {
         cardId: sourceCardId,
-        shellTradersAbility: "remove_shell_counter",
+        delayedInstallAbility: "remove_shell_counter",
         targetCardId,
         targetCardDefinitionId: targetDefinition.id,
         counterType: "shell",

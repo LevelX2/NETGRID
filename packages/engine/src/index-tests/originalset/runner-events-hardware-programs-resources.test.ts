@@ -2410,7 +2410,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.shellTradersAbility === "set_aside_from_grip",
+          action.payload?.delayedInstallAbility === "set_aside_from_grip",
       ),
     ).toBe(false);
 
@@ -2419,7 +2419,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const prepareActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip",
+        action.payload?.delayedInstallAbility === "set_aside_from_grip",
     );
     expect(prepareActions.map((action) => action.payload?.targetCardId).sort()).toEqual([
       hardwareId,
@@ -2452,7 +2452,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.cardId === shellId &&
         action.payload?.targetCardId === programId,
     );
@@ -2547,7 +2547,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardId === programId,
     );
     const paidRemove = mustAction(
@@ -2555,7 +2555,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.shellTradersAbility === "remove_shell_counter" &&
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
         action.payload?.targetCardId === programId,
     );
     expect(paidRemove.costs).toEqual([{ credits: 1 }]);

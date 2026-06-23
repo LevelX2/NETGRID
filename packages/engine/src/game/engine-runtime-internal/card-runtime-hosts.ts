@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps } from "./runtime-shared";
 import { createActivatedCardRuntimeHosts } from "./activated-card-runtime-hosts";
 import { createCardLifecycleRuntimeHosts } from "./card-lifecycle-runtime-hosts";
@@ -6,7 +5,7 @@ import { createCardRuntimeDepsHosts } from "./card-runtime-deps-hosts";
 import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-hosts";
 
 export function createCardRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, any> = {};
+  const runtime: Record<string, unknown> = {};
   Object.assign(
     runtime,
     createCardRuntimeDepsHosts(deps, runtime),

@@ -1181,12 +1181,12 @@ function resolveEndTurnTagIfRunnerReceivedTag(
   if (sourceIds.length === 0) return;
   const tagsBefore = state.runner.tags;
   for (const _sourceId of sourceIds) {
-    addRunnerTagsWithPrevention(state, legalAction, 1, "omniscience_foundation");
+    addRunnerTagsWithPrevention(state, legalAction, 1, "end_turn_tag_if_runner_received_tag");
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1951CorpUtilityAbility: "end_turn_tag_if_runner_received_tag",
-    omniscienceFoundationTagsAdded: Math.max(0, state.runner.tags - tagsBefore),
+    endTurnTagIfRunnerReceivedTagAdded: Math.max(0, state.runner.tags - tagsBefore),
     sourceCount: sourceIds.length,
     runnerTagsAfter: state.runner.tags,
   };
@@ -2194,7 +2194,7 @@ function startRunnerTurn(
   flags.allNighterBonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
-  flags.shellTradersStartTurnResolvedSourceIds = [];
+  flags.delayedInstallStartTurnResolvedSourceIds = [];
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   flags.delayedEndTurnEffects = [];

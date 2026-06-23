@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps } from "./runtime-shared";
 import { createApplyActionRuntimeHosts } from "./apply-action-runtime-hosts";
 import { createLegalActionRuntimeHosts } from "./legal-action-runtime-hosts";
@@ -6,7 +5,7 @@ import { createPlayBoardRuntimeHosts } from "./play-board-runtime-hosts";
 import { createScoredEconomyRuntimeHosts } from "./scored-economy-runtime-hosts";
 
 export function createActionRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, any> = {};
+  const runtime: Record<string, unknown> = {};
   Object.assign(
     runtime,
     createScoredEconomyRuntimeHosts(deps, runtime),

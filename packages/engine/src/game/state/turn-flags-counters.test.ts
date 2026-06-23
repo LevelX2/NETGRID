@@ -79,7 +79,7 @@ describe("turn-flags-counters", () => {
 
     const runnerFlags = ensureRunnerTurnFlags(current);
     expect(runnerFlags.runAttemptsThisTurn).toBe(0);
-    expect(runnerFlags.shellTradersStartTurnResolvedSourceIds).toEqual([]);
+    expect(runnerFlags.delayedInstallStartTurnResolvedSourceIds).toEqual([]);
     recordRunnerActionSpent(current, 2);
     expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(2);
 

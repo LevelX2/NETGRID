@@ -111,11 +111,11 @@ export function handleRunnerSpecialTriggerExecution(
     resolveJunkyardBbsAbility(host, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.shellTradersAbility === "set_aside_from_grip") {
+  if (legalAction.payload?.delayedInstallAbility === "set_aside_from_grip") {
     resolveShellTradersSetAside(host, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.shellTradersAbility === "remove_shell_counter") {
+  if (legalAction.payload?.delayedInstallAbility === "remove_shell_counter") {
     resolveShellTradersRemoveCounter(host, legalAction);
     return handled(legalAction);
   }
@@ -197,7 +197,7 @@ export function applyShellTradersStartOfTurn(
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
   } as NonNullable<GameState["runnerTurnFlags"]>);
-  const resolvedSourceIds = (flags.shellTradersStartTurnResolvedSourceIds ??= []);
+  const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
     if (
       host.cards.definitionFor(state, sourceCardId).id !==
@@ -211,7 +211,7 @@ export function applyShellTradersStartOfTurn(
     const targetDefinition = host.cards.definitionFor(state, targetCardId);
     const result = removeShellCounterAndMaybeInstall(host, targetCardId);
     effects?.push({
-      effectId: `runner.start.shell_traders.${sourceCardId}.${targetCardId}`,
+      effectId: `runner.start.delayed_install.${sourceCardId}.${targetCardId}`,
       kind: "counter_change",
       visibility: "public",
       side: "runner",
@@ -348,7 +348,7 @@ function resolveShellTradersSetAside(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "shell_traders_set_aside",
+    hiddenZoneAction: "delayed_install_set_aside",
     sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
@@ -401,7 +401,7 @@ function resolveShellTradersRemoveCounter(
     counterType: "shell",
     removedCounterAmount: 1,
     remainingCounters: result.remainingCounters,
-    shellTradersInstalledTarget: result.installed,
+    delayedInstallInstalledTarget: result.installed,
     runnerCreditsAfter: state.runner.credits,
   };
 }

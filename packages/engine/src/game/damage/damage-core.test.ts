@@ -375,7 +375,7 @@ function testHost(): DamageCoreHost {
           fangRunLockCreditCost: 0,
           valuPakProgramInstallActionsRemaining: 0,
           valuPakTemporaryProgramInstallCredits: 0,
-          shellTradersStartTurnResolvedSourceIds: [],
+          delayedInstallStartTurnResolvedSourceIds: [],
           bodyweightDataCrecheExtraRunPending: false,
           bodyweightDataCrecheExtraRunUsedThisTurn: false,
         };
