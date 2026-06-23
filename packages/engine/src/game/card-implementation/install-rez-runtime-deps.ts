@@ -4,7 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import type { CardEffectHiddenInfoResult } from "../../ability-engine/effect-interpreter";
+import type { CardEffectHiddenInfoResult } from "../../ability-engine/effect-execution-types";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,

@@ -6,7 +6,7 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import type { CardEffectImplementation } from "../definition-types";
-import type { CardEffectExecutionContext } from "../effect-interpreter";
+import type { CardEffectExecutionContext } from "../effect-execution-types";
 
 export type CardEffectPublicPayload = Record<string, string | number | boolean>;
 

@@ -12,7 +12,7 @@ import type {
 } from "@netgrid/shared";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
 import type { CardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
-import type { CardEffectMakeRunOptions } from "../../ability-engine/effect-interpreter";
+import type { CardEffectMakeRunOptions } from "../../ability-engine/effect-execution-types";
 import {
   createCounterLifecycleCardImplementationRuntimeDeps,
   type CounterLifecycleRuntimeDepsHost,
@@ -163,7 +163,13 @@ export function createGameCardImplementationRuntimeDeps(
     ...createDamageCardImplementationRuntimeDeps(host.damage),
     ...createCounterLifecycleCardImplementationRuntimeDeps(host.counters),
     startRun: (state, legalAction, serverId, options) =>
-      startRunForCardImplementation(host, state, legalAction, serverId, options),
+      startRunForCardImplementation(
+        host,
+        state,
+        legalAction,
+        serverId,
+        options,
+      ),
     ...createHiddenZoneCardImplementationRuntimeDeps(
       host.hiddenZone.runtimeDepsHost,
     ),
@@ -182,8 +188,8 @@ export function createGameCardImplementationRuntimeDeps(
     runnerTrashedTransactionsThisTurn: (state) =>
       state.runnerTurnFlags?.trashedTransactionsThisTurn === true,
     runnerInstalledResourceLastTurn: (state) =>
-      (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? []).some((cardId) =>
-        state.runner.rig.resources.includes(cardId),
+      (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? []).some(
+        (cardId) => state.runner.rig.resources.includes(cardId),
       ),
     runnerWasDamagedDuringLastThreeActions: (state) => {
       const current = Math.max(
@@ -355,7 +361,10 @@ function startRunForCardImplementation(
           }
         : {}),
       ...(options.successfulRunPrivateLookCount !== undefined
-        ? { successfulRunPrivateLookCount: options.successfulRunPrivateLookCount }
+        ? {
+            successfulRunPrivateLookCount:
+              options.successfulRunPrivateLookCount,
+          }
         : {}),
       ...(options.successfulRunArchivesMoveCount !== undefined
         ? {
@@ -459,7 +468,8 @@ function startRunForCardImplementation(
       : {}),
     ...(options.runTemporaryCredits !== undefined
       ? {
-          v1922RunnerEventAbility: "lucidrine_booster_drug_run_temporary_credits",
+          v1922RunnerEventAbility:
+            "lucidrine_booster_drug_run_temporary_credits",
           temporaryRunCredits: options.runTemporaryCredits.amount,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
@@ -549,7 +559,8 @@ function addCurrentEncounterAdditionalSubroutineForCardImplementation(
     publicPayload: {
       currentEncounterAdditionalSubroutines: count,
       currentEncounterAdditionalSubroutineKind: subroutineKind,
-      currentEncounterAdditionalSubroutineSourceDefinitionId: sourceDefinitionId,
+      currentEncounterAdditionalSubroutineSourceDefinitionId:
+        sourceDefinitionId,
     },
   };
 }

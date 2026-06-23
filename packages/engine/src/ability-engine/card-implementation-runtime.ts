@@ -21,22 +21,22 @@ import type {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { printedSubroutinesForCardImplementation } from "./printed-subroutine-implementations";
-import {
-  executeCardImplementationEffects,
-  type CardEffectDamageResult,
-  type CardEffectDrawCardsResult,
-  type CardEffectHostedCreditsResult,
-  type CardEffectCounterResult,
-  type CardEffectAvoidTagResult,
-  type CardEffectHiddenInfoResult,
-  type CardEffectMakeRunOptions,
-  type CardEffectMakeRunResult,
-  type CardEffectPrivateLookResult,
-  type CardEffectRemoveTagsResult,
-  type CardEffectReturnSourceResult,
-  type CardEffectTrashSourceResult,
-  type CardEffectAdvancementChoiceResult,
-} from "./effect-interpreter";
+import { executeCardImplementationEffects } from "./effect-interpreter";
+import type {
+  CardEffectAdvancementChoiceResult,
+  CardEffectAvoidTagResult,
+  CardEffectCounterResult,
+  CardEffectDamageResult,
+  CardEffectDrawCardsResult,
+  CardEffectHiddenInfoResult,
+  CardEffectHostedCreditsResult,
+  CardEffectMakeRunOptions,
+  CardEffectMakeRunResult,
+  CardEffectPrivateLookResult,
+  CardEffectRemoveTagsResult,
+  CardEffectReturnSourceResult,
+  CardEffectTrashSourceResult,
+} from "./effect-execution-types";
 import {
   canUseCardImplementationAbilityLimit,
   cardImplementationAbilityLimitFailureMessage,
@@ -522,15 +522,15 @@ function cardImplementationConditionMet(
     case "source_has_hosted_credits":
       return Boolean(
         sourceCardId &&
-          state.cardInstances[sourceCardId] &&
-          deps.cardCounter(state, sourceCardId, "bit") > 0,
+        state.cardInstances[sourceCardId] &&
+        deps.cardCounter(state, sourceCardId, "bit") > 0,
       );
     case "source_has_advancement_counters":
       return Boolean(
         sourceCardId &&
-          state.cardInstances[sourceCardId] &&
-          Math.floor(state.cardInstances[sourceCardId].advancementCounters) >=
-            condition.minimum,
+        state.cardInstances[sourceCardId] &&
+        Math.floor(state.cardInstances[sourceCardId].advancementCounters) >=
+          condition.minimum,
       );
     case "runner_attempted_run_last_turn":
       return (
@@ -633,7 +633,9 @@ function canResolveOnPlayCardImplementationAbility(
     return false;
   return ability.effects.every((effect) => {
     if (effect.kind === "expose_installed_cards")
-      return deps.exposeInstalledCorpCardTargets(state, "any_installed").length > 0;
+      return (
+        deps.exposeInstalledCorpCardTargets(state, "any_installed").length > 0
+      );
     if (effect.kind === "expose_outermost_ice_each_fort")
       return deps.outermostIceEachDataFortExposeCount(state) > 0;
     if (effect.kind === "search_trash_to_grip")
@@ -652,10 +654,8 @@ function canResolveOnPlayCardImplementationAbility(
       );
     if (effect.kind === "choose_stack_or_trash_program_install")
       return (
-        deps.stackOrTrashProgramInstallTargetCount(
-          state,
-          effect.installCost,
-        ) > 0
+        deps.stackOrTrashProgramInstallTargetCount(state, effect.installCost) >
+        0
       );
     if (effect.kind === "look_top_stack_show_to_corp_then_install_matching")
       return state.runner.stack.length > 0;
@@ -697,7 +697,12 @@ function canResolveActivatedCardImplementationAbility(
 ): boolean {
   if (
     ability.condition &&
-    !cardImplementationConditionMet(deps, state, ability.condition, sourceCardId)
+    !cardImplementationConditionMet(
+      deps,
+      state,
+      ability.condition,
+      sourceCardId,
+    )
   )
     return false;
   if (
@@ -726,10 +731,8 @@ function canResolveActivatedCardImplementationAbility(
       );
     if (effect.kind === "choose_stack_or_trash_program_install")
       return (
-        deps.stackOrTrashProgramInstallTargetCount(
-          state,
-          effect.installCost,
-        ) > 0
+        deps.stackOrTrashProgramInstallTargetCount(state, effect.installCost) >
+        0
       );
     if (effect.kind === "look_top_stack_show_to_corp_then_install_matching")
       return state.runner.stack.length > 0;
@@ -782,22 +785,37 @@ function assertOnPlayCardImplementationAbilityCanResolve(
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   if (ability.condition?.kind === "runner_attempted_run_this_game")
-    throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
+    throw new Error(
+      "Der Runner hat in diesem Spiel nicht genug Runs versucht.",
+    );
   if (ability.condition?.kind === "runner_trashed_node_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
   if (ability.condition?.kind === "runner_trashed_advertisement_this_turn")
-    throw new Error("Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.");
+    throw new Error(
+      "Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.",
+    );
   if (ability.condition?.kind === "runner_trashed_transactions_this_turn")
-    throw new Error("Der Runner hat in diesem Zug keine Transactions-Karte getrasht.");
+    throw new Error(
+      "Der Runner hat in diesem Zug keine Transactions-Karte getrasht.",
+    );
   if (ability.condition?.kind === "runner_installed_resource_last_turn")
-    throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
+    throw new Error(
+      "Der Runner hat im letzten Zug keine Resource installiert.",
+    );
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
-    throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
-  if (ability.condition?.kind === "runner_made_successful_run_on_server_this_turn")
+    throw new Error(
+      "Der Runner wurde in den letzten drei Aktionen nicht verletzt.",
+    );
+  if (
+    ability.condition?.kind === "runner_made_successful_run_on_server_this_turn"
+  )
     throw new Error(
       "Der Runner hat in diesem Zug keinen passenden erfolgreichen Run gemacht.",
     );
-  if (ability.condition?.kind === "runner_made_successful_hq_and_rd_runs_this_turn")
+  if (
+    ability.condition?.kind ===
+    "runner_made_successful_hq_and_rd_runs_this_turn"
+  )
     throw new Error(
       "Der Runner hat in diesem Zug nicht erfolgreich HQ und R&D angegriffen.",
     );
@@ -838,17 +856,27 @@ function assertActivatedCardImplementationAbilityCanResolve(
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   if (ability.condition?.kind === "runner_attempted_run_this_game")
-    throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
+    throw new Error(
+      "Der Runner hat in diesem Spiel nicht genug Runs versucht.",
+    );
   if (ability.condition?.kind === "runner_trashed_node_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
   if (ability.condition?.kind === "runner_trashed_advertisement_this_turn")
-    throw new Error("Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.");
+    throw new Error(
+      "Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.",
+    );
   if (ability.condition?.kind === "runner_trashed_transactions_this_turn")
-    throw new Error("Der Runner hat in diesem Zug keine Transactions-Karte getrasht.");
+    throw new Error(
+      "Der Runner hat in diesem Zug keine Transactions-Karte getrasht.",
+    );
   if (ability.condition?.kind === "runner_installed_resource_last_turn")
-    throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
+    throw new Error(
+      "Der Runner hat im letzten Zug keine Resource installiert.",
+    );
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
-    throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
+    throw new Error(
+      "Der Runner wurde in den letzten drei Aktionen nicht verletzt.",
+    );
   const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(
     ability.limit,
   );
@@ -899,7 +927,9 @@ export function executeCardImplementationLifecycleEffects(
         ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
         : {}),
       xValue: Math.floor(Number(legalAction?.payload?.xValue ?? 0)),
-      targetRezCost: Math.floor(Number(legalAction?.payload?.targetRezCost ?? 0)),
+      targetRezCost: Math.floor(
+        Number(legalAction?.payload?.targetRezCost ?? 0),
+      ),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
@@ -955,8 +985,11 @@ function hasNormalizedSubtype(
   subtype: string,
 ): boolean {
   const target = normalizeSubtypeLabel(subtype);
-  return subtypes?.some((candidate) => normalizeSubtypeLabel(candidate) === target) ??
-    false;
+  return (
+    subtypes?.some(
+      (candidate) => normalizeSubtypeLabel(candidate) === target,
+    ) ?? false
+  );
 }
 
 function cardImplementationStartOfCorpTurnAbilities(
@@ -1062,7 +1095,8 @@ export function executeCardImplementationStartOfCorpTurnEffects(
     const instance = state.cardInstances[cardId];
     if (!instance) continue;
     const definition = deps.definitionFor(state, cardId);
-    const startAbilities = cardImplementationStartOfCorpTurnAbilities(definition);
+    const startAbilities =
+      cardImplementationStartOfCorpTurnAbilities(definition);
     if (startAbilities.length === 0) continue;
     if (
       !isActiveCardImplementationStartOfCorpTurnSource(
@@ -1137,9 +1171,7 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
     const startAbilities =
       cardImplementationStartOfRunnerTurnAbilities(definition);
     if (startAbilities.length === 0) continue;
-    if (
-      !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
-    )
+    if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
       continue;
     for (const ability of startAbilities) {
       if (
@@ -1166,7 +1198,9 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
         ability.effects,
       );
       effects?.push(...result.resolvedEffects);
-      if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+      if (
+        !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
+      )
         break;
     }
   }
@@ -1188,11 +1222,10 @@ export function executeCardImplementationRunnerRunStartEffects(
     const instance = state.cardInstances[cardId];
     if (!instance) continue;
     const definition = deps.definitionFor(state, cardId);
-    const runStartAbilities = cardImplementationRunnerRunStartAbilities(definition);
+    const runStartAbilities =
+      cardImplementationRunnerRunStartAbilities(definition);
     if (runStartAbilities.length === 0) continue;
-    if (
-      !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
-    )
+    if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
       continue;
     for (const ability of runStartAbilities) {
       if (
@@ -1220,7 +1253,9 @@ export function executeCardImplementationRunnerRunStartEffects(
         ability.effects,
       );
       deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
-      if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+      if (
+        !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
+      )
         break;
     }
   }
@@ -1242,15 +1277,16 @@ export function pushCardImplementationEndOfRunnerTurnActions(
   state: GameState,
   actions: LegalAction[],
 ): void {
-  for (const cardId of cardImplementationRunnerInstalledSourceIds(deps, state)) {
+  for (const cardId of cardImplementationRunnerInstalledSourceIds(
+    deps,
+    state,
+  )) {
     const instance = state.cardInstances[cardId];
     if (!instance || instance.controller !== "runner") continue;
     const definition = deps.definitionFor(state, cardId);
     const abilities = cardImplementationEndOfRunnerTurnAbilities(definition);
     if (abilities.length === 0) continue;
-    if (
-      !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
-    )
+    if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
       continue;
     abilities.forEach((ability, index) => {
       if (
@@ -1298,9 +1334,8 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
   const abilityIndex = Number(
     legalAction.payload.cardImplementationLifecycleAbilityIndex,
   );
-  const ability = cardImplementationEndOfRunnerTurnAbilities(definition)[
-    abilityIndex
-  ];
+  const ability =
+    cardImplementationEndOfRunnerTurnAbilities(definition)[abilityIndex];
   if (!ability || !Number.isInteger(abilityIndex) || abilityIndex < 0)
     throw new Error("Die End-of-turn-Faehigkeit passt nicht zur Karte.");
   if (
@@ -1318,7 +1353,9 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
         ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
         : {}),
       xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
-      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
+      targetRezCost: Math.floor(
+        Number(legalAction.payload?.targetRezCost ?? 0),
+      ),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       reason: "end_of_turn",
       addHostedCredits: (sourceCardId, amount) =>
@@ -1357,7 +1394,8 @@ function activatedCardImplementationAbilitiesForTiming(
         ): entry is {
           ability: ActivatedCardAbilityImplementation;
           index: number;
-        } => entry.ability.kind === "activated" && entry.ability.timing === timing,
+        } =>
+          entry.ability.kind === "activated" && entry.ability.timing === timing,
       ) ?? []
   );
 }
@@ -1366,7 +1404,9 @@ function assertActivatedCostAmount(
   cost: CardAbilityCostImplementation,
 ): number {
   if (!Number.isInteger(cost.amount) || cost.amount < 0)
-    throw new Error("Activated CardImplementation cost amount must be non-negative.");
+    throw new Error(
+      "Activated CardImplementation cost amount must be non-negative.",
+    );
   return cost.amount;
 }
 
@@ -1419,7 +1459,12 @@ function activatedAbilityLegalActionCosts(
     }
   }
   return clicks > 0 || credits > 0
-    ? [{ ...(clicks > 0 ? { clicks } : {}), ...(credits > 0 ? { credits } : {}) }]
+    ? [
+        {
+          ...(clicks > 0 ? { clicks } : {}),
+          ...(credits > 0 ? { credits } : {}),
+        },
+      ]
     : [];
 }
 
@@ -1506,7 +1551,8 @@ function canPayActivatedCardImplementationCosts(
   );
   if ((side === "corp" ? corpSpendableCredits : state.runner.credits) < credits)
     return false;
-  const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
+  const advancementCounterCost =
+    advancementCounterCostForActivatedAbility(ability);
   if (advancementCounterCost > 0) {
     const source = state.cardInstances[cardId];
     if (!source || source.advancementCounters < advancementCounterCost)
@@ -1539,7 +1585,8 @@ function canPayActivatedCardImplementationCosts(
   }
   const randomDiscardCost = randomCorpHqDiscardCostForActivatedAbility(ability);
   if (randomDiscardCost > 0) {
-    if (side !== "corp" || state.corp.hq.length < randomDiscardCost) return false;
+    if (side !== "corp" || state.corp.hq.length < randomDiscardCost)
+      return false;
   }
   const topCorpRdTrashCost = topCorpRdTrashCostForActivatedAbility(ability);
   if (topCorpRdTrashCost > 0) {
@@ -1565,7 +1612,8 @@ function payActivatedCardImplementationCosts(
     deps.spendClick(state, side);
   }
   if (creditCost > 0) deps.spendCredits(state, side, creditCost);
-  const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
+  const advancementCounterCost =
+    advancementCounterCostForActivatedAbility(ability);
   if (advancementCounterCost > 0) {
     const source = state.cardInstances[cardId];
     if (!source || source.advancementCounters < advancementCounterCost)
@@ -1592,7 +1640,10 @@ function payActivatedCardImplementationCosts(
     const source = state.cardInstances[cardId];
     if (!source || source.tapped === true)
       throw new Error("Die Quelle ist bereits getappt.");
-    Object.assign(publicPayload, deps.revealHiddenRunnerResource(state, cardId));
+    Object.assign(
+      publicPayload,
+      deps.revealHiddenRunnerResource(state, cardId),
+    );
     source.faceup = true;
     source.rezzed = true;
     source.tapped = true;
@@ -1603,7 +1654,9 @@ function payActivatedCardImplementationCosts(
     if (side !== "corp")
       throw new Error("Nur die Korp kann zufaellige HQ-Discard-Kosten zahlen.");
     if (state.corp.hq.length < randomDiscardCost)
-      throw new Error("HQ enthaelt nicht genug Karten fuer den Random-Discard.");
+      throw new Error(
+        "HQ enthaelt nicht genug Karten fuer den Random-Discard.",
+      );
     Object.assign(
       publicPayload,
       deps.corpRandomDiscardFromHq(
@@ -1729,10 +1782,7 @@ function hasTrashSourceEffectForActivatedAbility(
 function exposeInstalledCardEffect(
   ability: ActivatedCardAbilityImplementation,
 ):
-  | Extract<
-      CardEffectImplementation,
-      { kind: "expose_installed_card" }
-    >
+  | Extract<CardEffectImplementation, { kind: "expose_installed_card" }>
   | undefined {
   return ability.effects.length === 1 &&
     ability.effects[0]?.kind === "expose_installed_card"
@@ -1743,10 +1793,7 @@ function exposeInstalledCardEffect(
 function moveTopTrashToGripEffect(
   ability: ActivatedCardAbilityImplementation,
 ):
-  | Extract<
-      CardEffectImplementation,
-      { kind: "move_top_trash_to_grip" }
-    >
+  | Extract<CardEffectImplementation, { kind: "move_top_trash_to_grip" }>
   | undefined {
   return ability.effects.length === 1 &&
     ability.effects[0]?.kind === "move_top_trash_to_grip"
@@ -1789,10 +1836,10 @@ function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
       const instance = state.cardInstances[cardId];
       return Boolean(
         instance &&
-          instance.controller === "corp" &&
-          instance.zone.side === "corp" &&
-          instance.zone.zone === "serverIce" &&
-          instance.rezzed === true,
+        instance.controller === "corp" &&
+        instance.zone.side === "corp" &&
+        instance.zone.zone === "serverIce" &&
+        instance.rezzed === true,
       );
     })
     .sort();
@@ -1825,7 +1872,9 @@ function sameFortSubroutineTargets(
   if (!sourceCardId || !state.run) return [];
   const serverId = sourceServerId(state, sourceCardId);
   if (!serverId || state.run.attackedServerId !== serverId) return [];
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) return [];
   const targets: SameFortSubroutineTarget[] = [];
   for (const iceId of server.ice.slice().sort()) {
@@ -1904,10 +1953,10 @@ export function pushActivatedCardImplementationActionsForTiming(
 ): void {
   if (deps.mustInstance(state.cardInstances, sourceCardId).controller !== side)
     return;
-  for (const { ability, index } of activatedCardImplementationAbilitiesForTiming(
-    definition,
-    timing,
-  )) {
+  for (const {
+    ability,
+    index,
+  } of activatedCardImplementationAbilitiesForTiming(definition, timing)) {
     if (
       !canResolveActivatedCardImplementationAbility(
         deps,
@@ -1917,18 +1966,29 @@ export function pushActivatedCardImplementationActionsForTiming(
       )
     )
       continue;
-    if (!canPayActivatedCardImplementationCosts(state, side, sourceCardId, ability))
+    if (
+      !canPayActivatedCardImplementationCosts(
+        state,
+        side,
+        sourceCardId,
+        ability,
+      )
+    )
       continue;
     const exposeEffect = exposeInstalledCardEffect(ability);
     if (exposeEffect) {
-      if (deps.exposeInstalledCorpCardTargets(state, exposeEffect.scope).length === 0)
+      if (
+        deps.exposeInstalledCorpCardTargets(state, exposeEffect.scope)
+          .length === 0
+      )
         continue;
       actions.push(
         deps.createAction(
           state,
           side,
           "activated_card_ability",
-          ability.label ?? `${definition.title}: installierte Korp-Karte exposen`,
+          ability.label ??
+            `${definition.title}: installierte Korp-Karte exposen`,
           sourceCardId,
           activatedAbilityLegalActionCosts(ability),
           activatedAbilityPayload(sourceCardId, ability, index),
@@ -1983,7 +2043,11 @@ export function pushActivatedCardImplementationActionsForTiming(
     }
     const copySubroutineEffect = copySameFortIceSubroutineEffect(ability);
     if (copySubroutineEffect) {
-      for (const target of sameFortSubroutineTargets(deps, state, sourceCardId)) {
+      for (const target of sameFortSubroutineTargets(
+        deps,
+        state,
+        sourceCardId,
+      )) {
         actions.push(
           deps.createAction(
             state,
@@ -2024,7 +2088,8 @@ function corpActivatedCardImplementationSourceIsAvailable(
   cardId: CardInstanceId,
   definition: CardDefinition,
 ): boolean {
-  if (definition.type === "agenda") return state.corp.scoreArea.includes(cardId);
+  if (definition.type === "agenda")
+    return state.corp.scoreArea.includes(cardId);
   return deps.rezzedCorpRootCardIds(state).includes(cardId);
 }
 
@@ -2032,21 +2097,29 @@ function activatedAbilityForLegalAction(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-): {
-  cardId: CardInstanceId;
-  definition: CardDefinition;
-  ability: ActivatedCardAbilityImplementation;
-  abilityIndex: number;
-} | undefined {
+):
+  | {
+      cardId: CardInstanceId;
+      definition: CardDefinition;
+      ability: ActivatedCardAbilityImplementation;
+      abilityIndex: number;
+    }
+  | undefined {
   if (legalAction.payload?.cardImplementationAbility !== "activated")
     return undefined;
   const cardId = legalAction.payload.cardId;
   if (typeof cardId !== "string" || !state.cardInstances[cardId])
-    throw new Error("Die aktivierte Kartenfaehigkeit hat keine gueltige Quelle.");
+    throw new Error(
+      "Die aktivierte Kartenfaehigkeit hat keine gueltige Quelle.",
+    );
   const definition = deps.definitionFor(state, cardId);
-  const abilityIndex = Number(legalAction.payload.cardImplementationAbilityIndex);
+  const abilityIndex = Number(
+    legalAction.payload.cardImplementationAbilityIndex,
+  );
   if (!Number.isInteger(abilityIndex) || abilityIndex < 0)
-    throw new Error("Die aktivierte Kartenfaehigkeit hat keinen gueltigen Index.");
+    throw new Error(
+      "Die aktivierte Kartenfaehigkeit hat keinen gueltigen Index.",
+    );
   const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
     abilityIndex
   ];
@@ -2067,8 +2140,13 @@ function validateActivatedCardImplementationAbility(
   },
 ): void {
   const { cardId, ability } = match;
-  if (deps.mustInstance(state.cardInstances, cardId).controller !== legalAction.side)
-    throw new Error("Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.");
+  if (
+    deps.mustInstance(state.cardInstances, cardId).controller !==
+    legalAction.side
+  )
+    throw new Error(
+      "Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.",
+    );
   validateActivatedAbilityCosts(ability, legalAction);
   if (
     !canPayActivatedCardImplementationCosts(
@@ -2078,7 +2156,9 @@ function validateActivatedCardImplementationAbility(
       ability,
     )
   )
-    throw new Error("Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.");
+    throw new Error(
+      "Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.",
+    );
   if (
     legalAction.payload?.cardImplementationAbilityTiming !== ability.timing ||
     legalAction.payload?.cardImplementationAbilityIndex !== match.abilityIndex
@@ -2086,13 +2166,17 @@ function validateActivatedCardImplementationAbility(
     throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zum Profil.");
   if (ability.timing === "runner_main") {
     if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
+      throw new Error(
+        "Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.",
+      );
     if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
       throw new Error(
         "Diese aktivierte Kartenfaehigkeit ist nur in der Runner-Aktionsphase nutzbar.",
       );
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2104,22 +2188,29 @@ function validateActivatedCardImplementationAbility(
       const targetCardId = String(
         legalAction.payload?.cardImplementationExposeTargetId ?? "",
       );
-      if (targetCardId && (
+      if (
+        targetCardId &&
         !deps
           .exposeInstalledCorpCardTargets(state, exposeEffect.scope)
           .includes(targetCardId)
-      ))
+      )
         throw new Error("Die zu exposende Korp-Karte ist nicht mehr gueltig.");
     }
     return;
   }
   if (ability.timing === "during_run") {
     if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
+      throw new Error(
+        "Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.",
+      );
     if (!state.run)
-      throw new Error("Diese aktivierte Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+      throw new Error(
+        "Diese aktivierte Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.",
+      );
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2145,7 +2236,9 @@ function validateActivatedCardImplementationAbility(
     )
       throw new Error("Das Kosten-/Penalty-Support-Fenster passt nicht mehr.");
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2157,13 +2250,12 @@ function validateActivatedCardImplementationAbility(
   if (ability.timing === "access_start") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf Access-Start-Faehigkeiten nutzen.");
-    if (
-      !state.run?.hiddenRunnerResourceAccessStartServerId ||
-      state.run.breach
-    )
+    if (!state.run?.hiddenRunnerResourceAccessStartServerId || state.run.breach)
       throw new Error("Es ist kein Access-Start-Fenster offen.");
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2174,7 +2266,9 @@ function validateActivatedCardImplementationAbility(
   }
   if (ability.timing === "corp_encounter") {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf diese Encounter-Kartenfaehigkeit nutzen.");
+      throw new Error(
+        "Nur die Korp darf diese Encounter-Kartenfaehigkeit nutzen.",
+      );
     if (
       state.timingPoint !== "run.encounter_ice" ||
       state.run?.phase !== "encounter_ice" ||
@@ -2198,7 +2292,9 @@ function validateActivatedCardImplementationAbility(
     if (legalAction.side !== "corp")
       throw new Error("Nur die Korp darf diese Run-Kartenfaehigkeit nutzen.");
     if (!state.run)
-      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+      throw new Error(
+        "Diese Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.",
+      );
     if (
       !corpActivatedCardImplementationSourceIsAvailable(
         deps,
@@ -2207,7 +2303,9 @@ function validateActivatedCardImplementationAbility(
         match.definition,
       )
     )
-      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+      throw new Error(
+        "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2220,7 +2318,9 @@ function validateActivatedCardImplementationAbility(
     if (legalAction.side !== "corp")
       throw new Error("Nur die Korp darf diese Trace-Kartenfaehigkeit nutzen.");
     if (!state.trace)
-      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Trace nutzbar.");
+      throw new Error(
+        "Diese Kartenfaehigkeit ist nur waehrend eines Trace nutzbar.",
+      );
     if (
       !corpActivatedCardImplementationSourceIsAvailable(
         deps,
@@ -2229,7 +2329,9 @@ function validateActivatedCardImplementationAbility(
         match.definition,
       )
     )
-      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+      throw new Error(
+        "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -2239,7 +2341,9 @@ function validateActivatedCardImplementationAbility(
     return;
   }
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
+    throw new Error(
+      "Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.",
+    );
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
     throw new Error(
       "Diese aktivierte Kartenfaehigkeit ist nur in der Korp-Aktionsphase nutzbar.",
@@ -2252,7 +2356,9 @@ function validateActivatedCardImplementationAbility(
       match.definition,
     )
   )
-    throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+    throw new Error(
+      "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
+    );
   assertActivatedCardImplementationAbilityCanResolve(
     deps,
     state,
@@ -2273,8 +2379,7 @@ function validateActivatedCardImplementationAbility(
       cardId,
       legalAction,
     );
-    if (!target)
-      throw new Error("Die Ziel-Subroutine ist nicht mehr gueltig.");
+    if (!target) throw new Error("Die Ziel-Subroutine ist nicht mehr gueltig.");
   }
 }
 
@@ -2287,7 +2392,11 @@ function sameFortSubroutineTargetForLegalAction(
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
   const subroutineIndex = Number(legalAction.payload?.subroutineIndex);
   const subroutineId = String(legalAction.payload?.subroutineId ?? "");
-  if (!targetCardId || !Number.isInteger(subroutineIndex) || subroutineIndex < 0)
+  if (
+    !targetCardId ||
+    !Number.isInteger(subroutineIndex) ||
+    subroutineIndex < 0
+  )
     return undefined;
   return sameFortSubroutineTargets(deps, state, sourceCardId).find(
     (target) =>
@@ -2330,8 +2439,11 @@ export function resolveActivatedCardImplementationAbility(
         ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
         : {}),
       xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
-      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
-      controller: deps.mustInstance(state.cardInstances, match.cardId).controller,
+      targetRezCost: Math.floor(
+        Number(legalAction.payload?.targetRezCost ?? 0),
+      ),
+      controller: deps.mustInstance(state.cardInstances, match.cardId)
+        .controller,
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
@@ -2516,12 +2628,7 @@ export function resolveActivatedCardImplementationAbility(
         deps.removeRunnerTags(state, mode, amount),
       avoidNextTag: (amount) => deps.avoidNextTag(state, amount),
       returnSourceToGripIfPaid: (sourceCardId, amount) =>
-        deps.returnSourceToGripIfPaid(
-          state,
-          legalAction,
-          sourceCardId,
-          amount,
-        ),
+        deps.returnSourceToGripIfPaid(state, legalAction, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
@@ -2646,7 +2753,9 @@ export function executeOnPlayCardImplementationAbility(
 ): void {
   const ability = printedCostOnPlayImplementation(definition);
   if (!ability)
-    throw new Error(`Kein On-Play-Implementation-Resolver fuer ${definition.id}.`);
+    throw new Error(
+      `Kein On-Play-Implementation-Resolver fuer ${definition.id}.`,
+    );
   assertOnPlayCardImplementationAbilityCanResolve(deps, state, ability);
   const result = executeCardImplementationEffects(
     state,
@@ -2657,7 +2766,13 @@ export function executeOnPlayCardImplementationAbility(
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
-        deps.damageRunner(state, legalAction, definition.id, damageType, amount),
+        deps.damageRunner(
+          state,
+          legalAction,
+          definition.id,
+          damageType,
+          amount,
+        ),
       unpreventableDamageRunner: (damageType, amount) =>
         deps.unpreventableDamageRunner(
           state,
@@ -2684,7 +2799,14 @@ export function executeOnPlayCardImplementationAbility(
           "new_remote"
         >,
       startPrivateLook: (zone, count) =>
-        deps.startPrivateLook(state, legalAction, cardId, definition.id, zone, count),
+        deps.startPrivateLook(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          zone,
+          count,
+        ),
       exposeInstalledCard: (scope) => {
         const targetId = String(
           legalAction.payload?.cardImplementationExposeTargetId ?? "",
@@ -2744,12 +2866,7 @@ export function executeOnPlayCardImplementationAbility(
           shuffleAfterwards,
         ),
       moveTopTrashToGrip: () =>
-        deps.moveTopTrashToGrip(
-          state,
-          legalAction,
-          cardId,
-          definition.id,
-        ),
+        deps.moveTopTrashToGrip(state, legalAction, cardId, definition.id),
       startSearchStackInstall: (filter, installCost, shuffleAfterwards) =>
         deps.startSearchStackInstallChoice(
           state,
@@ -2837,10 +2954,7 @@ export function executeOnPlayCardImplementationAbility(
           max,
           gainPerTrashed,
         ),
-      shuffleGripTrashAndStackThenDraw: (
-        drawCount,
-        removePlayedCardFromGame,
-      ) =>
+      shuffleGripTrashAndStackThenDraw: (drawCount, removePlayedCardFromGame) =>
         deps.shuffleGripTrashAndStackThenDraw(
           state,
           legalAction,
@@ -2850,11 +2964,7 @@ export function executeOnPlayCardImplementationAbility(
           removePlayedCardFromGame,
         ),
       startPayRezCostToTrashRezzedIceChoice: () =>
-        deps.startPayRezCostToTrashRezzedIceChoice(
-          state,
-          legalAction,
-          cardId,
-        ),
+        deps.startPayRezCostToTrashRezzedIceChoice(state, legalAction, cardId),
       startTrashUnrezzedIceChoice: () =>
         deps.startTrashUnrezzedIceChoice(state, legalAction, cardId),
       startCorpChoiceRezOrTrashIceChoice: () =>
@@ -2938,12 +3048,7 @@ export function executeOnPlayCardImplementationAbility(
           input,
         ),
       replaceFortCardsFromHq: () =>
-        deps.replaceFortCardsFromHq(
-          state,
-          legalAction,
-          cardId,
-          definition.id,
-        ),
+        deps.replaceFortCardsFromHq(state, legalAction, cardId, definition.id),
     },
     ability.effects,
   );
