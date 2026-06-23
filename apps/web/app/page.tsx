@@ -385,6 +385,7 @@ import { eventActionType, localActionSoundKey, localActionSoundKind, publicEvent
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { recentSessionHeadline, recentSessionStatusLabel } from "../features/recent/recent-session-labels";
+import { effectiveAiTurnPresentation, removePendingUndo } from "../features/match-session/client-payload-helpers";
 import { ChroniclePanel, chronicleContextByEventId } from "../features/chronicle/ChroniclePanel";
 import {
   FloatingAiDecisionDebugOverlay,
@@ -462,27 +463,12 @@ type LocalMatchClockAnchor = {
   decisionStartedAtMs: number;
 };
 
-function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
-  const presentation = payload?.aiTurnPresentation;
-  if (!payload || !presentation?.activeAiSide) return presentation;
-  const aiHasCurrentControl =
-    payload.playerView.activeSide === presentation.activeAiSide ||
-    payload.playerView.pendingChoice?.side === presentation.activeAiSide ||
-    payload.playerClock?.decisionOwnerSide === presentation.activeAiSide;
-  if (aiHasCurrentControl) return presentation;
-  return { ...presentation, canAdvanceAi: false };
-}
 type LobbyParticipant = ApiLobbyParticipantPayload;
 type MatchStartLobby = ApiMatchStartLobbyPayload;
 type LobbyClientPayload = ApiLobbyPayload;
 type ServerMessage = ApiServerMessage;
 type CreateMatchResponse = ApiCreateMatchResponse;
 type JoinMatchResponse = ApiJoinMatchResponse;
-
-function removePendingUndo<T extends { pendingUndo?: unknown }>(payload: T): Omit<T, "pendingUndo"> {
-  const { pendingUndo: _pendingUndo, ...withoutPendingUndo } = payload;
-  return withoutPendingUndo;
-}
 
 type LifecycleActionResponse =
   | {
