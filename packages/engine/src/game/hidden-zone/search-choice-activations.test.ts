@@ -6,7 +6,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  handleMysteryBoxTopFiveProgramInstallActivation,
+  handleTopFiveProgramInstallActivation,
   searchStackInstallTargets,
   searchStackToGripTargets,
   searchTrashToGripTargets,
@@ -37,15 +37,17 @@ function card(
   } as CardDefinition;
 }
 
-function makeHost(input: {
-  stack?: CardInstanceId[];
-  heap?: CardInstanceId[];
-  definitions?: Record<string, CardDefinition>;
-  credits?: number;
-  rigPrograms?: CardInstanceId[];
-  canInstallIds?: CardInstanceId[];
-  run?: NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>;
-} = {}): HiddenZoneSearchActivationHost {
+function makeHost(
+  input: {
+    stack?: CardInstanceId[];
+    heap?: CardInstanceId[];
+    definitions?: Record<string, CardDefinition>;
+    credits?: number;
+    rigPrograms?: CardInstanceId[];
+    canInstallIds?: CardInstanceId[];
+    run?: NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>;
+  } = {},
+): HiddenZoneSearchActivationHost {
   const definitions = input.definitions ?? {};
   const canInstallIds = new Set(input.canInstallIds ?? []);
   return {
@@ -100,7 +102,11 @@ describe("hidden-zone search choice activations", () => {
       heap: [heapProgram],
       definitions: {
         [stackProgram]: card("stack_program_def", "program", "Stack Program"),
-        [stackResource]: card("stack_resource_def", "resource", "Stack Resource"),
+        [stackResource]: card(
+          "stack_resource_def",
+          "resource",
+          "Stack Resource",
+        ),
         [heapProgram]: card("heap_program_def", "program", "Heap Program"),
       },
     });
@@ -113,7 +119,9 @@ describe("hidden-zone search choice activations", () => {
       revealToCorp: true,
       shuffleAfterwards: true,
     });
-    expect(host.state.pendingChoice?.choiceId).toBe("p3_37_search_stack_to_grip_11");
+    expect(host.state.pendingChoice?.choiceId).toBe(
+      "p3_37_search_stack_to_grip_11",
+    );
     expect(host.state.pendingChoice?.source).toBe(
       "p3_37.search_stack_to_grip:source:source_def:program:reveal:shuffle:11",
     );
@@ -131,7 +139,7 @@ describe("hidden-zone search choice activations", () => {
       filter: "program",
     });
     expect(
-      ((host.state.pendingChoice as unknown) as { choiceId: string }).choiceId,
+      (host.state.pendingChoice as unknown as { choiceId: string }).choiceId,
     ).toBe("p3_37_search_trash_to_grip_11");
     expect(trashResult.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_37_search_trash_to_grip",
@@ -229,18 +237,22 @@ describe("hidden-zone search choice activations", () => {
       },
     });
 
-    const result = startLookTopStackShowToCorpThenInstallMatchingActivation(host, {
-      sourceCardId,
-      sourceDefinitionId,
-      count: 5,
-      allowedTypes: ["program"],
-      installCost: "free",
-      trashSourceIfInstalled: true,
-      shuffleAfterwards: true,
-    });
+    const result = startLookTopStackShowToCorpThenInstallMatchingActivation(
+      host,
+      {
+        sourceCardId,
+        sourceDefinitionId,
+        count: 5,
+        allowedTypes: ["program"],
+        installCost: "free",
+        trashSourceIfInstalled: true,
+        shuffleAfterwards: true,
+      },
+    );
 
     expect(result.publicPayload).toMatchObject({
-      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       revealCount: 2,
       programFound: true,
       choiceVisibility: "corp_review",
@@ -254,11 +266,9 @@ describe("hidden-zone search choice activations", () => {
       minSelections: 1,
       maxSelections: 1,
     });
-    expect(host.state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      `shown_${program}`,
-      `shown_${resource}`,
-      "done",
-    ]);
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.id),
+    ).toEqual([`shown_${program}`, `shown_${resource}`, "done"]);
     expect(host.state.run?.successfulRunAbilityUsedSourceIds).toBeUndefined();
   });
 
@@ -274,14 +284,17 @@ describe("hidden-zone search choice activations", () => {
       },
     });
 
-    expect(sneakPreviewSourceOptions(host).map((option) => option.value)).toEqual([
-      "heap",
-      "stack",
-    ]);
+    expect(
+      sneakPreviewSourceOptions(host).map((option) => option.value),
+    ).toEqual(["heap", "stack"]);
     startSneakPreviewSourceActivation(host);
 
-    expect(host.state.pendingChoice?.choiceId).toBe("v1911_sneak_preview_source_11");
-    expect(host.state.pendingChoice?.source).toBe("v1911.sneak_preview_source:11");
+    expect(host.state.pendingChoice?.choiceId).toBe(
+      "v1911_sneak_preview_source_11",
+    );
+    expect(host.state.pendingChoice?.source).toBe(
+      "v1911.sneak_preview_source:11",
+    );
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "sneak_preview_source_choice",
       choiceVisibility: "runner_private",
@@ -303,7 +316,7 @@ describe("hidden-zone search choice activations", () => {
       },
     });
 
-    const result = handleMysteryBoxTopFiveProgramInstallActivation(host);
+    const result = handleTopFiveProgramInstallActivation(host);
 
     expect(result.handled).toBe(true);
     expect(host.state.pendingChoice?.choiceId).toBe("v1915_mystery_box_11");
@@ -313,6 +326,8 @@ describe("hidden-zone search choice activations", () => {
       programFound: true,
       choiceVisibility: "public",
     });
-    expect(host.state.run?.mysteryBoxUsedSourceIdsThisRun).toEqual([sourceCardId]);
+    expect(host.state.run?.mysteryBoxUsedSourceIdsThisRun).toEqual([
+      sourceCardId,
+    ]);
   });
 });

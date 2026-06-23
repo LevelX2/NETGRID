@@ -63,9 +63,10 @@ export type HiddenZoneSearchActivationBaseHost = {
   shuffleRunnerStack: (purpose: string) => void;
 };
 
-export type HiddenZoneSearchActivationHost = HiddenZoneSearchActivationBaseHost & {
-  legalAction: LegalAction;
-};
+export type HiddenZoneSearchActivationHost =
+  HiddenZoneSearchActivationBaseHost & {
+    legalAction: LegalAction;
+  };
 
 export type HiddenZoneSearchActivationResult = {
   publicPayload: HiddenZonePayload;
@@ -135,31 +136,39 @@ export function startSearchTrashToGripActivation(
     filter: SearchToGripFilter;
   },
 ): HiddenZoneSearchActivationResult {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const targets = searchTrashToGripTargets(host, input.filter);
-  if (targets.length === 0) throw new Error("Im Trash liegt keine suchbare Karte.");
+  if (targets.length === 0)
+    throw new Error("Im Trash liegt keine suchbare Karte.");
   host.state.pendingChoice = buildSearchTrashToGripChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId: input.sourceCardId,
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
-    options: host.state.runner.heap.slice().sort().map((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      const selectable = targets.includes(cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: definition.title,
-        value: cardId,
-        ...(!selectable ? { selectable: false } : {}),
-      };
-    }),
+    options: host.state.runner.heap
+      .slice()
+      .sort()
+      .map((cardId) => {
+        const definition = host.cards.definitionFor(cardId);
+        const selectable = targets.includes(cardId);
+        return {
+          id: `card_${cardId}`,
+          label: definition.title,
+          publicLabel: definition.title,
+          value: cardId,
+          ...(!selectable ? { selectable: false } : {}),
+        };
+      }),
   });
   const payload = buildSearchTrashToGripPayload({
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
   });
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -173,9 +182,11 @@ export function startSearchStackToGripActivation(
     shuffleAfterwards: true;
   },
 ): HiddenZoneSearchActivationResult {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const targets = searchStackToGripTargets(host, input.filter);
-  if (targets.length === 0) throw new Error("Im Stack liegt keine suchbare Karte.");
+  if (targets.length === 0)
+    throw new Error("Im Stack liegt keine suchbare Karte.");
   host.state.pendingChoice = buildSearchStackToGripChoice({
     stateVersion: host.state.stateVersion,
     sourceCardId: input.sourceCardId,
@@ -199,7 +210,10 @@ export function startSearchStackToGripActivation(
     filter: input.filter,
     revealToCorp: input.revealToCorp,
   });
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -215,7 +229,8 @@ export function startLookTopStackTakeMatchingActivation(
     shuffleRemainder: true;
   },
 ): HiddenZoneSearchActivationResult {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const topCards = host.state.runner.stack.slice(
     0,
     Math.max(0, Math.floor(input.count)),
@@ -246,11 +261,8 @@ export function startLookTopStackTakeMatchingActivation(
       };
     }),
     maxSelections: Math.min(
-      lookTopStackTakeMatchingTargets(
-        host,
-        input.count,
-        input.allowedTypes,
-      ).length,
+      lookTopStackTakeMatchingTargets(host, input.count, input.allowedTypes)
+        .length,
       maxAffordable,
     ),
   });
@@ -259,7 +271,10 @@ export function startLookTopStackTakeMatchingActivation(
     privateLookCount: topCards.length,
     costPerTaken: input.costPerTaken,
   });
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -273,7 +288,8 @@ export function startSearchStackInstallActivation(
     shuffleAfterwards: true;
   },
 ): HiddenZoneSearchActivationResult {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const targets = searchStackInstallTargets(
     host,
     input.filter,
@@ -303,7 +319,10 @@ export function startSearchStackInstallActivation(
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
   });
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -334,7 +353,10 @@ export function startStackOrTrashProgramInstallActivation(
     sourceDefinitionId: input.sourceDefinitionId,
     temporaryReturnAtEndOfTurn: true,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -358,7 +380,8 @@ export function startLookTopStackShowToCorpThenInstallMatchingActivation(
     input.allowedTypes.some((type) => type !== "program")
   )
     throw new Error("Diese Stack-Reveal-Installation ist nicht unterstuetzt.");
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   requireRun(host);
   const topCards = host.state.runner.stack.slice(0, input.count);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
@@ -412,7 +435,8 @@ export function startAujourdOuiTop5Activation(
   host: HiddenZoneSearchActivationHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (
     !host.state.runner.rig.resources.includes(sourceCardId) ||
     host.cards.definitionFor(sourceCardId).id !==
@@ -471,7 +495,8 @@ export function startSelfModifyingCodeStackActivation(
   host: HiddenZoneSearchActivationHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const hasSearchableCard = host.state.runner.stack.some((cardId) =>
     runnerStackSearchCardMatchesFilter(host, cardId, "program"),
   );
@@ -501,10 +526,12 @@ export function sneakPreviewInstallableProgramIds(
   host: HiddenZoneSearchActivationBaseHost,
   zone: SearchInstallSourceZone,
 ): CardInstanceId[] {
-  const source = zone === "heap" ? host.state.runner.heap : host.state.runner.stack;
+  const source =
+    zone === "heap" ? host.state.runner.heap : host.state.runner.stack;
   return source.filter((cardId) => {
     const definition = host.cards.definitionFor(cardId);
-    const uniqueBlocked = host.cards.isUniqueRunnerDefinitionInstalled(definition);
+    const uniqueBlocked =
+      host.cards.isUniqueRunnerDefinitionInstalled(definition);
     return (
       definition.type === "program" &&
       !uniqueBlocked &&
@@ -533,15 +560,19 @@ export function startSneakPreviewSourceActivation(
     sourceDefinitionId?: CardDefinitionId;
   } = {},
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const options = sneakPreviewSourceOptions(host);
   if (options.length === 0)
-    throw new Error("Sneak Preview findet kein legal installierbares Programm.");
+    throw new Error(
+      "Sneak Preview findet kein legal installierbares Programm.",
+    );
   host.state.pendingChoice = buildSneakPreviewSourceChoice({
     stateVersion: host.state.stateVersion,
     sourcePrefix: input.sourcePrefix ?? "v1911.sneak_preview",
     sourceCardId: input.sourceCardId,
-    sourceDefinitionId: input.sourceDefinitionId ?? host.constants.sneakPreviewId,
+    sourceDefinitionId:
+      input.sourceDefinitionId ?? host.constants.sneakPreviewId,
     options,
   });
   host.legalAction.payload = {
@@ -550,13 +581,15 @@ export function startSneakPreviewSourceActivation(
   };
 }
 
-export function handleMysteryBoxTopFiveProgramInstallActivation(
+export function handleTopFiveProgramInstallActivation(
   host: HiddenZoneSearchActivationHost,
 ): HiddenZoneSearchActivationHandlerResult {
   if (host.legalAction.side !== "runner")
     throw new Error("Nur der Runner darf Mystery Box nutzen.");
   const run = requireRun(host);
-  const sourceCardId = String(host.legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    host.legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Mystery Box ist nicht installiert.");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
@@ -650,7 +683,8 @@ export function runnerProgramInstallFromZoneTargets(
   zone: SearchInstallSourceZone,
   installCost: SearchInstallCost,
 ): CardInstanceId[] {
-  const source = zone === "heap" ? host.state.runner.heap : host.state.runner.stack;
+  const source =
+    zone === "heap" ? host.state.runner.heap : host.state.runner.stack;
   return source.filter((cardId) =>
     host.install.canInstallRunnerProgramFromZone(cardId, zone, installCost),
   );
@@ -688,7 +722,11 @@ export function lookTopStackShowToCorpThenInstallMatchingTargets(
     .filter(
       (cardId) =>
         allowed.has("program") &&
-        host.install.canInstallRunnerProgramFromZone(cardId, "stack", installCost),
+        host.install.canInstallRunnerProgramFromZone(
+          cardId,
+          "stack",
+          installCost,
+        ),
     );
 }
 
@@ -701,7 +739,10 @@ export function lookTopStackTakeMatchingTargets(
   return host.state.runner.stack
     .slice(0, Math.max(0, Math.floor(count)))
     .filter((cardId) =>
-      cardTypeMatchesSearchTypes(host.cards.definitionFor(cardId).type, allowed),
+      cardTypeMatchesSearchTypes(
+        host.cards.definitionFor(cardId).type,
+        allowed,
+      ),
     );
 }
 

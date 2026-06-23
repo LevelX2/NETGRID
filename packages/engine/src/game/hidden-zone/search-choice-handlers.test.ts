@@ -11,7 +11,7 @@ import {
   handleHiddenZoneSearchChoice,
   type HiddenZoneSearchChoiceHandlerHost,
 } from "./search-choice-handlers";
-import { handleMysteryBoxTopFiveProgramInstallActivation } from "./search-choice-activations";
+import { handleTopFiveProgramInstallActivation } from "./search-choice-activations";
 
 const programId = "program_1" as CardInstanceId;
 const secondProgramId = "program_2" as CardInstanceId;
@@ -31,9 +31,14 @@ function definition(
   return {
     id,
     title: id,
-    side: type === "agenda" || type === "asset" || type === "ice" || type === "operation" || type === "upgrade"
-      ? "corp"
-      : "runner",
+    side:
+      type === "agenda" ||
+      type === "asset" ||
+      type === "ice" ||
+      type === "operation" ||
+      type === "upgrade"
+        ? "corp"
+        : "runner",
     type,
     ...extra,
   } as CardDefinition;
@@ -83,15 +88,26 @@ function host(
   } = {},
 ): HiddenZoneSearchChoiceHandlerHost {
   const definitions = {
-    [programId]: definition("program_definition" as CardDefinitionId, "program", {
-      installCost: 1,
-      memoryCost: 1,
-    }),
-    [secondProgramId]: definition("second_program_definition" as CardDefinitionId, "program", {
-      installCost: 1,
-      memoryCost: 1,
-    }),
-    [hardwareId]: definition("hardware_definition" as CardDefinitionId, "hardware"),
+    [programId]: definition(
+      "program_definition" as CardDefinitionId,
+      "program",
+      {
+        installCost: 1,
+        memoryCost: 1,
+      },
+    ),
+    [secondProgramId]: definition(
+      "second_program_definition" as CardDefinitionId,
+      "program",
+      {
+        installCost: 1,
+        memoryCost: 1,
+      },
+    ),
+    [hardwareId]: definition(
+      "hardware_definition" as CardDefinitionId,
+      "hardware",
+    ),
     [sourceCardId]: definition(sourceDefinitionId, "resource"),
     ...overrides.definitions,
   };
@@ -110,9 +126,9 @@ function host(
   const cardInstances: Record<CardInstanceId, any> = {};
   for (const cardId of [
     ...runner.stack,
-      ...runner.heap,
-      hardwareId,
-      ...runner.rig.programs,
+    ...runner.heap,
+    hardwareId,
+    ...runner.rig.programs,
     ...runner.rig.resources,
   ]) {
     cardInstances[cardId] = {
@@ -137,14 +153,17 @@ function host(
     playerAction: selectedPlayerAction,
     legalAction,
     state: {
-      runner: runner as unknown as HiddenZoneSearchChoiceHandlerHost["state"]["runner"],
+      runner:
+        runner as unknown as HiddenZoneSearchChoiceHandlerHost["state"]["runner"],
       cardInstances,
       stateVersion: 1,
       randomCounter: 0,
       run: {
         runId: "run-1",
         phase: "movement",
-      } as unknown as NonNullable<HiddenZoneSearchChoiceHandlerHost["state"]["run"]>,
+      } as unknown as NonNullable<
+        HiddenZoneSearchChoiceHandlerHost["state"]["run"]
+      >,
     },
     constants: {
       aujourdOuiResourceCardId: aujourdOuiId,
@@ -168,7 +187,9 @@ function host(
         runner.heap = runner.heap.filter((id) => id !== cardId);
         runner.grip = runner.grip.filter((id) => id !== cardId);
         runner.rig.programs = runner.rig.programs.filter((id) => id !== cardId);
-        runner.rig.resources = runner.rig.resources.filter((id) => id !== cardId);
+        runner.rig.resources = runner.rig.resources.filter(
+          (id) => id !== cardId,
+        );
       },
       addToGrip: (cardId) => runner.grip.push(cardId),
       trashRunnerInstalledCardToHeap: (cardId) => trashed.push(cardId),
@@ -253,7 +274,11 @@ describe("hidden-zone search choice handlers", () => {
         source: `p3_37.look_top_stack_take_matching:${sourceCardId}:${sourceDefinitionId}:2:program:1:reveal:shuffle`,
         options: [
           { id: `card_${programId}`, label: "Program", value: programId },
-          { id: `card_${secondProgramId}`, label: "Program 2", value: secondProgramId },
+          {
+            id: `card_${secondProgramId}`,
+            label: "Program 2",
+            value: secondProgramId,
+          },
         ],
       }),
       playerAction(`card_${programId}`),
@@ -368,19 +393,18 @@ describe("hidden-zone search choice handlers", () => {
   });
 
   it("handles Mystery Box activation no-install path", () => {
-    const testHost = host(
-      choice({ source: "unused" }),
-      playerAction(),
-      {
-        stack: [hardwareId],
-        definitions: {
-          [sourceCardId]: definition("mystery_box" as CardDefinitionId, "program"),
-        },
+    const testHost = host(choice({ source: "unused" }), playerAction(), {
+      stack: [hardwareId],
+      definitions: {
+        [sourceCardId]: definition(
+          "mystery_box" as CardDefinitionId,
+          "program",
+        ),
       },
-    );
+    });
     testHost.legalAction.payload = { cardId: sourceCardId };
 
-    const result = handleMysteryBoxTopFiveProgramInstallActivation(testHost);
+    const result = handleTopFiveProgramInstallActivation(testHost);
 
     expect(result).toMatchObject({
       handled: true,
@@ -403,7 +427,10 @@ describe("hidden-zone search choice handlers", () => {
       playerAction(`card_${programId}`),
       {
         definitions: {
-          [sourceCardId]: definition("mystery_box" as CardDefinitionId, "program"),
+          [sourceCardId]: definition(
+            "mystery_box" as CardDefinitionId,
+            "program",
+          ),
         },
         installForFree: (cardId) => {
           installed.push(cardId);
@@ -459,8 +486,18 @@ describe("hidden-zone search choice handlers", () => {
         side: "corp",
         source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:1`,
         options: [
-          { id: `shown_${programId}`, label: "Program", value: programId, selectable: false },
-          { id: `shown_${hardwareId}`, label: "Hardware", value: hardwareId, selectable: false },
+          {
+            id: `shown_${programId}`,
+            label: "Program",
+            value: programId,
+            selectable: false,
+          },
+          {
+            id: `shown_${hardwareId}`,
+            label: "Hardware",
+            value: hardwareId,
+            selectable: false,
+          },
           { id: "done", label: "Gesehen", value: "done" },
         ],
       }),
@@ -481,11 +518,12 @@ describe("hidden-zone search choice handlers", () => {
       source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:2`,
       visibility: "public",
     });
-    expect(testHost.state.pendingChoice?.options.map((option) => option.value)).toEqual([
-      programId,
-    ]);
+    expect(
+      testHost.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual([programId]);
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       programFound: true,
       choiceVisibility: "public",
       shufflePerformed: false,
@@ -514,7 +552,8 @@ describe("hidden-zone search choice handlers", () => {
       sourceTrashCardIds: [sourceCardId],
     });
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       revealCount: 2,
       revealedCardDefinitionIds: "program_definition,hardware_definition",
       revealedProgramCount: 1,
@@ -533,7 +572,12 @@ describe("hidden-zone search choice handlers", () => {
         side: "corp",
         source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${hardwareId}:1`,
         options: [
-          { id: `shown_${hardwareId}`, label: "Hardware", value: hardwareId, selectable: false },
+          {
+            id: `shown_${hardwareId}`,
+            label: "Hardware",
+            value: hardwareId,
+            selectable: false,
+          },
           { id: "done", label: "Gesehen", value: "done" },
         ],
       }),
@@ -552,7 +596,8 @@ describe("hidden-zone search choice handlers", () => {
       sourceCardId,
     ]);
     expect(testHost.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       programFound: false,
       installedProgramCount: 0,
       selfTrashed: false,

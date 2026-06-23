@@ -71,12 +71,14 @@ export function resolveSelfModifyingCodeSearchInstallIntent(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   stackCardIds: readonly CardInstanceId[];
-  selectedCardDefinition: {
-    id: CardDefinitionId;
-    type: string;
-    installCost?: number | undefined;
-    memoryCost?: number | undefined;
-  } | undefined;
+  selectedCardDefinition:
+    | {
+        id: CardDefinitionId;
+        type: string;
+        installCost?: number | undefined;
+        memoryCost?: number | undefined;
+      }
+    | undefined;
   availableInstallCredits: number;
   runnerMemoryUsed: number;
   runnerMemoryLimit: number;
@@ -125,17 +127,21 @@ export function resolveSneakPreviewSearchInstallIntent(input: {
   legalTargetIdsForSourceZone: (
     sourceZone: SearchInstallSourceZone,
   ) => readonly CardInstanceId[];
-  selectedCardDefinition: {
-    id: CardDefinitionId;
-    type: string;
-  } | undefined;
+  selectedCardDefinition:
+    | {
+        id: CardDefinitionId;
+        type: string;
+      }
+    | undefined;
   defaultSourceDefinitionId: CardDefinitionId;
 }): SneakPreviewSearchInstallExecutionPlan {
   const sourceZone = sneakPreviewSourceZone(input.choice);
   const selection = resolveSneakPreviewSearchInstallSelection({
     choice: input.choice,
     selectedCardId: input.selectedCardId,
-    legalTargetIds: sourceZone ? input.legalTargetIdsForSourceZone(sourceZone) : [],
+    legalTargetIds: sourceZone
+      ? input.legalTargetIdsForSourceZone(sourceZone)
+      : [],
     defaultSourceDefinitionId: input.defaultSourceDefinitionId,
   });
   const selectedDefinition = input.selectedCardDefinition;
@@ -211,10 +217,12 @@ export function resolveMysteryBoxSearchInstallIntent(input: {
   selectedCardId: CardInstanceId | undefined;
   topCardIds: readonly CardInstanceId[];
   programCandidateIds?: readonly CardInstanceId[] | undefined;
-  selectedCardDefinition: {
-    id: CardDefinitionId;
-    type: string;
-  } | undefined;
+  selectedCardDefinition:
+    | {
+        id: CardDefinitionId;
+        type: string;
+      }
+    | undefined;
 }): MysteryBoxSearchInstallExecutionPlan {
   const programCandidateIds =
     input.programCandidateIds ??
@@ -227,7 +235,9 @@ export function resolveMysteryBoxSearchInstallIntent(input: {
     isSelectedProgram: input.selectedCardDefinition?.type === "program",
   });
   if (!programCandidateIds.includes(selection.selectedCardId))
-    throw new Error("Das gewaehlte Programm liegt nicht im Mystery-Box-Kandidatenpool.");
+    throw new Error(
+      "Das gewaehlte Programm liegt nicht im Mystery-Box-Kandidatenpool.",
+    );
   const selectedDefinition = input.selectedCardDefinition;
   if (!selectedDefinition)
     throw new Error("Mystery Box kann nur ein Programm installieren.");
@@ -271,7 +281,7 @@ export function buildMysteryBoxSearchInstallResolvedPayload(
   if (!plan.selectedCardDefinitionId)
     throw new Error("Mystery Box hat kein installiertes Programm im Plan.");
   return {
-    v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+    v1915RunnerProgramAbility: "top5_program_install",
     hiddenZoneBarrier: true,
     hiddenZoneAction: "mystery_box_program_install",
     installedProgramDefinitionId: plan.selectedCardDefinitionId,
@@ -317,7 +327,9 @@ export function buildSelfModifyingCodeResolvedPayload(
     searchDestination: input.installed ? "runner_rig" : "runner_stack",
     shuffled: plan.shuffleNeeded,
     installed: input.installed,
-    ...(plan.uniqueBlocked ? { installBlockedReason: "unique_already_installed" } : {}),
+    ...(plan.uniqueBlocked
+      ? { installBlockedReason: "unique_already_installed" }
+      : {}),
     ...(!plan.canPay ? { installBlockedReason: "insufficient_credits" } : {}),
   };
 }

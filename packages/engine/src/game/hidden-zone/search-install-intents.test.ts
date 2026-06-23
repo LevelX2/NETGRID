@@ -19,8 +19,7 @@ import {
 const sourceDefinitionId = "onr_v1_059_self-modifying-code" as CardDefinitionId;
 const selectedCardId = "stack_program" as CardInstanceId;
 const selectedDefinitionId = "simple_decoder" as CardDefinitionId;
-const sneakPreviewDefinitionId =
-  "onr_v1_089_sneak-preview" as CardDefinitionId;
+const sneakPreviewDefinitionId = "onr_v1_089_sneak-preview" as CardDefinitionId;
 const mysterySourceCardId = "mystery_box" as CardInstanceId;
 
 function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
@@ -75,9 +74,11 @@ describe("hidden-zone search/install intents", () => {
       shouldOpenMemoryChoice: false,
       canAttemptInstall: true,
     });
-    expect(buildSelfModifyingCodeResolvedPayload(plan, {
-      installed: true,
-    })).toEqual({
+    expect(
+      buildSelfModifyingCodeResolvedPayload(plan, {
+        installed: true,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
       hiddenZoneAction: "self_modifying_code_install_program",
@@ -109,9 +110,11 @@ describe("hidden-zone search/install intents", () => {
     });
 
     expect(plan.shouldOpenMemoryChoice).toBe(true);
-    expect(buildSelfModifyingCodeMemoryDeferredPayload(plan, {
-      installDeferredForMemory: true,
-    })).toEqual({
+    expect(
+      buildSelfModifyingCodeMemoryDeferredPayload(plan, {
+        installDeferredForMemory: true,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
       hiddenZoneAction: "self_modifying_code_install_program",
@@ -160,9 +163,11 @@ describe("hidden-zone search/install intents", () => {
     });
 
     expect(blocked.canAttemptInstall).toBe(false);
-    expect(buildSelfModifyingCodeResolvedPayload(blocked, {
-      installed: false,
-    })).toMatchObject({
+    expect(
+      buildSelfModifyingCodeResolvedPayload(blocked, {
+        installed: false,
+      }),
+    ).toMatchObject({
       searchDestination: "runner_stack",
       installed: false,
       installBlockedReason: "insufficient_credits",
@@ -294,9 +299,11 @@ describe("hidden-zone search/install intents", () => {
       installedProgramCount: 0,
       selfTrashed: false,
     });
-    expect(buildMysteryBoxNoInstallResolvedPayload(plan, {
-      randomCounterAfter: 4,
-    })).toEqual({
+    expect(
+      buildMysteryBoxNoInstallResolvedPayload(plan, {
+        randomCounterAfter: 4,
+      }),
+    ).toEqual({
       programFound: false,
       installedProgramCount: 0,
       selfTrashed: false,
@@ -338,10 +345,12 @@ describe("hidden-zone search/install intents", () => {
       installedProgramCount: 1,
       selfTrashed: true,
     });
-    expect(buildMysteryBoxSearchInstallResolvedPayload(plan, {
-      randomCounterAfter: 5,
-    })).toEqual({
-      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+    expect(
+      buildMysteryBoxSearchInstallResolvedPayload(plan, {
+        randomCounterAfter: 5,
+      }),
+    ).toEqual({
+      v1915RunnerProgramAbility: "top5_program_install",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "mystery_box_program_install",
       installedProgramDefinitionId: selectedDefinitionId,
