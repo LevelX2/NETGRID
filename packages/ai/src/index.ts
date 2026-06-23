@@ -158,8 +158,8 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeConfidence,
   semanticRuntimeScoreFromComponents,
-  semanticRuntimeTypeTieBreakerScore,
 } from "./runtime/semantic-runtime-score-components";
+import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -4157,53 +4157,28 @@ function semanticRuntimeScoreBreakdown(
   exclusion?: SemanticRuntimeExclusion,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
-  const typeTieBreaker = semanticRuntimeTypeTieBreakerScore(action.type);
-  const contextComponents =
-    input.side === "runner"
-      ? semanticRuntimeRunnerScoreComponents(
-          input,
-          action,
-          scopeId,
-          actionSemanticCandidate,
-        )
-      : semanticRuntimeCorpScoreComponents(input, action, scopeId);
-  const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
-  const costPenalty = -(actionCreditCost(action) * 35);
-  return [
-    buildSemanticDecisionDebugScoreComponent({
-      key: "semantic_type_tie_breaker",
-      label: "Action-Typ-Tiebreaker",
-      value: typeTieBreaker,
-      reason: action.type,
-    }),
-    ...(exclusion
-      ? [
-          buildSemanticDecisionDebugScoreComponent({
-            key: "semantic_action_excluded",
-            label: `Ausgeschlossen: ${exclusion.label}`,
-            value: 0,
-            reason: exclusion.reason,
-          }),
-        ]
-      : []),
-    ...contextComponents,
-    ...(privateBonus !== 0
-      ? [
-          buildSemanticDecisionDebugScoreComponent({
-            key: "semantic_private_actor_bonus",
-            label: "Akteur-private Action",
-            value: privateBonus,
-            reason: "private_to_actor",
-          }),
-        ]
-      : []),
-    buildSemanticDecisionDebugScoreComponent({
-      key: "semantic_credit_cost_penalty",
-      label: "Credit-Kosten",
-      value: costPenalty,
-      reason: String(actionCreditCost(action)),
-    }),
-  ];
+  return buildSemanticRuntimeScoreBreakdown({
+    input,
+    action,
+    scopeId,
+    ...(exclusion ? { exclusion } : {}),
+    dependencies: {
+      contextComponents: (componentInput, componentAction, componentScopeId) =>
+        componentInput.side === "runner"
+          ? semanticRuntimeRunnerScoreComponents(
+              componentInput,
+              componentAction,
+              componentScopeId,
+              actionSemanticCandidate,
+            )
+          : semanticRuntimeCorpScoreComponents(
+              componentInput,
+              componentAction,
+              componentScopeId,
+            ),
+      actionCreditCost,
+    },
+  });
 }
 
 function semanticRuntimeActionExclusion(
