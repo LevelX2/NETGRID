@@ -40,8 +40,8 @@ export type HiddenZoneArrangeChoiceHandlerHost = {
   playerAction?: PlayerAction;
   constants: {
     corpRdTop5ReorderOperationCardId: CardDefinitionId;
-    roninAroundId: CardDefinitionId;
-    tooManyDoorsId: CardDefinitionId;
+    runnerStackArrangeSourceId: CardDefinitionId;
+    corpRdTopArrangeSourceId: CardDefinitionId;
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
@@ -453,9 +453,9 @@ function resolveRunnerStackArrangeChoice(
     if (
       !sourceCardId ||
       !host.state.runner.rig.resources.includes(sourceCardId) ||
-      host.cards.definitionFor(sourceCardId).id !== host.constants.roninAroundId
+      host.cards.definitionFor(sourceCardId).id !== host.constants.runnerStackArrangeSourceId
     ) {
-      throw new Error("Die Ronin-Around-Reorder-Quelle ist nicht mehr installiert.");
+      throw new Error("Die Stack-Reorder-Quelle ist nicht mehr installiert.");
     }
   }
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
@@ -553,7 +553,7 @@ function resolveCorpRdArrangeChoice(
   const [, sourceIceId, subroutineIndexRaw] = choice.source.split(":");
   if (
     !sourceIceId ||
-    host.cards.definitionFor(sourceIceId).id !== host.constants.tooManyDoorsId
+    host.cards.definitionFor(sourceIceId).id !== host.constants.corpRdTopArrangeSourceId
   )
     throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Secret Spend Compare.");
   const subroutineIndex = Number(subroutineIndexRaw);

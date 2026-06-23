@@ -246,8 +246,8 @@ export function createHiddenZoneArrangeRuntime(
       constants: {
         corpRdTop5ReorderOperationCardId:
           CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
-        roninAroundId: RONIN_AROUND_ID,
-        tooManyDoorsId: TOO_MANY_DOORS_ID,
+        runnerStackArrangeSourceId: RONIN_AROUND_ID,
+        corpRdTopArrangeSourceId: TOO_MANY_DOORS_ID,
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
