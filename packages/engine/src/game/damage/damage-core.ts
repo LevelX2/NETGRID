@@ -1424,7 +1424,7 @@ function collectReplacementCandidates(
         return flatlineReplacementSourcesForDefinition(definition).some(
           (source) =>
             source.kind === "flatline_replacement_from_grip" &&
-            source.replacement === "arasaka_owns_you" &&
+            source.replacement === "flatline_tag_replacement" &&
             source.visibility === "public",
         );
       },
@@ -1453,7 +1453,7 @@ function collectReplacementCandidates(
         return flatlineReplacementSourcesForDefinition(definition).some(
           (source) =>
             source.kind === "flatline_replacement_installed" &&
-            source.replacement === "emergency_self_construct" &&
+            source.replacement === "installed_flatline_prevention" &&
             source.visibility === "public",
         );
       },

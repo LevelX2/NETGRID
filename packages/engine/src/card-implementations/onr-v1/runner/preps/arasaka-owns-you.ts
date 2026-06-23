@@ -7,7 +7,7 @@ export const arasakaOwnsYouImplementation: CardImplementationDefinition = {
   flatlineReplacementSources: [
     {
       kind: "flatline_replacement_from_grip",
-      replacement: "arasaka_owns_you",
+      replacement: "flatline_tag_replacement",
       visibility: "public",
     },
   ],

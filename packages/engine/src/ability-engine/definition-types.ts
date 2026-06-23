@@ -2153,7 +2153,7 @@ export type CardDamagePreventionSourceImplementation = {
 export type CardFlatlineReplacementSourceImplementation =
   | {
       kind: "flatline_replacement_from_grip";
-      replacement: "arasaka_owns_you";
+      replacement: "flatline_tag_replacement";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -2166,7 +2166,7 @@ export type CardFlatlineReplacementSourceImplementation =
     }
   | {
       kind: "flatline_replacement_installed";
-      replacement: "emergency_self_construct";
+      replacement: "installed_flatline_prevention";
       cost: { kind: "trash_source" };
       visibility: Extract<EventVisibilityClass, "public">;
     };
