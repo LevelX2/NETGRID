@@ -720,7 +720,7 @@ export function createApplyActionRuntimeHosts(
     rezzedCorpRootCardIds,
     shouldOpenInvestmentFirmCreditChoice,
     spendRunnerTagRemovalCredits,
-    startCodeViralCachePurgeChoice,
+    startVirusCounterPurgePreserveChoice,
     startInvestmentFirmCreditChoice,
     traceOrchestrationHost,
     trashCorpInstalledCardToArchives,
@@ -749,7 +749,7 @@ export function createApplyActionRuntimeHosts(
         trashRunnerInstalledCardToHeap,
       },
       callbacks: {
-        startCodeViralCachePurgeChoice,
+        startVirusCounterPurgePreserveChoice,
       },
     };
   }

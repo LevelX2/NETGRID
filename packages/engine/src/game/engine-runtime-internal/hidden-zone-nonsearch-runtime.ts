@@ -84,7 +84,7 @@ export function createHiddenZoneNonSearchRuntime(
     resolveAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveCodeViralCachePurgeChoice,
+    resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,

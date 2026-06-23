@@ -84,7 +84,7 @@ export function createHiddenZoneArrangeRuntime(
     resolveAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveCodeViralCachePurgeChoice,
+    resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,

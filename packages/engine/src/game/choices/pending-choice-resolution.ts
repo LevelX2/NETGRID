@@ -45,7 +45,7 @@ export type PendingChoiceResolutionHost = {
     resolvePaidSourceReturnToGripChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
-    resolveCodeViralCachePurgeChoice: HostFn<void>;
+    resolveVirusCounterPurgePreserveChoice: HostFn<void>;
     resolveChimeraDaemonTrashChoice: HostFn<void>;
     resolveRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
@@ -164,8 +164,8 @@ export function resolvePendingChoice(
   const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
   const resolveIncubatorTransformChoice =
     host.hiddenZone.resolveIncubatorTransformChoice;
-  const resolveCodeViralCachePurgeChoice =
-    host.hiddenZone.resolveCodeViralCachePurgeChoice;
+  const resolveVirusCounterPurgePreserveChoice =
+    host.hiddenZone.resolveVirusCounterPurgePreserveChoice;
   const resolveChimeraDaemonTrashChoice =
     host.hiddenZone.resolveChimeraDaemonTrashChoice;
   const resolveRunnerProgramReturnChoice =
@@ -523,7 +523,7 @@ export function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("runner_virus_counter_purge_replacement")
   ) {
-    resolveCodeViralCachePurgeChoice(state, legalAction, playerAction);
+    resolveVirusCounterPurgePreserveChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.aardvark")) {

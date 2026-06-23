@@ -56,7 +56,7 @@ export type TurnBasicExecutionHost = {
     ) => void;
   };
   callbacks: {
-    startCodeViralCachePurgeChoice: (
+    startVirusCounterPurgePreserveChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => boolean;
@@ -128,7 +128,7 @@ export function handleTurnBasicExecution(
       return handled(legalAction);
     case "purge_virus_counters": {
       host.turn.spendClicks(state, "corp", 3);
-      if (host.callbacks.startCodeViralCachePurgeChoice(state, legalAction))
+      if (host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction))
         return handled(legalAction);
       const purged = purgeVirusCounters(state);
       legalAction.payload = {

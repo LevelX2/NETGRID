@@ -196,8 +196,8 @@ function pendingChoiceHost(
       ),
       resolveRunnerHostingChoice: unexpected("resolveRunnerHostingChoice"),
       resolveIncubatorTransformChoice: unexpected("resolveIncubatorTransformChoice"),
-      resolveCodeViralCachePurgeChoice: unexpected(
-        "resolveCodeViralCachePurgeChoice",
+      resolveVirusCounterPurgePreserveChoice: unexpected(
+        "resolveVirusCounterPurgePreserveChoice",
       ),
       resolveChimeraDaemonTrashChoice: unexpected("resolveChimeraDaemonTrashChoice"),
       resolveRunnerProgramReturnChoice: unexpected(

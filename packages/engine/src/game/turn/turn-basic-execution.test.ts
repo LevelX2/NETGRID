@@ -344,7 +344,7 @@ function testHost(
       },
     },
     callbacks: {
-      startCodeViralCachePurgeChoice: () => false,
+      startVirusCounterPurgePreserveChoice: () => false,
     },
   };
 }

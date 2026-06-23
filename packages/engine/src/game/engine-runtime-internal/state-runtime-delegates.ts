@@ -712,45 +712,45 @@ export function totalCounters(...args: any[]): any {
   return runtimeDelegate("stateRuntimeResolvers", "totalCounters")(...args);
 }
 
-export function installedCodeViralCacheIds(...args: any[]): any {
+export function installedVirusCounterPurgePreserveSourceIds(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "installedCodeViralCacheIds",
+    "installedVirusCounterPurgePreserveSourceIds",
   )(...args);
 }
 
-export function codeViralCachePurgePreserveTargets(...args: any[]): any {
+export function virusCounterPurgePreserveTargets(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "codeViralCachePurgePreserveTargets",
+    "virusCounterPurgePreserveTargets",
   )(...args);
 }
 
-export function startCodeViralCachePurgeChoice(...args: any[]): any {
+export function startVirusCounterPurgePreserveChoice(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "startCodeViralCachePurgeChoice",
+    "startVirusCounterPurgePreserveChoice",
   )(...args);
 }
 
-export function parseCodeViralCachePreserveOption(...args: any[]): any {
+export function parseVirusCounterPurgePreserveOption(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "parseCodeViralCachePreserveOption",
+    "parseVirusCounterPurgePreserveOption",
   )(...args);
 }
 
-export function restoreCodeViralCachePreservedCounters(...args: any[]): any {
+export function restorePurgePreservedVirusCounters(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "restoreCodeViralCachePreservedCounters",
+    "restorePurgePreservedVirusCounters",
   )(...args);
 }
 
-export function resolveCodeViralCachePurgeChoice(...args: any[]): any {
+export function resolveVirusCounterPurgePreserveChoice(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
-    "resolveCodeViralCachePurgeChoice",
+    "resolveVirusCounterPurgePreserveChoice",
   )(...args);
 }
 

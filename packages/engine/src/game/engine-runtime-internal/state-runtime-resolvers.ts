@@ -1513,7 +1513,7 @@ function totalCounters(state: GameState, counterType: CounterType): number {
   return cardCounterTotal + poxTotal + faitTotal;
 }
 
-function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
+function installedVirusCounterPurgePreserveSourceIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.resources
     .filter(
       (cardId) =>
@@ -1523,11 +1523,11 @@ function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
-function codeViralCachePurgePreserveTargets(
+function virusCounterPurgePreserveTargets(
   state: GameState,
-): Array<CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }> {
+): Array<VirusCounterPurgePreserveTarget & { optionId: string; publicLabel: string }> {
   const targets: Array<
-    CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }
+    VirusCounterPurgePreserveTarget & { optionId: string; publicLabel: string }
   > = [];
   for (const cardId of visibleVirusCounterTargetIds(state).sort()) {
     const amount = cardCounter(state, cardId, "virus");
@@ -1562,13 +1562,13 @@ function codeViralCachePurgePreserveTargets(
   return targets;
 }
 
-function startCodeViralCachePurgeChoice(
+function startVirusCounterPurgePreserveChoice(
   state: GameState,
   legalAction: LegalAction,
 ): boolean {
-  const sourceIds = installedCodeViralCacheIds(state);
+  const sourceIds = installedVirusCounterPurgePreserveSourceIds(state);
   if (sourceIds.length === 0) return false;
-  const targets = codeViralCachePurgePreserveTargets(state);
+  const targets = virusCounterPurgePreserveTargets(state);
   if (targets.length === 0) return false;
   const sourceCardId = sourceIds[0];
   state.pendingChoice = {
@@ -1600,9 +1600,9 @@ function startCodeViralCachePurgeChoice(
   return true;
 }
 
-function parseCodeViralCachePreserveOption(
+function parseVirusCounterPurgePreserveOption(
   optionId: string,
-): CodeViralCachePreserveTarget | undefined {
+): VirusCounterPurgePreserveTarget | undefined {
   const [kind, id, indexRaw] = optionId.split(":");
   const index = Number(indexRaw);
   if (!Number.isInteger(index) || index <= 0) return undefined;
@@ -1617,13 +1617,13 @@ function parseCodeViralCachePreserveOption(
   return undefined;
 }
 
-function restoreCodeViralCachePreservedCounters(
+function restorePurgePreservedVirusCounters(
   state: GameState,
   selectedOptionIds: string[],
 ): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
   const selectedTargets = selectedOptionIds
-    .map(parseCodeViralCachePreserveOption)
-    .filter((target): target is CodeViralCachePreserveTarget => Boolean(target));
+    .map(parseVirusCounterPurgePreserveOption)
+    .filter((target): target is VirusCounterPurgePreserveTarget => Boolean(target));
   if (selectedTargets.length !== selectedOptionIds.length)
     throw new Error("Die Virus-Counter-Erhaltungsauswahl ist ungueltig.");
   if (selectedTargets.length > 2)
@@ -1688,7 +1688,7 @@ function restoreCodeViralCachePreservedCounters(
   };
 }
 
-function resolveCodeViralCachePurgeChoice(
+function resolveVirusCounterPurgePreserveChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -1700,13 +1700,13 @@ function resolveCodeViralCachePurgeChoice(
   )
     throw new Error("Es ist keine Virus-Counter-Erhaltungs-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
-  if (!sourceCardId || !installedCodeViralCacheIds(state).includes(sourceCardId))
+  if (!sourceCardId || !installedVirusCounterPurgePreserveSourceIds(state).includes(sourceCardId))
     throw new Error("Die Replacement-Quelle ist nicht mehr installiert.");
   const selected = selectedChoiceIds(playerAction.selectedChoices);
   const legalOptionIds = new Set(choice.options.map((option) => option.id));
   if (selected.some((optionId) => !legalOptionIds.has(optionId)))
     throw new Error("Die Virus-Counter-Erhaltungsauswahl ist nicht legal.");
-  const result = restoreCodeViralCachePreservedCounters(state, selected);
+  const result = restorePurgePreservedVirusCounters(state, selected);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: definitionFor(state, sourceCardId).id,
@@ -2062,12 +2062,12 @@ function refreshRecurringCredits(
     addVisibleCardCounter,
     spendVisibleCardCounter,
     totalCounters,
-    installedCodeViralCacheIds,
-    codeViralCachePurgePreserveTargets,
-    startCodeViralCachePurgeChoice,
-    parseCodeViralCachePreserveOption,
-    restoreCodeViralCachePreservedCounters,
-    resolveCodeViralCachePurgeChoice,
+    installedVirusCounterPurgePreserveSourceIds,
+    virusCounterPurgePreserveTargets,
+    startVirusCounterPurgePreserveChoice,
+    parseVirusCounterPurgePreserveOption,
+    restorePurgePreservedVirusCounters,
+    resolveVirusCounterPurgePreserveChoice,
     microtechBackupDriveIds,
     availableRunnerProgramInstallCredits,
     runnerCanPayInstallCost,
