@@ -1451,7 +1451,7 @@ export type GameState = {
     fangRunLockCreditCost?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
-    shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
+    delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];
     bodyweightDataCrecheExtraRunPending?: boolean;
     bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
     delayedEndTurnEffects?: Array<{

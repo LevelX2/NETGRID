@@ -102,7 +102,7 @@ describe("runner special trigger execution", () => {
     });
     const action = triggerAction(state, {
       cardId: sourceId,
-      shellTradersAbility: "set_aside_from_grip",
+      delayedInstallAbility: "set_aside_from_grip",
       targetCardId: targetId,
       targetCardDefinitionId: "program_a",
       shellCounterAmount: 3,
@@ -121,7 +121,7 @@ describe("runner special trigger execution", () => {
     });
     expect(counter(state, targetId, "shell")).toBe(3);
     expect(action.payload).toMatchObject({
-      hiddenZoneAction: "shell_traders_set_aside",
+      hiddenZoneAction: "delayed_install_set_aside",
       sourceDefinitionId: SHELL_TRADERS_ID,
       targetCardDefinitionId: "program_a",
       counterType: "shell",
@@ -155,7 +155,7 @@ describe("runner special trigger execution", () => {
     });
     const action = triggerAction(state, {
       cardId: sourceId,
-      shellTradersAbility: "remove_shell_counter",
+      delayedInstallAbility: "remove_shell_counter",
       targetCardId: targetId,
       targetCardDefinitionId: "program_a",
     }, [{ credits: 1 }]);
@@ -169,7 +169,7 @@ describe("runner special trigger execution", () => {
     expect(state.runner.memoryUsed).toBe(1);
     expect(counter(state, targetId, "shell")).toBe(0);
     expect(action.payload).toMatchObject({
-      shellTradersInstalledTarget: true,
+      delayedInstallInstalledTarget: true,
       remainingCounters: 0,
       runnerCreditsAfter: 1,
     });

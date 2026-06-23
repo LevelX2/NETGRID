@@ -77,7 +77,7 @@ export function buildRunnerShellTradersSetAsideAction(
     [{ clicks: 1 }],
     {
       cardId: input.sourceCardId,
-      shellTradersAbility: "set_aside_from_grip",
+      delayedInstallAbility: "set_aside_from_grip",
       targetCardId: input.targetCardId,
       targetCardDefinitionId: input.targetDefinition.id,
       shellCounterAmount: input.shellCounterAmount,
@@ -116,7 +116,7 @@ export function buildRunnerShellTradersRemoveCounterAction(
     [{ credits: 1 }],
     {
       cardId: input.sourceCardId,
-      shellTradersAbility: "remove_shell_counter",
+      delayedInstallAbility: "remove_shell_counter",
       targetCardId: input.targetCardId,
       targetCardDefinitionId: input.targetDefinitionId,
       counterType: "shell",

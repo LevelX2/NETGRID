@@ -59,11 +59,29 @@ Checks:
 
 ### Paket 2: Kartennamenspezifische Runtime-Reste
 
-Status: geplant
+Status: abgeschlossen
 
 Ziel:
 
 - Generische Namen fuer verbleibende funktionale Runtime-, Hidden-Zone-, Cause-, Payload- und Resolverpfade, soweit ohne Regelrisiko moeglich.
+
+Umgesetzt:
+
+- `shellTradersAbility` durch `delayedInstallAbility` ersetzt.
+- `shellTradersStartTurnResolvedSourceIds` durch `delayedInstallStartTurnResolvedSourceIds` ersetzt.
+- `shell_traders_set_aside` durch `delayed_install_set_aside` ersetzt.
+- `runner.start.shell_traders...` durch `runner.start.delayed_install...` ersetzt.
+- `shellTradersInstalledTarget` durch `delayedInstallInstalledTarget` ersetzt.
+- `omniscience_foundation` als Tag-Cause durch `end_turn_tag_if_runner_received_tag` ersetzt.
+- `omniscienceFoundationTagsAdded` durch `endTurnTagIfRunnerReceivedTagAdded` ersetzt.
+- Card-Function-Abstraction-Report von 151 auf 147 Findings aktualisiert.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test -- game/engine-runtime-internal/runtime-module-size.test.ts game/abilities/runner-special-trigger-execution.test.ts game/turn/runner-special-zone-install-actions.test.ts game/state/turn-flags-counters.test.ts compatibility/compatibility.test.ts` -> bestanden.
+- `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
+- `corepack pnpm --filter @netgrid/shared typecheck` -> bestanden.
+- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings.
 
 ### Paket 3: Effect-Familien
 
