@@ -34,7 +34,7 @@ function state(): GameState {
     },
     runnerTurnFlags: {
       bonusRunPending: true,
-      bodyweightDataCrecheExtraRunPending: true,
+      successfulRunExtraRunPending: true,
     },
     cardInstances: {},
     eventLog: [],
@@ -166,7 +166,7 @@ describe("start-run-action-execution", () => {
 
     expect(gameState.runner.clicks).toBe(3);
     expect(gameState.runnerTurnFlags?.bonusRunPending).toBe(false);
-    expect(gameState.runnerTurnFlags?.bodyweightDataCrecheExtraRunPending).toBe(
+    expect(gameState.runnerTurnFlags?.successfulRunExtraRunPending).toBe(
       false,
     );
     expect(calls).toEqual(["validate:hq", "start:hq:start_run", "pay_tax:0"]);

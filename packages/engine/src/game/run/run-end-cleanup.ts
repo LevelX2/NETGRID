@@ -154,7 +154,7 @@ export type RunEndCleanupHost = {
     isTokyoUnsuccessfulRunSource: (cardId: CardInstanceId) => boolean;
   };
   followups: {
-    applyBodyweightDataCrecheSuccessfulRun: (
+    applySuccessfulRunExtraRunFollowup: (
       legalAction?: LegalAction,
     ) => SuccessfulRunFollowupExecutionResult;
     cleanupDelayedSuccessfulRunTemporaryIce: (
@@ -303,7 +303,7 @@ export function handleRunEndCleanup(
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
   if (run && successful)
-    host.followups.applyBodyweightDataCrecheSuccessfulRun(legalAction);
+    host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
   if (run && successful) {
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;

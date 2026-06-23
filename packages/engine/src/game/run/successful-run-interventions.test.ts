@@ -17,7 +17,7 @@ import {
   type DamageCoreHost,
 } from "../damage/damage-core";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
   finalizeDelayedSuccessfulRunAfterPassedIce,
@@ -786,7 +786,7 @@ describe("successful run interventions", () => {
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
     const karl = applyDirectSuccessfulRunTriggers(fixture.host, legalAction);
-    const bodyweight = applyBodyweightDataCrecheSuccessfulRun(
+    const bodyweight = applySuccessfulRunExtraRunFollowup(
       fixture.host,
       legalAction,
     );
@@ -798,13 +798,13 @@ describe("successful run interventions", () => {
     });
     expect(fixture.state.runner.credits).toBe(6);
     expect(fixture.state.runnerTurnFlags).toMatchObject({
-      bodyweightDataCrecheExtraRunPending: true,
-      bodyweightDataCrecheExtraRunUsedThisTurn: true,
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: true,
       bonusRunPending: true,
     });
     expect(legalAction.payload).toMatchObject({
       karlSuccessfulRunCreditGain: 1,
-      bodyweightDataCrecheExtraRunPending: true,
+      successfulRunExtraRunPending: true,
       sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
     });
   });

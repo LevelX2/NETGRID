@@ -359,7 +359,7 @@ import {
 } from "../run/run-access-transition";
 import { type StartRunOptions } from "../run/run-core-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,
@@ -2195,8 +2195,8 @@ function startRunnerTurn(
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
   flags.delayedInstallStartTurnResolvedSourceIds = [];
-  flags.bodyweightDataCrecheExtraRunPending = false;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
+  flags.successfulRunExtraRunPending = false;
+  flags.successfulRunExtraRunUsedThisTurn = false;
   flags.delayedEndTurnEffects = [];
   flags.corpRezzedIceThisTurn = 0;
   delete flags.lastRezzedBlackIceThisTurn;

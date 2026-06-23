@@ -46,7 +46,7 @@ import {
   type RunContinuationExecutionHost,
 } from "./run-continuation-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
@@ -1191,8 +1191,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       followups: {
-        applyBodyweightDataCrecheSuccessfulRun: (legalAction) =>
-          applyBodyweightDataCrecheSuccessfulRun(
+        applySuccessfulRunExtraRunFollowup: (legalAction) =>
+          applySuccessfulRunExtraRunFollowup(
             successfulRunInterventionHost(state),
             legalAction,
           ),

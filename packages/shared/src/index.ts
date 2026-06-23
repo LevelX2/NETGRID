@@ -1452,8 +1452,8 @@ export type GameState = {
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];
-    bodyweightDataCrecheExtraRunPending?: boolean;
-    bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
+    successfulRunExtraRunPending?: boolean;
+    successfulRunExtraRunUsedThisTurn?: boolean;
     delayedEndTurnEffects?: Array<{
       sourceCardInstanceId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;

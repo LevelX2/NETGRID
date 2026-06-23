@@ -272,7 +272,7 @@ function makeHost(options: {
       isTokyoUnsuccessfulRunSource: (cardId) => tokyoSourceIds.has(cardId),
     },
     followups: {
-      applyBodyweightDataCrecheSuccessfulRun: () => ({ handled: false }),
+      applySuccessfulRunExtraRunFollowup: () => ({ handled: false }),
       cleanupDelayedSuccessfulRunTemporaryIce: () => {
         cleanupDelayedCount += 1;
       },

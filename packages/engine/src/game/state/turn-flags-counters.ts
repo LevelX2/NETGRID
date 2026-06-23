@@ -115,8 +115,8 @@ export function ensureRunnerTurnFlags(
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
     delayedInstallStartTurnResolvedSourceIds: [],
-    bodyweightDataCrecheExtraRunPending: false,
-    bodyweightDataCrecheExtraRunUsedThisTurn: false,
+    successfulRunExtraRunPending: false,
+    successfulRunExtraRunUsedThisTurn: false,
   });
   flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
   flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
@@ -148,8 +148,8 @@ export function ensureRunnerTurnFlags(
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   flags.delayedInstallStartTurnResolvedSourceIds ??= [];
-  flags.bodyweightDataCrecheExtraRunPending ??= false;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
+  flags.successfulRunExtraRunPending ??= false;
+  flags.successfulRunExtraRunUsedThisTurn ??= false;
   flags.delayedEndTurnEffects ??= [];
   flags.corpRezzedIceThisTurn ??= 0;
   return flags;

@@ -100,7 +100,7 @@ export function executeStartRunAction(
   if (legalAction.payload?.bonusRunNoClick === true) {
     if (legalAction.payload?.multiServerSuccessSequenceRun !== true) {
       flags.bonusRunPending = false;
-      flags.bodyweightDataCrecheExtraRunPending = false;
+      flags.successfulRunExtraRunPending = false;
     }
   } else {
     host.payment.spendRunnerClick();

@@ -376,8 +376,8 @@ function testHost(): DamageCoreHost {
           valuPakProgramInstallActionsRemaining: 0,
           valuPakTemporaryProgramInstallCredits: 0,
           delayedInstallStartTurnResolvedSourceIds: [],
-          bodyweightDataCrecheExtraRunPending: false,
-          bodyweightDataCrecheExtraRunUsedThisTurn: false,
+          successfulRunExtraRunPending: false,
+          successfulRunExtraRunUsedThisTurn: false,
         };
         return state.runnerTurnFlags;
       },

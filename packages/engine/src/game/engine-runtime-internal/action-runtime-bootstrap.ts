@@ -357,7 +357,7 @@ import {
 } from "../run/run-access-transition";
 import { type StartRunOptions } from "../run/run-core-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,

@@ -1228,7 +1228,7 @@ export function buildRunnerMainActions(
             bonusRunNoClick: true,
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
-              : flags.bodyweightDataCrecheExtraRunPending === true
+              : flags.successfulRunExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
             restrictedActionGrantActionType: "start_run",

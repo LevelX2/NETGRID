@@ -1005,7 +1005,7 @@ export function applyDirectSuccessfulRunTriggers(
   };
 }
 
-export function applyBodyweightDataCrecheSuccessfulRun(
+export function applySuccessfulRunExtraRunFollowup(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1025,17 +1025,17 @@ export function applyBodyweightDataCrecheSuccessfulRun(
   const sourceDefinitionId = host.cards.definitionFor(sourceId).id;
   const flags = host.runner.ensureTurnFlags();
   if (
-    flags.bodyweightDataCrecheExtraRunUsedThisTurn ||
-    flags.bodyweightDataCrecheExtraRunPending
+    flags.successfulRunExtraRunUsedThisTurn ||
+    flags.successfulRunExtraRunPending
   )
     return { handled: false };
-  flags.bodyweightDataCrecheExtraRunPending = true;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn = true;
+  flags.successfulRunExtraRunPending = true;
+  flags.successfulRunExtraRunUsedThisTurn = true;
   flags.bonusRunPending = true;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      bodyweightDataCrecheExtraRunPending: true,
+      successfulRunExtraRunPending: true,
       sourceDefinitionId,
     };
   }
