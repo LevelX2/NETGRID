@@ -862,7 +862,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(arasakaState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       replacementDecision: "apply",
-      v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
+      flatlineReplacementAbility: "flatline_tag_replacement_from_grip",
       preventedAmount: 4,
       removedTags: 2,
       coreDamageRemoved: 1,
@@ -1474,8 +1474,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       actionType: "resolve_choice",
       replacementDecision: "apply",
       replacementOutcome: "replaced",
-      v1920RunnerProgramAbility:
-        "emergency_self_construct_flatline_replacement",
+      flatlineReplacementAbility: "installed_flatline_prevention",
       sourceDefinitionId: "onr_v1_022_emergency-self-construct",
       preventedAmount: 4,
       coreDamageRemoved: 1,

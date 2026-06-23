@@ -1418,7 +1418,7 @@ function collectReplacementCandidates(
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
   ) {
-    const arasakaId = state.runner.grip.find(
+    const gripFlatlineReplacementId = state.runner.grip.find(
       (cardId) => {
         const definition = definitionFor(state, cardId);
         return flatlineReplacementSourcesForDefinition(definition).some(
@@ -1429,14 +1429,14 @@ function collectReplacementCandidates(
         );
       },
     );
-    if (arasakaId) {
-      const definition = definitionFor(state, arasakaId);
+    if (gripFlatlineReplacementId) {
+      const definition = definitionFor(state, gripFlatlineReplacementId);
       candidates.push({
-        candidateId: `v1919_arasaka_owns_you_${arasakaId}`,
+        candidateId: `flatline_tag_replacement_from_grip_${gripFlatlineReplacementId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
-          instanceId: arasakaId,
+          instanceId: gripFlatlineReplacementId,
           definitionId: definition.id,
           label: definition.title,
         },
@@ -1447,7 +1447,7 @@ function collectReplacementCandidates(
         optional: true,
       });
     }
-    const emergencySelfConstructId = state.runner.rig.programs.find(
+    const installedFlatlinePreventionId = state.runner.rig.programs.find(
       (cardId) => {
         const definition = definitionFor(state, cardId);
         return flatlineReplacementSourcesForDefinition(definition).some(
@@ -1458,14 +1458,14 @@ function collectReplacementCandidates(
         );
       },
     );
-    if (emergencySelfConstructId) {
-      const definition = definitionFor(state, emergencySelfConstructId);
+    if (installedFlatlinePreventionId) {
+      const definition = definitionFor(state, installedFlatlinePreventionId);
       candidates.push({
-        candidateId: `v1920_emergency_self_construct_${emergencySelfConstructId}`,
+        candidateId: `installed_flatline_prevention_${installedFlatlinePreventionId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
-          instanceId: emergencySelfConstructId,
+          instanceId: installedFlatlinePreventionId,
           definitionId: definition.id,
           label: definition.title,
         },
@@ -2045,12 +2045,12 @@ export function resolveReplacementChoice(
     candidate.sourceRef.definitionId ===
     ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
   ) {
-    resolveArasakaOwnsYouReplacement(state, legalAction, event, candidate);
+    resolveGripFlatlineTagReplacement(state, legalAction, event, candidate);
     clearReplacementState(state);
     return;
   }
   if (candidate.sourceRef.definitionId === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID) {
-    resolveEmergencySelfConstructReplacement(
+    resolveInstalledFlatlinePreventionReplacement(
       state,
       legalAction,
       event,
@@ -2171,7 +2171,7 @@ function resolveIdentityDonorReplacement(
   ];
 }
 
-function resolveArasakaOwnsYouReplacement(
+function resolveGripFlatlineTagReplacement(
   state: GameState,
   legalAction: LegalAction,
   event: ImminentEvent,
@@ -2214,7 +2214,7 @@ function resolveArasakaOwnsYouReplacement(
     replacementEventType: "prevent_damage",
     originalAmount,
     preventedAmount: originalAmount,
-    v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
+    flatlineReplacementAbility: "flatline_tag_replacement_from_grip",
     sourceDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
     cardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
     trashedCardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
@@ -2230,7 +2230,7 @@ function resolveArasakaOwnsYouReplacement(
   };
 }
 
-function resolveEmergencySelfConstructReplacement(
+function resolveInstalledFlatlinePreventionReplacement(
   state: GameState,
   legalAction: LegalAction,
   event: ImminentEvent,
@@ -2238,9 +2238,9 @@ function resolveEmergencySelfConstructReplacement(
 ): void {
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.rig.programs.includes(cardId))
-    throw new Error("Emergency Self-Construct ist nicht installiert.");
+    throw new Error("Die installierte Flatline-Prevention ist nicht installiert.");
   if (definitionFor(state, cardId).id !== EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID)
-    throw new Error("Die Emergency-Self-Construct-Quelle passt nicht.");
+    throw new Error("Die installierte Flatline-Prevention-Quelle passt nicht.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const coreDamageRemoved = state.runner.coreDamage;
@@ -2269,7 +2269,7 @@ function resolveEmergencySelfConstructReplacement(
     replacementEventType: "prevent_damage",
     originalAmount,
     preventedAmount: originalAmount,
-    v1920RunnerProgramAbility: "emergency_self_construct_flatline_replacement",
+    flatlineReplacementAbility: "installed_flatline_prevention",
     sourceDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
     cardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
     trashedCardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,

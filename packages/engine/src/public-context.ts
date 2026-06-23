@@ -501,7 +501,7 @@ export function publicContextForAction(
       "tagsAdded",
       "preventedAmount",
       "v1919RunnerEventAbility",
-      "v1920RunnerProgramAbility",
+      "flatlineReplacementAbility",
       "coreDamageRemoved",
       "gripCardsLost",
       "drawnCards",
@@ -1656,6 +1656,30 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.v1919RunnerEventAbility === "string") {
     context.v1919RunnerEventAbility =
       legalAction.payload.v1919RunnerEventAbility;
+    if (typeof legalAction.payload.agendaPointCostPaid === "number")
+      context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+    if (typeof legalAction.payload.removedTags === "number")
+      context.removedTags = legalAction.payload.removedTags;
+    if (typeof legalAction.payload.runnerTagsAfter === "number")
+      context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.futureAgendaPointForfeitPaid === "number")
+      context.futureAgendaPointForfeitPaid =
+        legalAction.payload.futureAgendaPointForfeitPaid;
+    if (
+      typeof legalAction.payload.futureAgendaPointForfeitPending === "number"
+    )
+      context.futureAgendaPointForfeitPending =
+        legalAction.payload.futureAgendaPointForfeitPending;
+    if (legalAction.payload.specialZone)
+      context.specialZone = legalAction.payload.specialZone;
+    if (legalAction.payload.specialZoneVisibility)
+      context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
+    if (legalAction.payload.specialZoneReason)
+      context.specialZoneReason = legalAction.payload.specialZoneReason;
+  }
+  if (typeof legalAction.payload?.flatlineReplacementAbility === "string") {
+    context.flatlineReplacementAbility =
+      legalAction.payload.flatlineReplacementAbility;
     if (typeof legalAction.payload.agendaPointCostPaid === "number")
       context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
     if (typeof legalAction.payload.removedTags === "number")
