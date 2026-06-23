@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const powerGridOverloadImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_299_power-grid-overload",
   corpUtility: {
-    kind: "power_grid_overload",
+    kind: "installed_hardware_trash_by_power_counters",
     excludesSubtype: "cybernetics",
     visibility: "public",
   },

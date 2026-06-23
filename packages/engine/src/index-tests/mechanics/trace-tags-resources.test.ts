@@ -1075,7 +1075,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("offers Power Grid Overload X actions for non-Cybernetics hardware and choices exact targets", () => {
     const runnerDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.traceTags.runner,
-      id: "v1914_power_grid_overload_rd_interface_runner",
+      id: "v1914_installed_hardware_trash_by_power_counters_rd_interface_runner",
       cards: [
         ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
         { id: "onr_v1_127_full-body-conversion", quantity: 1 },

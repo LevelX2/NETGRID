@@ -87,7 +87,7 @@ function makeHost(legalAction?: LegalAction) {
       uniqueDirectLongtailImplementationForCard: (cardId) =>
         cardId === "rock"
           ? {
-              kind: "i_got_a_rock_tagged_meat_damage",
+              kind: "tagged_meat_damage",
               requiredRunnerTags: 2,
               agendaPointCost: 3,
               damageType: "meat",
@@ -106,7 +106,7 @@ function makeHost(legalAction?: LegalAction) {
       uniqueDirectLongtailImplementationForDefinition: (definitionId) =>
         definitionId === definitions.rock!.id
           ? {
-              kind: "i_got_a_rock_tagged_meat_damage",
+              kind: "tagged_meat_damage",
               requiredRunnerTags: 2,
               agendaPointCost: 3,
               damageType: "meat",
@@ -180,7 +180,7 @@ describe("corp special damage abilities", () => {
 
     expect(rock.actions[0]?.payload).toMatchObject({
       cardId: "rock",
-      v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+      v1920AssetAbility: "tagged_meat_damage",
       agendaPointCost: 3,
       damageType: "meat",
       damageAmount: 15,
@@ -194,7 +194,7 @@ describe("corp special damage abilities", () => {
   it("executes I Got a Rock through agenda forfeit and damage callbacks", () => {
     const legalAction = makeAction({
       cardId: "rock",
-      v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+      v1920AssetAbility: "tagged_meat_damage",
     });
     const { host, calls } = makeHost(legalAction);
 

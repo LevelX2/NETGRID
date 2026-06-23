@@ -353,7 +353,7 @@ export function resolvePendingChoice(
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
+  if (state.pendingChoice.source.startsWith("v1914.installed_hardware_trash_by_power_counters")) {
     resolvePowerGridOverloadChoice(state, legalAction, playerAction);
     return;
   }

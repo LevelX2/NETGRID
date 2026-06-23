@@ -1390,14 +1390,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1920AssetAbility === "i_got_a_rock_tagged_meat_damage",
+        action.payload?.v1920AssetAbility === "tagged_meat_damage",
     );
 
     expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
     expect(state.winner).toBe("corp");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+      v1920AssetAbility: "tagged_meat_damage",
       agendaPointCost: 3,
       damageResolved: true,
       damageType: "meat",
@@ -3466,7 +3466,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       v1921DieRoll: 4,
       playfulAiChoiceOpened: false,
       playfulAiComplete: true,
@@ -3527,7 +3527,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       v1921DieRoll: 3,
       playfulAiChoiceOpened: true,
       playfulAiComplete: false,
@@ -3552,7 +3552,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.runner.credits).toBe(creditsBeforeChoice + 1);
     expect(firstResolvePayload).toMatchObject({
       actionType: "resolve_choice",
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       playfulAiGainedCredits: 1,
       playfulAiSetAsideDice: 2,
       playfulAiDiceQueuedBeforeRolls: 2,

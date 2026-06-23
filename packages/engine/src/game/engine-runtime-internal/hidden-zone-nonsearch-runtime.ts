@@ -225,7 +225,7 @@ export function createHiddenZoneNonSearchRuntime(
               definitionFor(state, cardId).id,
             );
           return implementation?.kind ===
-            "smiths_pawnshop_start_turn_trash_for_credits"
+            "start_turn_trash_for_credits"
             ? implementation.gainCredits
             : 2;
         },

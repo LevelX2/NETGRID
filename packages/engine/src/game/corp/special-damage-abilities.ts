@@ -84,7 +84,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForCard(sourceCardId);
-  if (implementation?.kind === "i_got_a_rock_tagged_meat_damage") {
+  if (implementation?.kind === "tagged_meat_damage") {
     if (
       host.state.runner.tags < implementation.requiredRunnerTags ||
       host.agendaPoints.total() < implementation.agendaPointCost
@@ -106,7 +106,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
           [{ clicks: 1 }],
           {
             cardId: sourceCardId,
-            v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+            v1920AssetAbility: "tagged_meat_damage",
             agendaPointCost: implementation.agendaPointCost,
             damageType: implementation.damageType,
             damageAmount: implementation.damageAmount,
@@ -144,7 +144,7 @@ export function handleCorpSpecialDamageAbilityAction(
   if (!legalAction || legalAction.type !== "gain_credit") return { handled: false };
   if (
     legalAction.payload?.v1920AssetAbility ===
-    "i_got_a_rock_tagged_meat_damage"
+    "tagged_meat_damage"
   ) {
     const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
     handleIGotARockAction(host, sourceCardId);
@@ -197,7 +197,7 @@ function handleIGotARockAction(
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForDefinition(definition.id);
-  if (implementation?.kind !== "i_got_a_rock_tagged_meat_damage")
+  if (implementation?.kind !== "tagged_meat_damage")
     throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
   if (host.state.runner.tags < implementation.requiredRunnerTags)
     throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
@@ -219,7 +219,7 @@ function handleIGotARockAction(
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+    v1920AssetAbility: "tagged_meat_damage",
     sourceDefinitionId: definition.id,
     sourceCardId,
     runnerTagsBefore: host.state.runner.tags,

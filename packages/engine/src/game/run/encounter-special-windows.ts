@@ -613,7 +613,7 @@ export function isSubmarineUplinkSource(
   return (
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
       ?.runnerUtilityLongtail?.kind ===
-    "submarine_uplink_trace_link_force_jack_out"
+    "trace_link_force_jack_out"
   );
 }
 

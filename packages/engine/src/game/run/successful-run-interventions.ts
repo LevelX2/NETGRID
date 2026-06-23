@@ -397,7 +397,7 @@ export function buildSuccessfulRunFollowupActions(
     }
     if (
       runnerUtilityLongtailKindForDefinition(definition.id) ===
-      "i_spy_successful_run_fort_counter_expose"
+      "successful_run_fort_counter_expose"
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind !== "archives") {
@@ -1271,7 +1271,7 @@ function resolveISpyPutSpyCounter(
   if (
     runnerUtilityLongtailKindForDefinition(
       host.cards.definitionFor(sourceCardId).id,
-    ) !== "i_spy_successful_run_fort_counter_expose"
+    ) !== "successful_run_fort_counter_expose"
   )
     throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
   if (serverId !== run.attackedServerId)

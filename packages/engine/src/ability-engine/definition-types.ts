@@ -74,7 +74,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "trojan_horse_tag";
+      kind: "encounter_tag";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -88,7 +88,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "power_grid_overload";
+      kind: "installed_hardware_trash_by_power_counters";
       excludesSubtype: "cybernetics";
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -260,11 +260,11 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "submarine_uplink_trace_link_force_jack_out";
+      kind: "trace_link_force_jack_out";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "i_spy_successful_run_fort_counter_expose";
+      kind: "successful_run_fort_counter_expose";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -303,7 +303,7 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "microtech_trode_set_ap_subroutine_modifier";
+      kind: "access_point_subroutine_modifier";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -654,7 +654,7 @@ export type CardRunEncounterInterventionImplementation =
 
 export type CardRunnerEventLongtailImplementation =
   | {
-      kind: "playful_ai_dice_loop";
+      kind: "random_dice_loop";
       dieFaces: 6;
       choiceOn: readonly [1, 2, 3];
       visibility: Extract<EventVisibilityClass, "public">;
@@ -1063,7 +1063,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "smiths_pawnshop_start_turn_trash_for_credits";
+      kind: "start_turn_trash_for_credits";
       gainCredits: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -1091,7 +1091,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "i_got_a_rock_tagged_meat_damage";
+      kind: "tagged_meat_damage";
       requiredRunnerTags: 2;
       agendaPointCost: 3;
       damageType: Extract<DamageType, "meat">;
@@ -1129,7 +1129,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "investment_firm_credit_diversion";
+      kind: "basic_credit_diversion_to_recurring_credits";
       counterType: Extract<CounterType, "recurring_credit">;
       hostedCreditsPerDivertedCredit: 2;
       startTurnTakeCredits: 1;

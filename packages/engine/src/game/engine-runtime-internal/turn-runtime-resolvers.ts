@@ -2686,7 +2686,7 @@ function applyRunnerStartOfTurnEffects(
     if (state.pendingChoice) break;
     if (
       uniqueDirectLongtailKindForCard(state, cardId) ===
-      "smiths_pawnshop_start_turn_trash_for_credits"
+      "start_turn_trash_for_credits"
     )
       startSmithsPawnshopChoice(
         hiddenZoneNonSearchChoiceHandlerHost(state, {

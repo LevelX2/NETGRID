@@ -1400,9 +1400,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     state.pendingChoice = {
-      choiceId: `v1914_power_grid_overload_${state.stateVersion + 1}`,
+      choiceId: `v1914_installed_hardware_trash_by_power_counters_${state.stateVersion + 1}`,
       side: "corp",
-      source: `v1914.power_grid_overload:${trashCount}:${state.stateVersion + 1}`,
+      source: `v1914.installed_hardware_trash_by_power_counters:${trashCount}:${state.stateVersion + 1}`,
       prompt: `Power Grid Overload: ${trashCount} Hardware trashen`,
       kind: "select_cards",
       options: eligibleHardwareIds.map((cardId) => {
@@ -1443,7 +1443,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1914.power_grid_overload"))
+    if (!choice || !choice.source.startsWith("v1914.installed_hardware_trash_by_power_counters"))
       throw new Error("Es ist keine Power-Grid-Overload-Choice offen.");
     const trashCount = powerGridOverloadTrashCountFromChoiceSource(
       choice.source,
@@ -1478,7 +1478,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         state,
         legalAction,
         hardwareIds,
-        "power_grid_overload",
+        "installed_hardware_trash_by_power_counters",
       )
     )
       return;

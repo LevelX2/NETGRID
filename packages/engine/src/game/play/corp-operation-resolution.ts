@@ -428,13 +428,13 @@ export function canPlayCorpUtilityOperation(
       });
     case "corp_rd_top_reorder":
       return host.state.corp.rd.length >= 2;
-    case "trojan_horse_tag":
+    case "encounter_tag":
       return host.corp.runnerStoleAgendaLastTurn();
     case "gain_credits_from_stolen_agenda_advancement_history":
       return host.corp.runnerStoleAgendaLastTurn();
     case "trash_runner_resources_if_tagged":
       return host.state.runner.tags > 0;
-    case "power_grid_overload":
+    case "installed_hardware_trash_by_power_counters":
       return (
         host.state.runner.tags > 0 &&
         host.state.corp.credits > 0 &&
@@ -534,7 +534,7 @@ export function resolveCorpUtilityOperation(
       host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
       return;
     }
-    case "trojan_horse_tag": {
+    case "encounter_tag": {
       if (!host.corp.runnerStoleAgendaLastTurn())
         throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
       host.damage.addRunnerTagsWithPrevention(legalAction, 1, "trojan_horse");
@@ -578,12 +578,12 @@ export function resolveCorpUtilityOperation(
       };
       return;
     }
-    case "power_grid_overload": {
+    case "installed_hardware_trash_by_power_counters": {
       host.runner.requireRunnerTagged();
       host.operations.resolvePowerGridOverloadOperation(legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "power_grid_overload",
+        v1951CorpUtilityAbility: "installed_hardware_trash_by_power_counters",
       };
       return;
     }

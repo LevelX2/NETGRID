@@ -1506,9 +1506,9 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     const longtail = runnerEventLongtailForDefinition(definition);
     if (longtail) {
       switch (longtail.kind) {
-        case "playful_ai_dice_loop":
+        case "random_dice_loop":
           return {
-            name: "card_implementation_runner_event_playful_ai_dice_loop",
+            name: "card_implementation_runner_event_random_dice_loop",
             resolve: (state, legalAction) =>
               resolvePlayfulAiDiceLoopEvent(
                 state,

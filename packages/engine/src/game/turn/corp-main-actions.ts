@@ -467,7 +467,7 @@ export function buildCorpMainActions(
     ) {
       if (
         corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "power_grid_overload"
+        "installed_hardware_trash_by_power_counters"
       ) {
         actions.push(...powerGridOverloadLegalActions(state, id, definition));
         continue;

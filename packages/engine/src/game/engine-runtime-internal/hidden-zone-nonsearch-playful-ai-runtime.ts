@@ -40,7 +40,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     implementation: CardRunnerEventLongtailImplementation,
   ): void {
     if (
-      implementation.kind !== "playful_ai_dice_loop" ||
+      implementation.kind !== "random_dice_loop" ||
       implementation.dieFaces !== 6 ||
       implementation.visibility !== "public"
     )
@@ -63,7 +63,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       sourceDefinitionId,
       v1921DieRoll: dieRoll,
       playfulAiDieRolls: String(dieRoll),
@@ -276,7 +276,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
       !state.runner.heap.includes(sourceCardId) ||
       runnerEventLongtailKindForDefinition(
         definitionFor(state, sourceCardId),
-      ) !== "playful_ai_dice_loop"
+      ) !== "random_dice_loop"
     )
       throw new Error(
         "Die Playful-AI-Choice gehoert nicht zur gespielten Karte.",
@@ -312,7 +312,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
 
     const payload: NonNullable<LegalAction["payload"]> = {
       ...(legalAction.payload ?? {}),
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       sourceDefinitionId,
       playfulAiDieRolls: progress.rolledDice.join(","),
       playfulAiGainedCredits: gainedCredits,

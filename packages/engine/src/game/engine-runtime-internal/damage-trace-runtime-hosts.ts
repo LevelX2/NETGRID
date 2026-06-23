@@ -843,7 +843,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
   function isInvestmentFirmCard(state: GameState, cardId: CardInstanceId): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
-      "investment_firm_credit_diversion"
+      "basic_credit_diversion_to_recurring_credits"
     );
   }
 
