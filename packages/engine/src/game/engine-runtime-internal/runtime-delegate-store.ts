@@ -24,7 +24,9 @@ export function runtimeDelegate(
 ): (...args: any[]) => any {
   const delegate = runtimeDelegates[groupName][delegateName];
   if (typeof delegate !== "function") {
-    throw new Error(`Runtime delegate fehlt: ${String(groupName)}.${delegateName}`);
+    throw new Error(
+      `Runtime delegate fehlt: ${String(groupName)}.${delegateName}`,
+    );
   }
   return delegate as (...args: any[]) => any;
 }
