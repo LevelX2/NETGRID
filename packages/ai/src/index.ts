@@ -179,6 +179,9 @@ import {
   runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalExclusion as buildRunnerSelfDamageSurvivalExclusion,
 } from "./runtime/runner-self-damage-choice";
+import {
+  runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
+} from "./runtime/runner-program-sacrifice-exclusion";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -3550,8 +3553,14 @@ const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclu
         survivalAssessment: runnerSelfDamageSurvivalAssessment,
       }),
     runnerEncounterActionExclusion: semanticRuntimeRunnerEncounterActionExclusion,
-    runnerProgramSacrificeExclusion:
-      semanticRuntimeRunnerProgramSacrificeExclusion,
+    runnerProgramSacrificeExclusion: (runtimeInput, action) =>
+      buildRunnerProgramSacrificeExclusion(runtimeInput, action, {
+        assessmentForAction: runnerProgramInstallTrashAssessmentForAction,
+        displacementPenalty: (assessment) =>
+          runnerProgramInstallDisplacementPenalty(
+            assessment as RunnerProgramInstallTrashAssessment | undefined,
+          ),
+      }),
     runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
     runnerRunTargetEvaluationForAction:
       semanticRuntimeRunnerRunTargetEvaluationForAction,
@@ -4047,27 +4056,6 @@ function semanticRuntimeRunnerBlinkRunExclusion(
       ...(assessment?.evidence ?? []),
       ...(evaluation?.evidence.slice(0, 16) ?? []),
       "why_blink_run_blocked:self_net_damage_buffer_too_low",
-    ]).join("|"),
-  };
-}
-
-function semanticRuntimeRunnerProgramSacrificeExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  const assessment = runnerProgramInstallTrashAssessmentForAction(
-    input,
-    action,
-  );
-  if (!assessment?.memoryRequired || assessment.canFreeRequiredMemory) {
-    return undefined;
-  }
-  return {
-    key: "program_sacrifice_no_acceptable_candidate",
-    label: "Kein akzeptables Programm-Opfer",
-    reason: sortedUnique([
-      ...assessment.evidence,
-      `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(assessment)}`,
     ]).join("|"),
   };
 }
