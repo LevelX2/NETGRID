@@ -1,6 +1,6 @@
 # AI Post-Bid-Link Efficiency Process 2026-06-23
 
-Status: `integration_verified`
+Status: `completed`
 
 Quelle/Vorgabe: Playtest-Analyse zu `match_b05eb9010f32c761` vom 2026-06-23. Die Runner-KI nutzte im Data-Raven-Trace nach bereits abgewehrtem Trace viermal `Submarine Uplink: +1 Link`, gab dadurch alle Credits aus und löste den erzwungenen Jack-out nach dem Encounter aus.
 
@@ -200,3 +200,7 @@ Verifiziert:
 Breiter Testlauf:
 
 - `vitest run packages/ai/src/trace-bid-efficiency.test.ts packages/ai/src/index.test.ts --maxWorkers=1 --testTimeout=30000`: Trace-Fälle grün, aber vier isoliert reproduzierbare bestehende Shell-Traders-Tests in `packages/ai/src/index.test.ts` fallen weiter, weil dort erwartete Shell-Traders-LegalActions fehlen. Separater Lauf `-t "Shell Traders"` zeigt denselben Blocker und ist nicht durch die Post-Bid-Link-Änderung verursacht.
+
+Integration:
+
+- Arbeitsbranch `codex/ai-post-bid-link-efficiency` wurde lokal per Fast-Forward nach `main` integriert.
