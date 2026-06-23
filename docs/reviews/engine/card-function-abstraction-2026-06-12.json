@@ -6195,7 +6195,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 648,
+      "line": 628,
       "column": 3,
       "token": "startupImmolator",
       "cardTitle": "Startup Immolator",
@@ -6206,7 +6206,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 679,
+      "line": 659,
       "column": 3,
       "token": "preyingMantis",
       "cardTitle": "Preying Mantis",
@@ -6217,7 +6217,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 680,
+      "line": 660,
       "column": 3,
       "token": "questForCattekin",
       "cardTitle": "Quest for Cattekin",
@@ -6228,7 +6228,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 793,
+      "line": 773,
       "column": 3,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -6239,7 +6239,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 804,
+      "line": 784,
       "column": 3,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -6250,7 +6250,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 806,
+      "line": 786,
       "column": 3,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -6261,7 +6261,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 888,
+      "line": 868,
       "column": 3,
       "token": "bizarreEncryption",
       "cardTitle": "Bizarre Encryption Scheme",
@@ -6272,7 +6272,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 972,
+      "line": 952,
       "column": 10,
       "token": "Siren",
       "cardTitle": "Siren",
@@ -6283,7 +6283,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 1004,
+      "line": 984,
       "column": 3,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",

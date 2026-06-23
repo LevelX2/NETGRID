@@ -132,12 +132,12 @@ Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare R
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `siren`
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `Siren`
 - `packages/engine/src/card-implementations/registry.ts:474` Pirate Broadcast / `pirateBroadcast`
-- `packages/engine/src/card-implementations/registry.ts:648` Startup Immolator / `startupImmolator`
-- `packages/engine/src/card-implementations/registry.ts:679` Preying Mantis / `preyingMantis`
-- `packages/engine/src/card-implementations/registry.ts:680` Quest for Cattekin / `questForCattekin`
-- `packages/engine/src/card-implementations/registry.ts:793` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/registry.ts:804` Krumz / `krumz`
-- `packages/engine/src/card-implementations/registry.ts:806` Newsgroup Taunting / `newsgroupTaunting`
-- `packages/engine/src/card-implementations/registry.ts:888` Bizarre Encryption Scheme / `bizarreEncryption`
-- `packages/engine/src/card-implementations/registry.ts:972` Siren / `Siren`
-- `packages/engine/src/card-implementations/registry.ts:1004` Pirate Broadcast / `pirateBroadcast`
+- `packages/engine/src/card-implementations/registry.ts:628` Startup Immolator / `startupImmolator`
+- `packages/engine/src/card-implementations/registry.ts:659` Preying Mantis / `preyingMantis`
+- `packages/engine/src/card-implementations/registry.ts:660` Quest for Cattekin / `questForCattekin`
+- `packages/engine/src/card-implementations/registry.ts:773` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/registry.ts:784` Krumz / `krumz`
+- `packages/engine/src/card-implementations/registry.ts:786` Newsgroup Taunting / `newsgroupTaunting`
+- `packages/engine/src/card-implementations/registry.ts:868` Bizarre Encryption Scheme / `bizarreEncryption`
+- `packages/engine/src/card-implementations/registry.ts:952` Siren / `Siren`
+- `packages/engine/src/card-implementations/registry.ts:984` Pirate Broadcast / `pirateBroadcast`

@@ -1,6 +1,6 @@
 # Engine CardImplementation Architecture Process 2026-06-23
 
-Status: active
+Status: completed
 
 ## Quelle/Vorgabe
 
