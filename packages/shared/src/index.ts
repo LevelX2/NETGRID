@@ -1483,7 +1483,7 @@ export type GameState = {
     restrictedActionGrants?: RestrictedActionGrantBucket;
     edgerunnerTempsInstallActionsRemaining?: number;
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
-    employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
+    scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   ambushHarness?: {

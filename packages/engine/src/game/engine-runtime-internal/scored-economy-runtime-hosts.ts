@@ -298,7 +298,7 @@ import {
 } from "../corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
 import {
@@ -623,7 +623,6 @@ import {
   DEAL_WITH_MILITECH_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
   DUPRE_ID,
-  EMPLOYEE_EMPOWERMENT_ID,
   GRUBB_ID,
   HELLS_RUN_ID,
   HUNT_CLUB_BBS_ID,
@@ -823,9 +822,6 @@ export function createScoredEconomyRuntimeHosts(
         isOveradvanceAgendaDefinition: (definitionId) =>
           OVERADVANCE_AGENDA_CARD_IDS.has(definitionId as CardDefinitionId),
       },
-      constants: {
-        employeeEmpowermentId: EMPLOYEE_EMPOWERMENT_ID,
-      },
       zones: {
         removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
         cleanupEmptyRemotes: () => cleanupEmptyRemotes(state),
@@ -850,13 +846,13 @@ export function createScoredEconomyRuntimeHosts(
         markScoredBlackOpsAgendaThisTurn: () => {
           ensureCorpTurnFlags(state).scoredBlackOpsAgendaThisTurn = true;
         },
-        employeeEmpowermentResolvedSourceIds: () =>
+        scoredAgendaStartDrawChoiceResolvedSourceIds: () =>
           ensureCorpTurnFlags(state)
-            .employeeEmpowermentStartTurnResolvedSourceIds ?? [],
-        markEmployeeEmpowermentResolved: (cardId) => {
+            .scoredAgendaStartDrawChoiceResolvedSourceIds ?? [],
+        markScoredAgendaStartDrawChoiceResolved: (cardId) => {
           const flags = ensureCorpTurnFlags(state);
-          flags.employeeEmpowermentStartTurnResolvedSourceIds = [
-            ...(flags.employeeEmpowermentStartTurnResolvedSourceIds ?? []),
+          flags.scoredAgendaStartDrawChoiceResolvedSourceIds = [
+            ...(flags.scoredAgendaStartDrawChoiceResolvedSourceIds ?? []),
             cardId,
           ];
         },
@@ -873,15 +869,19 @@ export function createScoredEconomyRuntimeHosts(
             "on_score",
           );
         },
-        appendEmployeeEmpowermentDrawEffect: (cardId, drawnCount) => {
+        appendScoredAgendaStartDrawChoiceEffect: (
+          cardId,
+          sourceDefinitionId,
+          drawnCount,
+        ) => {
           if (!legalAction) return;
           legalAction.resolvedEffects = [
             ...(legalAction.resolvedEffects ?? []),
             automaticDrawCardsEffect(
-              `corp.start.employee_empowerment.${cardId}`,
+              `corp.start.scored_agenda_start_draw.${cardId}`,
               "corp",
               drawnCount,
-              EMPLOYEE_EMPOWERMENT_ID,
+              sourceDefinitionId,
             ),
           ];
         },

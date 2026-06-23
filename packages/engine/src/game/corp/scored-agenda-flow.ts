@@ -4,7 +4,7 @@ import type {
   CardInstanceId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import { startEmployeeEmpowermentStartDrawChoice } from "./scored-agenda/employee-empowerment-sequence";
+import { startScoredAgendaStartDrawChoice } from "./scored-agenda/scored-agenda-start-draw-choice-sequence";
 import { applyScoredAgendaDirectEffects } from "./scored-agenda/scored-agenda-direct-effect-registry";
 import type {
   ScoredAgendaFlowHost,
@@ -14,7 +14,7 @@ import type {
 import { resolveScoredAgendaFlowChoice } from "./scored-agenda/scored-agenda-flow-choice-registry";
 import { resolveScoredAgendaScoreTime } from "./scored-agenda/scored-agenda-score-time-registry";
 
-export { startEmployeeEmpowermentStartDrawChoice };
+export { startScoredAgendaStartDrawChoice };
 export type {
   ScoredAgendaFlowHost,
   ScoredAgendaFlowResult,

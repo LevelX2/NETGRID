@@ -1,8 +1,8 @@
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import {
-  isEmployeeEmpowermentStartDrawChoiceSource,
-  resolveEmployeeEmpowermentStartDrawChoice,
-} from "./employee-empowerment-sequence";
+  isScoredAgendaStartDrawChoiceSource,
+  resolveScoredAgendaStartDrawChoice,
+} from "./scored-agenda-start-draw-choice-sequence";
 import {
   isScoredIceMarkModifierChoiceSource,
   resolveScoredRezzedIceMarkModifierChoice,
@@ -31,9 +31,9 @@ export const SCORED_AGENDA_FLOW_CHOICE_RESOLVERS: readonly ScoredAgendaFlowChoic
       resolve: resolveScoredRezzedIceMarkModifierChoice,
     },
     {
-      id: "employee_empowerment_start_draw_flow_choice",
-      matches: isEmployeeEmpowermentStartDrawChoiceSource,
-      resolve: resolveEmployeeEmpowermentStartDrawChoice,
+      id: "scored_agenda_start_draw_flow_choice",
+      matches: isScoredAgendaStartDrawChoiceSource,
+      resolve: resolveScoredAgendaStartDrawChoice,
     },
   ];
 

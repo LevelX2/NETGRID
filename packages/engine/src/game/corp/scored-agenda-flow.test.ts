@@ -14,7 +14,7 @@ import type { CardScoredAgendaImplementation } from "../../ability-engine/defini
 import {
   handleScoredAgendaFlowChoice,
   scoreAgenda,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
 } from "./scored-agenda-flow";
 import type { ScoredAgendaFlowHost } from "./scored-agenda/scored-agenda-flow-host";
 
@@ -184,9 +184,6 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       isOveradvanceAgendaDefinition: (definitionId) =>
         input.overadvanceDefinitionIds?.includes(definitionId) ?? false,
     },
-    constants: {
-      employeeEmpowermentId: "employee_empowerment",
-    },
     zones: {
       removeFromAllZones: (cardId) => removed.push(cardId),
       cleanupEmptyRemotes: () => {
@@ -219,13 +216,13 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     },
     flags: {
       markScoredBlackOpsAgendaThisTurn: () => undefined,
-      employeeEmpowermentResolvedSourceIds: () => employeeResolved,
-      markEmployeeEmpowermentResolved: (cardId) =>
+      scoredAgendaStartDrawChoiceResolvedSourceIds: () => employeeResolved,
+      markScoredAgendaStartDrawChoiceResolved: (cardId) =>
         employeeResolved.push(cardId),
     },
     effects: {
       executeOnScore: () => undefined,
-      appendEmployeeEmpowermentDrawEffect: () => undefined,
+      appendScoredAgendaStartDrawChoiceEffect: () => undefined,
     },
     draw: {
       drawCorpCard: () => {
@@ -524,9 +521,16 @@ describe("scored agenda flow", () => {
           { side: "corp", zone: "scoreArea" },
         ),
       },
+      implementations: {
+        employee_empowerment: {
+          kind: "corp_start_turn_optional_draw",
+          drawCount: 1,
+          visibility: "public",
+        },
+      },
     });
 
-    const startResult = startEmployeeEmpowermentStartDrawChoice(host);
+    const startResult = startScoredAgendaStartDrawChoice(host);
     expect(startResult.handled).toBe(true);
     const choice = host.state.pendingChoice!;
     host.state.phase = "corp_draw_phase";
@@ -542,7 +546,7 @@ describe("scored agenda flow", () => {
     expect(legalAction.payload).toMatchObject({
       choiceVisibility: "public",
       sourceDefinitionId: "employee_empowerment",
-      employeeEmpowermentStartDrawDecision: "draw",
+      scoredAgendaStartDrawDecision: "draw",
       drawnCount: 1,
     });
   });

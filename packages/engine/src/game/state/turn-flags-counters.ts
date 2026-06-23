@@ -184,6 +184,6 @@ export function ensureCorpTurnFlags(
   flags.scoredBlackOpsAgendaLastTurn ??= false;
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.counterPreventionUsedSourceIdsThisTurn ??= [];
-  flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
+  flags.scoredAgendaStartDrawChoiceResolvedSourceIds ??= [];
   return flags;
 }

@@ -4,6 +4,11 @@ import type { CardImplementationDefinition } from "../../../types";
 // text: You may choose to draw an additional card at the start of each of your turns. A: Draw two cards.
 export const employeeEmpowermentImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_199_employee-empowerment",
+  scoredAgenda: {
+    kind: "corp_start_turn_optional_draw",
+    drawCount: 1,
+    visibility: "public",
+  },
   abilities: [
     {
       kind: "activated",

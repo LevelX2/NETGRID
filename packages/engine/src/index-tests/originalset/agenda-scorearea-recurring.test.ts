@@ -3116,8 +3116,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart);
     expect(employee.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("v1912.employee_empowerment_start_draw"),
-      prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+      source: expect.stringContaining("scored_agenda.start_draw_choice"),
+      prompt: "Scored Agenda: zusätzliche Karte ziehen?",
       minSelections: 1,
       maxSelections: 1,
     });
@@ -3167,7 +3167,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employee.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      employeeEmpowermentStartDrawDecision: "skip",
+      scoredAgendaStartDrawDecision: "skip",
     });
     const employeeSkipReplay = replayEvents(
       employeeChoiceInitial,
@@ -3209,7 +3209,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       (action) => action.type === "end_turn",
     );
     expect(nextTurnStart.pendingChoice?.source).toContain(
-      "v1912.employee_empowerment_start_draw",
+      "scored_agenda.start_draw_choice",
     );
     const hqBeforeOptionalDraw = nextTurnStart.corp.hq.length;
     const employeeDraw = applyChoice(nextTurnStart, "corp", "draw");
@@ -3218,7 +3218,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employeeDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      employeeEmpowermentStartDrawDecision: "draw",
+      scoredAgendaStartDrawDecision: "draw",
       drawnCards: 1,
       resolvedEffects: [
         expect.objectContaining({

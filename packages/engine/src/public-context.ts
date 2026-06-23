@@ -517,7 +517,7 @@ export function publicContextForAction(
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
       "cardDefinitionId",
-      "employeeEmpowermentStartDrawDecision",
+      "scoredAgendaStartDrawDecision",
       "rezInterruptSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",

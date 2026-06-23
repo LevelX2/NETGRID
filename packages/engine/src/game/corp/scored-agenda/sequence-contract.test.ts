@@ -117,8 +117,8 @@ describe("scored agenda sequence contract matrix", () => {
 
     expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
     expect(flowResolverIds.sort()).toEqual([
-      "employee_empowerment_start_draw_flow_choice",
       "ice_transmutation_flow_choice",
+      "scored_agenda_start_draw_flow_choice",
       "subtype_reveal_flow_choice",
     ]);
     expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
@@ -214,8 +214,8 @@ describe("scored agenda sequence contract matrix", () => {
         resolverId: "ice_transmutation_flow_choice",
       },
       {
-        source: "v1912.employee_empowerment_start_draw:employee:8",
-        resolverId: "employee_empowerment_start_draw_flow_choice",
+        source: "scored_agenda.start_draw_choice:employee:8",
+        resolverId: "scored_agenda_start_draw_flow_choice",
       },
     ];
 

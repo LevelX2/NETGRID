@@ -313,7 +313,7 @@ import {
 } from "../corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
 import {
@@ -2134,7 +2134,7 @@ function startCorpTurn(
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
   ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
     clearAbilityUsageSourceIds();
-  ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
+  ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceResolvedSourceIds = [];
   ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
     clearAbilityUsageSourceIds();
   applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
@@ -2434,7 +2434,7 @@ function applyCorpStartOfTurnEffects(
       ),
     );
   if (!state.pendingChoice)
-    startEmployeeEmpowermentStartDrawChoice(scoredAgendaFlowHost(state));
+    startScoredAgendaStartDrawChoice(scoredAgendaFlowHost(state));
 }
 
 function applyPurgeableRunnerVirusCorpStartEffects(
