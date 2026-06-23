@@ -334,6 +334,8 @@ import {
 } from "../lib/storage-keys";
 import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
 import { copyTextToClipboard } from "../lib/clipboard";
+import { downloadTextFile } from "../lib/download";
+import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import {
   bootstrap,
@@ -438,6 +440,7 @@ import {
   FloatingAiDecisionDebugOverlay,
   type AiDecisionDebugOverlayStatus
 } from "../features/debug/AiDecisionDebugOverlay";
+import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
 import { StartLobbyPanel } from "../features/match-start/StartLobbyPanel";
 import {
   formatLobbyTime,
@@ -9431,74 +9434,6 @@ function ChronicleIcon({ category }: { category: ChronicleCategory }) {
     case "system":
     default:
       return <PanelRightOpen size={15} />;
-  }
-}
-
-function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; payload: ClientPayload; connection: "offline" | "connecting" | "online" }) {
-  if (!open) return null;
-  const hash = payload.finalStateHash ?? payload.eventTail.at(-1)?.stateHashAfter ?? payload.playerView.publicEvents.at(-1)?.stateHashAfter ?? "pending";
-  return (
-    <section className="section diagnosticsDrawer" data-testid="diagnostics-drawer">
-      <h2>Diagnostics</h2>
-      <dl>
-        <div>
-          <dt>Connection</dt>
-          <dd>{connection}</dd>
-        </div>
-        <div>
-          <dt>StateVersion</dt>
-          <dd>{payload.playerView.stateVersion}</dd>
-        </div>
-        <div>
-          <dt>MatchVersion</dt>
-          <dd>{payload.matchVersion}</dd>
-        </div>
-        <div>
-          <dt>StateHash</dt>
-          <dd>{shortDiagnosticsHash(hash)}</dd>
-        </div>
-        <div>
-          <dt>Sync</dt>
-          <dd>{connection === "online" ? "live" : "wartet"}</dd>
-        </div>
-        <div>
-          <dt>Visibility</dt>
-          <dd>side-filtered</dd>
-        </div>
-      </dl>
-    </section>
-  );
-}
-
-function shortDiagnosticsHash(hash: string): string {
-  if (hash.length <= 18) return hash;
-  return `${hash.slice(0, 14)}…`;
-}
-
-function runtimeRandomId(): string {
-  if (typeof globalThis !== "undefined" && typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
-}
-
-function downloadTextFile(fileName: string, text: string, mimeType: string): boolean {
-  if (!text.trim() || typeof document === "undefined" || !document.body || typeof Blob === "undefined" || typeof URL === "undefined") return false;
-  const blob = new Blob([text], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.style.display = "none";
-  document.body.appendChild(anchor);
-  try {
-    anchor.click();
-    return true;
-  } catch {
-    return false;
-  } finally {
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
   }
 }
 
