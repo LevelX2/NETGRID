@@ -129,12 +129,12 @@ Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare R
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `siren`
 - `packages/engine/src/card-implementations/registry.ts:396` Siren / `Siren`
 - `packages/engine/src/card-implementations/registry.ts:474` Pirate Broadcast / `pirateBroadcast`
-- `packages/engine/src/card-implementations/registry.ts:628` Startup Immolator / `startupImmolator`
-- `packages/engine/src/card-implementations/registry.ts:659` Preying Mantis / `preyingMantis`
-- `packages/engine/src/card-implementations/registry.ts:660` Quest for Cattekin / `questForCattekin`
-- `packages/engine/src/card-implementations/registry.ts:773` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/registry.ts:784` Krumz / `krumz`
-- `packages/engine/src/card-implementations/registry.ts:786` Newsgroup Taunting / `newsgroupTaunting`
-- `packages/engine/src/card-implementations/registry.ts:868` Bizarre Encryption Scheme / `bizarreEncryption`
-- `packages/engine/src/card-implementations/registry.ts:952` Siren / `Siren`
-- `packages/engine/src/card-implementations/registry.ts:984` Pirate Broadcast / `pirateBroadcast`
+- `packages/engine/src/card-implementations/registry.ts:601` Startup Immolator / `startupImmolator`
+- `packages/engine/src/card-implementations/registry.ts:632` Preying Mantis / `preyingMantis`
+- `packages/engine/src/card-implementations/registry.ts:633` Quest for Cattekin / `questForCattekin`
+- `packages/engine/src/card-implementations/registry.ts:746` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/registry.ts:757` Krumz / `krumz`
+- `packages/engine/src/card-implementations/registry.ts:759` Newsgroup Taunting / `newsgroupTaunting`
+- `packages/engine/src/card-implementations/registry.ts:841` Bizarre Encryption Scheme / `bizarreEncryption`
+- `packages/engine/src/card-implementations/registry.ts:925` Siren / `Siren`
+- `packages/engine/src/card-implementations/registry.ts:957` Pirate Broadcast / `pirateBroadcast`

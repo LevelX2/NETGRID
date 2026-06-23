@@ -45,7 +45,7 @@ CardImplementation-Datei einer Karte
 
 ### Paket 1: Prozessstart und objektive Baseline
 
-Status: in Arbeit
+Status: abgeschlossen
 
 Umfang:
 
@@ -101,7 +101,14 @@ Umgesetzt:
 
 Bewusste Restgrenze:
 
-- Die verbleibenden groesseren Bloecke im Interpreter sind ueberwiegend Hidden-Zone-, Run-, Search-/Install- und temporaere Credit-Pfade mit eng gekoppelten Host-Callbacks. Sie bleiben in diesem Paket im Dispatcher, bis die jeweiligen RuntimeDeps-/Host-Schnitte weiter stabilisiert sind.
+Restpunkt:
+Verbleibende groessere Bloecke im Interpreter fuer Hidden-Zone-, Run-, Search-/Install- und temporaere Credit-Pfade.
+Warum nicht umgesetzt:
+Diese Bloecke haengen eng an Host-Callbacks, Hidden-Info-Barrieren, Run-State und Kosten-/Ziel-Revalidierung. Ein mechanisches Verschieben waere nicht ausreichend sicher.
+Welche Voraussetzung fehlt:
+Stabilere RuntimeDeps-/Host-Schnitte fuer HiddenZoneRuntimeDeps, RunRuntimeDeps, AccessRuntimeDeps und InstallRezRuntimeDeps.
+Empfohlener spaeterer Auftrag:
+Gezielter RuntimeDeps-/Host-Schnitt fuer Hidden-Zone-, Run- und Install/Search-Effektfamilien mit separaten Regressionstests.
 
 Checks:
 
@@ -128,8 +135,23 @@ Umgesetzt:
 
 Bewusste Restgrenze:
 
-- Im Runtime-Internal-Bereich verbleiben 41 `@ts-nocheck`-Dateien. Die naechsten Kandidaten sind groessere Resolver-/Bootstrap-Dateien mit breiten Host-Deps; sie brauchen einen eigenen RuntimeDeps-Schnitt, damit keine Regeln oder Hidden-Info-Callbacks versehentlich umtypisiert werden.
-- Weitere Registry-Subregistries sind moeglich, aber fuer diese Iteration wurden die zusammenhaengenden Proteus-Runner-Gruppen ohne Verhaltensrisiko herausgezogen. Der naechste Registry-Schnitt sollte vorzugsweise mechanisch generiert oder pro Set/Faction geplant werden.
+Restpunkt:
+41 verbleibende `@ts-nocheck`-Dateien im Runtime-Internal-Bereich.
+Warum nicht umgesetzt:
+Die verbleibenden Dateien sind groessere Resolver-/Bootstrap-Dateien mit breiten Host-Deps und teils verdeckten Informationsgrenzen. Eine schnelle Umtypisierung wuerde Regeln, Hidden-Info-Callbacks oder LegalAction-Revalidierung riskieren.
+Welche Voraussetzung fehlt:
+Domänenspezifische RuntimeDeps-Schnitte fuer Action, Flow, Choice, State, Access, HiddenZone, Damage, Trace und InstallRez.
+Empfohlener spaeterer Auftrag:
+Separater RuntimeDeps-Typisierungsprozess mit einem Host-Cluster pro Paket und vollstaendigen Engine-Regressionstests.
+
+Restpunkt:
+Weitere Registry-Subregistries jenseits der Proteus-Runner-Gruppen.
+Warum nicht umgesetzt:
+Ein vollstaendiger Registry-Schnitt ueber alle Sets, Sides und Typen ist ein breiter Katalogumbau. Ohne Generator oder klaren Set-/Faction-Plan entsteht vor allem mechanische Importbewegung mit hohem Konfliktrisiko.
+Welche Voraussetzung fehlt:
+Entscheidung, ob die Registry langfristig per Generator/Indexmuster oder pro Set/Faction als manuelle Subregistries gepflegt wird.
+Empfohlener spaeterer Auftrag:
+Registry-Generator oder systematischer Set-/Faction-Subregistry-Prozess mit Paritaetscheck.
 
 Checks:
 
@@ -138,7 +160,7 @@ Checks:
 
 ### Paket 5: Abschlussreview
 
-Status: geplant
+Status: abgeschlossen
 
 Ziel:
 
@@ -146,3 +168,17 @@ Ziel:
 - Nur echte Scope-/Risiko-/Grundsatz-Restpunkte belassen.
 - Relevante Checks ausfuehren.
 - Lokal nach `main` integrieren und Worktree entfernen.
+
+Umgesetzt:
+
+- Offene Punkte erneut gelesen.
+- Abschlusschecks ausgefuehrt.
+- Abschlussreport erstellt.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine typecheck` -> bestanden.
+- `corepack pnpm --filter @netgrid/shared typecheck` -> bestanden.
+- `corepack pnpm --filter @netgrid/engine test` -> bestanden, 173 Testdateien / 1518 Tests.
+- `corepack pnpm check:card-function-abstraction` -> bestanden, 147 Baseline-Findings.
+- `corepack pnpm typecheck` -> bestanden.

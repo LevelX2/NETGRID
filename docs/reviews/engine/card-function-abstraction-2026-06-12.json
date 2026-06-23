@@ -71,8 +71,8 @@
       "packages/engine/src/ability-engine/definition-types.ts|2169|21|emergency_self_construct|Emergency Self-Construct|new_unclassified_card_name_leak",
       "packages/engine/src/ability-engine/definition-types.ts|2352|6|data_raven|Data Raven|new_unclassified_card_name_leak",
       "packages/engine/src/ability-engine/definition-types.ts|2352|57|doppelganger_antibody|Doppelganger Antibody|new_unclassified_card_name_leak",
-      "packages/engine/src/ability-engine/effect-interpreter.ts|246|52|pattel_antibody|Pattel Antibody|new_unclassified_card_name_leak",
-      "packages/engine/src/ability-engine/effect-interpreter.ts|776|35|pattel_antibody|Pattel Antibody|new_unclassified_card_name_leak",
+      "packages/engine/src/ability-engine/effect-families/counter-effects.ts|63|33|pattel_antibody|Pattel Antibody|new_unclassified_card_name_leak",
+      "packages/engine/src/ability-engine/effect-interpreter.ts|250|52|pattel_antibody|Pattel Antibody|new_unclassified_card_name_leak",
       "packages/engine/src/ability-engine/effective-values.ts|31|31|FaitAccompli|Fait Accompli|new_unclassified_card_name_leak",
       "packages/engine/src/ability-engine/effective-values.ts|101|50|FaitAccompli|Fait Accompli|new_unclassified_card_name_leak",
       "packages/engine/src/ability-engine/icebreaker-abilities.ts|36|8|ai_boon|AI Boon|new_unclassified_card_name_leak",
@@ -6182,7 +6182,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 628,
+      "line": 601,
       "column": 3,
       "token": "startupImmolator",
       "cardTitle": "Startup Immolator",
@@ -6193,7 +6193,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 659,
+      "line": 632,
       "column": 3,
       "token": "preyingMantis",
       "cardTitle": "Preying Mantis",
@@ -6204,7 +6204,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 660,
+      "line": 633,
       "column": 3,
       "token": "questForCattekin",
       "cardTitle": "Quest for Cattekin",
@@ -6215,7 +6215,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 773,
+      "line": 746,
       "column": 3,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -6226,7 +6226,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 784,
+      "line": 757,
       "column": 3,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -6237,7 +6237,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 786,
+      "line": 759,
       "column": 3,
       "token": "newsgroupTaunting",
       "cardTitle": "Newsgroup Taunting",
@@ -6248,7 +6248,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 868,
+      "line": 841,
       "column": 3,
       "token": "bizarreEncryption",
       "cardTitle": "Bizarre Encryption Scheme",
@@ -6259,7 +6259,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 952,
+      "line": 925,
       "column": 10,
       "token": "Siren",
       "cardTitle": "Siren",
@@ -6270,7 +6270,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/registry.ts",
-      "line": 984,
+      "line": 957,
       "column": 3,
       "token": "pirateBroadcast",
       "cardTitle": "Pirate Broadcast",
