@@ -87,6 +87,7 @@ describe("AI public export contract", () => {
     const forbiddenPublicModules = [
       "./diagnostics/semantic-runtime-debug",
       "./diagnostics/coverage-selection-debug",
+      "./diagnostics/semantic-runtime-action-alternatives",
       "./evaluation/semantic-shadow-league-delta",
       "./evaluation/selfplay-decision-snapshot-mining",
       "./evaluation/semantic-shadow-league",

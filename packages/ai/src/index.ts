@@ -138,11 +138,10 @@ import {
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
 import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "./diagnostics/coverage-selection-debug";
+import { buildSemanticRuntimeActionAlternatives } from "./diagnostics/semantic-runtime-action-alternatives";
 import {
   buildSemanticRuntimePlanSelectionDisplayContext,
   semanticRuntimeDebugActionDisplayScore,
-  semanticRuntimeDebugActionWhyChosen,
-  semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
   semanticRuntimeDebugDoctrineGoalItems,
@@ -4252,76 +4251,20 @@ function semanticRuntimeActionAlternatives(
         planRuntime,
       )
     : undefined;
-  const planSelection = buildSemanticRuntimePlanSelectionDisplayContext({
-    planRuntime,
+  return buildSemanticRuntimeActionAlternatives({
+    rankedChoices,
     selectedActionId,
-    ...(selectedChoice ? { selectedChoice } : {}),
+    planRuntime,
     ...(coverageSelection ? { coverageSelection } : {}),
-  });
-  const orderedChoices = rankedChoices.slice().sort((left, right) => {
-    const leftSelected = left.action.actionId === selectedActionId;
-    const rightSelected = right.action.actionId === selectedActionId;
-    if (leftSelected !== rightSelected) return leftSelected ? -1 : 1;
-    return 0;
-  });
-  return orderedChoices.slice(0, 32).map((choice, index) => {
-    const selected = choice.action.actionId === selectedActionId;
-    const displayScore = semanticRuntimeDebugActionDisplayScore(
-      choice,
-      selected,
-      planSelection,
-    );
-    const planScoreBreakdown = semanticRuntimeDebugPlanSelectionScoreBreakdown(
-      choice,
-      selected,
-      displayScore,
-      planSelection,
-    );
-    const coverageScoreBreakdown = semanticRuntimeDebugCoverageScoreBreakdown(
-      choice,
-      selected,
-      planSelection,
-    );
-    const sourceCard = semanticRuntimeVisibleSourceCard(input, choice.action);
-    return {
-      rank: index + 1,
-      actionId: choice.action.actionId,
-      actionType: choice.action.type,
-      label: choice.action.label,
-      source: String(choice.action.source),
-      ...(sourceCard?.title ? { sourceTitle: sourceCard.title } : {}),
-      selected,
-      ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
-      scoreBreakdown: [
-        ...semanticRuntimeScoreBreakdown(
-          input,
-          choice.action,
-          choice.scopeId,
-          choice.exclusion,
-        ),
-        ...coverageScoreBreakdown,
-        ...planScoreBreakdown,
-      ],
-      ...(selected
-        ? {
-            whyChosen: semanticRuntimeDebugActionWhyChosen(
-              choice,
-              planSelection,
-            ),
-          }
-        : {
-            whyNot: choice.exclusion
-              ? [
-                  `semantic_excluded:${choice.exclusion.key}`,
-                  choice.exclusion.reason,
-                ]
-              : semanticRuntimeDebugActionWhyNot(
-                  choice,
-                  displayScore,
-                  planSelection,
-                ),
-          }),
-    };
+    sourceTitleForChoice: (choice) =>
+      semanticRuntimeVisibleSourceCard(input, choice.action)?.title,
+    scoreBreakdownForChoice: (choice) =>
+      semanticRuntimeScoreBreakdown(
+        input,
+        choice.action,
+        choice.scopeId,
+        choice.exclusion,
+      ),
   });
 }
 
