@@ -180,8 +180,6 @@ import {
   type CatalogBlockStatusFilterKey,
   type CatalogSetIdFilterOption,
   type CatalogRarityFilterKey,
-  type CatalogSetFilterKey,
-  type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { type CatalogAiInspector } from "./ai-hint-inspector-ui";
@@ -627,34 +625,6 @@ const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validate
 
 const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
 
-const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
-  { key: "event", label: "Prep" },
-  { key: "hardware", label: "Hardware" },
-  { key: "resource", label: "Ressource" },
-  { key: "program", label: "Programm" },
-  { key: "icebreaker", label: "Icebrecher" }
-];
-
-const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
-  { key: "ice", label: "ICE" },
-  { key: "agenda", label: "Agenda" },
-  { key: "asset", label: "Asset" },
-  { key: "upgrade", label: "Upgrade" },
-  { key: "operation", label: "Operation" }
-];
-
-const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
-  { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
-  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
-];
-
-const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
-  { key: "all", label: "Alle Sets" },
-  { key: "original", label: "Original NetGrid Set" },
-  { key: "test", label: "Testkarten" },
-  { key: "other", label: "Andere Sets" }
-];
-
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   ice: true,
   agenda: true,
@@ -683,24 +653,6 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
 
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
-
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-}
-
-function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes">): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
 
 function payloadString(payload: Record<string, unknown>, key: string): string | null {
   const value = payload[key];
