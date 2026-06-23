@@ -207,7 +207,7 @@ function hostFor(
       moveAdvancementOptions: () => [RESOURCE_ID],
       resolveAgendaCounterOperation: (_legalAction, sourceDefinitionId) =>
         calls.push(`agendaCounter:${sourceDefinitionId}`),
-      resolveManagementShakeUpOperation: () => calls.push("managementShakeUp"),
+      resolveCorpOperationAddAdvancementCounters: () => calls.push("managementShakeUp"),
       resolveAdvancementPlacementOperation: () =>
         calls.push("systematicLayoffs"),
     },

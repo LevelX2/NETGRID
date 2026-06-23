@@ -590,10 +590,10 @@ export function resolveCardImplementationMoveAdvancementChoice(
   )(...args);
 }
 
-export function resolveManagementShakeUpOperation(...args: any[]): any {
+export function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
   return runtimeDelegate(
     "corpRuntimeResolvers",
-    "resolveManagementShakeUpOperation",
+    "resolveCorpOperationAddAdvancementCounters",
   )(...args);
 }
 

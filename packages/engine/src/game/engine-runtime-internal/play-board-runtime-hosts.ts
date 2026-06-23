@@ -719,7 +719,7 @@ export function createPlayBoardRuntimeHosts(
     hardwareTrashByCounterEligibleHardwareIds,
     requireRunnerTagged,
     resolveAgendaCounterOperation,
-    resolveManagementShakeUpOperation,
+    resolveCorpOperationAddAdvancementCounters,
     resolvePostOnPlayGenericFollowups,
     resolveHardwareTrashByCounterOperation,
     resolveRunnerLastTurnInstalledResourceTargetId,
@@ -906,8 +906,8 @@ export function createPlayBoardRuntimeHosts(
           ),
         resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
           resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
-        resolveManagementShakeUpOperation: (legalAction) =>
-          resolveManagementShakeUpOperation(state, legalAction),
+        resolveCorpOperationAddAdvancementCounters: (legalAction) =>
+          resolveCorpOperationAddAdvancementCounters(state, legalAction),
         resolveAdvancementPlacementOperation: (legalAction) =>
           resolveAdvancementPlacementOperation(state, legalAction),
       },

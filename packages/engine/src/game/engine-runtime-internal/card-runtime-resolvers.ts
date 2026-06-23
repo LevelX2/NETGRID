@@ -982,7 +982,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
     resolveCorpInstalledEconomyCreditChoice,
-    resolveManagementShakeUpOperation,
+    resolveCorpOperationAddAdvancementCounters,
     resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolveEndTurnTagIfRunnerReceivedTag,

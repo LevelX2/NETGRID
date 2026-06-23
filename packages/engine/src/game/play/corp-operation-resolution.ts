@@ -124,7 +124,7 @@ export type CorpOperationResolutionHost = {
       legalAction: LegalAction,
       sourceDefinitionId: CardDefinitionId,
     ) => void;
-    resolveManagementShakeUpOperation: (legalAction: LegalAction) => void;
+    resolveCorpOperationAddAdvancementCounters: (legalAction: LegalAction) => void;
     resolveAdvancementPlacementOperation: (
       legalAction: LegalAction,
     ) => void;
@@ -290,7 +290,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_v1919_corp_operation_add_three_advancement_counters",
     canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
     resolve: (host, legalAction) =>
-      host.board.resolveManagementShakeUpOperation(legalAction),
+      host.board.resolveCorpOperationAddAdvancementCounters(legalAction),
   },
   [PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_advance_installed_agenda",

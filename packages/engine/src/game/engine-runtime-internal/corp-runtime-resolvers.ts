@@ -1792,8 +1792,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     );
   }
 
-  function resolveManagementShakeUpOperation(...args: any[]): any {
-    return callTurnCorpRuntime("resolveManagementShakeUpOperation", args);
+  function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
+    return callTurnCorpRuntime("resolveCorpOperationAddAdvancementCounters", args);
   }
 
   function awardRunnerEventAgendaPoint(...args: any[]): any {
@@ -2076,7 +2076,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     moveAdvancementOptions,
     startCardImplementationMoveAdvancementChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveManagementShakeUpOperation,
+    resolveCorpOperationAddAdvancementCounters,
     awardRunnerEventAgendaPoint,
     choiceAction,
     abilityMetadata,
