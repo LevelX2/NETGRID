@@ -163,6 +163,52 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toContain("semantic_runtime_scope:basic_economy_draw");
   });
 
+  it("keeps the replay cluster shape on the visible run path", () => {
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [draw, run]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("held-1", "runner", "event"),
+      visibleCard("held-2", "runner", "program"),
+      visibleCard("held-3", "runner", "resource"),
+      visibleCard("held-4", "runner", "hardware"),
+    ];
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_runtime_default:true",
+        "action_type:start_run",
+      ]),
+    );
+    const runAlternative = decision.decisionDebug?.rankedAlternatives?.find(
+      (entry) => entry.selectedActionType === "start_run",
+    );
+    const drawAlternative = decision.decisionDebug?.rankedAlternatives?.find(
+      (entry) => entry.selectedActionType === "draw_card",
+    );
+    expect(runAlternative?.score ?? 0).toBeGreaterThan(
+      drawAlternative?.score ?? 0,
+    );
+  });
+
   it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
     const rdRun = legalAction(
       "run-rd",
