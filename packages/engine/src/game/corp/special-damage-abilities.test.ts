@@ -208,7 +208,7 @@ describe("corp special damage abilities", () => {
     expect(legalAction.payload).toMatchObject({
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      specialZoneReason: "v1920_i_got_a_rock",
+      specialZoneReason: "tagged_meat_damage_agenda_point_cost",
     });
   });
 
