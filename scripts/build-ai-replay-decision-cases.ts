@@ -1,5 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import {
   buildReplayDecisionCaseExtractionReport,
@@ -8,10 +8,17 @@ import {
 } from "../packages/ai/src/evaluation/replay-decision-case-extraction";
 
 const repoRoot = findRepoRoot(process.cwd());
-const dbPath = optionValue("--db") ?? "C:/Projekte/NETGRID/data/runtime/multiplayer/netgrid.sqlite";
+const runId = safeRunId(optionValue("--run-id") ?? "latest");
+const outputDir = resolve(
+  repoRoot,
+  optionValue("--out-dir") ?? `data/local/ai-replay/${runId}`,
+);
+const dbPath =
+  optionValue("--db") ??
+  join(repoRoot, "data/runtime/multiplayer/netgrid.sqlite");
 const maxCreatedAt = optionValue("--max-created-at");
-const jsonOut = resolve(repoRoot, "docs/reviews/ai/ai-replay-decision-cases-2026-06-23.json");
-const mdOut = resolve(repoRoot, "docs/reviews/ai/ai-replay-decision-cases-2026-06-23.md");
+const jsonOut = resolve(outputDir, `${runId}-decision-cases.json`);
+const mdOut = resolve(outputDir, `${runId}-decision-cases.md`);
 
 const db = new DatabaseSync(dbPath, { readOnly: true });
 const rows = (
@@ -61,8 +68,8 @@ const report = buildReplayDecisionCaseExtractionReport(
   })),
   {
     sourceLabel: maxCreatedAt
-      ? `local_sqlite_runtime:multiplayer/netgrid.sqlite:max_created_at:${maxCreatedAt}`
-      : "local_sqlite_runtime:multiplayer/netgrid.sqlite",
+      ? `${sourceLabelFor(dbPath)}:max_created_at:${maxCreatedAt}`
+      : sourceLabelFor(dbPath),
     generatedAt: new Date().toISOString(),
   },
 );
@@ -75,9 +82,9 @@ console.log(JSON.stringify(report.aggregate, null, 2));
 function renderMarkdown(report: ReplayDecisionCaseExtractionReport): string {
   return `# KI-Replay-DecisionCases
 
-Stand: 2026-06-23
+Run-ID: \`${runId}\`
 
-Quelle: lokale SQLite-Runtime, read-only
+Quelle: \`${report.source.label}\`, read-only
 
 Cutoff: ${maxCreatedAt ?? "keiner"}
 
@@ -109,7 +116,8 @@ ${countRows(topEntries(report.aggregate.byPlanKind, 20))}
 
 ## Sicherheitsgrenzen
 
-- Die JSON-Datei enthaelt keine Roh-Trace-JSONs, keine FullState-Snapshots und keine privaten Deckdaten.
+- Die JSON-Datei ist lokaler Analyseoutput unter \`data/local/\` und wird nicht versioniert.
+- Die Extraktion enthaelt keine Roh-Trace-JSONs, keine FullState-Snapshots und keine privaten Deckdaten.
 - Jeder Case enthaelt nur reproduzierbare Anker, ausgewaehlte Aktionsklasse, begrenzte sichtbarkeitsorientierte Diagnosefelder und einen Trace-Digest.
 - Holdout-Cases duerfen erst nach Cluster-Auswahl und Minimalfix fuer Nebenwirkungspruefung genutzt werden.
 
@@ -145,6 +153,22 @@ function optionValue(name: string): string | undefined {
   const index = process.argv.indexOf(name);
   if (index < 0) return undefined;
   return process.argv[index + 1];
+}
+
+function sourceLabelFor(path: string): string {
+  const resolvedPath = resolve(path);
+  const repoRelative = relativePath(repoRoot, resolvedPath);
+  return repoRelative.startsWith("..")
+    ? "local_sqlite_runtime:external_sqlite"
+    : `local_sqlite_runtime:${repoRelative.replaceAll("\\", "/")}`;
+}
+
+function relativePath(from: string, to: string): string {
+  return relative(from, to) || ".";
+}
+
+function safeRunId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_.-]/g, "-").slice(0, 80) || "latest";
 }
 
 function findRepoRoot(start: string): string {

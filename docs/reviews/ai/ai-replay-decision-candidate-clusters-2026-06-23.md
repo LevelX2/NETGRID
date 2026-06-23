@@ -40,6 +40,10 @@ Ausgewaehlter Repro-Cluster: `replay-cluster-12029aa33f19`
 
 Die Cluster sind bewusst noch nicht als behobene oder bestaetigte KI-Fehler markiert. Die Einstufung lautet `candidate_cluster_needs_repro`, weil eine Semantic-/Debug-Rangliste allein nicht beweist, dass die historische Entscheidung aus legaler Same-State-Sicht falsch war. Das naechste Paket muss fuer den ausgewaehlten Cluster mindestens einen Same-State-Repro und Gegenkontrollen liefern.
 
+## Artefakthygiene
+
+Der urspruenglich versionierte vollstaendige Cluster-JSON-Export wurde aus dem aktuellen Repository-Baum entfernt. Die versionierte Ersatzquelle ist `ai-replay-decision-safe-summary-2026-06-23.json`; neue vollstaendige Exports werden nur noch explizit unter `data/local/ai-replay/<run-id>` erzeugt.
+
 ## Verifikation
 
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/replay-decision-case-clustering.test.ts --maxWorkers=1 --testTimeout=30000`

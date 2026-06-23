@@ -82,7 +82,10 @@ Cutoff: 2026-06-23T19:58:35.456Z
 
 ## Sicherheitsgrenzen
 
-- Die JSON-Datei enthaelt keine Roh-Trace-JSONs, keine FullState-Snapshots und keine privaten Deckdaten.
+- Der urspruenglich versionierte vollstaendige JSON-Export wurde nach Review-Erkenntnissen aus dem aktuellen Repository-Baum entfernt.
+- Ersetzt wird er durch `ai-replay-decision-safe-summary-2026-06-23.json` mit Aggregaten und Sicherheitsgrenzen.
+- Neue vollstaendige Exports werden nur noch explizit unter `data/local/ai-replay/<run-id>` erzeugt und nicht versioniert.
+- Die Extraktion enthaelt keine Roh-Trace-JSONs, keine FullState-Snapshots und keine privaten Deckdaten.
 - Jeder Case enthaelt nur reproduzierbare Anker, ausgewaehlte Aktionsklasse, begrenzte sichtbarkeitsorientierte Diagnosefelder und einen Trace-Digest.
 - Holdout-Cases duerfen erst nach Cluster-Auswahl und Minimalfix fuer Nebenwirkungspruefung genutzt werden.
 
