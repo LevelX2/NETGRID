@@ -217,12 +217,12 @@ export function icebreakerEncounterStrengthBonus(...args: any[]): any {
   )(...args);
 }
 
-export function canOverlayProgramOnZetatechSoftwareInstaller(
+export function canOverlayProgramOnInstalledProgramHost(
   ...args: any[]
 ): any {
   return runtimeDelegate(
     "stateRuntimeServices",
-    "canOverlayProgramOnZetatechSoftwareInstaller",
+    "canOverlayProgramOnInstalledProgramHost",
   )(...args);
 }
 

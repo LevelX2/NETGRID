@@ -66,7 +66,7 @@ export type RunnerMainActionGenerationHost = {
   };
   install: {
     shouldOfferRunnerProgramTrashBeforeInstall: HostFn<boolean>;
-    canOverlayProgramOnZetatechSoftwareInstaller: HostFn<boolean>;
+    canOverlayProgramOnInstalledProgramHost: HostFn<boolean>;
     canHostProgramOnDaemon: HostFn<boolean>;
     cardImplementationAgendaPointInstallCost: HostFn<number>;
     pickRunnerAgendaForAgendaPointCost: HostFn<string | undefined>;
@@ -230,8 +230,8 @@ export function buildRunnerMainActions(
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
-  const canOverlayProgramOnZetatechSoftwareInstaller =
-    host.install.canOverlayProgramOnZetatechSoftwareInstaller;
+  const canOverlayProgramOnInstalledProgramHost =
+    host.install.canOverlayProgramOnInstalledProgramHost;
   const canHostProgramOnDaemon = host.install.canHostProgramOnDaemon;
   const cardImplementationAgendaPointInstallCost =
     host.install.cardImplementationAgendaPointInstallCost;
@@ -550,7 +550,7 @@ export function buildRunnerMainActions(
         ...state.runner.rig.hardware,
       ]) {
         if (
-          canOverlayProgramOnZetatechSoftwareInstaller(
+          canOverlayProgramOnInstalledProgramHost(
             state,
             hostId,
             definition,

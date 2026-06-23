@@ -948,7 +948,7 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     return Math.max(0, Math.floor(bonus.amount));
   }
 
-  function canOverlayProgramOnZetatechSoftwareInstaller(
+  function canOverlayProgramOnInstalledProgramHost(
     state: GameState,
     hostId: CardInstanceId,
     programDefinition: CardDefinition,
@@ -1129,7 +1129,7 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     hostedProgramStrengthModifier,
     icebreakerEncounterStrengthBonus,
-    canOverlayProgramOnZetatechSoftwareInstaller,
+    canOverlayProgramOnInstalledProgramHost,
     rezzedCorpRootCardIds,
     visibleVirusCounterTargetIds,
     hasInstalledRunnerApDamageReducerHardware,

@@ -252,7 +252,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     install: {
       shouldOfferRunnerProgramTrashBeforeInstall: () => false,
-      canOverlayProgramOnZetatechSoftwareInstaller: () => false,
+      canOverlayProgramOnInstalledProgramHost: () => false,
       canHostProgramOnDaemon: () => false,
       cardImplementationAgendaPointInstallCost: () => 0,
       pickRunnerAgendaForAgendaPointCost: () => undefined,

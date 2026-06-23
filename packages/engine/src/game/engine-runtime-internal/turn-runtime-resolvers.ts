@@ -781,7 +781,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     canInstallCorpRootCardInServer,
     canInstallRunnerProgramFromZone,
-    canOverlayProgramOnZetatechSoftwareInstaller,
+    canOverlayProgramOnInstalledProgramHost,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     cardHasSubtype,
     cardImplementationAgendaPointInstallCost,

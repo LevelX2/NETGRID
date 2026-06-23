@@ -20,7 +20,7 @@ function runnerInstallToHostPayload(
   return {
     cardId: input.cardId,
     hostOnCardId: input.hostCardId,
-    ...(overlayInstall ? { v1922ZetatechOverlayInstall: true } : {}),
+    ...(overlayInstall ? { programOverlayInstallRequested: true } : {}),
   };
 }
 
@@ -65,7 +65,7 @@ export function buildRunnerZetatechOverlayInstallAction(
     {
       targetRequirements: [
         {
-          id: "zetatechOverlayHost",
+          id: "programOverlayHost",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.rig.programs"],

@@ -345,7 +345,7 @@ function hostFor(
         "isInstalledCorpCardAdvanceable",
       ),
       shouldOfferRunnerProgramTrashBeforeInstall: () => false,
-      canOverlayProgramOnZetatechSoftwareInstaller: () => false,
+      canOverlayProgramOnInstalledProgramHost: () => false,
       canHostProgramOnDaemon: () => false,
       cardImplementationAgendaPointInstallCost: () => 0,
       pickRunnerAgendaForAgendaPointCost: () => undefined,

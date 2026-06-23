@@ -476,7 +476,7 @@ function testHost(
     },
     hosting: {
       canHostProgramOnDaemon: () => true,
-      canOverlayProgramOnZetatechSoftwareInstaller: () => true,
+      canOverlayProgramOnInstalledProgramHost: () => true,
       hostedPaymentCredits: () => 0,
     },
     payment: {

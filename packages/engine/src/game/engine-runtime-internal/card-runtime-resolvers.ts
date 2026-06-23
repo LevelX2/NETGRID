@@ -769,7 +769,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     canInstallCorpRootCardInServer,
     canInstallRunnerProgramFromZone,
-    canOverlayProgramOnZetatechSoftwareInstaller,
+    canOverlayProgramOnInstalledProgramHost,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     cardHasSubtype,
     cardImplementationAgendaPointInstallCost,

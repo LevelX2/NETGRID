@@ -3049,7 +3049,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === hammerId &&
-        action.payload?.v1922ZetatechOverlayInstall === true,
+        action.payload?.programOverlayInstallRequested === true,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -3086,10 +3086,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       cardDefinitionId: "onr_v1_031_hammer",
-      v1922RunnerProgramAbility: "zetatech_overlay_install",
-      zetatechOverlayInstall: true,
+      v1922RunnerProgramAbility: "program_overlay_install",
+      programOverlayInstall: true,
       hostDefinitionId: "onr_v1_075_zetatech-software-installer",
-      zetatechRecurringCreditsSpent: 2,
+      hostedRecurringCreditsSpent: 2,
       runnerCreditsAfter: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(

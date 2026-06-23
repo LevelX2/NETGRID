@@ -108,7 +108,7 @@ export type InstallCardHost = {
       hostCardId: CardInstanceId,
       definition: CardDefinition,
     ) => boolean;
-    canOverlayProgramOnZetatechSoftwareInstaller: (
+    canOverlayProgramOnInstalledProgramHost: (
       hostCardId: CardInstanceId,
       definition: CardDefinition,
     ) => boolean;
@@ -241,8 +241,8 @@ function installRunnerCard(
     typeof legalAction.payload?.hostOnCardId === "string"
       ? (String(legalAction.payload.hostOnCardId) as CardInstanceId)
       : undefined;
-  const zetatechOverlayInstall =
-    legalAction.payload?.v1922ZetatechOverlayInstall === true;
+  const programOverlayInstall =
+    legalAction.payload?.programOverlayInstallRequested === true;
   const selectedServerId =
     typeof legalAction.payload?.selectedServerId === "string"
       ? String(legalAction.payload.selectedServerId)
@@ -273,8 +273,8 @@ function installRunnerCard(
     definition.type === "program" &&
     hostOnCardId &&
     !(
-      zetatechOverlayInstall
-        ? host.hosting.canOverlayProgramOnZetatechSoftwareInstaller(
+      programOverlayInstall
+        ? host.hosting.canOverlayProgramOnInstalledProgramHost(
             hostOnCardId,
             definition,
           )
@@ -326,8 +326,8 @@ function installRunnerCard(
         host.servers.serverChoiceDisplayLabel(restrictiveTargetServerId),
     };
   }
-  const zetatechRecurringBefore =
-    zetatechOverlayInstall && hostOnCardId
+  const hostedRecurringCreditsBefore =
+    programOverlayInstall && hostOnCardId
       ? host.hosting.hostedPaymentCredits(hostOnCardId)
       : 0;
   const concealedHiddenRunnerResource =
@@ -403,17 +403,17 @@ function installRunnerCard(
       ? { selectedSubtype }
       : {}),
   };
-  if (zetatechOverlayInstall) {
+  if (programOverlayInstall) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "zetatech_overlay_install",
-      zetatechOverlayInstall: true,
+      v1922RunnerProgramAbility: "program_overlay_install",
+      programOverlayInstall: true,
       hostDefinitionId: ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
-      zetatechRecurringCreditsSpent:
-        zetatechOverlayInstall && hostOnCardId
+      hostedRecurringCreditsSpent:
+        programOverlayInstall && hostOnCardId
           ? Math.max(
               0,
-              zetatechRecurringBefore -
+              hostedRecurringCreditsBefore -
                 host.hosting.hostedPaymentCredits(hostOnCardId),
             )
           : 0,

@@ -714,7 +714,7 @@ export function createCardLifecycleRuntimeHosts(
     availableRunnerProgramInstallCredits,
     canHostProgramOnDaemon,
     canInstallCorpRootCardInServer,
-    canOverlayProgramOnZetatechSoftwareInstaller,
+    canOverlayProgramOnInstalledProgramHost,
     cardHasSubtype,
     cardImplementationAgendaPointInstallCost,
     cardImplementationRuntimeDeps,
@@ -847,11 +847,11 @@ export function createCardLifecycleRuntimeHosts(
       hosting: {
         canHostProgramOnDaemon: (hostCardId, definition) =>
           canHostProgramOnDaemon(state, hostCardId, definition),
-        canOverlayProgramOnZetatechSoftwareInstaller: (
+        canOverlayProgramOnInstalledProgramHost: (
           hostCardId,
           definition,
         ) =>
-          canOverlayProgramOnZetatechSoftwareInstaller(
+          canOverlayProgramOnInstalledProgramHost(
             state,
             hostCardId,
             definition,

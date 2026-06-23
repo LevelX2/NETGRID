@@ -254,8 +254,8 @@ export function createMainActionHostComposition(
       install: {
         shouldOfferRunnerProgramTrashBeforeInstall:
           install.shouldOfferRunnerProgramTrashBeforeInstall,
-        canOverlayProgramOnZetatechSoftwareInstaller:
-          install.canOverlayProgramOnZetatechSoftwareInstaller,
+        canOverlayProgramOnInstalledProgramHost:
+          install.canOverlayProgramOnInstalledProgramHost,
         canHostProgramOnDaemon: install.canHostProgramOnDaemon,
         cardImplementationAgendaPointInstallCost:
           install.cardImplementationAgendaPointInstallCost,

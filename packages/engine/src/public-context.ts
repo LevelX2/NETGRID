@@ -188,14 +188,14 @@ export function publicContextForAction(
       if (typeof legalAction.payload.hiddenResourceSlotId === "string")
         context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
     }
-    if (legalAction.payload?.zetatechOverlayInstall === true) {
-      context.v1922RunnerProgramAbility = "zetatech_overlay_install";
-      context.zetatechOverlayInstall = true;
+    if (legalAction.payload?.programOverlayInstall === true) {
+      context.v1922RunnerProgramAbility = "program_overlay_install";
+      context.programOverlayInstall = true;
       if (typeof legalAction.payload.hostDefinitionId === "string")
         context.hostDefinitionId = legalAction.payload.hostDefinitionId;
-      if (typeof legalAction.payload.zetatechRecurringCreditsSpent === "number")
-        context.zetatechRecurringCreditsSpent =
-          legalAction.payload.zetatechRecurringCreditsSpent;
+      if (typeof legalAction.payload.hostedRecurringCreditsSpent === "number")
+        context.hostedRecurringCreditsSpent =
+          legalAction.payload.hostedRecurringCreditsSpent;
       if (typeof legalAction.payload.runnerCreditsAfter === "number")
         context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     }
