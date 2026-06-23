@@ -349,17 +349,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     const socialInitial = structuredClone(social);
     const socialReplayStart = social.eventLog.length;
     social = apply(social, "runner", (action) => action.actionId === socialAction.actionId);
-    expect(social.pendingChoice?.source).toContain("p3_58.social_engineering_hide");
+    expect(social.pendingChoice?.source).toContain("hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide");
     social = applyChoice(social, "runner", "hide_3");
     social = applyChoice(social, "corp", "guess_2");
     social = applyChoice(social, "runner", `ice_${socialIceId}`);
     expect(social.run?.attackedServerId).toBe("hq");
     expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_111_social-engineering",
-      socialEngineeringRun: true,
+      secretSpendGuessRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
-        socialEngineeringGuessCorrect: false,
+        secretSpendGuessRunGuessCorrect: false,
         autoPassChosenIce: true,
       }),
     });

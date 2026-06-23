@@ -63,7 +63,7 @@ type CardImplementationStartRunOptions = Pick<
   | "runTraceLinkBonusSourceDefinitionId"
   | "runnerRunTemporaryCredits"
   | "unpreventableCoreDamageAtRunEnd"
-  | "socialEngineeringAutoPassIceId"
+  | "secretSpendGuessRunAutoPassIceId"
   | "prohibitNoisyIcebreakers"
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"

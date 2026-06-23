@@ -271,11 +271,11 @@ import {
 } from "../hidden-zone/search-choice-handlers";
 import {
   handleHiddenZoneArrangeChoice,
-  resolveNewBloodConcealAndReorder,
+  resolveConcealAndReorderInstalledIce,
   startCorpAssetRdTopReorderChoice,
   startCorpRdArrangeChoice,
   startCorpRdTopReorderChoice,
-  startFortressRespecificationReorderChoice,
+  startSuccessfulRunFortIceReorderChoice,
   startRunnerStackArrangeChoice,
   startRunnerStackTop5Choice,
   type HiddenZoneArrangeChoiceHandlerHost,
@@ -287,7 +287,7 @@ import {
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
   startSmithsPawnshopChoice,
-  startSocialEngineeringHideChoice,
+  startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startSynchronizedAttackOnHqRetainChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
@@ -1004,7 +1004,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     resolveManagementShakeUpOperation,
     resolveMitWestTier,
     resolveMultiBreakSubroutinesAction,
-    resolveOmniscienceFoundationEndTurnTag,
+    resolveEndTurnTagIfRunnerReceivedTag,
     resolveOpenEndedMileageProgramReturnChoice,
     resolveP358HiddenReplacementChoice,
     resolvePlayfulAiDiceLoopEvent,
@@ -1557,23 +1557,23 @@ function cardImplementationRunnerEventResolver(
     }
   }
   const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
-  if (hiddenLongtail?.kind === "fortress_respecification_ice_reorder") {
+  if (hiddenLongtail?.kind === "successful_run_fort_ice_reorder") {
     return {
-      name: "card_implementation_runner_event_fortress_respecification_ice_reorder",
+      name: "card_implementation_runner_event_successful_run_fort_ice_reorder",
       canPlay: (state) => hasSuccessfulRunThisTurn(state),
       resolve: (state, legalAction) => {
         if (!hasSuccessfulRunThisTurn(state))
           throw new Error(
             "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
           );
-        startFortressRespecificationReorderChoice(
+        startSuccessfulRunFortIceReorderChoice(
           hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
           String(legalAction.payload?.cardId ?? ""),
         );
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           hiddenZoneBarrier: true,
-          hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+          hiddenZoneAction: "successful_run_fort_ice_reorder",
         };
       },
     };

@@ -27,14 +27,15 @@ export const ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "agendaAbility",
 ] as const satisfies readonly LegacyAbilityPayloadField[];
 
-const P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX = "p3_58.";
+const P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX = "hidden_zone.";
 const P358_FORTRESS_RESPECIFICATION_CHOICE_PREFIX =
-  "p3_58.fortress_respecification:";
-const P358_SOCIAL_ENGINEERING_CHOICE_PREFIX = "p3_58.social_engineering_";
-const P358_NEW_BLOOD_REORDER_CHOICE_PREFIX = "p3_58.new_blood_reorder:";
+  "hidden_zone.successful_run_fort_ice_reorder:";
+const P358_SOCIAL_ENGINEERING_CHOICE_PREFIX =
+  "hidden_zone.secret_spend_guess_then_targeted_bypass_run.";
+const P358_NEW_BLOOD_REORDER_CHOICE_PREFIX = "hidden_zone.conceal_and_reorder_installed_ice:";
 
-// P3.58 choices predate the current typed HiddenReplacementLongtail split, but
-// their choice IDs and source prefixes are replay and stale-revalidation inputs.
+// Hidden replacement choices use functional source prefixes; card files may
+// name cards, but runtime replay/stale guards should describe the reusable path.
 export function isP358HiddenReplacementCompatibilityChoiceSource(
   source: string,
 ): boolean {

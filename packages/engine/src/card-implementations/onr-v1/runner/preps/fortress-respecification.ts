@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const fortressRespecificationImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_088_fortress-respecification",
   hiddenReplacementLongtail: {
-    kind: "fortress_respecification_ice_reorder",
+    kind: "successful_run_fort_ice_reorder",
     visibility: "hidden_info_barrier",
   },
 };

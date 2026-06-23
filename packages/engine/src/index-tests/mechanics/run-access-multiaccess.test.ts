@@ -970,11 +970,11 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.cardId === operationId,
     );
     expect(state.cardInstances[firstIceId]?.faceup).toBe(false);
-    expect(state.pendingChoice?.source).toContain("p3_58.new_blood_reorder");
+    expect(state.pendingChoice?.source).toContain("hidden_zone.conceal_and_reorder_installed_ice");
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      hiddenZoneAction: "conceal_and_reorder_installed_ice",
       amounts: expect.objectContaining({ concealedIceCount: 1 }),
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
@@ -988,7 +988,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      hiddenZoneAction: "conceal_and_reorder_installed_ice",
       amounts: expect.objectContaining({ reorderedIceCount: 2 }),
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });

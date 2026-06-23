@@ -14,7 +14,7 @@ import {
   handleHiddenZoneNonSearchChoice,
   startCorpArchivesToHqChoice,
   startRunnerGripTrashForCreditsChoice,
-  startSocialEngineeringHideChoice,
+  startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startSynchronizedAttackOnHqRetainChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./nonsearch-choice-handlers";
@@ -128,7 +128,7 @@ function makeHost(input: {
     stateVersion: 7,
     activeSide: "runner",
     pendingChoice: input.pendingChoice,
-    socialEngineeringSecret: undefined,
+    secretSpendGuessRunSecret: undefined,
     cardInstances,
     runner: {
       credits: 6,
@@ -333,7 +333,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       definitions: { [sourceId]: definition(socialId, "event", "Social") },
     });
 
-    startSocialEngineeringHideChoice(host, sourceId);
+    startSecretSpendGuessThenTargetedBypassRunHideChoice(host, sourceId);
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.activeSide).toBe("corp");
@@ -341,7 +341,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     host.playerAction = playerAction(["guess_1"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.pendingChoice?.source).toContain(
-      "p3_58.social_engineering_target",
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
 
     host.playerAction = playerAction([`ice_${ice}`]);
