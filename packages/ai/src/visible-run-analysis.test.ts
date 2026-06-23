@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
+import type { VisibleCard } from "@netgrid/shared";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -84,3 +86,125 @@ describe("visible run analysis known-path classification", () => {
     );
   });
 });
+
+describe("visible run analysis trace hazards", () => {
+  it("projects an unavoidable visible Hunter tag hazard without blocking access", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [],
+      2,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleTraceTagHazardUnavoidable: true,
+      expectedTagsFromVisibleIce: 1,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      sourceTitle: "Hunter",
+      traceBaseStrength: 5,
+      runnerTraceCapacity: 2,
+      traceAvoidanceCost: 5,
+      unavoidable: true,
+    });
+  });
+
+  it("keeps a visible Hunter tag hazard avoidable with enough visible base link", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [baseLinkCard("access-through-alpha", 9)],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 0,
+      creditsAfterAvoidingVisibleIceHazards: 0,
+    });
+    expect(assessment.visibleTraceTagHazardUnavoidable).toBeUndefined();
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 9,
+      minimumAvoidanceCost: 0,
+      unavoidable: false,
+    });
+  });
+
+  it("keeps a visible Hunter tag hazard avoidable through Replicator trace break", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [replicator("runner-replicator")],
+      3,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleIceHazardAvoidanceCost: 3,
+      creditsAfterAvoidingVisibleIceHazards: 0,
+    });
+    expect(assessment.visibleTraceTagHazardUnavoidable).toBeUndefined();
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      traceAvoidanceCost: 5,
+      breakAvoidanceCost: 3,
+      minimumAvoidanceCost: 3,
+      unavoidable: false,
+    });
+  });
+});
+
+function hunterTraceTagIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_249_hunter",
+    title: "Hunter",
+    type: "ice",
+    subtypes: ["sentry", "bloodhound"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          amount: 5,
+        },
+      ],
+    },
+  };
+}
+
+function baseLinkCard(instanceId: string, baseLink: number): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_148_access-through-alpha",
+    title: "Access through Alpha",
+    type: "resource",
+    subtypes: ["link"],
+    known: true,
+    baseLink,
+  };
+}
+
+function replicator(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_056_replicator",
+    title: "Replicator",
+    type: "program",
+    subtypes: ["icebreaker"],
+    known: true,
+    strength: 2,
+  };
+}

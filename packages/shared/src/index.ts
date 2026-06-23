@@ -1656,6 +1656,8 @@ export type VisibleEffectiveSubroutine = {
   id: string;
   type: SubroutineType;
   amount?: number;
+  baseTraceStrength?: number;
+  traceSuccessEffect?: TraceSuccessEffect;
   breakTags?: string[];
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
