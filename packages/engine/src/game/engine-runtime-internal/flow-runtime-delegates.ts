@@ -148,10 +148,10 @@ export function isCorpInstalledEconomyCreditSource(...args: any[]): any {
   return runtimeDelegate("flowRuntimeHosts", "isCorpInstalledEconomyCreditSource")(...args);
 }
 
-export function isHackerTrackerCentralCard(...args: any[]): any {
+export function isCorpTraceCounterPoolSource(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "isHackerTrackerCentralCard",
+    "isCorpTraceCounterPoolSource",
   )(...args);
 }
 
@@ -209,35 +209,35 @@ export function icebreakerHasSpecial(...args: any[]): any {
   return runtimeDelegate("flowRuntimeHosts", "icebreakerHasSpecial")(...args);
 }
 
-export function hackerTrackerCardIds(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "hackerTrackerCardIds")(...args);
+export function corpTraceCounterPoolSourceIds(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "corpTraceCounterPoolSourceIds")(...args);
 }
 
-export function hackerTrackerCounterType(...args: any[]): any {
+export function corpTraceCounterPoolCounterType(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "hackerTrackerCounterType",
+    "corpTraceCounterPoolCounterType",
   )(...args);
 }
 
-export function hackerTrackerCounterTotal(...args: any[]): any {
+export function corpTraceCounterPoolTotal(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "hackerTrackerCounterTotal",
+    "corpTraceCounterPoolTotal",
   )(...args);
 }
 
-export function spendHackerTrackerCounters(...args: any[]): any {
+export function spendCorpTraceCounterPoolCounters(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "spendHackerTrackerCounters",
+    "spendCorpTraceCounterPoolCounters",
   )(...args);
 }
 
-export function addHackerTrackerTraceCounters(...args: any[]): any {
+export function addCorpTraceCounterPoolCounters(...args: any[]): any {
   return runtimeDelegate(
     "flowRuntimeHosts",
-    "addHackerTrackerTraceCounters",
+    "addCorpTraceCounterPoolCounters",
   )(...args);
 }
 

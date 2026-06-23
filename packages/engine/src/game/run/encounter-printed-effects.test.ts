@@ -140,7 +140,7 @@ function makeHost(
         [counterType]: (card.counters?.[counterType] ?? 0) + amount,
       };
     },
-    addHackerTrackerTraceCounters: () => 0,
+    addCorpTraceCounterPoolCounters: () => 0,
     calculateRunnerLink: () => 0,
     cardCounter: (cardId, counterType) =>
       state.cardInstances[cardId]?.counters?.[counterType] ?? 0,
@@ -187,7 +187,7 @@ function makeHost(
       delete state.run;
     },
     hasInstalledMicrotechTrodeSet: () => false,
-    hackerTrackerCounterTotal: () => 0,
+    corpTraceCounterPoolTotal: () => 0,
     recurringTraceCreditPoolTotal: () => 0,
     openDamageResolutionWindow: () => false,
     openEventModificationWindow: () => false,
@@ -333,7 +333,7 @@ describe("encounter printed effects boundary", () => {
 
     const result = startTraceFromPrintedSubroutine(
       makeHost(state, legalAction, {
-        hackerTrackerCounterTotal: () => 1,
+        corpTraceCounterPoolTotal: () => 1,
         recurringTraceCreditPoolTotal: () => 1,
         rabbitTraceLimitReductionForIceTrace: () => 2,
       }),
@@ -410,7 +410,7 @@ describe("encounter printed effects boundary", () => {
 
     const result = applyPrintedTraceSuccessFollowups(
       makeHost(state, legalAction, {
-        addHackerTrackerTraceCounters: () => 1,
+        addCorpTraceCounterPoolCounters: () => 1,
       }),
       {
         trace: state.trace,

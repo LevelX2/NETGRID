@@ -29,7 +29,7 @@ export type EncounterPrintedEffectHost = {
       counterType: CounterType,
       amount: number,
     ) => void;
-    addHackerTrackerTraceCounters: () => number;
+    addCorpTraceCounterPoolCounters: () => number;
     calculateRunnerLink: () => number;
     cardCounter: (cardId: CardInstanceId, counterType: CounterType) => number;
     createDamageImminentEvent: (request: {
@@ -42,7 +42,7 @@ export type EncounterPrintedEffectHost = {
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
     finishRun: (successful: boolean) => void;
     hasInstalledMicrotechTrodeSet: () => boolean;
-    hackerTrackerCounterTotal: () => number;
+    corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
       event: ImminentEvent,
@@ -278,7 +278,7 @@ export function startTraceFromPrintedSubroutine(
   const baseCorpBidMax =
     state.corp.credits +
     encounterTemporaryTraceCredits +
-    host.callbacks.hackerTrackerCounterTotal() +
+    host.callbacks.corpTraceCounterPoolTotal() +
     host.callbacks.recurringTraceCreditPoolTotal() +
     fortTraceBits;
   const rabbitTraceLimitReduction =
@@ -380,7 +380,7 @@ export function applyPrintedTraceSuccessFollowups(
   const successful = result.successful;
   const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
   const hackerTrackerCountersAdded =
-    host.callbacks.addHackerTrackerTraceCounters();
+    host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewards(host, trace);

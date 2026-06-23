@@ -847,7 +847,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     );
   }
 
-  function isHackerTrackerCentralCard(
+  function isCorpTraceCounterPoolSource(
     state: GameState,
     cardId: CardInstanceId,
   ): boolean {
@@ -903,19 +903,19 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     }
   }
 
-  function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
+  function corpTraceCounterPoolSourceIds(state: GameState): CardInstanceId[] {
     return corpInstalledCardIds(state)
       .filter((cardId) => {
         const instance = state.cardInstances[cardId];
         return (
           instance?.rezzed === true &&
-          isHackerTrackerCentralCard(state, cardId)
+          isCorpTraceCounterPoolSource(state, cardId)
         );
       })
       .sort();
   }
 
-  function hackerTrackerCounterType(
+  function corpTraceCounterPoolCounterType(
     state: GameState,
     cardId: CardInstanceId,
   ): "bit" | "power" {
@@ -925,23 +925,23 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
       : "power";
   }
 
-  function hackerTrackerCounterTotal(state: GameState): number {
-    return hackerTrackerCardIds(state).reduce(
+  function corpTraceCounterPoolTotal(state: GameState): number {
+    return corpTraceCounterPoolSourceIds(state).reduce(
       (sum, cardId) =>
-        sum + cardCounter(state, cardId, hackerTrackerCounterType(state, cardId)),
+        sum + cardCounter(state, cardId, corpTraceCounterPoolCounterType(state, cardId)),
       0,
     );
   }
 
-  function spendHackerTrackerCounters(
+  function spendCorpTraceCounterPoolCounters(
     state: GameState,
     amount: number,
   ): number {
     let remaining = Math.max(0, Math.floor(amount));
     let spent = 0;
-    for (const cardId of hackerTrackerCardIds(state)) {
+    for (const cardId of corpTraceCounterPoolSourceIds(state)) {
       if (remaining <= 0) break;
-      const counterType = hackerTrackerCounterType(state, cardId);
+      const counterType = corpTraceCounterPoolCounterType(state, cardId);
       const available = cardCounter(state, cardId, counterType);
       const cardSpent = Math.min(available, remaining);
       if (cardSpent <= 0) continue;
@@ -952,10 +952,10 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     return spent;
   }
 
-  function addHackerTrackerTraceCounters(state: GameState): number {
+  function addCorpTraceCounterPoolCounters(state: GameState): number {
     let added = 0;
-    for (const cardId of hackerTrackerCardIds(state)) {
-      addCardCounter(state, cardId, hackerTrackerCounterType(state, cardId), 1);
+    for (const cardId of corpTraceCounterPoolSourceIds(state)) {
+      addCardCounter(state, cardId, corpTraceCounterPoolCounterType(state, cardId), 1);
       added += 1;
     }
     return added;
@@ -998,13 +998,13 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     isObligationDebtDefinition,
     isDrawTaxSourceDefinition,
     isCorpInstalledEconomyCreditSource,
-    isHackerTrackerCentralCard,
+    isCorpTraceCounterPoolSource,
     applyRunnerTraceCounterRunStartEffects,
-    hackerTrackerCardIds,
-    hackerTrackerCounterType,
-    hackerTrackerCounterTotal,
-    spendHackerTrackerCounters,
-    addHackerTrackerTraceCounters,
+    corpTraceCounterPoolSourceIds,
+    corpTraceCounterPoolCounterType,
+    corpTraceCounterPoolTotal,
+    spendCorpTraceCounterPoolCounters,
+    addCorpTraceCounterPoolCounters,
     rabbitTraceLimitReductionForIceTrace,
   };
 }

@@ -711,8 +711,8 @@ export function createActivatedCardRuntimeHosts(
     encounterPrintedEffectHostForState,
     encounterSpecialWindowHostForState,
     fortRunSideFamiliesHostForState,
-    addHackerTrackerTraceCounters,
-    hackerTrackerCounterTotal,
+    addCorpTraceCounterPoolCounters,
+    corpTraceCounterPoolTotal,
     identityModifierAmount,
     recurringTraceCreditPoolTotal,
     rezzedCorpRootCardIds,
@@ -772,7 +772,7 @@ export function createActivatedCardRuntimeHosts(
       counters: {
         cardCounter: (cardId, counterType) =>
           cardCounter(state, cardId, counterType as CounterType),
-        hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
+        corpTraceCounterPoolTotal: () => corpTraceCounterPoolTotal(state),
         recurringTraceCreditPoolTotal: () =>
           recurringTraceCreditPoolTotal(state),
       },
@@ -804,8 +804,8 @@ export function createActivatedCardRuntimeHosts(
       },
       callbacks: {
         sanitizeId,
-        addHackerTrackerTraceCounters: () =>
-          addHackerTrackerTraceCounters(state),
+        addCorpTraceCounterPoolCounters: () =>
+          addCorpTraceCounterPoolCounters(state),
         resolveTraceTrashRunnerResourceSuccess: (
           sourceDefinitionId,
           sourceCardInstanceId,

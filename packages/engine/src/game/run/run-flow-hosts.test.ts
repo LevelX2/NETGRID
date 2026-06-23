@@ -153,8 +153,8 @@ function hostFor(calls: string[]): RunFlowHost {
     trace: {
       calculateRunnerLink: () => 0,
       traceBidChoice: () => ({}) as never,
-      addHackerTrackerTraceCounters: () => 0,
-      hackerTrackerCounterTotal: () => 0,
+      addCorpTraceCounterPoolCounters: () => 0,
+      corpTraceCounterPoolTotal: () => 0,
       recurringTraceCreditPoolTotal: () => 0,
       rabbitTraceLimitReductionForIceTrace: () => 0,
       resolveTraceHardwareWreckerSuccess: () => ({}),

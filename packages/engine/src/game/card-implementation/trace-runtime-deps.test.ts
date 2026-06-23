@@ -112,7 +112,7 @@ function host(): TraceRuntimeDepsHost {
         },
         counters: {
           cardCounter: () => 0,
-          hackerTrackerCounterTotal: () => 0,
+          corpTraceCounterPoolTotal: () => 0,
           recurringTraceCreditPoolTotal: () => 0,
         },
         fort: {
@@ -131,7 +131,7 @@ function host(): TraceRuntimeDepsHost {
         },
         callbacks: {
           sanitizeId: (value) => value.replace(/[^a-zA-Z0-9_.-]/g, "_"),
-          addHackerTrackerTraceCounters: () => 0,
+          addCorpTraceCounterPoolCounters: () => 0,
           resolveTraceTrashRunnerResourceSuccess: () => ({}),
         },
         constants: {

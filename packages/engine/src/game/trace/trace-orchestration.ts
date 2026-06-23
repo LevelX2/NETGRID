@@ -96,7 +96,7 @@ export type TraceOrchestrationHost = {
   };
   counters: {
     cardCounter: (cardId: CardInstanceId, counterType: string) => number;
-    hackerTrackerCounterTotal: () => number;
+    corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
   };
   fort: {
@@ -126,7 +126,7 @@ export type TraceOrchestrationHost = {
   };
   callbacks: {
     sanitizeId: (value: string) => string;
-    addHackerTrackerTraceCounters: () => number;
+    addCorpTraceCounterPoolCounters: () => number;
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
@@ -160,7 +160,7 @@ export function startTraceFromOperation(
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpBidMax =
     state.corp.credits +
-    host.counters.hackerTrackerCounterTotal() +
+    host.counters.corpTraceCounterPoolTotal() +
     host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -847,7 +847,7 @@ function completeTraceWithoutRun(
   );
   if (successful) state.runner.tags += tagsAdded;
   const hackerTrackerCountersAdded =
-    host.callbacks.addHackerTrackerTraceCounters();
+    host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewardsForOperation(state, trace);

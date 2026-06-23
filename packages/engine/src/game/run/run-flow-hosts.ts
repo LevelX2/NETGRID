@@ -227,8 +227,8 @@ export type RunFlowHost = {
   };
   trace: {
     calculateRunnerLink: (state: GameState) => number;
-    addHackerTrackerTraceCounters: (state: GameState) => number;
-    hackerTrackerCounterTotal: (state: GameState) => number;
+    addCorpTraceCounterPoolCounters: (state: GameState) => number;
+    corpTraceCounterPoolTotal: (state: GameState) => number;
     recurringTraceCreditPoolTotal: (state: GameState) => number;
     rabbitTraceLimitReductionForIceTrace: (state: GameState) => number;
     resolveTraceHardwareWreckerSuccess: (
@@ -967,8 +967,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
     return encounterPrintedEffectHost(state, {
       addCardCounter: (cardId, counterType, amount) =>
         host.counters.addCardCounter(state, cardId, counterType, amount),
-      addHackerTrackerTraceCounters: () =>
-        host.trace.addHackerTrackerTraceCounters(state),
+      addCorpTraceCounterPoolCounters: () =>
+        host.trace.addCorpTraceCounterPoolCounters(state),
       calculateRunnerLink: () => host.trace.calculateRunnerLink(state),
       cardCounter: (cardId, counterType) =>
         host.counters.cardCounter(state, cardId, counterType),
@@ -979,7 +979,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
       hasInstalledMicrotechTrodeSet: () =>
         host.callbacks.hasInstalledMicrotechTrodeSet(state),
-      hackerTrackerCounterTotal: () => host.trace.hackerTrackerCounterTotal(state),
+      corpTraceCounterPoolTotal: () => host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () => host.trace.recurringTraceCreditPoolTotal(state),
       openEventModificationWindow: (event, action) =>
         host.damage.openEventModificationWindow(state, event, action),

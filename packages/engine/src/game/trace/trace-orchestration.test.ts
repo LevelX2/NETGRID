@@ -711,7 +711,7 @@ function testHost(
     },
     counters: {
       cardCounter: () => 0,
-      hackerTrackerCounterTotal: () => 0,
+      corpTraceCounterPoolTotal: () => 0,
       recurringTraceCreditPoolTotal: () => 0,
     },
     fort: {
@@ -733,7 +733,7 @@ function testHost(
     },
     callbacks: {
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
-      addHackerTrackerTraceCounters: () => 0,
+      addCorpTraceCounterPoolCounters: () => 0,
       resolveTraceTrashRunnerResourceSuccess: () => ({}),
     },
     constants: {
