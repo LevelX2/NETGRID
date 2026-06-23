@@ -1643,9 +1643,9 @@ export function publicContextForAction(
       context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
       context.remainingCounters = legalAction.payload.remainingCounters;
-    if (typeof legalAction.payload.faitAccompliServerCounters === "number")
-      context.faitAccompliServerCounters =
-        legalAction.payload.faitAccompliServerCounters;
+    if (typeof legalAction.payload.serverAgendaCostCounters === "number")
+      context.serverAgendaCostCounters =
+        legalAction.payload.serverAgendaCostCounters;
   }
   if (typeof legalAction.payload?.v1919RunnerEventAbility === "string") {
     context.v1919RunnerEventAbility =

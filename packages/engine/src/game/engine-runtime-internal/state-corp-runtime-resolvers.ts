@@ -1214,7 +1214,7 @@ function serverDifficultyIncreaseFromRunCounters(
     Math.floor(
       Math.max(
         0,
-        Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
+        Math.floor(state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0),
       ) / 2,
     ),
   );

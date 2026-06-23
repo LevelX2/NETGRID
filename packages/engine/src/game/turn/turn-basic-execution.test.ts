@@ -137,7 +137,7 @@ describe("turn basic execution", () => {
       counters: { virus: 2, power: 1 },
     };
     state.poxCountersByServer = { hq: 1 };
-    state.faitAccompliCountersByServer = { rd: 1 };
+    state.serverAgendaCostCountersByServer = { rd: 1 };
     const action = buildLegalAction(
       state,
       "corp",
@@ -153,7 +153,7 @@ describe("turn basic execution", () => {
     expect(state.corp.clicks).toBe(0);
     expect(state.cardInstances[cardId]?.counters).toEqual({ power: 1 });
     expect(state.poxCountersByServer).toEqual({});
-    expect(state.faitAccompliCountersByServer).toEqual({});
+    expect(state.serverAgendaCostCountersByServer).toEqual({});
     expect(action.payload).toMatchObject({
       purgedVirusCounters: 4,
       purgedCounterType: "virus",

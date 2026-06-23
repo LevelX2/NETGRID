@@ -384,8 +384,8 @@ export function purgeVirusCounters(state: GameState): number {
     setCardCounter(state, cardId as CardInstanceId, "virus", 0);
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
-  if (state.faitAccompliCountersByServer)
-    state.faitAccompliCountersByServer = {};
+  if (state.serverAgendaCostCountersByServer)
+    state.serverAgendaCostCountersByServer = {};
   return total;
 }
 
@@ -402,7 +402,7 @@ function totalCounters(state: GameState, counterType: CounterType): number {
   }
   let faitTotal = 0;
   for (const amount of Object.values(
-    state.faitAccompliCountersByServer ?? {},
+    state.serverAgendaCostCountersByServer ?? {},
   )) {
     faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }

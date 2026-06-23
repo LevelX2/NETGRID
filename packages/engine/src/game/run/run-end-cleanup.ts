@@ -1075,13 +1075,13 @@ function applyV181SuccessfulRunCounterTriggers(
     if (implementation.counterKind === "fait") {
       const current = Math.max(
         0,
-        Math.floor(host.state.faitAccompliCountersByServer?.[serverId] ?? 0),
+        Math.floor(host.state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
       );
       const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
         ? 0
         : trigger.amount;
-      host.state.faitAccompliCountersByServer = {
-        ...(host.state.faitAccompliCountersByServer ?? {}),
+      host.state.serverAgendaCostCountersByServer = {
+        ...(host.state.serverAgendaCostCountersByServer ?? {}),
         [serverId]: current + added,
       };
       if (legalAction) {

@@ -1507,7 +1507,7 @@ function totalCounters(state: GameState, counterType: CounterType): number {
     poxTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   let faitTotal = 0;
-  for (const amount of Object.values(state.faitAccompliCountersByServer ?? {})) {
+  for (const amount of Object.values(state.serverAgendaCostCountersByServer ?? {})) {
     faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   return cardCounterTotal + poxTotal + faitTotal;

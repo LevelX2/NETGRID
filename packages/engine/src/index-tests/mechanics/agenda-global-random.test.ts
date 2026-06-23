@@ -1241,7 +1241,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     state = makeSuccessfulRemoteRun(state);
     state = makeSuccessfulRemoteRun(state);
-    expect(state.faitAccompliCountersByServer?.remote_1).toBe(2);
+    expect(state.serverAgendaCostCountersByServer?.remote_1).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "decline_trash",
     });

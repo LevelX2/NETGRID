@@ -1224,11 +1224,11 @@ function resolveFaitAccompliSuccessfulRunCounter(
   if (used.includes(sourceCardId))
     throw new Error("Fait Accompli wurde fuer diesen Run bereits genutzt.");
   host.counters.addCardCounter(sourceCardId, "power", 1);
-  host.state.faitAccompliCountersByServer ??= {};
-  host.state.faitAccompliCountersByServer[serverId] =
+  host.state.serverAgendaCostCountersByServer ??= {};
+  host.state.serverAgendaCostCountersByServer[serverId] =
     Math.max(
       0,
-      Math.floor(host.state.faitAccompliCountersByServer[serverId] ?? 0),
+      Math.floor(host.state.serverAgendaCostCountersByServer[serverId] ?? 0),
     ) + 1;
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
@@ -1237,8 +1237,8 @@ function resolveFaitAccompliSuccessfulRunCounter(
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     addedCounterAmount: 1,
     remainingCounters: host.counters.cardCounter(sourceCardId, "power"),
-    faitAccompliServerCounters:
-      host.state.faitAccompliCountersByServer[serverId] ?? 0,
+    serverAgendaCostCounters:
+      host.state.serverAgendaCostCountersByServer[serverId] ?? 0,
   };
   return {
     handled: true,

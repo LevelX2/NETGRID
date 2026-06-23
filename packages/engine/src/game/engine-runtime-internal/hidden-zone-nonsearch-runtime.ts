@@ -902,12 +902,12 @@ export function createHiddenZoneNonSearchRuntime(
       mustServer(state, serverId);
       const available = Math.max(
         0,
-        Math.floor(state.faitAccompliCountersByServer?.[serverId] ?? 0),
+        Math.floor(state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
       );
       if (available <= 0)
         throw new Error("Der gewählte Fait-Counter ist nicht mehr verfügbar.");
-      state.faitAccompliCountersByServer = {
-        ...(state.faitAccompliCountersByServer ?? {}),
+      state.serverAgendaCostCountersByServer = {
+        ...(state.serverAgendaCostCountersByServer ?? {}),
         [serverId]: available + 1,
       };
       legalAction.payload = {

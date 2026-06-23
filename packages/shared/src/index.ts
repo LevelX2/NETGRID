@@ -1493,7 +1493,7 @@ export type GameState = {
   poxCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
-  faitAccompliCountersByServer?: Partial<
+  serverAgendaCostCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   spyCountersByServer?: Partial<

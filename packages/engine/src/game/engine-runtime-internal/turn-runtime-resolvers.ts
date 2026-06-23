@@ -3106,7 +3106,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
       serverId: server.id,
       amount: Math.max(
         0,
-        Math.floor(state.faitAccompliCountersByServer?.[server.id] ?? 0),
+        Math.floor(state.serverAgendaCostCountersByServer?.[server.id] ?? 0),
       ),
     }))
     .filter((entry) => entry.amount > 0)
