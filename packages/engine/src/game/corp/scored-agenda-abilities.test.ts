@@ -205,7 +205,13 @@ describe("scored agenda activated abilities", () => {
 
     const actions = buildScoredAgendaAbilityActions(host);
 
-    expect(calls.pushed).toEqual(["boon"]);
+    expect(calls.pushed).toEqual([
+      "ai_cfo",
+      "boon",
+      "retreat",
+      "reveal",
+      "stored",
+    ]);
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "hq_archives_shuffle_draw",
     );
@@ -306,7 +312,10 @@ describe("scored agenda activated abilities", () => {
       side: "corp",
       type: "activated_card_ability",
       abilityRef: { sourceCardInstanceId: "boon", abilityId: "boon" },
-      payload: { cardId: "boon" },
+      payload: {
+        cardId: "boon",
+        cardImplementationAbility: "activated",
+      },
     } as unknown as LegalAction;
     const { host, calls } = makeHost({ legalAction: action });
 
@@ -351,11 +360,10 @@ describe("scored agenda activated abilities", () => {
           "Netwatch Operations Office",
         ),
       },
-      activatedSourceId: "netwatch" as CardInstanceId,
     });
 
     expect(buildScoredAgendaAbilityActions(host)).toEqual([]);
-    expect(calls.pushed).toEqual([]);
+    expect(calls.pushed).toEqual(["netwatch"]);
   });
 
   it("ignores unrelated agendaAbility payloads", () => {

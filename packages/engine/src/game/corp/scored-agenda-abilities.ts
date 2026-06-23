@@ -108,15 +108,6 @@ export type ScoredAgendaAbilityLegalActionResult = {
   actions: LegalAction[];
 };
 
-const SIMPLE_SCORED_AGENDA_ACTIVATED_ABILITY_DEFINITION_IDS = new Set<string>([
-  "onr_v1_192_corporate-boon",
-  "onr_v1_193_corporate-coup",
-  "onr_v1_199_employee-empowerment",
-  "onr_v1_206_marine-arcology",
-  "onr_v1_209_political-coup",
-  "onr_v1_210_political-overthrow",
-]);
-
 export function buildScoredAgendaAbilityActions(
   host: ScoredAgendaAbilityHost,
 ): LegalAction[] {
@@ -134,15 +125,11 @@ export function buildScoredAgendaAbilityActionsForCard(
 ): ScoredAgendaAbilityLegalActionResult {
   const actions: LegalAction[] = [];
   const definition = host.cards.definitionFor(agendaId);
-  const handlesSimpleActivatedAbility =
-    SIMPLE_SCORED_AGENDA_ACTIVATED_ABILITY_DEFINITION_IDS.has(definition.id);
-  if (handlesSimpleActivatedAbility) {
-    host.callbacks.pushActivatedCardImplementationActions(
-      actions,
-      agendaId,
-      definition,
-    );
-  }
+  host.callbacks.pushActivatedCardImplementationActions(
+    actions,
+    agendaId,
+    definition,
+  );
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
     "tagged_runner_meat_damage_reduce_hand_size_on_success"
@@ -297,7 +284,7 @@ export function buildScoredAgendaAbilityActionsForCard(
     );
     return { handled: true, actions };
   }
-  return { handled: handlesSimpleActivatedAbility, actions };
+  return { handled: actions.length > 0, actions };
 }
 
 export function handleScoredAgendaActivatedAbilityAction(
@@ -306,14 +293,12 @@ export function handleScoredAgendaActivatedAbilityAction(
   const legalAction = host.legalAction;
   if (!legalAction) return { handled: false };
   if (legalAction.type === "activated_card_ability") {
+    if (legalAction.payload?.cardImplementationAbility !== "activated")
+      return { handled: false };
     const sourceCardId = legalAction.abilityRef?.sourceCardInstanceId;
     if (!sourceCardId || !host.state.corp.scoreArea.includes(sourceCardId))
       return { handled: false };
     const definition = host.cards.definitionFor(sourceCardId);
-    if (
-      !SIMPLE_SCORED_AGENDA_ACTIVATED_ABILITY_DEFINITION_IDS.has(definition.id)
-    )
-      return { handled: false };
     if (!host.callbacks.resolveActivatedCardImplementationAbility())
       throw new Error("Die aktivierte Kartenfaehigkeit ist nicht gueltig.");
     const result: ScoredAgendaActivatedAbilityHandlerResult = {
