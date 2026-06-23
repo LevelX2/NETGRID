@@ -55,7 +55,7 @@ import {
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
   ApiAiPacingMode,
   ApiClientGameMode,
@@ -70,9 +70,7 @@ import type {
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
   ApiPlayerClockSnapshot,
-  ApiRecentGameResult,
   ApiRecentResultEntry,
-  ApiRecentSeriesResult,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -118,7 +116,6 @@ import {
   type TurnStartAudioState
 } from "./action-cues";
 import { localizedDeCardTitle } from "./card-image-manifest";
-import { recentResultsEmptyText, recentSeriesWinnerLabel, seriesStatusLabel, singleRecentMatchPoints } from "./recent-results-ui";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -209,7 +206,7 @@ import {
   type IceModifierBadgeView,
   type InactiveCardZone
 } from "./action-board-ui";
-import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
+import { CardImage, localCardImageUrl } from "./card-image-service";
 import {
   deriveMatchStart,
   humanAiSideLabel,
@@ -312,43 +309,88 @@ import {
   type MaintenanceAiTraceDetail,
   type MaintenanceAiTraceIndexEntry
 } from "./maintenance";
+import {
+  ACTION_CUE_SETTINGS_STORAGE_KEY,
+  ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+  AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+  AI_PACING_MODE_STORAGE_KEY,
+  AUDIO_STORAGE_KEY,
+  CARD_DISPLAY_MODE_STORAGE_KEY,
+  CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+  CARD_SIZE_SETTINGS_STORAGE_KEY,
+  CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+  CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+  COLOR_SCHEME_STORAGE_KEY,
+  DECK_STORAGE_KEY,
+  DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
+  DISPLAY_NAME_STORAGE_KEY,
+  GAMEPLAY_SETTINGS_STORAGE_KEY,
+  LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
+  LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+  LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+  LEGACY_AI_PACING_MODE_STORAGE_KEY,
+  LEGACY_AUDIO_STORAGE_KEY,
+  LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
+  LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+  LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY,
+  LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+  LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+  LEGACY_DECK_STORAGE_KEY,
+  LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
+  LEGACY_DISPLAY_NAME_STORAGE_KEY,
+  LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
+  LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
+  LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
+  MATCH_START_SETTINGS_STORAGE_KEY,
+  RUN_OVERLAY_POSITION_STORAGE_KEY,
+  cardPreviewCollapsedStorageKeyFor
+} from "../lib/storage-keys";
+import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
+import {
+  clampOverlayPosition,
+  parseOverlayPositionPreference,
+  serializeOverlayPositionPreference,
+  type OverlayPositionPreference
+} from "../lib/overlay-position";
+import {
+  ActiveMatchWorkspaceNav,
+  AppBrand,
+  ConnectionBadge,
+  type ActiveMatchWorkspace,
+  type ConnectionState
+} from "../features/app-shell/AppShell";
+import { PlayerClockStrip, playerClockGraceDisplay } from "../features/game-board/PlayerClock";
+import {
+  ActionSlotMeter,
+  ActiveMatchResourceStrip,
+  CreditBadge,
+  ScoreAreaStat,
+  Stat
+} from "../features/game-board/ResourceStrip";
+import {
+  ActionLeadIcon,
+  ActionPanelDockPlaceholder,
+  ActionPanelFloatButton,
+  CostChips,
+  OverflowAwareActionButton,
+  PriorityWindowHoldToggle
+} from "../features/actions/ActionControls";
+import {
+  HardwareImageOverlay,
+  OperationImageOverlay,
+  hasGeneratedCardArt,
+  isHardwareCardType,
+  isOperationCardType,
+  isSubroutineRuleLine,
+  renderRuleTextSegments,
+  rulesTextLines,
+  shouldAddFallbackSubroutineMarker,
+  SubroutineIcon
+} from "../features/cards/CardTextRendering";
+import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
-const DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
-const LEGACY_DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
-const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
-const LEGACY_AUDIO_STORAGE_KEY = "netgrid-s01-audio";
-const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
-const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
-const GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
-const LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
-const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
-const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
-const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
-const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
-const DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
-const LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
-const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
-const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
-const CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
-const LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
-const CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
-const LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
-const CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX = "netgrid.cardPreviewCollapsed.v1";
-const AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
-const LEGACY_AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
-const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
-const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
-const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
-const LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
-const ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
-const LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
-const AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
-const LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
-const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
-const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
-const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
@@ -400,12 +442,11 @@ type ResourceStripMode = "auto" | "on" | "off";
 type ActionPanelMode = "docked" | "floating";
 type AiDecisionDebugOverlayStatus = "off" | "activating" | "waiting" | "live" | "error";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
-type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 type CardTooltipMode = "simple" | "enhanced" | "image";
-type RunOverlayPositionPreference = { kind: "default" } | { kind: "custom"; xPercent: number; yPercent: number };
+type RunOverlayPositionPreference = OverlayPositionPreference;
 
 type ConfirmationDialogRequest = {
   title: string;
@@ -1079,181 +1120,6 @@ function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes
   const type = formatCatalogTerm(card.type);
   const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
   return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function rulesTextLines(text: string): string[] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
-type OverlayTextDensityClass = "overlayTextDensityLarge" | "overlayTextDensityMedium" | "overlayTextDensityCompact";
-
-function normalizedOverlayLineLength(line: string): number {
-  return line.replace(/\s+/g, " ").trim().length;
-}
-
-function overlayTextDensityClass(title: string, rulesLines: string[]): OverlayTextDensityClass {
-  const lineCount = rulesLines.length;
-  const titleLength = title.trim().length;
-  const ruleLength = rulesLines.reduce((sum, line) => sum + normalizedOverlayLineLength(line), 0);
-  if (lineCount === 0) return titleLength > 24 ? "overlayTextDensityMedium" : "overlayTextDensityLarge";
-  if (lineCount === 1) {
-    if (ruleLength <= 28 && titleLength <= 24) return "overlayTextDensityLarge";
-    if (ruleLength <= 52) return "overlayTextDensityMedium";
-    return "overlayTextDensityCompact";
-  }
-  if (ruleLength <= 64 && titleLength <= 24) return "overlayTextDensityMedium";
-  return "overlayTextDensityCompact";
-}
-
-function shouldShowSubroutineMarkers(cardType: string, text: string): boolean {
-  return cardType.toLowerCase() === "ice" && rulesTextLines(text).length > 1;
-}
-
-function isSubroutineRuleLine(cardType: string, text: string, line: string): boolean {
-  return line.includes("[Subroutine]") || shouldShowSubroutineMarkers(cardType, text);
-}
-
-function shouldAddFallbackSubroutineMarker(cardType: string, text: string, line: string): boolean {
-  return !line.includes("[Subroutine]") && shouldShowSubroutineMarkers(cardType, text);
-}
-
-function renderRuleTextSegments(line: string, keyPrefix: string) {
-  return line.split(/(\[Subroutine\])/g).map((part, index) => (part === "[Subroutine]" ? <SubroutineIcon key={`${keyPrefix}-subroutine-${index}`} /> : part));
-}
-
-function SubroutineIcon() {
-  return (
-    <span className="subroutineIcon" role="img" aria-label="Subroutine">
-      ↩
-    </span>
-  );
-}
-
-function isHardwareCardType(type: string | undefined | null): boolean {
-  return (type ?? "").toLowerCase() === "hardware";
-}
-
-function isOperationCardType(type: string | undefined | null): boolean {
-  return (type ?? "").toLowerCase() === "operation";
-}
-
-function hasGeneratedCardArt(cardId: string | undefined | null): boolean {
-  return isGeneratedCardImageId(cardId);
-}
-
-function CardImageOverlay({
-  title,
-  kindLabel,
-  rulesText,
-  cost,
-  setBadgeLabel,
-  setBadgeTitle,
-  variantClassName,
-  className,
-  maxLines = 2
-}: {
-  title: string;
-  kindLabel: string;
-  rulesText?: string;
-  cost?: number;
-  setBadgeLabel?: string;
-  setBadgeTitle?: string;
-  variantClassName?: string;
-  className?: string;
-  maxLines?: number;
-}) {
-  const overlayRules = rulesText ? rulesTextLines(rulesText).slice(0, Math.max(0, maxLines)) : [];
-  const typographyClassName = overlayTextDensityClass(title, overlayRules);
-  const overlayClassName = ["hardwareImageOverlay", variantClassName, className, typographyClassName].filter(Boolean).join(" ");
-  return (
-    <span className={overlayClassName} aria-hidden="true">
-      <span className="hardwareImageOverlayTop">
-        <span className="hardwareImageOverlayName">{title}</span>
-      </span>
-      {setBadgeLabel ? (
-        <span className="hardwareImageOverlaySetBadge" title={setBadgeTitle}>
-          {setBadgeLabel}
-        </span>
-      ) : null}
-      {cost != null ? <span className="hardwareImageOverlayCost">{cost}</span> : null}
-      <span className="hardwareImageOverlayFrame">
-        <span className="hardwareImageOverlayKind">{kindLabel}</span>
-        {overlayRules.length > 0 ? (
-          <span className="hardwareImageOverlayRules">
-            {overlayRules.map((line, index) => (
-              <span key={`${title}-${kindLabel}-overlay-rule-${index}`}>{renderRuleTextSegments(line, `${title}-${kindLabel}-overlay-rule-${index}`)}</span>
-            ))}
-          </span>
-        ) : null}
-      </span>
-    </span>
-  );
-}
-
-function HardwareImageOverlay({
-  title,
-  rulesText,
-  installCost,
-  setBadgeLabel,
-  setBadgeTitle,
-  className,
-  maxLines = 2
-}: {
-  title: string;
-  rulesText?: string;
-  installCost?: number | null | undefined;
-  setBadgeLabel?: string;
-  setBadgeTitle?: string;
-  className?: string;
-  maxLines?: number;
-}) {
-  return (
-    <CardImageOverlay
-      title={title}
-      kindLabel="Hardware"
-      maxLines={maxLines}
-      {...(rulesText ? { rulesText } : {})}
-      {...(installCost != null ? { cost: installCost } : {})}
-      {...(setBadgeLabel ? { setBadgeLabel } : {})}
-      {...(setBadgeTitle ? { setBadgeTitle } : {})}
-      {...(className ? { className } : {})}
-    />
-  );
-}
-
-function OperationImageOverlay({
-  title,
-  rulesText,
-  cost,
-  setBadgeLabel,
-  setBadgeTitle,
-  className,
-  maxLines = 2
-}: {
-  title: string;
-  rulesText?: string;
-  cost?: number | null | undefined;
-  setBadgeLabel?: string;
-  setBadgeTitle?: string;
-  className?: string;
-  maxLines?: number;
-}) {
-  return (
-    <CardImageOverlay
-      title={title}
-      kindLabel="Operation"
-      variantClassName="operationImageOverlay"
-      maxLines={maxLines}
-      {...(rulesText ? { rulesText } : {})}
-      {...(cost != null ? { cost } : {})}
-      {...(setBadgeLabel ? { setBadgeLabel } : {})}
-      {...(setBadgeTitle ? { setBadgeTitle } : {})}
-      {...(className ? { className } : {})}
-    />
-  );
 }
 
 function catalogDetailLines(card: CatalogCardDetail): string[] {
@@ -2307,7 +2173,7 @@ export default function Page() {
   const [lobbyChatText, setLobbyChatText] = useState("");
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [simulationPending, setSimulationPending] = useState(false);
-  const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
+  const [connection, setConnection] = useState<ConnectionState>("offline");
   const [notice, setNotice] = useState("");
   const [undoNotice, setUndoNotice] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -2408,12 +2274,12 @@ export default function Page() {
   const [actionPanelOverlayPosition, setActionPanelOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
   );
   const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
   );
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] = useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
@@ -2811,11 +2677,11 @@ export default function Page() {
   }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled]);
 
   useEffect(() => {
-    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(actionPanelOverlayPosition));
+    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(actionPanelOverlayPosition));
   }, [actionPanelOverlayPosition]);
 
   useEffect(() => {
-    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(aiDecisionDebugOverlayPosition));
+    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(aiDecisionDebugOverlayPosition));
   }, [aiDecisionDebugOverlayPosition]);
 
   useEffect(() => {
@@ -5110,7 +4976,7 @@ export default function Page() {
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
           <div className="topbarStatusGroup">
-            <Brand />
+            <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
             <div className="topbarMeta">
               <span className="topbarVersion">{APP_STATUS_LABEL}</span>
               <ConnectionBadge text={statusText} state={connection} />
@@ -5792,7 +5658,7 @@ export default function Page() {
     <main className={activeMatchClassName} data-theme={colorScheme}>
       <header className="topbar" ref={topbarRef}>
         <div className="topbarStatusGroup">
-          <Brand />
+          <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
           <div className="topbarMeta">
             <span className="topbarVersion">{APP_STATUS_LABEL}</span>
             <ConnectionBadge text={statusText} state={connection} />
@@ -6858,63 +6724,6 @@ function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined 
   return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
 
-function Brand() {
-  return (
-    <div className="brand">
-      <div className="mark">
-        <img className="brandLogo" src={APP_ICON_SRC} alt="" aria-hidden="true" />
-      </div>
-      <div className="brandLockup">
-        <img className="brandWordmark" src={APP_WORDMARK_SRC} alt="" aria-hidden="true" />
-        <h1 className="srOnly">{APP_NAME}</h1>
-      </div>
-    </div>
-  );
-}
-
-function ActiveMatchWorkspaceNav({
-  workspace,
-  onWorkspace
-}: {
-  workspace: ActiveMatchWorkspace;
-  onWorkspace(workspace: ActiveMatchWorkspace): void;
-}) {
-  const items: Array<{ id: ActiveMatchWorkspace; label: string; title: string; icon: ReactNode }> =
-    workspace === "game"
-      ? [
-          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
-          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
-          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
-          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
-        ]
-      : [
-          { id: "game", label: "Aktives Spiel", title: "Zurück zum aktiven Spiel", icon: <Play size={16} /> },
-          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
-          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
-          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
-          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
-        ];
-
-  return (
-    <nav className={`activeWorkspaceNav ${workspace === "game" ? "compact" : ""}`} aria-label="Aktives Spiel und Werkzeuge">
-      {items.map((item) => (
-        <button
-          className={`button activeWorkspaceButton ${workspace === item.id ? "active" : ""} ${item.id === "game" && workspace !== "game" ? "runningGame" : ""}`}
-          key={item.id}
-          onClick={() => onWorkspace(item.id)}
-          type="button"
-          title={item.title}
-          aria-label={item.title}
-          aria-current={workspace === item.id ? "page" : undefined}
-        >
-          {item.icon}
-          <span className="workspaceLabel">{item.label}</span>
-        </button>
-      ))}
-    </nav>
-  );
-}
-
 function StartLobbyPanel({
   lobby,
   joinUrl,
@@ -7513,120 +7322,6 @@ function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", oppon
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
-}
-
-function RecentGamesPanel({
-  results,
-  loading,
-  error,
-  updatedAt,
-  onRefresh
-}: {
-  results: ApiRecentResultEntry[];
-  loading: boolean;
-  error: string;
-  updatedAt: string | null;
-  onRefresh: () => void;
-}) {
-  return (
-    <section className="recentGamesPanel" aria-label="Letzte Spiele" data-testid="recent-games-panel">
-      <div className="recentGamesHeader">
-        <div>
-          <p className="eyebrow">Letzte Spiele</p>
-          <h2>Abgeschlossene Ergebnisse</h2>
-        </div>
-        <button className="button" onClick={onRefresh} type="button" disabled={loading} data-testid="refresh-recent-games">
-          <RotateCcw size={14} />
-          Aktualisieren
-        </button>
-      </div>
-      {error ? (
-        <p className="notice recentGamesNotice" role="status">
-          {error}
-        </p>
-      ) : null}
-      {results.length === 0 ? (
-        <p className="recentGamesEmpty">{recentResultsEmptyText(loading)}</p>
-      ) : (
-        <ol className="recentGamesList">
-          {results.map((result) => (
-            <li key={result.resultId ?? (result.entryType === "series" ? result.seriesId : result.matchId)}>
-              {result.entryType === "series" ? <RecentSeriesResultCard result={result} /> : <RecentGameResultCard result={result} />}
-            </li>
-          ))}
-        </ol>
-      )}
-      {updatedAt ? <p className="recentGamesTimestamp">Zuletzt aktualisiert: {formatLobbyTime(updatedAt)}</p> : null}
-    </section>
-  );
-}
-
-function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
-  const winnerName = result.winner === "draw" ? "Unentschieden" : result.winner === "runner" ? result.runner.displayName : result.corp.displayName;
-  const scoreText = `${result.runner.agendaPoints} : ${result.corp.agendaPoints}`;
-  const runnerMatchPoints = result.runner.matchPoints ?? singleRecentMatchPoints(result.winner, "runner", result.runner.agendaPoints);
-  const corpMatchPoints = result.corp.matchPoints ?? singleRecentMatchPoints(result.winner, "corp", result.corp.agendaPoints);
-  return (
-    <article className="recentGameCard">
-      <div className="recentGamePrimary">
-        <div>
-          <p className="recentGameMatchup">
-            <strong>{result.runner.displayName}</strong>
-            <span>Runner</span>
-            <em>gegen</em>
-            <strong>{result.corp.displayName}</strong>
-            <span>Korp</span>
-          </p>
-          <p className="recentGameMeta">
-            {formatRecentGameDate(result.finishedAt)} · {matchModeLabel(result.matchMode)} · {matchFormatLabel(result.matchFormat)}
-            {result.series ? ` · Spiel ${result.series.gameNumber}/${result.series.gamesPlanned}` : ""}
-          </p>
-        </div>
-        <div className="recentGameScore" aria-label={`Endstand Runner ${result.runner.agendaPoints} zu Korp ${result.corp.agendaPoints}`}>
-          <span>{scoreText}</span>
-          <small>Agenda-Punkte</small>
-        </div>
-        <div className="recentGameScore matchPoints" aria-label={`Matchpunkte Runner ${runnerMatchPoints} zu Korp ${corpMatchPoints}`}>
-          <span>{runnerMatchPoints} : {corpMatchPoints}</span>
-          <small>Matchpunkte</small>
-        </div>
-      </div>
-      <div className="recentGameDetails">
-        <span>
-          <Award size={14} />
-          {result.winner === "draw" ? winnerName : `${winnerName} gewinnt`}
-        </span>
-        <span title={resultReasonLabel(result.reason, result.winner)}>{shortResultReasonLabel(result.reason)}</span>
-        <span>{result.actionCount} Aktionen</span>
-        <span>{result.runCount} Runs</span>
-        <span title={result.finalStateHash}>Hash {result.finalStateHash.slice(0, 8)}</span>
-      </div>
-      <div className="recentGameDecks">
-        <span>{result.runner.deckName ? `Runner-Deck: ${result.runner.deckName}` : "Runner-Deck"}</span>
-        <span>{result.corp.deckName ? `Korp-Deck: ${result.corp.deckName}` : "Korp-Deck"}</span>
-      </div>
-    </article>
-  );
-}
-
-function matchModeLabel(mode: ApiRecentGameResult["matchMode"]): string {
-  if (mode === "human_vs_human") return "Mensch vs Mensch";
-  if (mode === "human_runner_vs_corp_ai") return "Runner vs Korp-KI";
-  return "Korp vs Runner-KI";
-}
-
-function shortResultReasonLabel(reason: ApiRecentGameResult["reason"]): string {
-  if (reason === "agenda_points") return "Agenda-Ziel";
-  if (reason === "bad_publicity_7") return "Bad Publicity";
-  if (reason === "corp_deck_empty") return "Korp-Deck leer";
-  if (reason === "flatline") return "Flatline";
-  if (reason === "draw") return "Unentschieden";
-  if (reason === "time_expired") return "Spielerzeit";
-  return "Abgeschlossen";
-}
-
-function formatRecentGameDate(value: string): string {
-  return new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
 function OptionsPanel({
@@ -8439,54 +8134,6 @@ function damageImpactGripValue(count: number, maxHandSize: number | undefined): 
   return maxHandSize !== undefined ? `${count}/${maxHandSize}` : `${count}`;
 }
 
-function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
-  const winnerLabel = recentSeriesWinnerLabel(result);
-  return (
-    <article className="recentGameCard recentSeriesCard">
-      <div className="recentGamePrimary">
-        <div>
-          <p className="recentGameMatchup">
-            <strong>{result.players.player_a.displayName}</strong>
-            <span>Spieler A</span>
-            <em>gegen</em>
-            <strong>{result.players.player_b.displayName}</strong>
-            <span>Spieler B</span>
-          </p>
-          <p className="recentGameMeta">
-            {formatRecentGameDate(result.finishedAt)} · Matchserie · {result.gamesPlayed}/{result.gamesPlanned} Spiele · {seriesStatusLabel(result.status)}
-          </p>
-        </div>
-        <div className="recentGameScore matchPoints" aria-label={`Serien-Matchpunkte Spieler A ${result.players.player_a.matchPoints} zu Spieler B ${result.players.player_b.matchPoints}`}>
-          <span>{result.players.player_a.matchPoints} : {result.players.player_b.matchPoints}</span>
-          <small>Matchpunkte</small>
-        </div>
-        <div className="recentGameScore" aria-label={`Serien-Agenda-Punkte Spieler A ${result.players.player_a.agendaPoints} zu Spieler B ${result.players.player_b.agendaPoints}`}>
-          <span>{result.players.player_a.agendaPoints} : {result.players.player_b.agendaPoints}</span>
-          <small>Agenda-Punkte</small>
-        </div>
-      </div>
-      <div className="recentGameDetails">
-        <span>
-          <Award size={14} />
-          {winnerLabel}
-        </span>
-        <span>{result.players.player_a.wins} : {result.players.player_b.wins} Siege</span>
-        <span title={result.seriesId}>Serie {result.seriesId.slice(0, 8)}</span>
-      </div>
-      <ol className="recentSeriesGames">
-        {result.games.map((game) => (
-          <li key={game.matchId}>
-            <span>Spiel {game.gameNumber}</span>
-            <span>{game.runnerDisplayName} als Runner {game.runnerAgendaPoints} AP / {game.runnerMatchPoints} MP</span>
-            <span>{game.corpDisplayName} als Korp {game.corpAgendaPoints} AP / {game.corpMatchPoints} MP</span>
-            <span>{shortResultReasonLabel(game.reason)}</span>
-          </li>
-        ))}
-      </ol>
-    </article>
-  );
-}
-
 function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
   if (type === "meat") return "Meat Damage";
   if (type === "core") return "Core Damage";
@@ -9120,10 +8767,10 @@ function RunTimelineOverlay({
   const [position, setPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
   );
   useEffect(() => {
-    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(position));
+    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(position));
   }, [position]);
   const run = view.run;
   if (!run) return null;
@@ -9141,7 +8788,7 @@ function RunTimelineOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     setPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9338,7 +8985,7 @@ function ScoredAgendaOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9461,7 +9108,7 @@ function FloatingActionPanelOverlay({
       const overlay = overlayRef.current;
       if (!overlay) return;
       const rect = overlay.getBoundingClientRect();
-      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      const next = clampOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
       if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
     };
     clampToViewport();
@@ -9482,7 +9129,7 @@ function FloatingActionPanelOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -9569,7 +9216,7 @@ function FloatingAiDecisionDebugOverlay({
       const overlay = overlayRef.current;
       if (!overlay) return;
       const rect = overlay.getBoundingClientRect();
-      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      const next = clampOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
       if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
     };
     clampToViewport();
@@ -9595,7 +9242,7 @@ function FloatingAiDecisionDebugOverlay({
     if (!overlay || !offset) return;
     const rect = overlay.getBoundingClientRect();
     onPosition(
-      clampRunOverlayPosition(
+      clampOverlayPosition(
         ((event.clientX - offset.x) / window.innerWidth) * 100,
         ((event.clientY - offset.y) / window.innerHeight) * 100,
         window.innerWidth,
@@ -10899,37 +10546,6 @@ function aiDecisionDebugStatusLabel(status: AiDecisionDebugOverlayStatus, traceC
   return "Aus";
 }
 
-function ActionPanelDockPlaceholder({
-  runActive,
-  floatingVisible,
-  onDock
-}: {
-  runActive: boolean;
-  floatingVisible: boolean;
-  onDock(): void;
-}) {
-  return (
-    <section className="section actionPanelDockPlaceholder" data-testid="legal-actions-dock-placeholder">
-      <div className="sectionTitleLine">
-        <h2>Mögliche Aktionen</h2>
-        <button className="button actionPanelDockButton" type="button" onClick={onDock} title="Aktionsfenster andocken">
-          <PanelTopClose size={14} />
-          Andocken
-        </button>
-      </div>
-      <p className="meta">{runActive && !floatingVisible ? "Run-Fenster aktiv." : "Schwebendes Aktionsfenster aktiv."}</p>
-    </section>
-  );
-}
-
-function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
-  return (
-    <button className="priorityHoldToggle actionPanelFloatToggle" type="button" onClick={onFloat} aria-label="Aktionsfenster schweben lassen" title="Aktionsfenster schweben lassen">
-      <PanelTopOpen size={14} />
-    </button>
-  );
-}
-
 function LegalActionsPanel({
   view,
   primaryActions,
@@ -11130,49 +10746,6 @@ function LegalActionsPanel({
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
-  );
-}
-
-function PriorityWindowHoldToggle({ enabled, onToggle }: { enabled: boolean; onToggle(enabled: boolean): void }) {
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
-  const tooltipText = "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
-  const label = enabled ? "Fensterhalt ausschalten" : "Fensterhalt einschalten";
-  const showTooltip = (element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    const margin = 10;
-    const width = 276;
-    const left = Math.min(Math.max(margin, rect.right - width), window.innerWidth - width - margin);
-    const belowTop = rect.bottom + 8;
-    const top = belowTop + 64 < window.innerHeight ? belowTop : Math.max(margin, rect.top - 72);
-    setTooltipStyle({ left, top, width });
-  };
-  const tooltip =
-    tooltipStyle && typeof document !== "undefined"
-      ? createPortal(
-          <span className="priorityHoldTooltip" role="tooltip" style={tooltipStyle}>
-            {tooltipText}
-          </span>,
-          document.body
-        )
-      : null;
-
-  return (
-    <>
-      <button
-        className={`priorityHoldToggle ${enabled ? "active" : ""}`}
-        type="button"
-        aria-label={label}
-        aria-pressed={enabled}
-        onClick={() => onToggle(!enabled)}
-        onPointerEnter={(event) => showTooltip(event.currentTarget)}
-        onPointerLeave={() => setTooltipStyle(null)}
-        onFocus={(event) => showTooltip(event.currentTarget)}
-        onBlur={() => setTooltipStyle(null)}
-      >
-        <Pause size={15} />
-      </button>
-      {tooltip}
-    </>
   );
 }
 
@@ -11608,91 +11181,6 @@ function DiscardChoicePanel({
       </button>
     </section>
   );
-}
-
-function CostChips({ action }: { action: LegalAction }) {
-  const chips = actionCostChips(action);
-  if (chips.length === 0) return null;
-  return (
-    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
-      {chips.map((chip) => (
-        <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
-          {chip.kind === "action" ? (
-            Array.from({ length: chip.amount }, (_, index) => <span className="costActionIcon" aria-hidden="true" key={`action-${index}`} />)
-          ) : (
-            <>
-              <span className="costCreditIcon" aria-hidden="true" />
-              {chip.amount}
-            </>
-          )}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-type OverflowAwareActionButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
-  action: LegalAction;
-  label: string;
-  displayLabel?: string;
-  iconSize?: number;
-};
-
-function OverflowAwareActionButton({
-  action,
-  label,
-  displayLabel = label,
-  iconSize,
-  type = "button",
-  ...buttonProps
-}: OverflowAwareActionButtonProps) {
-  const labelRef = useRef<HTMLSpanElement | null>(null);
-  const [tooltipEnabled, setTooltipEnabled] = useState(false);
-
-  useEffect(() => {
-    const labelElement = labelRef.current;
-    if (!labelElement) {
-      setTooltipEnabled(false);
-      return;
-    }
-
-    const updateTooltipAvailability = () => {
-      const clipped =
-        labelElement.scrollWidth > labelElement.clientWidth + 1 ||
-        labelElement.scrollHeight > labelElement.clientHeight + 1;
-      setTooltipEnabled((current) => (current === clipped ? current : clipped));
-    };
-
-    updateTooltipAvailability();
-    const frame = window.requestAnimationFrame(updateTooltipAvailability);
-    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateTooltipAvailability) : null;
-    resizeObserver?.observe(labelElement);
-    window.addEventListener("resize", updateTooltipAvailability);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      resizeObserver?.disconnect();
-      window.removeEventListener("resize", updateTooltipAvailability);
-    };
-  }, [displayLabel, label]);
-
-  return (
-    <button
-      {...buttonProps}
-      type={type}
-      aria-label={label}
-      data-tooltip={tooltipEnabled ? label : undefined}
-    >
-      <ActionLeadIcon action={action} {...(iconSize !== undefined ? { size: iconSize } : {})} />
-      <span className="actionButtonLabel" ref={labelRef}>{displayLabel}</span>
-      <CostChips action={action} />
-    </button>
-  );
-}
-
-function ActionLeadIcon({ action, size = 15 }: { action: LegalAction; size?: number }) {
-  if (action.type === "jack_out") return <X size={size} aria-hidden="true" />;
-  if (action.type === "continue_run") return <Route size={size} aria-hidden="true" />;
-  return actionConsumesClick(action) ? <Play size={size} aria-hidden="true" /> : <Zap size={size} aria-hidden="true" />;
 }
 
 function setupWaitingLabel(view: PlayerView): string {
@@ -15382,10 +14870,6 @@ function formatAiHintLabel(value: string): string {
     .toLowerCase();
 }
 
-function ConnectionBadge({ text, state }: { text: string; state: "offline" | "connecting" | "online" }) {
-  return <span className={`connection ${state}`}>{text}</span>;
-}
-
 function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["counterDisplays"]; side: Side }) {
   const chips = identityCounterChipsForDisplays(displays);
   if (chips.length === 0) return null;
@@ -15496,327 +14980,6 @@ function PlayerPanel({
       <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
       <p className="meta statusLine">{sideStatusLineForView(view, view.side)}</p>
     </section>
-  );
-}
-
-function ActiveMatchResourceStrip({
-  view,
-  agendaPointsToWin,
-  actionCapacities,
-  topOffsetPx,
-  ariaHidden
-}: {
-  view: PlayerView;
-  agendaPointsToWin: number;
-  actionCapacities: Record<Side, number>;
-  topOffsetPx: number;
-  ariaHidden: boolean;
-}) {
-  const opponent = opponentSide(view.side);
-  const turnSide = turnSideForView(view) ?? view.activeSide;
-  const turnClicks = turnSide === view.side ? view.own.clicks : view.opponent.clicks;
-  const turnCapacity = actionCapacities[turnSide];
-  const turnDisplay = actionSlotDisplay(turnSide, turnClicks, turnCapacity, true);
-  const stripStyle = { "--resource-strip-top": `${topOffsetPx}px` } as CSSProperties;
-  return (
-    <section className="matchResourceStrip" style={stripStyle} aria-hidden={ariaHidden} data-testid="match-resource-strip">
-      <CompactResourceSide
-        label="Gegner"
-        side={opponent}
-        credits={view.opponent.credits}
-        agendaPoints={view.opponent.agendaPoints}
-        agendaPointsToWin={agendaPointsToWin}
-        tags={opponent === "runner" ? view.opponent.tags : 0}
-        coreDamage={opponent === "runner" ? view.opponent.coreDamage ?? 0 : 0}
-      />
-      <div className={`resourceStripTurn side-${turnSide}`} aria-label={`${sideLabel(turnSide)} am Zug, ${turnDisplay.label}`}>
-        <span className="resourceStripTurnLabel">{sideLabel(turnSide)}</span>
-        <strong>{turnDisplay.available}</strong>
-        <span>Aktionen</span>
-        <ActionSlotMeter side={turnSide} currentClicks={turnClicks} displayCapacity={turnCapacity} active compact slotsOnly />
-      </div>
-      <CompactResourceSide
-        label="Du"
-        side={view.side}
-        credits={view.own.credits}
-        agendaPoints={view.own.agendaPoints}
-        agendaPointsToWin={agendaPointsToWin}
-        tags={view.side === "runner" ? view.own.tags : 0}
-        coreDamage={view.side === "runner" ? view.own.coreDamage ?? 0 : 0}
-      />
-    </section>
-  );
-}
-
-function CompactResourceSide({
-  label,
-  side,
-  credits,
-  agendaPoints,
-  agendaPointsToWin,
-  tags,
-  coreDamage
-}: {
-  label: string;
-  side: Side;
-  credits: number;
-  agendaPoints: number;
-  agendaPointsToWin: number;
-  tags: number;
-  coreDamage: number;
-}) {
-  return (
-    <div className={`resourceStripSide side-${side}`} aria-label={`${label} ${sideLabel(side)}: ${credits} Credits, ${agendaPoints} von ${agendaPointsToWin} Agenda-Punkte`}>
-      <span className="resourceStripSideLabel">{label} · {sideLabel(side)}</span>
-      <span className="resourceStripMetric">
-        <span className="creditCoin" aria-hidden="true" />
-        <strong>{credits}</strong>
-      </span>
-      <span className="resourceStripMetric">
-        <AgendaIcon size={13} />
-        <strong>{agendaPoints}/{agendaPointsToWin}</strong>
-      </span>
-      {tags > 0 ? (
-        <span className="resourceStripMetric quiet">
-          <TagIcon size={13} />
-          <strong>{tags}</strong>
-        </span>
-      ) : null}
-      {coreDamage > 0 ? (
-        <span className="resourceStripMetric quiet">
-          <CoreDamageIcon size={13} />
-          <strong>{coreDamage}</strong>
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
-function ActionSlotMeter({
-  side,
-  currentClicks,
-  displayCapacity,
-  active,
-  compact = false,
-  slotsOnly = false
-}: {
-  side: Side;
-  currentClicks: number;
-  displayCapacity: number;
-  active: boolean;
-  compact?: boolean;
-  slotsOnly?: boolean;
-}) {
-  const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
-  if (slotsOnly) {
-    return (
-      <div className={`actionSlotsInline ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
-        <span className="srOnly">{display.label}</span>
-        <div className="actionSlots" aria-hidden="true">
-          {display.slots.map((slot) => (
-            <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
-      <div className="resourceStatTop">
-        <strong>{display.available}</strong>
-        <span className="statLabel">Aktionen</span>
-      </div>
-      <div className="actionSlots" aria-hidden="true">
-        {display.slots.map((slot) => (
-          <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CreditBadge({ credits }: { credits: number }) {
-  return (
-    <Stat value={credits} icon={<span className="creditCoin" aria-hidden="true" />} helpText="Credits sind die verfügbare Währung für Karten, Runs, Rezzes und andere Kosten." testId="credit-badge" />
-  );
-}
-
-function Stat({ label, value, unit, icon, helpText, testId }: { label?: string; value: number | string; unit?: string; icon?: ReactNode; helpText?: string; testId?: string }) {
-  const [helpPinned, setHelpPinned] = useState(false);
-  const [helpVisible, setHelpVisible] = useState(false);
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
-  const statRef = useRef<HTMLDivElement | null>(null);
-  const showHelp = Boolean(helpText && (helpPinned || helpVisible));
-  const updateTooltipPosition = () => {
-    const rect = statRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const width = Math.min(260, window.innerWidth - 28);
-    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
-    const belowTop = rect.bottom + 8;
-    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
-    setTooltipStyle({ left, top, width });
-  };
-  useEffect(() => {
-    if (!showHelp) return;
-    updateTooltipPosition();
-    window.addEventListener("resize", updateTooltipPosition);
-    window.addEventListener("scroll", updateTooltipPosition, true);
-    return () => {
-      window.removeEventListener("resize", updateTooltipPosition);
-      window.removeEventListener("scroll", updateTooltipPosition, true);
-    };
-  }, [showHelp]);
-  return (
-    <div
-      ref={statRef}
-      className={`stat ${helpText ? "hasStatHelp" : ""} ${helpPinned ? "helpPinned" : ""}`}
-      tabIndex={helpText ? 0 : undefined}
-      aria-label={helpText ? `${label ? `${label}: ` : ""}${value}${unit ? ` ${unit}` : ""}. ${helpText}` : undefined}
-      data-testid={testId}
-      onMouseEnter={() => {
-        if (!helpText) return;
-        updateTooltipPosition();
-        setHelpVisible(true);
-      }}
-      onMouseLeave={() => {
-        if (!helpPinned) setHelpVisible(false);
-      }}
-      onFocus={() => {
-        if (!helpText) return;
-        updateTooltipPosition();
-        setHelpVisible(true);
-      }}
-      onDoubleClick={(event) => {
-        if (!helpText) return;
-        event.preventDefault();
-        updateTooltipPosition();
-        setHelpPinned((current) => !current);
-      }}
-      onBlur={() => {
-        setHelpPinned(false);
-        setHelpVisible(false);
-      }}
-    >
-      <strong>
-        {icon ? <span className="statIcon">{icon}</span> : null}
-        <span className="statValue">{value}</span>
-        {unit ? <span className="statUnit">{unit}</span> : null}
-      </strong>
-      {label ? <span className="statLabel">{label}</span> : null}
-      {helpText && showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
-    </div>
-  );
-}
-
-function ScoreAreaStat({
-  value,
-  open,
-  highlighted,
-  interactive,
-  onToggle
-}: {
-  value: string;
-  open: boolean;
-  highlighted: boolean;
-  interactive: boolean;
-  onToggle(): void;
-}) {
-  const toggleLabel = open ? "Agendas ausblenden" : "Agendas anzeigen";
-  const agendaHelpText = "Agenda-Punkte entscheiden das Spiel: Die Korp punktet erzielte Agendas, der Runner gestohlene Agendas.";
-  const valueStat = <Stat value={value} icon={<AgendaIcon size={14} />} helpText={agendaHelpText} />;
-
-  if (!interactive) {
-    return valueStat;
-  }
-
-  return (
-    <>
-      {valueStat}
-      <ScoreAreaToggleButton
-        open={open}
-        highlighted={highlighted}
-        label={`${toggleLabel}. ${agendaHelpText}`}
-        helpText={agendaHelpText}
-        onToggle={onToggle}
-      />
-    </>
-  );
-}
-
-function ScoreAreaToggleButton({
-  open,
-  highlighted,
-  label,
-  helpText,
-  onToggle
-}: {
-  open: boolean;
-  highlighted: boolean;
-  label: string;
-  helpText: string;
-  onToggle(): void;
-}) {
-  const [helpPinned, setHelpPinned] = useState(false);
-  const [helpVisible, setHelpVisible] = useState(false);
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const showHelp = helpPinned || helpVisible;
-  const updateTooltipPosition = () => {
-    const rect = buttonRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const width = Math.min(260, window.innerWidth - 28);
-    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
-    const belowTop = rect.bottom + 8;
-    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
-    setTooltipStyle({ left, top, width });
-  };
-  useEffect(() => {
-    if (!showHelp) return;
-    updateTooltipPosition();
-    window.addEventListener("resize", updateTooltipPosition);
-    window.addEventListener("scroll", updateTooltipPosition, true);
-    return () => {
-      window.removeEventListener("resize", updateTooltipPosition);
-      window.removeEventListener("scroll", updateTooltipPosition, true);
-    };
-  }, [showHelp]);
-  return (
-    <button
-      ref={buttonRef}
-      className={`stat scoreAreaStatCell scoreAreaStatButton hasStatHelp ${open ? "is-open" : ""} ${highlighted ? "cueHighlightSoft" : ""}`}
-      type="button"
-      onClick={onToggle}
-      onMouseEnter={() => {
-        updateTooltipPosition();
-        setHelpVisible(true);
-      }}
-      onMouseLeave={() => {
-        if (!helpPinned) setHelpVisible(false);
-      }}
-      onFocus={() => {
-        updateTooltipPosition();
-        setHelpVisible(true);
-      }}
-      onBlur={() => {
-        setHelpPinned(false);
-        setHelpVisible(false);
-      }}
-      onDoubleClick={(event) => {
-        event.preventDefault();
-        updateTooltipPosition();
-        setHelpPinned((current) => !current);
-      }}
-      aria-expanded={open}
-      aria-label={label}
-    >
-      <strong className="scoreAreaToggleGlyphs">
-        <span className="statIcon"><AgendaIcon size={14} /></span>
-        <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
-          {open ? <PanelTopClose size={12} /> : <PanelTopOpen size={12} />}
-        </span>
-      </strong>
-      {showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
-    </button>
   );
 }
 
@@ -17261,73 +16424,6 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
   );
 }
 
-function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
-  const isNoLimit = snapshot.mode === "none";
-  const runnerValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "runner", nowMs) : playerClockLiveRemaining(snapshot, "runner", nowMs);
-  const corpValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "corp", nowMs) : playerClockLiveRemaining(snapshot, "corp", nowMs);
-  const ownerLabel = snapshot.expiredSide
-    ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
-    : snapshot.decisionOwnerSide
-      ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
-      : "Wartet";
-  const valueLabel = isNoLimit ? "verbraucht" : "verbleibend";
-  return (
-    <div className={`playerClockStrip ${snapshot.warningLevel} ${isNoLimit ? "countUp" : "countDown"}`} aria-label={`Spielerzeit ${valueLabel}: ${ownerLabel}`} data-testid="player-clock">
-      <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
-        <strong>Runner</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(runnerValueMs)}</span>
-        {isNoLimit ? <small>verbraucht</small> : null}
-      </span>
-      <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
-        <strong>Korp</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(corpValueMs)}</span>
-        {isNoLimit ? <small>verbraucht</small> : null}
-      </span>
-    </div>
-  );
-}
-
-function playerClockGraceDisplay(snapshot: ApiPlayerClockSnapshot | undefined, nowMs: number): string | null {
-  if (!snapshot || snapshot.mode !== "player_clock" || snapshot.decisionOwnerSide === undefined || snapshot.expiredSide) return null;
-  const remainingMs = playerClockLiveGraceRemaining(snapshot, nowMs);
-  if (remainingMs === null) return null;
-  return remainingMs > 0 ? `Kulanz ${formatPlayerClockDuration(remainingMs)}` : "Kulanz vorbei";
-}
-
-function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: number): number | null {
-  if (snapshot.decisionOwnerSide === undefined) return null;
-  if (snapshot.activityStartedAtMs !== undefined && snapshot.gracePeriodMs !== undefined) {
-    const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
-    return Math.max(0, snapshot.gracePeriodMs - elapsedMs);
-  }
-  if (snapshot.graceRemainingMs !== undefined) return Math.max(0, snapshot.graceRemainingMs);
-  return null;
-}
-function playerClockLiveConsumed(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
-  const consumedMs = snapshot.consumedMs?.[side] ?? 0;
-  if (snapshot.mode !== "none" || snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined) return consumedMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
-  const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
-  return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
-}
-
-function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
-  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
-  if (snapshot.expiredSide === side) return 0;
-  if (snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined || snapshot.gracePeriodMs === undefined) return remainingMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
-  const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
-  const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
-  return Math.max(0, remainingMs - Math.max(0, liveChargeableMs - serverChargeableMs));
-}
-
-function formatPlayerClockDuration(valueMs: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(valueMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
   if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
   const winner = response.winner ?? response.playerView.winner;
@@ -17564,10 +16660,6 @@ function shortMatchId(matchId: string): string {
   return normalized.length > 10 ? normalized.slice(0, 10) : normalized;
 }
 
-function cardPreviewCollapsedStorageKeyFor(matchId: string, side: Side): string {
-  return `${CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX}.${matchId}.${side}`;
-}
-
 function openMatchAgeLabel(ageSeconds: number): string {
   if (!Number.isFinite(ageSeconds) || ageSeconds < 0) return "gerade erstellt";
   if (ageSeconds < 60) return `${ageSeconds}s`;
@@ -17575,80 +16667,6 @@ function openMatchAgeLabel(ageSeconds: number): string {
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   return `${hours} h`;
-}
-
-function parseRunOverlayPositionPreference(raw: string | null): RunOverlayPositionPreference {
-  if (!raw) return { kind: "default" };
-  try {
-    return normalizeRunOverlayPositionPreference(JSON.parse(raw));
-  } catch {
-    return { kind: "default" };
-  }
-}
-
-function normalizeRunOverlayPositionPreference(value: unknown): RunOverlayPositionPreference {
-  if (!value || typeof value !== "object") return { kind: "default" };
-  const candidate = value as { kind?: unknown; xPercent?: unknown; yPercent?: unknown };
-  if (candidate.kind !== "custom" || !finiteRunOverlayPercent(candidate.xPercent) || !finiteRunOverlayPercent(candidate.yPercent)) {
-    return { kind: "default" };
-  }
-  return { kind: "custom", xPercent: candidate.xPercent, yPercent: candidate.yPercent };
-}
-
-function serializeRunOverlayPositionPreference(position: RunOverlayPositionPreference): string {
-  return JSON.stringify(position);
-}
-
-function clampRunOverlayPosition(
-  xPercent: number,
-  yPercent: number,
-  viewportWidth: number,
-  viewportHeight: number,
-  overlayWidth: number,
-  overlayHeight: number
-): RunOverlayPositionPreference {
-  const margin = 8;
-  const safeWidth = Math.max(1, viewportWidth);
-  const safeHeight = Math.max(1, viewportHeight);
-  const maxLeft = Math.max(margin, safeWidth - overlayWidth - margin);
-  const maxTop = Math.max(margin, safeHeight - overlayHeight - margin);
-  const leftPx = clampRunOverlayValue((xPercent / 100) * safeWidth, margin, maxLeft);
-  const topPx = clampRunOverlayValue((yPercent / 100) * safeHeight, margin, maxTop);
-  return {
-    kind: "custom",
-    xPercent: roundRunOverlayPercent((leftPx / safeWidth) * 100),
-    yPercent: roundRunOverlayPercent((topPx / safeHeight) * 100)
-  };
-}
-
-function finiteRunOverlayPercent(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
-}
-
-function clampRunOverlayValue(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function roundRunOverlayPercent(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-function rememberDisplayName(name: string): void {
-  const trimmed = name.trim();
-  if (trimmed) window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, trimmed);
-}
-
-function readLocalStorageWithLegacy(key: string, legacyKey: string): string | null {
-  const current = window.localStorage.getItem(key);
-  if (current !== null) return current;
-  const legacy = window.localStorage.getItem(legacyKey);
-  if (legacy !== null) window.localStorage.setItem(key, legacy);
-  return legacy;
-}
-
-function removeLocalStorageKeys(key: string, legacyKey: string): void {
-  window.localStorage.removeItem(key);
-  window.localStorage.removeItem(legacyKey);
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {

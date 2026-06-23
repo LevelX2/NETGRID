@@ -1,7 +1,15 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+function readCssWithImports(url: URL, seen = new Set<string>()): string {
+  const key = url.href;
+  if (seen.has(key)) return "";
+  seen.add(key);
+  const source = readFileSync(url, "utf8");
+  return source.replace(/^@import\s+"(.+)";/gm, (_match, specifier: string) => readCssWithImports(new URL(specifier, url), seen));
+}
+
+const css = readCssWithImports(new URL("./globals.css", import.meta.url));
 
 function zLayer(name: string): number {
   const match = css.match(new RegExp(`--${name}:\\s*(\\d+);`));
