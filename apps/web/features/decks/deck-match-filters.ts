@@ -3,7 +3,19 @@ import type { Side } from "@netgrid/shared";
 import type { MatchCardPoolSelection } from "../../app/match-start";
 import type { DeckCardEntry, EditableDeck } from "./deck-table-model";
 
+export const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
+export const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+export const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
+export const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
+export const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
+export const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
+export const PROTEUS_DECK_CARD_POOL_VERSION = "private-local-onr-v1-plus-proteus-playtest";
 export const PROTEUS_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
+export const PROTEUS_DECK_FORMAT_PROFILE_VERSION = "1.0.0";
+export const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
+  runner: "runner_identity_001",
+  corp: "corp_identity_001"
+};
 
 type DeckSnapshotForMatchPool = {
   formatProfileId: string;

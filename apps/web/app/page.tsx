@@ -283,7 +283,16 @@ import {
   type EditableDeck
 } from "../features/decks/deck-table-model";
 import {
+  DEFAULT_CORP_SNAPSHOT_ID,
+  DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
+  DEFAULT_DECK_CARD_POOL_VERSION,
+  DEFAULT_DECK_FORMAT_PROFILE_ID,
+  DEFAULT_DECK_FORMAT_PROFILE_VERSION,
+  DEFAULT_IDENTITY_BY_SIDE,
+  DEFAULT_RUNNER_SNAPSHOT_ID,
+  PROTEUS_DECK_CARD_POOL_VERSION,
   PROTEUS_DECK_FORMAT_PROFILE_ID,
+  PROTEUS_DECK_FORMAT_PROFILE_VERSION,
   catalogCardAllowedForDeckEditor,
   editableDeckAllowedForMatchCardPool,
   snapshotAllowedForMatchCardPool
@@ -422,24 +431,12 @@ import {
   zoneHighlighted
 } from "../features/game-board/board-view-helpers";
 
-const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
-const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
-const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
-const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
-const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
-const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
-const PROTEUS_DECK_CARD_POOL_VERSION = "private-local-onr-v1-plus-proteus-playtest";
-const PROTEUS_DECK_FORMAT_PROFILE_VERSION = "1.0.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.22";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
-const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
-  runner: "runner_identity_001",
-  corp: "corp_identity_001"
-};
 
 type MatchStatus = ApiMatchStatus;
 type GameMode = ApiClientGameMode;
