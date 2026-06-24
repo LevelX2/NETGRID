@@ -158,8 +158,8 @@ export type CreditEconomyExecutionHost = {
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    RUNNER_RANDOM_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
+    RUNNER_RANDOM_PROGRAM_SOURCES: ReadonlySet<string>;
+    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
   };
 };
@@ -454,7 +454,7 @@ export function handleCreditEconomyExecution(
         "Die V1.9.21-Programm-Zufallsfaehigkeit ist nicht installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.RUNNER_RANDOM_PROGRAM_CARD_IDS.has(definition.id))
+    if (!host.constants.RUNNER_RANDOM_PROGRAM_SOURCES.has(definition.id))
       throw new Error(
         "Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.",
       );
@@ -485,7 +485,7 @@ export function handleCreditEconomyExecution(
     const definition = host.cards.definitionFor(state, sourceCardId);
     if (
       definition.id !==
-      host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID
+      host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE
     )
       throw new Error(
         "Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.",
