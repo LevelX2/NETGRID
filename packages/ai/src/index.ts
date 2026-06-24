@@ -184,9 +184,8 @@ import {
   createSemanticRuntimeCorpBoardContext,
 } from "./runtime/semantic-runtime-corp-board-context";
 import {
-  semanticRuntimeCorpScoreNowSafetyGate as buildSemanticRuntimeCorpScoreNowSafetyGate,
-  type SemanticRuntimeCorpScoreSafetyGate,
-} from "./runtime/semantic-runtime-corp-score-safety";
+  createSemanticRuntimeCorpScoreSafetyContext,
+} from "./runtime/semantic-runtime-corp-score-safety-context";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
@@ -3857,6 +3856,11 @@ const {
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   rolesForAction,
 });
+const {
+  semanticRuntimeCorpScoreNowSafetyGate,
+} = createSemanticRuntimeCorpScoreSafetyContext({
+  scoreTerminalWindow: assessCorpScoreTerminalWindow,
+});
 const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext({
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3881,9 +3885,6 @@ const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
-};
-const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES = {
-  scoreTerminalWindow: assessCorpScoreTerminalWindow,
 };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
@@ -6488,17 +6489,6 @@ function semanticRuntimeCorpScoreNowDoctrineWeight(
     action,
     "corp_score_now",
     SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpScoreNowSafetyGate(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeCorpScoreSafetyGate {
-  return buildSemanticRuntimeCorpScoreNowSafetyGate(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES,
   );
 }
 
