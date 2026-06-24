@@ -173,10 +173,8 @@ import {
   semanticRuntimeCorpRemoteRezFloorAssessment as buildSemanticRuntimeCorpRemoteRezFloorAssessment,
 } from "./runtime/semantic-runtime-corp-rez-floor";
 import {
-  semanticRuntimeCorpAdvanceRemoteScore as buildSemanticRuntimeCorpAdvanceRemoteScore,
-  semanticRuntimeCorpInstallRemoteScore as buildSemanticRuntimeCorpInstallRemoteScore,
-  semanticRuntimeCorpShouldBuildProtectedScoreRemote as buildSemanticRuntimeCorpShouldBuildProtectedScoreRemote,
-} from "./runtime/semantic-runtime-corp-remote-score";
+  createSemanticRuntimeCorpRemoteScoreContext,
+} from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
   semanticRuntimeCorpPassiveScoreLinePenalty as buildSemanticRuntimeCorpPassiveScoreLinePenalty,
 } from "./runtime/semantic-runtime-corp-passive-scoreline";
@@ -3813,6 +3811,22 @@ const {
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   server: semanticRuntimeCorpServer,
 });
+const {
+  semanticRuntimeCorpInstallRemoteScore,
+  semanticRuntimeCorpShouldBuildProtectedScoreRemote,
+  semanticRuntimeCorpAdvanceRemoteScore,
+} = createSemanticRuntimeCorpRemoteScoreContext({
+  actionServerId: semanticRuntimeCorpActionServerId,
+  server: semanticRuntimeCorpServer,
+  hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
+  isRemoteServerTarget,
+  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
+  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+  actionCreditCost,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+});
 const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3847,18 +3861,6 @@ const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES = {
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
-};
-const SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES = {
-  actionServerId: semanticRuntimeCorpActionServerId,
-  server: semanticRuntimeCorpServer,
-  hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
-  isRemoteServerTarget,
-  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  actionCreditCost,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 };
 const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
@@ -6697,41 +6699,6 @@ function semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
     SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpInstallRemoteScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-  roles: string[],
-): number {
-  return buildSemanticRuntimeCorpInstallRemoteScore(
-    input,
-    action,
-    roles,
-    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpShouldBuildProtectedScoreRemote(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildSemanticRuntimeCorpShouldBuildProtectedScoreRemote(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpAdvanceRemoteScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  return buildSemanticRuntimeCorpAdvanceRemoteScore(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
   );
 }
 
