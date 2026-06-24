@@ -1514,17 +1514,26 @@ function eventModificationChoice(
     candidate,
   );
   if (isCorpDamagePreventionBypassCandidate(state, candidate)) {
-    const maxBypass = Math.min(amount, state.corp.credits);
+    const bypassCandidates = corpDamagePreventionBypassCandidatesForStage(
+      state,
+      window,
+    );
+    const costPerDamage = totalBypassCostPerDamage(bypassCandidates);
+    const maxBypass = Math.min(
+      amount,
+      costPerDamage > 0 ? Math.floor(state.corp.credits / costPerDamage) : 0,
+    );
     const options: ChoiceRequest["options"] = [];
-    for (let paid = 0; paid <= maxBypass; paid += 1) {
+    for (let damageAllowed = 0; damageAllowed <= maxBypass; damageAllowed += 1) {
+      const creditCost = damageAllowed * costPerDamage;
       options.push({
-        id: `${DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX}${paid}`,
+        id: `${DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX}${damageAllowed}`,
         label:
-          paid === 0
+          damageAllowed === 0
             ? "0 Credits zahlen: 0 Meat Damage durchlassen"
-            : `${paid} Credits zahlen: ${paid} Meat Damage durchlassen`,
+            : `${creditCost} Credits zahlen: ${damageAllowed} Meat Damage durchlassen`,
         publicLabel: "Event Modification",
-        value: paid,
+        value: damageAllowed,
       });
     }
     return {
@@ -1540,7 +1549,8 @@ function eventModificationChoice(
       visibility: candidate.visibility,
     };
   }
-  const options = [
+  const stageCandidates = eventModificationStageCandidates(window);
+  const options: ChoiceRequest["options"] = [
     {
       id: "pass",
       label: corpDamagePreventionCancel
@@ -1554,22 +1564,22 @@ function eventModificationChoice(
               : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
-    {
-      id: candidate.candidateId,
+    ...stageCandidates.map((stageCandidate) => ({
+      id: stageCandidate.candidateId,
       label:
         corpDamagePreventionCancel
           ? "Prevention wirken lassen"
           : event.eventType === "add_tag"
-            ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
+            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
             : event.eventType === "runner_installed_trash"
-              ? `${candidate.sourceRef.label}: ${candidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
-            : window.kind === "increase"
-              ? `${candidate.sourceRef.label}: Schaden um ${candidate.increaseAmount ?? 1} erhöhen`
-              : candidate.sourceRef.kind === "card"
-                ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
-                : `${candidate.preventAmount ?? amount} Schaden verhindern`,
+              ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+              : window.kind === "increase"
+                ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
+                : stageCandidate.sourceRef.kind === "card"
+                  ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
+                  : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification",
-    },
+    })),
   ];
   return {
     choiceId: `v120_choice_${window.windowId}`,
@@ -1608,7 +1618,28 @@ export function resolveEventModificationChoice(
     redactedKind: "event_modification",
   };
   if (selected === "pass") {
+    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
+      state,
+      window,
+      event,
+    );
     if (event.eventType === "add_tag") {
+      if (
+        continueEventModificationWindow(
+          state,
+          event,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...basePayload,
+            eventModificationDecision: "pass",
+            eventModificationOutcome: "next_window_opened",
+            originalAmount: numberPayload(event, "amount"),
+          },
+        )
+      )
+        return;
       resolveAddTagImminentEvent(state, event, legalAction);
       legalAction.payload = {
         ...basePayload,
@@ -1621,6 +1652,22 @@ export function resolveEventModificationChoice(
       return;
     }
     if (event.eventType === "runner_installed_trash") {
+      if (
+        continueEventModificationWindow(
+          state,
+          event,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...basePayload,
+            eventModificationDecision: "pass",
+            eventModificationOutcome: "next_window_opened",
+            originalAmount: numberPayload(event, "amount"),
+          },
+        )
+      )
+        return;
       const summary = resolveRunnerInstalledTrashImminentEvent(
         state,
         event,
@@ -1676,6 +1723,35 @@ export function resolveEventModificationChoice(
         ];
       }
     }
+    if (
+      continueEventModificationWindow(
+        state,
+        event,
+        window,
+        remainingCandidates,
+        legalAction,
+        {
+          ...basePayload,
+          eventModificationDecision: corpDamagePreventionCancel
+            ? "cancel"
+            : "pass",
+          eventModificationOutcome: "next_window_opened",
+          originalAmount: numberPayload(event, "amount"),
+          ...(corpDamagePreventionCancel
+            ? {
+                sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
+                agendaPointCost,
+                agendaPointCostPaid,
+                forfeitedAgendaDefinitionIds,
+                specialZone: "removed_from_game",
+                specialZoneVisibility: "public",
+                specialZoneReason: "damage_prevention_cancel",
+              }
+            : {}),
+        },
+      )
+    )
+      return;
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: corpDamagePreventionCancel ? "cancel" : "pass",
@@ -1711,23 +1787,30 @@ export function resolveEventModificationChoice(
     ) {
       throw new Error("Damage-Prevention-Bypass passt nicht zum Fenster.");
     }
-    const bypassPaid = Number(
+    const bypassDamageAllowed = Number(
       selected.replace(DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX, ""),
     );
+    const bypassCandidates = corpDamagePreventionBypassCandidatesForStage(
+      state,
+      window,
+    );
+    const bypassCostPerDamage = totalBypassCostPerDamage(bypassCandidates);
+    const bypassPaid = bypassDamageAllowed * bypassCostPerDamage;
     const originalAmount = numberPayload(event, "amount");
     if (
-      !Number.isInteger(bypassPaid) ||
-      bypassPaid < 0 ||
-      bypassPaid > originalAmount ||
+      !Number.isInteger(bypassDamageAllowed) ||
+      bypassDamageAllowed < 0 ||
+      bypassDamageAllowed > originalAmount ||
+      bypassCostPerDamage <= 0 ||
       bypassPaid > state.corp.credits
     ) {
       throw new Error("Damage-Prevention-Bypass ist nicht bezahlbar.");
     }
-    revalidateDamagePreventionCandidateSource(state, candidate);
-    const bypassCostPerDamage = candidate.bypassCostPerDamage ?? 0;
+    for (const bypassCandidate of bypassCandidates)
+      revalidateDamagePreventionCandidateSource(state, bypassCandidate);
     spendCredits(state, "corp", bypassPaid);
-    const preventedAmount = Math.max(0, originalAmount - bypassPaid);
-    const finalAmount = bypassPaid;
+    const preventedAmount = Math.max(0, originalAmount - bypassDamageAllowed);
+    const finalAmount = bypassDamageAllowed;
     const finalEvent = {
       ...event,
       payload: { ...event.payload, amount: finalAmount },
@@ -1752,6 +1835,18 @@ export function resolveEventModificationChoice(
       damagePreventionBypassPaid: bypassPaid,
       damagePreventionBypassCostPerDamage: bypassCostPerDamage,
     };
+    if (
+      finalAmount > 0 &&
+      continueEventModificationWindow(
+        state,
+        finalEvent,
+        window,
+        remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+        legalAction,
+        legalAction.payload,
+      )
+    )
+      return;
     clearEventModificationState(state);
     if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
     const summary = resolveDamageImminentEvent(state, finalEvent);
@@ -1763,6 +1858,12 @@ export function resolveEventModificationChoice(
   );
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
+  if (
+    !eventModificationStageCandidates(window).some(
+      (item) => item.candidateId === candidate.candidateId,
+    )
+  )
+    throw new Error("Dieser Event-Modification-Kandidat ist noch nicht legal.");
   if (
     candidate.eventId !== event.eventId ||
     !(
@@ -1934,6 +2035,18 @@ export function resolveEventModificationChoice(
       : {}),
     ...preventionCostPayload,
   };
+  if (
+    finalAmount > 0 &&
+    continueEventModificationWindow(
+      state,
+      finalEvent,
+      window,
+      remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+      legalAction,
+      legalAction.payload,
+    )
+  )
+    return;
   clearEventModificationState(state);
   if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, finalEvent);
@@ -1948,6 +2061,115 @@ function isCorpDamagePreventionCancelCandidate(
     candidate.controller === "corp" &&
     damagePreventionSourceForEventCandidate(state, candidate)
       ?.corpMayCancelUntilEndOfTurn !== undefined
+  );
+}
+
+function eventModificationStageCandidates(
+  window: EventModificationWindow,
+): EventModificationCandidate[] {
+  const first = window.candidates[0];
+  if (!first) return [];
+  return window.candidates.filter(
+    (candidate) =>
+      candidate.kind === first.kind &&
+      candidate.controller === first.controller &&
+      candidate.priority === first.priority &&
+      candidate.preventAmount === first.preventAmount,
+  );
+}
+
+function corpDamagePreventionBypassCandidatesForStage(
+  state: GameState,
+  window: EventModificationWindow,
+): EventModificationCandidate[] {
+  return eventModificationStageCandidates(window).filter((candidate) =>
+    isCorpDamagePreventionBypassCandidate(state, candidate),
+  );
+}
+
+function remainingEventModificationCandidatesAfterStage(
+  state: GameState,
+  window: EventModificationWindow,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  const stageIds = new Set(
+    eventModificationStageCandidates(window).map(
+      (candidate) => candidate.candidateId,
+    ),
+  );
+  return clampEventModificationCandidatesToEventAmount(
+    window.candidates.filter((candidate) => !stageIds.has(candidate.candidateId)),
+    numberPayload(event, "amount"),
+  );
+}
+
+function clampEventModificationCandidatesToEventAmount(
+  candidates: EventModificationCandidate[],
+  amount: number,
+): EventModificationCandidate[] {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    ...(typeof candidate.preventAmount === "number"
+      ? { preventAmount: Math.min(candidate.preventAmount, amount) }
+      : {}),
+  }));
+}
+
+function continueEventModificationWindow(
+  state: GameState,
+  event: ImminentEvent,
+  previousWindow: EventModificationWindow,
+  candidates: EventModificationCandidate[],
+  legalAction: LegalAction,
+  payload: LegalAction["payload"],
+): boolean {
+  const sorted = candidates
+    .filter((candidate) => candidate.eventId === event.eventId)
+    .filter(
+      (candidate) =>
+        candidate.preventAmount === undefined || candidate.preventAmount > 0,
+    )
+    .sort(compareEventModificationCandidate);
+  if (sorted.length === 0) return false;
+  if (hasEventModificationConflict(sorted))
+    throw new Error("Event-Modification-Konflikt blockiert.");
+  const candidate = sorted[0];
+  if (!candidate) return false;
+  const windowId =
+    `${previousWindow.windowId}_next_${candidate.priority}_${candidate.controller}`;
+  const window: EventModificationWindow = {
+    windowId,
+    eventId: event.eventId,
+    eventType: event.eventType,
+    kind: candidate.kind,
+    side: candidate.controller,
+    candidates: sorted,
+    createdAtStateVersion: state.stateVersion + 1,
+    optional: candidate.optional,
+  };
+  state.imminentEvent = { ...event, modificationWindowId: windowId };
+  state.eventModificationWindow = window;
+  state.pendingChoice = eventModificationChoice(
+    state,
+    window,
+    state.imminentEvent,
+    state.stateVersion + 1,
+  );
+  legalAction.payload = {
+    ...(payload ?? {}),
+    nextEventModificationWindowOpened: true,
+    nextEventModificationWindowId: window.windowId,
+    nextEventModificationKind: window.kind,
+  };
+  return true;
+}
+
+function totalBypassCostPerDamage(
+  candidates: EventModificationCandidate[],
+): number {
+  return candidates.reduce(
+    (sum, candidate) => sum + Math.max(0, candidate.bypassCostPerDamage ?? 0),
+    0,
   );
 }
 
