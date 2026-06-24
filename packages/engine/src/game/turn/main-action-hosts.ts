@@ -123,10 +123,6 @@ export function createMainActionHostComposition(
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
         uniqueDirectLongtailKindForDefinition:
           corp.uniqueDirectLongtailKindForDefinition,
-        corpInstalledEconomyActionProfileForDefinition:
-          corp.corpInstalledEconomyActionProfileForDefinition,
-        corpInstalledEconomyActionPayload:
-          corp.corpInstalledEconomyActionPayload,
         ...(corp.filterActionsForRestrictedExtraActions
           ? {
               filterActionsForRestrictedExtraActions:

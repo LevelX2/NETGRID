@@ -295,10 +295,6 @@ function hostFor(
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
-      corpInstalledEconomyActionProfileForDefinition: () => undefined,
-      corpInstalledEconomyActionPayload: unexpected(
-        "corpInstalledEconomyActionPayload",
-      ),
     },
     runner: {
       isConcealedRunnerResource: () => false,

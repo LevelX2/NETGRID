@@ -57,8 +57,6 @@ export type CorpMainActionGenerationHost = {
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
     uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
-    corpInstalledEconomyActionProfileForDefinition: HostFn<any>;
-    corpInstalledEconomyActionPayload: HostFn<LegalAction["payload"]>;
   };
   runner: {
     isConcealedRunnerResource: HostFn<boolean>;
@@ -165,10 +163,6 @@ export function buildCorpMainActions(
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
-  const corpInstalledEconomyActionProfileForDefinition =
-    host.corp.corpInstalledEconomyActionProfileForDefinition;
-  const corpInstalledEconomyActionPayload =
-    host.corp.corpInstalledEconomyActionPayload;
   const isConcealedRunnerResource = host.runner.isConcealedRunnerResource;
   const hiddenRunnerResourceSlotId = host.runner.hiddenRunnerResourceSlotId;
   const corpNewDataFortCreationLocked =
@@ -712,31 +706,6 @@ export function buildCorpMainActions(
         ),
       );
     }
-    const economyProfile = corpInstalledEconomyActionProfileForDefinition(
-      definition.id,
-    );
-    if (!economyProfile) continue;
-    const gainLabel =
-      `${definition.title}: ${economyProfile.creditGain} Credits` +
-      (economyProfile.trashSource ? " und trashen" : "");
-    actions.push(
-      action(
-        state,
-        "corp",
-        "gain_credit",
-        gainLabel,
-        assetId,
-        [
-          {
-            clicks: economyProfile.clickCost,
-            ...(economyProfile.creditCost > 0
-              ? { credits: economyProfile.creditCost }
-              : {}),
-          },
-        ],
-        corpInstalledEconomyActionPayload(economyProfile, assetId),
-      ),
-    );
   }
   const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
   const scoredAgendaTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
