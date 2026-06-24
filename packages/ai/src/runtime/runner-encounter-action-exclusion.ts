@@ -26,6 +26,26 @@ export type RunnerEncounterActionExclusionDependencies = {
   ) => RunnerEncounterBreakAccessAssessment;
 };
 
+export type RunnerEncounterActionExclusionContext = {
+  runnerEncounterActionExclusion: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeExclusion | undefined;
+};
+
+export function createRunnerEncounterActionExclusionContext(
+  dependencies: RunnerEncounterActionExclusionDependencies,
+): RunnerEncounterActionExclusionContext {
+  function encounterActionExclusion(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): SemanticRuntimeExclusion | undefined {
+    return runnerEncounterActionExclusion(input, action, dependencies);
+  }
+
+  return { runnerEncounterActionExclusion: encounterActionExclusion };
+}
+
 export function runnerEncounterActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,

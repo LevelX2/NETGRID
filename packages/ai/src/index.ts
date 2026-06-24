@@ -204,7 +204,7 @@ import {
   runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
 } from "./runtime/runner-blink-break-exclusion";
 import {
-  runnerEncounterActionExclusion as buildRunnerEncounterActionExclusion,
+  createRunnerEncounterActionExclusionContext,
 } from "./runtime/runner-encounter-action-exclusion";
 import {
   semanticRuntimePlanMemoryActionExclusion as buildSemanticRuntimePlanMemoryActionExclusion,
@@ -3941,18 +3941,20 @@ const {
   definitionType: definitionTypeForMetrics,
 });
 const {
+  runnerEncounterActionExclusion,
+} = createRunnerEncounterActionExclusionContext({
+  blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+  pumpViabilityAssessment,
+  breakAccessPathAssessment,
+});
+const {
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionContext({
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
   runnerSelfDamageSurvivalExclusion,
-  runnerEncounterActionExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
-    buildRunnerEncounterActionExclusion(runtimeInput, action, {
-      blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
-      pumpViabilityAssessment,
-      breakAccessPathAssessment,
-    }),
+  runnerEncounterActionExclusion,
   runnerProgramSacrificeExclusion,
   runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
   runnerRunTargetEvaluationForAction:
