@@ -1,5 +1,8 @@
 // @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
+import { proteusArmageddonImplementation } from "../../card-implementations/proteus/runner/programs/armageddon";
+import { proteusScaldanImplementation } from "../../card-implementations/proteus/runner/programs/scaldan";
+import { proteusTaxmanImplementation } from "../../card-implementations/proteus/runner/programs/taxman";
 import {
   DEMO_CARDS_BY_ID,
   type ActionType,
@@ -735,11 +738,14 @@ const { abilityMetadata, accessEffectHandlerHost, accessFlowHost, activeObligati
 
 
 export type AutomaticEffectCollector = ResolvedGameEffect[];
-export const PROTEUS_TAXMAN_ID = "onr_proteus_097_taxman" as CardDefinitionId;
-export const PROTEUS_SCALDAN_ID = "onr_proteus_094_scaldan" as CardDefinitionId;
+export const PROTEUS_TAXMAN_ID =
+  proteusTaxmanImplementation.cardDefinitionId as CardDefinitionId;
+export const PROTEUS_SCALDAN_ID =
+  proteusScaldanImplementation.cardDefinitionId as CardDefinitionId;
 export const PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID =
   "pipe_counter_corp_start_effect" as CardDefinitionId;
-export const PROTEUS_ARMAGEDDON_ID = "onr_proteus_078_armageddon" as CardDefinitionId;
+export const PROTEUS_ARMAGEDDON_ID =
+  proteusArmageddonImplementation.cardDefinitionId as CardDefinitionId;
 
 // Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
 // are still injected through runtime wiring so this module avoids public-facade

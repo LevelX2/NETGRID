@@ -258,6 +258,14 @@ function emptyRunnerTracePaymentQuote(
   };
 }
 
+function addSourceDefinitionId(
+  sourceDefinitionIds: CardDefinitionId[],
+  sourceDefinitionId: CardDefinitionId,
+): void {
+  if (!sourceDefinitionIds.includes(sourceDefinitionId))
+    sourceDefinitionIds.push(sourceDefinitionId);
+}
+
 function quoteRunnerTracePayment(
   deps: RunnerTracePaymentDependencies,
   state: GameState,
@@ -284,10 +292,11 @@ function quoteRunnerTracePayment(
   let remaining =
     amount -
     traceLinkBreakdown.reduce((sum, entry) => sum + entry.amount, 0);
-  const sourceDefinitionIds = new Set<CardDefinitionId>();
+  const sourceDefinitionIds: CardDefinitionId[] = [];
   const breakdown: RunnerTracePaymentBreakdown[] = traceLinkBreakdown.map(
     (entry) => {
-      if (entry.sourceDefinitionId) sourceDefinitionIds.add(entry.sourceDefinitionId);
+      if (entry.sourceDefinitionId)
+        addSourceDefinitionId(sourceDefinitionIds, entry.sourceDefinitionId);
       return runnerPaymentBreakdown(
         entry.kind,
         entry.amount,
@@ -334,7 +343,7 @@ function quoteRunnerTracePayment(
     traceLinkCreditsToPay,
     bonusTraceLinkCreditsToPay,
     normalCreditsToPay,
-    sourceDefinitionIds: [...sourceDefinitionIds].sort(),
+    sourceDefinitionIds: sourceDefinitionIds.sort(),
   };
 }
 
