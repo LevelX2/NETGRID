@@ -930,7 +930,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       )?.counterDisplays,
     ).toEqual([
       expect.objectContaining({
-        id: "restrictive_net_zoning_install_cost_rd",
+        id: "corp_ice_install_cost_modifier_rd",
         amount: 4,
         label: "Install +",
         counterType: "install_cost_modifier",
