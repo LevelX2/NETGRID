@@ -80,7 +80,6 @@ import {
   runnerRunTargetMultiRunPayoffClass,
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetSemanticGuidanceValue,
-  type RunnerRunTargetMultiRunPayoffClass,
 } from "./runner-run-target-guidance";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
@@ -208,6 +207,10 @@ import {
   runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent,
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
+import {
+  runnerMultiRunEventAssessment as buildRunnerMultiRunEventAssessment,
+  type RunnerMultiRunEventAssessment,
+} from "./runtime/runner-multi-run-event-assessment";
 import {
   runnerMultiRunEventExclusion as buildRunnerMultiRunEventExclusion,
 } from "./runtime/runner-multi-run-event-exclusion";
@@ -3602,17 +3605,6 @@ export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
   });
 }
 
-type RunnerMultiRunEventAssessment = {
-  sourceDefinitionId: string;
-  targetServerId: string;
-  phase: "first_run" | "followup_run";
-  canTakeRun: boolean;
-  payoffClass: RunnerRunTargetMultiRunPayoffClass;
-  value: number;
-  evaluation?: RunnerRunTargetEvaluation;
-  evidence: string[];
-};
-
 type SelfDamageSurvivalAssessment = {
   sourceDefinitionId: string;
   handBeforeAction: number;
@@ -5741,59 +5733,15 @@ function runnerMultiRunEventAssessment(
   input: AiDecisionInput,
   action: LegalAction,
 ): RunnerMultiRunEventAssessment | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  const isAllNighterPlay =
-    action.type === "play_event" && sourceDefinitionId === ALL_NIGHTER_CARD_ID;
-  const isAllNighterFollowup =
-    action.type === "start_run" && action.payload?.bonusRunNoClick === true;
-  if (!isAllNighterPlay && !isAllNighterFollowup) return undefined;
-
-  const phase = isAllNighterFollowup ? "followup_run" : "first_run";
-  const targetServerId = semanticRuntimeServerId(action) ?? "unknown";
-  const evaluation =
-    targetServerId === "unknown"
-      ? undefined
-      : runnerMultiRunTargetEvaluation(input, action, targetServerId);
-  const payoffClass = runnerRunTargetMultiRunPayoffClass(evaluation);
-  const canTakeRun = runnerRunTargetPlausibleForMultiRun(evaluation);
-  const evidence = [
-    `multiRunEvent:${phase}`,
-    `multiRunEvent:source:${sourceDefinitionId || "bonus_run"}`,
-    `multiRunEvent:target:${targetServerId}`,
-    `multiRunEvent:payoff:${payoffClass}`,
-    `multiRunEvent:plausible_run:${canTakeRun}`,
-    ...(evaluation
-      ? [
-          `multiRunEvent:recommendation:${evaluation.recommendation}`,
-          `multiRunEvent:path:${evaluation.pathPassability}`,
-          `multiRunEvent:access_payoff:${evaluation.accessPayoff}`,
-          `multiRunEvent:known_access:${evaluation.knownAccessState}`,
-          `multiRunEvent:credits_after:${evaluation.creditsAfterRun}`,
-          ...evaluation.evidence.slice(0, 8),
-        ]
-      : ["multiRunEvent:no_run_target_evaluation"]),
-    ...(canTakeRun
-      ? [
-          payoffClass === "high_payoff"
-            ? "multiRunEvent:allowed_high_payoff"
-            : "multiRunEvent:allowed_unknown_probe",
-        ]
-      : phase === "followup_run"
-        ? ["multiRunEvent:followup_declined_no_payoff"]
-        : ["multiRunEvent:no_plausible_first_run"]),
-  ];
-
-  return {
-    sourceDefinitionId: sourceDefinitionId || "bonus_run",
-    targetServerId,
-    phase,
-    canTakeRun,
-    payoffClass,
-    value: runnerMultiRunEventScoreValue(phase, payoffClass, canTakeRun),
-    ...(evaluation ? { evaluation } : {}),
-    evidence,
-  };
+  return buildRunnerMultiRunEventAssessment(input, action, {
+    allNighterDefinitionId: ALL_NIGHTER_CARD_ID,
+    sourceDefinitionIdForAction,
+    targetServerId: semanticRuntimeServerId,
+    targetEvaluation: runnerMultiRunTargetEvaluation,
+    payoffClass: runnerRunTargetMultiRunPayoffClass,
+    canTakeRun: runnerRunTargetPlausibleForMultiRun,
+    scoreValue: runnerMultiRunEventScoreValue,
+  });
 }
 
 function runnerMultiRunTargetEvaluation(
