@@ -175,8 +175,8 @@ import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
-  semanticRuntimeCorpPassiveScoreLinePenalty as buildSemanticRuntimeCorpPassiveScoreLinePenalty,
-} from "./runtime/semantic-runtime-corp-passive-scoreline";
+  createSemanticRuntimeCorpPassiveScoreLineContext,
+} from "./runtime/semantic-runtime-corp-passive-scoreline-context";
 import {
   createSemanticRuntimeCorpAdvancementCounterContext,
 } from "./runtime/semantic-runtime-corp-advancement-counter-context";
@@ -3850,6 +3850,13 @@ const {
   cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
   teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
 });
+const {
+  semanticRuntimeCorpPassiveScoreLinePenalty,
+} = createSemanticRuntimeCorpPassiveScoreLineContext({
+  scoreTerminalWindow: assessCorpScoreTerminalWindow,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  rolesForAction,
+});
 const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext({
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3874,11 +3881,6 @@ const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
-};
-const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES = {
-  scoreTerminalWindow: assessCorpScoreTerminalWindow,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  rolesForAction,
 };
 const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
@@ -6670,17 +6672,6 @@ function semanticRuntimeVisibleCardAdvancementRequirement(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeCorpPassiveScoreLinePenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildSemanticRuntimeCorpPassiveScoreLinePenalty(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES,
   );
 }
 
