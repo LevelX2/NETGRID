@@ -109,6 +109,7 @@ describe("AI public export contract", () => {
       "./decision/pilot/local-default-pilot-policy",
       "./decision/pilot/remote-contest-candidate",
       "./decision/target-choice-shadow",
+      "./runtime/action-order",
       "./runtime/semantic-runtime-score-components",
       "./runtime/semantic-runtime-score-breakdown",
       "./runtime/semantic-runtime-debug-context",

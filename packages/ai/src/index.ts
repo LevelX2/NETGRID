@@ -131,6 +131,7 @@ import {
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
+import { compareAction } from "./runtime/action-order";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -28366,8 +28367,4 @@ function fnv1a(value: string): string {
 
 function confidence(score: number): number {
   return Math.max(0.1, Math.min(0.99, round(score / 1000)));
-}
-
-function compareAction(left: LegalAction, right: LegalAction): number {
-  return left.actionId.localeCompare(right.actionId);
 }
