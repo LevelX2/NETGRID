@@ -134,13 +134,13 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
   const className =
     display.displayKind === "shell"
       ? "shellCounterBadge"
-      : display.id === "data_raven"
+      : display.id === "trace_tag_counter"
         ? "dataRavenCounterBadge"
         : "ablativeCounterBadge";
   const testId =
     display.displayKind === "shell"
       ? "shell-counter-badge"
-      : display.id === "data_raven"
+      : display.id === "trace_tag_counter"
         ? "data-raven-counter-badge"
         : display.id === "ablative"
           ? "ablative-counter-badge"
@@ -154,7 +154,7 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
 
 function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDisplays"]>[number], amount: number): string {
   if (display.displayKind === "shell") return `${amount} Shell`;
-  if (display.id === "data_raven") return `${amount} Raven`;
+  if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
 }
 

@@ -539,7 +539,7 @@ export function formatChronicleEvent(
           (effect) =>
             (effect.visibility === "hidden_info_barrier" ||
               stringValue(effect.reason) === "access_effect" ||
-              effect.counterType === "pattel_antibody") &&
+              isPattelAccessCounterType(effect.counterType)) &&
             (stringValue(effect.sourceDefinitionId) ||
               stringValue(effect.sourceTitle)),
         );
@@ -549,7 +549,7 @@ export function formatChronicleEvent(
           stringValue(ambushEffect?.sourceDefinitionId);
         const ambushPaidCost =
           numberValue(payload.ambushPaidCost) ??
-          (ambushEffect?.counterType === "pattel_antibody" &&
+          (isPattelAccessCounterType(ambushEffect?.counterType) &&
           payload.ambushPaymentDeclined !== true
             ? 3
             : undefined);
@@ -3902,7 +3902,7 @@ function pattelAccessCounterChronicleText(
 ): { title: string; description?: string; targetChips?: string[] } | null {
   if (
     effect.kind !== "counter_change" ||
-    effect.counterType !== "pattel_antibody"
+    !isPattelAccessCounterType(effect.counterType)
   )
     return null;
   const payload = event.publicPayload ?? {};
@@ -3917,7 +3917,7 @@ function pattelAccessCounterChronicleText(
     sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
     sourceTitle === "Pattel Antibody" ||
     stringValue(payload.hiddenZoneAction) ===
-      "proteus_pattel_antibody_access_counters";
+      "proteus_breaker_strength_penalty_access_counters";
   if (!isPattelAccessCounter) return null;
   const targetTitles = titlesForDefinitionIds(
     stringValue(payload.targetCardDefinitionIds),
@@ -3951,6 +3951,13 @@ function pattelAccessCounterChronicleText(
       ...targetTitles,
     ],
   };
+}
+
+function isPattelAccessCounterType(counterType: unknown): boolean {
+  return (
+    counterType === "breaker_strength_penalty" ||
+    counterType === "pattel_antibody"
+  );
 }
 
 function endTurnCreditPayoutChronicleItem(
@@ -5189,12 +5196,17 @@ function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
 }
 
 function counterLabel(counterType: unknown): string {
-  if (counterType === "data_raven") return "Data-Raven-Counter";
+  if (counterType === "trace_tag_counter" || counterType === "data_raven")
+    return "Data-Raven-Counter";
   if (counterType === "cerberus") return "Cerberus-Counter";
   if (counterType === "mastiff") return "Mastiff-Counter";
   if (counterType === "crying") return "Crying-Counter";
-  if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
-  if (counterType === "pattel_antibody") return "Pattel-Counter";
+  if (
+    counterType === "link_reduction_counter" ||
+    counterType === "doppelganger_antibody"
+  )
+    return "Doppelganger-Counter";
+  if (isPattelAccessCounterType(counterType)) return "Pattel-Counter";
   if (counterType === "cockroach") return "Cockroach-Counter";
   if (counterType === "cascade") return "Cascade-Counter";
   if (counterType === "highlighter") return "Highlighter-Counter";

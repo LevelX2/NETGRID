@@ -98,7 +98,38 @@ Checks:
 
 ### Paket 1
 
-Offen.
+Entscheidung: Die drei roten Werte werden nicht als neue `CounterType`-Werte ergänzt. Die Engine und die CardImplementation-Verträge verwenden bereits kanonische Shared-Counter:
+
+| Fachlicher Counter | Kanonischer `CounterType` | Produzent |
+| --- | --- | --- |
+| Data-Raven-Counter | `trace_tag_counter` | `packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts` |
+| Doppelganger-Counter | `link_reduction_counter` | `packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts` |
+| Pattel-Counter | `breaker_strength_penalty` | `packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts` |
+
+Begründung:
+
+- `data_raven`, `doppelganger_antibody` und `pattel_antibody` waren Web-/Chronicle-Alt- oder Anzeigenamen, aber keine aktuellen Shared-Vertragswerte.
+- Die Engine erzeugt und serialisiert die kanonischen Werte bereits über LegalActions, ResolvedEffects und VisibleCard-CounterDisplays.
+- Die sichtbaren UI-Labels bleiben kartenspezifisch: Data-Raven-Counter, Doppelganger-Counter und Pattel-Counter.
+- `counterLabel` akzeptiert alte Strings weiterhin als robuste Legacy-Beschriftung, ohne den aktuellen `CounterType`-Vertrag zu erweitern.
+
+Geänderte Bereiche:
+
+- `apps/web/app/action-board-ui.ts`
+- `apps/web/app/action-board-ui.test.ts`
+- `apps/web/app/chronicle.ts`
+- `apps/web/app/chronicle.test.ts`
+- `apps/web/features/cards/CardBadges.tsx`
+- `apps/web/features/chronicle/ChroniclePanel.tsx`
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts chronicle.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 423 Tests.
+- `corepack pnpm --filter @netgrid/engine test -- src/game/counters/proteus-antibody-access.test.ts src/index-tests/originalset/per-card-followups.test.ts src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Engine-Suite, 173 Dateien, 1517 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- `git diff --check`: grün.
 
 ### Paket 2
 

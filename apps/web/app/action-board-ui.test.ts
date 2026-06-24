@@ -1313,12 +1313,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(
       counterDisplayBadgeView(
         {
-          id: "data_raven",
+          id: "trace_tag_counter",
           amount: 2,
           displayKind: "trace",
           label: "Data-Raven-Counter",
           ariaLabel: "2 Data-Raven-Counter",
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           usageHint: "status_marker"
         },
         "data-raven-counter-badge"
@@ -1443,12 +1443,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe("Vienna 22: 2 Vienna geben dem Runner 2 zusätzliche HQ-Karten beim Zugriff auf HQ. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
     expect(
       counterDisplayTooltipText({
-        id: "pattel_antibody",
+        id: "breaker_strength_penalty",
         amount: 1,
         displayKind: "generic_counter",
         label: "Pattel-Counter",
         ariaLabel: "1 Pattel-Counter",
-        counterType: "pattel_antibody",
+        counterType: "breaker_strength_penalty",
         usageHint: "status_marker"
       })
     ).toBe("Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.");

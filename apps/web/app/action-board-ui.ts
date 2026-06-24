@@ -291,9 +291,11 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return `Viral Pipeline: Zu Beginn jedes Korp-Zugs muss die Korp pro Pipe-Counter 1 Aktion aussetzen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "spy":
       return "I Spy: Solange der Spy-Counter auf diesem Fort liegt, bleiben alle installierten Korp-Karten in oder auf diesem Fort für den Runner sichtbar. Die Korp kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Spy-Counter zu entfernen.";
-    case "doppelganger_antibody":
+    case "trace_tag_counter":
+      return `Data Raven: Zu Beginn jedes Runner-Zugs erhält der Runner pro Data-Raven-Counter 1 Tag. Der Runner kann 1 Aktion nehmen und 1 Credit zahlen, um 1 Data-Raven-Counter zu entfernen.`;
+    case "link_reduction_counter":
       return `Doppelganger Antibody: Zu Beginn jedes Runner-Zugs verliert der Runner pro Doppelganger-Counter 1 Credit. Der Runner kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Doppelganger-Counter zu entfernen.`;
-    case "pattel_antibody":
+    case "breaker_strength_penalty":
       return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
     case "mark":
       if (display.id === "ice_transmutation")

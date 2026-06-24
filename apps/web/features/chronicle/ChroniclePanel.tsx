@@ -384,8 +384,8 @@ function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
     payload.accessEffectSourceDefinitionId ||
     payload.ambushPaidCost !== undefined ||
     payload.ambushPaymentDeclined === true ||
-    payload.hiddenZoneAction === "proteus_pattel_antibody_access_counters" ||
-    payload.counterType === "pattel_antibody"
+    payload.hiddenZoneAction === "proteus_breaker_strength_penalty_access_counters" ||
+    payload.counterType === "breaker_strength_penalty"
   )
     return true;
   const effects = Array.isArray(payload.resolvedEffects) ? payload.resolvedEffects : [];
@@ -394,7 +394,8 @@ function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
       effect &&
       typeof effect === "object" &&
       ((effect as Record<string, unknown>).reason === "access_effect" ||
-        (effect as Record<string, unknown>).counterType === "pattel_antibody"),
+        (effect as Record<string, unknown>).counterType ===
+          "breaker_strength_penalty"),
   );
 }
 
