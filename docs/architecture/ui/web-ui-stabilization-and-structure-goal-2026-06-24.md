@@ -149,7 +149,16 @@ Checks:
 
 ### Paket 3
 
-Offen.
+Entscheidung: Die technische Web-Baseline ist nach Paket 1 und 2 vollständig wiederhergestellt. Weitere Strukturpakete dürfen gestartet werden.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- `git diff --check`: grün.
+
+Hinweis: `next build` schaltet `apps/web/next-env.d.ts` lokal von `./.next/dev/types/routes.d.ts` auf `./.next/types/routes.d.ts` um. Diese generierte Nebenwirkung wurde nicht übernommen.
 
 ### Paket 4
 
