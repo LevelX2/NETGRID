@@ -11,7 +11,6 @@ const scannedRoots = [
   "packages/engine/src/mechanics",
   "packages/engine/src/card-implementations",
   "packages/shared/src",
-  "scripts",
 ];
 
 const productionExtensions = new Set([".ts", ".mts", ".mjs"]);
