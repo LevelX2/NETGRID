@@ -139,6 +139,11 @@ import {
   semanticRuntimeChoiceIsReactive,
 } from "./runtime/reactive-action";
 import {
+  isRunnerEconomyRole,
+  isRunnerNonAdditiveUtilityRole,
+  isRunnerPressureRole,
+} from "./runtime/runner-role-classification";
+import {
   type PracticalMicroCandidate,
 } from "./runtime/practical-micro-runtime";
 import {
@@ -27690,31 +27695,6 @@ function sourceDefinitionIdForSimulationAction(
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
   return findVisibleCard(input, action.source)?.definitionId;
-}
-
-function isRunnerEconomyRole(role: string): boolean {
-  return role === "economy" || role === "tempo" || role.includes("economy");
-}
-
-function isRunnerPressureRole(role: string): boolean {
-  return (
-    role === "run_pressure" ||
-    role === "access" ||
-    role.includes("pressure") ||
-    role.includes("interface") ||
-    role.includes("multiaccess")
-  );
-}
-
-function isRunnerNonAdditiveUtilityRole(role: string): boolean {
-  return (
-    role === "program_search" ||
-    role === "stack_search" ||
-    role === "trash_recovery" ||
-    role === "search_trash" ||
-    role.includes("setup.recovery") ||
-    role.includes("setup.stack_filter")
-  );
 }
 
 function serverIdForCorpInstalledCard(
