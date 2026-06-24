@@ -187,7 +187,26 @@ Checks:
 
 ### Paket 5
 
-Offen.
+Entscheidung: Der WebSocket-Transport wurde aus `page.tsx` in `apps/web/features/match-session/useMatchTransport.ts` verschoben. Der Schnitt ist bewusst klein:
+
+- Der Hook besitzt Socket-Lebenszyklus, Connection-State-Updates, Join-on-open, Offline-Guard, Senden bestehender Socket-Nachrichten und Close.
+- `page.tsx` behält Session, Payload, Lobby, Notice, LegalAction-Auswahl und die Anwendung von Servernachrichten.
+- `applyServerMessage` bleibt im Root, weil es viele Root-State-Bereiche koordiniert und ein weiterer Schnitt ohne Testharness zu groß wäre.
+- LegalAction-Payloads, Action-IDs, StateVersion und IdempotencyKeys wurden nicht verändert.
+
+Ergebnis:
+
+- `apps/web/app/page.tsx`: 4168 -> 4095 Zeilen.
+- Kein Mega-Hook: nur Transport, kein Bootstrap, keine LegalAction-Ermittlung, keine Darstellung.
+- SessionToken und ReconnectToken bleiben getrennt; der Hook verwendet nur den bestehenden `sessionToken` für den Socket-Join.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 175 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
 
 ### Paket 6
 

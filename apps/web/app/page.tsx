@@ -217,7 +217,6 @@ import {
   fromJoinedResponse,
   lobbyFromInitialResponse,
   lobbyFromJoinedResponse,
-  normalizeWebSocketUrl,
   postJson,
   serverErrorNotice,
   type AiDecisionPreview,
@@ -367,6 +366,7 @@ import { eventActionType, localActionSoundKey, localActionSoundKind, publicEvent
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
 import { effectiveAiTurnPresentation, removePendingUndo } from "../features/match-session/client-payload-helpers";
+import { useMatchTransport } from "../features/match-session/useMatchTransport";
 import { ChroniclePanel, chronicleContextByEventId } from "../features/chronicle/ChroniclePanel";
 import {
   FloatingAiDecisionDebugOverlay,
@@ -668,7 +668,6 @@ export default function Page() {
     corp: baseActionSlotCapacity("corp")
   });
   const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
-  const socketRef = useRef<WebSocket | null>(null);
   const sessionRef = useRef<SessionInfo | null>(null);
   const lobbyRef = useRef<LobbyClientPayload | null>(null);
   const resultAudioPrimedRef = useRef(false);
@@ -708,6 +707,14 @@ export default function Page() {
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  const { closeSocket, ensureSocketConnected, sendSocketMessage } =
+    useMatchTransport({
+      session,
+      onMessage: applyServerMessage,
+      setConnection,
+      setNotice,
+    });
 
   useEffect(() => {
     lobbyRef.current = lobby;
@@ -1130,16 +1137,6 @@ export default function Page() {
     selectedParticipantBCorpLocalDeckId,
     localDecksLoaded
   ]);
-
-  useEffect(() => {
-    if (!session) return;
-    if (!session.sessionToken.trim() || !session.webSocketUrl.trim()) {
-      setConnection("offline");
-      return;
-    }
-    connectWebSocket(session);
-    return () => socketRef.current?.close();
-  }, [session?.matchId, session?.sessionToken]);
 
   const blockStatusFilteredCatalogCards = useMemo(() => filterCatalogCardsByBlockStatus(catalogCards, catalogBlockStatusFilter), [catalogBlockStatusFilter, catalogCards]);
   const catalogBlockStatusCounts = useMemo(() => summarizeCatalogBlockStatusFilters(catalogCards), [catalogCards]);
@@ -2428,7 +2425,7 @@ export default function Page() {
       } else {
         clearStoredSession();
       }
-      socketRef.current?.close();
+      closeSocket();
       setConnection("offline");
     }
     if (session && shouldForgetRecoveryStatus(remotePayload.matchStatus)) {
@@ -2524,18 +2521,13 @@ export default function Page() {
     const stateVersion = payload.playerView.stateVersion;
     if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
     if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
-    socketRef.current?.send(
-      JSON.stringify({
-        type: "submit_action",
-        payload: {
-          matchId: session.matchId,
-          side: session.side,
-          actionId: action.actionId,
-          clientKnownStateVersion: stateVersion,
-          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`
-        }
-      })
-    );
+    sendSocketMessage("submit_action", {
+      matchId: session.matchId,
+      side: session.side,
+      actionId: action.actionId,
+      clientKnownStateVersion: stateVersion,
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`
+    });
     return true;
   };
 
@@ -2561,38 +2553,28 @@ export default function Page() {
     if (!session || !payload || !ensureSocketConnected()) return;
     const stateVersion = payload.playerView.stateVersion;
     playImmediateActionAudio(action, stateVersion);
-    socketRef.current?.send(
-      JSON.stringify({
-        type: "submit_action",
-        payload: {
-          matchId: session.matchId,
-          side: session.side,
-          actionId: action.actionId,
-          clientKnownStateVersion: stateVersion,
-          selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
-        }
-      })
-    );
+    sendSocketMessage("submit_action", {
+      matchId: session.matchId,
+      side: session.side,
+      actionId: action.actionId,
+      clientKnownStateVersion: stateVersion,
+      selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
+    });
   };
 
   const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[], options: { immediateAudio?: boolean } = {}): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
     const stateVersion = payload.playerView.stateVersion;
     if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
-    socketRef.current?.send(
-      JSON.stringify({
-        type: "submit_action",
-        payload: {
-          matchId: session.matchId,
-          side: session.side,
-          actionId: action.actionId,
-          clientKnownStateVersion: stateVersion,
-          selectedChoices: { choiceId, selectedOptionIds },
-          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
-        }
-      })
-    );
+    sendSocketMessage("submit_action", {
+      matchId: session.matchId,
+      side: session.side,
+      actionId: action.actionId,
+      clientKnownStateVersion: stateVersion,
+      selectedChoices: { choiceId, selectedOptionIds },
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
+    });
     return true;
   };
 
@@ -2608,12 +2590,12 @@ export default function Page() {
 
   const setReady = (ready: boolean) => {
     if (!session || !ensureSocketConnected()) return;
-    socketRef.current?.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
+    sendSocketMessage("set_ready", { ready });
   };
 
   const cancelCountdown = () => {
     if (!session || !ensureSocketConnected()) return;
-    socketRef.current?.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
+    sendSocketMessage("cancel_countdown", {});
   };
 
   const cancelMatchLifecycle = async () => {
@@ -2777,7 +2759,7 @@ export default function Page() {
     if (!session || !ensureSocketConnected()) return;
     const text = lobbyChatText.trim();
     if (!text) return;
-    socketRef.current?.send(JSON.stringify({ type: "send_lobby_chat", payload: { text } }));
+    sendSocketMessage("send_lobby_chat", { text });
     setLobbyChatText("");
   };
 
@@ -2787,16 +2769,11 @@ export default function Page() {
     try {
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
-      socketRef.current?.send(
-        JSON.stringify({
-          type: "advance_ai",
-          payload: {
-            knownStateVersion: payload.playerView.stateVersion,
-            knownMatchVersion: payload.matchVersion,
-            mode
-          }
-        })
-      );
+      sendSocketMessage("advance_ai", {
+        knownStateVersion: payload.playerView.stateVersion,
+        knownMatchVersion: payload.matchVersion,
+        mode
+      });
       return true;
     } catch {
       pendingAiAdvanceKeyRef.current = null;
@@ -2808,23 +2785,20 @@ export default function Page() {
   const requestUndo = () => {
     if (!latestEventId || !ensureSocketConnected()) return;
     setUndoNotice("");
-    socketRef.current?.send(JSON.stringify({ type: "request_undo", payload: { targetEventId: latestEventId } }));
+    sendSocketMessage("request_undo", { targetEventId: latestEventId });
   };
 
   const resolveUndo = (accepted: boolean) => {
     if (!payload?.pendingUndo || !ensureSocketConnected()) return;
     setUndoNotice("");
-    socketRef.current?.send(
-      JSON.stringify({
-        type: accepted ? "accept_undo" : "decline_undo",
-        payload: { undoRequestId: payload.pendingUndo.undoRequestId }
-      })
-    );
+    sendSocketMessage(accepted ? "accept_undo" : "decline_undo", {
+      undoRequestId: payload.pendingUndo.undoRequestId
+    });
   };
 
   const leaveMatch = () => {
     const leavingSession = session;
-    socketRef.current?.close();
+    closeSocket();
     clearStoredSession(leavingSession ?? undefined);
     if (leavingSession) removeRecentSession(leavingSession);
     setRecentSession(loadRecentSession());
@@ -2835,12 +2809,6 @@ export default function Page() {
     setConnection("offline");
     setSeriesTransitioning(false);
     setNotice("");
-  };
-
-  const ensureSocketConnected = () => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) return true;
-    setNotice("Serververbindung ist offline. Bitte prüfe, ob der lokale Multiplayer-Server läuft, und verbinde Dich erneut.");
-    return false;
   };
 
   const copyJoinLink = async () => {
@@ -3108,49 +3076,6 @@ export default function Page() {
     if (deck.side === "runner") setRunnerLocalSnapshot(result.snapshot);
     else setCorpLocalSnapshot(result.snapshot);
     return result.snapshot;
-  }
-
-  function connectWebSocket(nextSession: SessionInfo) {
-    setConnection("connecting");
-    socketRef.current?.close();
-    const socketUrl = normalizeWebSocketUrl(nextSession.webSocketUrl);
-    if (!socketUrl) {
-      setConnection("offline");
-      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
-      return;
-    }
-    let socket: WebSocket;
-    try {
-      socket = new WebSocket(socketUrl);
-    } catch {
-      setConnection("offline");
-      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
-      return;
-    }
-    socketRef.current = socket;
-    socket.onopen = () => {
-      if (socketRef.current !== socket) return;
-      setConnection("online");
-      socket.send(
-        JSON.stringify({
-          type: "join_match",
-          payload: {
-            matchId: nextSession.matchId,
-            side: nextSession.side,
-            sessionToken: nextSession.sessionToken
-          }
-        })
-      );
-    };
-    socket.onclose = () => {
-      if (socketRef.current === socket) setConnection("offline");
-    };
-    socket.onerror = () => {
-      if (socketRef.current === socket) setConnection("offline");
-    };
-    socket.onmessage = (event) => {
-      if (socketRef.current === socket) applyServerMessage(JSON.parse(event.data as string) as ServerMessage);
-    };
   }
 
   function applyServerMessage(message: ServerMessage) {
