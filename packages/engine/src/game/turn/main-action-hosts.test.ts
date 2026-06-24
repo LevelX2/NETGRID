@@ -408,7 +408,6 @@ function hostFor(
         SHORT_CIRCUIT_RESOURCE_CARD_ID: "short_circuit",
         AUJOURD_OUI_RESOURCE_CARD_ID: "aujourd_oui",
         SERVER_EXPOSE_PROGRAM_CARD_IDS: new Set(),
-        STACK_TOP_REVEAL_PROGRAM_CARD_IDS: new Set(),
         COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: "counter_stack_reveal",
         FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",
         BOARDWALK_RANDOM_PROGRAM_CARD_ID: "boardwalk",

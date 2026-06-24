@@ -110,7 +110,6 @@ export type RunnerMainActionGenerationHost = {
     SHORT_CIRCUIT_RESOURCE_CARD_ID: string;
     AUJOURD_OUI_RESOURCE_CARD_ID: string;
     SERVER_EXPOSE_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS: ReadonlySet<string>;
     COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
     BOARDWALK_RANDOM_PROGRAM_CARD_ID: string;
@@ -270,8 +269,6 @@ export function buildRunnerMainActions(
     host.constants.AUJOURD_OUI_RESOURCE_CARD_ID;
   const SERVER_EXPOSE_PROGRAM_CARD_IDS =
     host.constants.SERVER_EXPOSE_PROGRAM_CARD_IDS;
-  const STACK_TOP_REVEAL_PROGRAM_CARD_IDS =
-    host.constants.STACK_TOP_REVEAL_PROGRAM_CARD_IDS;
   const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID =
     host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID;
   const FAIT_ACCOMPLI_COUNTER_PROGRAM_ID =
@@ -812,22 +809,6 @@ export function buildRunnerMainActions(
             ),
           );
         }
-      }
-      if (
-        STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(definition.id) &&
-        state.runner.stack.length > 0
-      ) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: Stack-Spitze revealn`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1911HiddenZoneAbility: "reveal_stack_top" },
-          ),
-        );
       }
       if (
         definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID &&

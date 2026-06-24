@@ -614,7 +614,6 @@ import {
   SHORT_CIRCUIT_RESOURCE_CARD_ID,
   STACK_SEARCH_PROGRAM_CARD_IDS,
   STACK_TOP_REORDER_RESOURCE_CARD_ID,
-  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
@@ -934,7 +933,6 @@ export function configureActionRuntimeBootstrap({
         SHORT_CIRCUIT_RESOURCE_CARD_ID,
         AUJOURD_OUI_RESOURCE_CARD_ID,
         SERVER_EXPOSE_PROGRAM_CARD_IDS,
-        STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
         COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
         FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
         BOARDWALK_RANDOM_PROGRAM_CARD_ID,

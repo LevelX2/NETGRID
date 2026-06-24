@@ -26,7 +26,6 @@ export function createHiddenZoneSearchRuntime(
     SNEAK_PREVIEW_ID,
     STACK_SEARCH_PROGRAM_CARD_IDS,
     STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,
@@ -709,8 +708,7 @@ export function createHiddenZoneSearchRuntime(
       return;
     }
     if (ability === "reveal_stack_top") {
-      if (!STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(sourceDefinition.id))
-        throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
+      throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
       revealRunnerStackTop(state, legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),

@@ -26,7 +26,6 @@ export function createCorpZoneRuntimeHosts(
     SNEAK_PREVIEW_ID,
     STACK_SEARCH_PROGRAM_CARD_IDS,
     STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,

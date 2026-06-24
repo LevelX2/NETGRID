@@ -615,7 +615,6 @@ import {
   SHORT_CIRCUIT_RESOURCE_CARD_ID,
   STACK_SEARCH_PROGRAM_CARD_IDS,
   STACK_TOP_REORDER_RESOURCE_CARD_ID,
-  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
@@ -821,7 +820,6 @@ export function initializeStateRuntimeBootstrap({
     SNEAK_PREVIEW_ID,
     STACK_SEARCH_PROGRAM_CARD_IDS,
     STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,

@@ -29,8 +29,6 @@ export const STACK_SEARCH_PROGRAM_CARD_IDS = new Set([
   "onr_v1_177_the-short-circuit",
 ]);
 
-export const STACK_TOP_REVEAL_PROGRAM_CARD_IDS = new Set<string>([]);
-
 export const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID = "onr_v1_032_i-spy";
 
 export const STACK_TOP_REORDER_RESOURCE_CARD_ID = "onr_v1_175_ronin-around";
