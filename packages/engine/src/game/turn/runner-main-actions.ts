@@ -1103,7 +1103,7 @@ export function buildRunnerMainActions(
               [{ clicks: 1 }],
               {
                 cardId: resourceId,
-                resourceAbility: "danshis_second_id",
+                resourceAbility: "remove_tags_trash_resource",
                 removeTagAmount: amount,
                 trashOnUse: true,
               },

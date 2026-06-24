@@ -99,7 +99,9 @@ export function handleTurnBasicExecution(
       return handled(legalAction);
     case "remove_tag":
       host.turn.spendClick(state, "runner");
-      if (legalAction.payload?.resourceAbility === "danshis_second_id") {
+      if (
+        legalAction.payload?.resourceAbility === "remove_tags_trash_resource"
+      ) {
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (
           !state.runner.rig.resources.includes(sourceCardId as CardInstanceId)
