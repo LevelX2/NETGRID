@@ -250,8 +250,8 @@ import {
   visibleMemoryCost as visibleMemoryCostForAi,
 } from "./runtime/visible-card-heuristics";
 import {
-  visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
-  visibleBreakerRoles as buildVisibleBreakerRoles,
+  visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
+  visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
 import {
   createRunnerVisibleCardContext,
@@ -7333,16 +7333,6 @@ function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
     card.type === "program" &&
     visibleBreakerRolesForAi(card).length > 0
   );
-}
-
-function visibleBreakerRoleCountsForAi(
-  cards: VisibleCard[],
-): Map<string, number> {
-  return buildVisibleBreakerRoleCounts(cards);
-}
-
-function visibleBreakerRolesForAi(card: VisibleCard): string[] {
-  return buildVisibleBreakerRoles(card);
 }
 
 function selectedDiscardChoiceOptionIds(
