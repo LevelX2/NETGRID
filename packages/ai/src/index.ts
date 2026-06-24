@@ -60,7 +60,6 @@ import {
 } from "./deck-capabilities";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import {
-  buildRunnerStrategicIntentProfile,
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 import {
@@ -271,6 +270,9 @@ import {
 import {
   createRunnerRecentHistoryContext,
 } from "./runtime/runner-recent-history-context";
+import {
+  createRunnerStrategicIntentContext,
+} from "./runtime/runner-strategic-intent-context";
 import {
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
@@ -3596,6 +3598,9 @@ const {
   scrubEvidence,
 });
 const {
+  runnerStrategicIntentForInput,
+} = createRunnerStrategicIntentContext();
+const {
   runnerRunOnlyActionAdjustedSemanticChoice,
 } = createRunnerRunOnlyActionContext({
   compareAction,
@@ -4273,16 +4278,6 @@ function deckCapabilitiesForInput(
   return (
     (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
     buildDeckCapabilityProfileFromInput(input)
-  );
-}
-
-function runnerStrategicIntentForInput(
-  input: AiDecisionInput,
-  deckCapabilities: DeckCapabilityProfile,
-): RunnerStrategicIntentProfile {
-  return (
-    (input as AiDecisionInputWithDeckCapabilities).ownRunnerStrategicIntent ??
-    buildRunnerStrategicIntentProfile({ deckCapabilities })
   );
 }
 
