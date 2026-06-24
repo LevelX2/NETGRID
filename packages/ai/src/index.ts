@@ -254,6 +254,9 @@ import {
   runnerArchivesScoreComponents as buildRunnerArchivesScoreComponents,
 } from "./runtime/runner-archives-score";
 import {
+  runnerKnownIcePathScoreComponents as buildRunnerKnownIcePathScoreComponents,
+} from "./runtime/runner-known-ice-path-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7255,28 +7258,16 @@ function semanticRuntimeRunnerKnownIcePathComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (action.type !== "start_run" || !server) return [];
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
-  if (assessment.assessedKnownIceCount <= 0) return [];
-  if (!assessment.canReachAccess) return [];
-  if ((assessment.visibleBreakCost ?? 0) <= 0) return [];
-  return [
-    {
-      key: "runner_visible_ice_path_cost",
-      label: "Sichtbare ICE-Kosten",
-      value: -Math.min(
-        1800,
-        (assessment.visibleBreakCost ?? 0) * 220 +
-          Math.max(0, 2 - assessment.creditsAfterPath) * 350,
+  return buildRunnerKnownIcePathScoreComponents(input, action, server, {
+    assessment: (input, server) =>
+      assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
       ),
-      reason: semanticRuntimeKnownIcePathReason(assessment, server.id),
-    },
-  ];
+    reason: semanticRuntimeKnownIcePathReason,
+  });
 }
 
 function semanticRuntimeKnownIcePathReason(
