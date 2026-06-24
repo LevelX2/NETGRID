@@ -377,7 +377,7 @@ describe("fort run side families", () => {
     expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(0);
     expect(action.payload).toMatchObject({
       postBreakStealthLoss: 2,
-      v1922RunnerProgramAbility: "ramming_piston_stealth_loss",
+      v1922RunnerProgramAbility: "post_break_stealth_loss",
     });
   });
 });
