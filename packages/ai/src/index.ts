@@ -214,14 +214,9 @@ import {
   runnerEncounterActionExclusion as buildRunnerEncounterActionExclusion,
 } from "./runtime/runner-encounter-action-exclusion";
 import {
-  knownCentralPayoffExclusion as buildKnownCentralPayoffExclusion,
-} from "./runtime/known-central-payoff-exclusion";
-import {
   semanticRuntimePlanMemoryActionExclusion as buildSemanticRuntimePlanMemoryActionExclusion,
 } from "./runtime/semantic-runtime-plan-memory-exclusion";
-import {
-  runnerArchivesExclusion as buildRunnerArchivesExclusion,
-} from "./runtime/runner-archives-exclusion";
+import { createRunnerSimpleExclusionsContext } from "./runtime/runner-simple-exclusions-context";
 import {
   runnerSourceCardAnswerRole as buildRunnerSourceCardAnswerRole,
 } from "./runtime/runner-source-card-answer-role";
@@ -3892,6 +3887,14 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
 };
 const semanticRuntimeKnownIcePathReason = buildRunnerKnownIcePathReason;
 const {
+  semanticRuntimeKnownCentralPayoffExclusion,
+  semanticRuntimeRunnerEmptyRemoteExclusion,
+  semanticRuntimeRunnerArchivesExclusion,
+} = createRunnerSimpleExclusionsContext({
+  evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
+  definitionType: definitionTypeForMetrics,
+});
+const {
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionContext({
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
@@ -4734,26 +4737,6 @@ function isEndRunSubroutine(subroutine: VisibleEncounterSubroutine): boolean {
   );
 }
 
-function semanticRuntimeKnownCentralPayoffExclusion(
-  input: AiDecisionInput,
-  serverId: string | undefined,
-): SemanticRuntimeExclusion | undefined {
-  return buildKnownCentralPayoffExclusion(input, serverId, {
-    evaluatePayoff: evaluateKnownCentralAccessPayoff,
-  });
-}
-
-function semanticRuntimeRunnerEmptyRemoteExclusion(
-  server: AiDecisionInput["playerView"]["servers"][number],
-): SemanticRuntimeExclusion | undefined {
-  if (server.root.length > 0) return undefined;
-  return {
-    key: "remote_empty_no_root",
-    label: "Remote ohne Root-Ziel",
-    reason: `empty_remote_root:${server.id}`,
-  };
-}
-
 function semanticRuntimePlanMemoryActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
@@ -4776,15 +4759,6 @@ function runnerCardMechanicsForAi(definitionId: string): string[] {
       : []),
     ...(demoDefinition?.mechanics ?? []),
   ];
-}
-
-function semanticRuntimeRunnerArchivesExclusion(
-  input: AiDecisionInput,
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): SemanticRuntimeExclusion | undefined {
-  return buildRunnerArchivesExclusion(input, server, {
-    definitionType: definitionTypeForMetrics,
-  });
 }
 
 function semanticRuntimeRunnerSourceCardAnswerRole(

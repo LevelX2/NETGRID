@@ -145,6 +145,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-blink-break-exclusion",
       "./runtime/runner-encounter-action-exclusion",
       "./runtime/known-central-payoff-exclusion",
+      "./runtime/runner-simple-exclusions-context",
       "./runtime/semantic-runtime-plan-memory-exclusion",
       "./runtime/runner-archives-exclusion",
       "./runtime/runner-source-card-answer-role",
