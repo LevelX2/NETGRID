@@ -1552,6 +1552,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertsechsundvierzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-multi-run-context.ts` kapselt zusätzlich die Runner-Multi-Run-Event-Score-Composition auf Basis des bereits dort erzeugten Assessments.
+  - `packages/ai/src/index.ts` nutzt den ScoreComponent-Adapter aus dem Multi-Run-Context und entfernt den lokalen Inline-Builder in der Runner-Score-Composition.
+  - `packages/ai/src/index.ts` sank weiter von 28.797 auf 28.794 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

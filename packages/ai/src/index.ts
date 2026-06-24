@@ -222,7 +222,6 @@ import {
 } from "./runtime/runner-hand-funding-context";
 import { runnerScoreComponents as buildRunnerScoreComponents } from "./runtime/runner-score-components";
 import {
-  runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent,
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
 import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
@@ -3642,6 +3641,7 @@ const {
 const {
   semanticRuntimeRunnerMultiRunEventExclusion,
   runnerMultiRunEventAssessment,
+  runnerMultiRunEventScoreComponent,
   runnerMultiRunTargetEvaluation,
   semanticRuntimeRunnerRunTargetEvaluation,
   semanticRuntimeRunnerRunTargetEvaluationForAction,
@@ -4771,10 +4771,7 @@ function semanticRuntimeRunnerScoreComponents(
         viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
         lateNoFundingCreditRepeatScoreComponent:
           runnerLateNoFundingCreditRepeatScoreComponent,
-        multiRunEventScoreComponent: (input, action) =>
-          buildRunnerMultiRunEventScoreComponent(input, action, {
-            assessment: runnerMultiRunEventAssessment,
-          }),
+        multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
         bankInvestmentCommitmentScoreComponents:
           runnerBankInvestmentCommitmentScoreComponents,
         noRunEconomyCommitmentScoreComponents:

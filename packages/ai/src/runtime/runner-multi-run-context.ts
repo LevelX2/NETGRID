@@ -1,10 +1,15 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  AiDecisionScoreComponent,
+  LegalAction,
+} from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   runnerMultiRunEventAssessment,
   type RunnerMultiRunEventAssessment,
 } from "./runner-multi-run-event-assessment";
 import { runnerMultiRunEventExclusion } from "./runner-multi-run-event-exclusion";
+import { runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent } from "./runner-multi-run-event-score";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 export type RunnerMultiRunContextDependencies<
@@ -45,6 +50,10 @@ export type RunnerMultiRunContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerMultiRunEventAssessment | undefined;
+  runnerMultiRunEventScoreComponent: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecisionScoreComponent | undefined;
   runnerMultiRunTargetEvaluation: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -163,6 +172,8 @@ export function createRunnerMultiRunContext<
     semanticRuntimeRunnerMultiRunEventExclusion: (input, action) =>
       runnerMultiRunEventExclusion(input, action, { assessment }),
     runnerMultiRunEventAssessment: assessment,
+    runnerMultiRunEventScoreComponent: (input, action) =>
+      buildRunnerMultiRunEventScoreComponent(input, action, { assessment }),
     runnerMultiRunTargetEvaluation,
     semanticRuntimeRunnerRunTargetEvaluation,
     semanticRuntimeRunnerRunTargetEvaluationForAction,
