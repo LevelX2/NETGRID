@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-06-24-corp-ai-prioritize-tagged-meat-damage-payoffs
-status: in_progress
+status: done
 kind: fix
 area: ai
 priority: high
@@ -8,12 +8,20 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-24
 startedAt: 2026-06-24
-completedAt:
+completedAt: 2026-06-24
 branch: codex/activity-tagged-meat-damage-payoffs
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+  - packages/ai/src/tag-punish-ontology-consumer.ts
+  - docs/architecture/ai/corp-ai-tagged-meat-damage-payoff-process-2026-06-24.md
+checks:
+  - corepack pnpm exec vitest run packages/ai/src/index.test.ts -t "Schlaghund tagged meat damage"
+  - corepack pnpm exec vitest run packages/ai/src/index.test.ts -t "Schlaghund tagged meat damage|prioritizes trashing Diplomatic Immunity|uses tag punishment operations|skips tag punishment operations"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Korp-KI priorisiert getaggte Meat-Damage-Payoffs
@@ -65,4 +73,18 @@ Die Korp-KI soll bei stark getaggtem Runner und legalen, sichtbaren Meat-Damage-
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Semantic Runtime erkennt kartenbasierte Korp-`gain_credit`-LegalActions mit Tag-Punish-/Damage-Hints jetzt als `corp_tag_punish`, bevor der generische `economy.gain_credit`-Candidate den Scope auf Economy herunterstuft. Dadurch wird `Schlaghund` nicht mehr wie ein normaler Credit-Klick behandelt, sondern als legaler Tag-/Meat-Damage-Payoff mit eigener Score-Komponente bewertet.
+
+Die neue Score-Komponente `corp_tagged_meat_damage_payoff_pressure` berücksichtigt side-safe sichtbare Informationen: Runner-Tags, sichtbare Quellkarte/Hints, raw Meat Damage, Schlaghund-Wahrscheinlichkeit aus sichtbarer Tagzahl, Runner-Handcount, Korp-Credits, sichtbare `Full Body Conversion` und `Dermatech Bodyplating` sowie Präventionsdruck bei mehreren verbleibenden Korp-Aktionen. Sie erzeugt keine LegalActions und ändert keine Engine-, Replay-, StateHash-, Randomness- oder Hidden-Info-Verträge.
+
+Regressionen ergänzt:
+
+- Getaggter Runner mit 7 Tags, sichtbarer `Full Body Conversion`, `Dermatech Bodyplating`, legalem `Schlaghund`, Basic-Credit und `Fetch 4.0.1`-ICE-Install wählt `Schlaghund` als `corp.semantic.corp_tag_punish`.
+- Gegenprobe ohne Runner-Tags promotet `Schlaghund` nicht über den Basic-Credit.
+
+Checks:
+
+- `corepack pnpm exec vitest run packages/ai/src/index.test.ts -t "Schlaghund tagged meat damage"`: bestanden.
+- `corepack pnpm exec vitest run packages/ai/src/index.test.ts -t "Schlaghund tagged meat damage|prioritizes trashing Diplomatic Immunity|uses tag punishment operations|skips tag punishment operations"`: bestanden.
+- `corepack pnpm --filter @netgrid/ai typecheck`: bestanden.
+- `git diff --check`: bestanden.
