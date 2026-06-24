@@ -247,6 +247,10 @@ import {
   runnerAccessTrashScoreComponents as buildRunnerAccessTrashScoreComponents,
 } from "./runtime/runner-access-trash-score";
 import {
+  runnerHqMemoryScoreComponents as buildRunnerHqMemoryScoreComponents,
+  runnerRndMemoryScoreComponents as buildRunnerRndMemoryScoreComponents,
+} from "./runtime/runner-central-memory-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7204,72 +7208,32 @@ function semanticRuntimeRunnerRndMemoryComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  const components: AiDecisionScoreComponent[] = [];
-  const freshness =
-    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
-  const stalePenalty = staleKnownRndRepeatRunPenalty(input, action);
-  const freshBoost = rndFreshRepeatRunBoost(input, action);
-  if (freshBoost !== 0) {
-    components.push({
-      key: "runner_rnd_fresh_memory",
-      label: "R&D-Frische",
-      value: freshBoost,
-      reason: freshness?.freshness ?? "unknown",
-    });
-  } else if (stalePenalty !== 0) {
-    components.push({
-      key: "runner_rnd_stale_known_top",
-      label: "R&D bekannte Topkarte",
-      value: -stalePenalty,
-      reason: freshness?.freshness ?? "stale_known_same_top",
-    });
-  } else if (!freshness || freshness.freshness === "invalidated") {
-    components.push({
-      key: "runner_rnd_unknown_top",
-      label: "R&D unbekannte Topkarte",
-      value: 180,
-      reason: "unknown_or_invalidated",
-    });
-  }
-  return components;
+  return buildRunnerRndMemoryScoreComponents(input, action, {
+    rndTopFreshness: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
+    staleKnownRndRepeatRunPenalty,
+    rndFreshRepeatRunBoost,
+    hqHandMemory: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
+    definitionType: definitionTypeForMetrics,
+    staleKnownHqRepeatRunPenalty,
+  });
 }
 
 function semanticRuntimeRunnerHqMemoryComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  const components: AiDecisionScoreComponent[] = [];
-  const memory =
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
-  const knownDefinitions = memory?.knownDefinitions ?? [];
-  const knownAgenda = knownDefinitions.some(
-    (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
-  );
-  if (knownAgenda) {
-    components.push({
-      key: "runner_hq_known_agenda",
-      label: "HQ bekannte Agenda",
-      value: memory?.allCardsKnown ? 520 : 260,
-      reason: memory?.allCardsKnown ? "all_hq_known" : "partial_hq_known",
-    });
-  }
-  const stalePenalty = staleKnownHqRepeatRunPenalty(input, action);
-  if (stalePenalty !== 0) {
-    components.push({
-      key: "runner_hq_all_known_low_value",
-      label: "HQ bekannte Low-Value-Hand",
-      value: -stalePenalty,
-      reason: "all_known_low_value",
-    });
-  } else if (knownDefinitions.length > 0 && !knownAgenda) {
-    components.push({
-      key: "runner_hq_partial_known_cards",
-      label: "HQ bekannte Karten",
-      value: -Math.min(180, knownDefinitions.length * 45),
-      reason: `${knownDefinitions.length}/${memory?.handCount ?? "?"}`,
-    });
-  }
-  return components;
+  return buildRunnerHqMemoryScoreComponents(input, action, {
+    rndTopFreshness: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
+    staleKnownRndRepeatRunPenalty,
+    rndFreshRepeatRunBoost,
+    hqHandMemory: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
+    definitionType: definitionTypeForMetrics,
+    staleKnownHqRepeatRunPenalty,
+  });
 }
 
 function semanticRuntimeRunnerArchivesComponents(
