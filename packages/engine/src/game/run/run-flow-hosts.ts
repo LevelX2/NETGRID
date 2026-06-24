@@ -103,7 +103,6 @@ import {
   isTokyoUnsuccessfulRunSource,
   fortTraceBitPoolSource,
   runnerCanUseBreakerOnCurrentFort,
-  runnerStealthRecurringCredits,
   tokyoUnsuccessfulRunAmountForCard,
   type FortRunSideFamiliesHost,
 } from "./fort-run-side-families";
@@ -612,8 +611,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       breaker: {
         dupreStrengthCounterBonus: (breakerId) =>
           host.ice.dupreStrengthCounterBonus(state, breakerId),
-        runnerStealthRecurringCredits: () =>
-          runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)),
       },
       payment: {
         availableRunnerRunCredits: (breakerId) =>

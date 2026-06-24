@@ -550,12 +550,7 @@ export function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  const exactStealthLoss = breakerDefinition.id === PILE_DRIVER_ID;
-  if (exactStealthLoss && availableStealth < lossAmount)
-    throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
-  const requiredLoss = exactStealthLoss
-    ? lossAmount
-    : Math.min(lossAmount, availableStealth);
+  const requiredLoss = Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return { handled: false };
   if (stealthSources.length > 1) {
     startHammerStealthLossChoice(host, breakerId, requiredLoss, stealthSources);

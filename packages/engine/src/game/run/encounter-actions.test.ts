@@ -154,7 +154,6 @@ function hostFor(
     },
     breaker: {
       dupreStrengthCounterBonus: () => 0,
-      runnerStealthRecurringCredits: () => 0,
     },
     payment: {
       availableRunnerRunCredits: () => state.runner.credits,

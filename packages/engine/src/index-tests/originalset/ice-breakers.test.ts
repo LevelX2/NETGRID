@@ -1480,6 +1480,82 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("lets Pile Driver break a wall when fewer than 3 Stealth bits are available", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-pile-driver-stealth-penalty-not-cost",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_pile_driver_penalty_runner",
+          name: "Spotcheck Pile Driver Penalty Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_047_pile-driver", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_pile_driver_penalty_corp",
+          name: "Spotcheck Pile Driver Penalty Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+    const pileDriverId = installRunnerProgramForTest(
+      state,
+      "onr_v1_047_pile-driver",
+    );
+    setCardCounterForTest(state, pileDriverId, "recurring_credit", 1);
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_237_data-wall");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === pileDriverId &&
+        action.payload?.subroutineIndexes === "0",
+    );
+    expect(breakAction.costs).toEqual([{ credits: 3 }]);
+    expect(breakAction.payload).toMatchObject({
+      breakSubroutineCount: 1,
+      multiBreakSubroutines: true,
+      targetIceDefinitionId: "onr_v1_237_data-wall",
+    });
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(cardCounterAmount(state, pileDriverId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_047_pile-driver",
+      breakSubroutineCount: 1,
+      multiBreakSubroutines: true,
+      postBreakStealthLoss: 1,
+    });
+  });
+
   it("applies Wrecking Ball as a Proteus wall breaker with public Stealth loss", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

@@ -16,7 +16,6 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   MYSTERY_BOX_ID,
-  PILE_DRIVER_ID,
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
 import { RANDOM_BREAKER_PROGRAM_SOURCE } from "../../mechanics/random-effects";
@@ -70,7 +69,6 @@ export type RunnerEncounterActionHost = {
   };
   breaker: {
     dupreStrengthCounterBonus: (breakerId: CardInstanceId) => number;
-    runnerStealthRecurringCredits: () => number;
   };
   payment: {
     availableRunnerRunCredits: (breakerId?: CardInstanceId) => number;
@@ -287,14 +285,7 @@ export function buildRunnerEncounterActions(
       !run.noBreakSubroutinesActive &&
       breakAbilities.length > 0 &&
       breakerStrength >= encounteredIceStrength &&
-      canPayAtLeastOneBreakAbility &&
-      breakAbilities.every(
-        (ability) =>
-          breaker.id !== PILE_DRIVER_ID ||
-          ability.postBreakStealthLossMode !== "total_if_available" ||
-          host.breaker.runnerStealthRecurringCredits() >=
-            (ability.postBreakStealthLoss ?? 0),
-      )
+      canPayAtLeastOneBreakAbility
     ) {
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];

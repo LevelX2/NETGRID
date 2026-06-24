@@ -449,7 +449,6 @@ import {
   fortTraceBitPoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
-  runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
   spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
@@ -960,12 +959,6 @@ export function createCardRuntimeDepsHosts(
         );
       }
     }
-    const stealthLoss = ability.postBreakStealthLoss ?? 0;
-    if (
-      runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)) <
-      stealthLoss
-    )
-      throw new Error("Nicht genug Stealth-Credits fuer Multi-Break.");
     const expectedCost = breakSubroutineCostBreakdown(
       state,
       ability.cost.credits,
