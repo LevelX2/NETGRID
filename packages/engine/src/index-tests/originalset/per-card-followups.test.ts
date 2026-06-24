@@ -2946,7 +2946,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     tokyo = apply(tokyo, "runner", (action) => action.type === "continue_run");
     expect(tokyo.corp.credits).toBe(creditsBefore + 2);
     expect(tokyo.eventLog.at(-1)?.publicPayload).toMatchObject({
-      tokyoChibaInfightingBonus: true,
+      unsuccessfulRunCorpCreditBonus: true,
       corpCreditsGained: 2,
       corpCreditsAfter: creditsBefore + 2,
     });

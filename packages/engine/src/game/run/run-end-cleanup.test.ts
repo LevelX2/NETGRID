@@ -767,7 +767,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.cardInstances.ice_1?.rezzed).toBe(false);
     expect(fixture.state.cardInstances.ice_1?.faceup).toBe(false);
     expect(fixture.legalAction.payload).toMatchObject({
-      temporaryDiscountedRezRunEndDerez: true,
+      temporaryDiscountedRunEndDerez: true,
       derezzedCount: 1,
     });
   });
@@ -856,7 +856,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.corp.credits).toBe(7);
     expect(fixture.state.runnerTurnFlags?.successfulRunThisTurn).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
-      tokyoChibaInfightingBonus: true,
+      unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId: "tokyo_def",
       serverId: "remote_1",
       corpCreditsGained: 3,

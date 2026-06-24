@@ -297,8 +297,8 @@ export function handleRunEndCleanup(
   const run = host.state.run;
   if (run) clearEncounterTemporaryTraceCredits(run, legalAction);
   const dupre = run ? applyDupreRunEndCounters(host, run) : { handled: false };
-  const olivia = run
-    ? derezOliviaSalazarTemporaryIce(host, run, legalAction)
+  const temporaryDiscountedDerez = run
+    ? derezTemporaryDiscountedRunIce(host, run, legalAction)
     : { handled: false };
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
@@ -325,7 +325,7 @@ export function handleRunEndCleanup(
   const bonusRunOnFinish =
     run?.grantBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
-  const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
+  const corpBonus = unsuccessfulRunCorpCreditBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
   if (run) host.followups.resolveTestSpinRunEnd(run, legalAction);
   host.credits.gainRunner(bonus);
@@ -339,7 +339,7 @@ export function handleRunEndCleanup(
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      tokyoChibaInfightingBonus: true,
+      unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId,
       serverId: run.attackedServerId,
       corpCreditsGained: corpBonus.amount,
@@ -350,7 +350,7 @@ export function handleRunEndCleanup(
       ...(legalAction.resolvedEffects ?? []),
       {
         effectId: `${run.runId}.${
-          corpBonus.sourceCardId ?? "tokyo-chiba-infighting"
+          corpBonus.sourceCardId ?? "unsuccessful-run-corp-credit-bonus"
         }.unsuccessful_run.gain_credits`,
         kind: "gain_credits",
         visibility: "public",
@@ -358,7 +358,7 @@ export function handleRunEndCleanup(
         amount: corpBonus.amount,
         reason: "unsuccessful_run",
         sourceDefinitionId,
-        sourceTitle: sourceDefinition?.title ?? "Tokyo-Chiba Infighting",
+        sourceTitle: sourceDefinition?.title ?? "Unsuccessful run credit bonus",
         serverId: run.attackedServerId,
         ...(serverLabel ? { serverLabel } : {}),
       },
@@ -408,7 +408,9 @@ export function handleRunEndCleanup(
     ...(postRunBridge.followupRunChoiceStarted !== undefined
       ? { followupRunChoiceStarted: postRunBridge.followupRunChoiceStarted }
       : {}),
-    ...(olivia.derezCardIds ? { derezCardIds: olivia.derezCardIds } : {}),
+    ...(temporaryDiscountedDerez.derezCardIds
+      ? { derezCardIds: temporaryDiscountedDerez.derezCardIds }
+      : {}),
     ...(dupre.placedCounters !== undefined
       ? { placedCounters: dupre.placedCounters }
       : {}),
@@ -780,7 +782,7 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
   };
 }
 
-function derezOliviaSalazarTemporaryIce(
+function derezTemporaryDiscountedRunIce(
   host: RunEndCleanupHost,
   run: ActiveRun,
   legalAction?: LegalAction,
@@ -806,7 +808,7 @@ function derezOliviaSalazarTemporaryIce(
   if (derezCardIds.length > 0 && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      temporaryDiscountedRezRunEndDerez: true,
+      temporaryDiscountedRunEndDerez: true,
       derezzedCount: derezCardIds.length,
     };
   }
@@ -1205,7 +1207,7 @@ function startBrokenIceVirusCounterChoice(
   }
 }
 
-function tokyoChibaUnsuccessfulRunBonus(
+function unsuccessfulRunCorpCreditBonus(
   host: RunEndCleanupHost,
   run: GameState["run"],
   successful: boolean,

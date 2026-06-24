@@ -998,7 +998,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.cardInstances[iceId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      temporaryDiscountedRezRunEndDerez: true,
+      temporaryDiscountedRunEndDerez: true,
       derezzedCount: 1,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
