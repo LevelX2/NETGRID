@@ -148,6 +148,7 @@ import {
   createSemanticRuntimeVisibleCardContext,
 } from "./runtime/semantic-runtime-visible-card-context";
 import {
+  roundSemanticRuntimeScore as roundScore,
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
@@ -279,6 +280,7 @@ import {
   hasEvidenceFlag,
   hasEvidencePrefix,
 } from "./runtime/evidence-value";
+import { roundNumber as round } from "./runtime/number-rounding";
 import {
   eventMayChangeArchives as aiEventMayChangeArchives,
   eventVersion as aiEventVersion,
@@ -28365,16 +28367,8 @@ function fnv1a(value: string): string {
   return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
-function round(value: number): number {
-  return Math.round(value * 1000) / 1000;
-}
-
 function minDefined(values: number[]): number {
   return values.length > 0 ? Math.min(...values) : 0;
-}
-
-function roundScore(value: number): number {
-  return Math.round(value * 100) / 100;
 }
 
 function confidence(score: number): number {
