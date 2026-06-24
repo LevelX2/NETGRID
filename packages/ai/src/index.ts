@@ -437,6 +437,7 @@ import {
   runnerArchivesScoreComponents as buildRunnerArchivesScoreComponents,
 } from "./runtime/runner-archives-score";
 import {
+  runnerKnownIcePathReason as buildRunnerKnownIcePathReason,
   runnerKnownIcePathScoreComponents as buildRunnerKnownIcePathScoreComponents,
 } from "./runtime/runner-known-ice-path-score";
 import {
@@ -6432,27 +6433,7 @@ function semanticRuntimeKnownIcePathReason(
   assessment: KnownRezzedIcePathAssessment,
   serverId: string,
 ): string {
-  return [
-    `server:${serverId}`,
-    `known_ice:${assessment.assessedKnownIceCount}`,
-    `can_reach_access:${assessment.canReachAccess}`,
-    `reason:${assessment.noAccessReason ?? "reachable"}`,
-    `unpayable:${assessment.unpayableReason ?? "none"}`,
-    `break_cost:${assessment.visibleBreakCost ?? 0}`,
-    `credits_after:${assessment.creditsAfterPath}`,
-    ...(assessment.missingCoverage?.length
-      ? [`missing:${assessment.missingCoverage.join("|")}`]
-      : []),
-    ...(assessment.unbreakableIceTitle
-      ? [`ice:${assessment.unbreakableIceTitle}`]
-      : []),
-    ...(assessment.hardUnbrokenEffectIceTitle
-      ? [`hard_effect_ice:${assessment.hardUnbrokenEffectIceTitle}`]
-      : []),
-    ...(assessment.hardUnbrokenRunEffects?.length
-      ? [`hard_effect:${assessment.hardUnbrokenRunEffects.join("|")}`]
-      : []),
-  ].join(";");
+  return buildRunnerKnownIcePathReason(assessment, serverId);
 }
 
 function semanticRuntimeRunnerRemoteComponents(
