@@ -189,16 +189,8 @@ import {
   type CorpAdvancementCounterPlacementAssessment,
 } from "./runtime/semantic-runtime-corp-advancement-counter";
 import {
-  semanticRuntimeCorpActionIsScoreLine as buildSemanticRuntimeCorpActionIsScoreLine,
-  semanticRuntimeCorpActionServerId as buildSemanticRuntimeCorpActionServerId,
-  semanticRuntimeCorpActionSourceCard as buildSemanticRuntimeCorpActionSourceCard,
-  semanticRuntimeCorpAdvanceCompletesScore as buildSemanticRuntimeCorpAdvanceCompletesScore,
-  semanticRuntimeCorpEmptyRemoteCount as buildSemanticRuntimeCorpEmptyRemoteCount,
-  semanticRuntimeCorpRemoteHasScoreLine as buildSemanticRuntimeCorpRemoteHasScoreLine,
-  semanticRuntimeCorpRemoteIsProtected as buildSemanticRuntimeCorpRemoteIsProtected,
-  semanticRuntimeCorpServer as buildSemanticRuntimeCorpServer,
-  semanticRuntimeCorpVisibleServerCard as buildSemanticRuntimeCorpVisibleServerCard,
-} from "./runtime/semantic-runtime-corp-board";
+  createSemanticRuntimeCorpBoardContext,
+} from "./runtime/semantic-runtime-corp-board-context";
 import {
   semanticRuntimeCorpScoreNowSafetyGate as buildSemanticRuntimeCorpScoreNowSafetyGate,
   type SemanticRuntimeCorpScoreSafetyGate,
@@ -3793,6 +3785,23 @@ const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES = {
   persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
   remoteTrashAccessContext: runnerRemoteTrashAccessContext,
 };
+const {
+  semanticRuntimeCorpActionServerId,
+  semanticRuntimeCorpServer,
+  semanticRuntimeCorpActionSourceCard,
+  semanticRuntimeCorpVisibleServerCard,
+  semanticRuntimeCorpActionIsScoreLine,
+  semanticRuntimeCorpAdvanceCompletesScore,
+  semanticRuntimeCorpRemoteIsProtected,
+  semanticRuntimeCorpRemoteHasScoreLine,
+  semanticRuntimeCorpEmptyRemoteCount,
+} = createSemanticRuntimeCorpBoardContext({
+  serverId: semanticRuntimeServerId,
+  findVisibleCard,
+  findVisibleCorpServerCard,
+  rolesForAction,
+  isRemoteServerTarget,
+});
 const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3865,13 +3874,6 @@ const SEMANTIC_RUNTIME_CORP_ADVANCEMENT_COUNTER_DEPENDENCIES = {
   cardType: semanticRuntimeVisibleCardType,
   cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
   teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
-};
-const SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES = {
-  serverId: semanticRuntimeServerId,
-  findVisibleCard,
-  findVisibleCorpServerCard,
-  rolesForAction,
-  isRemoteServerTarget,
 };
 const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
@@ -6761,94 +6763,6 @@ function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
   return buildSemanticRuntimeCorpHasRemoteRezFloorFundingNeed(
     input,
     SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpActionServerId(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string | undefined {
-  return buildSemanticRuntimeCorpActionServerId(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpServer(
-  input: AiDecisionInput,
-  serverId: string | undefined,
-): AiDecisionInput["playerView"]["servers"][number] | undefined {
-  return buildSemanticRuntimeCorpServer(input, serverId);
-}
-
-function semanticRuntimeCorpActionSourceCard(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  return buildSemanticRuntimeCorpActionSourceCard(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpVisibleServerCard(
-  input: AiDecisionInput,
-  cardId: string,
-):
-  | {
-      card: VisibleCard;
-      server: AiDecisionInput["playerView"]["servers"][number];
-    }
-  | undefined {
-  return buildSemanticRuntimeCorpVisibleServerCard(
-    input,
-    cardId,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpActionIsScoreLine(
-  input: AiDecisionInput,
-  action: LegalAction,
-  roles = rolesForAction(input, action),
-): boolean {
-  return buildSemanticRuntimeCorpActionIsScoreLine(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
-    roles,
-  );
-}
-
-function semanticRuntimeCorpAdvanceCompletesScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildSemanticRuntimeCorpAdvanceCompletesScore(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpRemoteIsProtected(
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): boolean {
-  return buildSemanticRuntimeCorpRemoteIsProtected(server);
-}
-
-function semanticRuntimeCorpRemoteHasScoreLine(
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): boolean {
-  return buildSemanticRuntimeCorpRemoteHasScoreLine(server);
-}
-
-function semanticRuntimeCorpEmptyRemoteCount(input: AiDecisionInput): number {
-  return buildSemanticRuntimeCorpEmptyRemoteCount(
-    input,
-    SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES,
   );
 }
 
