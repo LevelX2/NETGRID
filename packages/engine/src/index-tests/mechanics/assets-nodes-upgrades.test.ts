@@ -1045,7 +1045,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.credits).toBe(creditsBefore + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+      hiddenZoneAction: "corp_hq_agenda_reveal",
       sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
       sourceTitle: "Corporate Negotiating Center",
       publicRevealKind: "reveal",

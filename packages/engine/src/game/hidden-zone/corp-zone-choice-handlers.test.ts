@@ -191,7 +191,7 @@ describe("corp zone choice handlers", () => {
     startCorpHqAgendaRevealChoice(host);
 
     expect(host.state.pendingChoice?.source).toBe(
-      "v1917.corp_negotiating_center:cnc_source:8",
+      "v1917.corp_hq_agenda_reveal:cnc_source:8",
     );
     expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
       "hq_agenda_1",
@@ -205,7 +205,7 @@ describe("corp zone choice handlers", () => {
       hq: ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
       pendingChoice: selectCardsChoice(
-        "v1917.corp_negotiating_center:cnc_source:8",
+        "v1917.corp_hq_agenda_reveal:cnc_source:8",
         ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_agenda_1"]),
@@ -217,7 +217,7 @@ describe("corp zone choice handlers", () => {
     expect(host.state.corp.credits).toBe(5);
     expect(host.state.pendingChoice).toBeUndefined();
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+      hiddenZoneAction: "corp_hq_agenda_reveal",
       revealedCount: 1,
       gainedCredits: 1,
       publicRevealDefinitionIds: "agenda_alpha",
@@ -230,14 +230,14 @@ describe("corp zone choice handlers", () => {
       hq: ["hq_operation"] as CardInstanceId[],
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
       pendingChoice: selectCardsChoice(
-        "v1917.corp_negotiating_center:cnc_source:8",
+        "v1917.corp_hq_agenda_reveal:cnc_source:8",
         ["hq_operation"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_operation"]),
     });
 
     expect(() => handleCorpZoneChoice(host)).toThrow(
-      "Corporate Negotiating Center darf nur HQ-Agenden zeigen.",
+      "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.",
     );
   });
 
