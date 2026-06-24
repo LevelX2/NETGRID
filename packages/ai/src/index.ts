@@ -112,6 +112,7 @@ import {
 import {
   classifyTagPunishLegalActionFromOntology,
   classifyTagPunishPayoffFromOntology,
+  getStructuredTagPunishProfileForCard,
   type StructuredTagPunishPayoffKind,
 } from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
@@ -9813,6 +9814,11 @@ function semanticRuntimeCorpScoreComponents(
       });
     }
   }
+  const installedEconomyPressure = corpInstalledEconomyActionPressure(
+    input,
+    action,
+  );
+  if (installedEconomyPressure) components.push(installedEconomyPressure);
   const resourceTrashPressure = corpTaggedDamagePreventionResourceTrashPressure(
     input,
     action,
@@ -9824,6 +9830,11 @@ function semanticRuntimeCorpScoreComponents(
   );
   if (taggedMeatDamagePayoffPressure)
     components.push(taggedMeatDamagePayoffPressure);
+  const tagSourcePayoffPressure = corpTagSourceVisiblePayoffPressure(
+    input,
+    action,
+  );
+  if (tagSourcePayoffPressure) components.push(tagSourcePayoffPressure);
   const taggedEndgameResourceTrashPressure =
     corpTaggedEndgameResourceTrashPressure(input, action);
   if (taggedEndgameResourceTrashPressure)
@@ -9838,6 +9849,11 @@ function semanticRuntimeCorpScoreComponents(
     action,
   );
   if (taggedSlowSetupPenalty) components.push(taggedSlowSetupPenalty);
+  const unprotectedTagAssetPenalty = corpUnprotectedTagAssetSetupPenalty(
+    input,
+    action,
+  );
+  if (unprotectedTagAssetPenalty) components.push(unprotectedTagAssetPenalty);
   const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
@@ -10029,6 +10045,427 @@ function corpVisibleDamagePayoffProfile(input: AiDecisionInput): {
   };
 }
 
+function corpInstalledEconomyActionPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const assessment = corpInstalledEconomyActionAssessment(input, action);
+  if (
+    !assessment ||
+    assessment.immediateGain <= 0 ||
+    assessment.netCredits <= 0
+  )
+    return undefined;
+  const lowCredits = input.playerView.own.credits < 6;
+  const remoteInstability = semanticRuntimeCorpHasRemoteInstability(input);
+  const rezFloorNeed = semanticRuntimeCorpHasRemoteRezFloorFundingNeed(input);
+  const value = Math.min(
+    1900,
+    420 +
+      assessment.netCredits * 260 +
+      (lowCredits ? 430 : 120) +
+      (remoteInstability ? 180 : 0) +
+      (rezFloorNeed ? 360 : 0),
+  );
+  if (value <= 0) return undefined;
+  return {
+    key: "corp_card_action_economy_gain",
+    label: "Installierte Corp-Economy nutzen",
+    value,
+    reason: [
+      ...assessment.evidence,
+      `corp_credits:${input.playerView.own.credits}`,
+      `low_credits:${lowCredits}`,
+      `remote_instability:${remoteInstability}`,
+      `remote_rez_floor_funding_need:${rezFloorNeed}`,
+    ].join("|"),
+  };
+}
+
+function corpInstalledEconomyActionAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpInstalledEconomyActionAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability" &&
+    (action.type !== "gain_credit" ||
+      action.source === "basic_action" ||
+      action.source === "game_rule")
+  ) {
+    return undefined;
+  }
+  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
+  const sourceDefinitionId =
+    sourceCard?.definitionId ?? sourceDefinitionIdForAction(input, action);
+  if (!sourceDefinitionId) return undefined;
+
+  if (
+    action.type === "activated_card_ability" &&
+    isSourceAdvancementCounterCreditPayoutAction(action)
+  ) {
+    const amountPerCounter =
+      numberRecordValue(
+        action.payload,
+        "cardImplementationAmountPerAdvancementCounter",
+      ) ?? 0;
+    const advancementCounters = Math.max(
+      0,
+      Math.floor(sourceCard?.advancementCounters ?? 0),
+    );
+    const payout = advancementCounters * amountPerCounter;
+    return {
+      kind: "advancement_counter_payout",
+      sourceDefinitionId,
+      immediateGain: payout,
+      netCredits: payout - actionCreditCost(action),
+      advancementCounters,
+      amountPerCounter,
+      evidence: [
+        "installed_corp_economy:true",
+        "installed_corp_economy_kind:advancement_counter_payout",
+        `installed_corp_economy_source:${sourceDefinitionId}`,
+        `installed_corp_economy_advancement_counters:${advancementCounters}`,
+        `installed_corp_economy_amount_per_counter:${amountPerCounter}`,
+        `installed_corp_economy_immediate_gain:${payout}`,
+        `installed_corp_economy_net_credits:${payout - actionCreditCost(action)}`,
+      ],
+    };
+  }
+
+  const immediateGain = corpActionImmediateCreditGainAmount(action);
+  if (immediateGain <= 0) return undefined;
+  const storedCredits = sourceCard
+    ? corpVisibleCardStoredCredits(sourceCard)
+    : 0;
+  const sourceLooksLikeCreditBank =
+    sourceCard !== undefined &&
+    corpSourceCardLooksLikeCreditBank(input, action, sourceCard);
+  if (!sourceLooksLikeCreditBank && (storedCredits <= 0 || immediateGain < 2))
+    return undefined;
+  const netCredits = immediateGain - actionCreditCost(action);
+  return {
+    kind: "pool_payout",
+    sourceDefinitionId,
+    immediateGain,
+    netCredits,
+    storedCredits,
+    evidence: [
+      "installed_corp_economy:true",
+      "installed_corp_economy_kind:pool_payout",
+      `installed_corp_economy_source:${sourceDefinitionId}`,
+      `installed_corp_economy_immediate_gain:${immediateGain}`,
+      `installed_corp_economy_net_credits:${netCredits}`,
+      `installed_corp_economy_stored_credits:${storedCredits}`,
+      `installed_corp_economy_source_credit_bank:${sourceLooksLikeCreditBank}`,
+    ],
+  };
+}
+
+function corpActionImmediateCreditGainAmount(action: LegalAction): number {
+  const payload = action.payload ?? {};
+  const numericPayloadCandidates = [
+    numberRecordValue(payload, "cardImplementationCreditAmount"),
+    numberRecordValue(payload, "cardImplementationCredits"),
+    numberRecordValue(payload, "creditAmount"),
+    numberRecordValue(payload, "creditsGained"),
+    numberRecordValue(payload, "gainCredits"),
+  ].filter((value): value is number => typeof value === "number");
+  const payloadAmount = numericPayloadCandidates.find((value) => value > 0);
+  if (payloadAmount !== undefined) return Math.floor(payloadAmount);
+
+  const text = [
+    action.label,
+    stringRecordValue(payload, "cardImplementationAbilityLabel"),
+    stringRecordValue(payload, "abilityLabel"),
+    stringRecordValue(payload, "effectLabel"),
+    action.effectRef,
+    ...(action.resolvedEffects ?? []).flatMap((effect) =>
+      Object.values(effect as Record<string, unknown>)
+        .filter(
+          (value) => typeof value === "string" || typeof value === "number",
+        )
+        .map(String),
+    ),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const patterns = [
+    /(\d+)\s+credits?\s+nehmen/,
+    /(?:gain|take)\s+\[?(\d+)\]?\s+credits?/,
+    /\[?(\d+)\]?\s+credits?.*(?:gain|take|nehmen)/,
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (match?.[1]) return Math.max(0, Math.floor(Number(match[1])));
+  }
+  if (action.type === "gain_credit") return 1;
+  return 0;
+}
+
+function corpSourceCardLooksLikeCreditBank(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard,
+): boolean {
+  const sourceDefinitionId =
+    sourceCard.definitionId ?? sourceDefinitionIdForAction(input, action);
+  const roles = rolesForCardId(sourceDefinitionId);
+  const definition = sourceDefinitionId
+    ? (RUNTIME_CARDS[sourceDefinitionId] ??
+      DEMO_CARDS_BY_ID[sourceDefinitionId])
+    : undefined;
+  const hint = sourceDefinitionId
+    ? AI_HINTS.get(sourceDefinitionId)
+    : undefined;
+  const text = [
+    sourceCard.title,
+    sourceCard.type,
+    ...(sourceCard.subtypes ?? []),
+    sourceCard.rulesText,
+    cardDefinitionText(definition),
+    ...cardDefinitionMechanics(definition),
+    ...roles,
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...corpHintValueText(hint),
+    action.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return (
+    roles.some((role) => role.includes("economy")) ||
+    /action_economy|gain_credits|stored credits|hosted credits|credit bank|pool_payout|take \[?\d+\]?|credits? nehmen/.test(
+      text,
+    )
+  );
+}
+
+function corpVisibleCardStoredCredits(card: VisibleCard): number {
+  const counterValues = [
+    card.counters?.bit,
+    card.counters?.power,
+    card.counters?.recurring_credit,
+    ...(card.counterDisplays ?? [])
+      .filter((display) => {
+        const text = [
+          display.displayKind,
+          display.usageHint,
+          display.label,
+          display.ariaLabel,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return /stored|credit|spendable|bank/.test(text);
+      })
+      .map((display) => display.amount),
+  ]
+    .filter((value): value is number => typeof value === "number")
+    .map((value) => Math.max(0, Math.floor(value)));
+  return counterValues.length > 0 ? Math.max(...counterValues) : 0;
+}
+
+function corpHintValueText(hint: ReturnType<typeof AI_HINTS.get>): string[] {
+  if (!hint) return [];
+  return [
+    ...(hint.lineSupport ?? []),
+    ...(hint.effects ?? []).flatMap((effect) =>
+      Object.values(effect as Record<string, unknown>)
+        .filter(
+          (value) => typeof value === "string" || typeof value === "number",
+        )
+        .map(String),
+    ),
+  ];
+}
+
+function corpTagSourceVisiblePayoffPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (!corpTagSourceActionIsImmediate(action)) return undefined;
+  if (!isCorpTagSourceAction(input, action)) return undefined;
+  if (!corpOntologyPayoffAvailableForTagSource(input, action)) return undefined;
+  const successEstimate = isCorpTraceTagSourceAction(input, action)
+    ? traceTagExpectedSuccessEstimate(input)
+    : 1;
+  if (successEstimate < 0.25) return undefined;
+  const payoffProfile = corpVisibleTagPunishPayoffProfile(
+    input,
+    action.actionId,
+  );
+  if (!payoffProfile.available) return undefined;
+  const payoffPriority =
+    payoffProfile.payoffKinds.includes("damage") ||
+    payoffProfile.payoffKinds.includes("scored_agenda_damage_like")
+      ? 250
+      : payoffProfile.payoffKinds.includes("economic")
+        ? 150
+        : 90;
+  const value = Math.round(1150 + successEstimate * 450 + payoffPriority);
+  return {
+    key: "corp_tag_source_visible_payoff_pressure",
+    label: "Tag-Quelle mit sichtbarem Payoff",
+    value,
+    reason: [
+      "corp_tag_source_visible_payoff:true",
+      `source_definition:${sourceDefinitionIdForAction(input, action) || "unknown"}`,
+      `runner_tags:${input.playerView.opponent.tags}`,
+      `trace_tag_source:${isCorpTraceTagSourceAction(input, action)}`,
+      `trace_success_estimate:${successEstimate}`,
+      ...payoffProfile.evidence,
+      ...(corpTagPunishOntologyAssessmentForAction(input, action)?.evidence ??
+        []),
+    ].join("|"),
+  };
+}
+
+function corpTagSourceActionIsImmediate(action: LegalAction): boolean {
+  return (
+    action.type === "play_operation" ||
+    action.type === "activated_card_ability" ||
+    action.type === "trigger_ability"
+  );
+}
+
+function corpVisibleTagPunishPayoffProfile(
+  input: AiDecisionInput,
+  excludedActionId?: string,
+): {
+  available: boolean;
+  payoffKinds: StructuredTagPunishPayoffKind[];
+  evidence: string[];
+} {
+  const payoffKinds: StructuredTagPunishPayoffKind[] = [];
+  const payoffSources: string[] = [];
+  for (const action of input.legalActions) {
+    if (action.actionId === excludedActionId || action.side !== "corp")
+      continue;
+    const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+    if (!assessment?.isPunishPayoff) continue;
+    payoffKinds.push(assessment.payoffKind);
+    payoffSources.push(assessment.sourceDefinitionId || "unknown_action");
+  }
+  for (const card of [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ]) {
+    if (!card.known || !card.definitionId) continue;
+    const profile = classifyTagPunishPayoffFromOntology(card.definitionId);
+    if (!profile) continue;
+    payoffKinds.push(...profile.payoffKinds);
+    payoffSources.push(card.definitionId);
+  }
+  const uniqueKinds = sortedUnique(
+    payoffKinds,
+  ) as StructuredTagPunishPayoffKind[];
+  const uniqueSources = sortedUnique(payoffSources);
+  return {
+    available: uniqueKinds.length > 0,
+    payoffKinds: uniqueKinds,
+    evidence: [
+      `corp_visible_tag_punish_payoff_available:${uniqueKinds.length > 0}`,
+      ...uniqueKinds.map(
+        (kind) => `corp_visible_tag_punish_payoff_kind:${kind}`,
+      ),
+      ...uniqueSources
+        .slice(0, 4)
+        .map((source) => `corp_visible_tag_punish_payoff_source:${source}`),
+    ],
+  };
+}
+
+function corpUnprotectedTagAssetSetupPenalty(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.type !== "install_card" && action.type !== "rez_ice")
+    return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (!sourceDefinitionId) return undefined;
+  const profile = getStructuredTagPunishProfileForCard(sourceDefinitionId);
+  if (!profile?.tagSource) return undefined;
+  if (!corpActionSourceIsPersistentTagAsset(input, action, sourceDefinitionId))
+    return undefined;
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (!isRemoteServerTarget(serverId)) return undefined;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  const unprotected =
+    serverId === "new_remote" ||
+    (server !== undefined && server.ice.length === 0);
+  if (!unprotected) return undefined;
+  const immediateOperationAvailable =
+    corpImmediateOperationTagSourceWithPayoffAvailable(input, action.actionId);
+  const value =
+    (action.type === "rez_ice" ? -1350 : -1200) +
+    (immediateOperationAvailable ? -350 : 0);
+  return {
+    key: "corp_unprotected_tag_asset_setup_penalty",
+    label: "Ungeschuetztes Tag-Asset-Setup",
+    value,
+    reason: [
+      "corp_unprotected_tag_asset_setup:true",
+      `source_definition:${sourceDefinitionId}`,
+      `server:${serverId ?? "unknown"}`,
+      `server_ice_count:${server?.ice.length ?? 0}`,
+      `immediate_operation_tag_source_available:${immediateOperationAvailable}`,
+      ...profile.evidence,
+    ].join("|"),
+  };
+}
+
+function corpActionSourceIsPersistentTagAsset(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceDefinitionId: string,
+): boolean {
+  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
+  const definition =
+    RUNTIME_CARDS[sourceDefinitionId] ?? DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const definitionDisplay = definition as
+    | {
+        type?: string;
+        mechanics?: string[];
+      }
+    | undefined;
+  const roles = rolesForCardId(sourceDefinitionId);
+  const text = [
+    sourceCard?.type,
+    definitionDisplay?.type,
+    ...(definitionDisplay?.mechanics ?? []),
+    ...roles,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return /asset|upgrade|persistent|modifier|runner_draw_tax/.test(text);
+}
+
+function corpImmediateOperationTagSourceWithPayoffAvailable(
+  input: AiDecisionInput,
+  excludedActionId?: string,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === excludedActionId || action.side !== "corp")
+      return false;
+    return (
+      action.type === "play_operation" &&
+      isCorpTagSourceAction(input, action) &&
+      corpOntologyPayoffAvailableForTagSource(input, action)
+    );
+  });
+}
+
 type RunnerVisibleMeatPreventionProfile = {
   fullBodyConversions: number;
   flatPrevention: number;
@@ -10056,6 +10493,17 @@ type CorpTagPunishResourceTrashProfile = {
     | "rnd_information"
     | "high_risk_runner_economy";
   baseValue: number;
+  evidence: string[];
+};
+
+type CorpInstalledEconomyActionAssessment = {
+  kind: "pool_payout" | "advancement_counter_payout";
+  sourceDefinitionId: string;
+  immediateGain: number;
+  netCredits: number;
+  storedCredits?: number;
+  advancementCounters?: number;
+  amountPerCounter?: number;
   evidence: string[];
 };
 

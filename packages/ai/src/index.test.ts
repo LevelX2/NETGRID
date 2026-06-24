@@ -3650,6 +3650,191 @@ describe("MVP 0.3 AI controller contract", () => {
     );
   });
 
+  it("uses immediate trace tag source before more economy or unprotected tag-asset setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_284_chance-observation"] ||
+      !runtimeCards["onr_v1_307_urban-renewal"] ||
+      !runtimeCards["onr_v1_313_city-surveillance"] ||
+      !runtimeCards["onr_v1_309_bbs-whispering-campaign"]
+    ) {
+      return;
+    }
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-chance-before-setup",
+      { installedBbs: true, cityInHq: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const cityInstall =
+      input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinitionFromInput(input, action) ===
+            "onr_v1_313_city-surveillance" &&
+          action.payload?.serverId === "new_remote",
+      ) ??
+      input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinitionFromInput(input, action) ===
+            "onr_v1_313_city-surveillance",
+      );
+
+    expect(chanceObservation).toBeDefined();
+    expect(bbsTake).toBeDefined();
+    expect(cityInstall).toBeDefined();
+    if (!chanceObservation || !bbsTake || !cityInstall)
+      throw new Error("Missing Chance/BBS/City replay fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [cityInstall, bbsTake, chanceObservation],
+    });
+    const cityAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === cityInstall.actionId,
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(chanceObservation.actionId);
+    expect(debugText).toContain("corp_tag_source_visible_payoff_pressure");
+    expect(debugText).toContain("corp_visible_tag_punish_payoff_kind:damage");
+    expect(
+      cityAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_unprotected_tag_asset_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("does not add visible-payoff tag-source pressure without a visible payoff", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (!runtimeCards["onr_v1_284_chance-observation"]) return;
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-chance-no-payoff",
+      { cityInHq: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(chanceObservation).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!chanceObservation || !basicCredit)
+      throw new Error("Missing Chance no-payoff fixture actions");
+
+    const payoffIds = new Set([
+      "onr_v1_285_closed-accounts",
+      "onr_v1_301_punitive-counterstrike",
+      "onr_v1_302_scorched-earth",
+      "onr_v1_307_urban-renewal",
+    ]);
+    const stripPayoffs = (cards: VisibleCard[]) =>
+      cards.filter((card) => !payoffIds.has(card.definitionId ?? ""));
+    const noPayoffInput: AiDecisionInput = {
+      ...input,
+      legalActions: [basicCredit, chanceObservation],
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          gripOrHq: stripPayoffs(input.playerView.own.gripOrHq),
+          scoreArea: stripPayoffs(input.playerView.own.scoreArea),
+        },
+        servers: input.playerView.servers.map((server) => ({
+          ...server,
+          ice: stripPayoffs(server.ice),
+          root: stripPayoffs(server.root),
+        })),
+      },
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(noPayoffInput);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(debugText).not.toContain("corp_tag_source_visible_payoff_pressure");
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("keeps unprotected persistent tag-asset rez below immediate tag source", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_284_chance-observation"] ||
+      !runtimeCards["onr_v1_307_urban-renewal"] ||
+      !runtimeCards["onr_v1_313_city-surveillance"]
+    ) {
+      return;
+    }
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-city-rez-risk",
+      { cityInstalled: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const cityRez = input.legalActions.find(
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_313_city-surveillance",
+    );
+
+    expect(chanceObservation).toBeDefined();
+    expect(cityRez).toBeDefined();
+    if (!chanceObservation || !cityRez)
+      throw new Error("Missing Chance/City rez replay fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [cityRez, chanceObservation],
+    });
+    const cityAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === cityRez.actionId,
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(chanceObservation.actionId);
+    expect(
+      cityAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_unprotected_tag_asset_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(debugText).toContain(
+      "immediate_operation_tag_source_available:true",
+    );
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("does not promote Schlaghund tagged meat damage when Runner has no tags", () => {
     const runtimeCards = createRuntimeCardsById();
     if (!runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST]) return;
@@ -5782,6 +5967,82 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("scores installed Corp economy payouts in semantic runtime", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-semantic-installed-bbs-economy",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing semantic BBS economy fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, bbsTake],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(bbsTake.actionId);
+    expect(debugText).toContain("corp_card_action_economy_gain");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("does not give opaque Corp abilities the installed-economy bonus", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-semantic-opaque-bbs-ability",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing opaque BBS fixture actions");
+
+    const opaqueAbility: LegalAction = {
+      ...bbsTake,
+      actionId: "test.opaque-corp-card-ability",
+      label: "BBS Whispering Campaign: Konfiguration prüfen",
+      costs: [{ clicks: 1, credits: 3 }],
+      payload: {},
+      resolvedEffects: [],
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, opaqueAbility],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(debugText).not.toContain("corp_card_action_economy_gain");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
@@ -28145,6 +28406,66 @@ function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function corpReplayTagPunishWindowInput(
+  seed: string,
+  options: {
+    installedBbs?: boolean;
+    cityInHq?: boolean;
+    cityInstalled?: boolean;
+  } = {},
+) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: V095_RUNNER_DECK,
+    corpDeck: {
+      ...V095_CORP_DECK,
+      id: `corp_replay_tag_punish_${seed}`,
+      cards: [
+        ...V095_CORP_DECK.cards,
+        { id: "onr_v1_284_chance-observation", quantity: 1 },
+        { id: "onr_v1_307_urban-renewal", quantity: 1 },
+        { id: "onr_v1_313_city-surveillance", quantity: 1 },
+        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  moveCorpCardToHq(state, "onr_v1_284_chance-observation");
+  moveCorpCardToHq(state, "onr_v1_307_urban-renewal");
+  if (options.cityInHq) {
+    moveCorpCardToHq(state, "onr_v1_313_city-surveillance");
+  }
+  if (options.cityInstalled) {
+    putCorpRootInServer(state, "remote_2", "onr_v1_313_city-surveillance", 0, {
+      faceup: false,
+      rezzed: false,
+    });
+  }
+  if (options.installedBbs) {
+    putInstalledCorpBbsInRemote(state, "remote_1", 16);
+  }
+  state.runnerTurnFlags = {
+    ...(state.runnerTurnFlags ?? {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false,
+    }),
+    runAttemptsLastTurn: 1,
+  };
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.credits = 10;
+  state.corp.clicks = 3;
+  state.runner.credits = 8;
+  state.runner.tags = 0;
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v0.9-hard",
   });
 }
 

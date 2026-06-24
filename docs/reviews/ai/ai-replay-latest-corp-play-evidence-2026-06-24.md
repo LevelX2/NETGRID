@@ -31,49 +31,49 @@ Ausgewertet wurden `matches`, `events`, `state_snapshots` und `ai_decision_trace
 
 ## Zugweise Bewertung der Korp-Entscheidungen
 
-| Decision | StateVersion | Aktion | Relevante Alternativen | Bewertung |
-| --- | ---: | --- | --- | --- |
-| 1 | 1 | Corp-Mulligan keep | nur Setup-Choice | ok |
-| 2 | 2 | Mandatory draw | Pflichtaktion | ok |
-| 3 | 3 | Data Wall vor HQ | Data Wall vor R&D gleich bewertet, BBS, Basic-Credit, Corporate War remote | vertretbar, aber tie-breaker ignoriert R&D-Defaultdruck; kein harter Fehler |
-| 4 | 4 | BBS installieren | Basic-Credit, Draw, Corporate War remote | ok: Economy-Asset aufbauen |
-| 5 | 5 | BBS rezzen | Basic-Credit, Draw, Corporate War remote | ok |
-| 6 | 6 | Basic-`gain_credit` | `BBS Whispering Campaign: 2 Credits nehmen` | Fehler: +1 Basic-Credit schlägt +2 Card-Economy wegen Low-Credit-Bonus |
-| 7 | 7 | End turn | keine relevante LegalAction | ok |
-| 8 | 14 | Mandatory draw | Pflichtaktion | ok |
-| 9 | 15 | Filter vor R&D installieren | BBS-Ability, `Chance Observation`, Basic-Credit, Corporate War remote | vertretbar als Reaktion auf R&D-Run; Chance-Taglinie beginnt aber schon sichtbar |
-| 10 | 16 | BBS-Ability | `Chance Observation`, Basic-Credit | ok, aber `Chance Observation` bleibt nur knapp darunter |
-| 11 | 17 | BBS-Ability | `Chance Observation`, Basic-Credit | ok |
-| 12 | 18 | End turn | keine relevante LegalAction | ok |
-| 13 | 22 | Filter rezzen | Decline rez | ok |
-| 14 | 25 | Data Wall rezzen | Decline rez | ok |
-| 15 | 28 | Mandatory draw | Pflichtaktion | ok |
-| 16 | 29 | City Surveillance in Remote 2 installieren | BBS-Ability, `Chance Observation`, Basic-Credit, Corporate War remote | Fehler/Schwachpunkt: ungeschützte Remote-Asset-Linie verdrängt aktiven Tag-Enabler und wird später getrasht |
-| 17 | 30 | City Surveillance rezzen | BBS-Ability, `Chance Observation`, Basic-Credit | Fehler/Schwachpunkt: Rez wird wie Defense/Tempo behandelt, obwohl ungeschütztes Asset sofort contestbar bleibt |
-| 18 | 31 | BBS-Ability | `Chance Observation`, Basic-Credit | ok |
-| 19 | 32 | BBS-Ability | `Chance Observation`, Basic-Credit | ok |
-| 20 | 33 | End turn | keine relevante LegalAction | ok |
-| 21 | 46 | Mandatory draw | Pflichtaktion | ok |
-| 22 | 47 | Data Wall vor HQ installieren | BBS-Ability, `Chance Observation`, Draw, Basic-Credit | nachvollziehbar nach HQ-Multiaccess; kein harter Fehler |
-| 23 | 48 | BBS-Ability | `Chance Observation`, Draw, Basic-Credit | ok |
-| 24 | 49 | BBS-Ability | `Chance Observation`, Draw, Basic-Credit | ok |
-| 25 | 50 | End turn | keine relevante LegalAction | ok |
-| 26 | 58 | Mandatory draw | Pflichtaktion | ok |
-| 27 | 59 | Vacuum Link vor R&D installieren | BBS-Ability, `Chance Observation`, Basic-Credit | vertretbar nach R&D-Druck, aber Chance-Taglinie weiter verzögert |
-| 28 | 60 | BBS-Ability | `Chance Observation`, Draw, Basic-Credit | ok |
-| 29 | 61 | BBS-Ability | `Chance Observation`, Draw, Basic-Credit | ok |
-| 30 | 62 | End turn | keine relevante LegalAction | ok |
-| 31 | 69 | Mandatory draw | Pflichtaktion | ok |
-| 32 | 70 | Basic-`gain_credit` | Draw | ok: keine bessere LegalAction im Trace |
-| 33 | 71 | Basic-`gain_credit` | Draw | ok |
-| 34 | 72 | Basic-`gain_credit` | Draw | ok |
-| 35 | 73 | End turn | keine relevante LegalAction | ok |
-| 36 | 78 | Vacuum Link rezzen | Decline rez | ok |
-| 37 | 90 | Mandatory draw | Pflichtaktion | ok |
-| 38 | 91 | Banpei vor HQ installieren | Banpei vor R&D, `Chance Observation`, Basic-Credit | Schwach: bei 3 Klicks und sichtbarem Payoff wäre Tag-Enabler vor weiterem ICE plausibler |
-| 39 | 92 | `Chance Observation` spielen | Basic-Credit, Draw | sehr spät, aber jetzt korrekt |
-| 40 | 93 | Trace-Bid-Choice | Choice-Auflösung | ok als Choice-Handling; gesonderte Trace-Bid-Qualität hier nicht vertieft |
-| 41 | 95 | `Urban Renewal` spielen | zweites Urban Renewal, `Closed Accounts`, `The Short Circuit` trashen | korrekt: unmittelbare Flatline-Payoff-Aktion ist besser als Resource-Trash |
+| Decision | StateVersion | Aktion                                     | Relevante Alternativen                                                     | Bewertung                                                                                                      |
+| -------- | -----------: | ------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1        |            1 | Corp-Mulligan keep                         | nur Setup-Choice                                                           | ok                                                                                                             |
+| 2        |            2 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 3        |            3 | Data Wall vor HQ                           | Data Wall vor R&D gleich bewertet, BBS, Basic-Credit, Corporate War remote | vertretbar, aber tie-breaker ignoriert R&D-Defaultdruck; kein harter Fehler                                    |
+| 4        |            4 | BBS installieren                           | Basic-Credit, Draw, Corporate War remote                                   | ok: Economy-Asset aufbauen                                                                                     |
+| 5        |            5 | BBS rezzen                                 | Basic-Credit, Draw, Corporate War remote                                   | ok                                                                                                             |
+| 6        |            6 | Basic-`gain_credit`                        | `BBS Whispering Campaign: 2 Credits nehmen`                                | Fehler: +1 Basic-Credit schlägt +2 Card-Economy wegen Low-Credit-Bonus                                         |
+| 7        |            7 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 8        |           14 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 9        |           15 | Filter vor R&D installieren                | BBS-Ability, `Chance Observation`, Basic-Credit, Corporate War remote      | vertretbar als Reaktion auf R&D-Run; Chance-Taglinie beginnt aber schon sichtbar                               |
+| 10       |           16 | BBS-Ability                                | `Chance Observation`, Basic-Credit                                         | ok, aber `Chance Observation` bleibt nur knapp darunter                                                        |
+| 11       |           17 | BBS-Ability                                | `Chance Observation`, Basic-Credit                                         | ok                                                                                                             |
+| 12       |           18 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 13       |           22 | Filter rezzen                              | Decline rez                                                                | ok                                                                                                             |
+| 14       |           25 | Data Wall rezzen                           | Decline rez                                                                | ok                                                                                                             |
+| 15       |           28 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 16       |           29 | City Surveillance in Remote 2 installieren | BBS-Ability, `Chance Observation`, Basic-Credit, Corporate War remote      | Fehler/Schwachpunkt: ungeschützte Remote-Asset-Linie verdrängt aktiven Tag-Enabler und wird später getrasht    |
+| 17       |           30 | City Surveillance rezzen                   | BBS-Ability, `Chance Observation`, Basic-Credit                            | Fehler/Schwachpunkt: Rez wird wie Defense/Tempo behandelt, obwohl ungeschütztes Asset sofort contestbar bleibt |
+| 18       |           31 | BBS-Ability                                | `Chance Observation`, Basic-Credit                                         | ok                                                                                                             |
+| 19       |           32 | BBS-Ability                                | `Chance Observation`, Basic-Credit                                         | ok                                                                                                             |
+| 20       |           33 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 21       |           46 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 22       |           47 | Data Wall vor HQ installieren              | BBS-Ability, `Chance Observation`, Draw, Basic-Credit                      | nachvollziehbar nach HQ-Multiaccess; kein harter Fehler                                                        |
+| 23       |           48 | BBS-Ability                                | `Chance Observation`, Draw, Basic-Credit                                   | ok                                                                                                             |
+| 24       |           49 | BBS-Ability                                | `Chance Observation`, Draw, Basic-Credit                                   | ok                                                                                                             |
+| 25       |           50 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 26       |           58 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 27       |           59 | Vacuum Link vor R&D installieren           | BBS-Ability, `Chance Observation`, Basic-Credit                            | vertretbar nach R&D-Druck, aber Chance-Taglinie weiter verzögert                                               |
+| 28       |           60 | BBS-Ability                                | `Chance Observation`, Draw, Basic-Credit                                   | ok                                                                                                             |
+| 29       |           61 | BBS-Ability                                | `Chance Observation`, Draw, Basic-Credit                                   | ok                                                                                                             |
+| 30       |           62 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 31       |           69 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 32       |           70 | Basic-`gain_credit`                        | Draw                                                                       | ok: keine bessere LegalAction im Trace                                                                         |
+| 33       |           71 | Basic-`gain_credit`                        | Draw                                                                       | ok                                                                                                             |
+| 34       |           72 | Basic-`gain_credit`                        | Draw                                                                       | ok                                                                                                             |
+| 35       |           73 | End turn                                   | keine relevante LegalAction                                                | ok                                                                                                             |
+| 36       |           78 | Vacuum Link rezzen                         | Decline rez                                                                | ok                                                                                                             |
+| 37       |           90 | Mandatory draw                             | Pflichtaktion                                                              | ok                                                                                                             |
+| 38       |           91 | Banpei vor HQ installieren                 | Banpei vor R&D, `Chance Observation`, Basic-Credit                         | Schwach: bei 3 Klicks und sichtbarem Payoff wäre Tag-Enabler vor weiterem ICE plausibler                       |
+| 39       |           92 | `Chance Observation` spielen               | Basic-Credit, Draw                                                         | sehr spät, aber jetzt korrekt                                                                                  |
+| 40       |           93 | Trace-Bid-Choice                           | Choice-Auflösung                                                           | ok als Choice-Handling; gesonderte Trace-Bid-Qualität hier nicht vertieft                                      |
+| 41       |           95 | `Urban Renewal` spielen                    | zweites Urban Renewal, `Closed Accounts`, `The Short Circuit` trashen      | korrekt: unmittelbare Flatline-Payoff-Aktion ist besser als Resource-Trash                                     |
 
 ## Fehlergruppen
 
@@ -158,7 +158,7 @@ Schicht: keine Anpassung aus diesem Match. Bestehende Tests decken Schlaghund-Ta
 ## Umsetzungsempfehlung
 
 1. Generische Korp-Action-Economy-Komponente ergänzen: aktivierte/triggered Korp-Kartenaktionen mit sichtbarem Credit-Gain erhalten einen Credit-Gain-Wert und übernehmen Low-Credit-/Reserve-Kontext.
-2. Generische Tag-Enabler-Komponente ergänzen: `corp_tag_source_with_visible_payoff_pressure` für legale Tag-/Trace-Quellen mit sichtbarem Payoff und plausibler Success-Erwartung.
+2. Generische Tag-Enabler-Komponente ergänzen: `corp_tag_source_visible_payoff_pressure` für legale Tag-/Trace-Quellen mit sichtbarem Payoff und plausibler Success-Erwartung.
 3. Ungeschützte Remote-Tag-Asset-Linie abwerten: persistente Tag-Enabler-Assets in ungeschützten Remotes bekommen einen Verwundbarkeitsabschlag, wenn eine sofortige Tag-Operation oder bessere Schutz-/Payoff-Aktion legal ist.
 4. Tests mit positiven und negativen Gegenproben ergänzen:
    - +2 Card-Economy schlägt Basic-`gain_credit`.

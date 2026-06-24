@@ -1,6 +1,6 @@
 # AI Replay Latest Corp Play Layer Audit 2026-06-24
 
-Status: RCP-3 layer audit
+Status: RCP-4 implemented
 
 Quelle: `docs/reviews/ai/ai-replay-latest-corp-play-evidence-2026-06-24.md`
 
@@ -14,13 +14,13 @@ Die im Replay belegten Fehler liegen nicht in der Rules Engine und nicht in fals
 
 ## Schichtzuordnung je Fehlergruppe
 
-| Fehlergruppe | Hintdaten | Ontologie | Runtime-Scoring | Plan/Memory | Engine/LegalActions | Testlücke |
-| --- | --- | --- | --- | --- | --- | --- |
-| F1 BBS-ähnliche +2-Card-Economy verliert gegen Basic-Credit | korrekt | nicht nötig | defekt/fehlend | nicht nötig | korrekt | fehlt |
-| F2 `Chance Observation` als Tag-Enabler zu spät | korrekt | korrekt klassifizierbar | defekt/fehlend | `own_hand_future_play_plan_model:not_modelled` sichtbar | korrekt | fehlt |
-| F3 `City Surveillance` ungeschützt über Operation-Taglinie | korrekt | korrekt klassifizierbar | zu grob | Remote-Verwundbarkeit fehlt | korrekt | fehlt |
-| F4 Resource-Trash spät | kein konkreter Fehler im Match | ok | Follow-up nur für No-Kill-Fenster | nicht in Scope | korrekt | teilweise vorhanden |
-| F5 Schlaghund | kein konkreter Fehler im Match | ok | bestehende Tests vorhanden | nicht in Scope | keine LegalAction im Replay | kein neuer Test nötig |
+| Fehlergruppe                                                | Hintdaten                      | Ontologie               | Runtime-Scoring                   | Plan/Memory                                             | Engine/LegalActions         | Testlücke             |
+| ----------------------------------------------------------- | ------------------------------ | ----------------------- | --------------------------------- | ------------------------------------------------------- | --------------------------- | --------------------- |
+| F1 BBS-ähnliche +2-Card-Economy verliert gegen Basic-Credit | korrekt                        | nicht nötig             | defekt/fehlend                    | nicht nötig                                             | korrekt                     | fehlt                 |
+| F2 `Chance Observation` als Tag-Enabler zu spät             | korrekt                        | korrekt klassifizierbar | defekt/fehlend                    | `own_hand_future_play_plan_model:not_modelled` sichtbar | korrekt                     | fehlt                 |
+| F3 `City Surveillance` ungeschützt über Operation-Taglinie  | korrekt                        | korrekt klassifizierbar | zu grob                           | Remote-Verwundbarkeit fehlt                             | korrekt                     | fehlt                 |
+| F4 Resource-Trash spät                                      | kein konkreter Fehler im Match | ok                      | Follow-up nur für No-Kill-Fenster | nicht in Scope                                          | korrekt                     | teilweise vorhanden   |
+| F5 Schlaghund                                               | kein konkreter Fehler im Match | ok                      | bestehende Tests vorhanden        | nicht in Scope                                          | keine LegalAction im Replay | kein neuer Test nötig |
 
 ## Hints
 
@@ -97,10 +97,21 @@ Mindestverhalten:
 
 ## Akzeptanztests
 
+Umgesetzt in `packages/ai/src/index.ts` und abgesichert in `packages/ai/src/index.test.ts`:
+
 1. `chooseCorpAction` wählt +2-Card-Economy statt Basic-`gain_credit` und zeigt `corp_card_action_economy_gain`.
-2. Eine opake Korp-Ability ohne Credit-Gain schlägt Basic-`gain_credit` nicht.
+2. Eine opake Korp-Ability ohne sichtbaren Credit-Gain erhält keinen `corp_card_action_economy_gain`-Bonus und fällt in der Gegenprobe hinter Basic-`gain_credit`.
 3. `chooseCorpAction` wählt `Chance Observation`, wenn eine tagabhängige Payoff-Karte sichtbar verfügbar ist und `City Surveillance` ungeschützt installiert werden könnte.
-4. `Chance Observation` ohne sichtbaren Payoff wird nicht blind über sinnvolle Defense/Economy gehoben.
+4. `City Surveillance`-Rez in ungeschütztem Remote erhält `corp_unprotected_tag_asset_setup_penalty`, wenn eine sofortige Operation-Tagquelle mit Payoff-Kontext legal ist.
+5. `Chance Observation` ohne sichtbaren Payoff erhält keinen `corp_tag_source_visible_payoff_pressure`-Bonus.
+
+Gelaufene Gates:
+
+- `tsc -p packages/ai/tsconfig.json --noEmit`
+- `vitest run packages/ai/src/index.test.ts --testNamePattern "installed Corp economy payouts|semantic runtime|opaque Corp abilities|immediate trace tag source|visible-payoff tag-source|unprotected persistent tag-asset"`
+- `vitest run packages/ai/src/index.test.ts`
+- `prettier --check` für die geänderten AI- und Review-Artefakte
+- `git diff --check`
 
 ## Nicht ändern
 
