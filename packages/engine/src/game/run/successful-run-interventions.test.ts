@@ -505,7 +505,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       selectedIceDefinitionId: "hq_ice_def",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_dr_dreff_temporary_encounter",
+      hiddenZoneAction: "successful_run_temporary_encounter",
     });
     expect(legalAction.payload).not.toHaveProperty("unselectedHqCardIds");
   });
@@ -544,7 +544,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       installCostPaid: 2,
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_jenny_jett_install_approach",
+      hiddenZoneAction: "successful_run_install_approach",
     });
   });
 

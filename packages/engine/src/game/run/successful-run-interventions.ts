@@ -839,7 +839,7 @@ export function resolveSuccessfulRunInterventionChoice(
       rezCostPaid: cost,
       serverId: server.id,
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_dr_dreff_temporary_encounter",
+      hiddenZoneAction: "successful_run_temporary_encounter",
     };
     return {
       handled: true,
@@ -885,7 +885,7 @@ export function resolveSuccessfulRunInterventionChoice(
     installCostPaid: cost,
     serverId: server.id,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_54_jenny_jett_install_approach",
+    hiddenZoneAction: "successful_run_install_approach",
   };
   return {
     handled: true,
