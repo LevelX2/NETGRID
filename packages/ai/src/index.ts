@@ -135,17 +135,17 @@ import {
 } from "./diagnostics/decision-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { projectAccessWindowChoice } from "./access/access-window-choice";
-import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
 import {
   semanticRuntimeActionTypeIsReactive,
   semanticRuntimeChoiceIsReactive,
 } from "./runtime/reactive-action";
 import {
-  applyPracticalMicroRuntimeComparator,
   type PracticalMicroCandidate,
 } from "./runtime/practical-micro-runtime";
-import { applyPracticalTacticOverlay } from "./runtime/practical-tactic-overlay";
+import {
+  createSemanticRuntimeDecisionContext,
+} from "./runtime/semantic-runtime-decision-context";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -3997,54 +3997,6 @@ const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
   compareAction,
 });
 
-function chooseSemanticRuntimeAction(
-  input: AiDecisionInput,
-  legacyDecisionProvider: () => AiDecision,
-  options: AiDecisionRuntimeOptions,
-): AiDecision {
-  const lazyLegacyDecision = memoizeLegacyDecision(legacyDecisionProvider);
-  const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
-    input,
-    lazyLegacyDecision,
-    options,
-    {
-      semanticRuntimeChoices,
-      semanticRuntimeChoiceIsReactive,
-      buildActionSemanticCandidates,
-      getTacticalPlanMemorySnapshot,
-      deckCapabilitiesForInput,
-      runnerStrategicIntentForInput,
-      evaluateRunnerHandDevelopment,
-      buildRunnerEconomyPosture,
-      evaluateRunnerRunTargets,
-      buildRunnerTacticalGoals,
-      evaluateTacticalPlans,
-      bestSemanticRuntimeChoice,
-      bestSemanticRuntimeChoiceForTacticalPlanOverride,
-      tacticalPlanMappedChoice,
-      runnerSelfDamageImmediateWinSemanticChoice,
-      semanticRuntimeChoiceWithEvidence,
-      tacticalPlanMappingOverrideEvidence,
-      tacticalPlanRuntimeAlignedToChoice,
-      runnerRunOnlyActionAdjustedSemanticChoice,
-      semanticRuntimeCoverageSelectionDebug,
-      selectedChoicesForDecision,
-      rememberTacticalPlanRuntime,
-      scrubEvidence,
-      semanticRuntimeDecisionDebug,
-    },
-  );
-  const legacyDecision = lazyLegacyDecision();
-  const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
-    input,
-    legacyDecision,
-    runtimeDecision,
-    options,
-    practicalMicroRuntimeCandidates(input, runtimeDecision),
-  );
-  return applyPracticalTacticOverlay(input, practicalMicroDecision, options);
-}
-
 function practicalMicroRuntimeCandidates(
   input: AiDecisionInput,
   runtimeDecision: AiDecision,
@@ -4318,6 +4270,33 @@ const {
 } = createSemanticRuntimeDebugContext({
   scoreBreakdown: semanticRuntimeScoreBreakdown,
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
+});
+const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
+  semanticRuntimeChoices,
+  semanticRuntimeChoiceIsReactive,
+  buildActionSemanticCandidates,
+  getTacticalPlanMemorySnapshot,
+  deckCapabilitiesForInput,
+  runnerStrategicIntentForInput,
+  evaluateRunnerHandDevelopment,
+  buildRunnerEconomyPosture,
+  evaluateRunnerRunTargets,
+  buildRunnerTacticalGoals,
+  evaluateTacticalPlans,
+  bestSemanticRuntimeChoice,
+  bestSemanticRuntimeChoiceForTacticalPlanOverride,
+  tacticalPlanMappedChoice,
+  runnerSelfDamageImmediateWinSemanticChoice,
+  semanticRuntimeChoiceWithEvidence,
+  tacticalPlanMappingOverrideEvidence,
+  tacticalPlanRuntimeAlignedToChoice,
+  runnerRunOnlyActionAdjustedSemanticChoice,
+  semanticRuntimeCoverageSelectionDebug,
+  selectedChoicesForDecision,
+  rememberTacticalPlanRuntime,
+  scrubEvidence,
+  semanticRuntimeDecisionDebug,
+  practicalMicroRuntimeCandidates,
 });
 
 type VisibleEncounterSubroutine = NonNullable<
