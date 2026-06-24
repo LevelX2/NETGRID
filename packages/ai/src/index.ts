@@ -226,6 +226,11 @@ import {
   runnerBadPublicityRelevanceScoreComponent as buildRunnerBadPublicityRelevanceScoreComponent,
 } from "./runtime/runner-bad-publicity-relevance-score";
 import {
+  runnerBadPublicityRelevanceAssessment as buildRunnerBadPublicityRelevanceAssessment,
+  type RunnerBadPublicityRelevanceAssessment,
+  type RunnerBadPublicityRelevanceAssessmentDependencies,
+} from "./runtime/runner-bad-publicity-relevance-assessment";
+import {
   runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
   type RunnerLoanLiabilityAssessment,
 } from "./runtime/runner-loan-liability-assessment";
@@ -3694,28 +3699,24 @@ type SelfDamageActionEvidence = {
   evidence: string[];
 };
 
-type BadPublicityRelevanceAssessment = {
-  sourceDefinitionId: string;
-  currentCorpBadPublicity: number;
-  badPublicityGainFromAction: number;
-  immediateBadPublicityCloseout: boolean;
-  badPublicityPlanPresent: boolean;
-  badPublicitySupportCount: number;
-  payoffLikelyWithinHorizon: boolean;
-  drawbackSeverity: number;
-  badPublicityRelevanceScore: number;
-  evidence: string[];
-};
-
-type BadPublicityActionEvidence = {
-  gain: number;
-  evidence: string[];
-};
-
-const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
 const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
+const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
+const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES: RunnerBadPublicityRelevanceAssessmentDependencies =
+  {
+    sourceDefinitionIdForAction,
+    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+    actionCreditCost,
+    fakedHitCardId: FAKED_HIT_CARD_ID,
+    cardSupport: {
+      rolesForCardId,
+      hintEffectsForCard: (definitionId) => AI_HINTS.get(definitionId)?.effects,
+      rulesTextForCard: (definitionId) =>
+        DEMO_CARDS_BY_ID[definitionId]?.rulesText,
+      effectTarget: (effect) => stringRecordValue(effect, "target"),
+    },
+  };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -8263,123 +8264,12 @@ function runnerBadPublicityRelevanceScoreComponent(
 function runnerBadPublicityRelevanceAssessment(
   input: AiDecisionInput,
   action: LegalAction,
-): BadPublicityRelevanceAssessment | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (!sourceDefinitionId) return undefined;
-  const actionEvidence = badPublicityEvidenceForAction(sourceDefinitionId);
-  if (!actionEvidence) return undefined;
-
-  const currentCorpBadPublicity = visibleCorpBadPublicity(input);
-  const badPublicityGainFromAction = actionEvidence.gain;
-  const immediateBadPublicityCloseout =
-    currentCorpBadPublicity + badPublicityGainFromAction >=
-    BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI;
-  const badPublicitySupportCount = runnerVisibleBadPublicitySupportCount(input);
-  const badPublicityPlanPresent = badPublicitySupportCount >= 2;
-  const payoffLikelyWithinHorizon =
-    immediateBadPublicityCloseout ||
-    (badPublicityPlanPresent &&
-      currentCorpBadPublicity + badPublicityGainFromAction >= 4);
-  const selfDamageAssessment = runnerSelfDamageSurvivalAssessment(
+): RunnerBadPublicityRelevanceAssessment | undefined {
+  return buildRunnerBadPublicityRelevanceAssessment(
     input,
     action,
+    RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES,
   );
-  const drawbackSeverity =
-    actionCreditCost(action) * 45 +
-    (selfDamageAssessment
-      ? selfDamageAssessment.effectiveSelfDamage * 450 +
-        (selfDamageAssessment.preventable === false ? 250 : 0)
-      : 0);
-  const badPublicityRelevanceScore = immediateBadPublicityCloseout
-    ? 1600
-    : badPublicityPlanPresent
-      ? Math.max(-250, 350 - Math.floor(drawbackSeverity * 0.5))
-      : -900 - drawbackSeverity;
-  const evidence = [
-    `bad_publicity_current:${currentCorpBadPublicity}`,
-    `bad_publicity_gain_from_action:${badPublicityGainFromAction}`,
-    `bad_publicity_closeout:${immediateBadPublicityCloseout}`,
-    `bad_publicity_plan_present:${badPublicityPlanPresent}`,
-    `bad_publicity_support_count:${badPublicitySupportCount}`,
-    `bad_publicity_payoff_horizon:${payoffLikelyWithinHorizon}`,
-    `bad_publicity_drawback_severity:${drawbackSeverity}`,
-    `bad_publicity_relevance_score:${badPublicityRelevanceScore}`,
-    ...(immediateBadPublicityCloseout
-      ? ["immediate_bad_publicity_closeout"]
-      : badPublicityPlanPresent
-        ? ["bad_publicity_plan_support"]
-        : [
-            "bad_publicity_support_only",
-            "no_bad_publicity_closeout",
-            "why_bad_publicity_support_only:no_visible_bad_publicity_plan",
-          ]),
-    ...(drawbackSeverity > 0 && !immediateBadPublicityCloseout
-      ? ["drawback_outweighs_bp_gain"]
-      : []),
-    ...(selfDamageAssessment?.evidence ?? []),
-    ...actionEvidence.evidence,
-  ];
-
-  return {
-    sourceDefinitionId,
-    currentCorpBadPublicity,
-    badPublicityGainFromAction,
-    immediateBadPublicityCloseout,
-    badPublicityPlanPresent,
-    badPublicitySupportCount,
-    payoffLikelyWithinHorizon,
-    drawbackSeverity,
-    badPublicityRelevanceScore,
-    evidence,
-  };
-}
-
-function badPublicityEvidenceForAction(
-  sourceDefinitionId: string,
-): BadPublicityActionEvidence | undefined {
-  if (sourceDefinitionId === FAKED_HIT_CARD_ID) {
-    return {
-      gain: 1,
-      evidence: ["bad_publicity_contract:faked_hit"],
-    };
-  }
-  if (!cardHasBadPublicitySupport(sourceDefinitionId)) return undefined;
-  return {
-    gain: 1,
-    evidence: [`bad_publicity_contract:hint:${sourceDefinitionId}`],
-  };
-}
-
-function runnerVisibleBadPublicitySupportCount(input: AiDecisionInput): number {
-  const visibleOwnCards = [
-    ...input.playerView.own.gripOrHq,
-    ...(input.playerView.own.rig ?? []),
-    ...input.playerView.own.scoreArea,
-  ];
-  return visibleOwnCards.filter(
-    (card) =>
-      card.known &&
-      card.definitionId !== undefined &&
-      cardHasBadPublicitySupport(card.definitionId),
-  ).length;
-}
-
-function cardHasBadPublicitySupport(definitionId: string): boolean {
-  const roles = rolesForCardId(definitionId);
-  const hint = AI_HINTS.get(definitionId);
-  const definition = DEMO_CARDS_BY_ID[definitionId];
-  return (
-    roles.some((role) => role.includes("bad_publicity")) ||
-    hint?.effects?.some((effect) => effectMentionsBadPublicity(effect)) ===
-      true ||
-    /bad publicity|bad_publicity/i.test(definition?.rulesText ?? "")
-  );
-}
-
-function effectMentionsBadPublicity(effect: unknown): boolean {
-  const target = stringRecordValue(effect, "target");
-  return target?.includes("bad_publicity") === true;
 }
 
 function actionConsumesOwnRunnerHandCard(
