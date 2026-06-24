@@ -219,6 +219,9 @@ import {
   runnerBadPublicityRelevanceScoreComponent as buildRunnerBadPublicityRelevanceScoreComponent,
 } from "./runtime/runner-bad-publicity-relevance-score";
 import {
+  runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
+} from "./runtime/runner-viral15-jack-out-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -13614,32 +13617,10 @@ function runnerViral15JackOutScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (
-    input.side !== "runner" ||
-    action.type !== "jack_out" ||
-    action.payload?.v1922CorpIceAbility !== "viral_15_jack_out_tax"
-  ) {
-    return undefined;
-  }
-  const cost = actionCreditCost(action);
-  if (cost > input.playerView.own.credits) return undefined;
-  const installedPrograms = (input.playerView.own.rig ?? []).filter(
-    (card) => card.known === true && card.type === "program",
-  );
-  if (installedPrograms.length === 0) return undefined;
-  const protectedBreakers = installedPrograms.filter(
+  return buildRunnerViral15JackOutScoreComponent(input, action, {
+    actionCreditCost,
     isVisibleIcebreakerProgram,
-  ).length;
-  return {
-    key: "runner_viral15_jack_out_prevents_program_trash",
-    label: "Viral-15-Rigschutz",
-    value: 1350 + Math.min(2, protectedBreakers) * 120,
-    reason: [
-      `jack_out_cost:${cost}`,
-      `installed_programs:${installedPrograms.length}`,
-      `visible_breakers:${protectedBreakers}`,
-    ].join("|"),
-  };
+  });
 }
 
 function visibleBreakerRoleCountsForAi(
