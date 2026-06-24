@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-06-24-corp-ai-prioritize-tagged-meat-damage-payoffs
-status: inbox
+status: in_progress
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-24
-startedAt:
+startedAt: 2026-06-24
 completedAt:
-branch:
+branch: codex/activity-tagged-meat-damage-payoffs
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
