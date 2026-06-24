@@ -156,6 +156,10 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
+import {
+  semanticRuntimeRunnerEvidence as buildSemanticRuntimeRunnerEvidence,
+  type SemanticRuntimeRunnerEvidenceDependencies,
+} from "./runtime/semantic-runtime-runner-evidence";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import {
   semanticRuntimeServerId,
@@ -3720,6 +3724,21 @@ const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES: RunnerBlinkRiskEvidenceDependenci
     multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
     runRiskAssessment: assessBlinkRiskForRunAction,
     breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
+  };
+const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES: SemanticRuntimeRunnerEvidenceDependencies =
+  {
+    programInstallTrashAssessmentForAction:
+      runnerProgramInstallTrashAssessmentForAction,
+    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+    muPressureActionEvidence: runnerMuPressureActionEvidence,
+    bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
+    noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
+    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+    blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
+    loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+    persistentInstallEvidenceForAction:
+      runnerPersistentInstallEvidenceForAction,
+    remoteTrashAccessContext: runnerRemoteTrashAccessContext,
   };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
@@ -7950,70 +7969,11 @@ function semanticRuntimeRunnerEvidence(
   input: AiDecisionInput,
   action: LegalAction,
 ): string[] {
-  if (input.side !== "runner") return [];
-  const sacrificeAssessment = runnerProgramInstallTrashAssessmentForAction(
+  return buildSemanticRuntimeRunnerEvidence(
     input,
     action,
+    SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES,
   );
-  const actionMuPressureEvidence = runnerMuPressureActionEvidence(
-    input,
-    action,
-  );
-  const bankCommitmentEvidence = runnerBankInvestmentCommitmentEvidence(
-    input,
-    action,
-  );
-  const noRunEconomyCommitmentEvidence = runnerNoRunEconomyCommitmentEvidence(
-    input,
-    action,
-  );
-  const selfDamageSurvivalEvidence =
-    runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
-  const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
-  const loanLiabilityEvidence =
-    runnerLoanLiabilityAssessment(input, action)?.evidence ?? [];
-  const persistentInstallEvidence = runnerPersistentInstallEvidenceForAction(
-    input,
-    action,
-  );
-  if (sacrificeAssessment?.memoryRequired) {
-    return [
-      `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
-      ...sacrificeAssessment.evidence,
-      ...actionMuPressureEvidence,
-      ...bankCommitmentEvidence,
-      ...noRunEconomyCommitmentEvidence,
-      ...selfDamageSurvivalEvidence,
-      ...blinkRiskEvidence,
-      ...loanLiabilityEvidence,
-      ...persistentInstallEvidence,
-    ];
-  }
-  if (
-    actionMuPressureEvidence.length > 0 ||
-    bankCommitmentEvidence.length > 0 ||
-    noRunEconomyCommitmentEvidence.length > 0 ||
-    selfDamageSurvivalEvidence.length > 0 ||
-    blinkRiskEvidence.length > 0 ||
-    loanLiabilityEvidence.length > 0 ||
-    persistentInstallEvidence.length > 0
-  )
-    return [
-      ...actionMuPressureEvidence,
-      ...bankCommitmentEvidence,
-      ...noRunEconomyCommitmentEvidence,
-      ...selfDamageSurvivalEvidence,
-      ...blinkRiskEvidence,
-      ...loanLiabilityEvidence,
-      ...persistentInstallEvidence,
-    ];
-  if (
-    action.type !== "trash_accessed_card" &&
-    action.type !== "decline_trash"
-  ) {
-    return [];
-  }
-  return runnerRemoteTrashAccessContext(input, action).evidence;
 }
 
 function runnerBlinkRiskEvidenceForAction(
