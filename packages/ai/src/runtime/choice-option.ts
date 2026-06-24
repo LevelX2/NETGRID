@@ -18,3 +18,12 @@ export function playfulAiGainValue(option: {
   }
   return 0;
 }
+
+export function boundedSelectionCount(
+  minSelections: number,
+  maxSelections: number,
+  available: number,
+): number {
+  const requested = Math.max(minSelections, maxSelections);
+  return Math.max(0, Math.min(requested, available));
+}

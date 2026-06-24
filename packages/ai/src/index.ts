@@ -269,6 +269,7 @@ import {
   actionCreditCost,
 } from "./runtime/action-cost";
 import {
+  boundedSelectionCount,
   playfulAiGainValue,
   selectableChoiceOptions,
 } from "./runtime/choice-option";
@@ -7821,15 +7822,6 @@ function isSearchChoice(
     choice.stackSearchResolution ||
     /search|stack/i.test(choice.source),
   );
-}
-
-function boundedSelectionCount(
-  minSelections: number,
-  maxSelections: number,
-  available: number,
-): number {
-  const requested = Math.max(minSelections, maxSelections);
-  return Math.max(0, Math.min(requested, available));
 }
 
 function scoreSearchChoiceOption(
