@@ -273,6 +273,7 @@ import {
   playfulAiGainValue,
   selectableChoiceOptions,
 } from "./runtime/choice-option";
+import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   createRunnerCentralMemoryContext,
 } from "./runtime/runner-central-memory-context";
@@ -7731,15 +7732,6 @@ function discardStrongestDoctrinePlan(
     .sort(
       (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
     )[0]?.[0];
-}
-
-function discardRolesMatch(roles: string[], needles: string[]): boolean {
-  return needles.some((needle) =>
-    roles.some(
-      (role) =>
-        role === needle || role.includes(needle) || role.startsWith(needle),
-    ),
-  );
 }
 
 function discardEvidenceForInput(input: AiDecisionInput): string[] {
