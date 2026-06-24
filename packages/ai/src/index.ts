@@ -220,9 +220,11 @@ import {
 } from "./runtime/runner-bad-publicity-relevance-score";
 import {
   runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
+  type RunnerLoanLiabilityAssessment,
 } from "./runtime/runner-loan-liability-assessment";
 import {
   runnerLoanRunFundingContext as buildRunnerLoanRunFundingContext,
+  type RunnerLoanRunFundingContext,
 } from "./runtime/runner-loan-run-funding-context";
 import {
   runnerLoanRuntimeContext as buildRunnerLoanRuntimeContext,
@@ -230,6 +232,7 @@ import {
 import {
   runnerInstalledLoanActionSpend as buildRunnerInstalledLoanActionSpend,
   runnerLoanProjectedSpendAfterLoan as buildRunnerLoanProjectedSpendAfterLoan,
+  type RunnerLoanProjectedSpend,
 } from "./runtime/runner-loan-projected-spend";
 import {
   runnerLoanSpendCandidateKind as buildRunnerLoanSpendCandidateKind,
@@ -5480,75 +5483,6 @@ function semanticRuntimeRunnerScore(
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
-
-type RunnerLoanGamePhase = "opening" | "midgame" | "late";
-
-type RunnerLoanLiabilitySeverity = "low" | "medium" | "high" | "critical";
-
-type RunnerLoanUseCase =
-  | "emergency_funding"
-  | "remote_contest_funding"
-  | "known_agenda_funding"
-  | "closeout_funding"
-  | "fund_critical_breaker_install"
-  | "generic_setup"
-  | "bad_use";
-
-type RunnerLoanDebtRepaymentRisk = "low" | "medium" | "high" | "critical";
-
-type RunnerLoanRunFundingContext = {
-  remoteScoreThreat: RunnerLoanAssessmentRemoteThreat;
-  remoteContestFunding: boolean;
-  knownAgendaPayoff: boolean;
-  knownAgendaFunding: boolean;
-  closeoutFunding: boolean;
-  bestTargetId?: string;
-  bestTargetPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
-  bestTargetRecommendation?: RunnerRunTargetEvaluation["recommendation"];
-  bestTargetPathCost: number;
-  bestTargetCreditsAfterRun: number;
-  evidence: string[];
-};
-
-type RunnerLoanAssessmentRemoteThreat =
-  | "none"
-  | "possible"
-  | "visible"
-  | "urgent";
-
-type RunnerLoanProjectedSpend = {
-  plannedSpendAfterLoan: number;
-  directPlanSpendAfterLoan: number;
-  genericSetupSpendAfterLoan: number;
-  genericSetupSpendCount: number;
-  criticalBreakerSpendAfterLoan: number;
-  evidence: string[];
-};
-
-type RunnerLoanLiabilityAssessment = {
-  loanLiabilityAssessment: true;
-  loanInstallAction: boolean;
-  loanAlreadyInstalled: boolean;
-  currentCredits: number;
-  installCreditGain: number;
-  creditsAfterLoan: number;
-  plannedSpendAfterLoan: number;
-  creditsAfterPlannedSpend: number;
-  desiredCreditReserve: number;
-  contestReserve: number;
-  currentGamePhase: RunnerLoanGamePhase;
-  remoteScoreThreat: RunnerLoanAssessmentRemoteThreat;
-  knownAgendaPayoff: boolean;
-  activeFundingNeed: boolean;
-  debtRepaymentRisk: RunnerLoanDebtRepaymentRisk;
-  leavePlayPayCost: number;
-  startTurnCreditLoss: number;
-  resourceTrashRisk: boolean;
-  liabilitySeverity: RunnerLoanLiabilitySeverity;
-  loanUseCase: RunnerLoanUseCase;
-  scoreValue: number;
-  evidence: string[];
-};
 
 function semanticRuntimeRunnerScoreComponents(
   input: AiDecisionInput,
