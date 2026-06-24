@@ -325,6 +325,9 @@ import {
   runnerMuPressureAssessment as buildRunnerMuPressureAssessment,
 } from "./runtime/runner-mu-pressure-assessment";
 import {
+  runnerMuPressureActionEvidence as buildRunnerMuPressureActionEvidence,
+} from "./runtime/runner-mu-pressure-action-evidence";
+import {
   runnerMuPressureEvidence as buildRunnerMuPressureEvidence,
   runnerMuPressureReason as buildRunnerMuPressureReason,
   runnerMuPressureSeverity as buildRunnerMuPressureSeverity,
@@ -11147,30 +11150,11 @@ function runnerMuPressureActionEvidence(
   action: LegalAction,
   providedAssessment?: RunnerMuPressureAssessment,
 ): string[] {
-  const assessment = providedAssessment ?? runnerMuPressureAssessment(input);
-  if (assessment.severity === "none") return [];
-  const memorySupportAction = isRunnerMemorySupportAction(input, action);
-  const programInstallAction = isRunnerProgramInstallActionForMuPressure(
-    input,
-    action,
-  );
-  if (
-    action.type !== "gain_credit" &&
-    !memorySupportAction &&
-    !programInstallAction
-  ) {
-    return [];
-  }
-  return sortedUnique([
-    ...assessment.evidence,
-    ...(memorySupportAction ? ["runner_memory_support_action:true"] : []),
-    ...(action.type === "gain_credit"
-      ? ["runner_memory_support_funding_action:true"]
-      : []),
-    ...(programInstallAction && !memorySupportAction
-      ? ["runner_program_install_under_mu_pressure:true"]
-      : []),
-  ]);
+  return buildRunnerMuPressureActionEvidence(input, action, providedAssessment, {
+    assessment: runnerMuPressureAssessment,
+    isMemorySupportAction: isRunnerMemorySupportAction,
+    isProgramInstallAction: isRunnerProgramInstallActionForMuPressure,
+  });
 }
 
 function runnerMuPressureReason(
