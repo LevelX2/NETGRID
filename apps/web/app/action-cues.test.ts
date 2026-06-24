@@ -114,10 +114,10 @@ describe("deriveOpponentActionCues", () => {
     const vacuumEvent = event("evt_vacuum", "continue_run", {
       actor: "runner",
       serverLabel: "HQ",
-      vacuumLinkDieRoll: 3,
-      vacuumLinkRewindApplied: true,
-      vacuumLinkRewindRezzedIceBack: 3,
-      vacuumLinkTargetIceIndex: 1
+      rezzedIceRewindDieRoll: 3,
+      rezzedIceRewindApplied: true,
+      rezzedIceRewindRezzedIceBack: 3,
+      rezzedIceRewindTargetIceIndex: 1
     });
 
     const runnerCues = deriveOpponentActionCues({

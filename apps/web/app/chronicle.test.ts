@@ -1569,10 +1569,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         serverLabel: "HQ",
-        vacuumLinkDieRoll: 3,
-        vacuumLinkRewindApplied: true,
-        vacuumLinkRewindRezzedIceBack: 3,
-        vacuumLinkTargetIceIndex: 1,
+        rezzedIceRewindDieRoll: 3,
+        rezzedIceRewindApplied: true,
+        rezzedIceRewindRezzedIceBack: 3,
+        rezzedIceRewindTargetIceIndex: 1,
       }),
       "runner",
     );
@@ -1580,8 +1580,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         serverLabel: "HQ",
-        vacuumLinkDieRoll: 5,
-        vacuumLinkRewindApplied: false,
+        rezzedIceRewindDieRoll: 5,
+        rezzedIceRewindApplied: false,
       }),
       "corp",
     );

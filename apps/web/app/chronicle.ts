@@ -2416,11 +2416,19 @@ export function formatChronicleEvent(
         break;
       }
       {
-        const vacuumLinkDieRoll = numberValue(payload.vacuumLinkDieRoll);
+        const vacuumLinkDieRoll =
+          numberValue(payload.vacuumLinkDieRoll) ??
+          numberValue(payload.rezzedIceRewindDieRoll);
         if (vacuumLinkDieRoll !== undefined) {
-          const rewindApplied = payload.vacuumLinkRewindApplied === true;
-          const rewindBack = numberValue(payload.vacuumLinkRewindRezzedIceBack);
-          const targetIceIndex = numberValue(payload.vacuumLinkTargetIceIndex);
+          const rewindApplied =
+            payload.vacuumLinkRewindApplied === true ||
+            payload.rezzedIceRewindApplied === true;
+          const rewindBack =
+            numberValue(payload.vacuumLinkRewindRezzedIceBack) ??
+            numberValue(payload.rezzedIceRewindRezzedIceBack);
+          const targetIceIndex =
+            numberValue(payload.vacuumLinkTargetIceIndex) ??
+            numberValue(payload.rezzedIceRewindTargetIceIndex);
           const targetIcePosition =
             targetIceIndex !== undefined ? targetIceIndex + 1 : undefined;
           category = "run";

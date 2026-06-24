@@ -388,7 +388,12 @@ export function actionSoundCountForAction(actionType: string, payload: Record<st
 }
 
 function isForcedPublicEffectCue(actionType: string, payload: Record<string, unknown>): boolean {
-  return actionType === "continue_run" && (payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice" || typeof payload.vacuumLinkDieRoll === "number");
+  return (
+    actionType === "continue_run" &&
+    (payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice" ||
+      typeof payload.vacuumLinkDieRoll === "number" ||
+      typeof payload.rezzedIceRewindDieRoll === "number")
+  );
 }
 
 function isForcedAccessEffectCueItem(item: { chips: string[]; category: string; visibility: ChronicleVisibility }): boolean {
