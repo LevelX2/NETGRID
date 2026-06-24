@@ -237,6 +237,10 @@ import {
   runnerPersistentInstallLegacyScoreDelta as buildRunnerPersistentInstallLegacyScoreDelta,
 } from "./runtime/runner-persistent-install-fit-score";
 import {
+  runnerMuPressureFundingScoreComponent as buildRunnerMuPressureFundingScoreComponent,
+  runnerMuPressureInstallScoreComponent as buildRunnerMuPressureInstallScoreComponent,
+} from "./runtime/runner-mu-pressure-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -12645,28 +12649,22 @@ function runnerMuPressureInstallScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const bonus = runnerMuPressureInstallPriorityBonus(input, action);
-  if (bonus.value <= 0) return undefined;
-  return {
-    key: "runner_mu_pressure_memory_support",
-    label: "MU-Druck",
-    value: bonus.value,
-    reason: runnerMuPressureReason(bonus.assessment),
-  };
+  return buildRunnerMuPressureInstallScoreComponent(input, action, {
+    installPriorityBonus: runnerMuPressureInstallPriorityBonus,
+    fundingPriorityBonus: runnerMuPressureFundingPriorityBonus,
+    reason: runnerMuPressureReason,
+  });
 }
 
 function runnerMuPressureFundingScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const bonus = runnerMuPressureFundingPriorityBonus(input, action);
-  if (bonus.value <= 0) return undefined;
-  return {
-    key: "runner_mu_pressure_funding",
-    label: "Memory-Support finanzieren",
-    value: bonus.value,
-    reason: runnerMuPressureReason(bonus.assessment),
-  };
+  return buildRunnerMuPressureFundingScoreComponent(input, action, {
+    installPriorityBonus: runnerMuPressureInstallPriorityBonus,
+    fundingPriorityBonus: runnerMuPressureFundingPriorityBonus,
+    reason: runnerMuPressureReason,
+  });
 }
 
 function runnerMuPressureInstallPriorityBonus(
