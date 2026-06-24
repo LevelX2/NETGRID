@@ -448,16 +448,17 @@ import {
   semanticRuntimeCorpScoreNowDoctrineWeight as buildSemanticRuntimeCorpScoreNowDoctrineWeight,
   semanticRuntimeDoctrineActionGate as buildSemanticRuntimeDoctrineActionGate,
   semanticRuntimeDoctrineClamp,
-  semanticRuntimeDoctrineConsumerForPlan,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
   semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
   semanticRuntimeRunnerDoctrineActionGate as buildSemanticRuntimeRunnerDoctrineActionGate,
+  semanticRuntimeRunnerDoctrineRunWeight as buildSemanticRuntimeRunnerDoctrineRunWeight,
   semanticRuntimeRunnerLowValueRecoveryContext as buildSemanticRuntimeRunnerLowValueRecoveryContext,
   type SemanticRuntimeDoctrineActionGateContext,
   type SemanticRuntimeDoctrineActionGateDependencies,
   type SemanticRuntimeCorpDoctrineWeightDependencies,
   type SemanticRuntimeDoctrineConsumer,
   type SemanticRuntimeRunnerDoctrineActionGateDependencies,
+  type SemanticRuntimeRunnerDoctrineRunWeightDependencies,
   type SemanticRuntimeRunnerLowValueRecoveryContextDependencies,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
@@ -6557,32 +6558,12 @@ function semanticRuntimeRunnerDoctrineRunWeight(
   action: LegalAction,
   serverId: string | undefined,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || input.ownDeckDoctrine?.side !== "runner")
-    return undefined;
-  const planKey =
-    serverId === "rd"
-      ? "pressure_rnd"
-      : serverId === "hq"
-        ? "pressure_hq"
-        : isRemoteServerTarget(serverId)
-          ? "contest_remote"
-          : undefined;
-  if (!planKey) return undefined;
-  const consumer = semanticRuntimeDoctrineConsumerForPlan(planKey);
-  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
-  const gate = semanticRuntimeDoctrineActionGate(
+  return buildSemanticRuntimeRunnerDoctrineRunWeight(
     input,
     action,
-    planKey,
-    consumer,
-    {
-      serverId,
-    },
+    serverId,
+    SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES,
   );
-  if (raw > 0 && !gate.allowed) {
-    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
-  }
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
 }
 
 function semanticRuntimeRunnerRemoteContestDoctrineGuard(
@@ -6738,6 +6719,15 @@ const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES: SemanticRuntime
       ),
     runnerRemoteContestDoctrineGuard:
       semanticRuntimeRunnerRemoteContestDoctrineGuard,
+  };
+
+const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES: SemanticRuntimeRunnerDoctrineRunWeightDependencies =
+  {
+    isRemoteServerTarget,
+    rawWeight: semanticRuntimeDoctrineRawWeight,
+    actionGate: semanticRuntimeDoctrineActionGate,
+    suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
+    planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
   };
 
 function semanticRuntimeDoctrinePlanWeightComponent(

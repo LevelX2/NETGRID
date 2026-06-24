@@ -103,6 +103,24 @@ export type SemanticRuntimeRunnerDoctrineActionGateDependencies = {
   ) => SemanticRuntimeDoctrineGate;
 };
 
+export type SemanticRuntimeRunnerDoctrineRunWeightDependencies = {
+  isRemoteServerTarget: (serverId: string | undefined) => boolean;
+  rawWeight: (input: AiDecisionInput, planKey: string) => number;
+  actionGate: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    planKey: string,
+    consumer: SemanticRuntimeDoctrineConsumer,
+    context: SemanticRuntimeDoctrineActionGateContext,
+  ) => SemanticRuntimeDoctrineGate;
+  suppressedComponent: (evidence: readonly string[]) => AiDecisionScoreComponent;
+  planWeightComponent: (
+    input: AiDecisionInput,
+    planKey: string,
+    consumer: SemanticRuntimeDoctrineConsumer,
+  ) => AiDecisionScoreComponent | undefined;
+};
+
 export function semanticRuntimeDoctrineClamp(
   consumer: SemanticRuntimeDoctrineConsumer,
 ): number {
@@ -402,4 +420,32 @@ export function semanticRuntimeRunnerDoctrineActionGate(
     if (!remoteContestGate.allowed) return remoteContestGate;
   }
   return semanticRuntimeDoctrineGateAllowed(consumer);
+}
+
+export function semanticRuntimeRunnerDoctrineRunWeight(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string | undefined,
+  dependencies: SemanticRuntimeRunnerDoctrineRunWeightDependencies,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || input.ownDeckDoctrine?.side !== "runner")
+    return undefined;
+  const planKey =
+    serverId === "rd"
+      ? "pressure_rnd"
+      : serverId === "hq"
+        ? "pressure_hq"
+        : dependencies.isRemoteServerTarget(serverId)
+          ? "contest_remote"
+          : undefined;
+  if (!planKey) return undefined;
+  const consumer = semanticRuntimeDoctrineConsumerForPlan(planKey);
+  const raw = dependencies.rawWeight(input, planKey);
+  const gate = dependencies.actionGate(input, action, planKey, consumer, {
+    serverId,
+  });
+  if (raw > 0 && !gate.allowed) {
+    return dependencies.suppressedComponent(gate.evidence);
+  }
+  return dependencies.planWeightComponent(input, planKey, consumer);
 }
