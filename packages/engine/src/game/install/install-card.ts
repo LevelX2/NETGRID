@@ -15,7 +15,7 @@ import {
   SKIVVISS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
 } from "../../mechanics/damage-prevention";
 import { ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID } from "../../mechanics/longtail-card-effects";
@@ -488,7 +488,7 @@ function installRunnerHardware(
       definition.recurringCredits ?? 0,
     );
   if (
-    definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID &&
+    definition.id === ABLATIVE_COUNTER_HARDWARE_SOURCE &&
     host.cards.damagePreventionSourcesForDefinition(definition).length === 0
   ) {
     host.counters.setCardCounter(

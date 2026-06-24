@@ -6,14 +6,14 @@ export type RuntimeDamagePreventionProfile = {
   priority: number;
 };
 
-export const DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID =
+export const DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE =
   "onr_v1_160_diplomatic-immunity";
 
-export const ABLATIVE_COUNTER_HARDWARE_CARD_ID = "onr_v1_121_armored-fridge";
+export const ABLATIVE_COUNTER_HARDWARE_SOURCE = "onr_v1_121_armored-fridge";
 
 export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
 
-export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID =
+export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE =
   "onr_v1_127_full-body-conversion";
 
 export const EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID =
@@ -37,7 +37,7 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["net", "core"],
     priority: 120,
   },
-  [ABLATIVE_COUNTER_HARDWARE_CARD_ID]: {
+  [ABLATIVE_COUNTER_HARDWARE_SOURCE]: {
     maxPerTurn: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
     damageTypes: ["meat"],
     priority: 120,
