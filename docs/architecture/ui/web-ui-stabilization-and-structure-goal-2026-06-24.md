@@ -235,7 +235,18 @@ Checks:
 
 ### Paket 7
 
-Offen.
+Entscheidung: Kein Code-Schnitt in diesem Paket.
+
+Bewertung:
+
+- `apps/web/features/debug/AiDecisionDebugOverlay.tsx` ist mit 1319 Zeilen weiterhin groß, enthält aber stark gekoppelte Projektion, Export, Redaction, Plan-Labels, Memory-Labels und Darstellung. Ein sinnvoller Schnitt müsste zuerst die reinen Export-/Projektionsfunktionen inklusive ihrer Label-Helfer geschlossen extrahieren; das wäre ein eigenes, größeres Paket mit gezielten Tests für Redaction.
+- `apps/web/features/decks/DeckEditorPanel.tsx` ist mit 1221 Zeilen groß, aber nach Paket 4 liegen Agenda-Regeln bereits in `features/decks/deck-editor-model.ts`. Weitere Hooks für Auswahl, Filter oder Table-Settings sollten nur mit UI-Verhaltenstests geschnitten werden.
+- Eine Aufteilung allein nach Zeilenzahl würde Ersatzmonolithen erzeugen und wurde verworfen.
+
+Checks:
+
+- Keine Codeänderung.
+- `git diff --check`: grün.
 
 ### Paket 8
 
