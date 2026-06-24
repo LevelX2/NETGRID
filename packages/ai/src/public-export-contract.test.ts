@@ -130,6 +130,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-install-score",
       "./runtime/runner-start-run-score",
       "./runtime/runner-basic-action-penalty-score",
+      "./runtime/runner-followup-score",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",

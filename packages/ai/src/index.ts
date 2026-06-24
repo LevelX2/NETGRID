@@ -221,6 +221,9 @@ import {
 import {
   runnerBasicActionPenaltyScoreComponents,
 } from "./runtime/runner-basic-action-penalty-score";
+import {
+  runnerFollowupScoreComponents,
+} from "./runtime/runner-followup-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5682,26 +5685,15 @@ function semanticRuntimeRunnerScoreComponents(
       repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
     }),
   );
-  const runTargetGuidance = semanticRuntimeRunnerRunTargetGuidanceComponent(
-    input,
-    action,
+  components.push(
+    ...runnerFollowupScoreComponents(input, action, {
+      runTargetGuidanceComponent:
+        semanticRuntimeRunnerRunTargetGuidanceComponent,
+      accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
+      badPublicityRelevanceScoreComponent:
+        runnerBadPublicityRelevanceScoreComponent,
+    }),
   );
-  if (runTargetGuidance) components.push(runTargetGuidance);
-  if (action.type === "trash_accessed_card") {
-    components.push(
-      ...semanticRuntimeRunnerAccessTrashComponents(input, action),
-    );
-  }
-  if (action.type === "decline_trash") {
-    components.push(
-      ...semanticRuntimeRunnerAccessTrashComponents(input, action),
-    );
-  }
-  const badPublicityRelevance = runnerBadPublicityRelevanceScoreComponent(
-    input,
-    action,
-  );
-  if (badPublicityRelevance) components.push(badPublicityRelevance);
   components.push(
     ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId),
   );
