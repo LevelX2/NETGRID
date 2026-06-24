@@ -328,6 +328,14 @@ import {
   runnerMuPressureActionEvidence as buildRunnerMuPressureActionEvidence,
 } from "./runtime/runner-mu-pressure-action-evidence";
 import {
+  isRunnerMemorySupportAction as buildIsRunnerMemorySupportAction,
+  isRunnerMemorySupportCard as buildIsRunnerMemorySupportCard,
+  isRunnerProgramInstallActionForMuPressure as buildIsRunnerProgramInstallActionForMuPressure,
+  isUsefulRunnerProgramInHandForMuPressure as buildIsUsefulRunnerProgramInHandForMuPressure,
+  runnerMemorySupportSearchAction as buildRunnerMemorySupportSearchAction,
+  runnerMissingCreditsForCheapestMemorySupport as buildRunnerMissingCreditsForCheapestMemorySupport,
+} from "./runtime/runner-mu-pressure-memory-support";
+import {
   runnerMuPressureEvidence as buildRunnerMuPressureEvidence,
   runnerMuPressureReason as buildRunnerMuPressureReason,
   runnerMuPressureSeverity as buildRunnerMuPressureSeverity,
@@ -11167,39 +11175,31 @@ function isRunnerProgramInstallActionForMuPressure(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.side !== "runner" || action.type !== "install_card") return false;
-  const source = findVisibleCard(input, action.source);
-  return source?.type === "program" || visibleMemoryCostForAi(source) > 0;
+  return buildIsRunnerProgramInstallActionForMuPressure(
+    action,
+    findVisibleCard(input, action.source),
+    visibleMemoryCostForAi,
+  );
 }
 
 function isRunnerMemorySupportAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.side !== "runner" || action.type !== "install_card") return false;
-  return isRunnerMemorySupportCardForAi(findVisibleCard(input, action.source));
+  return buildIsRunnerMemorySupportAction(
+    action,
+    findVisibleCard(input, action.source),
+    isRunnerMemorySupportCardForAi,
+  );
 }
 
 function isRunnerMemorySupportCardForAi(
   card: VisibleCard | undefined,
 ): boolean {
-  if (!card || card.known === false) return false;
-  const roles = rolesForCardId(card.definitionId);
-  const text = [
-    card.title,
-    card.definitionId,
-    card.type,
-    ...(card.subtypes ?? []),
-    card.rulesText,
-    ...roles,
-  ]
-    .filter((entry): entry is string => typeof entry === "string")
-    .join(" ")
-    .toLowerCase();
-  return (
-    safeNonNegativeInteger(card.memoryLimitBonus) > 0 ||
-    roles.some((role) => role === "memory" || role === "memory_support") ||
-    /\b(memory|mu)\b|mem chip/.test(text)
+  return buildIsRunnerMemorySupportCard(
+    card,
+    card ? rolesForCardId(card.definitionId) : [],
+    safeNonNegativeInteger,
   );
 }
 
@@ -11207,78 +11207,30 @@ function isUsefulRunnerProgramInHandForMuPressure(
   input: AiDecisionInput,
   card: VisibleCard,
 ): boolean {
-  if (card.known === false || card.type !== "program") return false;
-  if (visibleMemoryCostForAi(card) <= 0) return false;
-  if (
-    card.definitionId &&
-    (input.playerView.own.rig ?? []).some(
-      (installed) => installed.definitionId === card.definitionId,
-    )
-  ) {
-    return false;
-  }
-  const roles = rolesForCardId(card.definitionId);
-  const subtypes = (card.subtypes ?? []).map((subtype) =>
-    subtype.toLowerCase(),
-  );
-  return (
-    roles.length === 0 ||
-    roles.some(
-      (role) =>
-        role.startsWith("breaker_") ||
-        isRunnerPressureRole(role) ||
-        isRunnerEconomyRole(role) ||
-        [
-          "setup",
-          "build_rig",
-          "memory",
-          "memory_support",
-          "draw",
-          "search",
-          "defense",
-          "protection",
-          "hosting",
-          "recovery",
-        ].some((needle) => role === needle || role.includes(needle)),
-    ) ||
-    subtypes.some((subtype) =>
-      ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
-        subtype,
-      ),
-    )
-  );
+  return buildIsUsefulRunnerProgramInHandForMuPressure(input, card, {
+    visibleMemoryCost: visibleMemoryCostForAi,
+    rolesForCardId,
+    isRunnerPressureRole,
+    isRunnerEconomyRole,
+  });
 }
 
 function runnerMissingCreditsForCheapestMemorySupport(
   input: AiDecisionInput,
   memorySupportCards: readonly VisibleCard[],
 ): number | undefined {
-  const credits = input.playerView.own.credits;
-  const missingCredits = memorySupportCards
-    .map((card) => Math.max(0, visibleInstallCostForAi(card) - credits))
-    .filter((missing) => missing > 0)
-    .sort((left, right) => left - right);
-  return missingCredits[0];
+  return buildRunnerMissingCreditsForCheapestMemorySupport(
+    input.playerView.own.credits,
+    memorySupportCards,
+    visibleInstallCostForAi,
+  );
 }
 
 function runnerMemorySupportSearchAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.side !== "runner") return false;
-  if (
-    action.type !== "trigger_ability" &&
-    action.type !== "activated_card_ability" &&
-    action.type !== "play_event"
-  ) {
-    return false;
-  }
-  const roles = rolesForAction(input, action);
-  const label = action.label.toLowerCase();
-  return (
-    roles.some((role) => role.includes("search") || role.includes("memory")) ||
-    /search|memory|mu|mem chip/.test(label)
-  );
+  return buildRunnerMemorySupportSearchAction(action, rolesForAction(input, action));
 }
 
 function selectedRunnerProgramInstallTrashOptionIds(
