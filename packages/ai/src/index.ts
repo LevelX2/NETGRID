@@ -216,6 +216,9 @@ import {
   runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents,
 } from "./runtime/runner-economy-commitment-score";
 import {
+  runnerBadPublicityRelevanceScoreComponent as buildRunnerBadPublicityRelevanceScoreComponent,
+} from "./runtime/runner-bad-publicity-relevance-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -9818,14 +9821,9 @@ function runnerBadPublicityRelevanceScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const assessment = runnerBadPublicityRelevanceAssessment(input, action);
-  if (!assessment) return undefined;
-  return {
-    key: "runner_bad_publicity_relevance",
-    label: "Bad-Publicity-Relevanz",
-    value: assessment.badPublicityRelevanceScore,
-    reason: sortedUnique(assessment.evidence).join("|"),
-  };
+  return buildRunnerBadPublicityRelevanceScoreComponent(input, action, {
+    assessment: runnerBadPublicityRelevanceAssessment,
+  });
 }
 
 function runnerBadPublicityRelevanceAssessment(
