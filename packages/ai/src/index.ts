@@ -336,6 +336,7 @@ import {
   runnerMissingCreditsForCheapestMemorySupport as buildRunnerMissingCreditsForCheapestMemorySupport,
 } from "./runtime/runner-mu-pressure-memory-support";
 import {
+  programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
   programSacrificeCategory,
   runnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentEvidence,
@@ -11542,18 +11543,14 @@ function programSacrificeCandidateIsRedundant(
   card: VisibleCard | undefined,
   breakerRoles: readonly string[],
 ): boolean {
-  if (!card) return false;
   const rig = input.playerView.own.rig ?? [];
-  if (
-    card.definitionId &&
-    rig.filter((candidate) => candidate.definitionId === card.definitionId)
-      .length > 1
-  ) {
-    return true;
-  }
-  if (breakerRoles.length === 0) return false;
   const roleCounts = visibleBreakerRoleCountsForAi(rig);
-  return breakerRoles.every((role) => (roleCounts.get(role) ?? 0) > 1);
+  return buildProgramSacrificeCandidateIsRedundant(
+    card,
+    breakerRoles,
+    rig,
+    roleCounts,
+  );
 }
 
 function visibleCounterValueForAi(card: VisibleCard | undefined): number {

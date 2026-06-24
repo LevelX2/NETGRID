@@ -124,3 +124,21 @@ export function sacrificeCandidateLabel(
     ""
   );
 }
+
+export function programSacrificeCandidateIsRedundant(
+  card: VisibleCard | undefined,
+  breakerRoles: readonly string[],
+  rig: readonly VisibleCard[],
+  roleCounts: ReadonlyMap<string, number>,
+): boolean {
+  if (!card) return false;
+  if (
+    card.definitionId &&
+    rig.filter((candidate) => candidate.definitionId === card.definitionId)
+      .length > 1
+  ) {
+    return true;
+  }
+  if (breakerRoles.length === 0) return false;
+  return breakerRoles.every((role) => (roleCounts.get(role) ?? 0) > 1);
+}
