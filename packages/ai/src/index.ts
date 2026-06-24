@@ -342,10 +342,14 @@ import {
   runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
   runnerCardLooksLikeCreditPayout as buildRunnerCardLooksLikeCreditPayout,
   safeNonNegativeInteger as buildSafeNonNegativeInteger,
+  normalizedRulesTextForDefinition as buildNormalizedRulesTextForDefinition,
   visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
+  visibleCardAdvancementRequirement as buildVisibleCardAdvancementRequirement,
   visibleCardPlayOrInstallCost as buildVisibleCardPlayOrInstallCost,
   visibleCardText as buildVisibleCardText,
+  visibleCardType as buildVisibleCardType,
   visibleCounterValue as buildVisibleCounterValue,
+  visibleIceRezCost as buildVisibleIceRezCost,
   visibleInstallCost as buildVisibleInstallCost,
   visibleMemoryCost as buildVisibleMemoryCost,
 } from "./runtime/visible-card-heuristics";
@@ -6657,20 +6661,18 @@ function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
 }
 
 function normalizedRulesTextForDefinition(definitionId: string): string {
-  const runtime = RUNTIME_CARDS[definitionId];
-  const demo = DEMO_CARDS_BY_ID[definitionId];
-  const runtimeText = (runtime as { text?: string } | undefined)?.text ?? "";
-  const demoText = typeof demo?.rulesText === "string" ? demo.rulesText : "";
-  return `${runtimeText} ${demoText}`.toLowerCase().replace(/\s+/g, " ").trim();
+  return buildNormalizedRulesTextForDefinition(
+    RUNTIME_CARDS[definitionId],
+    DEMO_CARDS_BY_ID[definitionId],
+  );
 }
 
 function semanticRuntimeVisibleCardType(card: VisibleCard): string | undefined {
   const definitionId = card.definitionId;
-  return (
-    card.type ??
-    (definitionId
-      ? (RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type)
-      : undefined)
+  return buildVisibleCardType(
+    card,
+    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
+    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
   );
 }
 
@@ -6678,12 +6680,10 @@ function semanticRuntimeVisibleCardAdvancementRequirement(
   card: VisibleCard,
 ): number | undefined {
   const definitionId = card.definitionId;
-  return (
-    card.advancementRequirement ??
-    (definitionId
-      ? (RUNTIME_CARDS[definitionId]?.numeric.advancementRequirement ??
-        DEMO_CARDS_BY_ID[definitionId]?.advancementRequirement)
-      : undefined)
+  return buildVisibleCardAdvancementRequirement(
+    card,
+    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
+    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
   );
 }
 
@@ -6747,12 +6747,11 @@ function semanticRuntimeCorpRemoteRezFloorAssessment(
 function semanticRuntimeVisibleIceRezCost(
   card: VisibleCard,
 ): number | undefined {
-  return (
-    card.rezCost ??
-    (card.definitionId
-      ? (RUNTIME_CARDS[card.definitionId]?.numeric.rezCost ??
-        DEMO_CARDS_BY_ID[card.definitionId]?.rezCost)
-      : undefined)
+  const definitionId = card.definitionId;
+  return buildVisibleIceRezCost(
+    card,
+    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
+    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
   );
 }
 

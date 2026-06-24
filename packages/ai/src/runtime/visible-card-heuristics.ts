@@ -10,6 +10,22 @@ export type VisibleCardHeuristicDefinition = {
   rezCost?: number;
 };
 
+export type VisibleCardRuntimeDefinition = {
+  text?: string;
+  type?: string;
+  numeric?: {
+    advancementRequirement?: number | null;
+    rezCost?: number | null;
+  };
+};
+
+export type VisibleCardDemoDefinition = {
+  rulesText?: string;
+  type?: string;
+  advancementRequirement?: number;
+  rezCost?: number;
+};
+
 export function visibleCardPlayOrInstallCost(
   card: VisibleCard,
   definition: VisibleCardHeuristicDefinition | undefined,
@@ -40,6 +56,43 @@ export function visibleCardText(
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+export function normalizedRulesTextForDefinition(
+  runtime: VisibleCardRuntimeDefinition | undefined,
+  demo: VisibleCardDemoDefinition | undefined,
+): string {
+  const runtimeText = runtime?.text ?? "";
+  const demoText = typeof demo?.rulesText === "string" ? demo.rulesText : "";
+  return `${runtimeText} ${demoText}`.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+export function visibleCardType(
+  card: VisibleCard,
+  runtime: VisibleCardRuntimeDefinition | undefined,
+  demo: VisibleCardDemoDefinition | undefined,
+): string | undefined {
+  return card.type ?? runtime?.type ?? demo?.type;
+}
+
+export function visibleCardAdvancementRequirement(
+  card: VisibleCard,
+  runtime: VisibleCardRuntimeDefinition | undefined,
+  demo: VisibleCardDemoDefinition | undefined,
+): number | undefined {
+  return (
+    card.advancementRequirement ??
+    runtime?.numeric?.advancementRequirement ??
+    demo?.advancementRequirement
+  );
+}
+
+export function visibleIceRezCost(
+  card: VisibleCard,
+  runtime: VisibleCardRuntimeDefinition | undefined,
+  demo: VisibleCardDemoDefinition | undefined,
+): number | undefined {
+  return card.rezCost ?? runtime?.numeric?.rezCost ?? demo?.rezCost;
 }
 
 export function runnerCardLooksLikeCreditPayout(
