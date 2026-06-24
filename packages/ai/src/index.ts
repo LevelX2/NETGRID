@@ -241,6 +241,10 @@ import {
   runnerLoanResourceTrashRisk,
 } from "./runtime/runner-loan-state-context";
 import {
+  runnerLoanCriticalBreakerFundingNeed as buildRunnerLoanCriticalBreakerFundingNeed,
+  runnerLoanEmergencyFundingNeed as buildRunnerLoanEmergencyFundingNeed,
+} from "./runtime/runner-loan-funding-need";
+import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
 } from "./runtime/runner-viral15-jack-out-score";
 import {
@@ -5868,42 +5872,27 @@ function runnerLoanCriticalBreakerFundingNeed(
   creditsAfterLoan: number,
   remoteThreatVisible: boolean,
 ): { active: boolean; evidence: string[] } {
-  const candidates = input.playerView.own.gripOrHq.filter((card) => {
-    if (card.known === false || !card.definitionId) return false;
-    const roles = rolesForCardId(card.definitionId);
-    return (
-      roles.some((role) => role.startsWith("breaker_")) &&
-      runnerCardAddressesVisibleBreakerNeed(input, card) &&
-      visibleCardPlayOrInstallCostForAi(card) <= creditsAfterLoan
-    );
-  });
-  const active = candidates.length > 0 && remoteThreatVisible;
-  return {
-    active,
-    evidence: [
-      `loanCriticalBreakerFunding:${active}`,
-      `loanCriticalBreakerCandidates:${candidates.length}`,
-    ],
-  };
+  return buildRunnerLoanCriticalBreakerFundingNeed(
+    input,
+    creditsAfterLoan,
+    remoteThreatVisible,
+    {
+      rolesForCardId,
+      cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+      visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
+    },
+  );
 }
 
 function runnerLoanEmergencyFundingNeed(
   input: AiDecisionInput,
   desiredCreditReserve: number,
 ): boolean {
-  const safeEconomyAvailable = input.legalActions.some(
-    (action) =>
-      action.type === "gain_credit" ||
-      (action.type === "play_event" &&
-        rolesForAction(input, action).some(isRunnerEconomyRole)),
-  );
-  return (
-    input.playerView.own.credits <= 1 &&
-    (input.playerView.own.tags > 0 ||
-      runnerHasKnownUnaffordableLegalRun(input) ||
-      (!safeEconomyAvailable && input.playerView.own.gripOrHq.length <= 1) ||
-      (!safeEconomyAvailable && desiredCreditReserve <= 1))
-  );
+  return buildRunnerLoanEmergencyFundingNeed(input, desiredCreditReserve, {
+    rolesForAction,
+    isRunnerEconomyRole,
+    hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+  });
 }
 
 function runnerProjectedCreditGainForAction(action: LegalAction): number {
