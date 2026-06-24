@@ -349,7 +349,7 @@ describe("trace orchestration", () => {
     });
   });
 
-  it("handles Paris City Grid trace trigger ability through trace orchestration", () => {
+  it("does not handle legacy Paris City Grid trace trigger payloads", () => {
     const sourceId = "paris_1" as CardInstanceId;
     const sourceDefinition = definition("paris_city_grid", "upgrade");
     const state = minimalState({
@@ -376,24 +376,9 @@ describe("trace orchestration", () => {
       action,
     );
 
-    expect(result).toEqual({ handled: true });
-    expect(state.trace).toMatchObject({
-      sourceCardInstanceId: sourceId,
-      sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
-      status: "corp_bid",
-    });
-    expect(state.pendingChoice).toMatchObject({
-      side: "corp",
-      source: `trace:${state.trace?.traceId}`,
-      kind: "bid_amount",
-    });
-    expect(action.payload).toMatchObject({
-      traceStarted: true,
-      sourceCardId: sourceId,
-      sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
-    });
+    expect(result).toEqual({ handled: false });
+    expect(state.trace).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
   });
 
   it("does not import from index.ts", () => {
@@ -735,11 +720,6 @@ function testHost(
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
       addCorpTraceCounterPoolCounters: () => 0,
       resolveTraceTrashRunnerResourceSuccess: () => ({}),
-    },
-    constants: {
-      PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID:
-        options.parisTraceDefinitionId ??
-        ("paris_city_grid" as CardDefinitionId),
     },
   };
 }

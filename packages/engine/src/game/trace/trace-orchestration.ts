@@ -134,9 +134,6 @@ export type TraceOrchestrationHost = {
       targetCardId: CardInstanceId | undefined,
     ) => Record<string, unknown>;
   };
-  constants: {
-    PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: CardDefinitionId;
-  };
 };
 
 export function startTraceFromOperation(
@@ -244,30 +241,7 @@ export function handleTraceOrchestrationAction(
   host: TraceOrchestrationHost,
   legalAction: LegalAction,
 ): { handled: boolean } {
-  if (legalAction.payload?.v1918UpgradeAbility !== "trace_2_tag")
-    return { handled: false };
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
-  const sourceCardId = String(
-    legalAction.payload?.cardId ?? "",
-  ) as CardInstanceId;
-  if (!host.corp.rezzedCorpRootCardIds().includes(sourceCardId))
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
-    );
-  const definition = host.cards.definitionFor(sourceCardId);
-  if (
-    definition.id !== host.constants.PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID ||
-    host.cards.hasCardImplementationForDefinition(definition.id)
-  )
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
-    );
-  const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-  if (!Number.isInteger(traceStrength) || traceStrength !== 2)
-    throw new Error("Paris City Grid startet in diesem WIP genau Trace 2.");
-  startTraceFromOperation(host, definition.id, traceStrength, legalAction);
-  return { handled: true };
+  return { handled: false };
 }
 
 export function traceBidChoice(

@@ -15,7 +15,6 @@ export function createHiddenZoneArrangeRuntime(
     CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
@@ -254,8 +253,7 @@ export function createHiddenZoneArrangeRuntime(
         hiddenReplacementLongtailKind: (definitionId) =>
           cardImplementationForDefinitionId(definitionId)
             ?.hiddenReplacementLongtail?.kind,
-        isHiddenZoneReorderAssetDefinition: (definitionId) =>
-          HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definitionId),
+        isHiddenZoneReorderAssetDefinition: () => false,
         hasCorpUtilityKind: (cardId, kind) =>
           hasCorpUtilityKind(
             state,

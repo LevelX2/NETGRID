@@ -154,8 +154,6 @@ export type CreditEconomyExecutionHost = {
   constants: {
     COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
     CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
-    HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: ReadonlySet<string>;
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: ReadonlySet<string>;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
@@ -266,50 +264,6 @@ export function handleCreditEconomyExecution(
     )
       throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
     host.hiddenZone.resolveReschedulerHqShuffleDraw(
-      state,
-      legalAction,
-      sourceCardId,
-    );
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1917AssetAbility === "reveal_rd_top") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Reveal-Faehigkeit passt nicht zur Karte.",
-      );
-    host.hiddenZone.revealCorpRdTop(state, legalAction);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneAction: "v1917_corp_reveal_rd_top",
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1917AssetAbility === "reorder_rd_top2") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Reorder-Faehigkeit passt nicht zur Karte.",
-      );
-    host.hiddenZone.startCorpAssetRdTopReorderChoice(
       state,
       legalAction,
       sourceCardId,

@@ -272,8 +272,6 @@ function testHost(
     constants: {
       COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: "stack_reveal",
       CORP_HQ_SHUFFLE_DRAW_CARD_ID: "rescheduler",
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: new Set(["reveal_asset"]),
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: new Set(["reorder_asset"]),
       COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
       COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),

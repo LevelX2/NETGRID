@@ -134,9 +134,6 @@ function host(): TraceRuntimeDepsHost {
           addCorpTraceCounterPoolCounters: () => 0,
           resolveTraceTrashRunnerResourceSuccess: () => ({}),
         },
-        constants: {
-          PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: "paris" as CardDefinitionId,
-        },
       }),
       resolveRunnerLastTurnInstalledResourceTargetId: (_gameState, targetRef) =>
         targetRef === targetResourceId ? targetResourceId : undefined,

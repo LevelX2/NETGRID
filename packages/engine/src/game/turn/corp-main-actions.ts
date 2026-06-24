@@ -96,8 +96,6 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: ReadonlySet<string>;
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: ReadonlySet<string>;
     CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
@@ -205,10 +203,6 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS =
-    host.constants.HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS;
-  const HIDDEN_ZONE_REORDER_ASSET_CARD_IDS =
-    host.constants.HIDDEN_ZONE_REORDER_ASSET_CARD_IDS;
   const CORP_HQ_SHUFFLE_DRAW_CARD_ID =
     host.constants.CORP_HQ_SHUFFLE_DRAW_CARD_ID;
   const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
@@ -645,38 +639,6 @@ export function buildCorpMainActions(
     );
     if (specialDamageActions.handled)
       actions.push(...specialDamageActions.actions);
-    if (
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reveal_rd_top" },
-        ),
-      );
-    }
-    if (
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length >= 2
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze anordnen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reorder_rd_top2" },
-        ),
-      );
-    }
     if (
       definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
       hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")
