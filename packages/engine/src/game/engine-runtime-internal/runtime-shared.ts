@@ -20,21 +20,22 @@ import type {
 import type { PendingChoiceResolutionHost } from "../choices/pending-choice-resolution";
 import type { CardRunnerEventLongtailImplementation } from "../../ability-engine/definition-types";
 
-type RuntimeFunction = (...args: any[]) => any;
+type RuntimeCallable = (...args: unknown[]) => unknown;
+type RuntimeBag = { [key: string]: unknown };
 
 // This is the first named slice of the staged RuntimeDeps surface. Keep adding
 // domain-specific keys here as bootstrap files lose their broad any bindings.
 export type CardRuntimeDeps = {
   cardImplementationRuntimeDeps?: unknown;
-  executeEffectCommands?: RuntimeFunction;
-  hiddenZoneArrangeChoiceHandlerHost?: RuntimeFunction;
-  hiddenZoneNonSearchChoiceHandlerHost?: RuntimeFunction;
-  hiddenZoneSearchActivationHandlerHost?: RuntimeFunction;
-  hiddenZoneSearchChoiceHandlerHost?: RuntimeFunction;
-  pendingChoiceResolutionHost?: RuntimeFunction;
+  executeEffectCommands?: RuntimeCallable;
+  hiddenZoneArrangeChoiceHandlerHost?: RuntimeCallable;
+  hiddenZoneNonSearchChoiceHandlerHost?: RuntimeCallable;
+  hiddenZoneSearchActivationHandlerHost?: RuntimeCallable;
+  hiddenZoneSearchChoiceHandlerHost?: RuntimeCallable;
+  pendingChoiceResolutionHost?: RuntimeCallable;
 };
 
-export type RuntimeDeps = CardRuntimeDeps & Record<string, unknown>;
+export type RuntimeDeps = CardRuntimeDeps & RuntimeBag;
 export type {
   GameState,
   LegalAction,
@@ -57,7 +58,7 @@ export type {
   CardRunnerEventLongtailImplementation,
 };
 
-export function runtimeBinding<T extends RuntimeFunction = RuntimeFunction>(
+export function resolveRuntimeMember<T extends RuntimeCallable = RuntimeCallable>(
   runtime: Record<string, unknown>,
   property: string | symbol,
 ): T {
@@ -65,7 +66,7 @@ export function runtimeBinding<T extends RuntimeFunction = RuntimeFunction>(
   const value = runtime[key];
   if (value !== undefined && typeof value !== "function") return value as T;
   return ((...args: unknown[]) =>
-    (runtime[key] as RuntimeFunction)(...args)) as T;
+    (runtime[key] as RuntimeCallable)(...args)) as T;
 }
 
 export function runtimeProxy<T extends object>(
@@ -73,6 +74,6 @@ export function runtimeProxy<T extends object>(
 ): T {
   return new Proxy(
     {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
+    { get: (_target, property) => resolveRuntimeMember(runtime, property) },
   ) as T;
 }
