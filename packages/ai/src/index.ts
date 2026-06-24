@@ -262,12 +262,10 @@ import {
 import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
 import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
 import {
-  programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
-  programSacrificeCandidate as buildProgramSacrificeCandidate,
+  createRunnerProgramInstallTrashContext,
+} from "./runtime/runner-program-install-trash-context";
+import {
   runnerProgramInstallDisplacementPenalty,
-  runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
-  sacrificeCandidateLabel,
-  type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runtime/runner-program-install-trash-policy";
 import {
@@ -3729,6 +3727,23 @@ const {
   },
   runnerBankCommitmentRunOverride,
   isRunnerRigInstallAction,
+});
+const {
+  selectedRunnerProgramInstallTrashOptionIds,
+  selectedRunnerForcedProgramTrashOptionIds,
+  runnerProgramInstallTrashAssessment,
+  runnerProgramInstallTrashAssessmentForAction,
+} = createRunnerProgramInstallTrashContext({
+  safeNonNegativeInteger,
+  visibleMemoryCost: visibleMemoryCostForAi,
+  visibleCardsByInstanceId: visibleCardsByInstanceIdForAi,
+  visibleBreakerRoleCounts: visibleBreakerRoleCountsForAi,
+  visibleBreakerRoles: visibleBreakerRolesForAi,
+  rolesForCardId,
+  isRunnerPressureRole,
+  isRunnerEconomyRole,
+  visibleCounterValue: visibleCounterValueForAi,
+  visibleInstallCost: visibleInstallCostForAi,
 });
 const {
   runnerMuPressureInstallScoreComponent,
@@ -7564,61 +7579,6 @@ function selectedChoicesForDecision(
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
 }
 
-function selectedRunnerProgramInstallTrashOptionIds(
-  input: AiDecisionInput,
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): string[] {
-  const assessment = runnerProgramInstallTrashAssessment(
-    input,
-    choice,
-    selectableOptions,
-  );
-  if (!assessment.memoryRequired) return [];
-  if (assessment.requiredMemoryToFree <= 0) return [];
-  if (!assessment.canFreeRequiredMemory) return [];
-  return assessment.selectedCandidates
-    .map((candidate) => candidate.option?.id)
-    .filter((id): id is string => typeof id === "string");
-}
-
-function selectedRunnerForcedProgramTrashOptionIds(
-  input: AiDecisionInput,
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): string[] {
-  const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
-  const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(
-    input.playerView.own.rig ?? [],
-  );
-  const selected = selectableOptions
-    .map((option) => {
-      const card =
-        typeof option.value === "string"
-          ? installedCards.get(option.value)
-          : option.card;
-      return programSacrificeCandidateForAi(
-        input,
-        card,
-        installedBreakerRoleCounts,
-        option,
-      );
-    })
-    .filter((candidate) => candidate.option)
-    .sort(
-      (left, right) =>
-        right.score - left.score ||
-        sacrificeCandidateLabel(left).localeCompare(
-          sacrificeCandidateLabel(right),
-          "de",
-        ),
-    )[0];
-  return selected?.option?.id ? [selected.option.id] : [];
-}
-
 function selectedCorpAdvancementCounterChoiceOptionId(
   input: AiDecisionInput,
   selectableOptions: NonNullable<
@@ -7685,119 +7645,6 @@ function corpAdvancementCounterChoiceScore(
       rezzedIce * 12
     );
   }, 0);
-}
-
-function runnerProgramInstallTrashAssessment(
-  input: AiDecisionInput,
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): RunnerProgramInstallTrashAssessment {
-  const sourceCardId = choice.source.split(":")[1] ?? "";
-  const source = input.playerView.own.gripOrHq.find(
-    (card) => card.instanceId === sourceCardId,
-  );
-  return runnerProgramInstallTrashAssessmentFromCards(
-    input,
-    source,
-    selectableOptions,
-  );
-}
-
-function runnerProgramInstallTrashAssessmentForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerProgramInstallTrashAssessment | undefined {
-  if (
-    input.side !== "runner" ||
-    action.side !== "runner" ||
-    action.type !== "install_card" ||
-    action.payload?.runnerProgramTrashBeforeInstall !== true
-  ) {
-    return undefined;
-  }
-  const source =
-    typeof action.source === "string"
-      ? input.playerView.own.gripOrHq.find(
-          (card) => card.instanceId === action.source,
-        )
-      : undefined;
-  return runnerProgramInstallTrashAssessmentFromCards(input, source);
-}
-
-function runnerProgramInstallTrashAssessmentFromCards(
-  input: AiDecisionInput,
-  source: VisibleCard | undefined,
-  selectableOptions?: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): RunnerProgramInstallTrashAssessment {
-  const memoryUsed = safeNonNegativeInteger(input.playerView.own.memoryUsed);
-  const memoryLimit = safeNonNegativeInteger(input.playerView.own.memoryLimit);
-  const sourceMemoryCost = visibleMemoryCostForAi(source);
-  const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
-  const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(
-    input.playerView.own.rig ?? [],
-  );
-  const candidates = selectableOptions
-    ? selectableOptions.map((option) => {
-        const card =
-          typeof option.value === "string"
-            ? installedCards.get(option.value)
-            : undefined;
-        return programSacrificeCandidateForAi(
-          input,
-          card,
-          installedBreakerRoleCounts,
-          option,
-        );
-      })
-    : (input.playerView.own.rig ?? []).map((card) =>
-        programSacrificeCandidateForAi(input, card, installedBreakerRoleCounts),
-      );
-  return buildRunnerProgramInstallTrashAssessmentFromCards({
-    memoryUsed,
-    memoryLimit,
-    sourceMemoryCost,
-    candidates,
-  });
-}
-
-function programSacrificeCandidateForAi(
-  input: AiDecisionInput,
-  card: VisibleCard | undefined,
-  installedBreakerRoleCounts: Map<string, number>,
-  option?: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"][number],
-): ProgramSacrificeCandidate {
-  return buildProgramSacrificeCandidate(card, installedBreakerRoleCounts, option, {
-    visibleMemoryCost: visibleMemoryCostForAi,
-    rolesForCardId,
-    visibleBreakerRoles: visibleBreakerRolesForAi,
-    isRunnerPressureRole,
-    isRunnerEconomyRole,
-    visibleCounterValue: visibleCounterValueForAi,
-    visibleInstallCost: visibleInstallCostForAi,
-    isRedundant: (candidate, breakerRoles) =>
-      programSacrificeCandidateIsRedundant(input, candidate, breakerRoles),
-  });
-}
-
-function programSacrificeCandidateIsRedundant(
-  input: AiDecisionInput,
-  card: VisibleCard | undefined,
-  breakerRoles: readonly string[],
-): boolean {
-  const rig = input.playerView.own.rig ?? [];
-  const roleCounts = visibleBreakerRoleCountsForAi(rig);
-  return buildProgramSacrificeCandidateIsRedundant(
-    card,
-    breakerRoles,
-    rig,
-    roleCounts,
-  );
 }
 
 function visibleCounterValueForAi(card: VisibleCard | undefined): number {
