@@ -30,6 +30,20 @@ export type RunnerLateNoFundingCreditRepeatScoreDependencies = {
   safeProgressTargets: (input: AiDecisionInput) => RunnerSafeProgressTarget[];
 };
 
+export type RunnerLateNoFundingCreditSafeProgressTargetsDependencies<
+  TTarget extends RunnerSafeProgressTarget,
+> = {
+  closeout: (input: AiDecisionInput) => {
+    opportunity: boolean;
+    target?: string | undefined;
+  };
+  pressureReadyTargets: (input: AiDecisionInput) => TTarget[];
+  recentStartRunsOnServer: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => number;
+};
+
 export function runnerLowValueRecoveryRepeatScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
@@ -91,4 +105,19 @@ export function runnerLateNoFundingCreditRepeatScoreComponent(
       `credits:${credits}`,
     ].join("|"),
   };
+}
+
+export function runnerLateNoFundingCreditSafeProgressTargets<
+  TTarget extends RunnerSafeProgressTarget,
+>(
+  input: AiDecisionInput,
+  dependencies: RunnerLateNoFundingCreditSafeProgressTargetsDependencies<TTarget>,
+): TTarget[] {
+  const closeout = dependencies.closeout(input);
+  if (!closeout.opportunity || !closeout.target) return [];
+  return dependencies.pressureReadyTargets(input).filter((target) => {
+    if (dependencies.recentStartRunsOnServer(input, target.serverId) > 0)
+      return false;
+    return target.serverId === closeout.target;
+  });
 }

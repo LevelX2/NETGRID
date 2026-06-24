@@ -345,6 +345,7 @@ import {
   runnerBlinkRecoveryScoreComponent as buildRunnerBlinkRecoveryScoreComponent,
 } from "./runtime/runner-blink-recovery-score";
 import {
+  runnerLateNoFundingCreditSafeProgressTargets as buildRunnerLateNoFundingCreditSafeProgressTargets,
   runnerLateNoFundingCreditRepeatScoreComponent as buildRunnerLateNoFundingCreditRepeatScoreComponent,
   runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
 } from "./runtime/runner-recovery-repeat-score";
@@ -6149,18 +6150,9 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
 function runnerLateNoFundingCreditSafeProgressTargets(
   input: AiDecisionInput,
 ): RunnerPressureReadyTargetForMetrics[] {
-  const closeout = bestTrueCentralCloseoutProfileForMetrics(input);
-  if (!closeout.opportunity || !closeout.target) return [];
-  // The target must match the current best closeout and must not have just been
-  // run; otherwise a credit can be real reserve preservation, not passivity.
-  return assessRunnerPressureReadyForMetrics(input).readyTargets.filter(
-    (target) => {
-      if (
-        semanticRuntimeRecentRunnerStartRunsOnServer(input, target.serverId) > 0
-      )
-        return false;
-      return target.serverId === closeout.target;
-    },
+  return buildRunnerLateNoFundingCreditSafeProgressTargets(
+    input,
+    RUNNER_LATE_NO_FUNDING_CREDIT_SAFE_PROGRESS_TARGETS_DEPENDENCIES,
   );
 }
 
@@ -6636,6 +6628,13 @@ const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES: RunnerRecentStartRunsOnSe
     eventVersion: aiEventVersion,
     serverIdFromEvent: aiServerIdFromEvent,
   };
+
+const RUNNER_LATE_NO_FUNDING_CREDIT_SAFE_PROGRESS_TARGETS_DEPENDENCIES = {
+  closeout: bestTrueCentralCloseoutProfileForMetrics,
+  pressureReadyTargets: (input: AiDecisionInput) =>
+    assessRunnerPressureReadyForMetrics(input).readyTargets,
+  recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+};
 
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
