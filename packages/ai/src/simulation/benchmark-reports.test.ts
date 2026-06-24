@@ -455,9 +455,7 @@ describe("benchmark report formatting", () => {
       maxActions: 160,
       maxFindings: 50,
     });
-    expect(JSON.stringify(base.summaries)).not.toContain(
-      "actionAlternatives",
-    );
+    expect(JSON.stringify(base.summaries)).not.toContain("actionAlternatives");
 
     const withAlternatives = runAiSelfplayTraceMining({
       seeds: ["ai-v143-tuning-005"],
@@ -469,6 +467,9 @@ describe("benchmark report formatting", () => {
       maxFindings: 5,
       includeActionAlternativesForFindings: true,
       maxAlternativesPerFinding: 3,
+      opportunitySnapshotRequests: [
+        { seed: "ai-v143-tuning-005", actionIndices: [9, 11, 20] },
+      ],
     });
     const entriesWithAlternatives = withAlternatives.summaries.flatMap(
       (summary) =>
@@ -477,9 +478,9 @@ describe("benchmark report formatting", () => {
         ),
     );
 
-    expect(
-      withAlternatives.config.includeActionAlternativesForFindings,
-    ).toBe(true);
+    expect(withAlternatives.config.includeActionAlternativesForFindings).toBe(
+      true,
+    );
     expect(withAlternatives.config.maxAlternativesPerFinding).toBe(3);
     expect(entriesWithAlternatives.length).toBeGreaterThan(0);
     expect(
@@ -668,7 +669,8 @@ describe("benchmark report formatting", () => {
     const noAlternativeSummary: AiSimulationSummary = {
       ...reserveSummary,
       seed: "selfplay-action-limit-runner-no-alternative-subcluster",
-      finalStateHash: "fnv1a:selfplay-action-limit-runner-no-alternative-subcluster",
+      finalStateHash:
+        "fnv1a:selfplay-action-limit-runner-no-alternative-subcluster",
       actionSequence: [
         selfplayAction("runner", 1, "gain_credit", {
           selectedActionId: "runner-no-alternative-gain",
@@ -680,7 +682,8 @@ describe("benchmark report formatting", () => {
     const plausibleOnlySummary: AiSimulationSummary = {
       ...reserveSummary,
       seed: "selfplay-action-limit-runner-plausible-only-subcluster",
-      finalStateHash: "fnv1a:selfplay-action-limit-runner-plausible-only-subcluster",
+      finalStateHash:
+        "fnv1a:selfplay-action-limit-runner-plausible-only-subcluster",
       actionSequence: [
         selfplayAction("runner", 1, "gain_credit", {
           selectedActionId: "runner-plausible-only-gain",

@@ -9824,6 +9824,20 @@ function semanticRuntimeCorpScoreComponents(
   );
   if (taggedMeatDamagePayoffPressure)
     components.push(taggedMeatDamagePayoffPressure);
+  const taggedEndgameResourceTrashPressure =
+    corpTaggedEndgameResourceTrashPressure(input, action);
+  if (taggedEndgameResourceTrashPressure)
+    components.push(taggedEndgameResourceTrashPressure);
+  const taggedPayoffFundingPressure = corpTagPunishPayoffFundingPressure(
+    input,
+    action,
+  );
+  if (taggedPayoffFundingPressure) components.push(taggedPayoffFundingPressure);
+  const taggedSlowSetupPenalty = corpTagPunishEndgameSlowSetupPenalty(
+    input,
+    action,
+  );
+  if (taggedSlowSetupPenalty) components.push(taggedSlowSetupPenalty);
   const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
@@ -10023,6 +10037,28 @@ type RunnerVisibleMeatPreventionProfile = {
   evidence: string[];
 };
 
+type CorpTagPunishEndgameContext = {
+  active: boolean;
+  endgame: boolean;
+  runnerTags: number;
+  runnerAgendaPoints: number;
+  runnerAgendaGap: number;
+  runnerScoreCards: number;
+  agendaPressure: boolean;
+  heavyTagPressure: boolean;
+  evidence: string[];
+};
+
+type CorpTagPunishResourceTrashProfile = {
+  kind:
+    | "tag_defense"
+    | "trace_link_defense"
+    | "rnd_information"
+    | "high_risk_runner_economy";
+  baseValue: number;
+  evidence: string[];
+};
+
 function corpTaggedMeatDamagePayoffPressure(
   input: AiDecisionInput,
   action: LegalAction,
@@ -10105,6 +10141,316 @@ function corpTaggedMeatDamagePayoffPressure(
       ...prevention.evidence,
     ].join("|"),
   };
+}
+
+function corpTaggedEndgameResourceTrashPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.type !== "trash_resource")
+    return undefined;
+  const context = corpTagPunishEndgameContext(input);
+  if (!context.active) return undefined;
+  const target = corpVisibleRunnerRigTrashTarget(input, action);
+  if (!target?.definitionId) return undefined;
+  if (runnerDamagePreventionResourceProfile(target)) return undefined;
+  const profile = runnerTagPunishResourceTrashProfile(target);
+  if (!profile) return undefined;
+
+  const tagReliability = Math.min(700, context.runnerTags * 85);
+  const agendaValue = context.agendaPressure ? 450 : 0;
+  const endgameValue = context.endgame ? 350 : 0;
+  const value = profile.baseValue + tagReliability + agendaValue + endgameValue;
+
+  return {
+    key: "corp_tag_punish_endgame_resource_trash",
+    label: "Tag-Punish-Resource trashen",
+    value,
+    reason: [
+      `runner_tags:${context.runnerTags}`,
+      `runner_agenda_points:${context.runnerAgendaPoints}`,
+      `runner_agenda_gap:${context.runnerAgendaGap}`,
+      `target_definition:${target.definitionId}`,
+      `resource_trash_kind:${profile.kind}`,
+      ...context.evidence,
+      ...profile.evidence,
+    ].join("|"),
+  };
+}
+
+function corpTagPunishPayoffFundingPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.type !== "gain_credit") return undefined;
+  const funding = corpTagPunishFundingNeed(input);
+  if (!funding.needed) return undefined;
+  if (corpTagPunishImmediatePressureAvailable(input, action.actionId)) {
+    return undefined;
+  }
+  const value = Math.min(
+    1750,
+    500 + funding.creditGap * 260 + (funding.context.endgame ? 250 : 0),
+  );
+  if (value <= 0) return undefined;
+  return {
+    key: "corp_tag_punish_payoff_funding",
+    label: "Tag-Punish-Payoff finanzieren",
+    value,
+    reason: [
+      `corp_credits:${input.playerView.own.credits}`,
+      `funding_target:${funding.targetCredits}`,
+      `credit_gap:${funding.creditGap}`,
+      ...funding.evidence,
+    ].join("|"),
+  };
+}
+
+function corpTagPunishEndgameSlowSetupPenalty(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp") return undefined;
+  const context = corpTagPunishEndgameContext(input);
+  if (!context.active) return undefined;
+  const slowKind = corpTagPunishSlowSetupKind(input, action);
+  if (!slowKind) return undefined;
+  const pressureAvailable = corpTagPunishImmediatePressureAvailable(
+    input,
+    action.actionId,
+  );
+  const funding = corpTagPunishFundingNeed(input);
+  if (!pressureAvailable && !funding.needed) return undefined;
+  const basePenalty = corpTagPunishSlowSetupPenaltyValue(slowKind);
+  const value =
+    context.endgame || pressureAvailable
+      ? basePenalty
+      : Math.round(basePenalty * 0.65);
+  return {
+    key: "corp_tag_punish_endgame_slow_setup_penalty",
+    label: "Langsames Setup trotz Tag-Punish",
+    value,
+    reason: [
+      `slow_setup_kind:${slowKind}`,
+      `immediate_pressure_available:${pressureAvailable}`,
+      `funding_needed:${funding.needed}`,
+      ...context.evidence,
+    ].join("|"),
+  };
+}
+
+function corpTagPunishEndgameContext(
+  input: AiDecisionInput,
+): CorpTagPunishEndgameContext {
+  const runnerTags = input.playerView.opponent.tags;
+  const runnerAgendaPoints = input.playerView.opponent.agendaPoints;
+  const runnerAgendaGap = Math.max(
+    0,
+    input.playerView.agendaPointsToWin - runnerAgendaPoints,
+  );
+  const runnerScoreCards = input.playerView.opponent.scoreArea.length;
+  const agendaPressure =
+    runnerAgendaPoints >= 3 || runnerAgendaGap <= 3 || runnerScoreCards >= 2;
+  const heavyTagPressure = runnerTags >= 6;
+  const active =
+    (runnerTags >= 3 && (agendaPressure || heavyTagPressure)) ||
+    runnerTags >= 7;
+  const endgame =
+    active &&
+    runnerTags >= 6 &&
+    (agendaPressure || input.playerView.opponent.handCount <= 4);
+  return {
+    active,
+    endgame,
+    runnerTags,
+    runnerAgendaPoints,
+    runnerAgendaGap,
+    runnerScoreCards,
+    agendaPressure,
+    heavyTagPressure,
+    evidence: [
+      `tag_punish_endgame_active:${active}`,
+      `tag_punish_endgame:${endgame}`,
+      `runner_tags:${runnerTags}`,
+      `runner_agenda_points:${runnerAgendaPoints}`,
+      `runner_agenda_gap:${runnerAgendaGap}`,
+      `runner_score_cards:${runnerScoreCards}`,
+      `agenda_pressure:${agendaPressure}`,
+      `heavy_tag_pressure:${heavyTagPressure}`,
+    ],
+  };
+}
+
+function corpTagPunishFundingNeed(input: AiDecisionInput): {
+  needed: boolean;
+  targetCredits: number;
+  creditGap: number;
+  context: CorpTagPunishEndgameContext;
+  evidence: string[];
+} {
+  const context = corpTagPunishEndgameContext(input);
+  const damagePayoff = corpVisibleDamagePayoffProfile(input);
+  const legalPayoff = input.legalActions.some((action) =>
+    corpTagPunishActionIsImmediatePayoff(input, action),
+  );
+  const targetCredits =
+    context.active && (damagePayoff.meatDamagePayoff || legalPayoff)
+      ? Math.min(
+          8,
+          6 +
+            (context.endgame ? 1 : 0) +
+            (damagePayoff.meatDamagePayoff ? 1 : 0),
+        )
+      : 0;
+  const creditGap = Math.max(0, targetCredits - input.playerView.own.credits);
+  const needed = context.active && targetCredits > 0 && creditGap > 0;
+  return {
+    needed,
+    targetCredits,
+    creditGap,
+    context,
+    evidence: [
+      `tag_punish_funding_needed:${needed}`,
+      `legal_tag_punish_payoff_available:${legalPayoff}`,
+      ...context.evidence,
+      ...damagePayoff.evidence,
+    ],
+  };
+}
+
+function corpTagPunishImmediatePressureAvailable(
+  input: AiDecisionInput,
+  excludedActionId?: string,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === excludedActionId || action.side !== "corp")
+      return false;
+    if (corpTagPunishActionIsImmediatePayoff(input, action)) return true;
+    if (action.type !== "trash_resource") return false;
+    const target = corpVisibleRunnerRigTrashTarget(input, action);
+    return Boolean(
+      target &&
+      (runnerDamagePreventionResourceProfile(target) ||
+        runnerTagPunishResourceTrashProfile(target)),
+    );
+  });
+}
+
+function corpTagPunishActionIsImmediatePayoff(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (!assessment?.isPunishPayoff) return false;
+  return (
+    assessment.payoffKind === "damage" ||
+    assessment.payoffKind === "economic" ||
+    assessment.payoffKind === "resource_trash" ||
+    assessment.payoffKind === "hardware_trash" ||
+    assessment.payoffKind === "scored_agenda_damage_like" ||
+    assessment.payoffKind === "unknown"
+  );
+}
+
+function corpTagPunishSlowSetupKind(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  if (action.type === "draw_card") return "draw";
+  if (action.type === "install_card") {
+    if (semanticRuntimeCorpActionIsScoreLine(input, action)) return undefined;
+    const serverId = semanticRuntimeCorpActionServerId(input, action);
+    if (action.payload?.placement === "ice") {
+      if (serverId === "archives") return "archives_ice_setup";
+      if (isRemoteServerTarget(serverId)) return "remote_ice_setup";
+      if (serverId === "hq" || serverId === "rd") return "central_ice_setup";
+      return "ice_setup";
+    }
+    if (isRemoteServerTarget(serverId)) return "remote_root_setup";
+    return "install_setup";
+  }
+  if (action.type === "rez_ice") {
+    const serverId = semanticRuntimeCorpActionServerId(input, action);
+    if (serverId === "archives") return "archives_rez_setup";
+    if (isRemoteServerTarget(serverId)) return "remote_rez_setup";
+    if (serverId === "hq" || serverId === "rd") return "central_rez_setup";
+    return "rez_setup";
+  }
+  return undefined;
+}
+
+function corpTagPunishSlowSetupPenaltyValue(kind: string): number {
+  if (kind.startsWith("archives")) return -1250;
+  if (kind.startsWith("remote")) return -1100;
+  if (kind.startsWith("central")) return -650;
+  if (kind === "draw") return -450;
+  return -850;
+}
+
+function runnerTagPunishResourceTrashProfile(
+  card: VisibleCard,
+): CorpTagPunishResourceTrashProfile | undefined {
+  if (card.type !== "resource" || !card.definitionId) return undefined;
+  const definition =
+    RUNTIME_CARDS[card.definitionId] ?? DEMO_CARDS_BY_ID[card.definitionId];
+  const hint = AI_HINTS.get(card.definitionId);
+  const hintEffectText = (hint?.effects ?? []).flatMap((effect) =>
+    Object.values(effect as Record<string, unknown>)
+      .filter((value) => typeof value === "string" || typeof value === "number")
+      .map(String),
+  );
+  const text = [
+    card.title,
+    card.rulesText,
+    cardDefinitionText(definition),
+    ...rolesForCardId(card.definitionId),
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...(hint?.lineSupport ?? []),
+    ...cardDefinitionMechanics(definition),
+    ...hintEffectText,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const candidates: CorpTagPunishResourceTrashProfile[] = [];
+  if (
+    /tag_avoid|tag_removal|avoid_tags|remove_tags|tag_clear|tag_prevention|next_tag_avoidance/.test(
+      text,
+    )
+  ) {
+    candidates.push({
+      kind: "tag_defense",
+      baseValue: 1150,
+      evidence: ["runner_resource_tag_defense_visible:true"],
+    });
+  }
+  if (
+    /trace_bid_support|post_bid_trace_link|trace_defense|trace_boost|base_link|resource\.base_link|\blink\b/.test(
+      text,
+    )
+  ) {
+    candidates.push({
+      kind: "trace_link_defense",
+      baseValue: 1000,
+      evidence: ["runner_resource_trace_defense_visible:true"],
+    });
+  }
+  if (/rd_pressure|pressure_rnd|rnd_information|r&d|information/.test(text)) {
+    candidates.push({
+      kind: "rnd_information",
+      baseValue: 900,
+      evidence: ["runner_resource_rnd_information_visible:true"],
+    });
+  }
+  if (/high_risk_burst_credit|economy\.high_risk_burst_credit/.test(text)) {
+    candidates.push({
+      kind: "high_risk_runner_economy",
+      baseValue: 850,
+      evidence: ["runner_resource_high_risk_economy_visible:true"],
+    });
+  }
+  return candidates.sort((left, right) => right.baseValue - left.baseValue)[0];
 }
 
 function corpTaggedMeatDamageAmountForAction(

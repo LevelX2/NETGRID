@@ -7403,7 +7403,7 @@
       "side": "runner",
       "cardType": "hardware",
       "roles": ["hardware", "damage_prevention", "rig_defense"],
-      "planRoles": ["build_rig", "recover_economy"],
+      "planRoles": ["build_rig", "survive_meat_damage"],
       "requiredMechanics": ["install_hardware", "damage_prevention"],
       "valueHints": {
         "survivability": 2
@@ -9593,8 +9593,8 @@
       "cardId": "onr_v1_160_diplomatic-immunity",
       "side": "runner",
       "cardType": "resource",
-      "roles": ["meat_damage", "resource", "unique"],
-      "planRoles": ["remote_upgrade_modifier"],
+      "roles": ["meat_damage", "resource", "unique", "damage_prevention"],
+      "planRoles": ["survive_meat_damage"],
       "requiredMechanics": [
         "event_modification_prevention_avoid_resolver",
         "agenda_point_cost_resolver",
@@ -17728,7 +17728,7 @@
         "tag_operation",
         "trace_operation"
       ],
-      "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+      "planRoles": ["bait_runner", "protect_hq"],
       "requiredMechanics": [
         "last_turn_run_check",
         "play_operation",
@@ -17812,7 +17812,7 @@
         "tag_operation",
         "trace_operation"
       ],
-      "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+      "planRoles": ["bait_runner", "protect_hq"],
       "requiredMechanics": [
         "last_turn_run_check",
         "play_operation",
@@ -18022,7 +18022,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["operation", "tag_punishment", "tag_punishment_operation"],
-      "planRoles": ["recover_economy", "bait_runner"],
+      "planRoles": ["punish_tagged_runner", "bait_runner"],
       "requiredMechanics": [
         "play_operation",
         "runner_is_tagged",
@@ -19230,7 +19230,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["operation", "tag_enabler", "tag_operation"],
-      "planRoles": ["recover_economy", "bait_runner"],
+      "planRoles": ["punish_tagged_runner", "bait_runner"],
       "requiredMechanics": [
         "play_operation",
         "runner_stole_agenda_last_turn",
