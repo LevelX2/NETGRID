@@ -1,0 +1,20 @@
+export function selectableChoiceOptions<T extends { selectable?: boolean }>(
+  options: T[],
+): T[] {
+  return options.filter((option) => option.selectable !== false);
+}
+
+export function playfulAiGainValue(option: {
+  id: string;
+  value?: string | number | boolean;
+  label: string;
+}): number {
+  if (typeof option.value === "number") return option.value;
+  const splitMatch = /^gain_(\d+)_set_aside_\d+$/.exec(option.id);
+  if (splitMatch) return Number(splitMatch[1]);
+  if (option.id === "take_credits") {
+    const labelMatch = /^(\d+)\s+Credits? nehmen/.exec(option.label);
+    return labelMatch ? Number(labelMatch[1]) : 0;
+  }
+  return 0;
+}
