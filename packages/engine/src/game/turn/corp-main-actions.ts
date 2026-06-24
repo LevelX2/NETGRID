@@ -96,7 +96,6 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
@@ -203,8 +202,6 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const CORP_HQ_SHUFFLE_DRAW_CARD_ID =
-    host.constants.CORP_HQ_SHUFFLE_DRAW_CARD_ID;
   const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
     host.constants.COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID;
   const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
@@ -639,10 +636,7 @@ export function buildCorpMainActions(
     );
     if (specialDamageActions.handled)
       actions.push(...specialDamageActions.actions);
-    if (
-      definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
-      hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")
-    ) {
+    if (hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")) {
       actions.push(
         action(
           state,

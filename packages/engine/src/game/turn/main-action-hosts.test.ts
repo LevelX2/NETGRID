@@ -398,7 +398,6 @@ function hostFor(
       topRunnerHeapCardId: () => undefined,
       constants: {
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        CORP_HQ_SHUFFLE_DRAW_CARD_ID: "corp_hq_shuffle_draw",
         COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
         COUNTER_UPGRADE_CARD_IDS: new Set(),

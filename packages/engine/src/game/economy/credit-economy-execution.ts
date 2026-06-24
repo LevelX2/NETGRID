@@ -39,7 +39,9 @@ export type CreditEconomyExecutionHost = {
     hasCorpUtilityKind: (
       state: GameState,
       cardId: CardInstanceId,
-      kind: "move_installed_corp_card_to_hq",
+      kind:
+        | "move_installed_corp_card_to_hq"
+        | "shuffle_hq_into_rd_then_draw_same_count",
     ) => boolean;
     uniqueDirectLongtailImplementationForCard: (
       state: GameState,
@@ -153,7 +155,6 @@ export type CreditEconomyExecutionHost = {
   };
   constants: {
     COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
-    CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
@@ -259,8 +260,11 @@ export function handleCreditEconomyExecution(
     if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
       throw new Error("Rescheduler ist nicht rezzed installiert.");
     if (
-      host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.CORP_HQ_SHUFFLE_DRAW_CARD_ID
+      !host.cards.hasCorpUtilityKind(
+        state,
+        sourceCardId,
+        "shuffle_hq_into_rd_then_draw_same_count",
+      )
     )
       throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
     host.hiddenZone.resolveReschedulerHqShuffleDraw(

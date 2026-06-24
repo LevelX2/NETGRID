@@ -1,8 +1,6 @@
 export const CORP_HQ_AGENDA_REVEAL_CARD_ID =
   "onr_v1_314_corporate-negotiating-center";
 
-export const CORP_HQ_SHUFFLE_DRAW_CARD_ID = "onr_v1_336_rescheduler";
-
 export const SERVER_ICE_SWAP_UPGRADE_CARD_ID =
   "onr_v1_369_singapore-city-grid";
 
