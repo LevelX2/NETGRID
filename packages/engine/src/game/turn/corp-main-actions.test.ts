@@ -263,7 +263,6 @@ function testCorpMainHost(
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
       COUNTER_UPGRADE_CARD_IDS: new Set(),
       TAG_CONDITION_UPGRADE_CARD_IDS: new Set(),
-      COUNTER_ASSET_CARD_IDS: new Set(),
       ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
     },
   };

@@ -564,7 +564,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  COUNTER_ASSET_CARD_IDS,
   COUNTER_OPERATION_CARD_IDS,
   OVERADVANCE_AGENDA_CARD_IDS,
   scoredAgendaCounterCreditPayload,

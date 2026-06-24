@@ -563,7 +563,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  COUNTER_ASSET_CARD_IDS,
   COUNTER_OPERATION_CARD_IDS,
   OVERADVANCE_AGENDA_CARD_IDS,
   scoredAgendaCounterCreditPayload,
@@ -937,7 +936,6 @@ export function configureActionRuntimeBootstrap({
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
         COUNTER_UPGRADE_CARD_IDS,
         TAG_CONDITION_UPGRADE_CARD_IDS,
-        COUNTER_ASSET_CARD_IDS,
         ADVANCEMENT_PLACEMENT_OPERATION_ID,
         RUNNER_EVENT_RESOLVERS,
         STACK_SEARCH_PROGRAM_CARD_IDS,

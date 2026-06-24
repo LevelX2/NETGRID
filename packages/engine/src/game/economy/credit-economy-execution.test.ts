@@ -278,7 +278,6 @@ function testHost(
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
       COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),
       TAG_CONDITION_UPGRADE_CARD_IDS: new Set(["tag_condition"]),
-      COUNTER_ASSET_CARD_IDS: new Set(["counter_asset"]),
       RUNNER_RANDOM_PROGRAM_CARD_IDS: new Set(["random_program"]),
       QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: "quest_for_cattekin",
       FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",

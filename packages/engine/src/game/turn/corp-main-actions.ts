@@ -103,7 +103,6 @@ export type CorpMainActionGenerationHost = {
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
     TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
     ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
   };
 };
@@ -220,7 +219,6 @@ export function buildCorpMainActions(
   const COUNTER_UPGRADE_CARD_IDS = host.constants.COUNTER_UPGRADE_CARD_IDS;
   const TAG_CONDITION_UPGRADE_CARD_IDS =
     host.constants.TAG_CONDITION_UPGRADE_CARD_IDS;
-  const COUNTER_ASSET_CARD_IDS = host.constants.COUNTER_ASSET_CARD_IDS;
   const ADVANCEMENT_PLACEMENT_OPERATION_ID =
     host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
 
@@ -778,27 +776,6 @@ export function buildCorpMainActions(
             cardId: assetId,
             v1918UpgradeAbility: "tag_condition_credit",
             gainCreditsAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      COUNTER_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Power-Counter laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "add_power_counter",
-            counterType: "power",
-            addCounterAmount: 1,
           },
         ),
       );

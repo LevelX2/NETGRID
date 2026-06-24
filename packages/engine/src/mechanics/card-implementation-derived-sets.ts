@@ -84,15 +84,6 @@ function hasFortRunWindowKind(
   );
 }
 
-export const CORP_ADVANCEMENT_COUNTER_ASSET_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "asset") &&
-    hasEffectKind(implementation, [
-      "distribute_advancement_counters",
-      "move_advancement_counters",
-    ]),
-);
-
 export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "operation") &&

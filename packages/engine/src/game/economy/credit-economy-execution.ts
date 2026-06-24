@@ -160,7 +160,6 @@ export type CreditEconomyExecutionHost = {
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
     TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
     RUNNER_RANDOM_PROGRAM_CARD_IDS: ReadonlySet<string>;
     QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
@@ -510,39 +509,6 @@ export function handleCreditEconomyExecution(
       gainedCredits: gainAmount,
       corpCreditsAfter: state.corp.credits,
       runnerTagsAfter: state.runner.tags,
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1919AssetAbility === "add_power_counter") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.19-Asset-Counter nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.19-Asset-Counter-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.COUNTER_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.19-Asset-Counter-Faehigkeit passt nicht zur Karte.",
-      );
-    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
-    if (!Number.isInteger(addAmount) || addAmount !== 1)
-      throw new Error(
-        "V1.9.19-Counter-Assets laden in diesem WIP genau 1 Power-Counter.",
-      );
-    host.counters.addCardCounter(state, sourceCardId, "power", addAmount);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definition.id,
-      addedCounterAmount: addAmount,
-      remainingCounters: host.counters.cardCounter(
-        state,
-        sourceCardId,
-        "power",
-      ),
     };
     return handled(legalAction);
   }

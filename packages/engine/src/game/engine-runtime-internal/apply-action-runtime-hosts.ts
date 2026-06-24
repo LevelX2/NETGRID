@@ -524,7 +524,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  COUNTER_ASSET_CARD_IDS,
   COUNTER_OPERATION_CARD_IDS,
   OVERADVANCE_AGENDA_CARD_IDS,
   scoredAgendaCounterCreditPayload,
@@ -848,7 +847,6 @@ export function createApplyActionRuntimeHosts(
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
         COUNTER_UPGRADE_CARD_IDS,
         TAG_CONDITION_UPGRADE_CARD_IDS,
-        COUNTER_ASSET_CARD_IDS,
         RUNNER_RANDOM_PROGRAM_CARD_IDS,
         QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
         FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
