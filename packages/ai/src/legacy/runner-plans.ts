@@ -2924,18 +2924,29 @@ function bestCitySurveillanceDrawProjection(
 function citySurveillanceDrawProjectionForAction(
   action: LegalAction,
 ): CitySurveillanceDrawProjection {
-  const sourceCount = Number(action.payload?.citySurveillanceSourceCount ?? 0);
+  const sourceCount = Number(
+    action.payload?.drawTaxSourceCount ??
+      action.payload?.citySurveillanceSourceCount ??
+      0,
+  );
   if (!Number.isFinite(sourceCount) || sourceCount <= 0) {
     return { sourceCount: 0, creditsPaid: 0, tagsAdded: 0, decision: "none" };
   }
   const creditsPaid = Number(
-    action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+    action.payload?.drawTaxProjectedCreditsPaid ??
+      action.payload?.citySurveillanceProjectedCreditsPaid ??
+      0,
   );
   const tagsAdded = Number(
-    action.payload?.citySurveillanceProjectedTagsAdded ?? 0,
+    action.payload?.drawTaxProjectedTagsAdded ??
+      action.payload?.citySurveillanceProjectedTagsAdded ??
+      0,
   );
   const decision =
-    action.payload?.citySurveillanceDrawDecision === "pay" ? "pay" : "tag";
+    action.payload?.drawTaxDecision === "pay" ||
+    action.payload?.citySurveillanceDrawDecision === "pay"
+      ? "pay"
+      : "tag";
   return {
     sourceCount,
     creditsPaid: Number.isFinite(creditsPaid) ? creditsPaid : 0,

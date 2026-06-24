@@ -11009,6 +11009,7 @@ select,
   height: 100%;
   border-radius: 6px;
   object-fit: cover;
+  pointer-events: none;
 }
 
 .card.withImage.hardware,

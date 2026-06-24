@@ -81,7 +81,9 @@ describe("hidden zone trigger execution", () => {
       minSelections: 1,
       maxSelections: 1,
     });
-    expect(state.pendingChoice?.source).toContain("v1915.mystery_box");
+    expect(state.pendingChoice?.source).toContain(
+      "v1915.revealed_stack_program_install",
+    );
     expect(state.pendingChoice?.options.map((option) => option.value)).toEqual([
       programId,
     ]);
@@ -133,7 +135,7 @@ describe("hidden zone trigger execution", () => {
 
     expect(state.pendingChoice).toBeUndefined();
     expect(shuffledPurposes).toEqual([
-      `v1915.mystery_box.shuffle.no_program.${sourceId}.run_1`,
+      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceId}.run_1`,
     ]);
     expect(action.payload).toMatchObject({
       programFound: false,

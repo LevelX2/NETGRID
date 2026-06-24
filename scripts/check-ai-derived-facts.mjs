@@ -1125,7 +1125,7 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /kind:\s*"corporate_retreat_disable_on_rez_or_install"/.test(
+    /kind:\s*"corporate_retreat_disable_on_rez_or_install"|kind:\s*"scored_agenda_credit_until_install_or_rez"/.test(
       implementationText,
     )
   ) {
@@ -1789,7 +1789,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       );
     }
     if (
-      /blink_random_break_or_net_damage|ai_boon_run_start_random_strength|bartmoss_post_encounter_self_trash_check/.test(
+      /blink_random_break_or_net_damage|ai_boon_run_start_random_strength|run_start_random_strength_bonus|bartmoss_post_encounter_self_trash_check/.test(
         implementationText,
       )
     ) {
@@ -2030,7 +2030,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       resource: "damage",
       source: "implementation.flatlineReplacementSources",
     });
-    if (/emergency_self_construct/.test(implementationText)) {
+    if (/emergency_self_construct|flatline_replacement_installed/.test(implementationText)) {
       addEffect(facts, {
         kind: "remove_brain_damage",
         timing: "flatline_replacement",
@@ -2549,7 +2549,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/i_spy_successful_run_fort_counter_expose/.test(implementationText)) {
+  if (/i_spy_successful_run_fort_counter_expose|successful_run_fort_counter_expose/.test(implementationText)) {
     addEffect(facts, {
       kind: "expose_info",
       timing: "successful_run",
@@ -3309,7 +3309,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/city_surveillance_draw_tag/.test(implementationText)) {
+  if (/city_surveillance_draw_tag|runner_draw_tax_tag/.test(implementationText)) {
     addEffect(facts, {
       kind: "tag_source",
       timing: "runner_turn",
@@ -3345,7 +3345,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/acme_savings_and_loan_debt/.test(implementationText)) {
+  if (/acme_savings_and_loan_debt|obligation_debt/.test(implementationText)) {
     addEffect(facts, {
       kind: "economy",
       timing: "on_rez",
@@ -3366,7 +3366,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/investment_firm_credit_diversion/.test(implementationText)) {
+  if (/investment_firm_credit_diversion|basic_credit_diversion_to_recurring_credits/.test(implementationText)) {
     if (expectsKind("effect:finite_economy_pool")) {
       addEffect(facts, {
         kind: "finite_economy_pool",
@@ -3439,7 +3439,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/trojan_horse_tag/.test(implementationText)) {
+  if (/trojan_horse_tag|kind:\s*"encounter_tag"/.test(implementationText)) {
     addEffect(facts, {
       kind: "tag_source",
       timing: "action",
@@ -3474,7 +3474,7 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /i_got_a_rock_tagged_meat_damage|schlaghund_tag_die_meat_damage/.test(
+    /i_got_a_rock_tagged_meat_damage|tagged_meat_damage|schlaghund_tag_die_meat_damage/.test(
       implementationText,
     )
   ) {
@@ -3519,7 +3519,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/power_grid_overload/.test(implementationText)) {
+  if (/power_grid_overload|installed_hardware_trash_by_counter/.test(implementationText)) {
     addEffect(facts, {
       kind: "hardware_trash",
       timing: "action",

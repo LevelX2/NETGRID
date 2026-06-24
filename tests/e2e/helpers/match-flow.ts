@@ -81,13 +81,22 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
   await clickActionIfVisible(page, "mandatory_draw");
   const cardSlots = page.locator(".corpHqHandPanel:not(.corpOpponentHqHandPanel) .cardSlot").filter({ has: page.getByTestId("known-card") });
   const count = await cardSlots.count();
-  for (let index = 0; index < count; index += 1) {
+  for (let index = count - 1; index >= 0; index -= 1) {
     const slot = cardSlots.nth(index);
     const card = slot.getByTestId("known-card");
     const marker = slot.getByTestId("card-action-marker");
     const title = await knownCardTitle(card);
     if (!title) continue;
-    await card.click();
+    if (await marker.isVisible().catch(() => false)) {
+      await marker.click({ force: true, timeout: 1_000 }).catch(() => undefined);
+      const install = page.locator('[data-testid="card-action-button"][data-action-type="install_card"]').first();
+      if (await install.isVisible().catch(() => false)) {
+        await install.click();
+        await expect(page.locator('[data-testid="server"] [data-testid="known-card"]').first()).toBeVisible();
+        return title;
+      }
+    }
+    await card.click({ timeout: 1_000 }).catch(() => undefined);
     const panelInstall = page.locator('[data-testid="action-button"][data-action-type="install_card"]').first();
     if (await panelInstall.isVisible().catch(() => false)) {
       await panelInstall.click();
@@ -95,7 +104,7 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
       return title;
     }
     if (!(await marker.isVisible().catch(() => false))) continue;
-    await marker.click();
+    await marker.click({ force: true, timeout: 1_000 }).catch(() => undefined);
     const install = page.locator('[data-testid="card-action-button"][data-action-type="install_card"]').first();
     if (await install.isVisible().catch(() => false)) {
       await install.click();

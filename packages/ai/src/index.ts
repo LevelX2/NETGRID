@@ -16166,10 +16166,14 @@ function scoreRunnerAction(
       score = features.handCount < 3 ? 430 : 320;
       if (features.citySurveillanceSourceCount > 0) {
         const projectedCreditsPaid = Number(
-          action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+          action.payload?.drawTaxProjectedCreditsPaid ??
+            action.payload?.citySurveillanceProjectedCreditsPaid ??
+            0,
         );
         const projectedTagsAdded = Number(
-          action.payload?.citySurveillanceProjectedTagsAdded ?? 0,
+          action.payload?.drawTaxProjectedTagsAdded ??
+            action.payload?.citySurveillanceProjectedTagsAdded ??
+            0,
         );
         score -=
           (Number.isFinite(projectedCreditsPaid) ? projectedCreditsPaid : 0) *
@@ -16189,9 +16193,9 @@ function scoreRunnerAction(
       if (features.citySurveillanceSourceCount > 0) {
         evidence.push(
           `city_surveillance_sources:${features.citySurveillanceSourceCount}`,
-          `city_surveillance_decision:${String(action.payload?.citySurveillanceDrawDecision ?? "unknown")}`,
-          `city_surveillance_projected_credits:${Number(action.payload?.citySurveillanceProjectedCreditsPaid ?? 0)}`,
-          `city_surveillance_projected_tags:${Number(action.payload?.citySurveillanceProjectedTagsAdded ?? 0)}`,
+          `city_surveillance_decision:${String(action.payload?.drawTaxDecision ?? action.payload?.citySurveillanceDrawDecision ?? "unknown")}`,
+          `city_surveillance_projected_credits:${Number(action.payload?.drawTaxProjectedCreditsPaid ?? action.payload?.citySurveillanceProjectedCreditsPaid ?? 0)}`,
+          `city_surveillance_projected_tags:${Number(action.payload?.drawTaxProjectedTagsAdded ?? action.payload?.citySurveillanceProjectedTagsAdded ?? 0)}`,
         );
       }
       break;

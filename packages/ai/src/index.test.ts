@@ -13551,8 +13551,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(drawCard?.payload).toMatchObject({
-      citySurveillanceDrawDecision: "tag",
-      citySurveillanceProjectedTagsAdded: 1,
+      drawTaxDecision: "tag",
+      drawTaxProjectedTagsAdded: 1,
     });
     expect(gainCredit).toBeDefined();
     if (!drawCard || !gainCredit)
