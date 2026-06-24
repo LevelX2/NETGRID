@@ -274,6 +274,12 @@ import {
   incrementStringCounter,
 } from "./runtime/counter";
 import {
+  evidenceNumber,
+  evidenceValue,
+  hasEvidenceFlag,
+  hasEvidencePrefix,
+} from "./runtime/evidence-value";
+import {
   eventMayChangeArchives as aiEventMayChangeArchives,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
@@ -17802,37 +17808,6 @@ function nextEntries(
   windowActions = 3,
 ): PlanConversionActionEntry[] {
   return sequence.slice(index + 1, index + windowActions + 1);
-}
-
-function hasEvidenceFlag(
-  entry: PlanConversionActionEntry,
-  flag: string,
-): boolean {
-  return entry.evidence.includes(flag);
-}
-
-function evidenceValue(
-  entry: PlanConversionActionEntry,
-  prefix: string,
-): string | undefined {
-  return entry.evidence
-    .find((item) => item.startsWith(prefix))
-    ?.slice(prefix.length);
-}
-
-function evidenceNumber(
-  entry: PlanConversionActionEntry,
-  prefix: string,
-): number {
-  const parsed = Number(evidenceValue(entry, prefix));
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function hasEvidencePrefix(
-  entry: PlanConversionActionEntry,
-  prefix: string,
-): boolean {
-  return entry.evidence.some((item) => item.startsWith(prefix));
 }
 
 type BreakerOntologyCoverageMetricKey =
