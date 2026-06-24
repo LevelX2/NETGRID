@@ -214,8 +214,8 @@ import {
 } from "./runtime/semantic-runtime-plan-memory-exclusion";
 import { createRunnerSimpleExclusionsContext } from "./runtime/runner-simple-exclusions-context";
 import {
-  runnerSourceCardAnswerRole as buildRunnerSourceCardAnswerRole,
-} from "./runtime/runner-source-card-answer-role";
+  createRunnerSourceCardAnswerRoleContext,
+} from "./runtime/runner-source-card-answer-role-context";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import {
   runnerHandFundingTarget as buildRunnerHandFundingTarget,
@@ -3893,6 +3893,17 @@ const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
 });
+const {
+  semanticRuntimeRunnerSourceCardAnswerRole,
+} = createRunnerSourceCardAnswerRoleContext({
+  visibleSourceCard: semanticRuntimeVisibleSourceCard,
+  sourceDefinitionId: sourceDefinitionIdForAction,
+  rolesForCardId,
+  sourceDefinition: (definitionId) =>
+    definitionId
+      ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+      : undefined,
+});
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -4674,21 +4685,6 @@ function runnerCardMechanicsForAi(definitionId: string): string[] {
       : []),
     ...(demoDefinition?.mechanics ?? []),
   ];
-}
-
-function semanticRuntimeRunnerSourceCardAnswerRole(
-  input: AiDecisionInput,
-  action: LegalAction,
-): "search" | "draw" | undefined {
-  return buildRunnerSourceCardAnswerRole(input, action, {
-    visibleSourceCard: semanticRuntimeVisibleSourceCard,
-    sourceDefinitionId: sourceDefinitionIdForAction,
-    rolesForCardId,
-    sourceDefinition: (definitionId) =>
-      definitionId
-        ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
-        : undefined,
-  });
 }
 
 function semanticRuntimeBaseScore(

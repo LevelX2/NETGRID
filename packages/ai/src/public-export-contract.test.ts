@@ -150,6 +150,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-plan-memory-exclusion",
       "./runtime/runner-archives-exclusion",
       "./runtime/runner-source-card-answer-role",
+      "./runtime/runner-source-card-answer-role-context",
       "./runtime/runner-hand-buffer-need",
       "./runtime/runner-hand-funding-target",
       "./runtime/runner-tag-cleanup-score",
