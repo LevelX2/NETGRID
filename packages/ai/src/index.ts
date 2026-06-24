@@ -229,6 +229,9 @@ import {
   runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
 } from "./runtime/runner-recovery-repeat-score";
 import {
+  runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
+} from "./runtime/runner-junkyard-bbs-recovery-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -6717,34 +6720,14 @@ function runnerJunkyardBbsRecoveryScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (!isRunnerJunkyardBbsRecoveryAction(input, action)) return undefined;
-
-  const target = runnerJunkyardBbsRecoveryTarget(input, action);
-  const targetDefinitionId = target?.definitionId;
-  const targetRoles = rolesForCardId(targetDefinitionId);
-  const targetAssessment = runnerJunkyardBbsRecoveryTargetAssessment(
-    input,
-    target,
-    targetDefinitionId,
-    targetRoles,
-  );
-  const actionOpportunityCost =
-    700 + actionClickCost(action) * 130 + actionCreditCost(action) * 110;
-  const value = targetAssessment.value - actionOpportunityCost;
-  return {
-    key: "runner_junkyard_bbs_recovery_target",
-    label: "Junkyard-BBS-Zielwert",
-    value,
-    reason: sortedUnique([
-      `target:${targetDefinitionId ?? "unknown"}`,
-      `target_value:${targetAssessment.value}`,
-      `opportunity_cost:${actionOpportunityCost}`,
-      `click_cost:${actionClickCost(action)}`,
-      `credit_cost:${actionCreditCost(action)}`,
-      ...targetAssessment.evidence,
-    ]).join("|"),
-  };
+  return buildRunnerJunkyardBbsRecoveryScoreComponent(input, action, {
+    isRecoveryAction: isRunnerJunkyardBbsRecoveryAction,
+    target: runnerJunkyardBbsRecoveryTarget,
+    rolesForCardId,
+    targetAssessment: runnerJunkyardBbsRecoveryTargetAssessment,
+    actionClickCost,
+    actionCreditCost,
+  });
 }
 
 function isRunnerJunkyardBbsRecoveryAction(
