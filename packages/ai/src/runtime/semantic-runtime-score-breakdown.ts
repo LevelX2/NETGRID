@@ -4,6 +4,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decision-debug";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { semanticRuntimeTypeTieBreakerScore } from "./semantic-runtime-score-components";
@@ -16,6 +17,68 @@ export type SemanticRuntimeScoreBreakdownDependencies = {
   ) => AiDecisionScoreComponent[];
   actionCreditCost: (action: LegalAction) => number;
 };
+
+export type SemanticRuntimeScoreBreakdownContextDependencies = {
+  runnerComponents: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
+  ) => AiDecisionScoreComponent[];
+  corpComponents: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+  ) => AiDecisionScoreComponent[];
+  actionCreditCost: (action: LegalAction) => number;
+};
+
+export type SemanticRuntimeScoreBreakdownContext = {
+  semanticRuntimeScoreBreakdown: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+    exclusion?: SemanticRuntimeExclusion,
+    actionSemanticCandidate?: ActionSemanticCandidate,
+  ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
+};
+
+export function createSemanticRuntimeScoreBreakdownContext(
+  dependencies: SemanticRuntimeScoreBreakdownContextDependencies,
+): SemanticRuntimeScoreBreakdownContext {
+  function semanticRuntimeScoreBreakdown(
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+    exclusion?: SemanticRuntimeExclusion,
+    actionSemanticCandidate?: ActionSemanticCandidate,
+  ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
+    return buildSemanticRuntimeScoreBreakdown({
+      input,
+      action,
+      scopeId,
+      ...(exclusion ? { exclusion } : {}),
+      dependencies: {
+        contextComponents: (componentInput, componentAction, componentScopeId) =>
+          componentInput.side === "runner"
+            ? dependencies.runnerComponents(
+                componentInput,
+                componentAction,
+                componentScopeId,
+                actionSemanticCandidate,
+              )
+            : dependencies.corpComponents(
+                componentInput,
+                componentAction,
+                componentScopeId,
+              ),
+        actionCreditCost: dependencies.actionCreditCost,
+      },
+    });
+  }
+
+  return { semanticRuntimeScoreBreakdown };
+}
 
 export function buildSemanticRuntimeScoreBreakdown(params: {
   input: AiDecisionInput;

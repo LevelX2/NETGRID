@@ -181,7 +181,9 @@ import {
 import {
   createSemanticRuntimeCorpScoreSafetyContext,
 } from "./runtime/semantic-runtime-corp-score-safety-context";
-import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
+import {
+  createSemanticRuntimeScoreBreakdownContext,
+} from "./runtime/semantic-runtime-score-breakdown";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
   createSemanticRuntimeChoiceBuilderContext,
@@ -3987,6 +3989,29 @@ const {
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
+const {
+  semanticRuntimeScoreBreakdown,
+} = createSemanticRuntimeScoreBreakdownContext({
+  runnerComponents: (
+    componentInput,
+    componentAction,
+    componentScopeId,
+    actionSemanticCandidate,
+  ) =>
+    semanticRuntimeRunnerScoreComponents(
+      componentInput,
+      componentAction,
+      componentScopeId,
+      actionSemanticCandidate,
+    ),
+  corpComponents: (componentInput, componentAction, componentScopeId) =>
+    semanticRuntimeCorpScoreComponents(
+      componentInput,
+      componentAction,
+      componentScopeId,
+    ),
+  actionCreditCost,
+});
 const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
   scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
   actionExclusion: semanticRuntimeActionExclusion,
@@ -4231,37 +4256,6 @@ function deckCapabilitiesForInput(
     (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
     buildDeckCapabilityProfileFromInput(input)
   );
-}
-
-function semanticRuntimeScoreBreakdown(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-  exclusion?: SemanticRuntimeExclusion,
-  actionSemanticCandidate?: ActionSemanticCandidate,
-): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
-  return buildSemanticRuntimeScoreBreakdown({
-    input,
-    action,
-    scopeId,
-    ...(exclusion ? { exclusion } : {}),
-    dependencies: {
-      contextComponents: (componentInput, componentAction, componentScopeId) =>
-        componentInput.side === "runner"
-          ? semanticRuntimeRunnerScoreComponents(
-              componentInput,
-              componentAction,
-              componentScopeId,
-              actionSemanticCandidate,
-            )
-          : semanticRuntimeCorpScoreComponents(
-              componentInput,
-              componentAction,
-              componentScopeId,
-            ),
-      actionCreditCost,
-    },
-  });
 }
 
 const {
