@@ -73,7 +73,7 @@ export type AccessFlowHost = {
   };
   run: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       run: ActiveRun,
       legalAction?: LegalAction,
     ) => boolean;
@@ -402,7 +402,7 @@ export function completeCurrentBreachAccess(
       },
     };
     host.state.run = completedRun;
-    if (host.run.startExpertScheduleAnalyzerPostAccessChoice(completedRun, legalAction))
+    if (host.run.startPostAccessInstalledProgramChoice(completedRun, legalAction))
       return {
         handled: true,
         accessFinished: true,
@@ -508,12 +508,12 @@ function stealAgenda(
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1919RunnerEventAbility: "arasaka_owns_you_future_agenda_forfeit",
+        v1919RunnerEventAbility: "future_agenda_point_forfeit",
         futureAgendaPointForfeitPaid: paidDebt,
         futureAgendaPointForfeitPending: host.state.runnerAgendaPointsToForfeit,
         specialZone: "removed_from_game",
         specialZoneVisibility: "public",
-        specialZoneReason: "v1919_arasaka_owns_you_future_agenda_forfeit",
+        specialZoneReason: "v1919_future_agenda_point_forfeit",
       };
     }
     if (host.state.run?.breach) {
@@ -727,7 +727,7 @@ function trashAccessedCard(
     cardId as CardInstanceId,
   );
   if (legalAction && overrideCost === undefined) {
-    const scatterShotSpent =
+    const upgradeTrashRecurringCreditsSpent =
       definition.type === "upgrade" ? trashPayment.recurringSpent : 0;
     const poltergeistSpent =
       definition.type === "asset" ? trashPayment.recurringSpent : 0;
@@ -743,11 +743,11 @@ function trashAccessedCard(
             accessTrashCostSourceTitles: effectiveCost.sourceTitles.join(","),
           }
         : {}),
-      ...(scatterShotSpent > 0
+      ...(upgradeTrashRecurringCreditsSpent > 0
         ? {
             v1922RunnerProgramAbility:
-              "scatter_shot_upgrade_trash_recurring_credit",
-            scatterShotRecurringCreditsSpent: scatterShotSpent,
+              "upgrade_trash_recurring_credit",
+            upgradeTrashRecurringCreditsSpent: upgradeTrashRecurringCreditsSpent,
             runnerCreditsSpent: trashPayment.runnerCreditsSpent,
           }
         : {}),

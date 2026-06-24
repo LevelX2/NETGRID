@@ -21,7 +21,7 @@ import {
 
 const planningId = "planning_consultants" as CardDefinitionId;
 const roninId = "ronin_around" as CardDefinitionId;
-const tooManyDoorsId = "too_many_doors" as CardDefinitionId;
+const corpRdTopArrangeSourceId = "too_many_doors" as CardDefinitionId;
 const sourceCardId = "source" as CardInstanceId;
 
 function definition(
@@ -108,8 +108,8 @@ function makeHost(input: {
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     constants: {
       corpRdTop5ReorderOperationCardId: planningId,
-      roninAroundId: roninId,
-      tooManyDoorsId,
+      runnerStackArrangeSourceId: roninId,
+      corpRdTopArrangeSourceId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),

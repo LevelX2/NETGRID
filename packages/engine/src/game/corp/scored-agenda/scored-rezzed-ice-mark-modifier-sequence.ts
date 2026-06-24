@@ -15,7 +15,7 @@ const SCORED_ICE_MARK_CHOICE_SOURCE =
 export function isScoredIceMarkModifierChoiceSource(source: string): boolean {
   return (
     source.startsWith(`${SCORED_ICE_MARK_CHOICE_SOURCE}:`) ||
-    source.startsWith("v1920.ice_transmutation")
+    source.startsWith("scored_agenda.rezzed_ice_mark_modifier")
   );
 }
 
@@ -48,9 +48,9 @@ export function startScoredRezzedIceMarkModifierChoice(
   if (targets.length === 0) {
     applySequencePayloadPatch(legalAction, {
       ...primitivePayload,
-      agendaAbility: "v1920_ice_transmutation",
+      agendaAbility: "scored_rezzed_ice_mark_modifier",
       scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
-      iceTransmutationSkippedReason: "no_rezzed_ice",
+      scoredIceMarkModifierSkippedReason: "no_rezzed_ice",
     });
     return;
   }
@@ -59,7 +59,7 @@ export function startScoredRezzedIceMarkModifierChoice(
     side: "corp",
     source: `${SCORED_ICE_MARK_CHOICE_SOURCE}:${agendaId}:${host.state.stateVersion + 1}`,
     prompt:
-      "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+      "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     kind: "select_cards",
     options: targets.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
@@ -77,7 +77,7 @@ export function startScoredRezzedIceMarkModifierChoice(
   };
   applySequencePayloadPatch(legalAction, {
     ...primitivePayload,
-    agendaAbility: "v1920_ice_transmutation_choice",
+    agendaAbility: "scored_rezzed_ice_mark_modifier_choice",
     cardImplementationTargetKind: scoredAgenda.target,
     cardImplementationCounterType: scoredAgenda.counterType,
     cardImplementationCounterAmount: scoredAgenda.counterAmount,
@@ -150,7 +150,7 @@ export function resolveScoredRezzedIceMarkModifierChoice(
       effectKind: "mark_modifier",
       abilityKey: scoredAgenda.abilityKey,
     }),
-    agendaAbility: "v1920_ice_transmutation",
+    agendaAbility: "scored_rezzed_ice_mark_modifier",
     sourceAgendaId: agendaId,
     targetIceId,
     targetIceDefinitionId: host.cards.definitionFor(targetIceId).id,

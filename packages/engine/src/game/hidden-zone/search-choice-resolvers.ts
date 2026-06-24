@@ -43,7 +43,7 @@ export type LookTopStackTakeMatchingSelectionResult = {
   shuffleNeeded: true;
 };
 
-export type SneakPreviewProgramSelectionResult = {
+export type TemporaryProgramSelectionResult = {
   selectedCardId: CardInstanceId;
   sourceZone: SearchSourceZone;
   sourceDefinitionId: CardDefinitionId;
@@ -51,12 +51,12 @@ export type SneakPreviewProgramSelectionResult = {
   shuffleNeeded: boolean;
 };
 
-export type SelfModifyingCodeSelectionResult = {
+export type PaidStackProgramInstallSelectionResult = {
   selectedCardId: CardInstanceId;
   shuffleNeeded: true;
 };
 
-export type MysteryBoxInstallSelectionResult = {
+export type RevealedStackProgramInstallSelectionResult = {
   sourceCardId: CardInstanceId;
   selectedCardId: CardInstanceId;
   shuffleNeeded: true;
@@ -220,14 +220,14 @@ export function resolveLookTopStackTakeMatchingSelection(input: {
   };
 }
 
-export function resolveSelfModifyingCodeSearchInstallSelection(input: {
+export function resolvePaidStackProgramInstallSelection(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   stackCardIds: readonly CardInstanceId[];
   isSelectedProgram: boolean;
-}): SelfModifyingCodeSelectionResult {
+}): PaidStackProgramInstallSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1911.self_modifying_code_install_program"))
+  if (!choice || !choice.source.startsWith("v1911.hidden_stack_program_install"))
     throw new Error("Es ist keine Self-Modifying-Code-Choice offen.");
   if (!input.selectedCardId || !input.stackCardIds.includes(input.selectedCardId))
     throw new Error("Die gewählte Karte liegt nicht im Stack.");
@@ -239,17 +239,17 @@ export function resolveSelfModifyingCodeSearchInstallSelection(input: {
   };
 }
 
-export function resolveSneakPreviewSearchInstallSelection(input: {
+export function resolveTemporaryProgramSearchInstallSelection(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   legalTargetIds: readonly CardInstanceId[];
   defaultSourceDefinitionId: CardDefinitionId;
-}): SneakPreviewProgramSelectionResult {
+}): TemporaryProgramSelectionResult {
   const choice = input.choice;
   if (!choice) throw new Error("Es ist keine Sneak-Preview-Programmauswahl offen.");
-  const sourceZone = choice.source.startsWith("v1911.sneak_preview_heap_install")
+  const sourceZone = choice.source.startsWith("v1911.temporary_program_install_heap_install")
     ? "heap"
-    : choice.source.startsWith("v1911.sneak_preview_stack_install")
+    : choice.source.startsWith("v1911.temporary_program_install_stack_install")
       ? "stack"
       : choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? (choice.source.split(":")[3] as SearchSourceZone | undefined)
@@ -276,21 +276,21 @@ export function resolveSneakPreviewSearchInstallSelection(input: {
   };
 }
 
-export function resolveMysteryBoxInstallSelection(input: {
+export function resolveRevealedStackProgramInstallSelection(input: {
   choice: ChoiceRequest | undefined;
   selectedCardId: CardInstanceId | undefined;
   currentTopCardIds: readonly CardInstanceId[];
   isSelectedProgram: boolean;
-}): MysteryBoxInstallSelectionResult {
+}): RevealedStackProgramInstallSelectionResult {
   const choice = input.choice;
-  if (!choice || !choice.source.startsWith("v1915.mystery_box"))
-    throw new Error("Es ist keine Mystery-Box-Choice offen.");
+  if (!choice || !choice.source.startsWith("v1915.revealed_stack_program_install"))
+    throw new Error("Es ist keine Revealed-Stack-Program-Install-Choice offen.");
   const sourceCardId = choice.source.split(":")[1] as CardInstanceId | undefined;
-  if (!sourceCardId) throw new Error("Mystery Box ist nicht mehr installiert.");
+  if (!sourceCardId) throw new Error("Die offengelegte Stack-Quelle ist nicht mehr installiert.");
   if (!input.selectedCardId || !input.currentTopCardIds.includes(input.selectedCardId))
     throw new Error("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
   if (!input.isSelectedProgram)
-    throw new Error("Mystery Box kann nur ein Programm installieren.");
+    throw new Error("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
   return {
     sourceCardId,
     selectedCardId: input.selectedCardId,

@@ -196,16 +196,16 @@ describe("V1.1.2 Full Archives Access", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-no-target"),
     );
-    const experimentalAiId = moveCorpCardToArchives(
+    const programTrashByAdvancementAssetId = moveCorpCardToArchives(
       state,
       "onr_v1_323_experimental-ai",
       false,
     );
-    state.cardInstances[experimentalAiId] = {
-      ...state.cardInstances[experimentalAiId]!,
+    state.cardInstances[programTrashByAdvancementAssetId] = {
+      ...state.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 2,
     };
-    keepOnlyCorpArchivesCards(state, [experimentalAiId]);
+    keepOnlyCorpArchivesCards(state, [programTrashByAdvancementAssetId]);
 
     state = apply(
       state,
@@ -228,16 +228,16 @@ describe("V1.1.2 Full Archives Access", () => {
       MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-target"),
     );
     const programId = installRunnerProgramForTest(state, "simple_decoder");
-    const experimentalAiId = moveCorpCardToArchives(
+    const programTrashByAdvancementAssetId = moveCorpCardToArchives(
       state,
       "onr_v1_323_experimental-ai",
       false,
     );
-    state.cardInstances[experimentalAiId] = {
-      ...state.cardInstances[experimentalAiId]!,
+    state.cardInstances[programTrashByAdvancementAssetId] = {
+      ...state.cardInstances[programTrashByAdvancementAssetId]!,
       advancementCounters: 1,
     };
-    keepOnlyCorpArchivesCards(state, [experimentalAiId]);
+    keepOnlyCorpArchivesCards(state, [programTrashByAdvancementAssetId]);
 
     state = apply(
       state,

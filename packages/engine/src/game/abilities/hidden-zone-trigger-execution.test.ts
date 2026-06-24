@@ -30,7 +30,9 @@ describe("hidden zone trigger execution", () => {
       [{ clicks: 1 }],
     );
 
-    expect(handleHiddenZoneTriggerExecution(testHost(state, action), action)).toEqual({
+    expect(
+      handleHiddenZoneTriggerExecution(testHost(state, action), action),
+    ).toEqual({
       handled: false,
     });
     expect(JSON.stringify(state)).toBe(before);
@@ -44,24 +46,34 @@ describe("hidden zone trigger execution", () => {
     state.run = {
       runId: "run_1",
       attackedServerId: "rd",
-      mysteryBoxUsedSourceIdsThisRun: [],
+      hiddenStackInstallUsedSourceIdsThisRun: [],
     } as any;
     state.runner.rig.programs = [sourceId];
     state.runner.stack = [programId, resourceId];
-    state.cardInstances[sourceId] = instance(sourceId, MYSTERY_BOX_ID, "runner");
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      MYSTERY_BOX_ID,
+      "runner",
+    );
     state.cardInstances[programId] = instance(programId, "program_a", "runner");
-    state.cardInstances[resourceId] = instance(resourceId, "resource_a", "runner");
+    state.cardInstances[resourceId] = instance(
+      resourceId,
+      "resource_a",
+      "runner",
+    );
     const action = triggerAction(state, {
       cardId: sourceId,
-      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+      v1915RunnerProgramAbility: "top5_program_install",
     });
 
-    expect(handleHiddenZoneTriggerExecution(testHost(state, action), action)).toEqual({
+    expect(
+      handleHiddenZoneTriggerExecution(testHost(state, action), action),
+    ).toEqual({
       handled: true,
       actionType: "trigger_ability",
     });
 
-    expect(state.run?.mysteryBoxUsedSourceIdsThisRun).toEqual([sourceId]);
+    expect(state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([sourceId]);
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
       kind: "select_cards",
@@ -74,7 +86,7 @@ describe("hidden zone trigger execution", () => {
       programId,
     ]);
     expect(action.payload).toMatchObject({
-      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+      v1915RunnerProgramAbility: "top5_program_install",
       cardId: sourceId,
       programFound: true,
       choiceVisibility: "public",
@@ -89,16 +101,24 @@ describe("hidden zone trigger execution", () => {
     state.run = {
       runId: "run_1",
       attackedServerId: "rd",
-      mysteryBoxUsedSourceIdsThisRun: [],
+      hiddenStackInstallUsedSourceIdsThisRun: [],
     } as any;
     state.runner.rig.programs = [sourceId];
     state.runner.stack = [resourceId];
-    state.cardInstances[sourceId] = instance(sourceId, MYSTERY_BOX_ID, "runner");
-    state.cardInstances[resourceId] = instance(resourceId, "resource_a", "runner");
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      MYSTERY_BOX_ID,
+      "runner",
+    );
+    state.cardInstances[resourceId] = instance(
+      resourceId,
+      "resource_a",
+      "runner",
+    );
     const shuffledPurposes: string[] = [];
     const action = triggerAction(state, {
       cardId: sourceId,
-      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+      v1915RunnerProgramAbility: "top5_program_install",
     });
 
     handleHiddenZoneTriggerExecution(
@@ -175,11 +195,11 @@ function testHost(
     state,
     legalAction,
     constants: {
-      aujourdOuiResourceCardId: "aujourd_oui",
-      mysteryBoxId: MYSTERY_BOX_ID,
-      selfModifyingCodeId: "self_modifying_code",
-      shortCircuitResourceCardId: "short_circuit",
-      sneakPreviewId: "sneak_preview",
+      topStackTakeMatchingSourceId: "aujourd_oui",
+      randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+      stackProgramFreeInstallSourceId: "self_modifying_code",
+      stackSearchGripSourceId: "short_circuit",
+      temporaryProgramInstallSourceId: "sneak_preview",
     },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),
@@ -223,9 +243,11 @@ function definitionFor(
 ): CardDefinition {
   const card = state.cardInstances[cardId];
   if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
-  const type = card.definitionId.startsWith("program") || card.definitionId === MYSTERY_BOX_ID
-    ? "program"
-    : "resource";
+  const type =
+    card.definitionId.startsWith("program") ||
+    card.definitionId === MYSTERY_BOX_ID
+      ? "program"
+      : "resource";
   return {
     id: card.definitionId,
     title: card.definitionId,

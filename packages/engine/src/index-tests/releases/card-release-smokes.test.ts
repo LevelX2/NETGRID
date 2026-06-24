@@ -2845,7 +2845,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter" &&
+        action.payload?.runnerUtilityAbility ===
+          "successful_run_fort_counter_expose" &&
         action.payload?.cardId === iSpyId,
     );
     expect(state.spyCountersByServer?.remote_1).toBe(1);

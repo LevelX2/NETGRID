@@ -7,7 +7,7 @@ export const emergencySelfConstructImplementation: CardImplementationDefinition 
   flatlineReplacementSources: [
     {
       kind: "flatline_replacement_installed",
-      replacement: "emergency_self_construct",
+      replacement: "installed_flatline_prevention",
       cost: { kind: "trash_source" },
       visibility: "public",
     },

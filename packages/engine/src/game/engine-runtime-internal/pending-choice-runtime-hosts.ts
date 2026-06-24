@@ -1,33 +1,31 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
-    AUJOURD_OUI_RESOURCE_CARD_ID,
+    AUJOURD_OUI_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,
     COCKROACH_ID,
-    CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-    CORP_HQ_AGENDA_REVEAL_CARD_ID,
-    CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+    CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+    CORP_HQ_AGENDA_REVEAL_SOURCE,
+    CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_CARD_IDS,
-    SHORT_CIRCUIT_RESOURCE_CARD_ID,
+    SERVER_EXPOSE_PROGRAM_SOURCES,
+    SHORT_CIRCUIT_RESOURCE_SOURCE,
     SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_CARD_IDS,
-    STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+    STACK_SEARCH_PROGRAM_SOURCES,
+    STACK_TOP_REORDER_RESOURCE_SOURCE,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,
@@ -86,30 +84,30 @@ export function createPendingChoiceRuntimeHosts(
     resolveAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveCodeViralCachePurgeChoice,
+    resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveFortHqReplacementChoice,
     resolveHammerStealthLossChoice,
     resolvePdcaDamageReplacementChoice,
-    resolveInvestmentFirmCreditChoice,
-    resolveMicrotechAiInterfacePreAccessChoice,
+    resolveCorpInstalledEconomyCreditChoice,
+    resolvePreAccessTopRdReorderChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolvePattelsVirusCounterChoice,
+    resolveBrokenIceVirusCounterChoice,
     resolvePostMeatDamageHiddenResourceChoice,
-    resolvePowerGridOverloadChoice,
-    resolvePriorityWreckSpendChoice,
+    resolveHardwareTrashByCounterChoice,
+    resolveSuccessfulRunCreditLossSpendChoice,
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
     resolveSenatorialFieldTripChoice,
-    resolveSingaporeCityGridSwapChoice,
-    resolveSpeedTrapRezInterruptChoice,
+    resolveHqIceSwapChoice,
+    resolveRezInterruptJackOutChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveSystematicLayoffsAdvancementChoice,
-    resolveTooManyDoorsSecretSpendChoiceInRunModule,
+    resolveAdvancementPlacementChoice,
+    resolveSecretSpendCompareChoiceInRunModule,
     resolveTraceChoice,
-    resolveViral15ProgramTrashChoiceInRunModule,
+    resolveActiveIceProgramTrashChoiceInRunModule,
     rezCostForCard,
     rezzedBlackIceIds,
     rezzedCorpRootCardIds,
@@ -134,7 +132,7 @@ export function createPendingChoiceRuntimeHosts(
     shouldLoadLegacyRecurringCredits,
     shuffleRunnerStackAndRefreshZones,
     shuffleStateIds,
-    sneakPreviewInstallableProgramIds,
+    temporaryProgramInstallableProgramIds,
     spendCardCounter,
     spendCredits,
     spendRunnerInstallCredits,
@@ -162,7 +160,7 @@ export function createPendingChoiceRuntimeHosts(
     canInstallRunnerProgramFromZone,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     chooseCorpAgendasForPointCost,
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     corpAgendaPointTotal,
     corpZoneChoiceHandlerHost,
     creditTextForPrompt,
@@ -180,8 +178,8 @@ export function createPendingChoiceRuntimeHosts(
     hiddenZoneSearchActivationTargetHost,
     hiddenZoneSearchChoiceHandlerHost,
     hiddenZoneSearchHandlerHostBase,
-    huntClubBbsExposeOptionLabel,
-    huntClubBbsExposeTargets,
+    multiExposeInstalledCorpCardOptionLabel,
+    multiExposeInstalledCorpCardTargets,
     iceChoiceLabelForSide,
     installRunnerProgramForFree,
     installRunnerProgramFromStackWithoutClick,
@@ -190,57 +188,54 @@ export function createPendingChoiceRuntimeHosts(
     installedRunnerConnectionIds,
     installedRunnerIcebreakerIds,
     outermostIceExposures,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
     parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
-    playfulAiSplitOptions,
+    randomDiceSplitOptions,
     publicIcePositionLabelForCard,
     publicIceSelectionLabelForCard,
-    resolveAnonymousTipDerezBlackIceChoice,
+    resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
-    resolveCoreCommandJettisonIceChoice,
-    resolveDealWithMilitech,
+    resolvePayRezCostToTrashRezzedIceChoice,
+    resolveRunnerIcebreakerCounterEvent,
     resolveExposeInstalledCorpCardsChoice,
     resolveExposePreventionChoice,
-    resolveForgedActivationOrdersCorpChoice,
-    resolveForgedActivationOrdersTargetChoice,
+    resolveCorpChoiceRezOrTrashIceDecisionChoice,
+    resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveGripInstallTemporaryCreditChoice,
-    resolveHuntClubBbsExposeChoice,
+    resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
-    resolveOpenEndedMileageProgramReturnChoice,
+    resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolvePlayfulAiDiceLoopEvent,
+    resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveSecurityCodeWormChipTrashIceChoice,
+    resolveTrashUnrezzedIceChoice,
     resolveStackInstallRunCleanupChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
-    resolveV1921PlayfulAiChoice,
+    resolveRandomDiceSplitChoice,
     revealCorpRdTop,
     revealRunnerStackTop,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
     shuffleCorpCardIntoRd,
     shuffleRunnerStack,
-    startAnonymousTipDerezBlackIceChoice,
-    startCoreCommandJettisonIceChoice,
+    startDerezRezzedBlackIceChoice,
+    startPayRezCostToTrashRezzedIceChoice,
     startExposeInstalledCorpCardsChoice,
-    startForgedActivationOrdersTargetChoice,
-    startHuntClubBbsExposeChoice,
-    startOpenEndedMileageProgramReturnChoice,
+    startCorpChoiceRezOrTrashIceChoice,
+    startMultiExposeInstalledCorpCardsChoice,
+    startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
-    startSecurityCodeWormChipTrashIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
-    startV1921PlayfulAiChoice,
+    startTrashUnrezzedIceChoice,
+    startRunnerProgramFreeMemoryChoice,
+    startRandomDiceSplitChoice,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
     runnerInstalledConnectionTrashBadPublicityChoiceSource ??
@@ -283,7 +278,9 @@ export function createPendingChoiceRuntimeHosts(
     sourceCardId: CardInstanceId,
   ):
     | Extract<
-        NonNullable<NonNullable<GameState["run"]>["runStartInterventions"]>[number],
+        NonNullable<
+          NonNullable<GameState["run"]>["runStartInterventions"]
+        >[number],
         { kind: "start_run_redirect_to_source_fort" }
       >
     | undefined {
@@ -304,7 +301,9 @@ export function createPendingChoiceRuntimeHosts(
     const source = mustInstance(state.cardInstances, sourceCardId);
     const serverId = source.zone.serverId;
     if (serverId !== run.attackedServerId)
-      throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
+      throw new Error(
+        "Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.",
+      );
     if (
       source.rezzed !== true ||
       corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
@@ -346,8 +345,11 @@ export function createPendingChoiceRuntimeHosts(
   ): void {
     const choice = state.pendingChoice;
     const run = state.run;
-    if (choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")) {
-      if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
+    if (
+      choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")
+    ) {
+      if (!run)
+        throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
       if (run.runId !== runId || run.attackedServerId !== serverId)
@@ -392,8 +394,8 @@ export function createPendingChoiceRuntimeHosts(
           startOfRunRedirectDecision: "pass",
           originalServerId: originalRunStartServerId(run),
         };
-        const spendCap = mustServer(state, run.attackedServerId).root
-          .slice()
+        const spendCap = mustServer(state, run.attackedServerId)
+          .root.slice()
           .sort()
           .find(
             (cardId) =>
@@ -408,12 +410,15 @@ export function createPendingChoiceRuntimeHosts(
         continueRunAfterStartOfRunFortUtility(state, legalAction);
         return;
       }
-      const option = choice.options.find((candidate) => candidate.id === selected);
+      const option = choice.options.find(
+        (candidate) => candidate.id === selected,
+      );
       const sourceCardId =
         typeof option?.value === "string"
           ? (option.value as CardInstanceId)
           : undefined;
-      if (!sourceCardId) throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
+      if (!sourceCardId)
+        throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
       if (selected.startsWith("herman_")) {
         const server = mustServer(state, run.attackedServerId);
         const selectedSource = mustInstance(state.cardInstances, sourceCardId);
@@ -444,7 +449,8 @@ export function createPendingChoiceRuntimeHosts(
           kind: "select_cards",
           options: server.ice.map((cardId, index) => ({
             id: `card_${cardId}`,
-            label: exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
+            label:
+              exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
             publicLabel: `ICE ${index + 1}`,
             value: cardId,
           })),
@@ -467,7 +473,11 @@ export function createPendingChoiceRuntimeHosts(
         )
           throw new Error("Die Spend-Cap-Quelle kann nicht gerezzt werden.");
         state.corp.credits -= cost;
-        state.cardInstances[sourceCardId] = { ...source, rezzed: true, faceup: true };
+        state.cardInstances[sourceCardId] = {
+          ...source,
+          rezzed: true,
+          faceup: true,
+        };
         delete state.pendingChoice;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -493,7 +503,8 @@ export function createPendingChoiceRuntimeHosts(
         openRunSpendCapChoice(state, sourceCardId, legalAction);
         return;
       }
-      const targetServerId = mustInstance(state.cardInstances, sourceCardId).zone.serverId;
+      const targetServerId = mustInstance(state.cardInstances, sourceCardId)
+        .zone.serverId;
       const source = mustInstance(state.cardInstances, sourceCardId);
       const intervention = startRunRedirectInterventionForSource(
         run,
@@ -511,7 +522,10 @@ export function createPendingChoiceRuntimeHosts(
       const availableCredits = Math.max(
         0,
         state.corp.credits -
-          Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+          Math.max(
+            0,
+            Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+          ),
       );
       if (availableCredits < intervention.costCredits)
         throw new Error("Die Korp kann den Redirect nicht bezahlen.");
@@ -531,7 +545,9 @@ export function createPendingChoiceRuntimeHosts(
       continueRunAfterStartOfRunFortUtility(state, legalAction);
       return;
     }
-    if (choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")) {
+    if (
+      choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")
+    ) {
       if (!run) throw new Error("Es laeuft kein Run fuer Fort-Reorder.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
@@ -602,26 +618,26 @@ export function createPendingChoiceRuntimeHosts(
         resolveP358HiddenReplacementChoice,
         handleHiddenZoneSearchChoice,
         hiddenZoneSearchChoiceHandlerHost,
-        resolveHuntClubBbsExposeChoice,
+        resolveMultiExposeInstalledCorpCardsChoice,
         resolveExposeInstalledCorpCardsChoice,
         resolveExposePreventionChoice,
-        resolveInvestmentFirmCreditChoice,
+        resolveCorpInstalledEconomyCreditChoice,
         resolveCrashEverettDrawChoice,
-        resolvePowerGridOverloadChoice,
-        resolveSystematicLayoffsAdvancementChoice,
-        resolveAnonymousTipDerezBlackIceChoice,
-        resolveCoreCommandJettisonIceChoice,
-        resolveForgedActivationOrdersTargetChoice,
-        resolveForgedActivationOrdersCorpChoice,
-        resolveSecurityCodeWormChipTrashIceChoice,
-        resolveV1921PlayfulAiChoice,
+        resolveHardwareTrashByCounterChoice,
+        resolveAdvancementPlacementChoice,
+        resolveDerezRezzedBlackIceChoice,
+        resolvePayRezCostToTrashRezzedIceChoice,
+        resolveCorpChoiceRezOrTrashIceTargetChoice,
+        resolveCorpChoiceRezOrTrashIceDecisionChoice,
+        resolveTrashUnrezzedIceChoice,
+        resolveRandomDiceSplitChoice,
         resolveRunnerInstalledConnectionTrashBadPublicityChoice,
         resolveGripInstallTemporaryCreditChoice,
         resolveStackInstallRunCleanupChoice,
-        resolveOpenEndedMileageProgramReturnChoice,
+        resolvePaidSourceReturnToGripChoice,
         resolveRunnerHostingChoice,
         resolveIncubatorTransformChoice,
-        resolveCodeViralCachePurgeChoice,
+        resolveVirusCounterPurgePreserveChoice,
         resolveChimeraDaemonTrashChoice,
         resolveRunnerProgramReturnChoice,
         resolveRunnerPrivateLookChoice,
@@ -638,18 +654,18 @@ export function createPendingChoiceRuntimeHosts(
         resolveRunnerProgramTrashBeforeInstallChoice,
       },
       run: {
-        resolveSingaporeCityGridSwapChoice,
+        resolveHqIceSwapChoice,
         fortPassWindowHostForState,
-        resolveTooManyDoorsSecretSpendChoiceInRunModule,
+        resolveSecretSpendCompareChoiceInRunModule,
         encounterSpecialWindowHostForState,
         resolveHammerStealthLossChoice,
         fortRunSideFamiliesHostForState,
-        resolveViral15ProgramTrashChoiceInRunModule,
+        resolveActiveIceProgramTrashChoiceInRunModule,
         encounterResolutionHostForState,
         resolvePassRezzedIceProgramTrashChoiceInRunModule,
-        resolveSpeedTrapRezInterruptChoice,
+        resolveRezInterruptJackOutChoice,
         runRezWindowHostForState,
-        resolvePattelsVirusCounterChoice,
+        resolveBrokenIceVirusCounterChoice,
         runEndCleanupHost,
         resolveAardvarkInterceptionChoice,
         resolveSuccessfulRunInterventionChoiceInRunModule,
@@ -658,9 +674,9 @@ export function createPendingChoiceRuntimeHosts(
         resolveStartOfRunFortUtilityChoice,
       },
       access: {
-        resolvePriorityWreckSpendChoice,
+        resolveSuccessfulRunCreditLossSpendChoice,
         runAccessTransitionHost,
-        resolveMicrotechAiInterfacePreAccessChoice,
+        resolvePreAccessTopRdReorderChoice,
       },
       cardImplementation: {
         resolveCardImplementationAccessPaymentChoice,

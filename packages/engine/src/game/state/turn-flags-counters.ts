@@ -107,16 +107,16 @@ export function ensureRunnerTurnFlags(
     runnerActionsTakenThisTurn: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false,
+    bonusRunPending: false,
     forgoNextActionPending: false,
     forgoNextActionsPending: 0,
     runLockActionsPending: 0,
-    fangRunLockCreditCost: 0,
+    runnerRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
     delayedInstallStartTurnResolvedSourceIds: [],
-    bodyweightDataCrecheExtraRunPending: false,
-    bodyweightDataCrecheExtraRunUsedThisTurn: false,
+    successfulRunExtraRunPending: false,
+    successfulRunExtraRunUsedThisTurn: false,
   });
   flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
   flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
@@ -140,16 +140,16 @@ export function ensureRunnerTurnFlags(
   flags.runnerActionsTakenThisTurn ??= 0;
   flags.abilityUsedSourceIdsByLimitKey ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
-  flags.allNighterBonusRunPending ??= false;
+  flags.bonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;
   flags.forgoNextActionsPending ??= 0;
   flags.runLockActionsPending ??= 0;
-  flags.fangRunLockCreditCost ??= 0;
+  flags.runnerRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   flags.delayedInstallStartTurnResolvedSourceIds ??= [];
-  flags.bodyweightDataCrecheExtraRunPending ??= false;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
+  flags.successfulRunExtraRunPending ??= false;
+  flags.successfulRunExtraRunUsedThisTurn ??= false;
   flags.delayedEndTurnEffects ??= [];
   flags.corpRezzedIceThisTurn ??= 0;
   return flags;
@@ -184,6 +184,6 @@ export function ensureCorpTurnFlags(
   flags.scoredBlackOpsAgendaLastTurn ??= false;
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.counterPreventionUsedSourceIdsThisTurn ??= [];
-  flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
+  flags.scoredAgendaStartDrawChoiceResolvedSourceIds ??= [];
   return flags;
 }

@@ -1177,7 +1177,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.payload?.serverId === "hq",
     );
     expect(priorityState.pendingChoice?.source).toContain(
-      "p3_33.priority_wreck",
+      "successful_run.credit_loss_spend",
     );
     expect(priorityState.run?.breach).toBeUndefined();
     priorityState = applyChoice(priorityState, "runner", "pay_3");
@@ -1435,7 +1435,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     expect(microtechState.pendingChoice?.source).toContain(
-      "p3_33.microtech_ai_interface",
+      "pre_access.top_rd_reorder",
     );
     microtechState = applyChoice(microtechState, "runner", "cut_1");
     expect(microtechState.run?.breach?.queue[0]?.cardInstanceId).toBe(
@@ -1659,7 +1659,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       maxSelections: 1,
     });
     expect(state.pendingChoice?.source).toContain(
-      "p3_38.mystery_box_corp_review",
+      "p3_38.revealed_stack_program_install_corp_review",
     );
     expect(state.pendingChoice?.options.map((option) => option.value)).toEqual(
       expect.arrayContaining([selectedProgram, secondProgram, "done"]),
@@ -1739,7 +1739,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     expect(noProgram.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("p3_38.mystery_box_corp_review"),
+      source: expect.stringContaining("p3_38.revealed_stack_program_install_corp_review"),
     });
     noProgram = applyChoice(noProgram, "corp", "done");
     expect(noProgram.pendingChoice).toBeUndefined();
@@ -2268,7 +2268,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     state = applyChoice(state, "runner", "bid_1");
     expect(cardCounterAmount(state, hellsRunId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hellsRunTraceCreditsSpent: 1,
+      bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 0,
       traceLinkCreditSourceDefinitionIds: "onr_v1_164_hells-run",
     });
@@ -3116,8 +3116,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart);
     expect(employee.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("v1912.employee_empowerment_start_draw"),
-      prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+      source: expect.stringContaining("scored_agenda.start_draw_choice"),
+      prompt: "Scored Agenda: zusätzliche Karte ziehen?",
       minSelections: 1,
       maxSelections: 1,
     });
@@ -3167,7 +3167,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employee.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      employeeEmpowermentStartDrawDecision: "skip",
+      scoredAgendaStartDrawDecision: "skip",
     });
     const employeeSkipReplay = replayEvents(
       employeeChoiceInitial,
@@ -3209,7 +3209,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       (action) => action.type === "end_turn",
     );
     expect(nextTurnStart.pendingChoice?.source).toContain(
-      "v1912.employee_empowerment_start_draw",
+      "scored_agenda.start_draw_choice",
     );
     const hqBeforeOptionalDraw = nextTurnStart.corp.hq.length;
     const employeeDraw = applyChoice(nextTurnStart, "corp", "draw");
@@ -3218,7 +3218,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(employeeDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      employeeEmpowermentStartDrawDecision: "draw",
+      scoredAgendaStartDrawDecision: "draw",
       drawnCards: 1,
       resolvedEffects: [
         expect.objectContaining({

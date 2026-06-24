@@ -5,8 +5,8 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
-import { markCorporateRetreatAvailableOnScore } from "./corporate-retreat-sequence";
-import { resolveCorporateWarOnScore } from "./corporate-war-sequence";
+import { markScoredAgendaInstallRezCreditAvailableOnScore } from "./scored-agenda-install-rez-credit-sequence";
+import { resolveScoreCreditSwingOnScore } from "./score-credit-swing-sequence";
 import { applyDirectScoreEconomyEffects } from "./direct-score-economy-effects";
 import { applyOveradvanceScoreEffects } from "./overadvance-score-effects";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
@@ -95,15 +95,15 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
         ),
     },
     {
-      id: "corporate_retreat_score_effect",
-      kind: "corporate_retreat_disable_on_rez_or_install",
+      id: "scored_agenda_install_rez_credit_score_effect",
+      kind: "scored_agenda_credit_until_install_or_rez",
       mode: "agenda_kind",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
         if (
-          scoredAgenda?.kind !== "corporate_retreat_disable_on_rez_or_install"
+          scoredAgenda?.kind !== "scored_agenda_credit_until_install_or_rez"
         )
           return;
-        markCorporateRetreatAvailableOnScore(host, cardId, legalAction);
+        markScoredAgendaInstallRezCreditAvailableOnScore(host, cardId, legalAction);
       },
     },
     {
@@ -116,7 +116,7 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           "score_credit_swing_if_corp_credit_threshold_met"
         )
           return;
-        resolveCorporateWarOnScore(host, definition, legalAction, scoredAgenda);
+        resolveScoreCreditSwingOnScore(host, definition, legalAction, scoredAgenda);
       },
     },
   ];

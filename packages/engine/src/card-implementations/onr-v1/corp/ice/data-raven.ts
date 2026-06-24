@@ -19,7 +19,7 @@ export const dataRavenImplementation: CardImplementationDefinition = {
         {
           kind: "add_counter",
           recipient: "runner",
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           amount: 1,
           visibility: "public",
         },
@@ -28,7 +28,7 @@ export const dataRavenImplementation: CardImplementationDefinition = {
   ],
   runnerCounterEffects: [
     {
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       removeCost: 1,
       startOfRunnerTurn: {
         kind: "add_tags",

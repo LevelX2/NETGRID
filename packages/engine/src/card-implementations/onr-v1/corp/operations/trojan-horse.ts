@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const trojanHorseImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_306_trojan-horse",
   corpUtility: {
-    kind: "trojan_horse_tag",
+    kind: "encounter_tag",
     visibility: "public",
   },
 };

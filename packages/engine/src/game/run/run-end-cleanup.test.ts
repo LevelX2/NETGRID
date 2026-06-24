@@ -13,7 +13,7 @@ import {
   clearEncounterTemporaryTraceCredits,
   handleRunEndCleanup,
   recordDupreBreakUsage,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
@@ -272,7 +272,7 @@ function makeHost(options: {
       isTokyoUnsuccessfulRunSource: (cardId) => tokyoSourceIds.has(cardId),
     },
     followups: {
-      applyBodyweightDataCrecheSuccessfulRun: () => ({ handled: false }),
+      applySuccessfulRunExtraRunFollowup: () => ({ handled: false }),
       cleanupDelayedSuccessfulRunTemporaryIce: () => {
         cleanupDelayedCount += 1;
       },
@@ -443,7 +443,7 @@ describe("run end cleanup", () => {
           attackedServerId: "remote_1",
           phase: "movement",
           position: { kind: "server", serverId: "remote_1" },
-          grantAllNighterBonusRunOnFinish: true,
+          grantBonusRunOnFinish: true,
         } as unknown as NonNullable<GameState["run"]>,
       });
 
@@ -454,7 +454,7 @@ describe("run end cleanup", () => {
       );
 
       expect(result.followupRunChoiceStarted).toBe(true);
-      expect(fixture.state.runnerTurnFlags?.allNighterBonusRunPending).toBe(true);
+      expect(fixture.state.runnerTurnFlags?.bonusRunPending).toBe(true);
     }
   });
 
@@ -757,7 +757,7 @@ describe("run end cleanup", () => {
         attackedServerId: "remote_1",
         phase: "movement",
         position: { kind: "server", serverId: "remote_1" },
-        oliviaSalazarTemporaryRezzedIceIds: ["ice_1"],
+        temporaryDiscountedRezzedIceIds: ["ice_1"],
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -767,7 +767,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.cardInstances.ice_1?.rezzed).toBe(false);
     expect(fixture.state.cardInstances.ice_1?.faceup).toBe(false);
     expect(fixture.legalAction.payload).toMatchObject({
-      oliviaSalazarRunEndDerez: true,
+      temporaryDiscountedRunEndDerez: true,
       derezzedCount: 1,
     });
   });
@@ -806,10 +806,10 @@ describe("run end cleanup", () => {
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
 
     fixture.state.pendingChoice = {
-      choiceId: "v181_pattels_virus_8",
+      choiceId: "broken_ice_virus_counter_8",
       side: "runner",
-      source: "v181.pattels_virus:ice_1:8:amount=2",
-      prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
+      source: "broken_ice.virus_counter:ice_1:8:amount=2",
+      prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
       kind: "select_cards",
       options: [
         {
@@ -825,7 +825,7 @@ describe("run end cleanup", () => {
       visibility: "public",
     };
 
-    resolvePattelsVirusCounterChoice(
+    resolveBrokenIceVirusCounterChoice(
       fixture.host,
       fixture.legalAction,
       {
@@ -833,14 +833,14 @@ describe("run end cleanup", () => {
         actionId: "runner.resolve_choice",
         type: "resolve_choice",
         selectedChoices: { selectedOptionIds: ["card_ice_1"] },
-      } as unknown as Parameters<typeof resolvePattelsVirusCounterChoice>[2],
+      } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2],
     );
 
     expect(fixture.state.pendingChoice).toBeUndefined();
     expect(fixture.state.cardInstances.ice_1?.counters?.virus).toBe(2);
     expect(fixture.legalAction.payload).toMatchObject({
-      v181RunnerProgramAbility: "pattels_virus_counter",
-      pattelsVirusCounterAdded: 2,
+      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      brokenIceVirusCounterAdded: 2,
       targetCardDefinitionId: "ice_def",
       remainingCounters: 2,
       choiceVisibility: "public",
@@ -856,7 +856,7 @@ describe("run end cleanup", () => {
     expect(fixture.state.corp.credits).toBe(7);
     expect(fixture.state.runnerTurnFlags?.successfulRunThisTurn).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
-      tokyoChibaInfightingBonus: true,
+      unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId: "tokyo_def",
       serverId: "remote_1",
       corpCreditsGained: 3,

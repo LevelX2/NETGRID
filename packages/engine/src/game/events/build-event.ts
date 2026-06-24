@@ -346,7 +346,7 @@ function revealForPublicEvent(
     legalAction.type === "activated_card_ability" ||
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "agendaAbility", [
-        "v1922_corporate_retreat",
+        "scored_agenda_credit_until_install_or_rez",
       ])) ||
     (legalAction.side === "runner" &&
       (legalAction.type === "gain_credit" ||

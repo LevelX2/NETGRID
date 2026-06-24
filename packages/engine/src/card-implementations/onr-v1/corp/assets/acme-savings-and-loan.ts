@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const acmeSavingsAndLoanImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
   remainingReplacementLongtail: {
-    kind: "acme_savings_and_loan_debt",
+    kind: "obligation_debt",
     agendaPointRezCost: 1,
     gainCreditsOnRez: 12,
     endTurnCreditDebt: 1,

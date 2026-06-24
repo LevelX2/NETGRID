@@ -28,7 +28,7 @@ export type EffectiveAgendaDifficultyDependencies = {
   // Remaining agenda-difficulty rules still live in the host. Injecting them keeps
   // this module free of index.ts imports while preserving current ordering.
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
-  serverDifficultyIncreaseFromFaitAccompli: (
+  serverDifficultyIncreaseFromRunCounters: (
     state: GameState,
     agendaId: CardInstanceId,
   ) => number;
@@ -98,7 +98,7 @@ export function effectiveAgendaDifficulty(
     agendaId,
     definition,
   );
-  difficulty += deps.serverDifficultyIncreaseFromFaitAccompli(state, agendaId);
+  difficulty += deps.serverDifficultyIncreaseFromRunCounters(state, agendaId);
   difficulty -= deps.serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
 }

@@ -149,14 +149,14 @@ describe("counter utility trigger execution", () => {
       "runner_identity_def",
       "runner",
     );
-    setCounter(state, identityId, "data_raven", 1);
+    setCounter(state, identityId, "trace_tag_counter", 1);
     const action = triggerAction(
       state,
       "runner",
       {
         runnerAbility: "remove_runner_trace_counter",
         cardId: identityId,
-        counterType: "data_raven",
+        counterType: "trace_tag_counter",
         removeCounterAmount: 1,
         counterRemoveCreditCost: 2,
       },
@@ -166,9 +166,9 @@ describe("counter utility trigger execution", () => {
     handleCounterUtilityTriggerExecution(
       testHost(state, {
         traceCounterEffect: {
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           removeCost: 2,
-          sourceDefinitionId: "data_raven_source",
+          sourceDefinitionId: "trace_tag_counter_source",
         },
       }),
       action,
@@ -176,10 +176,10 @@ describe("counter utility trigger execution", () => {
 
     expect(state.runner.clicks).toBe(1);
     expect(state.runner.credits).toBe(3);
-    expect(counter(state, identityId, "data_raven")).toBe(0);
+    expect(counter(state, identityId, "trace_tag_counter")).toBe(0);
     expect(action.payload).toMatchObject({
-      sourceDefinitionId: "data_raven_source",
-      counterType: "data_raven",
+      sourceDefinitionId: "trace_tag_counter_source",
+      counterType: "trace_tag_counter",
       removedCounterAmount: 1,
       remainingCounters: 0,
       runnerCreditsAfter: 3,
@@ -373,7 +373,7 @@ function testHost(
           runnerActionsTakenThisTurn: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
-          allNighterBonusRunPending: false,
+          bonusRunPending: false,
         }),
       trashInstalledCardToHeap: (stateToMutate, cardId) => {
         stateToMutate.runner.rig.resources =

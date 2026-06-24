@@ -1,8 +1,5 @@
-import type {
-  DamageType,
-  ImminentEvent,
-} from "@netgrid/shared";
-import type { CardEffectDamageResult } from "../../ability-engine/effect-interpreter";
+import type { DamageType, ImminentEvent } from "@netgrid/shared";
+import type { CardEffectDamageResult } from "../../ability-engine/effect-execution-types";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
 import {
   createDamageImminentEvent,
@@ -43,7 +40,9 @@ export type DamageCardImplementationRuntimeDeps = Pick<
   DamageRuntimeDepsKey
 >;
 
-type RuntimeState = Parameters<DamageCardImplementationRuntimeDeps["damageRunner"]>[0];
+type RuntimeState = Parameters<
+  DamageCardImplementationRuntimeDeps["damageRunner"]
+>[0];
 type RuntimeLegalAction = Parameters<
   DamageCardImplementationRuntimeDeps["damageRunner"]
 >[1];
@@ -117,9 +116,7 @@ export function createDamageCardImplementationRuntimeDeps(
       source: `operation:${sourceDefinitionId}`,
     };
     const event = host.damage.createDamageImminentEvent(state, request);
-    if (
-      host.damage.openDamageResolutionWindow(state, event, legalAction)
-    ) {
+    if (host.damage.openDamageResolutionWindow(state, event, legalAction)) {
       return {
         resolved: false,
         damageType,
@@ -134,9 +131,9 @@ export function createDamageCardImplementationRuntimeDeps(
     const publicPayload = damageSummaryPublicPayload(summary);
     if (typeof event.payload.baseDamageAmount === "number")
       publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
-    if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-      publicPayload.bioweaponsEngineeringModifier =
-        event.payload.bioweaponsEngineeringModifier;
+    if (typeof event.payload.damageAmountModifier === "number")
+      publicPayload.damageAmountModifier =
+        event.payload.damageAmountModifier;
     return {
       resolved: true,
       damageType: summary.damageType,
@@ -185,7 +182,9 @@ export function createDamageCardImplementationRuntimeDeps(
 
 function runnerWasDamagedDuringLastThreeActions(state: RuntimeState): boolean {
   const flags = state.runnerTurnFlags;
-  const lastDamageOrdinal = Math.floor(flags?.lastDamageRunnerActionOrdinal ?? 0);
+  const lastDamageOrdinal = Math.floor(
+    flags?.lastDamageRunnerActionOrdinal ?? 0,
+  );
   if (lastDamageOrdinal <= 0) return false;
   const actionsTaken = Math.floor(flags?.runnerActionsTakenThisTurn ?? 0);
   return actionsTaken - lastDamageOrdinal < 3;

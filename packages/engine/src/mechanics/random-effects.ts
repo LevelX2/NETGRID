@@ -1,25 +1,17 @@
-import { schlaghundImplementation } from "../card-implementations/onr-v1/corp/assets/schlaghund";
-import { rioDeJaneiroCityGridImplementation } from "../card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid";
 import { aiBoonImplementation } from "../card-implementations/onr-v1/runner/programs/ai-boon";
 import { boardwalkImplementation } from "../card-implementations/onr-v1/runner/programs/boardwalk";
 import { questForCattekinImplementation } from "../card-implementations/onr-v1/runner/resources/quest-for-cattekin";
 
-export const AI_BOON_RANDOM_BREAKER_CARD_ID =
+export const AI_BOON_RANDOM_BREAKER_SOURCE =
   aiBoonImplementation.cardDefinitionId;
 
-export const BOARDWALK_RANDOM_PROGRAM_CARD_ID =
+export const BOARDWALK_RANDOM_PROGRAM_SOURCE =
   boardwalkImplementation.cardDefinitionId;
 
-export const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID =
+export const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE =
   questForCattekinImplementation.cardDefinitionId;
 
-export const SCHLAGHUND_RANDOM_ASSET_CARD_ID =
-  schlaghundImplementation.cardDefinitionId;
-
-export const RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID =
-  rioDeJaneiroCityGridImplementation.cardDefinitionId;
-
-export const RUNNER_RANDOM_PROGRAM_CARD_IDS = new Set([
-  AI_BOON_RANDOM_BREAKER_CARD_ID,
-  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
+export const RUNNER_RANDOM_PROGRAM_SOURCES = new Set([
+  AI_BOON_RANDOM_BREAKER_SOURCE,
+  BOARDWALK_RANDOM_PROGRAM_SOURCE,
 ]);

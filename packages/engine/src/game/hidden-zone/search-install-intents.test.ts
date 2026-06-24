@@ -5,29 +5,28 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  buildMysteryBoxNoInstallResolvedPayload,
-  buildMysteryBoxSearchInstallResolvedPayload,
-  buildSelfModifyingCodeMemoryDeferredPayload,
-  buildSelfModifyingCodeResolvedPayload,
-  buildSneakPreviewSearchInstallResolvedPayload,
-  createMysteryBoxNoInstallIntent,
-  resolveMysteryBoxSearchInstallIntent,
-  resolveSelfModifyingCodeSearchInstallIntent,
-  resolveSneakPreviewSearchInstallIntent,
+  buildRevealedStackNoProgramInstallResolvedPayload,
+  buildRevealedStackProgramInstallResolvedPayload,
+  buildPaidStackProgramInstallMemoryDeferredPayload,
+  buildPaidStackProgramInstallResolvedPayload,
+  buildTemporaryProgramSearchInstallResolvedPayload,
+  createRevealedStackNoProgramInstallIntent,
+  resolveRevealedStackProgramInstallIntent,
+  resolvePaidStackProgramInstallIntent,
+  resolveTemporaryProgramSearchInstallIntent,
 } from "./search-install-intents";
 
 const sourceDefinitionId = "onr_v1_059_self-modifying-code" as CardDefinitionId;
 const selectedCardId = "stack_program" as CardInstanceId;
 const selectedDefinitionId = "simple_decoder" as CardDefinitionId;
-const sneakPreviewDefinitionId =
-  "onr_v1_089_sneak-preview" as CardDefinitionId;
-const mysterySourceCardId = "mystery_box" as CardInstanceId;
+const sneakPreviewDefinitionId = "onr_v1_089_sneak-preview" as CardDefinitionId;
+const mysterySourceCardId = "revealed_stack_program_install" as CardInstanceId;
 
 function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
   return {
     choiceId: "choice_1",
     side: "runner",
-    source: "v1911.self_modifying_code_install_program:source_card:8",
+    source: "v1911.hidden_stack_program_install:source_card:8",
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: [],
@@ -41,7 +40,7 @@ function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
 
 describe("hidden-zone search/install intents", () => {
   it("builds an SMC search/install plan for a legal stack program", () => {
-    const plan = resolveSelfModifyingCodeSearchInstallIntent({
+    const plan = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -75,12 +74,14 @@ describe("hidden-zone search/install intents", () => {
       shouldOpenMemoryChoice: false,
       canAttemptInstall: true,
     });
-    expect(buildSelfModifyingCodeResolvedPayload(plan, {
-      installed: true,
-    })).toEqual({
+    expect(
+      buildPaidStackProgramInstallResolvedPayload(plan, {
+        installed: true,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       selectedCount: 1,
@@ -91,7 +92,7 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("marks SMC memory deferral without installing or mutating", () => {
-    const plan = resolveSelfModifyingCodeSearchInstallIntent({
+    const plan = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -109,12 +110,14 @@ describe("hidden-zone search/install intents", () => {
     });
 
     expect(plan.shouldOpenMemoryChoice).toBe(true);
-    expect(buildSelfModifyingCodeMemoryDeferredPayload(plan, {
-      installDeferredForMemory: true,
-    })).toEqual({
+    expect(
+      buildPaidStackProgramInstallMemoryDeferredPayload(plan, {
+        installDeferredForMemory: true,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       sourceDefinitionId,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       selectedCount: 1,
@@ -127,7 +130,7 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid SMC selections and reports blocked install plans", () => {
     expect(() =>
-      resolveSelfModifyingCodeSearchInstallIntent({
+      resolvePaidStackProgramInstallIntent({
         choice: choice(),
         selectedCardId,
         stackCardIds: ["other_card" as CardInstanceId],
@@ -143,7 +146,7 @@ describe("hidden-zone search/install intents", () => {
       }),
     ).toThrow("Die gewählte Karte liegt nicht im Stack.");
 
-    const blocked = resolveSelfModifyingCodeSearchInstallIntent({
+    const blocked = resolvePaidStackProgramInstallIntent({
       choice: choice(),
       selectedCardId,
       stackCardIds: [selectedCardId],
@@ -160,9 +163,11 @@ describe("hidden-zone search/install intents", () => {
     });
 
     expect(blocked.canAttemptInstall).toBe(false);
-    expect(buildSelfModifyingCodeResolvedPayload(blocked, {
-      installed: false,
-    })).toMatchObject({
+    expect(
+      buildPaidStackProgramInstallResolvedPayload(blocked, {
+        installed: false,
+      }),
+    ).toMatchObject({
       searchDestination: "runner_stack",
       installed: false,
       installBlockedReason: "insufficient_credits",
@@ -170,9 +175,9 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("builds a Sneak Preview stack search/install plan", () => {
-    const plan = resolveSneakPreviewSearchInstallIntent({
+    const plan = resolveTemporaryProgramSearchInstallIntent({
       choice: choice({
-        source: "v1911.sneak_preview_stack_install:8",
+        source: "v1911.temporary_program_install_stack_install:8",
       }),
       selectedCardId,
       legalTargetIdsForSourceZone: () => [selectedCardId],
@@ -196,9 +201,9 @@ describe("hidden-zone search/install intents", () => {
       temporaryReturnNeeded: true,
       isCardImplementationChoice: false,
     });
-    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+    expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "temporary_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
       searchReveal: "public",
       searchDestination: "install_program",
@@ -213,9 +218,9 @@ describe("hidden-zone search/install intents", () => {
   });
 
   it("builds a Sneak Preview heap search/install plan without shuffle", () => {
-    const plan = resolveSneakPreviewSearchInstallIntent({
+    const plan = resolveTemporaryProgramSearchInstallIntent({
       choice: choice({
-        source: "v1911.sneak_preview_heap_install:8",
+        source: "v1911.temporary_program_install_heap_install:8",
       }),
       selectedCardId,
       legalTargetIdsForSourceZone: () => [selectedCardId],
@@ -238,9 +243,9 @@ describe("hidden-zone search/install intents", () => {
       temporaryReturnNeeded: true,
       isCardImplementationChoice: false,
     });
-    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+    expect(buildTemporaryProgramSearchInstallResolvedPayload(plan)).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "temporary_program_install",
       sourceDefinitionId: sneakPreviewDefinitionId,
       searchReveal: "hidden",
       searchDestination: "install_program",
@@ -254,9 +259,9 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid Sneak Preview program selections", () => {
     expect(() =>
-      resolveSneakPreviewSearchInstallIntent({
+      resolveTemporaryProgramSearchInstallIntent({
         choice: choice({
-          source: "v1911.sneak_preview_stack_install:8",
+          source: "v1911.temporary_program_install_stack_install:8",
         }),
         selectedCardId,
         legalTargetIdsForSourceZone: () => ["other_card" as CardInstanceId],
@@ -275,7 +280,7 @@ describe("hidden-zone search/install intents", () => {
       "top_event_2",
       "top_event_3",
     ] as CardInstanceId[];
-    const plan = createMysteryBoxNoInstallIntent({
+    const plan = createRevealedStackNoProgramInstallIntent({
       sourceCardId: mysterySourceCardId,
       topCardIds,
       programCandidateIds: [],
@@ -294,9 +299,11 @@ describe("hidden-zone search/install intents", () => {
       installedProgramCount: 0,
       selfTrashed: false,
     });
-    expect(buildMysteryBoxNoInstallResolvedPayload(plan, {
-      randomCounterAfter: 4,
-    })).toEqual({
+    expect(
+      buildRevealedStackNoProgramInstallResolvedPayload(plan, {
+        randomCounterAfter: 4,
+      }),
+    ).toEqual({
       programFound: false,
       installedProgramCount: 0,
       selfTrashed: false,
@@ -310,9 +317,9 @@ describe("hidden-zone search/install intents", () => {
       "top_event",
       "second_program",
     ] as CardInstanceId[];
-    const plan = resolveMysteryBoxSearchInstallIntent({
+    const plan = resolveRevealedStackProgramInstallIntent({
       choice: choice({
-        source: `v1915.mystery_box:${mysterySourceCardId}:${topCardIds.join(",")}:8`,
+        source: `v1915.revealed_stack_program_install:${mysterySourceCardId}:${topCardIds.join(",")}:8`,
       }),
       selectedCardId,
       topCardIds,
@@ -338,12 +345,14 @@ describe("hidden-zone search/install intents", () => {
       installedProgramCount: 1,
       selfTrashed: true,
     });
-    expect(buildMysteryBoxSearchInstallResolvedPayload(plan, {
-      randomCounterAfter: 5,
-    })).toEqual({
-      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+    expect(
+      buildRevealedStackProgramInstallResolvedPayload(plan, {
+        randomCounterAfter: 5,
+      }),
+    ).toEqual({
+      v1915RunnerProgramAbility: "top5_program_install",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "mystery_box_program_install",
+      hiddenZoneAction: "revealed_stack_program_install",
       installedProgramDefinitionId: selectedDefinitionId,
       installedProgramCount: 1,
       selfTrashed: true,
@@ -353,9 +362,9 @@ describe("hidden-zone search/install intents", () => {
 
   it("rejects invalid Mystery Box top-five install selections", () => {
     expect(() =>
-      resolveMysteryBoxSearchInstallIntent({
+      resolveRevealedStackProgramInstallIntent({
         choice: choice({
-          source: `v1915.mystery_box:${mysterySourceCardId}:top_event:8`,
+          source: `v1915.revealed_stack_program_install:${mysterySourceCardId}:top_event:8`,
         }),
         selectedCardId,
         topCardIds: ["top_event" as CardInstanceId],
@@ -368,9 +377,9 @@ describe("hidden-zone search/install intents", () => {
     ).toThrow("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
 
     expect(() =>
-      resolveMysteryBoxSearchInstallIntent({
+      resolveRevealedStackProgramInstallIntent({
         choice: choice({
-          source: `v1915.mystery_box:${mysterySourceCardId}:${selectedCardId}:8`,
+          source: `v1915.revealed_stack_program_install:${mysterySourceCardId}:${selectedCardId}:8`,
         }),
         selectedCardId,
         topCardIds: [selectedCardId],
@@ -380,6 +389,6 @@ describe("hidden-zone search/install intents", () => {
           type: "event",
         },
       }),
-    ).toThrow("Mystery Box kann nur ein Programm installieren.");
+    ).toThrow("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
   });
 });

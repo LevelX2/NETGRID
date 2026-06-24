@@ -11,7 +11,7 @@ describe("run window registry", () => {
     expect(new Set(resolverIds).size).toBe(resolverIds.length);
     expect(resolverIds.sort()).toEqual([
       "fort_pass_advancement_after_passing_last_ice",
-      "singapore_city_grid_fort_ice_swap",
+      "hq_ice_swap_run_window",
       "start_run_ice_reposition",
     ]);
   });
@@ -24,7 +24,7 @@ describe("run window registry", () => {
       ]).sort(),
     ).toEqual([
       ["fort_pass_advancement_after_passing_last_ice", "corp_fort_pass_window"],
-      ["singapore_city_grid_fort_ice_swap", "corp_root_rez_window"],
+      ["hq_ice_swap_run_window", "corp_root_rez_window"],
       ["start_run_ice_reposition", "corp_root_rez_window"],
     ]);
   });
@@ -48,7 +48,7 @@ describe("run window registry", () => {
         window: "corp_fort_pass_window",
       },
       {
-        id: "singapore_city_grid_fort_ice_swap",
+        id: "hq_ice_swap_run_window",
         window: "corp_root_rez_window",
       },
       { id: "start_run_ice_reposition", window: "corp_root_rez_window" },

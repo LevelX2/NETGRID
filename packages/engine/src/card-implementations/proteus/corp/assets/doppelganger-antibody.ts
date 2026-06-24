@@ -15,7 +15,7 @@ export const doppelgangerAntibodyImplementation: CardImplementationDefinition = 
       effects: [
         {
           kind: "add_runner_counter",
-          counterType: "doppelganger_antibody",
+          counterType: "link_reduction_counter",
           amount: 1,
           visibility: "hidden_info_barrier",
         },
@@ -24,7 +24,7 @@ export const doppelgangerAntibodyImplementation: CardImplementationDefinition = 
   ],
   runnerCounterEffects: [
     {
-      counterType: "doppelganger_antibody",
+      counterType: "link_reduction_counter",
       removeCost: 4,
       startOfRunnerTurn: {
         kind: "lose_credits",

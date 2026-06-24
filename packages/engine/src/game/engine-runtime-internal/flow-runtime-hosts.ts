@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps } from "./runtime-shared";
 import { createAccessFlowRuntimeHosts } from "./access-flow-runtime-hosts";
 import { createDamageTraceRuntimeHosts } from "./damage-trace-runtime-hosts";
@@ -7,7 +6,7 @@ import { createInstallRezRuntimeHosts } from "./install-rez-runtime-hosts";
 import { createRunFlowRuntimeHosts } from "./run-flow-runtime-hosts";
 
 export function createFlowRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, any> = {};
+  const runtime: Record<string, unknown> = {};
   Object.assign(
     runtime,
     createInstallRezRuntimeHosts(deps),

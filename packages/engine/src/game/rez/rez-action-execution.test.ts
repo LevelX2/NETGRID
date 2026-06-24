@@ -42,8 +42,8 @@ function hostFor(calls: string[]): RezActionExecutionHost {
       executeRezCard: (cardId, rootRez, legalAction) => {
         calls.push(`rez:${cardId}:${rootRez}:${legalAction.type}`);
       },
-      expireCorporateRetreatInstallCreditAbilities: () => {
-        calls.push("expire_corporate_retreat");
+      expireScoredAgendaInstallRezCreditAbilities: () => {
+        calls.push("expire_scored_agenda_install_rez_credit");
       },
     },
     run: {
@@ -82,7 +82,7 @@ describe("rez-action-execution", () => {
     expect(calls).toEqual([]);
   });
 
-  it("delegates rez_ice and expires Corporate Retreat install credits", () => {
+  it("delegates rez_ice and expires scored Agenda install/rez credits", () => {
     const calls: string[] = [];
     const legalAction = rezAction({
       cardId: "root_asset_1" as CardInstanceId,
@@ -94,7 +94,7 @@ describe("rez-action-execution", () => {
     expect(result).toEqual({ handled: true });
     expect(calls).toEqual([
       "rez:root_asset_1:true:rez_ice",
-      "expire_corporate_retreat",
+      "expire_scored_agenda_install_rez_credit",
     ]);
   });
 

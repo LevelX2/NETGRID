@@ -13,9 +13,9 @@ type HostFn<T = unknown> = (...args: any[]) => T;
 export type CreditEconomyRunnerDrawSummary = {
   drawnCount: number;
   drawnCardIds?: CardInstanceId[];
-  citySurveillanceSourceCount: number;
-  citySurveillanceCreditsPaid: number;
-  citySurveillanceTagsAdded: number;
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
   crashEverettSourceCardId?: CardInstanceId;
   crashEverettChoiceOpened?: boolean;
 };
@@ -39,16 +39,20 @@ export type CreditEconomyExecutionHost = {
     hasCorpUtilityKind: (
       state: GameState,
       cardId: CardInstanceId,
-      kind: "move_installed_corp_card_to_hq",
+      kind:
+        | "move_installed_corp_card_to_hq"
+        | "shuffle_hq_into_rd_then_draw_same_count",
     ) => boolean;
     uniqueDirectLongtailImplementationForCard: (
       state: GameState,
       cardId: CardInstanceId,
-    ) => {
-      kind?: string;
-      agendaPointCost?: number;
-      gainCredits?: number;
-    } | undefined;
+    ) =>
+      | {
+          kind?: string;
+          agendaPointCost?: number;
+          gainCredits?: number;
+        }
+      | undefined;
   };
   credits: {
     gain: (state: GameState, side: Side, amount: number) => void;
@@ -117,18 +121,18 @@ export type CreditEconomyExecutionHost = {
   };
   hiddenZone: {
     resolveV1911RunnerHiddenZoneAbility: HostFn<void>;
-    resolveV1911CorporateDownsizing: HostFn<void>;
+    resolveScoredAgendaCorpRdTopReveal: HostFn<void>;
     revealRunnerStackTop: HostFn<void>;
     revealCorpRdTop: HostFn<void>;
     resolveReschedulerHqShuffleDraw: HostFn<void>;
     startCorpAssetRdTopReorderChoice: HostFn<void>;
   };
   delegates: {
-    shouldOpenInvestmentFirmCreditChoice: (
+    shouldOpenCorpInstalledEconomyCreditChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => boolean;
-    startInvestmentFirmCreditChoice: (
+    startCorpInstalledEconomyCreditChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => void;
@@ -150,19 +154,12 @@ export type CreditEconomyExecutionHost = {
     nextRandom: (state: GameState, purpose: string) => number;
   };
   constants: {
-    COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
-    CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
-    HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: ReadonlySet<string>;
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: ReadonlySet<string>;
+    COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
-    COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
-    INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID: string;
-    ACTION_ASSET_CARD_IDS: ReadonlySet<string>;
-    RUNNER_RANDOM_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
+    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
+    RUNNER_RANDOM_PROGRAM_SOURCES: ReadonlySet<string>;
+    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
   };
 };
@@ -180,19 +177,16 @@ export function handleCreditEconomyExecution(
 
   const { state } = host;
   host.actions.spendClick(state, legalAction.side);
-  if (host.delegates.shouldOpenInvestmentFirmCreditChoice(state, legalAction)) {
-    host.delegates.startInvestmentFirmCreditChoice(state, legalAction);
+  if (host.delegates.shouldOpenCorpInstalledEconomyCreditChoice(state, legalAction)) {
+    host.delegates.startCorpInstalledEconomyCreditChoice(state, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.v1911HiddenZoneAbility) {
     host.hiddenZone.resolveV1911RunnerHiddenZoneAbility(state, legalAction);
     return handled(legalAction);
   }
-  if (
-    legalAction.payload?.agendaAbility ===
-    "v1911_corporate_downsizing_reveal_rd_top"
-  ) {
-    host.hiddenZone.resolveV1911CorporateDownsizing(state, legalAction);
+  if (legalAction.payload?.agendaAbility === "scored_agenda_reveal_rd_top") {
+    host.hiddenZone.resolveScoredAgendaCorpRdTopReveal(state, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.v1912CounterAbility === "reveal_stack_top") {
@@ -204,16 +198,12 @@ export function handleCreditEconomyExecution(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
     if (!state.runner.rig.programs.includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.12 Counter-Faehigkeit ist nicht installiert.",
-      );
+      throw new Error("Die V1.9.12 Counter-Faehigkeit ist nicht installiert.");
     if (
       host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID
+      host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE
     )
-      throw new Error(
-        "Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.",
-      );
+      throw new Error("Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.");
     host.hiddenZone.revealRunnerStackTop(state, legalAction);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -226,7 +216,9 @@ export function handleCreditEconomyExecution(
       throw new Error("Nur der Runner darf Crying-Counter entfernen.");
     const sourceCardId = String(legalAction.payload?.cardId ?? "");
     if (sourceCardId !== state.runner.identity)
-      throw new Error("Crying-Counter liegen auf dem Runner-Identitaetsstatus.");
+      throw new Error(
+        "Crying-Counter liegen auf dem Runner-Identitaetsstatus.",
+      );
     if (host.counters.cardCounter(state, state.runner.identity, "crying") <= 0)
       throw new Error("Es ist kein Crying-Counter vorhanden.");
     const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
@@ -258,8 +250,7 @@ export function handleCreditEconomyExecution(
     return handled(legalAction);
   }
   if (
-    legalAction.payload?.v1917AssetAbility ===
-    "rescheduler_hq_shuffle_draw"
+    legalAction.payload?.v1917AssetAbility === "rescheduler_hq_shuffle_draw"
   ) {
     if (legalAction.side !== "corp")
       throw new Error("Nur die Korp darf Rescheduler nutzen.");
@@ -269,55 +260,14 @@ export function handleCreditEconomyExecution(
     if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
       throw new Error("Rescheduler ist nicht rezzed installiert.");
     if (
-      host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.CORP_HQ_SHUFFLE_DRAW_CARD_ID
+      !host.cards.hasCorpUtilityKind(
+        state,
+        sourceCardId,
+        "shuffle_hq_into_rd_then_draw_same_count",
+      )
     )
       throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
-    host.hiddenZone.resolveReschedulerHqShuffleDraw(state, legalAction, sourceCardId);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1917AssetAbility === "reveal_rd_top") {
-    if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.",
-      );
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Reveal-Faehigkeit passt nicht zur Karte.",
-      );
-    host.hiddenZone.revealCorpRdTop(state, legalAction);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneAction: "v1917_corp_reveal_rd_top",
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1917AssetAbility === "reorder_rd_top2") {
-    if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.",
-      );
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.17-Hidden-Zone-Reorder-Faehigkeit passt nicht zur Karte.",
-      );
-    host.hiddenZone.startCorpAssetRdTopReorderChoice(
+    host.hiddenZone.resolveReschedulerHqShuffleDraw(
       state,
       legalAction,
       sourceCardId,
@@ -362,15 +312,15 @@ export function handleCreditEconomyExecution(
   }
   if (
     legalAction.payload?.v1951CorpUtilityAbility ===
-    "cowboy_sysop_uninstall_corp_card_to_hq"
+    "corp_installed_card_to_hq"
   ) {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Cowboy Sysop nutzen.");
+      throw new Error("Nur die Korp darf diese installierte Karte bewegen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
     if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error("Cowboy Sysop ist nicht rezzed installiert.");
+      throw new Error("Die Corp-Utility-Quelle ist nicht rezzed installiert.");
     if (
       !host.cards.hasCorpUtilityKind(
         state,
@@ -378,12 +328,12 @@ export function handleCreditEconomyExecution(
         "move_installed_corp_card_to_hq",
       )
     )
-      throw new Error("Die Cowboy-Sysop-Faehigkeit passt nicht zur Karte.");
+      throw new Error("Die Corp-Utility-Faehigkeit passt nicht zur Karte.");
     const targetCardId = String(
       legalAction.payload?.targetCardId ?? "",
     ) as CardInstanceId;
     if (!host.corp.installedCardIds(state).includes(targetCardId))
-      throw new Error("Das Cowboy-Sysop-Ziel ist nicht mehr installiert.");
+      throw new Error("Das Corp-Utility-Ziel ist nicht mehr installiert.");
     const targetDefinitionId = host.cards.definitionFor(state, targetCardId).id;
     const targetIdentityKnown = host.corp.publicInstalledCardIdentityKnown(
       state,
@@ -393,17 +343,17 @@ export function handleCreditEconomyExecution(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
+      hiddenZoneAction: "corp_installed_card_to_hq",
       movedCardCount: 1,
-      ...(targetIdentityKnown ? { movedCardDefinitionId: targetDefinitionId } : {}),
+      ...(targetIdentityKnown
+        ? { movedCardDefinitionId: targetDefinitionId }
+        : {}),
     };
     return handled(legalAction);
   }
   if (legalAction.payload?.v1917AssetAbility === "remove_virus_counter") {
     if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.17-Virus-Counter-Assets nutzen.",
-      );
+      throw new Error("Nur die Korp darf V1.9.17-Virus-Counter-Assets nutzen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
@@ -419,13 +369,11 @@ export function handleCreditEconomyExecution(
     const targetCardId = String(
       legalAction.payload?.targetCardId ?? "",
     ) as CardInstanceId;
-    if (!host.counters.visibleVirusCounterTargetIds(state).includes(targetCardId))
-      throw new Error(
-        "Das V1.9.17-Virus-Counter-Ziel ist nicht mehr gueltig.",
-      );
-    const removeAmount = Number(
-      legalAction.payload?.removeCounterAmount ?? 0,
-    );
+    if (
+      !host.counters.visibleVirusCounterTargetIds(state).includes(targetCardId)
+    )
+      throw new Error("Das V1.9.17-Virus-Counter-Ziel ist nicht mehr gueltig.");
+    const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
     if (!Number.isInteger(removeAmount) || removeAmount !== 1)
       throw new Error(
         "Disinfectant, Inc. entfernt in V1.9.17 genau 1 Virus-Counter.",
@@ -437,7 +385,11 @@ export function handleCreditEconomyExecution(
       hiddenZoneAction: "v1917_remove_virus_counter",
       counterType: "virus",
       removedCounterAmount: removeAmount,
-      remainingCounters: host.counters.cardCounter(state, targetCardId, "virus"),
+      remainingCounters: host.counters.cardCounter(
+        state,
+        targetCardId,
+        "virus",
+      ),
       targetCardDefinitionId: host.cards.definitionFor(state, targetCardId).id,
     };
     return handled(legalAction);
@@ -453,164 +405,32 @@ export function handleCreditEconomyExecution(
         "Die V1.9.18-Upgrade-Counter-Faehigkeit ist nicht rezzed installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.COUNTER_UPGRADE_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.",
-      );
+    if (!host.constants.COUNTER_UPGRADE_SOURCES.has(definition.id))
+      throw new Error("Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.");
     const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
     if (!Number.isInteger(addAmount) || addAmount !== 1)
       throw new Error(
         "V1.9.18-Counter-Upgrades laden in diesem WIP genau 1 Power-Counter.",
       );
     host.counters.addCardCounter(state, sourceCardId, "power", addAmount);
-    const serverLabel = host.cards.publicServerLabelForCard(state, sourceCardId);
+    const serverLabel = host.cards.publicServerLabelForCard(
+      state,
+      sourceCardId,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       sourceDefinitionId: definition.id,
       ...(serverLabel ? { serverLabel } : {}),
       addedCounterAmount: addAmount,
-      remainingCounters: host.counters.cardCounter(state, sourceCardId, "power"),
+      remainingCounters: host.counters.cardCounter(
+        state,
+        sourceCardId,
+        "power",
+      ),
     };
     return handled(legalAction);
   }
   if (host.delegates.handleTraceOrchestrationAction(legalAction).handled) {
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1918UpgradeAbility === "tag_condition_credit") {
-    if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.18-Tag-Condition-Upgrades nutzen.",
-      );
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.18-Tag-Condition-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (
-      !host.constants.TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) ||
-      host.cards.hasCardImplementationForDefinition(definition.id)
-    )
-      throw new Error(
-        "Die V1.9.18-Tag-Condition-Faehigkeit passt nicht zur Karte.",
-      );
-    if (state.runner.tags <= 0)
-      throw new Error("Der Runner ist nicht getaggt.");
-    const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-    if (!Number.isInteger(gainAmount) || gainAmount !== 1)
-      throw new Error(
-        "V1.9.18-Tag-Condition-Upgrades gewaehrten in diesem WIP genau 1 Credit.",
-      );
-    host.credits.gain(state, "corp", gainAmount);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      gainedCredits: gainAmount,
-      corpCreditsAfter: state.corp.credits,
-      runnerTagsAfter: state.runner.tags,
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1919AssetAbility === "add_power_counter") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.19-Asset-Counter nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.19-Asset-Counter-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.COUNTER_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.19-Asset-Counter-Faehigkeit passt nicht zur Karte.",
-      );
-    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
-    if (!Number.isInteger(addAmount) || addAmount !== 1)
-      throw new Error(
-        "V1.9.19-Counter-Assets laden in diesem WIP genau 1 Power-Counter.",
-      );
-    host.counters.addCardCounter(state, sourceCardId, "power", addAmount);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definition.id,
-      addedCounterAmount: addAmount,
-      remainingCounters: host.counters.cardCounter(state, sourceCardId, "power"),
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1919AssetAbility === "gain_credits") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.19-Asset-Economy nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.19-Asset-Economy-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (
-      definition.id !==
-      host.constants.INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID
-    )
-      throw new Error(
-        "Die V1.9.19-Asset-Economy-Faehigkeit passt nicht zur Karte.",
-      );
-    const advancementCounterCount = Math.max(
-      0,
-      Math.floor(
-        host.cards.mustInstance(state.cardInstances, sourceCardId)
-          .advancementCounters,
-      ),
-    );
-    const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-    const expectedGain = advancementCounterCount * 4;
-    if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
-      throw new Error(
-        "Information Laundering gewaehrt 4 Credits pro Advancement-Counter.",
-      );
-    host.credits.gain(state, "corp", gainAmount);
-    host.corp.trashInstalledCardToArchives(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      advancementCounterCount,
-      gainedCredits: gainAmount,
-      selfTrashed: true,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1920AssetAbility === "gain_actions") {
-    if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.20-Asset-Action-Economy nutzen.",
-      );
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.20-Asset-Action-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.ACTION_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.20-Asset-Action-Faehigkeit passt nicht zur Karte.",
-      );
-    const gainedActions = Number(legalAction.payload?.gainedActions ?? 0);
-    if (!Number.isInteger(gainedActions) || gainedActions !== 2)
-      throw new Error(
-        "V1.9.20-Action-Assets gewaehrten in diesem WIP genau 2 Aktionen.",
-      );
-    state.corp.clicks += gainedActions;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      gainedActions,
-      corpClicksAfter: state.corp.clicks,
-    };
     return handled(legalAction);
   }
   if (host.delegates.handleCorpSpecialDamageAbilityAction(legalAction).handled)
@@ -622,13 +442,10 @@ export function handleCreditEconomyExecution(
     throw new Error("Rio de Janeiro City Grid nutzt automatische Trigger.");
   }
   if (
-    legalAction.payload?.v1921RunnerProgramAbility ===
-    "deterministic_die_probe"
+    legalAction.payload?.v1921RunnerProgramAbility === "deterministic_die_probe"
   ) {
     if (legalAction.side !== "runner")
-      throw new Error(
-        "Nur der Runner darf V1.9.21-Programm-Zufall nutzen.",
-      );
+      throw new Error("Nur der Runner darf V1.9.21-Programm-Zufall nutzen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
@@ -637,12 +454,13 @@ export function handleCreditEconomyExecution(
         "Die V1.9.21-Programm-Zufallsfaehigkeit ist nicht installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.RUNNER_RANDOM_PROGRAM_CARD_IDS.has(definition.id))
+    if (!host.constants.RUNNER_RANDOM_PROGRAM_SOURCES.has(definition.id))
       throw new Error(
         "Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.",
       );
     const randomPurpose = `v1921.die.${definition.id}.program_probe`;
-    const dieRoll = Math.floor(host.random.nextRandom(state, randomPurpose) * 6) + 1;
+    const dieRoll =
+      Math.floor(host.random.nextRandom(state, randomPurpose) * 6) + 1;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       randomPurpose,
@@ -656,9 +474,7 @@ export function handleCreditEconomyExecution(
     "deterministic_die_probe"
   ) {
     if (legalAction.side !== "runner")
-      throw new Error(
-        "Nur der Runner darf V1.9.21-Ressourcen-Zufall nutzen.",
-      );
+      throw new Error("Nur der Runner darf V1.9.21-Ressourcen-Zufall nutzen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
@@ -667,12 +483,16 @@ export function handleCreditEconomyExecution(
         "Die V1.9.21-Ressourcen-Zufallsfaehigkeit ist nicht installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (definition.id !== host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID)
+    if (
+      definition.id !==
+      host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE
+    )
       throw new Error(
         "Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.",
       );
     const randomPurpose = `v1921.die.${definition.id}.resource_probe`;
-    const dieRoll = Math.floor(host.random.nextRandom(state, randomPurpose) * 6) + 1;
+    const dieRoll =
+      Math.floor(host.random.nextRandom(state, randomPurpose) * 6) + 1;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       randomPurpose,
@@ -681,13 +501,9 @@ export function handleCreditEconomyExecution(
     };
     return handled(legalAction);
   }
-  if (
-    legalAction.payload?.v1919RunnerProgramAbility === "add_power_counter"
-  ) {
+  if (legalAction.payload?.v1919RunnerProgramAbility === "add_power_counter") {
     if (legalAction.side !== "runner")
-      throw new Error(
-        "Nur der Runner darf V1.9.19-Programm-Counter nutzen.",
-      );
+      throw new Error("Nur der Runner darf V1.9.19-Programm-Counter nutzen.");
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
@@ -713,7 +529,11 @@ export function handleCreditEconomyExecution(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       addedCounterAmount: addAmount,
-      remainingCounters: host.counters.cardCounter(state, sourceCardId, "power"),
+      remainingCounters: host.counters.cardCounter(
+        state,
+        sourceCardId,
+        "power",
+      ),
     };
     return handled(legalAction);
   }
@@ -725,8 +545,10 @@ export function handleCreditEconomyExecution(
     ) as CardInstanceId;
     if (!state.runner.rig.resources.includes(sourceCardId))
       throw new Error("Databroker ist nicht installiert.");
-    const implementation =
-      host.cards.uniqueDirectLongtailImplementationForCard(state, sourceCardId);
+    const implementation = host.cards.uniqueDirectLongtailImplementationForCard(
+      state,
+      sourceCardId,
+    );
     if (implementation?.kind !== "databroker_agenda_point_credits")
       throw new Error("Die Databroker-Faehigkeit passt nicht zur Karte.");
     const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
@@ -759,27 +581,27 @@ export function handleCreditEconomyExecution(
     };
     return handled(legalAction);
   }
-  if (host.delegates.handleScoredAgendaActivatedAbilityAction(legalAction).handled) {
+  if (
+    host.delegates.handleScoredAgendaActivatedAbilityAction(legalAction).handled
+  ) {
     return handled(legalAction);
   }
   if (
-    legalAction.payload?.v1920RunnerRunLockAbility ===
-    "fang_2_0_pay_to_run"
+    legalAction.payload?.v1920RunnerRunLockAbility === "pay_to_remove_run_lock"
   ) {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
-    const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
+    const cost = Number(legalAction.payload?.runnerRunLockCreditCost ?? 0);
     const pendingCost = Math.max(
       0,
-      Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+      Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
     );
     if (!Number.isInteger(cost) || cost <= 0 || cost !== pendingCost)
       throw new Error("Die Run-Sperre verlangt den aktuellen Betrag.");
     host.credits.spend(state, "runner", cost);
-    host.runner.ensureTurnFlags(state).fangRunLockCreditCost = 0;
+    host.runner.ensureTurnFlags(state).runnerRunLockCreditCost = 0;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      fangRunLockCleared: true,
       runnerRunLockCleared: true,
       runnerCreditsAfter: state.runner.credits,
       gainedCredits: 0,

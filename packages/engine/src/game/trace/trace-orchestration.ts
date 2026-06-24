@@ -74,7 +74,7 @@ export type TraceOrchestrationHost = {
         | "trace_success_cancel_window"
       >,
     ) => Array<{ ability: ActivatedCardAbilityImplementation; index: number }>;
-    isSubmarineUplinkSource: (cardId: CardInstanceId) => boolean;
+    isTraceLinkForceJackOutSource: (cardId: CardInstanceId) => boolean;
   };
   payment: {
     corpTracePaymentDeps: CorpTracePaymentDependencies;
@@ -96,7 +96,7 @@ export type TraceOrchestrationHost = {
   };
   counters: {
     cardCounter: (cardId: CardInstanceId, counterType: string) => number;
-    hackerTrackerCounterTotal: () => number;
+    corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
   };
   fort: {
@@ -108,7 +108,7 @@ export type TraceOrchestrationHost = {
       | undefined;
   };
   run: {
-    markSubmarineUplinkJackOutAfterEncounter: (
+    markTraceLinkForceJackOutAfterEncounter: (
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
@@ -126,16 +126,13 @@ export type TraceOrchestrationHost = {
   };
   callbacks: {
     sanitizeId: (value: string) => string;
-    addHackerTrackerTraceCounters: () => number;
+    addCorpTraceCounterPoolCounters: () => number;
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
       targetCardId: CardInstanceId | undefined,
     ) => Record<string, unknown>;
-  };
-  constants: {
-    PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: CardDefinitionId;
   };
 };
 
@@ -160,7 +157,7 @@ export function startTraceFromOperation(
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpBidMax =
     state.corp.credits +
-    host.counters.hackerTrackerCounterTotal() +
+    host.counters.corpTraceCounterPoolTotal() +
     host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -200,11 +197,11 @@ export function startTraceFromOperation(
     ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
-          parisCityGridPoolAvailable: host.counters.cardCounter(
+          fortTraceBitPoolAvailable: host.counters.cardCounter(
             fortTraceBitPoolSource.cardId,
             "bit",
           ),
-          parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
+          fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
   };
@@ -244,30 +241,7 @@ export function handleTraceOrchestrationAction(
   host: TraceOrchestrationHost,
   legalAction: LegalAction,
 ): { handled: boolean } {
-  if (legalAction.payload?.v1918UpgradeAbility !== "trace_2_tag")
-    return { handled: false };
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
-  const sourceCardId = String(
-    legalAction.payload?.cardId ?? "",
-  ) as CardInstanceId;
-  if (!host.corp.rezzedCorpRootCardIds().includes(sourceCardId))
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
-    );
-  const definition = host.cards.definitionFor(sourceCardId);
-  if (
-    definition.id !== host.constants.PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID ||
-    host.cards.hasCardImplementationForDefinition(definition.id)
-  )
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
-    );
-  const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-  if (!Number.isInteger(traceStrength) || traceStrength !== 2)
-    throw new Error("Paris City Grid startet in diesem WIP genau Trace 2.");
-  startTraceFromOperation(host, definition.id, traceStrength, legalAction);
-  return { handled: true };
+  return { handled: false };
 }
 
 export function traceBidChoice(
@@ -489,7 +463,7 @@ function resolveTraceBaseLinkChoice(
   host.payment.recordRunActionSpendingCapSpend(candidate.creditCost);
   host.payment.spendRunnerCredits(candidate.creditCost);
   if (state.run)
-    host.run.markSubmarineUplinkJackOutAfterEncounter(
+    host.run.markTraceLinkForceJackOutAfterEncounter(
       candidate.sourceCardInstanceId,
       legalAction,
     );
@@ -639,7 +613,7 @@ function postBidTraceLinkCandidates(
     )) {
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
-      if (host.cards.isSubmarineUplinkSource(cardId) && !state.run) continue;
+      if (host.cards.isTraceLinkForceJackOutSource(cardId) && !state.run) continue;
       const traceCost = costForTraceAbility(ability);
       const creditCost = traceCost.creditCost;
       if (state.runner.credits + runnerTraceLinkCredits(host) < creditCost)
@@ -740,7 +714,7 @@ function resolveTracePostBidLinkChoice(
       ? tapTraceSource(host, candidate.cardId)
       : {};
     if (state.run)
-      host.run.markSubmarineUplinkJackOutAfterEncounter(
+      host.run.markTraceLinkForceJackOutAfterEncounter(
         candidate.cardId,
         legalAction,
       );
@@ -847,7 +821,7 @@ function completeTraceWithoutRun(
   );
   if (successful) state.runner.tags += tagsAdded;
   const hackerTrackerCountersAdded =
-    host.callbacks.addHackerTrackerTraceCounters();
+    host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewardsForOperation(state, trace);

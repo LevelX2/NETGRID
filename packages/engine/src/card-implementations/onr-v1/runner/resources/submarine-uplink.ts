@@ -37,7 +37,7 @@ export const submarineUplinkImplementation: CardImplementationDefinition = {
     },
   ],
   runnerUtilityLongtail: {
-    kind: "submarine_uplink_trace_link_force_jack_out",
+    kind: "trace_link_force_jack_out",
     visibility: "public",
   },
 };

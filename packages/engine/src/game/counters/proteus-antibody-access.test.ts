@@ -142,12 +142,12 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
 
     state = apply(state, "corp", (action) => action.type === "resolve_choice");
     expect(
-      state.cardInstances[state.runner.identity]?.counters?.doppelganger_antibody,
+      state.cardInstances[state.runner.identity]?.counters?.link_reduction_counter,
     ).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
       ambushPaidCost: 2,
-      counterType: "doppelganger_antibody",
+      counterType: "link_reduction_counter",
       addedCounterAmount: 1,
       remainingCounters: 1,
     });
@@ -171,10 +171,10 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.counterType === "doppelganger_antibody",
+        action.payload?.counterType === "link_reduction_counter",
     );
     expect(
-      state.cardInstances[state.runner.identity]?.counters?.doppelganger_antibody,
+      state.cardInstances[state.runner.identity]?.counters?.link_reduction_counter,
     ).toBeUndefined();
     expect(state.runner.credits).toBe(0);
   });
@@ -189,21 +189,21 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "corp", (action) => action.type === "resolve_choice");
 
-    expect(state.cardInstances[breakerId]?.counters?.pattel_antibody).toBe(1);
+    expect(state.cardInstances[breakerId]?.counters?.breaker_strength_penalty).toBe(1);
     const runnerView = getPlayerView(state, "runner");
     const visibleBreaker = runnerView.own.rig?.find(
       (card) => card.instanceId === breakerId,
     );
     expect(visibleBreaker?.counterDisplays).toContainEqual(
       expect.objectContaining({
-        id: "pattel_antibody",
-        counterType: "pattel_antibody",
+        id: "breaker_strength_penalty",
+        counterType: "breaker_strength_penalty",
         amount: 1,
       }),
     );
     state.cardInstances[breakerId] = {
       ...state.cardInstances[breakerId]!,
-      counters: { pattel_antibody: 4 },
+      counters: { breaker_strength_penalty: 4 },
     };
     const reducedView = getPlayerView(state, "runner");
     const reducedBreaker = reducedView.own.rig?.find(

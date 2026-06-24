@@ -288,7 +288,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.serverId === "hq",
     );
 
-    expect(state.pendingChoice?.source).toContain("p3_33.priority_wreck");
+    expect(state.pendingChoice?.source).toContain("successful_run.credit_loss_spend");
     expect(state.run?.breach).toBeUndefined();
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       "Simple Economy Operation",

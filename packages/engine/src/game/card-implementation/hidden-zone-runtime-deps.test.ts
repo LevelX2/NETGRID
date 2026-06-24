@@ -91,11 +91,11 @@ function host(input: {
   const searchTargetHost = (gameState: GameState) => ({
     state: gameState,
     constants: {
-      aujourdOuiResourceCardId: "aujourd" as CardDefinitionId,
-      mysteryBoxId: "mystery" as CardDefinitionId,
-      selfModifyingCodeId: "smc" as CardDefinitionId,
-      shortCircuitResourceCardId: "short_circuit" as CardDefinitionId,
-      sneakPreviewId: "sneak_preview" as CardDefinitionId,
+      topStackTakeMatchingSourceId: "aujourd" as CardDefinitionId,
+      randomStackProgramInstallSourceId: "mystery" as CardDefinitionId,
+      stackProgramFreeInstallSourceId: "smc" as CardDefinitionId,
+      stackSearchGripSourceId: "short_circuit" as CardDefinitionId,
+      temporaryProgramInstallSourceId: "sneak_preview" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId: CardInstanceId) =>

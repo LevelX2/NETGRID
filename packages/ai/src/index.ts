@@ -13870,7 +13870,7 @@ function selectedChoicesForDecision(
   if (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("p3_56.pass_ice_program_trash") ||
-      choice.source.startsWith("v1922.viral_15_program_trash"))
+      choice.source.startsWith("card_implementation.active_ice_program_trash"))
   ) {
     return {
       choiceId: choice.choiceId,
@@ -15031,7 +15031,7 @@ function runnerViral15JackOutScoreComponent(
   if (
     input.side !== "runner" ||
     action.type !== "jack_out" ||
-    action.payload?.v1922CorpIceAbility !== "viral_15_jack_out_tax"
+    action.payload?.v1922CorpIceAbility !== "jack_out_tax_after_passed_rezzed_ice"
   ) {
     return undefined;
   }

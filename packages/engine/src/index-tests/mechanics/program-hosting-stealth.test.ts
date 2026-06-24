@@ -524,7 +524,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
     expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
     expect(state.run).toBeUndefined();
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(1);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(1);
     expect(validateGameState(state).ok).toBe(true);
     const successReplay = replayEvents(
       initial,

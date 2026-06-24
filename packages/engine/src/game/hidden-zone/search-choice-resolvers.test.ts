@@ -2,11 +2,11 @@ import type { CardInstanceId, ChoiceRequest } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   resolveLookTopStackTakeMatchingSelection,
-  resolveMysteryBoxInstallSelection,
+  resolveRevealedStackProgramInstallSelection,
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
-  resolveSelfModifyingCodeSearchInstallSelection,
-  resolveSneakPreviewSearchInstallSelection,
+  resolvePaidStackProgramInstallSelection,
+  resolveTemporaryProgramSearchInstallSelection,
 } from "./search-choice-resolvers";
 
 function choice(overrides: Partial<ChoiceRequest>): ChoiceRequest {
@@ -116,9 +116,9 @@ describe("hidden-zone search choice resolvers", () => {
 
   it("validates SMC, Sneak Preview and Mystery Box install selections", () => {
     const programId = "program" as CardInstanceId;
-    expect(resolveSelfModifyingCodeSearchInstallSelection({
+    expect(resolvePaidStackProgramInstallSelection({
       choice: choice({
-        source: "v1911.self_modifying_code_install_program:source_card:8",
+        source: "v1911.hidden_stack_program_install:source_card:8",
       }),
       selectedCardId: programId,
       stackCardIds: [programId],
@@ -128,9 +128,9 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveSneakPreviewSearchInstallSelection({
+    expect(resolveTemporaryProgramSearchInstallSelection({
       choice: choice({
-        source: "v1911.sneak_preview_stack_install:8",
+        source: "v1911.temporary_program_install_stack_install:8",
       }),
       selectedCardId: programId,
       legalTargetIds: [programId],
@@ -143,9 +143,9 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveMysteryBoxInstallSelection({
+    expect(resolveRevealedStackProgramInstallSelection({
       choice: choice({
-        source: "v1915.mystery_box:source_card:top_a,top_b:8",
+        source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
       }),
       selectedCardId: programId,
       currentTopCardIds: [programId],
@@ -156,9 +156,9 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
     expect(() =>
-      resolveSelfModifyingCodeSearchInstallSelection({
+      resolvePaidStackProgramInstallSelection({
         choice: choice({
-          source: "v1911.self_modifying_code_install_program:source_card:8",
+          source: "v1911.hidden_stack_program_install:source_card:8",
         }),
         selectedCardId: programId,
         stackCardIds: [programId],

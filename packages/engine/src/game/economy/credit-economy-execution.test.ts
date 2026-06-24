@@ -48,10 +48,12 @@ describe("credit economy execution", () => {
     state.corp.credits = 5;
     const action = gainCreditAction(state, "corp");
 
-    expect(handleCreditEconomyExecution(testHost(state), action)).toMatchObject({
-      handled: true,
-      actionType: "gain_credit",
-    });
+    expect(handleCreditEconomyExecution(testHost(state), action)).toMatchObject(
+      {
+        handled: true,
+        actionType: "gain_credit",
+      },
+    );
 
     expect(state.corp.clicks).toBe(2);
     expect(state.corp.credits).toBe(6);
@@ -74,7 +76,7 @@ describe("credit economy execution", () => {
     expect(action.payload).toMatchObject({
       drawCardAfter: true,
       drawnCount: 1,
-      citySurveillanceSourceCount: 0,
+      drawTaxSourceCount: 0,
     });
   });
 
@@ -107,47 +109,6 @@ describe("credit economy execution", () => {
       removedCounterAmount: 1,
       remainingCounters: 0,
       runnerCreditsAfter: 2,
-    });
-  });
-
-  it("executes Information Laundering credit payout and self-trash", () => {
-    const state = createGame({
-      seed: "arch-69-credit-economy-information-laundering",
-      setupMode: "completed",
-    });
-    state.corp.clicks = 3;
-    state.corp.credits = 2;
-    const sourceCardId = "corp_info_laundering" as CardInstanceId;
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      "information_laundering",
-      "corp",
-      2,
-    );
-    const trashed: CardInstanceId[] = [];
-    const action = gainCreditAction(state, "corp", {
-      v1919AssetAbility: "gain_credits",
-      cardId: sourceCardId,
-      gainCreditsAmount: 8,
-    });
-
-    handleCreditEconomyExecution(
-      testHost(state, {
-        rezzedRootCardIds: [sourceCardId],
-        trashCorpInstalledCardToArchives: (cardId) => trashed.push(cardId),
-      }),
-      action,
-    );
-
-    expect(state.corp.clicks).toBe(2);
-    expect(state.corp.credits).toBe(10);
-    expect(trashed).toEqual([sourceCardId]);
-    expect(action.payload).toMatchObject({
-      v1919AssetAbility: "gain_credits",
-      advancementCounterCount: 2,
-      gainedCredits: 8,
-      selfTrashed: true,
-      corpCreditsAfter: 10,
     });
   });
 
@@ -222,10 +183,20 @@ function testHost(
           counterType
         ] ?? 0,
       addCardCounter: (stateToMutate, cardId, counterType, amount) => {
-        setCardCounter(stateToMutate, cardId, counterType, cardCounter(stateToMutate, cardId, counterType) + amount);
+        setCardCounter(
+          stateToMutate,
+          cardId,
+          counterType,
+          cardCounter(stateToMutate, cardId, counterType) + amount,
+        );
       },
       spendCardCounter: (stateToMutate, cardId, counterType, amount) => {
-        setCardCounter(stateToMutate, cardId, counterType, cardCounter(stateToMutate, cardId, counterType) - amount);
+        setCardCounter(
+          stateToMutate,
+          cardId,
+          counterType,
+          cardCounter(stateToMutate, cardId, counterType) - amount,
+        );
       },
       visibleVirusCounterTargetIds: () => [],
     },
@@ -242,9 +213,9 @@ function testHost(
         action.payload = {
           ...(action.payload ?? {}),
           drawnCount: summary.drawnCount,
-          citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
-          citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
-          citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
+          drawTaxSourceCount: summary.drawTaxSourceCount,
+          drawTaxCreditsPaid: summary.drawTaxCreditsPaid,
+          drawTaxTagsAdded: summary.drawTaxTagsAdded,
         };
       },
       ensureTurnFlags: (stateToMutate) =>
@@ -265,7 +236,7 @@ function testHost(
           runnerActionsTakenThisTurn: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
-          allNighterBonusRunPending: false,
+          bonusRunPending: false,
         }),
     },
     corp: {
@@ -278,15 +249,15 @@ function testHost(
     },
     hiddenZone: {
       resolveV1911RunnerHiddenZoneAbility: () => undefined,
-      resolveV1911CorporateDownsizing: () => undefined,
+      resolveScoredAgendaCorpRdTopReveal: () => undefined,
       revealRunnerStackTop: () => undefined,
       revealCorpRdTop: () => undefined,
       resolveReschedulerHqShuffleDraw: () => undefined,
       startCorpAssetRdTopReorderChoice: () => undefined,
     },
     delegates: {
-      shouldOpenInvestmentFirmCreditChoice: () => false,
-      startInvestmentFirmCreditChoice: () => undefined,
+      shouldOpenCorpInstalledEconomyCreditChoice: () => false,
+      startCorpInstalledEconomyCreditChoice: () => undefined,
       resolveCorpInstalledEconomyAction: () => false,
       handleTraceOrchestrationAction: () => ({ handled: false }),
       handleCorpSpecialDamageAbilityAction: () => ({ handled: false }),
@@ -299,20 +270,12 @@ function testHost(
       },
     },
     constants: {
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: "stack_reveal",
-      CORP_HQ_SHUFFLE_DRAW_CARD_ID: "rescheduler",
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: new Set(["reveal_asset"]),
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: new Set(["reorder_asset"]),
+      COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "stack_reveal",
       COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
-      COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),
-      TAG_CONDITION_UPGRADE_CARD_IDS: new Set(["tag_condition"]),
-      COUNTER_ASSET_CARD_IDS: new Set(["counter_asset"]),
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
-        "information_laundering",
-      ACTION_ASSET_CARD_IDS: new Set(["action_asset"]),
-      RUNNER_RANDOM_PROGRAM_CARD_IDS: new Set(["random_program"]),
-      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: "quest_for_cattekin",
+      COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
+      RUNNER_RANDOM_PROGRAM_SOURCES: new Set(["random_program"]),
+      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
       FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",
     },
   };
@@ -322,9 +285,9 @@ function runnerDrawSummary(): CreditEconomyRunnerDrawSummary {
   return {
     drawnCount: 1,
     drawnCardIds: ["drawn_card" as CardInstanceId],
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
+    drawTaxSourceCount: 0,
+    drawTaxCreditsPaid: 0,
+    drawTaxTagsAdded: 0,
   };
 }
 

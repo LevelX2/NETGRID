@@ -58,7 +58,7 @@ export type RunnerAccessActionHost = {
   callbacks: {
     successfulRunProgramActions: (run: ActiveRun) => LegalAction[];
     runnerDuringRunCardImplementationLegalActions: () => LegalAction[];
-    mysteryBoxRunActions: (run: ActiveRun) => LegalAction[];
+    hiddenStackInstallRunActions: (run: ActiveRun) => LegalAction[];
   };
 };
 
@@ -76,15 +76,15 @@ export function buildRunnerAccessActions(
   if (successfulRunActions.length > 0)
     return { handled: true, legalActions: successfulRunActions };
   if (!run.accessedCardId) {
-    const mysteryBoxActions = [
+    const hiddenStackInstallActions = [
       ...host.callbacks.runnerDuringRunCardImplementationLegalActions(),
-      ...host.callbacks.mysteryBoxRunActions(run),
+      ...host.callbacks.hiddenStackInstallRunActions(run),
     ];
     if (hasPendingAccessCandidate(host, run))
       return {
         handled: true,
         legalActions: [
-          ...mysteryBoxActions,
+          ...hiddenStackInstallActions,
           host.actions.buildLegalAction(
             "runner",
             "access_card",
@@ -93,8 +93,8 @@ export function buildRunnerAccessActions(
           ),
         ],
       };
-    if (mysteryBoxActions.length > 0)
-      return { handled: true, legalActions: mysteryBoxActions };
+    if (hiddenStackInstallActions.length > 0)
+      return { handled: true, legalActions: hiddenStackInstallActions };
     return {
       handled: true,
       legalActions: [
@@ -213,8 +213,8 @@ export function buildRunnerAccessActions(
       availableRunnerAccessTrashCredits(host, run.accessedCardId) >=
       trashCost.totalCost
     ) {
-      const scatterShotRecurringCreditsAvailable =
-        scatterShotRecurringCreditSourceIds(host, run.accessedCardId).reduce(
+      const upgradeTrashRecurringCreditsAvailable =
+        upgradeTrashRecurringCreditSourceIds(host, run.accessedCardId).reduce(
           (sum, cardId) => sum + host.payment.hostedPaymentCredits(cardId),
           0,
         );
@@ -241,12 +241,12 @@ export function buildRunnerAccessActions(
                   accessTrashCostSourceTitles: trashCost.sourceTitles.join(","),
                 }
               : {}),
-            ...(scatterShotRecurringCreditsAvailable > 0 &&
+            ...(upgradeTrashRecurringCreditsAvailable > 0 &&
             definition.type === "upgrade"
               ? {
                   v1922RunnerProgramAbility:
-                    "scatter_shot_upgrade_trash_recurring_credit",
-                  scatterShotRecurringCreditsAvailable,
+                    "upgrade_trash_recurring_credit",
+                  upgradeTrashRecurringCreditsAvailable,
                 }
               : {}),
             ...(poltergeistRecurringCreditsAvailable > 0 &&
@@ -442,7 +442,7 @@ export function runnerAccessTrashRecurringCreditSourceIds(
   accessedCardId: CardInstanceId,
 ): CardInstanceId[] {
   return [
-    ...scatterShotRecurringCreditSourceIds(host, accessedCardId),
+    ...upgradeTrashRecurringCreditSourceIds(host, accessedCardId),
     ...poltergeistRecurringCreditSourceIds(host, accessedCardId),
   ].sort();
 }
@@ -502,7 +502,7 @@ function accessQueueZone(
   return "remote_root";
 }
 
-function scatterShotRecurringCreditSourceIds(
+function upgradeTrashRecurringCreditSourceIds(
   host: RunnerAccessActionHost,
   accessedCardId: CardInstanceId,
 ): CardInstanceId[] {

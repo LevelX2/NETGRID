@@ -1,23 +1,46 @@
-// @ts-nocheck
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  CardRunnerEventLongtailImplementation,
+  ChoiceRequest,
+  GameState,
+  LegalAction,
+  PlayerAction,
+  RuntimeDeps,
+  Side,
+} from "./runtime-shared";
 
-export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
+type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
+  credits: (state: GameState, side: Side, amount: number) => void;
+  definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
+  rollDeterministicDie: (state: GameState, purpose: string) => number;
+  runnerEventLongtailKindForDefinition: (
+    definition: CardDefinition,
+  ) => CardRunnerEventLongtailImplementation["kind"] | undefined;
+  selectedChoiceIds: (
+    selectedChoices: PlayerAction["selectedChoices"],
+  ) => string[];
+};
+
+export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
+  const typedDeps = deps as HiddenZoneNonSearchDiceLoopRuntimeDeps;
   const {
     credits,
     definitionFor,
     rollDeterministicDie,
     runnerEventLongtailKindForDefinition,
     selectedChoiceIds,
-  } = deps;
+  } = typedDeps;
 
-  function resolvePlayfulAiDiceLoopEvent(
+  function resolveRandomDiceLoopEvent(
     state: GameState,
     legalAction: LegalAction,
     sourceDefinitionId: CardDefinitionId,
     implementation: CardRunnerEventLongtailImplementation,
   ): void {
     if (
-      implementation.kind !== "playful_ai_dice_loop" ||
+      implementation.kind !== "random_dice_loop" ||
       implementation.dieFaces !== 6 ||
       implementation.visibility !== "public"
     )
@@ -30,7 +53,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
       dieRoll as (typeof implementation.choiceOn)[number],
     );
     if (choiceOpened) {
-      startV1921PlayfulAiChoice(
+      startRandomDiceSplitChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
         dieRoll,
@@ -40,20 +63,20 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       sourceDefinitionId,
       v1921DieRoll: dieRoll,
-      playfulAiDieRolls: String(dieRoll),
-      playfulAiRolledDice: 1,
-      playfulAiDiceQueuedAfterRolls: 0,
-      playfulAiRemainingDice: 0,
-      playfulAiChoiceOpened: choiceOpened,
-      playfulAiComplete: !choiceOpened,
+      randomDiceLoopRolls: String(dieRoll),
+      randomDiceLoopRolledDice: 1,
+      randomDiceLoopQueuedAfterRolls: 0,
+      randomDiceLoopRemainingDice: 0,
+      randomDiceSplitChoiceOpened: choiceOpened,
+      randomDiceLoopComplete: !choiceOpened,
       randomCounterAfter: state.randomCounter,
     };
   }
 
-  function startV1921PlayfulAiChoice(
+  function startRandomDiceSplitChoice(
     state: GameState,
     sourceCardId: CardInstanceId,
     dieRoll: number,
@@ -74,10 +97,10 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
       throw new Error("Der Playful-AI-Wurfindex ist ungültig.");
     const choiceStateVersion = state.stateVersion + 1;
     state.pendingChoice = {
-      choiceId: `v1921_playful_ai_${choiceStateVersion}`,
+      choiceId: `random_dice_split_${choiceStateVersion}`,
       side: "runner",
       source: [
-        "v1921.playful_ai",
+        "card_implementation.random_dice_split",
         sourceCardId,
         String(dieRoll),
         String(remainingDice),
@@ -88,7 +111,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
         `Playful AI: ${dieRoll} ${creditTextForPrompt(dieRoll)} nehmen ` +
         `und/oder ${dieRoll} ${diePromptText(dieRoll)} beiseitelegen.`,
       kind: "select_option",
-      options: playfulAiSplitOptions(dieRoll),
+      options: randomDiceSplitOptions(dieRoll),
       minSelections: 1,
       maxSelections: 1,
       stateVersion: choiceStateVersion,
@@ -104,7 +127,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     return amount === 1 ? "Würfel" : "Würfel";
   }
 
-  function playfulAiSplitOptions(dieRoll: number): ChoiceRequest["options"] {
+  function randomDiceSplitOptions(dieRoll: number): ChoiceRequest["options"] {
     return Array.from({ length: dieRoll + 1 }, (_, gainedCredits) => {
       const setAsideDice = dieRoll - gainedCredits;
       const creditText = creditTextForPrompt(gainedCredits);
@@ -118,7 +141,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     });
   }
 
-  function parsePlayfulAiChoiceSource(source: string): {
+  function parseRandomDiceSplitChoiceSource(source: string): {
     sourceCardId: CardInstanceId;
     dieRoll: number;
     remainingDice: number;
@@ -156,7 +179,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     };
   }
 
-  function parsePlayfulAiSplit(
+  function parseRandomDiceSplit(
     choice: ChoiceRequest,
     selectedOptionId: string | undefined,
     dieRoll: number,
@@ -184,7 +207,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     return { gainedCredits, setAsideDice };
   }
 
-  function continueV1921PlayfulAiLoop(
+  function continueRandomDiceLoop(
     state: GameState,
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinitionId,
@@ -213,7 +236,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
       nextRollIndex += 1;
       rolledDice.push(nextRoll);
       if (nextRoll <= 3) {
-        startV1921PlayfulAiChoice(
+        startRandomDiceSplitChoice(
           state,
           sourceCardId,
           nextRoll,
@@ -238,22 +261,22 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     };
   }
 
-  function resolveV1921PlayfulAiChoice(
+  function resolveRandomDiceSplitChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1921.playful_ai"))
+    if (!choice || !choice.source.startsWith("card_implementation.random_dice_split"))
       throw new Error("Es ist keine Playful-AI-Choice offen.");
-    const choiceState = parsePlayfulAiChoiceSource(choice.source);
+    const choiceState = parseRandomDiceSplitChoiceSource(choice.source);
     const { sourceCardId, dieRoll, remainingDice, rollIndex } = choiceState;
     if (
       !sourceCardId ||
       !state.runner.heap.includes(sourceCardId) ||
       runnerEventLongtailKindForDefinition(
         definitionFor(state, sourceCardId),
-      ) !== "playful_ai_dice_loop"
+      ) !== "random_dice_loop"
     )
       throw new Error(
         "Die Playful-AI-Choice gehoert nicht zur gespielten Karte.",
@@ -265,7 +288,7 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
     let gainedCredits = 0;
     let setAsideDice = 0;
     let queuedDiceBeforeRolls = remainingDice;
-    let progress: ReturnType<typeof continueV1921PlayfulAiLoop> = {
+    let progress: ReturnType<typeof continueRandomDiceLoop> = {
       rolledDice: [],
       remainingDice,
       rollIndex,
@@ -273,12 +296,12 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
       complete: true,
     };
     if (dieRoll <= 3) {
-      const split = parsePlayfulAiSplit(choice, selectedOptionId, dieRoll);
+      const split = parseRandomDiceSplit(choice, selectedOptionId, dieRoll);
       gainedCredits = split.gainedCredits;
       setAsideDice = split.setAsideDice;
       if (gainedCredits > 0) credits(state, "runner", gainedCredits);
       queuedDiceBeforeRolls = remainingDice + setAsideDice;
-      progress = continueV1921PlayfulAiLoop(
+      progress = continueRandomDiceLoop(
         state,
         sourceCardId,
         sourceDefinitionId,
@@ -289,17 +312,17 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
 
     const payload: NonNullable<LegalAction["payload"]> = {
       ...(legalAction.payload ?? {}),
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921RunnerEventAbility: "random_dice_loop",
       sourceDefinitionId,
-      playfulAiDieRolls: progress.rolledDice.join(","),
-      playfulAiGainedCredits: gainedCredits,
-      playfulAiSetAsideDice: setAsideDice,
-      playfulAiRolledDice: progress.rolledDice.length,
-      playfulAiDiceQueuedBeforeRolls: queuedDiceBeforeRolls,
-      playfulAiDiceQueuedAfterRolls: progress.remainingDice,
-      playfulAiRemainingDice: progress.remainingDice,
-      playfulAiChoiceOpened: progress.choiceOpened,
-      playfulAiComplete: progress.complete,
+      randomDiceLoopRolls: progress.rolledDice.join(","),
+      randomDiceSplitGainedCredits: gainedCredits,
+      randomDiceSplitSetAsideDice: setAsideDice,
+      randomDiceLoopRolledDice: progress.rolledDice.length,
+      randomDiceLoopQueuedBeforeRolls: queuedDiceBeforeRolls,
+      randomDiceLoopQueuedAfterRolls: progress.remainingDice,
+      randomDiceLoopRemainingDice: progress.remainingDice,
+      randomDiceSplitChoiceOpened: progress.choiceOpened,
+      randomDiceLoopComplete: progress.complete,
       randomCounterAfter: state.randomCounter,
       runnerCreditsAfter: state.runner.credits,
     };
@@ -309,14 +332,14 @@ export function createHiddenZoneNonSearchPlayfulAiRuntime(deps: RuntimeDeps) {
   }
 
   return {
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     creditTextForPrompt,
     diePromptText,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
-    playfulAiSplitOptions,
-    resolvePlayfulAiDiceLoopEvent,
-    resolveV1921PlayfulAiChoice,
-    startV1921PlayfulAiChoice,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
+    randomDiceSplitOptions,
+    resolveRandomDiceLoopEvent,
+    resolveRandomDiceSplitChoice,
+    startRandomDiceSplitChoice,
   };
 }

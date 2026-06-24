@@ -1,33 +1,31 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
-    AUJOURD_OUI_RESOURCE_CARD_ID,
+    AUJOURD_OUI_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,
     COCKROACH_ID,
-    CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-    CORP_HQ_AGENDA_REVEAL_CARD_ID,
-    CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+    CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+    CORP_HQ_AGENDA_REVEAL_SOURCE,
+    CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_CARD_IDS,
-    SHORT_CIRCUIT_RESOURCE_CARD_ID,
+    SERVER_EXPOSE_PROGRAM_SOURCES,
+    SHORT_CIRCUIT_RESOURCE_SOURCE,
     SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_CARD_IDS,
-    STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+    STACK_SEARCH_PROGRAM_SOURCES,
+    STACK_TOP_REORDER_RESOURCE_SOURCE,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,
@@ -85,27 +83,27 @@ export function createCorpZoneRuntimeHosts(
     resolveAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveCodeViralCachePurgeChoice,
+    resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,
-    resolveInvestmentFirmCreditChoice,
-    resolveMicrotechAiInterfacePreAccessChoice,
+    resolveCorpInstalledEconomyCreditChoice,
+    resolvePreAccessTopRdReorderChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolvePattelsVirusCounterChoice,
+    resolveBrokenIceVirusCounterChoice,
     resolvePostMeatDamageHiddenResourceChoice,
-    resolvePowerGridOverloadChoice,
-    resolvePriorityWreckSpendChoice,
+    resolveHardwareTrashByCounterChoice,
+    resolveSuccessfulRunCreditLossSpendChoice,
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveSingaporeCityGridSwapChoice,
-    resolveSpeedTrapRezInterruptChoice,
+    resolveHqIceSwapChoice,
+    resolveRezInterruptJackOutChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveSystematicLayoffsAdvancementChoice,
-    resolveTooManyDoorsSecretSpendChoiceInRunModule,
+    resolveAdvancementPlacementChoice,
+    resolveSecretSpendCompareChoiceInRunModule,
     resolveTraceChoice,
-    resolveViral15ProgramTrashChoiceInRunModule,
+    resolveActiveIceProgramTrashChoiceInRunModule,
     rezCostForCard,
     rezzedBlackIceIds,
     rezzedCorpRootCardIds,
@@ -130,7 +128,7 @@ export function createCorpZoneRuntimeHosts(
     shouldLoadLegacyRecurringCredits,
     shuffleRunnerStackAndRefreshZones,
     shuffleStateIds,
-    sneakPreviewInstallableProgramIds,
+    temporaryProgramInstallableProgramIds,
     spendCardCounter,
     spendCredits,
     spendRunnerInstallCredits,
@@ -155,7 +153,7 @@ export function createCorpZoneRuntimeHosts(
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
     canInstallRunnerProgramFromZone,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     creditTextForPrompt,
     diePromptText,
     discardChoice,
@@ -170,51 +168,48 @@ export function createCorpZoneRuntimeHosts(
     installRunnerProgramFromStackWithoutClick,
     installRunnerProgramFromZoneWithoutClick,
     installedRunnerConnectionIds,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
     parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
     pendingChoiceResolutionHost,
-    playfulAiSplitOptions,
+    randomDiceSplitOptions,
     publicIcePositionLabelForCard,
     publicIceSelectionLabelForCard,
-    resolveAnonymousTipDerezBlackIceChoice,
+    resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
-    resolveCoreCommandJettisonIceChoice,
+    resolvePayRezCostToTrashRezzedIceChoice,
     resolveDiscardChoice,
-    resolveForgedActivationOrdersCorpChoice,
-    resolveForgedActivationOrdersTargetChoice,
+    resolveCorpChoiceRezOrTrashIceDecisionChoice,
+    resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveIncubatorTransformChoice,
-    resolveOpenEndedMileageProgramReturnChoice,
+    resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolvePlayfulAiDiceLoopEvent,
+    resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveSecurityCodeWormChipTrashIceChoice,
+    resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
     resolveV1911RunnerHiddenZoneAbility,
-    resolveV1921PlayfulAiChoice,
+    resolveRandomDiceSplitChoice,
     revealCorpRdTop,
     revealRunnerStackTop,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
     setupMulliganChoice,
     shuffleRunnerStack,
-    startAnonymousTipDerezBlackIceChoice,
-    startCoreCommandJettisonIceChoice,
-    startForgedActivationOrdersTargetChoice,
-    startOpenEndedMileageProgramReturnChoice,
+    startDerezRezzedBlackIceChoice,
+    startPayRezCostToTrashRezzedIceChoice,
+    startCorpChoiceRezOrTrashIceChoice,
+    startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
-    startSecurityCodeWormChipTrashIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
-    startV1921PlayfulAiChoice,
+    startTrashUnrezzedIceChoice,
+    startRunnerProgramFreeMemoryChoice,
+    startRandomDiceSplitChoice,
     takeSetupMulligan,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   function corpZoneChoiceHandlerHost(
     state: GameState,
@@ -226,7 +221,7 @@ export function createCorpZoneRuntimeHosts(
       legalAction,
       ...(playerAction ? { playerAction } : {}),
       constants: {
-        corpHqAgendaRevealCardId: CORP_HQ_AGENDA_REVEAL_CARD_ID,
+        corpHqAgendaRevealCardId: CORP_HQ_AGENDA_REVEAL_SOURCE,
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
@@ -284,20 +279,20 @@ export function createCorpZoneRuntimeHosts(
     return [];
   }
 
-  function resolveV1911CorporateDownsizing(
+  function resolveScoredAgendaCorpRdTopReveal(
     state: GameState,
     legalAction: LegalAction,
   ): void {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Corporate Downsizing nutzen.");
+      throw new Error("Nur die Korp darf diese Scored-Agenda-Aktion nutzen.");
     const sourceCardId = String(legalAction.payload?.cardId ?? "");
     if (!state.corp.scoreArea.includes(sourceCardId))
-      throw new Error("Corporate Downsizing ist nicht gescort.");
+      throw new Error("Die Scored Agenda ist nicht gescort.");
     if (
       scoredAgendaKindForDefinition(definitionFor(state, sourceCardId)) !==
       "shuffle_selected_hq_agendas_into_rd_gain_credits"
     )
-      throw new Error("Die Agenda-Aktion passt nicht zu Corporate Downsizing.");
+      throw new Error("Die Agenda-Aktion passt nicht zur Scored-Agenda-Art.");
     revealCorpRdTop(state, legalAction);
   }
 
@@ -512,11 +507,11 @@ export function createCorpZoneRuntimeHosts(
     amount: number,
   ): {
     amount: number;
-    counterType: Extract<CounterType, "militech" | "pattel_antibody">;
+    counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
     countersAfter: number;
     publicPayload: Record<string, string | number | boolean>;
   } {
-    if (counterType !== "militech" && counterType !== "pattel_antibody")
+    if (counterType !== "militech" && counterType !== "breaker_strength_penalty")
       throw new Error("Dieser Icebreaker-Counter-Typ wird nicht unterstuetzt.");
     const targetIds = installedRunnerIcebreakerIds(state);
     for (const cardId of targetIds)
@@ -617,7 +612,7 @@ export function createCorpZoneRuntimeHosts(
     };
   }
 
-  function resolveDealWithMilitech(
+  function resolveRunnerIcebreakerCounterEvent(
     state: GameState,
     legalAction: LegalAction,
   ): void {
@@ -637,11 +632,11 @@ export function createCorpZoneRuntimeHosts(
     };
   }
 
-  function huntClubBbsExposeTargets(state: GameState): CardInstanceId[] {
+  function multiExposeInstalledCorpCardTargets(state: GameState): CardInstanceId[] {
     return exposeInstalledCorpCardTargets(state, "any_installed");
   }
 
-  function huntClubBbsExposeOptionLabel(
+  function multiExposeInstalledCorpCardOptionLabel(
     state: GameState,
     cardId: CardInstanceId,
   ): string {
@@ -652,20 +647,20 @@ export function createCorpZoneRuntimeHosts(
     state: GameState,
     scope: "inside_data_fort" | "any_installed" = "any_installed",
   ) {
-    return exposeInstalledCorpCardTargets(state, scope).map(
-      (cardId) => ({
-        id: exposeInstalledCorpCardChoiceOptionId(cardId),
-        label: exposeInstalledCorpCardLabel(state, cardId),
-        value: cardId,
-      }),
-    );
+    return exposeInstalledCorpCardTargets(state, scope).map((cardId) => ({
+      id: exposeInstalledCorpCardChoiceOptionId(cardId),
+      label: exposeInstalledCorpCardLabel(state, cardId),
+      value: cardId,
+    }));
   }
 
   function installedCorpCardIdsInFort(
     state: GameState,
     serverId: string,
   ): CardInstanceId[] {
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) return [];
     return [...server.root, ...server.ice]
       .filter((cardId) =>
@@ -686,7 +681,9 @@ export function createCorpZoneRuntimeHosts(
     return [
       { id: "fort_none", label: "Keine Karten exposen", value: "none" },
       ...state.corp.servers
-        .filter((server) => installedCorpCardIdsInFort(state, server.id).length > 0)
+        .filter(
+          (server) => installedCorpCardIdsInFort(state, server.id).length > 0,
+        )
         .sort((left, right) => left.id.localeCompare(right.id))
         .map((server) => ({
           id: `fort_${server.id}`,
@@ -696,25 +693,25 @@ export function createCorpZoneRuntimeHosts(
     ];
   }
 
-  function startHuntClubBbsExposeChoice(
+  function startMultiExposeInstalledCorpCardsChoice(
     state: GameState,
     legalAction: LegalAction,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const options = huntClubBbsExposeTargets(state).map((cardId) => ({
+    const options = multiExposeInstalledCorpCardTargets(state).map((cardId) => ({
       id: exposeInstalledCorpCardChoiceOptionId(cardId),
-      label: huntClubBbsExposeOptionLabel(state, cardId),
+      label: multiExposeInstalledCorpCardOptionLabel(state, cardId),
       value: cardId,
     }));
     if (options.length === 0)
       throw new Error(
-        "Hunt Club BBS findet keine installierte verdeckte Korp-Karte.",
+        "Die Multi-Expose-Choice findet keine installierte verdeckte Korp-Karte.",
       );
     state.pendingChoice = {
-      choiceId: `v1912_hunt_club_bbs_expose_${state.stateVersion + 1}`,
+      choiceId: `card_implementation_multi_expose_installed_corp_cards_${state.stateVersion + 1}`,
       side: "runner",
-      source: `v1912.hunt_club_bbs_expose:${state.stateVersion + 1}`,
+      source: `card_implementation.multi_expose_installed_corp_cards:${state.stateVersion + 1}`,
       prompt: "Bis zu drei installierte Korp-Karten exposen",
       kind: "select_cards",
       options,
@@ -726,7 +723,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose_choice",
+      hiddenZoneAction: "multi_expose_installed_corp_cards_choice",
       choiceVisibility: "runner_private",
     };
   }
@@ -770,7 +767,8 @@ export function createCorpZoneRuntimeHosts(
       };
       return { publicPayload: payload };
     }
-    const targetScope = scope === "inside_data_fort" ? "inside_data_fort" : "any_installed";
+    const targetScope =
+      scope === "inside_data_fort" ? "inside_data_fort" : "any_installed";
     const options = exposeInstalledCorpCardsChoiceOptions(state, targetScope);
     if (options.length === 0)
       throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
@@ -813,7 +811,7 @@ export function createCorpZoneRuntimeHosts(
     };
     const payload = {
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose_choice",
+      hiddenZoneAction: "multi_expose_installed_corp_cards_choice",
       choiceVisibility: "runner_private",
       sourceDefinitionId,
     };
@@ -824,22 +822,22 @@ export function createCorpZoneRuntimeHosts(
     return { publicPayload: payload };
   }
 
-  function resolveHuntClubBbsExposeChoice(
+  function resolveMultiExposeInstalledCorpCardsChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("v1912.hunt_club_bbs_expose"))
-      throw new Error("Es ist keine Hunt-Club-BBS-Expose-Choice offen.");
+    if (!choice || !choice.source.startsWith("card_implementation.multi_expose_installed_corp_cards"))
+      throw new Error("Es ist keine Multi-Expose-Choice offen.");
     const selectedIds = selectedChoiceCardIds(choice, playerAction);
-    const legalTargets = new Set(huntClubBbsExposeTargets(state));
+    const legalTargets = new Set(multiExposeInstalledCorpCardTargets(state));
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
-        throw new Error("Hunt Club BBS darf dieses Ziel nicht exposen.");
+        throw new Error("Diese Multi-Expose-Choice darf dieses Ziel nicht exposen.");
     }
     const labels = selectedIds.map((cardId) =>
-      huntClubBbsExposeOptionLabel(state, cardId),
+      multiExposeInstalledCorpCardOptionLabel(state, cardId),
     );
     const definitionIds = selectedIds.map(
       (cardId) => definitionFor(state, cardId).id,
@@ -848,7 +846,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose",
+      hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       revealedCount: selectedIds.length,
       publicRevealDefinitionIds: definitionIds.join(","),
@@ -862,9 +860,7 @@ export function createCorpZoneRuntimeHosts(
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (
-      choice?.source.startsWith("p3_36.expose_installed_card_review:")
-    ) {
+    if (choice?.source.startsWith("p3_36.expose_installed_card_review:")) {
       const [, targetCardId = "", sourceCardId = "", sourceDefinitionId = ""] =
         choice.source.split(":");
       if (!targetCardId || !state.cardInstances[targetCardId])
@@ -892,8 +888,12 @@ export function createCorpZoneRuntimeHosts(
     )
       throw new Error("Es ist keine Expose-Choice offen.");
     if (choice.source.startsWith("p3_36.expose_installed_card:")) {
-      const [, sourceCardId = "", sourceDefinitionId = "", scopeText = "any_installed"] =
-        choice.source.split(":");
+      const [
+        ,
+        sourceCardId = "",
+        sourceDefinitionId = "",
+        scopeText = "any_installed",
+      ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
       const sourceDefinition = definitionFor(state, sourceCardId);
@@ -901,13 +901,19 @@ export function createCorpZoneRuntimeHosts(
         throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
       if (selectedIds.length !== 1)
-        throw new Error("Es muss genau eine installierte Korp-Karte gewählt werden.");
+        throw new Error(
+          "Es muss genau eine installierte Korp-Karte gewählt werden.",
+        );
       const scope =
         scopeText === "inside_data_fort" ? "inside_data_fort" : "any_installed";
       const targetCardId = selectedIds[0];
-      const legalTargets = new Set(exposeInstalledCorpCardTargets(state, scope));
+      const legalTargets = new Set(
+        exposeInstalledCorpCardTargets(state, scope),
+      );
       if (!targetCardId || !legalTargets.has(targetCardId))
-        throw new Error("Diese installierte Korp-Karte darf nicht exposed werden.");
+        throw new Error(
+          "Diese installierte Korp-Karte darf nicht exposed werden.",
+        );
       delete state.pendingChoice;
       exposeInstalledCorpCardForImplementation(
         state,
@@ -920,8 +926,13 @@ export function createCorpZoneRuntimeHosts(
       return;
     }
     if (choice.source.startsWith("p3_36.expose_installed_cards_fort_select")) {
-      const [, sourceCardId = "", sourceDefinitionId = "", minText = "0", maxText = "0"] =
-        choice.source.split(":");
+      const [
+        ,
+        sourceCardId = "",
+        sourceDefinitionId = "",
+        minText = "0",
+        maxText = "0",
+      ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
       const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
@@ -967,7 +978,9 @@ export function createCorpZoneRuntimeHosts(
       };
       return;
     }
-    if (choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")) {
+    if (
+      choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")
+    ) {
       const [, , serverId = "", sourceCardId = "", sourceDefinitionId = ""] =
         choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
@@ -1036,7 +1049,7 @@ export function createCorpZoneRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "hunt_club_bbs_expose",
+      hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       sourceDefinitionId,
       sourceTitle: sourceDefinition.title,
@@ -1064,9 +1077,7 @@ export function createCorpZoneRuntimeHosts(
       exposeSourceCardId = "",
       exposeSourceDefinitionId = "",
       scopeText = "any_installed",
-    ] = choice.source
-      .slice("corp.expose_prevention:".length)
-      .split(":");
+    ] = choice.source.slice("corp.expose_prevention:".length).split(":");
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "pass") {
       delete state.pendingChoice;
@@ -1088,12 +1099,15 @@ export function createCorpZoneRuntimeHosts(
       };
       return;
     }
-    const option = choice.options.find((candidate) => candidate.id === selected);
+    const option = choice.options.find(
+      (candidate) => candidate.id === selected,
+    );
     const sourceCardId =
       typeof option?.value === "string"
         ? (option.value as CardInstanceId)
         : undefined;
-    if (!sourceCardId) throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
+    if (!sourceCardId)
+      throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
     const source = state.cardInstances[sourceCardId];
     const utility = corpUtilityImplementationForCard(state, sourceCardId);
     if (!source || utility?.kind !== "expose_prevention")
@@ -1179,19 +1193,19 @@ export function createCorpZoneRuntimeHosts(
     exposeInstalledCorpCardsChoiceOptions,
     exposeOutermostIceOfEachDataFort,
     exposedCorpCardInServer,
-    huntClubBbsExposeOptionLabel,
-    huntClubBbsExposeTargets,
+    multiExposeInstalledCorpCardOptionLabel,
+    multiExposeInstalledCorpCardTargets,
     installedCorpCardServerContext,
     installedRunnerIcebreakerIds,
     outermostIceExposures,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
-    resolveHuntClubBbsExposeChoice,
-    resolveV1911CorporateDownsizing,
+    resolveMultiExposeInstalledCorpCardsChoice,
+    resolveScoredAgendaCorpRdTopReveal,
     shuffleCorpCardIntoRd,
     startExposeInstalledCorpCardsChoice,
-    startHuntClubBbsExposeChoice,
+    startMultiExposeInstalledCorpCardsChoice,
     trashCorpInstalledCardsInScoredSourceServer,
   };
 }

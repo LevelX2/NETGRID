@@ -1,16 +1,16 @@
-export const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
-  "onr_v1_316_cowboy-sysop";
+import { cowboySysopImplementation } from "../card-implementations/onr-v1/corp/assets/cowboy-sysop";
+import { disinfectantIncImplementation } from "../card-implementations/onr-v1/corp/assets/disinfectant-inc";
+import { setupImplementation } from "../card-implementations/onr-v1/corp/assets/setup";
+import { trapImplementation } from "../card-implementations/onr-v1/corp/assets/trap";
 
-export const DATA_MASONS_HOSTING_ASSET_CARD_ID = "onr_v1_317_data-masons";
+export const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
+  cowboySysopImplementation.cardDefinitionId;
 
 export const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
-  "onr_v1_319_disinfectant-inc";
+  disinfectantIncImplementation.cardDefinitionId;
 
-export const SOLO_SQUAD_DAMAGE_ASSET_CARD_ID = "onr_v1_342_solo-squad";
+export const SETUP_ACCESS_AMBUSH_ASSET_SOURCE =
+  setupImplementation.cardDefinitionId;
 
-export const SETUP_ACCESS_AMBUSH_ASSET_CARD_ID = "onr_v1_340_setup";
-
-export const TRAP_ACCESS_AMBUSH_ASSET_CARD_ID = "onr_v1_345_trap";
-
-export const SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID =
-  "onr_v1_344_spinn-public-relations";
+export const TRAP_ACCESS_AMBUSH_ASSET_SOURCE =
+  trapImplementation.cardDefinitionId;

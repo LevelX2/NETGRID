@@ -1,12 +1,12 @@
 import type {
   CardDefinitionId,
   CardInstanceId,
-  SneakPreviewTemporaryInstall,
+  TemporaryProgramInstallReturn,
 } from "@netgrid/shared";
 import type { FreeProgramInstallExecutionResult } from "./free-program-install-execution";
 
-export type SneakPreviewPostInstallSideEffectPlan = {
-  kind: "sneak_preview";
+export type TemporaryProgramInstallPostInstallSideEffectPlan = {
+  kind: "temporary_program_install";
   installedProgramId: CardInstanceId;
   selectedProgramId: CardInstanceId;
   sourceCardId?: CardInstanceId | undefined;
@@ -14,11 +14,11 @@ export type SneakPreviewPostInstallSideEffectPlan = {
   temporaryReturnNeeded: boolean;
   sourceTrashNeeded: false;
   oncePerRunNeeded: false;
-  temporaryReturnRecord?: SneakPreviewTemporaryInstall | undefined;
+  temporaryReturnRecord?: TemporaryProgramInstallReturn | undefined;
 };
 
-export type MysteryBoxPostInstallSideEffectPlan = {
-  kind: "mystery_box";
+export type SourceTrashPostInstallSideEffectPlan = {
+  kind: "revealed_stack_program_install";
   installedProgramId: CardInstanceId;
   selectedProgramId: CardInstanceId;
   sourceCardId?: CardInstanceId | undefined;
@@ -27,8 +27,8 @@ export type MysteryBoxPostInstallSideEffectPlan = {
   oncePerRunNeeded: false;
 };
 
-export type MysteryBoxOncePerRunPlan = {
-  kind: "mystery_box_once_per_run";
+export type SourceOncePerRunPostInstallPlan = {
+  kind: "once_per_run_source_use";
   sourceCardId: CardInstanceId;
   usedSourceIdsThisRun: CardInstanceId[];
   nextUsedSourceIdsThisRun: CardInstanceId[];
@@ -36,13 +36,13 @@ export type MysteryBoxOncePerRunPlan = {
 };
 
 export type HiddenZonePostInstallSideEffectPlan =
-  | SneakPreviewPostInstallSideEffectPlan
-  | MysteryBoxPostInstallSideEffectPlan;
+  | TemporaryProgramInstallPostInstallSideEffectPlan
+  | SourceTrashPostInstallSideEffectPlan;
 
-export function createSneakPreviewPostInstallSideEffectPlan(input: {
+export function createTemporaryProgramInstallPostInstallSideEffectPlan(input: {
   execution: FreeProgramInstallExecutionResult;
   sourceCardDefinitionId: CardDefinitionId;
-}): SneakPreviewPostInstallSideEffectPlan {
+}): TemporaryProgramInstallPostInstallSideEffectPlan {
   const temporaryReturnRecord = input.execution.temporaryReturnNeeded
     ? {
         cardId: input.execution.installedProgramId,
@@ -50,7 +50,7 @@ export function createSneakPreviewPostInstallSideEffectPlan(input: {
       }
     : undefined;
   return {
-    kind: "sneak_preview",
+    kind: "temporary_program_install",
     installedProgramId: input.execution.installedProgramId,
     selectedProgramId: input.execution.selectedProgramId,
     sourceCardId: input.execution.sourceCardId,
@@ -62,13 +62,13 @@ export function createSneakPreviewPostInstallSideEffectPlan(input: {
   };
 }
 
-export function createMysteryBoxPostInstallSideEffectPlan(
+export function createSourceTrashPostInstallSideEffectPlan(
   execution: FreeProgramInstallExecutionResult,
-): MysteryBoxPostInstallSideEffectPlan {
+): SourceTrashPostInstallSideEffectPlan {
   if (execution.sourceTrashNeeded && !execution.sourceCardId)
-    throw new Error("Mystery Box hat keine Source fuer Source-Trash im Plan.");
+    throw new Error("Der Source-Trash-Plan hat keine Source-Karte.");
   return {
-    kind: "mystery_box",
+    kind: "revealed_stack_program_install",
     installedProgramId: execution.installedProgramId,
     selectedProgramId: execution.selectedProgramId,
     sourceCardId: execution.sourceCardId,
@@ -78,14 +78,14 @@ export function createMysteryBoxPostInstallSideEffectPlan(
   };
 }
 
-export function createMysteryBoxOncePerRunPlan(input: {
+export function createSourceOncePerRunPostInstallPlan(input: {
   sourceCardId: CardInstanceId;
   usedSourceIdsThisRun: readonly CardInstanceId[];
-}): MysteryBoxOncePerRunPlan {
+}): SourceOncePerRunPostInstallPlan {
   if (input.usedSourceIdsThisRun.includes(input.sourceCardId))
-    throw new Error("Mystery Box wurde in diesem Run bereits genutzt.");
+    throw new Error("Die Source wurde in diesem Run bereits genutzt.");
   return {
-    kind: "mystery_box_once_per_run",
+    kind: "once_per_run_source_use",
     sourceCardId: input.sourceCardId,
     usedSourceIdsThisRun: [...input.usedSourceIdsThisRun],
     nextUsedSourceIdsThisRun: [
@@ -96,10 +96,10 @@ export function createMysteryBoxOncePerRunPlan(input: {
   };
 }
 
-export function applySneakPreviewTemporaryReturnPlan(
-  plan: SneakPreviewPostInstallSideEffectPlan,
+export function applyTemporaryProgramInstallReturnPlan(
+  plan: TemporaryProgramInstallPostInstallSideEffectPlan,
   callbacks: {
-    recordTemporaryReturn: (record: SneakPreviewTemporaryInstall) => void;
+    recordTemporaryReturn: (record: TemporaryProgramInstallReturn) => void;
   },
 ): { temporaryReturnRecorded: boolean } {
   if (!plan.temporaryReturnNeeded || !plan.temporaryReturnRecord)
@@ -108,21 +108,21 @@ export function applySneakPreviewTemporaryReturnPlan(
   return { temporaryReturnRecorded: true };
 }
 
-export function applyMysteryBoxSourceTrashPlan(
-  plan: MysteryBoxPostInstallSideEffectPlan,
+export function applySourceTrashPostInstallPlan(
+  plan: SourceTrashPostInstallSideEffectPlan,
   callbacks: {
     trashSource: (sourceCardId: CardInstanceId) => void;
   },
 ): { sourceTrashed: boolean } {
   if (!plan.sourceTrashNeeded) return { sourceTrashed: false };
   if (!plan.sourceCardId)
-    throw new Error("Mystery Box hat keine Source fuer Source-Trash im Plan.");
+    throw new Error("Der Source-Trash-Plan hat keine Source-Karte.");
   callbacks.trashSource(plan.sourceCardId);
   return { sourceTrashed: true };
 }
 
-export function applyMysteryBoxOncePerRunPlan(
-  plan: MysteryBoxOncePerRunPlan,
+export function applySourceOncePerRunPostInstallPlan(
+  plan: SourceOncePerRunPostInstallPlan,
   callbacks: {
     markUsedThisRun: (usedSourceIds: CardInstanceId[]) => void;
   },

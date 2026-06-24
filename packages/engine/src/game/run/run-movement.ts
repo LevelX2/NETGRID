@@ -11,7 +11,7 @@ import type {
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  applyRioDeJaneiroCityGridPassedIceTrigger,
+  applyPassedIceRunEndTrigger,
   type EncounterSpecialWindowHost,
 } from "./encounter-special-windows";
 import {
@@ -352,7 +352,7 @@ export function movePastCurrentIce(
   if (
     passedIceId &&
     host.cards.cardInstanceFor(passedIceId).rezzed &&
-    applyRioDeJaneiroCityGridPassedIceTrigger(
+    applyPassedIceRunEndTrigger(
       host.encounter.encounterSpecialWindowHost(),
       passedIceId,
       legalAction,

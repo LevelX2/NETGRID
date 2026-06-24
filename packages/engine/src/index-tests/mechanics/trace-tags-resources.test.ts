@@ -433,7 +433,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(0);
     expect(state.run).toBeUndefined();
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(1);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(1);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.trace).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -538,14 +538,14 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(0);
     expect(state.run).toBeUndefined();
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(cardCounterAmount(state, hackerTrackerId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "runner_bid",
       traceSuccessful: true,
       tagsAdded: 0,
       fangRunEnded: true,
-      fangRunLockCreditCost: 2,
+      runnerRunLockCreditCost: 2,
       hackerTrackerCountersAdded: 1,
     });
     expect(
@@ -554,16 +554,16 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ),
     ).toBe(false);
 
-    const creditsBeforeClearingFangLock = state.runner.credits;
+    const creditsBeforeClearingRunLock = state.runner.credits;
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1920RunnerRunLockAbility === "fang_2_0_pay_to_run",
+        action.payload?.v1920RunnerRunLockAbility === "pay_to_remove_run_lock",
     );
-    expect(state.runner.credits).toBe(creditsBeforeClearingFangLock - 2);
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(0);
+    expect(state.runner.credits).toBe(creditsBeforeClearingRunLock - 2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(0);
     expect(
       getLegalActions(state, "runner").some(
         (action) => action.type === "start_run",
@@ -1001,7 +1001,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.cardInstances[programId]?.counters).toBeUndefined();
   });
 
-  it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
+  it("gates Hardware-Trash-by-Counter on visible tags and installed Runner hardware", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.traceTags("v1914-power-grid-overload"),
     );
@@ -1061,21 +1061,21 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload" &&
-        action.payload?.powerGridOverloadTrashCount === 1,
+        action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
     expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
     expect(tagged.runner.heap).toContain(hardwareId);
     expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      powerGridOverloadTrashCount: 1,
+      hardwareTrashByCounterTrashCount: 1,
       trashedHardwareCount: 1,
     });
   });
 
-  it("offers Power Grid Overload X actions for non-Cybernetics hardware and choices exact targets", () => {
+  it("offers Hardware-Trash-by-Counter X actions for non-Cybernetics hardware and choices exact targets", () => {
     const runnerDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.traceTags.runner,
-      id: "v1914_power_grid_overload_rd_interface_runner",
+      id: "installed_hardware_trash_by_counter_rd_interface_runner",
       cards: [
         ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
         { id: "onr_v1_127_full-body-conversion", quantity: 1 },
@@ -1122,7 +1122,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         action.type === "play_operation" &&
         sourceDefinition(rdOnly, action) === "onr_v1_299_power-grid-overload" &&
         action.payload?.cardId === rdOnlyOperationId &&
-        action.payload?.powerGridOverloadTrashCount === 1,
+        action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
     expect(rdOnlyAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
     rdOnly = apply(
@@ -1167,12 +1167,12 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       )
       .sort(
         (left, right) =>
-          Number(left.payload?.powerGridOverloadTrashCount ?? 0) -
-          Number(right.payload?.powerGridOverloadTrashCount ?? 0),
+          Number(left.payload?.hardwareTrashByCounterTrashCount ?? 0) -
+          Number(right.payload?.hardwareTrashByCounterTrashCount ?? 0),
       );
     expect(
       powerGridActions.map(
-        (action) => action.payload?.powerGridOverloadTrashCount,
+        (action) => action.payload?.hardwareTrashByCounterTrashCount,
       ),
     ).toEqual([1, 2]);
     expect(powerGridActions.map((action) => action.costs)).toEqual([
@@ -1189,7 +1189,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
         action.payload?.cardId === operationId &&
-        action.payload?.powerGridOverloadTrashCount === 1,
+        action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
     state = apply(
       state,
@@ -1211,9 +1211,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     ).not.toContain(cyberneticsId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      powerGridOverloadChoiceOpened: true,
+      hardwareTrashByCounterChoiceOpened: true,
       eligibleHardwareCount: 2,
-      powerGridOverloadTrashCount: 1,
+      hardwareTrashByCounterTrashCount: 1,
     });
 
     const rdOptionId =
@@ -1227,7 +1227,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.runner.rig.hardware).toContain(cyberneticsId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      powerGridOverloadTrashCount: 1,
+      hardwareTrashByCounterTrashCount: 1,
       trashedHardwareCount: 1,
       trashedHardwareDefinitionIds: "onr_v1_139_r-and-d-interface",
     });

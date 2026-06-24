@@ -1,7 +1,7 @@
 import type { CorpServer, GameState, LegalAction } from "@netgrid/shared";
 import {
   buildCorpFortPassWindowActions,
-  buildSingaporeCityGridRunActions,
+  buildHqIceSwapRunActions,
   buildStartRunIceRepositionActions,
   type FortPassWindowHost,
 } from "../fort-pass-window";
@@ -22,10 +22,10 @@ export type RunWindowActionResolver = {
 
 export const RUN_WINDOW_ACTION_RESOLVERS: readonly RunWindowActionResolver[] = [
   {
-    id: "singapore_city_grid_fort_ice_swap",
+    id: "hq_ice_swap_run_window",
     window: "corp_root_rez_window",
     buildActions: ({ host, run, server }) =>
-      buildSingaporeCityGridRunActions(host, run, server),
+      buildHqIceSwapRunActions(host, run, server),
   },
   {
     id: "start_run_ice_reposition",

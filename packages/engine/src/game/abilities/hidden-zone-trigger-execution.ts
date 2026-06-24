@@ -1,6 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import {
-  handleMysteryBoxTopFiveProgramInstallActivation,
+  handleTopFiveProgramInstallActivation,
   type HiddenZoneSearchActivationHost,
 } from "../hidden-zone/search-choice-activations";
 
@@ -18,10 +18,9 @@ export function handleHiddenZoneTriggerExecution(
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
   if (
-    legalAction.payload?.v1915RunnerProgramAbility ===
-    "mystery_box_top5_program_install"
+    legalAction.payload?.v1915RunnerProgramAbility === "top5_program_install"
   ) {
-    handleMysteryBoxTopFiveProgramInstallActivation(host);
+    handleTopFiveProgramInstallActivation(host);
     return handled(legalAction);
   }
 

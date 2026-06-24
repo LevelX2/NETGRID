@@ -1,77 +1,76 @@
+import { viral15Implementation } from "../card-implementations/onr-v1/corp/ice/viral-15";
+import { edgerunnerIncTempsImplementation } from "../card-implementations/onr-v1/corp/operations/edgerunner-inc-temps";
+import { corollaSpeedChipImplementation } from "../card-implementations/onr-v1/runner/hardware/corolla-speed-chip";
+import { microtechBackupDriveImplementation } from "../card-implementations/onr-v1/runner/hardware/microtech-backup-drive";
+import { anonymousTipImplementation } from "../card-implementations/onr-v1/runner/preps/anonymous-tip";
+import { coreCommandJettisonIceImplementation } from "../card-implementations/onr-v1/runner/preps/core-command-jettison-ice";
+import { forgedActivationOrdersImplementation } from "../card-implementations/onr-v1/runner/preps/forged-activation-orders";
+import { miscForSaleImplementation } from "../card-implementations/onr-v1/runner/preps/misc-for-sale";
+import { openEndedMileageProgramImplementation } from "../card-implementations/onr-v1/runner/preps/open-ended-mileage-program";
+import { securityCodeWormChipImplementation } from "../card-implementations/onr-v1/runner/preps/security-code-worm-chip";
+import { synchronizedAttackOnHqImplementation } from "../card-implementations/onr-v1/runner/preps/synchronized-attack-on-hq";
+import { valuPakSoftwareBundleImplementation } from "../card-implementations/onr-v1/runner/preps/valu-pak-software-bundle";
+import { falseEchoImplementation } from "../card-implementations/onr-v1/runner/programs/false-echo";
+import { japaneseWaterTortureImplementation } from "../card-implementations/onr-v1/runner/programs/japanese-water-torture";
+import { netspaceInverterImplementation } from "../card-implementations/onr-v1/runner/programs/netspace-inverter";
+import { rabbitImplementation } from "../card-implementations/onr-v1/runner/programs/rabbit";
+import { scatterShotImplementation } from "../card-implementations/onr-v1/runner/programs/scatter-shot";
+import { speedTrapImplementation } from "../card-implementations/onr-v1/runner/programs/speed-trap";
+import { zetatechSoftwareInstallerImplementation } from "../card-implementations/onr-v1/runner/programs/zetatech-software-installer";
+
 export const ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID =
-  "onr_v1_077_anonymous-tip";
+  anonymousTipImplementation.cardDefinitionId;
 
 export const CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID =
-  "onr_v1_080_core-command-jettison-ice";
+  coreCommandJettisonIceImplementation.cardDefinitionId;
 
 export const FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID =
-  "onr_v1_086_forged-activation-orders";
+  forgedActivationOrdersImplementation.cardDefinitionId;
 
 export const MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID =
-  "onr_v1_100_misc-for-sale";
+  miscForSaleImplementation.cardDefinitionId;
 
 export const OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID =
-  "onr_v1_102_open-ended-mileage-program";
+  openEndedMileageProgramImplementation.cardDefinitionId;
 
 export const SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID =
-  "onr_v1_109_security-code-worm-chip";
+  securityCodeWormChipImplementation.cardDefinitionId;
 
 export const SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID =
-  "onr_v1_113_synchronized-attack-on-hq";
+  synchronizedAttackOnHqImplementation.cardDefinitionId;
 
 export const VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID =
-  "onr_v1_117_valu-pak-software-bundle";
-
-export const NEWSGROUP_FILTER_CREDIT_PROGRAM_ID = "onr_v1_045_newsgroup-filter";
+  valuPakSoftwareBundleImplementation.cardDefinitionId;
 
 export const JAPANESE_WATER_TORTURE_BREAKER_ID =
-  "onr_v1_037_japanese-water-torture";
+  japaneseWaterTortureImplementation.cardDefinitionId;
 
 export const ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID =
-  "onr_v1_075_zetatech-software-installer";
+  zetatechSoftwareInstallerImplementation.cardDefinitionId;
 
-export const RABBIT_HQ_INTERFACE_PROGRAM_ID = "onr_v1_051_rabbit";
+export const RABBIT_HQ_INTERFACE_PROGRAM_ID =
+  rabbitImplementation.cardDefinitionId;
 
-export const SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID = "onr_v1_057_scatter-shot";
-
-export const ARTEMIS_2020_STRENGTH_HARDWARE_ID = "onr_v1_122_artemis-2020";
+export const SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID =
+  scatterShotImplementation.cardDefinitionId;
 
 export const COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID =
-  "onr_v1_124_corolla-speed-chip";
+  corollaSpeedChipImplementation.cardDefinitionId;
 
-export const FALSE_ECHO_FORCE_REZ_PROGRAM_ID = "onr_v1_026_false-echo";
+export const FALSE_ECHO_FORCE_REZ_PROGRAM_ID =
+  falseEchoImplementation.cardDefinitionId;
 
 export const NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID =
-  "onr_v1_044_netspace-inverter";
+  netspaceInverterImplementation.cardDefinitionId;
 
-export const SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID = "onr_v1_067_speed-trap";
-
-export const ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID =
-  "onr_v1_119_arasaka-portable-prototype";
+export const SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID =
+  speedTrapImplementation.cardDefinitionId;
 
 export const MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID =
-  "onr_v1_131_microtech-backup-drive";
-
-export const PANDORAS_DECK_LINK_HARDWARE_ID = "onr_v1_136_pandoras-deck";
-
-export const CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID =
-  "onr_v1_195_corporate-retreat";
-
-export const CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID =
-  "onr_v1_196_corporate-war";
-
-export const DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID =
-  "onr_v1_197_data-fort-reclamation";
-
-export const MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID =
-  "onr_v1_206_marine-arcology";
-
-export const POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID =
-  "onr_v1_210_political-overthrow";
-
-export const SECURITY_PURGE_PURGE_AGENDA_ID = "onr_v1_216_security-purge";
+  microtechBackupDriveImplementation.cardDefinitionId;
 
 export const EDGERUNNER_TEMPS_INSTALL_OPERATION_ID =
-  "onr_v1_289_edgerunner-inc-temps";
+  edgerunnerIncTempsImplementation.cardDefinitionId;
 
-export const VIRAL_15_PROGRAM_TRASH_ICE_ID = "onr_v1_276_viral-15";
+export const ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID =
+  viral15Implementation.cardDefinitionId;

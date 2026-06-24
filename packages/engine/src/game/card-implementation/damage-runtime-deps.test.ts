@@ -76,7 +76,7 @@ function host(input: {
         return {
           payload: {
             baseDamageAmount: request.amount,
-            bioweaponsEngineeringModifier: 1,
+            damageAmountModifier: 1,
           },
         } as unknown as ImminentEvent;
       },
@@ -184,7 +184,7 @@ describe("damage card implementation runtime deps", () => {
         runnerGripAfter: 2,
         runnerMaxHandSizeAfter: 5,
         baseDamageAmount: 2,
-        bioweaponsEngineeringModifier: 1,
+        damageAmountModifier: 1,
       },
     });
   });

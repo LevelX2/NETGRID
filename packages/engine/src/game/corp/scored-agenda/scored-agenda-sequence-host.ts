@@ -41,7 +41,7 @@ export type CorpInstallRezSequenceHandlerHost = {
     isRegionUpgrade: (definition: CardDefinition) => boolean;
     rootInstallRezzesOnInstall: (definition: CardDefinition) => boolean;
     rezCostForCard: (cardId: CardInstanceId) => number;
-    isPriorityRequisitionCandidate: (cardId: CardInstanceId) => boolean;
+    isScoredAgendaFreeRezCandidate: (cardId: CardInstanceId) => boolean;
   };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;

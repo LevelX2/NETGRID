@@ -1,76 +1,68 @@
-import { runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegate } from "./runtime-delegate-store";
 
 export function openPostMeatDamageReactionWindow(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .openPostMeatDamageReactionWindow as any
+    runtimeDelegate("cardRuntimeResolvers", "openPostMeatDamageReactionWindow")
   )(...args);
 }
 
 export function postMeatDamageHiddenResourceCandidates(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .postMeatDamageHiddenResourceCandidates as any
+    runtimeDelegate("cardRuntimeResolvers", "postMeatDamageHiddenResourceCandidates")
   )(...args);
 }
 
 export function resolvePostMeatDamageHiddenResourceChoice(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .resolvePostMeatDamageHiddenResourceChoice as any
+    runtimeDelegate("cardRuntimeResolvers", "resolvePostMeatDamageHiddenResourceChoice")
   )(...args);
 }
 
 export function randomCorpHqDiscard(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeResolvers.randomCorpHqDiscard as any)(
+  return (runtimeDelegate("cardRuntimeResolvers", "randomCorpHqDiscard"))(
     ...args,
   );
 }
 
 export function installTargetBindingForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .installTargetBindingForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "installTargetBindingForDefinition")
   )(...args);
 }
 
 export function requiresDataFortInstallTarget(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers.requiresDataFortInstallTarget as any
+    runtimeDelegate("cardRuntimeResolvers", "requiresDataFortInstallTarget")
   )(...args);
 }
 
 export function runnerEventLongtailForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .runnerEventLongtailForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "runnerEventLongtailForDefinition")
   )(...args);
 }
 
 export function variableRezForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers.variableRezForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "variableRezForDefinition")
   )(...args);
 }
 
 export function runnerEventLongtailKindForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .runnerEventLongtailKindForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "runnerEventLongtailKindForDefinition")
   )(...args);
 }
 
 export function hiddenReplacementLongtailForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .hiddenReplacementLongtailForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "hiddenReplacementLongtailForDefinition")
   )(...args);
 }
 
 export function cardImplementationRunnerEventResolver(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .cardImplementationRunnerEventResolver as any
+    runtimeDelegate("cardRuntimeResolvers", "cardImplementationRunnerEventResolver")
   )(...args);
 }
 
@@ -78,114 +70,109 @@ export function printedCostCardImplementationMakeRunEffect(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .printedCostCardImplementationMakeRunEffect as any
+    runtimeDelegate("cardRuntimeResolvers", "printedCostCardImplementationMakeRunEffect")
   )(...args);
 }
 
 export function scoredAgendaImplementationForDefinitionId(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .scoredAgendaImplementationForDefinitionId as any
+    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaImplementationForDefinitionId")
   )(...args);
 }
 
 export function scoredAgendaImplementationForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers
-      .scoredAgendaImplementationForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaImplementationForDefinition")
   )(...args);
 }
 
 export function scoredAgendaKindForDefinition(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers.scoredAgendaKindForDefinition as any
+    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaKindForDefinition")
   )(...args);
 }
 
 export function emptyRunnerDrawSummary(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeResolvers.emptyRunnerDrawSummary as any)(
+  return (runtimeDelegate("cardRuntimeResolvers", "emptyRunnerDrawSummary"))(
     ...args,
   );
 }
 
 export function mergeRunnerDrawSummary(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeResolvers.mergeRunnerDrawSummary as any)(
+  return (runtimeDelegate("cardRuntimeResolvers", "mergeRunnerDrawSummary"))(
     ...args,
   );
 }
 
 export function applyRunnerDrawSummaryPayload(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers.applyRunnerDrawSummaryPayload as any
+    runtimeDelegate("cardRuntimeResolvers", "applyRunnerDrawSummaryPayload")
   )(...args);
 }
 
 export function runnerDrawSummaryPublicPayload(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeResolvers.runnerDrawSummaryPublicPayload as any
+    runtimeDelegate("cardRuntimeResolvers", "runnerDrawSummaryPublicPayload")
   )(...args);
 }
 
 export function dupreStrengthCounterBonus(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.dupreStrengthCounterBonus as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "dupreStrengthCounterBonus"))(
     ...args,
   );
 }
 
 export function permanentIcebreakerStrengthCounterBonus(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .permanentIcebreakerStrengthCounterBonus as any
+    runtimeDelegate("cardRuntimeHosts", "permanentIcebreakerStrengthCounterBonus")
   )(...args);
 }
 
 export function pumpAmountForLegalAction(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.pumpAmountForLegalAction as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "pumpAmountForLegalAction"))(
     ...args,
   );
 }
 
 export function pumpAbilityForLegalAction(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.pumpAbilityForLegalAction as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "pumpAbilityForLegalAction"))(
     ...args,
   );
 }
 
 export function breakAbilityForLegalAction(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.breakAbilityForLegalAction as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "breakAbilityForLegalAction"))(
     ...args,
   );
 }
 
 export function pumpDurationForLegalAction(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.pumpDurationForLegalAction as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "pumpDurationForLegalAction"))(
     ...args,
   );
 }
 
 export function assertCurrentSubroutineMatchesLegalAction(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .assertCurrentSubroutineMatchesLegalAction as any
+    runtimeDelegate("cardRuntimeHosts", "assertCurrentSubroutineMatchesLegalAction")
   )(...args);
 }
 
 export function resolveMultiBreakSubroutinesAction(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.resolveMultiBreakSubroutinesAction as any
+    runtimeDelegate("cardRuntimeHosts", "resolveMultiBreakSubroutinesAction")
   )(...args);
 }
 
 export function assertBreakSubroutineCostQuoteValid(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.assertBreakSubroutineCostQuoteValid as any
+    runtimeDelegate("cardRuntimeHosts", "assertBreakSubroutineCostQuoteValid")
   )(...args);
 }
 
 export function subroutinesForCurrentEncounter(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.subroutinesForCurrentEncounter as any
+    runtimeDelegate("cardRuntimeHosts", "subroutinesForCurrentEncounter")
   )(...args);
 }
 
@@ -193,8 +180,7 @@ export function variableTraceSubroutineForCurrentEncounter(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .variableTraceSubroutineForCurrentEncounter as any
+    runtimeDelegate("cardRuntimeHosts", "variableTraceSubroutineForCurrentEncounter")
   )(...args);
 }
 
@@ -202,8 +188,7 @@ export function relativeDamageSubroutineForCurrentEncounter(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .relativeDamageSubroutineForCurrentEncounter as any
+    runtimeDelegate("cardRuntimeHosts", "relativeDamageSubroutineForCurrentEncounter")
   )(...args);
 }
 
@@ -211,103 +196,99 @@ export function relativeTraceSubroutinesForCurrentEncounter(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .relativeTraceSubroutinesForCurrentEncounter as any
+    runtimeDelegate("cardRuntimeHosts", "relativeTraceSubroutinesForCurrentEncounter")
   )(...args);
 }
 
 export function runCardImplementationActionHost(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.runCardImplementationActionHost as any
+    runtimeDelegate("cardRuntimeHosts", "runCardImplementationActionHost")
   )(...args);
 }
 
 export function runStartTaxForServerUpgrades(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.runStartTaxForServerUpgrades as any
+    runtimeDelegate("cardRuntimeHosts", "runStartTaxForServerUpgrades")
   )(...args);
 }
 
 export function runStartTaxForCorpRootAssets(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.runStartTaxForCorpRootAssets as any
+    runtimeDelegate("cardRuntimeHosts", "runStartTaxForCorpRootAssets")
   )(...args);
 }
 
 export function spendRunnerAccessTrashCredits(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.spendRunnerAccessTrashCredits as any
+    runtimeDelegate("cardRuntimeHosts", "spendRunnerAccessTrashCredits")
   )(...args);
 }
 
 export function runnerSpecialTriggerExecutionHost(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.runnerSpecialTriggerExecutionHost as any
+    runtimeDelegate("cardRuntimeHosts", "runnerSpecialTriggerExecutionHost")
   )(...args);
 }
 
 export function runFortTriggerExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.runFortTriggerExecutionHost as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "runFortTriggerExecutionHost"))(
     ...args,
   );
 }
 
 export function counterUtilityTriggerExecutionHost(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.counterUtilityTriggerExecutionHost as any
+    runtimeDelegate("cardRuntimeHosts", "counterUtilityTriggerExecutionHost")
   )(...args);
 }
 
 export function triggerAbilityExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.triggerAbilityExecutionHost as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "triggerAbilityExecutionHost"))(
     ...args,
   );
 }
 
 export function installCardHost(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.installCardHost as any)(...args);
+  return (runtimeDelegate("cardRuntimeHosts", "installCardHost"))(...args);
 }
 
 export function rezCardHost(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.rezCardHost as any)(...args);
+  return (runtimeDelegate("cardRuntimeHosts", "rezCardHost"))(...args);
 }
 
 export function traceOrchestrationHost(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.traceOrchestrationHost as any)(
+  return (runtimeDelegate("cardRuntimeHosts", "traceOrchestrationHost"))(
     ...args,
   );
 }
 
 export function activatedCardImplementationExecutionHost(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .activatedCardImplementationExecutionHost as any
+    runtimeDelegate("cardRuntimeHosts", "activatedCardImplementationExecutionHost")
   )(...args);
 }
 
 export function resolveRunnerTargetedEventImplementation(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .resolveRunnerTargetedEventImplementation as any
+    runtimeDelegate("cardRuntimeHosts", "resolveRunnerTargetedEventImplementation")
   )(...args);
 }
 
 export function resolvePostOnPlayGenericFollowups(...args: any[]): any {
   return (
-    runtimeDelegates.cardRuntimeHosts.resolvePostOnPlayGenericFollowups as any
+    runtimeDelegate("cardRuntimeHosts", "resolvePostOnPlayGenericFollowups")
   )(...args);
 }
 
-export function resolveMitWestTier(...args: any[]): any {
-  return (runtimeDelegates.cardRuntimeHosts.resolveMitWestTier as any)(...args);
+export function resolveRunnerGripHeapStackShuffleDrawEvent(...args: any[]): any {
+  return (runtimeDelegate("cardRuntimeHosts", "resolveRunnerGripHeapStackShuffleDrawEvent"))(...args);
 }
 
 export function shuffleGripTrashAndStackThenDrawForCardImplementation(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .shuffleGripTrashAndStackThenDrawForCardImplementation as any
+    runtimeDelegate("cardRuntimeHosts", "shuffleGripTrashAndStackThenDrawForCardImplementation")
   )(...args);
 }
 
@@ -315,8 +296,7 @@ export function startRunnerProgramTrashBeforeInstallChoice(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .startRunnerProgramTrashBeforeInstallChoice as any
+    runtimeDelegate("cardRuntimeHosts", "startRunnerProgramTrashBeforeInstallChoice")
   )(...args);
 }
 
@@ -324,7 +304,6 @@ export function resolveRunnerProgramTrashBeforeInstallChoice(
   ...args: any[]
 ): any {
   return (
-    runtimeDelegates.cardRuntimeHosts
-      .resolveRunnerProgramTrashBeforeInstallChoice as any
+    runtimeDelegate("cardRuntimeHosts", "resolveRunnerProgramTrashBeforeInstallChoice")
   )(...args);
 }

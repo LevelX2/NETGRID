@@ -10,23 +10,23 @@ import type {
 } from "./scored-agenda-flow-host";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
-export function isEmployeeEmpowermentStartDrawChoiceSource(
+export function isScoredAgendaStartDrawChoiceSource(
   source: string,
 ): boolean {
-  return source.startsWith("v1912.employee_empowerment_start_draw");
+  return source.startsWith("scored_agenda.start_draw_choice");
 }
 
-export function startEmployeeEmpowermentStartDrawChoice(
+export function startScoredAgendaStartDrawChoice(
   host: ScoredAgendaFlowHost,
 ): ScoredAgendaFlowResult {
   if (host.state.pendingChoice) return { handled: false };
-  const sourceCardId = scoredEmployeeEmpowermentSourceIds(host)[0];
+  const sourceCardId = scoredAgendaStartDrawSourceIds(host)[0];
   if (!sourceCardId) return { handled: false };
   host.state.pendingChoice = {
-    choiceId: `v1912_employee_empowerment_start_draw_${sourceCardId}_${host.state.stateVersion + 1}`,
+    choiceId: `scored_agenda_start_draw_choice_${sourceCardId}_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1912.employee_empowerment_start_draw:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+    source: `scored_agenda.start_draw_choice:${sourceCardId}:${host.state.stateVersion + 1}`,
+    prompt: "Scored Agenda: zusätzliche Karte ziehen?",
     kind: "select_option",
     options: [
       {
@@ -54,37 +54,43 @@ export function startEmployeeEmpowermentStartDrawChoice(
   };
 }
 
-export function resolveEmployeeEmpowermentStartDrawChoice(
+export function resolveScoredAgendaStartDrawChoice(
   host: ScoredAgendaFlowHost,
 ): void {
   const legalAction = requireLegalAction(host);
   const playerAction = requirePlayerAction(host);
   const choice = host.state.pendingChoice;
-  if (!choice || !isEmployeeEmpowermentStartDrawChoiceSource(choice.source))
-    throw new Error("Es ist keine Employee-Empowerment-Choice offen.");
+  if (!choice || !isScoredAgendaStartDrawChoiceSource(choice.source))
+    throw new Error("Es ist keine scored Agenda-Start-Draw-Choice offen.");
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Employee Empowerment nutzen.");
+    throw new Error("Nur die Korp darf die scored Agenda-Start-Draw-Choice nutzen.");
   if (
     host.state.phase !== "corp_draw_phase" ||
     host.state.timingPoint !== "corp_draw.mandatory_draw"
   )
     throw new Error(
-      "Employee Empowerment ist nur am Start des Korp-Zugs nutzbar.",
+      "Die scored Agenda-Start-Draw-Choice ist nur am Start des Korp-Zugs nutzbar.",
     );
   const [, sourceCardId] = choice.source.split(":");
+  const sourceDefinition = sourceCardId
+    ? host.cards.definitionFor(sourceCardId as CardInstanceId)
+    : undefined;
+  const scoredAgenda = sourceDefinition
+    ? host.cards.scoredAgendaForDefinition(sourceDefinition)
+    : undefined;
   if (
     !sourceCardId ||
+    !sourceDefinition ||
     !host.state.corp.scoreArea.includes(sourceCardId as CardInstanceId) ||
-    host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
-      host.constants.employeeEmpowermentId
+    scoredAgenda?.kind !== "corp_start_turn_optional_draw"
   )
     throw new Error(
-      "Employee Empowerment ist nicht mehr in der Korp-ScoreArea.",
+      "Die Start-Draw-Agenda ist nicht mehr in der Korp-ScoreArea.",
     );
 
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
   const useDraw = selected === "draw";
-  host.flags.markEmployeeEmpowermentResolved(sourceCardId as CardInstanceId);
+  host.flags.markScoredAgendaStartDrawChoiceResolved(sourceCardId as CardInstanceId);
   delete host.state.pendingChoice;
 
   const rdBefore = host.state.corp.rd.length;
@@ -92,29 +98,34 @@ export function resolveEmployeeEmpowermentStartDrawChoice(
   const drawnCount = useDraw ? rdBefore - host.state.corp.rd.length : 0;
   applySequencePayloadPatch(legalAction, {
     choiceVisibility: "public",
-    sourceDefinitionId: host.constants.employeeEmpowermentId,
-    cardDefinitionId: host.constants.employeeEmpowermentId,
-    employeeEmpowermentStartDrawDecision: useDraw ? "draw" : "skip",
+    sourceDefinitionId: sourceDefinition.id,
+    cardDefinitionId: sourceDefinition.id,
+    scoredAgendaStartDrawDecision: useDraw ? "draw" : "skip",
     ...(useDraw ? { drawnCards: drawnCount, drawnCount } : {}),
   });
   if (useDraw) {
-    host.effects.appendEmployeeEmpowermentDrawEffect(
+    host.effects.appendScoredAgendaStartDrawChoiceEffect(
       sourceCardId as CardInstanceId,
+      sourceDefinition.id,
       drawnCount,
     );
   }
-  if (!host.state.winner) startEmployeeEmpowermentStartDrawChoice(host);
+  if (!host.state.winner) startScoredAgendaStartDrawChoice(host);
 }
 
-function scoredEmployeeEmpowermentSourceIds(
+function scoredAgendaStartDrawSourceIds(
   host: ScoredAgendaFlowHost,
 ): CardInstanceId[] {
-  const resolved = new Set(host.flags.employeeEmpowermentResolvedSourceIds());
+  const resolved = new Set(host.flags.scoredAgendaStartDrawChoiceResolvedSourceIds());
   return host.state.corp.scoreArea
     .filter(
-      (cardId) =>
-        host.cards.definitionFor(cardId).id ===
-          host.constants.employeeEmpowermentId && !resolved.has(cardId),
+      (cardId) => {
+        const definition = host.cards.definitionFor(cardId);
+        return (
+          host.cards.scoredAgendaForDefinition(definition)?.kind ===
+            "corp_start_turn_optional_draw" && !resolved.has(cardId)
+        );
+      },
     )
     .sort();
 }

@@ -132,7 +132,7 @@ export type StateHash = string;
 export type Winner = Side | "draw";
 export type GameEndReason =
   | "agenda_points"
-  | "acme_savings_and_loan_unpaid"
+  | "obligation_debt_unpaid"
   | "bad_publicity_7"
   | "corp_deck_empty"
   | "flatline"
@@ -156,10 +156,10 @@ export type CounterType =
   | "socket_rd"
   | "pipe"
   | "spy"
-  | "doppelganger_antibody"
-  | "pattel_antibody"
+  | "link_reduction_counter"
+  | "breaker_strength_penalty"
   | "cerberus"
-  | "data_raven"
+  | "trace_tag_counter"
   | "mastiff"
   | "militech"
   | "power"
@@ -218,7 +218,7 @@ export type SubroutineType =
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_end_the_run_subroutine"
-  | "set_run_viral_15"
+  | "set_run_active_ice_program_trash"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
@@ -671,7 +671,7 @@ export type CardSearchPresentation = StackSearchResolution & {
   temporaryReturnAtEndOfTurn?: boolean;
 };
 
-export type SneakPreviewTemporaryInstall = {
+export type TemporaryProgramInstallReturn = {
   cardId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
 };
@@ -985,7 +985,7 @@ export type RunState = {
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
-  grantAllNighterBonusRunOnFinish?: boolean;
+  grantBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
@@ -1048,7 +1048,7 @@ export type RunState = {
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
-  microtechAiInterfacePreAccessResolved?: boolean;
+  preAccessTopRdReorderResolved?: boolean;
   hiddenRunnerResourceAccessStartServerId?: Exclude<ServerId, "new_remote">;
   hiddenRunnerResourceAccessStartWindowClosed?: boolean;
   badPublicityCredits?: number;
@@ -1083,8 +1083,8 @@ export type RunState = {
   turbeauAccessTraceConsumedByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
   >;
-  viral15ActiveSourceIceId?: CardInstanceId;
-  viral15PendingPassedIceId?: CardInstanceId;
+  activeIceProgramTrashSourceIceId?: CardInstanceId;
+  activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
   passRezzedIceProgramTrashSourceIceId?: CardInstanceId;
   passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
   jackOutAdditionalCostForRun?: number;
@@ -1135,9 +1135,9 @@ export type RunState = {
     paymentAmount?: number;
     gainCredits?: number;
   };
-  aiBoonSourceCardId?: CardInstanceId;
-  aiBoonRunStrength?: number;
-  aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
+  runStartRandomStrengthSourceCardId?: CardInstanceId;
+  runStartRandomStrengthBonus?: number;
+  runStartRandomStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -1158,7 +1158,7 @@ export type RunState = {
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
-  mysteryBoxUsedSourceIdsThisRun?: CardInstanceId[];
+  hiddenStackInstallUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
@@ -1178,10 +1178,10 @@ export type RunState = {
   accessStealCostModifierSnapshotsByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, AccessStealCostModifierSnapshot[]>
   >;
-  singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
+  hqIceSwapUsedSourceIdsThisRun?: CardInstanceId[];
   iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
-  oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
-  oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
+  discountedRezUsedSourceIdsThisRun?: CardInstanceId[];
+  temporaryDiscountedRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
   successfulRunInterventionWindowClosed?: boolean;
   secretSpendGuessRunAutoPassIceId?: CardInstanceId;
@@ -1197,9 +1197,9 @@ export type RunState = {
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
   rootRezWindowPassedKeys?: string[];
-  speedTrapPendingRezCardId?: CardInstanceId;
-  speedTrapPendingRezTimingPoint?: string;
-  speedTrapPendingRezActiveSide?: Side;
+  rezInterruptPendingRezCardId?: CardInstanceId;
+  rezInterruptPendingRezTimingPoint?: string;
+  rezInterruptPendingRezActiveSide?: Side;
   runActionSpendingCap?: {
     sourceCardInstanceId: CardInstanceId;
     limit: number;
@@ -1347,7 +1347,7 @@ export type GameState = {
   setup?: SetupState;
   pendingChoice?: PendingChoice;
   imminentEvent?: ImminentEvent;
-  sneakPreviewTemporaryInstalls?: SneakPreviewTemporaryInstall[];
+  temporaryProgramInstallReturns?: TemporaryProgramInstallReturn[];
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
   runnerTagAvoidanceCredits?: number;
@@ -1369,7 +1369,7 @@ export type GameState = {
   run?: RunState;
   trace?: TraceState;
   secretSpendComparison?: {
-    source: "too_many_doors";
+    source: "secret_spend_compare";
     runId: string;
     sourceIceId: CardInstanceId;
     subroutineIndex: number;
@@ -1387,7 +1387,7 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     resolveAt: "runner_start_turn";
   }>;
-  acmeSavingsAndLoanObligations?: number;
+  activeObligationDebtCount?: number;
   corpTemporaryInstallRezCredits?: {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
@@ -1444,16 +1444,16 @@ export type GameState = {
     restrictedActionGrants?: RestrictedActionGrantBucket;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
-    allNighterBonusRunPending?: boolean;
+    bonusRunPending?: boolean;
     forgoNextActionPending?: boolean;
     forgoNextActionsPending?: number;
     runLockActionsPending?: number;
-    fangRunLockCreditCost?: number;
+    runnerRunLockCreditCost?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];
-    bodyweightDataCrecheExtraRunPending?: boolean;
-    bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
+    successfulRunExtraRunPending?: boolean;
+    successfulRunExtraRunUsedThisTurn?: boolean;
     delayedEndTurnEffects?: Array<{
       sourceCardInstanceId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
@@ -1483,7 +1483,7 @@ export type GameState = {
     restrictedActionGrants?: RestrictedActionGrantBucket;
     edgerunnerTempsInstallActionsRemaining?: number;
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
-    employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
+    scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   ambushHarness?: {
@@ -1493,7 +1493,7 @@ export type GameState = {
   poxCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
-  faitAccompliCountersByServer?: Partial<
+  serverAgendaCostCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   spyCountersByServer?: Partial<
@@ -2486,8 +2486,8 @@ function onrSetRunFutureEndTheRunSubroutine(id: string): SubroutineDefinition {
   return { id, type: "set_run_future_end_the_run_subroutine" };
 }
 
-function onrSetRunViral15(id: string): SubroutineDefinition {
-  return { id, type: "set_run_viral_15" };
+function onrSetRunActiveIceProgramTrash(id: string): SubroutineDefinition {
+  return { id, type: "set_run_active_ice_program_trash" };
 }
 
 function onrSetRunFutureStrengthBonus(
@@ -8018,13 +8018,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
     subroutines: [
       {
-        id: "onr_v1_236_data_raven_trace_counter",
+        id: "onr_v1_236_trace_tag_counter_trace_counter",
         type: "initiate_trace",
         baseTraceStrength: 5,
         traceSuccessEffect: {
           type: "add_tag_and_counter",
           tagAmount: 1,
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           amount: 1,
         },
       },
@@ -8427,8 +8427,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 3,
     rulesText:
-      "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Viral 15, unless Runner jacks out.",
-    subroutines: [onrSetRunViral15("onr_v1_276_viral_15_run_modifier")],
+      "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Active ICE Program Trash, unless Runner jacks out.",
+    subroutines: [onrSetRunActiveIceProgramTrash("onr_v1_276_active_ice_program_trash_run_modifier")],
     mechanics: [
       "run_modifier",
       "jack_out_tax",

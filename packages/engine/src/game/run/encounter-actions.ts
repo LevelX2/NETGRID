@@ -19,10 +19,8 @@ import {
   PILE_DRIVER_ID,
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
-import { AI_BOON_RANDOM_BREAKER_CARD_ID } from "../../mechanics/random-effects";
-import {
-  buildRunnerSelfModifyingCodeInstallAction,
-} from "../turn/runner-special-zone-install-actions";
+import { AI_BOON_RANDOM_BREAKER_SOURCE } from "../../mechanics/random-effects";
+import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -47,12 +45,16 @@ export type RunnerEncounterActionHost = {
       definition?: CardDefinition,
     ) => string[];
     hostedProgramStrengthModifier: (cardId: CardInstanceId) => number;
-    publicServerLabel: (serverId: ActiveRun["attackedServerId"]) => string | undefined;
+    publicServerLabel: (
+      serverId: ActiveRun["attackedServerId"],
+    ) => string | undefined;
     icebreakerEncounterStrengthBonus?: (
       breakerId: CardInstanceId,
       encounteredIceId: CardInstanceId,
     ) => number;
-    permanentIcebreakerStrengthCounterBonus?: (breakerId: CardInstanceId) => number;
+    permanentIcebreakerStrengthCounterBonus?: (
+      breakerId: CardInstanceId,
+    ) => number;
   };
   run: {
     currentRun: () => ActiveRun;
@@ -130,14 +132,15 @@ export function buildRunnerEncounterActions(
   const encounteredIceStrength = host.ice.strengthForIce(encounteredIceId);
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
-  actions.push(...selfModifyingCodeEncounterActions(host));
+  actions.push(...paidStackProgramInstallEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
     if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
       continue;
     if (!host.run.canUseBreakerOnCurrentFort(breakerId)) continue;
-    const subtypeChange =
-      cardImplementationForDefinitionId(breaker.id)?.icebreakerSubtypeChange;
+    const subtypeChange = cardImplementationForDefinitionId(
+      breaker.id,
+    )?.icebreakerSubtypeChange;
     if (
       subtypeChange?.timing === "during_run" &&
       !(
@@ -146,7 +149,10 @@ export function buildRunnerEncounterActions(
       )
     ) {
       for (const subtype of subtypeChange.choices) {
-        if (host.payment.availableRunnerRunCredits(breakerId) < subtypeChange.cost.credits)
+        if (
+          host.payment.availableRunnerRunCredits(breakerId) <
+          subtypeChange.cost.credits
+        )
           continue;
         actions.push(
           host.actions.buildLegalAction(
@@ -166,11 +172,11 @@ export function buildRunnerEncounterActions(
       }
     }
     const breakerBaseStrength =
-      typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
-        ? run.aiBoonRunStrengthByBreaker[breakerId]
-        : breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
-            typeof run.aiBoonRunStrength === "number"
-          ? run.aiBoonRunStrength
+      typeof run.runStartRandomStrengthBonusByBreaker?.[breakerId] === "number"
+        ? run.runStartRandomStrengthBonusByBreaker[breakerId]
+        : breaker.id === AI_BOON_RANDOM_BREAKER_SOURCE &&
+            typeof run.runStartRandomStrengthBonus === "number"
+          ? run.runStartRandomStrengthBonus
           : (breaker.strength ?? 0);
     const breakerStrength =
       breakerBaseStrength +
@@ -182,7 +188,7 @@ export function buildRunnerEncounterActions(
       ) ?? 0) +
       host.cards.cardCounter(breakerId, "militech") +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
-      host.cards.cardCounter(breakerId, "pattel_antibody") * -1 +
+      host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
       host.breaker.dupreStrengthCounterBonus(breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);
@@ -247,7 +253,11 @@ export function buildRunnerEncounterActions(
                 pumpAmount: amount,
                 futureActionDebtAdded: amount,
               },
-              host.actions.abilityMetadata(breakerId, pump.id, encounteredIceId),
+              host.actions.abilityMetadata(
+                breakerId,
+                pump.id,
+                encounteredIceId,
+              ),
             ),
           );
         }
@@ -269,7 +279,9 @@ export function buildRunnerEncounterActions(
         ability.cost.credits,
         1,
       );
-      return host.payment.availableRunnerRunCredits(breakerId) >= cost.totalCost;
+      return (
+        host.payment.availableRunnerRunCredits(breakerId) >= cost.totalCost
+      );
     });
     if (
       !run.noBreakSubroutinesActive &&
@@ -402,7 +414,8 @@ export function buildRunnerEncounterActions(
       ): entry is {
         index: number;
         subroutine: NonNullable<CardDefinition["subroutines"]>[number];
-      } => entry.subroutine?.type === "trash_installed_program_unless_runner_pays",
+      } =>
+        entry.subroutine?.type === "trash_installed_program_unless_runner_pays",
     );
   const payOrTrashProgramAmount = payOrTrashProgramEntries.reduce(
     (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
@@ -495,7 +508,9 @@ function nextSentryFreeBreakActions(
 ): LegalAction[] {
   const run = host.run.currentRun();
   if (run.nextSentryFreeBreakByBreaker?.[breakerId] === undefined) return [];
-  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== encounteredIceId)
+  if (
+    run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== encounteredIceId
+  )
     return [];
   if (!encounteredIceSubtypes.includes("sentry")) return [];
   return subroutines.flatMap((subroutine, index) => {
@@ -534,7 +549,10 @@ export function buildRunnerMovementActions(
 ): RunnerMovementActionBuildResult {
   const run = host.run.currentRun();
   if (run.postPassPayOrEndRun)
-    return { handled: true, legalActions: postPassPayOrEndRunActions(host, run) };
+    return {
+      handled: true,
+      legalActions: postPassPayOrEndRunActions(host, run),
+    };
   if (
     run.jackOutLockedUntilEncounterEnds ||
     run.nextEncounterJackOutLock ||
@@ -554,7 +572,7 @@ export function buildRunnerMovementActions(
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
   actions.push(...host.callbacks.postPassSpecialWindowActions());
-  actions.push(...buildMysteryBoxRunActions(host, run));
+  actions.push(...buildRevealedStackProgramInstallRunActions(host, run));
   const jackOutAdditionalCost = host.payment.runJackOutAdditionalCost(run);
   if (host.payment.availableRunnerRunCredits() >= jackOutAdditionalCost) {
     actions.push(
@@ -567,12 +585,12 @@ export function buildRunnerMovementActions(
         jackOutAdditionalCost > 0 ? [{ credits: jackOutAdditionalCost }] : [],
         jackOutAdditionalCost > 0
           ? {
-              v1922CorpIceAbility: "viral_15_jack_out_tax",
+              v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
               jackOutAdditionalCost,
-              ...(run.viral15ActiveSourceIceId
+              ...(run.activeIceProgramTrashSourceIceId
                 ? {
                     sourceDefinitionId: host.cards.definitionFor(
-                      run.viral15ActiveSourceIceId,
+                      run.activeIceProgramTrashSourceIceId,
                     ).id,
                   }
                 : {}),
@@ -591,7 +609,7 @@ export function buildRunnerMovementActions(
   return { handled: true, legalActions: actions };
 }
 
-function selfModifyingCodeEncounterActions(
+function paidStackProgramInstallEncounterActions(
   host: RunnerEncounterActionHost,
 ): LegalAction[] {
   const state = host.state;
@@ -607,14 +625,15 @@ function selfModifyingCodeEncounterActions(
   return state.runner.rig.programs
     .slice()
     .sort()
-    .filter((cardId) => host.cards.definitionFor(cardId).id === SELF_MODIFYING_CODE_ID)
+    .filter(
+      (cardId) =>
+        host.cards.definitionFor(cardId).id === SELF_MODIFYING_CODE_ID,
+    )
     .filter(
       (cardId) =>
         !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
     )
-    .map((cardId) =>
-      buildRunnerSelfModifyingCodeInstallAction(state, cardId),
-    );
+    .map((cardId) => buildRunnerHiddenStackProgramInstallAction(state, cardId));
 }
 
 function multiBreakSubroutineActions(
@@ -660,7 +679,9 @@ function multiBreakSubroutineActions(
           breakSubroutineCount: eligibleIndexes.length,
           multiBreakSubroutines: true,
           breakAllMatchingSubroutines: true,
-          ...(breakAbility.onUseEndRun ? { breakerEndsRunAfterBreak: true } : {}),
+          ...(breakAbility.onUseEndRun
+            ? { breakerEndsRunAfterBreak: true }
+            : {}),
           targetIceDefinitionId: iceDefinition.id,
           targetIceTitle: iceDefinition.title,
           ...breakCost.publicPayload,
@@ -689,8 +710,7 @@ function multiBreakSubroutineActions(
         subroutineIndexes.length,
       );
       if (
-        host.payment.availableRunnerRunCredits(breakerId) <
-        breakCost.totalCost
+        host.payment.availableRunnerRunCredits(breakerId) < breakCost.totalCost
       )
         return;
       actions.push(
@@ -705,8 +725,6 @@ function multiBreakSubroutineActions(
             subroutineIndexes: subroutineIndexes.join(","),
             breakSubroutineCount: subroutineIndexes.length,
             multiBreakSubroutines: true,
-            // Kept for PublicContext and older Pile Driver regression tests.
-            pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
             ...breakCost.publicPayload,
@@ -769,7 +787,8 @@ export function breakAbilityMatchesSubroutine(
 ): boolean {
   const tags = ability.subroutineBreakTags ?? [];
   if (tags.length === 0) return true;
-  if (tags.includes("trace") && subroutine.type === "initiate_trace") return true;
+  if (tags.includes("trace") && subroutine.type === "initiate_trace")
+    return true;
   const subroutineTags = subroutine.breakTags ?? [];
   return tags.some((tag) => subroutineTags.includes(tag));
 }
@@ -827,7 +846,8 @@ function postPassPayOrEndRunActions(
   const amount = Math.max(0, Math.floor(pending.amount));
   const serverLabel = host.cards.publicServerLabel(pending.serverId);
   const payload = {
-    fortRunWindowAbility: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+    fortRunWindowAbility:
+      "runner_pay_or_end_run_after_passing_ice_on_this_fort",
     ...(pending.sourceDefinitionIds[0]
       ? { sourceDefinitionId: pending.sourceDefinitionIds[0] }
       : {}),
@@ -871,12 +891,12 @@ function postPassPayOrEndRunActions(
   return actions;
 }
 
-export function buildMysteryBoxRunActions(
+export function buildRevealedStackProgramInstallRunActions(
   host: RunnerEncounterActionHost,
   run: ActiveRun,
 ): LegalAction[] {
   const state = host.state;
-  const used = new Set(run.mysteryBoxUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.hiddenStackInstallUsedSourceIdsThisRun ?? []);
   if (state.runner.stack.length === 0) return [];
   return state.runner.rig.programs
     .slice()
@@ -899,14 +919,14 @@ export function buildMysteryBoxRunActions(
         [],
         {
           cardId: sourceCardId,
-          v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+          v1915RunnerProgramAbility: "top5_program_install",
           revealCount: topCards.length,
           revealedCardDefinitionIds: topCards
             .map((cardId) => host.cards.definitionFor(cardId).id)
             .join(","),
           revealedProgramCount: programCount,
           hiddenZoneBarrier: true,
-          hiddenZoneAction: "mystery_box_stack_top5_reveal",
+          hiddenZoneAction: "revealed_stack_program_install_top5_reveal",
         },
       );
     });

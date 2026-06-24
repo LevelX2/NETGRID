@@ -15,8 +15,8 @@ import {
   handleRunRootRezPostRez,
   passCorpRunRootRezWindow,
   resolveCorpRootRezEffect,
-  resolveSpeedTrapRezInterruptChoice,
-  startSpeedTrapRezInterruptChoice,
+  resolveRezInterruptJackOutChoice,
+  startRezInterruptJackOutChoice,
   type RunRezWindowHost,
 } from "./run-rez-window";
 
@@ -260,11 +260,11 @@ function hostFor(state: GameState): {
             zone: { side: "corp", zone: "archives" },
           };
         },
-        acmeSavingsAndLoanObligationCount: () =>
-          Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)),
-        addAcmeSavingsAndLoanObligation: (amount) => {
-          state.acmeSavingsAndLoanObligations =
-            Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)) +
+        activeObligationCount: () =>
+          Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)),
+        addActiveObligation: (amount) => {
+          state.activeObligationDebtCount =
+            Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)) +
             amount;
         },
       },
@@ -317,7 +317,7 @@ describe("run rez window", () => {
     expect(actions[2]?.payload).toMatchObject({
       cardId: "root_1",
       rootRez: true,
-      speedTrapInterruptEligible: true,
+      rezInterruptJackOutEligible: true,
       serverId: "rd",
     });
   });
@@ -411,7 +411,7 @@ describe("run rez window", () => {
       rootRez: true,
     });
 
-    const startResult = startSpeedTrapRezInterruptChoice(
+    const startResult = startRezInterruptJackOutChoice(
       host,
       "root_1",
       action,
@@ -419,26 +419,26 @@ describe("run rez window", () => {
 
     expect(startResult).toMatchObject({
       handled: true,
-      speedTrapChoiceStarted: true,
+      rezInterruptChoiceStarted: true,
       sourceDefinitionId: "onr_v1_067_speed-trap",
       sourceCardId: "program_1",
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: expect.stringContaining("v1922.speed_trap:program_1:root_1"),
+      source: expect.stringContaining("rez_interrupt.jack_out:program_1:root_1"),
       kind: "select_option",
       visibility: "public",
     });
     expect(action.payload).toMatchObject({
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
+      v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
       sourceDefinitionId: "onr_v1_067_speed-trap",
-      speedTrapSourceCardId: "program_1",
+      rezInterruptSourceCardId: "program_1",
       rezzedCardDefinitionId: "simple_upgrade",
-      speedTrapChoiceOpened: true,
+      rezInterruptChoiceOpened: true,
     });
 
     const resolveAction = legalAction(state, "runner", "resolve_choice");
-    const result = resolveSpeedTrapRezInterruptChoice(
+    const result = resolveRezInterruptJackOutChoice(
       host,
       resolveAction,
       choiceAction("jack_out"),
@@ -447,14 +447,14 @@ describe("run rez window", () => {
     expect(result).toMatchObject({
       handled: true,
       runnerJackedOut: true,
-      speedTrapResolved: true,
+      rezInterruptResolved: true,
       successfulRunWithoutAccess: true,
     });
     expect(calls.finish).toHaveLength(1);
     expect(calls.finish[0]?.successful).toBe(true);
     expect(resolveAction.payload).toMatchObject({
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-      speedTrapUsed: true,
+      v1922RunnerProgramAbility: "rez_interrupt_jack_out",
+      rezInterruptUsed: true,
       successfulRunWithoutAccess: true,
       rezzedCardDefinitionId: "simple_upgrade",
     });

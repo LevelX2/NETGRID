@@ -178,8 +178,7 @@ function executePumpBreakerAction(
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility:
-        "japanese_water_torture_future_action_debt",
+      v1922RunnerProgramAbility: "variable_pump_future_action_debt",
       futureActionDebtAdded: pumpAmount,
       futureActionDebtPending: pendingDebt,
       breakerStrengthAfter:

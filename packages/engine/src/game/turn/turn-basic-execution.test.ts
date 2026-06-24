@@ -12,7 +12,7 @@ import {
   addCorpActionDebt,
   handleTurnBasicExecution,
   purgeVirusCounters,
-  type CitySurveillanceDrawDecision,
+  type DrawTaxDecision,
   type TurnBasicExecutionHost,
   type TurnBasicRunnerDrawSummary,
 } from "./turn-basic-execution";
@@ -137,7 +137,7 @@ describe("turn basic execution", () => {
       counters: { virus: 2, power: 1 },
     };
     state.poxCountersByServer = { hq: 1 };
-    state.faitAccompliCountersByServer = { rd: 1 };
+    state.serverAgendaCostCountersByServer = { rd: 1 };
     const action = buildLegalAction(
       state,
       "corp",
@@ -153,7 +153,7 @@ describe("turn basic execution", () => {
     expect(state.corp.clicks).toBe(0);
     expect(state.cardInstances[cardId]?.counters).toEqual({ power: 1 });
     expect(state.poxCountersByServer).toEqual({});
-    expect(state.faitAccompliCountersByServer).toEqual({});
+    expect(state.serverAgendaCostCountersByServer).toEqual({});
     expect(action.payload).toMatchObject({
       purgedVirusCounters: 4,
       purgedCounterType: "virus",
@@ -344,7 +344,7 @@ function testHost(
       },
     },
     callbacks: {
-      startCodeViralCachePurgeChoice: () => false,
+      startVirusCounterPurgePreserveChoice: () => false,
     },
   };
 }
@@ -369,7 +369,7 @@ function drawCorpCardForTest(state: GameState): void {
 function drawRunnerCardsForTest(
   state: GameState,
   amount: number,
-  _decision?: CitySurveillanceDrawDecision,
+  _decision?: DrawTaxDecision,
 ): TurnBasicRunnerDrawSummary {
   const drawnCardIds: CardInstanceId[] = [];
   for (let index = 0; index < amount; index += 1) {
@@ -385,9 +385,9 @@ function drawRunnerCardsForTest(
   return {
     drawnCount: drawnCardIds.length,
     drawnCardIds,
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
+    drawTaxSourceCount: 0,
+    drawTaxCreditsPaid: 0,
+    drawTaxTagsAdded: 0,
   };
 }
 

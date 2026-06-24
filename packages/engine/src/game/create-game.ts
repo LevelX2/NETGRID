@@ -168,7 +168,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     winner: null,
     agendaPointsToWin:
       config.agendaPointsToWin ?? STANDARD_AGENDA_POINTS_TO_WIN,
-    acmeSavingsAndLoanObligations: 0,
+    activeObligationDebtCount: 0,
     corpBonusAgendaPoints: 0,
     setup:
       config.setupMode === "completed"

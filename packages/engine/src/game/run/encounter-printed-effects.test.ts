@@ -140,7 +140,7 @@ function makeHost(
         [counterType]: (card.counters?.[counterType] ?? 0) + amount,
       };
     },
-    addHackerTrackerTraceCounters: () => 0,
+    addCorpTraceCounterPoolCounters: () => 0,
     calculateRunnerLink: () => 0,
     cardCounter: (cardId, counterType) =>
       state.cardInstances[cardId]?.counters?.[counterType] ?? 0,
@@ -174,11 +174,11 @@ function makeHost(
         runnerActionsTakenThisTurn: 0,
         abilityUsedSourceIdsByLimitKey: {},
         startOfTurnFloatingCreditsApplied: false,
-        allNighterBonusRunPending: false,
+        bonusRunPending: false,
         forgoNextActionPending: false,
         forgoNextActionsPending: 0,
         runLockActionsPending: 0,
-        fangRunLockCreditCost: 0,
+        runnerRunLockCreditCost: 0,
         valuPakProgramInstallActionsRemaining: 0,
         valuPakTemporaryProgramInstallCredits: 0,
       }),
@@ -186,8 +186,8 @@ function makeHost(
       legalAction?.payload && (legalAction.payload.finishedRun = successful);
       delete state.run;
     },
-    hasInstalledMicrotechTrodeSet: () => false,
-    hackerTrackerCounterTotal: () => 0,
+    hasInstalledRunnerApDamageReducerHardware: () => false,
+    corpTraceCounterPoolTotal: () => 0,
     recurringTraceCreditPoolTotal: () => 0,
     openDamageResolutionWindow: () => false,
     openEventModificationWindow: () => false,
@@ -333,7 +333,7 @@ describe("encounter printed effects boundary", () => {
 
     const result = startTraceFromPrintedSubroutine(
       makeHost(state, legalAction, {
-        hackerTrackerCounterTotal: () => 1,
+        corpTraceCounterPoolTotal: () => 1,
         recurringTraceCreditPoolTotal: () => 1,
         rabbitTraceLimitReductionForIceTrace: () => 2,
       }),
@@ -401,7 +401,7 @@ describe("encounter printed effects boundary", () => {
       successEffect: {
         type: "add_tag_and_counter",
         tagAmount: 1,
-        counterType: "data_raven",
+        counterType: "trace_tag_counter",
         amount: 1,
       },
     };
@@ -410,7 +410,7 @@ describe("encounter printed effects boundary", () => {
 
     const result = applyPrintedTraceSuccessFollowups(
       makeHost(state, legalAction, {
-        addHackerTrackerTraceCounters: () => 1,
+        addCorpTraceCounterPoolCounters: () => 1,
       }),
       {
         trace: state.trace,
@@ -431,7 +431,7 @@ describe("encounter printed effects boundary", () => {
     expect(state.trace).toBeUndefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.tags).toBe(1);
-    expect(state.cardInstances.runner_identity?.counters?.data_raven).toBe(1);
+    expect(state.cardInstances.runner_identity?.counters?.trace_tag_counter).toBe(1);
     expect(state.run?.traceSuccessBySubroutineIndex).toEqual({ 0: true });
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.0.trace",
@@ -445,7 +445,7 @@ describe("encounter printed effects boundary", () => {
       traceSuccessful: true,
       tagsAdded: 1,
       addedCounterAmount: 1,
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       remainingCounters: 1,
       hackerTrackerCountersAdded: 1,
       traceHostedCreditsAdded: 1,
@@ -484,7 +484,7 @@ describe("encounter printed effects boundary", () => {
     );
 
     expect(finished).toBe(false);
-    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.1.trace",
       traceStep: "post_bid_link",
@@ -492,7 +492,6 @@ describe("encounter printed effects boundary", () => {
       tagsAdded: 0,
       fangRunEnded: true,
       runnerRunEnded: true,
-      fangRunLockCreditCost: 2,
       runnerRunLockCreditCost: 2,
     });
   });

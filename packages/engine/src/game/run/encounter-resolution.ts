@@ -11,7 +11,7 @@ import {
 } from "@netgrid/shared";
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE } from "../../compatibility/runtime-compatibility";
-import { VIRAL_15_PROGRAM_TRASH_ICE_ID } from "../../mechanics/longtail-card-effects";
+import { ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID } from "../../mechanics/longtail-card-effects";
 import {
   payEncounterSubroutineRunCost,
   runDurationPaymentHost,
@@ -244,12 +244,12 @@ export function resolveRunDurationMarkerSubroutine(
       stateChanged: true,
     };
   }
-  if (subroutine.type === "set_run_viral_15") {
+  if (subroutine.type === "set_run_active_ice_program_trash") {
     if (!run.encounteredIceId)
-      throw new Error("Viral 15 benoetigt ein Encounter-ICE.");
-    run.viral15ActiveSourceIceId = run.encounteredIceId;
+      throw new Error("Active ICE Program Trash benoetigt ein Encounter-ICE.");
+    run.activeIceProgramTrashSourceIceId = run.encounteredIceId;
     legalActionPayload(legalAction, {
-      v1922CorpIceAbility: "viral_15_run_modifier",
+      v1922CorpIceAbility: "active_ice_program_trash_run_modifier",
       jackOutAdditionalCost: runJackOutAdditionalCost(run),
       sourceDefinitionId: definition.id,
     });
@@ -257,7 +257,7 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["viral15ActiveSourceIceId"],
+      setRunMarkers: ["activeIceProgramTrashSourceIceId"],
       jackOutAdditionalCost: runJackOutAdditionalCost(run),
       mustTrashProgramAfterPass: true,
       stateChanged: true,
@@ -416,7 +416,7 @@ export function appendUnpaidPayOrEndRunEffects(
   return { ended };
 }
 
-export function resolveFatalAttractorPostEncounter(
+export function resolvePostEncounterNetDamage(
   host: EncounterResolutionHost,
   options: {
     subroutines: readonly EncounterSubroutine[];
@@ -445,7 +445,7 @@ export function resolveFatalAttractorPostEncounter(
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
       const summary = options.dealDamage({
-        damageId: `${run.runId}.${encounteredIceId}.fatal_attractor`,
+        damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
         source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
@@ -469,7 +469,7 @@ export function cleanupEncounterDurationMarkers(host: EncounterResolutionHost): 
 export function passedIceFollowupMarkersForCurrentIce(
   host: EncounterResolutionHost,
 ): {
-  viral15PendingPassedIceId?: CardInstanceId;
+  activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
   passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
@@ -477,10 +477,10 @@ export function passedIceFollowupMarkersForCurrentIce(
   const run = mustRun(host.state);
   const passedIceId = run.encounteredIceId;
   return {
-    ...(run.viral15ActiveSourceIceId &&
+    ...(run.activeIceProgramTrashSourceIceId &&
     passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed
-      ? { viral15PendingPassedIceId: passedIceId }
+      ? { activeIceProgramTrashPendingPassedIceId: passedIceId }
       : {}),
     ...(run.passRezzedIceProgramTrashSourceIceId &&
     passedIceId &&
@@ -518,7 +518,7 @@ export function consumeForcedJackOutAfterEncounter(
   };
 }
 
-export function startViral15ProgramTrashChoice(
+export function startActiveIceProgramTrashChoice(
   host: EncounterResolutionHost,
   passedIceId: CardInstanceId,
   legalAction?: LegalAction,
@@ -526,10 +526,10 @@ export function startViral15ProgramTrashChoice(
   const state = host.state;
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const run = mustRun(state);
-  const sourceIceId = run.viral15ActiveSourceIceId;
+  const sourceIceId = run.activeIceProgramTrashSourceIceId;
   if (!sourceIceId) return { handled: false };
-  if (definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID)
-    throw new Error("Viral-15-Quelle ist ungueltig.");
+  if (definitionFor(state, sourceIceId).id !== ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID)
+    throw new Error("Active-ICE-Program-Trash-Quelle ist ungueltig.");
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
     .sort()
@@ -539,22 +539,22 @@ export function startViral15ProgramTrashChoice(
     });
   if (programOptions.length === 0) {
     legalActionPayload(legalAction, {
-      v1922CorpIceAbility: "viral_15_program_trash",
-      sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
-      viral15ProgramTrashChoiceOpened: false,
+      v1922CorpIceAbility: "active_ice_program_trash",
+      sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+      activeIceProgramTrashChoiceOpened: false,
       trashedCount: 0,
     });
     return {
       handled: true,
       choiceOpened: false,
-      sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
+      sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
     };
   }
   state.pendingChoice = {
-    choiceId: `choice_v1922_viral_15_program_trash_${state.stateVersion + 1}`,
+    choiceId: `active_ice_program_trash_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v1922.viral_15_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
-    prompt: "Viral 15: installiertes Programm trashen.",
+    source: `card_implementation.active_ice_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
+    prompt: "Active ICE Program Trash: installiertes Programm trashen.",
     kind: "select_cards",
     options: programOptions,
     minSelections: 1,
@@ -563,17 +563,17 @@ export function startViral15ProgramTrashChoice(
     visibility: "hidden_info_barrier",
   };
   legalActionPayload(legalAction, {
-    v1922CorpIceAbility: "viral_15_program_trash",
-    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
-    viral15ProgramTrashChoiceOpened: true,
-    viral15ProgramTrashCandidateCount: programOptions.length,
+    v1922CorpIceAbility: "active_ice_program_trash",
+    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+    activeIceProgramTrashChoiceOpened: true,
+    activeIceProgramTrashCandidateCount: programOptions.length,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_viral_15_program_trash_choice",
+    hiddenZoneAction: "active_ice_program_trash_choice",
   });
   return {
     handled: true,
     choiceOpened: true,
-    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
+    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
     stateChanged: true,
   };
 }
@@ -634,24 +634,24 @@ export function startPassRezzedIceProgramTrashChoice(
   };
 }
 
-export function resolveViral15ProgramTrashChoice(
+export function resolveActiveIceProgramTrashChoice(
   host: EncounterResolutionHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): PassIceFollowupResult {
   const state = host.state;
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.viral_15_program_trash"))
-    throw new Error("Viral-15-Programmtrash-Choice ist nicht offen.");
+  if (!choice || !choice.source.startsWith("card_implementation.active_ice_program_trash"))
+    throw new Error("Active-ICE-Program-Trash-Choice ist nicht offen.");
   const [, sourceIceId, passedIceId] = choice.source.split(":");
   if (
     !sourceIceId ||
     !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID
+    definitionFor(state, sourceIceId).id !== ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID
   )
-    throw new Error("Viral-15-Quelle ist nicht mehr gueltig.");
+    throw new Error("Active-ICE-Program-Trash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
-    throw new Error("Das passierte ICE fuer Viral 15 fehlt.");
+    throw new Error("Das passierte ICE fuer Active ICE Program Trash fehlt.");
   const selectedProgramId = selectedChoiceCardIds(choice, playerAction)[0];
   if (
     !selectedProgramId ||
@@ -665,16 +665,16 @@ export function resolveViral15ProgramTrashChoice(
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1922CorpIceAbility: "viral_15_program_trash",
-    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
+    v1922CorpIceAbility: "active_ice_program_trash",
+    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_viral_15_program_trash",
+    hiddenZoneAction: "active_ice_program_trash",
     trashedCount: 1,
     trashedCardDefinitionId: selectedDefinitionId,
   };
   return {
     handled: true,
-    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
+    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
     stateChanged: true,
   };
 }
@@ -724,12 +724,12 @@ export function handlePostPassProgramTrashChoices(
   legalAction?: LegalAction,
 ): PassIceFollowupResult {
   const run = mustRun(host.state);
-  if (run.viral15PendingPassedIceId) {
-    const pendingPassedIceId = run.viral15PendingPassedIceId;
-    const { viral15PendingPassedIceId: _pending, ...runWithoutPending } = run;
+  if (run.activeIceProgramTrashPendingPassedIceId) {
+    const pendingPassedIceId = run.activeIceProgramTrashPendingPassedIceId;
+    const { activeIceProgramTrashPendingPassedIceId: _pending, ...runWithoutPending } = run;
     void _pending;
     host.state.run = runWithoutPending;
-    const result = startViral15ProgramTrashChoice(
+    const result = startActiveIceProgramTrashChoice(
       host,
       pendingPassedIceId,
       legalAction,

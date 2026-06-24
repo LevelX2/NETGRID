@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const corporateRetreatImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_195_corporate-retreat",
   scoredAgenda: {
-    kind: "corporate_retreat_disable_on_rez_or_install",
+    kind: "scored_agenda_credit_until_install_or_rez",
     counterType: "mark",
     gainAmount: 2,
     visibility: "public",

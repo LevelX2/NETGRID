@@ -1,685 +1,724 @@
-import { runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegate } from "./runtime-delegate-store";
 
 export function corpRunnerActionPaidWindowActions(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.corpRunnerActionPaidWindowActions as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "corpRunnerActionPaidWindowActions",
   )(...args);
 }
 
 export function specialZoneHarnessActions(...args: any[]): any {
-  return (runtimeDelegates.actionRuntimeHosts.specialZoneHarnessActions as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "specialZoneHarnessActions",
+  )(...args);
 }
 
 export function turnBasicExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.actionRuntimeHosts.turnBasicExecutionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "turnBasicExecutionHost",
+  )(...args);
 }
 
 export function creditEconomyExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.creditEconomyExecutionHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "creditEconomyExecutionHost",
   )(...args);
 }
 
 export function resolveEndTurnTagIfRunnerReceivedTag(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveEndTurnTagIfRunnerReceivedTag as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveEndTurnTagIfRunnerReceivedTag",
   )(...args);
 }
 
 export function resolveFieldReporterEndOfRunnerTurn(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveFieldReporterEndOfRunnerTurn as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveFieldReporterEndOfRunnerTurn",
   )(...args);
 }
 
 export function resolveDelayedEndTurnDamageEffects(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveDelayedEndTurnDamageEffects as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveDelayedEndTurnDamageEffects",
   )(...args);
 }
 
 export function endTurn(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.endTurn as any)(...args);
+  return runtimeDelegate("turnRuntimeResolvers", "endTurn")(...args);
 }
 
-export function resolveSneakPreviewTemporaryInstallReturns(
+export function resolveTemporaryProgramInstallReturns(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveSneakPreviewTemporaryInstallReturns as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveTemporaryProgramInstallReturns",
   )(...args);
 }
 
-export function resolveAcmeSavingsAndLoanEndOfCorpTurn(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveAcmeSavingsAndLoanEndOfCorpTurn as any
+export function resolveCorpObligationEndOfTurn(...args: any[]): any {
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveCorpObligationEndOfTurn",
   )(...args);
 }
 
 export function startDiscardPhase(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.startDiscardPhase as any)(
-    ...args,
-  );
+  return runtimeDelegate("turnRuntimeResolvers", "startDiscardPhase")(...args);
 }
 
 export function processDiscardStep(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.processDiscardStep as any)(
-    ...args,
-  );
+  return runtimeDelegate("turnRuntimeResolvers", "processDiscardStep")(...args);
 }
 
 export function completeDiscardPhase(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.completeDiscardPhase as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "completeDiscardPhase",
+  )(...args);
 }
 
 export function appendResolvedEffectsToPayload(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.appendResolvedEffectsToPayload as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "appendResolvedEffectsToPayload",
   )(...args);
 }
 
 export function automaticGainCreditsEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticGainCreditsEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticGainCreditsEffect",
   )(...args);
 }
 
 export function automaticLoseCreditsEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticLoseCreditsEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticLoseCreditsEffect",
   )(...args);
 }
 
 export function automaticDrawCardsEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticDrawCardsEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticDrawCardsEffect",
   )(...args);
 }
 
 export function automaticTagEffect(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.automaticTagEffect as any)(
-    ...args,
-  );
+  return runtimeDelegate("turnRuntimeResolvers", "automaticTagEffect")(...args);
 }
 
 export function automaticTrashCardEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticTrashCardEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticTrashCardEffect",
   )(...args);
 }
 
 export function automaticCounterChangeEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticCounterChangeEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticCounterChangeEffect",
   )(...args);
 }
 
 export function automaticStealAgendaEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.automaticStealAgendaEffect as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "automaticStealAgendaEffect",
   )(...args);
 }
 
 export function publicCardTitle(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.publicCardTitle as any)(
-    ...args,
-  );
+  return runtimeDelegate("turnRuntimeResolvers", "publicCardTitle")(...args);
 }
 
 export function applyRunnerForgoNextAction(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.applyRunnerForgoNextAction as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "applyRunnerForgoNextAction",
   )(...args);
 }
 
 export function addRunnerFutureActionDebt(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.addRunnerFutureActionDebt as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "addRunnerFutureActionDebt",
   )(...args);
 }
 
 export function consumeRunnerFutureActionDebt(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.consumeRunnerFutureActionDebt as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "consumeRunnerFutureActionDebt",
   )(...args);
 }
 
 export function filterActionsForRestrictedExtraActions(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .filterActionsForRestrictedExtraActions as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "filterActionsForRestrictedExtraActions",
   )(...args);
 }
 
 export function consumeRestrictedExtraActionForAction(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .consumeRestrictedExtraActionForAction as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "consumeRestrictedExtraActionForAction",
   )(...args);
 }
 
 export function acceptExtraActionOffer(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.acceptExtraActionOffer as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "acceptExtraActionOffer",
   )(...args);
 }
 
 export function declineExtraActionOffer(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.declineExtraActionOffer as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "declineExtraActionOffer",
   )(...args);
 }
 
 export function resolvePdcaCounterAction(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.resolvePdcaCounterAction as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolvePdcaCounterAction",
   )(...args);
 }
 
 export function resolveForcedActionNotPossible(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.resolveForcedActionNotPossible as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveForcedActionNotPossible",
   )(...args);
 }
 
 export function startCorpTurn(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.startCorpTurn as any)(...args);
+  return runtimeDelegate("turnRuntimeResolvers", "startCorpTurn")(...args);
 }
 
 export function startRunnerTurn(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.startRunnerTurn as any)(
-    ...args,
-  );
+  return runtimeDelegate("turnRuntimeResolvers", "startRunnerTurn")(...args);
 }
 
 export function untapRunnerCardsAtTurnStart(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.untapRunnerCardsAtTurnStart as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "untapRunnerCardsAtTurnStart",
   )(...args);
 }
 
 export function resolveDelayedAccessEffects(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .resolveDelayedAccessEffects as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resolveDelayedAccessEffects",
   )(...args);
 }
 
 export function applyCorpStartOfTurnEffects(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.applyCorpStartOfTurnEffects as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "applyCorpStartOfTurnEffects",
   )(...args);
 }
 
-export function applyPurgeableRunnerVirusCorpStartEffects(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .applyPurgeableRunnerVirusCorpStartEffects as any
+export function applyPurgeableRunnerVirusCorpStartEffects(...args: any[]): any {
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "applyPurgeableRunnerVirusCorpStartEffects",
   )(...args);
 }
 
 export function virusCounterDrawsAtCorpStart(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.virusCounterDrawsAtCorpStart as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "virusCounterDrawsAtCorpStart",
   )(...args);
 }
 
 export function skivvissCounterTotal(...args: any[]): any {
-  return (runtimeDelegates.turnRuntimeResolvers.skivvissCounterTotal as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "skivvissCounterTotal",
+  )(...args);
 }
 
 export function virusCounterCascadeTrashAtCorpStart(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .virusCounterCascadeTrashAtCorpStart as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "virusCounterCascadeTrashAtCorpStart",
   )(...args);
 }
 
 export function trashFaceupRdCardsForCascade(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.trashFaceupRdCardsForCascade as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "trashFaceupRdCardsForCascade",
   )(...args);
 }
 
 export function applyRunnerStartOfTurnEffects(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.applyRunnerStartOfTurnEffects as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "applyRunnerStartOfTurnEffects",
   )(...args);
 }
 
 export function applyStartTurnRandomEffectTables(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .applyStartTurnRandomEffectTables as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "applyStartTurnRandomEffectTables",
   )(...args);
 }
 
 export function virusCounterCreditsAtRunnerStart(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .virusCounterCreditsAtRunnerStart as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "virusCounterCreditsAtRunnerStart",
   )(...args);
 }
 
 export function startVirusCounterRunnerPrivateLookAtStart(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .startVirusCounterRunnerPrivateLookAtStart as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "startVirusCounterRunnerPrivateLookAtStart",
   )(...args);
 }
 
 export function randomCorpHqCardsWithoutReplacement(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .randomCorpHqCardsWithoutReplacement as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "randomCorpHqCardsWithoutReplacement",
   )(...args);
 }
 
 export function startRunnerPrivateLookAtSpecificCorpCards(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .startRunnerPrivateLookAtSpecificCorpCards as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "startRunnerPrivateLookAtSpecificCorpCards",
   )(...args);
 }
 
 export function queueIncubatorStartOfTurnTransforms(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers
-      .queueIncubatorStartOfTurnTransforms as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "queueIncubatorStartOfTurnTransforms",
   )(...args);
 }
 
 export function startIncubatorTransformChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.turnRuntimeResolvers.startIncubatorTransformChoice as any
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "startIncubatorTransformChoice",
   )(...args);
 }
 
 export function forfeitRunnerAgendaForPointCost(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.forfeitRunnerAgendaForPointCost as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "forfeitRunnerAgendaForPointCost",
   )(...args);
 }
 
 export function forfeitCorpAgendaForPointCost(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.forfeitCorpAgendaForPointCost as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "forfeitCorpAgendaForPointCost",
   )(...args);
 }
 
-export function acmeSavingsAndLoanObligationCount(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .acmeSavingsAndLoanObligationCount as any
+export function activeObligationCount(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "activeObligationCount",
   )(...args);
 }
 
-export function addAcmeSavingsAndLoanObligation(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.addAcmeSavingsAndLoanObligation as any
+export function addActiveObligation(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "addActiveObligation",
   )(...args);
 }
 
-export function removeAcmeSavingsAndLoanObligation(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .removeAcmeSavingsAndLoanObligation as any
+export function removeActiveObligation(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "removeActiveObligation",
   )(...args);
 }
 
 export function spendCorpAgendaPointCost(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.spendCorpAgendaPointCost as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "spendCorpAgendaPointCost",
   )(...args);
 }
 
 export function installedAgendaOperationTarget(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.installedAgendaOperationTarget as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "installedAgendaOperationTarget",
   )(...args);
 }
 
 export function corpAgendaCounterOperationTarget(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .corpAgendaCounterOperationTarget as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "corpAgendaCounterOperationTarget",
   )(...args);
 }
 
 export function corpScoredAgendaForfeitTargets(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.corpScoredAgendaForfeitTargets as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "corpScoredAgendaForfeitTargets",
   )(...args);
 }
 
-export function powerGridOverloadEligibleHardwareIds(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .powerGridOverloadEligibleHardwareIds as any
+export function hardwareTrashByCounterEligibleHardwareIds(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "hardwareTrashByCounterEligibleHardwareIds",
   )(...args);
 }
 
-export function powerGridOverloadLegalActions(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.powerGridOverloadLegalActions as any
+export function hardwareTrashByCounterLegalActions(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "hardwareTrashByCounterLegalActions",
   )(...args);
 }
 
-export function powerGridOverloadTrashCountFromPayload(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .powerGridOverloadTrashCountFromPayload as any
+export function hardwareTrashByCounterTrashCountFromPayload(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "hardwareTrashByCounterTrashCountFromPayload",
   )(...args);
 }
 
-export function resolvePowerGridOverloadOperation(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolvePowerGridOverloadOperation as any
+export function resolveHardwareTrashByCounterOperation(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveHardwareTrashByCounterOperation",
   )(...args);
 }
 
-export function startPowerGridOverloadChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.startPowerGridOverloadChoice as any
+export function startHardwareTrashByCounterChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "startHardwareTrashByCounterChoice",
   )(...args);
 }
 
-export function powerGridOverloadTrashCountFromChoiceSource(
+export function hardwareTrashByCounterTrashCountFromChoiceSource(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .powerGridOverloadTrashCountFromChoiceSource as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "hardwareTrashByCounterTrashCountFromChoiceSource",
   )(...args);
 }
 
-export function resolvePowerGridOverloadChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.resolvePowerGridOverloadChoice as any
+export function resolveHardwareTrashByCounterChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveHardwareTrashByCounterChoice",
   )(...args);
 }
 
-export function trashPowerGridOverloadHardware(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.trashPowerGridOverloadHardware as any
+export function trashHardwareByCounter(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "trashHardwareByCounter",
   )(...args);
 }
 
-export function systematicLayoffsLegalActions(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.systematicLayoffsLegalActions as any
+export function advancementPlacementLegalActions(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "advancementPlacementLegalActions",
   )(...args);
 }
 
 export function resolveAgendaCounterOperation(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.resolveAgendaCounterOperation as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveAgendaCounterOperation",
   )(...args);
 }
 
-export function resolveSystematicLayoffsAdvancementOperation(
+export function resolveAdvancementPlacementOperation(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveSystematicLayoffsAdvancementOperation as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveAdvancementPlacementOperation",
   )(...args);
 }
 
-export function systematicLayoffsPlacementOptions(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .systematicLayoffsPlacementOptions as any
+export function advancementPlacementOptions(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "advancementPlacementOptions",
   )(...args);
 }
 
-export function startSystematicLayoffsAdvancementChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .startSystematicLayoffsAdvancementChoice as any
+export function startAdvancementPlacementChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "startAdvancementPlacementChoice",
   )(...args);
 }
 
-export function resolveSystematicLayoffsAdvancementChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveSystematicLayoffsAdvancementChoice as any
+export function resolveAdvancementPlacementChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveAdvancementPlacementChoice",
   )(...args);
 }
 
-export function applySystematicLayoffsAdvancementPlacement(
+export function applyAdvancementCounterPlacement(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .applySystematicLayoffsAdvancementPlacement as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "applyAdvancementCounterPlacement",
   )(...args);
 }
 
 export function advanceableInstalledCardTargets(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.advanceableInstalledCardTargets as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "advanceableInstalledCardTargets",
   )(...args);
 }
 
 export function isInstalledCorpCardAdvanceable(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.isInstalledCorpCardAdvanceable as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "isInstalledCorpCardAdvanceable",
   )(...args);
 }
 
 export function advancementDistributionOptions(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.advancementDistributionOptions as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "advancementDistributionOptions",
   )(...args);
 }
 
 export function startCardImplementationAdvancementDistributionChoice(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .startCardImplementationAdvancementDistributionChoice as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "startCardImplementationAdvancementDistributionChoice",
   )(...args);
 }
 
 export function parseAdvancementDistributionValue(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .parseAdvancementDistributionValue as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "parseAdvancementDistributionValue",
   )(...args);
 }
 
 export function sourcePartsForP334Choice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.sourcePartsForP334Choice as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "sourcePartsForP334Choice",
   )(...args);
 }
 
 export function validateAdvancementDistribution(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.validateAdvancementDistribution as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "validateAdvancementDistribution",
   )(...args);
 }
 
 export function resolveCardImplementationAdvancementDistributionChoice(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveCardImplementationAdvancementDistributionChoice as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveCardImplementationAdvancementDistributionChoice",
   )(...args);
 }
 
 export function movableAdvancementSourceIds(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.movableAdvancementSourceIds as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "movableAdvancementSourceIds",
   )(...args);
 }
 
 export function moveAdvancementOptions(...args: any[]): any {
-  return (runtimeDelegates.corpRuntimeResolvers.moveAdvancementOptions as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "moveAdvancementOptions",
+  )(...args);
 }
 
 export function startCardImplementationMoveAdvancementChoice(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .startCardImplementationMoveAdvancementChoice as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "startCardImplementationMoveAdvancementChoice",
   )(...args);
 }
 
 export function resolveCardImplementationMoveAdvancementChoice(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveCardImplementationMoveAdvancementChoice as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveCardImplementationMoveAdvancementChoice",
   )(...args);
 }
 
-export function resolveManagementShakeUpOperation(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveManagementShakeUpOperation as any
+export function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveCorpOperationAddAdvancementCounters",
   )(...args);
 }
 
 export function awardRunnerEventAgendaPoint(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.awardRunnerEventAgendaPoint as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "awardRunnerEventAgendaPoint",
   )(...args);
 }
 
 export function choiceAction(...args: any[]): any {
-  return (runtimeDelegates.corpRuntimeResolvers.choiceAction as any)(...args);
+  return runtimeDelegate("corpRuntimeResolvers", "choiceAction")(...args);
 }
 
 export function abilityMetadata(...args: any[]): any {
-  return (runtimeDelegates.corpRuntimeResolvers.abilityMetadata as any)(
-    ...args,
-  );
+  return runtimeDelegate("corpRuntimeResolvers", "abilityMetadata")(...args);
 }
 
 export function resolveCorpInstalledEconomyAction(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveCorpInstalledEconomyAction as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveCorpInstalledEconomyAction",
   )(...args);
 }
 
 export function validateCorpInstalledEconomyAction(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .validateCorpInstalledEconomyAction as any
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "validateCorpInstalledEconomyAction",
   )(...args);
 }
 
-export function rezzedInvestmentFirmIds(...args: any[]): any {
-  return (runtimeDelegates.corpRuntimeResolvers.rezzedInvestmentFirmIds as any)(
-    ...args,
-  );
-}
-
-export function shouldOpenInvestmentFirmCreditChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .shouldOpenInvestmentFirmCreditChoice as any
+export function rezzedCorpInstalledEconomyCreditSourceIds(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "rezzedCorpInstalledEconomyCreditSourceIds",
   )(...args);
 }
 
-export function startInvestmentFirmCreditChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers.startInvestmentFirmCreditChoice as any
+export function shouldOpenCorpInstalledEconomyCreditChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "shouldOpenCorpInstalledEconomyCreditChoice",
   )(...args);
 }
 
-export function resolveInvestmentFirmCreditChoice(...args: any[]): any {
-  return (
-    runtimeDelegates.corpRuntimeResolvers
-      .resolveInvestmentFirmCreditChoice as any
+export function startCorpInstalledEconomyCreditChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "startCorpInstalledEconomyCreditChoice",
+  )(...args);
+}
+
+export function resolveCorpInstalledEconomyCreditChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "corpRuntimeResolvers",
+    "resolveCorpInstalledEconomyCreditChoice",
   )(...args);
 }
 
 export function corpInstallRezSequenceHandlerHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.corpInstallRezSequenceHandlerHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "corpInstallRezSequenceHandlerHost",
   )(...args);
 }
 
 export function scoredAgendaFlowHost(...args: any[]): any {
-  return (runtimeDelegates.actionRuntimeHosts.scoredAgendaFlowHost as any)(
-    ...args,
-  );
+  return runtimeDelegate("actionRuntimeHosts", "scoredAgendaFlowHost")(...args);
 }
 
 export function scoredAgendaAbilityHost(...args: any[]): any {
-  return (runtimeDelegates.actionRuntimeHosts.scoredAgendaAbilityHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "scoredAgendaAbilityHost",
+  )(...args);
 }
 
 export function corpTraceDamageAbilityHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.corpTraceDamageAbilityHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "corpTraceDamageAbilityHost",
   )(...args);
 }
 
 export function corpSpecialDamageAbilityHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.corpSpecialDamageAbilityHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "corpSpecialDamageAbilityHost",
   )(...args);
 }
 
 export function playCardExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.actionRuntimeHosts.playCardExecutionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "playCardExecutionHost",
+  )(...args);
 }
 
 export function corpOperationResolutionHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.corpOperationResolutionHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "corpOperationResolutionHost",
   )(...args);
 }
 
 export function boardStateActionExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts.boardStateActionExecutionHost as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "boardStateActionExecutionHost",
   )(...args);
 }
 
 export function hasHiddenResourceAccessStartActions(...args: any[]): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts
-      .hasHiddenResourceAccessStartActions as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "hasHiddenResourceAccessStartActions",
   )(...args);
 }
 
 export function pushCorpTraceDamageOrCardImplementationActions(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.actionRuntimeHosts
-      .pushCorpTraceDamageOrCardImplementationActions as any
+  return runtimeDelegate(
+    "actionRuntimeHosts",
+    "pushCorpTraceDamageOrCardImplementationActions",
   )(...args);
 }

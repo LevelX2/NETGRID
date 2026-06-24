@@ -1,8 +1,8 @@
 import type { CardInstanceId } from "@netgrid/shared";
 import type {
-  MysteryBoxSearchInstallExecutionPlan,
+  RevealedStackProgramInstallExecutionPlan,
   SearchInstallSourceZone,
-  SneakPreviewSearchInstallExecutionPlan,
+  TemporaryProgramSearchInstallExecutionPlan,
 } from "./search-install-intents";
 
 export type FreeProgramInstallSourceZone = SearchInstallSourceZone;
@@ -25,8 +25,8 @@ export type FreeProgramInstallExecutionCallbacks = {
   installProgramForFree: (programId: CardInstanceId) => CardInstanceId | undefined;
 };
 
-export function createSneakPreviewFreeProgramInstallInput(
-  plan: SneakPreviewSearchInstallExecutionPlan,
+export function createTemporaryProgramFreeInstallInput(
+  plan: TemporaryProgramSearchInstallExecutionPlan,
 ): FreeProgramInstallExecutionInput {
   return {
     selectedProgramId: plan.selectedCardId,
@@ -39,11 +39,11 @@ export function createSneakPreviewFreeProgramInstallInput(
   };
 }
 
-export function createMysteryBoxFreeProgramInstallInput(
-  plan: MysteryBoxSearchInstallExecutionPlan,
+export function createRevealedStackFreeProgramInstallInput(
+  plan: RevealedStackProgramInstallExecutionPlan,
 ): FreeProgramInstallExecutionInput {
   if (!plan.selectedCardId)
-    throw new Error("Mystery Box hat kein installiertes Programm im Plan.");
+    throw new Error("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
   return {
     selectedProgramId: plan.selectedCardId,
     sourceZone: "stack",

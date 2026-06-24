@@ -1,33 +1,31 @@
 // @ts-nocheck
-import { runtimeBinding } from "./runtime-shared";
+import { runtimeProxy } from "./runtime-shared";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
-    AUJOURD_OUI_RESOURCE_CARD_ID,
+    AUJOURD_OUI_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,
     COCKROACH_ID,
-    CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-    CORP_HQ_AGENDA_REVEAL_CARD_ID,
-    CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+    CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+    CORP_HQ_AGENDA_REVEAL_SOURCE,
+    CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_CARD_IDS,
-    SHORT_CIRCUIT_RESOURCE_CARD_ID,
+    SERVER_EXPOSE_PROGRAM_SOURCES,
+    SHORT_CIRCUIT_RESOURCE_SOURCE,
     SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_CARD_IDS,
-    STACK_TOP_REORDER_RESOURCE_CARD_ID,
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+    STACK_SEARCH_PROGRAM_SOURCES,
+    STACK_TOP_REORDER_RESOURCE_SOURCE,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,
@@ -84,27 +82,27 @@ export function createHiddenZoneSearchRuntime(
     resolveAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveCodeViralCachePurgeChoice,
+    resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
     resolveHammerStealthLossChoice,
-    resolveInvestmentFirmCreditChoice,
-    resolveMicrotechAiInterfacePreAccessChoice,
+    resolveCorpInstalledEconomyCreditChoice,
+    resolvePreAccessTopRdReorderChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolvePattelsVirusCounterChoice,
+    resolveBrokenIceVirusCounterChoice,
     resolvePostMeatDamageHiddenResourceChoice,
-    resolvePowerGridOverloadChoice,
-    resolvePriorityWreckSpendChoice,
+    resolveHardwareTrashByCounterChoice,
+    resolveSuccessfulRunCreditLossSpendChoice,
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveSingaporeCityGridSwapChoice,
-    resolveSpeedTrapRezInterruptChoice,
+    resolveHqIceSwapChoice,
+    resolveRezInterruptJackOutChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveSystematicLayoffsAdvancementChoice,
-    resolveTooManyDoorsSecretSpendChoiceInRunModule,
+    resolveAdvancementPlacementChoice,
+    resolveSecretSpendCompareChoiceInRunModule,
     resolveTraceChoice,
-    resolveViral15ProgramTrashChoiceInRunModule,
+    resolveActiveIceProgramTrashChoiceInRunModule,
     rezCostForCard,
     rezzedBlackIceIds,
     rezzedCorpRootCardIds,
@@ -129,7 +127,7 @@ export function createHiddenZoneSearchRuntime(
     shouldLoadLegacyRecurringCredits,
     shuffleRunnerStackAndRefreshZones,
     shuffleStateIds,
-    sneakPreviewInstallableProgramIds,
+    temporaryProgramInstallableProgramIds,
     spendCardCounter,
     spendCredits,
     spendRunnerInstallCredits,
@@ -155,7 +153,7 @@ export function createHiddenZoneSearchRuntime(
     addCounterToAllInstalledRunnerIcebreakers,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     chooseCorpAgendasForPointCost,
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     corpAgendaPointTotal,
     corpZoneChoiceHandlerHost,
     creditTextForPrompt,
@@ -170,61 +168,58 @@ export function createHiddenZoneSearchRuntime(
     exposedCorpCardInServer,
     hiddenZoneArrangeChoiceHandlerHost,
     hiddenZoneNonSearchChoiceHandlerHost,
-    huntClubBbsExposeOptionLabel,
-    huntClubBbsExposeTargets,
+    multiExposeInstalledCorpCardOptionLabel,
+    multiExposeInstalledCorpCardTargets,
     iceChoiceLabelForSide,
     installedCorpCardServerContext,
     installedRunnerConnectionIds,
     installedRunnerIcebreakerIds,
     outermostIceExposures,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
     parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
     pendingChoiceResolutionHost,
-    playfulAiSplitOptions,
+    randomDiceSplitOptions,
     publicIcePositionLabelForCard,
     publicIceSelectionLabelForCard,
-    resolveAnonymousTipDerezBlackIceChoice,
+    resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
     resolveChimeraDaemonTrashChoice,
-    resolveCoreCommandJettisonIceChoice,
-    resolveDealWithMilitech,
+    resolvePayRezCostToTrashRezzedIceChoice,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
-    resolveForgedActivationOrdersCorpChoice,
-    resolveForgedActivationOrdersTargetChoice,
-    resolveHuntClubBbsExposeChoice,
+    resolveCorpChoiceRezOrTrashIceDecisionChoice,
+    resolveCorpChoiceRezOrTrashIceTargetChoice,
+    resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
-    resolveOpenEndedMileageProgramReturnChoice,
+    resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolvePlayfulAiDiceLoopEvent,
+    resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveSecurityCodeWormChipTrashIceChoice,
+    resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
-    resolveV1921PlayfulAiChoice,
+    resolveScoredAgendaCorpRdTopReveal,
+    resolveRandomDiceSplitChoice,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
     setupMulliganChoice,
     shuffleCorpCardIntoRd,
-    startAnonymousTipDerezBlackIceChoice,
-    startCoreCommandJettisonIceChoice,
+    startDerezRezzedBlackIceChoice,
+    startPayRezCostToTrashRezzedIceChoice,
     startExposeInstalledCorpCardsChoice,
-    startForgedActivationOrdersTargetChoice,
-    startHuntClubBbsExposeChoice,
-    startOpenEndedMileageProgramReturnChoice,
+    startCorpChoiceRezOrTrashIceChoice,
+    startMultiExposeInstalledCorpCardsChoice,
+    startPaidSourceReturnToGripChoice,
     startRunnerHostingChoice,
-    startSecurityCodeWormChipTrashIceChoice,
-    startV1921PlayfulAiChoice,
+    startTrashUnrezzedIceChoice,
+    startRandomDiceSplitChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = new Proxy(
-    {},
-    { get: (_target, property) => runtimeBinding(runtime, property) },
-  ) as any;
+  } = runtimeProxy<Record<string, unknown>>(runtime);
 
   function hiddenZoneSearchHandlerHostBase(
     state: GameState,
@@ -234,11 +229,11 @@ export function createHiddenZoneSearchRuntime(
       state,
       legalAction,
       constants: {
-        aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
-        mysteryBoxId: MYSTERY_BOX_ID,
-        selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
-        shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
-        sneakPreviewId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
+        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
+        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
@@ -258,8 +253,8 @@ export function createHiddenZoneSearchRuntime(
       spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
       installRunnerProgramFromStackWithoutClick: (cardId) =>
         installRunnerProgramFromStackWithoutClick(state, cardId, legalAction),
-      startSelfModifyingCodeFreeMuChoice: (cardId) =>
-        startSelfModifyingCodeFreeMuChoice(state, cardId),
+      startRunnerProgramFreeMemoryChoice: (cardId) =>
+        startRunnerProgramFreeMemoryChoice(state, cardId),
       availableRunnerProgramInstallCredits: () =>
         availableRunnerProgramInstallCredits(state),
       runnerMemoryLimit: () => runnerMemoryLimit(state),
@@ -291,8 +286,8 @@ export function createHiddenZoneSearchRuntime(
             filter,
             installCost,
           ),
-        sneakPreviewInstallableProgramIds: (sourceZone) =>
-          sneakPreviewInstallableProgramIds(
+        temporaryProgramInstallableProgramIds: (sourceZone) =>
+          temporaryProgramInstallableProgramIds(
             hiddenZoneSearchActivationTargetHost(state),
             sourceZone,
           ),
@@ -315,11 +310,11 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       constants: {
-        aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
-        mysteryBoxId: MYSTERY_BOX_ID,
-        selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
-        shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
-        sneakPreviewId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
+        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
+        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
@@ -511,7 +506,7 @@ export function createHiddenZoneSearchRuntime(
     return true;
   }
 
-  function startSelfModifyingCodeFreeMuChoice(
+  function startRunnerProgramFreeMemoryChoice(
     state: GameState,
     selectedProgramId: CardInstanceId,
   ): boolean {
@@ -524,9 +519,9 @@ export function createHiddenZoneSearchRuntime(
       });
     if (options.length === 0) return false;
     state.pendingChoice = {
-      choiceId: `v1911_self_modifying_code_free_mu_${state.stateVersion + 1}`,
+      choiceId: `runner_program_free_memory_${state.stateVersion + 1}`,
       side: "runner",
-      source: `v1911.self_modifying_code_free_mu:${selectedProgramId}:${state.stateVersion + 1}`,
+      source: `runner.program_free_memory:${selectedProgramId}:${state.stateVersion + 1}`,
       prompt: "MU freimachen",
       kind: "select_cards",
       options,
@@ -551,7 +546,7 @@ export function createHiddenZoneSearchRuntime(
     const definition = definitionFor(state, cardId);
     if (definition.type !== "program")
       throw new Error(
-        options.typeError ?? "Sneak Preview darf nur Programme installieren.",
+        options.typeError ?? "Die temporaere Programminstallation darf nur Programme installieren.",
       );
     if (
       (options.checkUnique ?? true) &&
@@ -566,7 +561,7 @@ export function createHiddenZoneSearchRuntime(
       runnerMemoryLimit(state)
     )
       throw new Error(
-        options.memoryError ?? "Nicht genug Memory fuer Sneak Preview.",
+        options.memoryError ?? "Nicht genug Memory fuer die temporaere Programminstallation.",
       );
     removeFromAllZones(state, cardId);
     state.runner.rig.programs.push(cardId);
@@ -650,14 +645,14 @@ export function createHiddenZoneSearchRuntime(
     const sourceDefinition = definitionFor(state, sourceCardId);
     const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
     if (ability === "search_stack_program_to_grip") {
-      if (!STACK_SEARCH_PROGRAM_CARD_IDS.has(sourceDefinition.id))
+      if (!STACK_SEARCH_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
       if (cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error(
           "Diese Stack-Search-Ability wird deklarativ abgewickelt.",
         );
       spendCredits(state, "runner", creditCostForAction(legalAction));
-      if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID) {
+      if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE) {
         startAujourdOuiTop5Activation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           sourceCardId,
@@ -667,12 +662,12 @@ export function createHiddenZoneSearchRuntime(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           {
             sourcePrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-                ? `v1911.short_circuit_search:${sourceCardId}`
+              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+                ? `runner.stack_search_to_grip:${sourceCardId}`
                 : "v1911.search_stack",
             choiceIdPrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-                ? "v1911_short_circuit_search"
+              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+                ? "runner_stack_search_to_grip"
                 : "v1911_search_stack",
           },
         );
@@ -682,16 +677,16 @@ export function createHiddenZoneSearchRuntime(
         hiddenZoneBarrier: true,
         sourceDefinitionId: sourceDefinition.id,
         hiddenZoneAction:
-          sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+          sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE
             ? "v1911_aujourdoui_top5"
-            : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-              ? "v1911_short_circuit_search"
+            : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+              ? "runner_stack_search_to_grip"
               : "v1911_search_stack",
       };
       return;
     }
     if (ability === "expose_server_card") {
-      if (!SERVER_EXPOSE_PROGRAM_CARD_IDS.has(sourceDefinition.id))
+      if (!SERVER_EXPOSE_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
       if (cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error("Diese Expose-Ability wird deklarativ abgewickelt.");
@@ -713,8 +708,7 @@ export function createHiddenZoneSearchRuntime(
       return;
     }
     if (ability === "reveal_stack_top") {
-      if (!STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(sourceDefinition.id))
-        throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
+      throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
       revealRunnerStackTop(state, legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -725,7 +719,7 @@ export function createHiddenZoneSearchRuntime(
       return;
     }
     if (ability === "arrange_stack_top2") {
-      if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_CARD_ID)
+      if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_SOURCE)
         throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
       startRunnerStackArrangeChoice(
         hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
@@ -758,6 +752,6 @@ export function createHiddenZoneSearchRuntime(
     revealCorpRdTop,
     revealRunnerStackTop,
     shuffleRunnerStack,
-    startSelfModifyingCodeFreeMuChoice,
+    startRunnerProgramFreeMemoryChoice,
   };
 }

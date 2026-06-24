@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isHqToNewRemoteInstallRezChoiceSource,
   isHqToNewRemoteInstallRezRezChoiceSource,
-} from "./data-fort-reclamation-sequence";
+} from "./hq-to-new-remote-install-rez-sequence";
 
 describe("data fort reclamation sequence routing", () => {
   it("recognizes install and rez sequence choice sources", () => {
@@ -13,7 +13,7 @@ describe("data fort reclamation sequence routing", () => {
     ).toBe(true);
     expect(
       isHqToNewRemoteInstallRezChoiceSource(
-        "v1922.data_fort_reclamation:data_fort_agenda:8",
+        "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
       ),
     ).toBe(true);
     expect(
@@ -22,7 +22,7 @@ describe("data fort reclamation sequence routing", () => {
       ),
     ).toBe(true);
     expect(
-      isHqToNewRemoteInstallRezChoiceSource("v162.priority_requisition"),
+      isHqToNewRemoteInstallRezChoiceSource("card_implementation.scored_agenda_free_rez"),
     ).toBe(false);
   });
 });

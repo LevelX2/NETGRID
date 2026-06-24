@@ -5,7 +5,7 @@ import {
   type AccessFlowCompositionHost,
 } from "../access/access-flow-hosts";
 import { buildRunnerDuringRunCardImplementationActions } from "./card-implementation-run-actions";
-import { buildMysteryBoxRunActions } from "./encounter-actions";
+import { buildRevealedStackProgramInstallRunActions } from "./encounter-actions";
 import {
   createRunFlowAdapters,
   type RunFlowAdapters,
@@ -30,7 +30,7 @@ export type RunAccessLegalActionHostCompositionHost = {
   > & {
     finishRun: RunFlowHost["callbacks"]["finishRun"];
     successfulRunInterventionHost: StateHostFn<SuccessfulRunInterventionHost>;
-    startExpertScheduleAnalyzerPostAccessChoice: AccessFlowCompositionHost["run"]["startExpertScheduleAnalyzerPostAccessChoice"];
+    startPostAccessInstalledProgramChoice: AccessFlowCompositionHost["run"]["startPostAccessInstalledProgramChoice"];
   };
   access: Pick<
     RunFlowHost["access"],
@@ -113,8 +113,8 @@ export function createRunAccessLegalActionHostComposition(
       advanceArchivesBreachPastNonDecisionCards:
         access.advanceArchivesBreachPastNonDecisionCards,
       startRunnerPrivateLookChoice: access.startRunnerPrivateLookChoice,
-      startExpertScheduleAnalyzerPostAccessChoice:
-        run.startExpertScheduleAnalyzerPostAccessChoice,
+      startPostAccessInstalledProgramChoice:
+        run.startPostAccessInstalledProgramChoice,
     },
     run: {
       currentRun: run.currentRun,
@@ -129,7 +129,7 @@ export function createRunAccessLegalActionHostComposition(
         run.executeCardImplementationRunnerRunStartEffects,
       applyRunnerTraceCounterRunStartEffects:
         run.applyRunnerTraceCounterRunStartEffects,
-      applyAiBoonRunStart: run.applyAiBoonRunStart,
+      applyRunStartRandomStrengthBonus: run.applyRunStartRandomStrengthBonus,
       openStartOfRunFortUtilityWindow: run.openStartOfRunFortUtilityWindow,
     },
     trace: callbacks.trace,
@@ -179,13 +179,13 @@ export function createRunAccessLegalActionHostComposition(
         buildRunnerDuringRunCardImplementationActions(
           cardImplementation.runCardImplementationActionHost(state),
         ).legalActions,
-      mysteryBoxRunActions: (state, activeRun) =>
-        buildMysteryBoxRunActions(
+      hiddenStackInstallRunActions: (state, activeRun) =>
+        buildRevealedStackProgramInstallRunActions(
           runFlow.runnerEncounterActionHostForState(state),
           activeRun,
         ),
-      startExpertScheduleAnalyzerPostAccessChoice:
-        run.startExpertScheduleAnalyzerPostAccessChoice,
+      startPostAccessInstalledProgramChoice:
+        run.startPostAccessInstalledProgramChoice,
     },
     damage: {
       resolveDamageOperation: callbacks.damage.resolveDamageOperation,

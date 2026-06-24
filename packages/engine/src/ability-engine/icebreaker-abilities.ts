@@ -33,7 +33,7 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
   onUseEndRun?: boolean;
   breakAllMatchingSubroutines?: boolean;
   special?:
-    | "ai_boon_run_start_random_strength"
+    | "run_start_random_strength_bonus"
     | "blink_random_break_or_net_damage"
     | "bartmoss_post_encounter_self_trash_check"
     | "snowball_run_strength_per_successful_break"

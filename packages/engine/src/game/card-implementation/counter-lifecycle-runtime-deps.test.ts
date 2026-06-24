@@ -66,7 +66,7 @@ function host(input: {
           amount,
           counterType: counterType as Extract<
             CounterType,
-            "militech" | "pattel_antibody"
+            "militech" | "breaker_strength_penalty"
           >,
           countersAfter: 5,
           publicPayload: {

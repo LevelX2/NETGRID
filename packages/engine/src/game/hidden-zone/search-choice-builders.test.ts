@@ -3,17 +3,17 @@ import { describe, expect, it } from "vitest";
 import {
   buildLookTopStackTakeMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
-  buildMysteryBoxInstallChoice,
+  buildRevealedStackProgramInstallChoice,
   buildSearchStackInstallChoice,
   buildSearchStackInstallPayload,
   buildSearchStackToGripChoice,
   buildSearchStackToGripPayload,
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
-  buildSelfModifyingCodeSearchInstallChoice,
-  buildSneakPreviewProgramChoice,
-  buildSneakPreviewSourceChoice,
-  buildSneakPreviewSourceChoicePayload,
+  buildPaidStackProgramInstallChoice,
+  buildTemporaryProgramInstallChoice,
+  buildTemporaryProgramInstallSourceChoice,
+  buildTemporaryProgramInstallSourceChoicePayload,
 } from "./search-choice-builders";
 
 const sourceCardId = "source_card" as CardInstanceId;
@@ -203,26 +203,26 @@ describe("hidden-zone search choice builders", () => {
   });
 
   it("builds SMC, Sneak Preview and Mystery Box search choices with stable sources", () => {
-    const smc = buildSelfModifyingCodeSearchInstallChoice({
+    const smc = buildPaidStackProgramInstallChoice({
       stateVersion: 7,
       sourceCardId,
       options: [{ id: "card_program", label: "Program", value: "program" }],
     });
-    const sneakSource = buildSneakPreviewSourceChoice({
+    const sneakSource = buildTemporaryProgramInstallSourceChoice({
       stateVersion: 7,
       sourcePrefix: "p3_38.stack_or_trash_program_install",
       sourceCardId,
       sourceDefinitionId,
       options: [{ id: "source_stack", label: "Stack", value: "stack" }],
     });
-    const sneakProgram = buildSneakPreviewProgramChoice({
+    const sneakProgram = buildTemporaryProgramInstallChoice({
       stateVersion: 7,
       sourceZone: "stack",
-      sourcePrefix: "v1911.sneak_preview",
+      sourcePrefix: "v1911.temporary_program_install",
       sourceDefinitionId,
       options: [{ id: "card_program", label: "Program", value: "program" }],
     });
-    const mystery = buildMysteryBoxInstallChoice({
+    const mystery = buildRevealedStackProgramInstallChoice({
       stateVersion: 7,
       sourceCardId,
       topCards: ["top_a", "top_b"] as CardInstanceId[],
@@ -230,8 +230,8 @@ describe("hidden-zone search choice builders", () => {
     });
 
     expect(smc).toMatchObject({
-      choiceId: "v1911_self_modifying_code_install_program_8",
-      source: "v1911.self_modifying_code_install_program:source_card:8",
+      choiceId: "v1911_hidden_stack_program_install_8",
+      source: "v1911.hidden_stack_program_install:source_card:8",
       cardSearchPresentation: {
         sourceZone: "stack",
         selectableFilter: "program",
@@ -242,20 +242,20 @@ describe("hidden-zone search choice builders", () => {
       },
     });
     expect(sneakSource).toMatchObject({
-      choiceId: "v1911_sneak_preview_source_8",
+      choiceId: "v1911_temporary_program_install_source_8",
       source:
         "p3_38.stack_or_trash_program_install_source:source_card:source_definition:8",
       prompt: "Sneak-Preview-Quelle wählen",
       visibility: "hidden_info_barrier",
     });
-    expect(buildSneakPreviewSourceChoicePayload()).toEqual({
+    expect(buildTemporaryProgramInstallSourceChoicePayload()).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_source_choice",
+      hiddenZoneAction: "temporary_program_install_source_choice",
       choiceVisibility: "runner_private",
     });
     expect(sneakProgram).toMatchObject({
-      choiceId: "v1911_sneak_preview_stack_install_8",
-      source: "v1911.sneak_preview_stack_install:8",
+      choiceId: "v1911_temporary_program_install_stack_install_8",
+      source: "v1911.temporary_program_install_stack_install:8",
       prompt: "Programm aus dem Stack installieren",
       cardSearchPresentation: {
         sourceZone: "stack",
@@ -269,9 +269,9 @@ describe("hidden-zone search choice builders", () => {
       },
     });
     expect(mystery).toMatchObject({
-      choiceId: "v1915_mystery_box_8",
-      source: "v1915.mystery_box:source_card:top_a,top_b:8",
-      prompt: "Mystery-Box-Programm installieren",
+      choiceId: "v1915_revealed_stack_program_install_8",
+      source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
+      prompt: "Programm aus offengelegtem Stack installieren",
       visibility: "public",
     });
   });

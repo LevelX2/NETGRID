@@ -241,7 +241,7 @@ describe("run duration payment", () => {
     });
 
     state.run!.jackOutAdditionalCostForRun = 2;
-    state.run!.viral15ActiveSourceIceId = "ice_1" as CardInstanceId;
+    state.run!.activeIceProgramTrashSourceIceId = "ice_1" as CardInstanceId;
     expect(runJackOutAdditionalCost(state.run!)).toBe(3);
   });
 });

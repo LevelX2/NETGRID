@@ -587,10 +587,10 @@ export function applyPostBreakStealthLoss(
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
     ...(breakerDefinition.id === RAMMING_PISTON_ID
-      ? { v1922RunnerProgramAbility: "ramming_piston_stealth_loss" }
+      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
     ...(breakerDefinition.id === PILE_DRIVER_ID
-      ? { v1922RunnerProgramAbility: "pile_driver_stealth_loss" }
+      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
   };
   return {

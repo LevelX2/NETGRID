@@ -84,16 +84,7 @@ function hasFortRunWindowKind(
   );
 }
 
-export const CORP_ADVANCEMENT_COUNTER_ASSET_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "asset") &&
-    hasEffectKind(implementation, [
-      "distribute_advancement_counters",
-      "move_advancement_counters",
-    ]),
-);
-
-export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
+export const CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "operation") &&
     hasEffectKind(implementation, [
@@ -102,38 +93,23 @@ export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
     ]),
 );
 
-export const CORP_ACTION_ASSET_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "asset") &&
-    hasEffectKind(implementation, ["gain_actions"]),
-);
-
-export const CORP_FORT_RUN_WINDOW_UPGRADE_CARD_IDS = cardIdsMatching(
+export const CORP_FORT_RUN_WINDOW_UPGRADE_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&
     (implementation.fortRunWindows?.length ?? 0) > 0,
 );
 
-export const CORP_TRACE_ASSET_CARD_IDS = cardIdsMatching(
+export const CORP_TRACE_ASSET_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "asset") &&
     hasEffectKind(implementation, ["trace"]),
 );
 
-export const CORP_RUN_TAX_UPGRADE_CARD_IDS = cardIdsMatching(
+export const CORP_RUN_TAX_UPGRADE_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&
     hasFortRunWindowKind(implementation, [
       "temporary_hq_ice_encounter_after_successful_run",
       "block_stealth_bits_during_runs_on_this_fort",
-    ]),
-);
-
-export const CORP_TAG_CONDITION_UPGRADE_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "upgrade") &&
-    hasFortRunWindowKind(implementation, [
-      "swap_unrezzed_fort_ice_with_hq_ice",
-      "corp_trace_bits_during_runs_on_this_fort",
     ]),
 );

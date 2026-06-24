@@ -881,7 +881,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.rig.programs).not.toContain(targetProgramId);
     expect(state.runner.grip).toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_end_turn_return",
+      hiddenZoneAction: "temporary_program_install_end_turn_return",
       returnedCount: 1,
     });
 
@@ -1184,7 +1184,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.payload?.v1911HiddenZoneAbility ===
-          "self_modifying_code_install_program",
+          "hidden_stack_program_install",
       ),
     ).toBe(false);
 
@@ -1216,7 +1216,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.payload?.v1911HiddenZoneAbility ===
-          "self_modifying_code_install_program",
+          "hidden_stack_program_install",
       ),
     ).toBe(false);
   });
@@ -1313,11 +1313,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       (action) =>
         action.type === "score_agenda" && action.payload?.cardId === agendaId,
     );
-    expect(state.pendingChoice?.source).toContain("p3_50.corporate_downsizing");
+    expect(state.pendingChoice?.source).toContain("scored_agenda.hq_agenda_shuffle_credits");
     state = applyChoices(state, "corp", [`card_${shownAgendaId}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
       publicRevealKind: "reveal",
       shownCount: 1,
       shuffledIntoRndCount: 1,
@@ -1426,7 +1426,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("opens Too Many Doors secret spend privately and resolves replay-safe", () => {
+  it("opens Secret Spend Compare secret spend privately and resolves replay-safe", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
     state.runner.credits = 20;
     state.corp.credits = 20;
@@ -1455,7 +1455,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.payload?.encounterContinue === true,
     );
     expect(state.pendingChoice?.source).toContain(
-      "p3_56.too_many_doors_secret_spend",
+      "card_implementation.secret_spend_compare",
     );
     expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(3);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
@@ -1477,7 +1477,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 1,
-      tooManyDoorsEndRun: false,
+      secretSpendEndRun: false,
       corpCreditsAfter: corpCreditsBeforeReveal - 1,
       runnerCreditsAfter: runnerCreditsBeforeReveal - 1,
     });

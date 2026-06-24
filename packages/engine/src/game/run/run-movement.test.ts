@@ -290,7 +290,7 @@ describe("run movement execution", () => {
     });
     const { host, calls } = hostFor(state);
     const jackOut = action(state, "jack_out", [{ credits: 2 }], {
-      v1922CorpIceAbility: "viral_15_jack_out_tax",
+      v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
     });
 
     const result = handleRunMovementAction(host, jackOut);
@@ -302,7 +302,7 @@ describe("run movement execution", () => {
     });
     expect(state.runner.credits).toBe(1);
     expect(jackOut.payload).toMatchObject({
-      v1922CorpIceAbility: "viral_15_jack_out_tax",
+      v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
       jackOutAdditionalCost: 2,
       jackOutBeforeAccess: true,
       runnerCreditsAfter: 1,

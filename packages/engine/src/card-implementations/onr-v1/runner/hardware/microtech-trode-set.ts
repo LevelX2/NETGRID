@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const microtechTrodeSetImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_132_microtech-trode-set",
   runnerUtilityLongtail: {
-    kind: "microtech_trode_set_ap_subroutine_modifier",
+    kind: "access_point_subroutine_modifier",
     visibility: "public",
   },
 };

@@ -2,7 +2,7 @@ import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Corprunner's Shattered Remains
 // text: You may advance Shattered Remains before and after you rez it. When Runner accesses Shattered Remains, it destroys one piece of hardware for each advancement counter on it.
-export const corprunnersShatteredRemainsImplementation: CardImplementationDefinition = {
+export const hardwareTrashByAdvancementAssetImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_315_corprunners-shattered-remains",
   advanceable: { while: "installed_before_and_after_rez" },
   accessEffects: [

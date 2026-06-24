@@ -119,18 +119,20 @@ function useBaseLinkEffect(
   return effects[0];
 }
 
-function isSubmarineUplinkDefinition(definitionId: CardDefinitionId): boolean {
+function isTraceLinkForceJackOutDefinition(
+  definitionId: CardDefinitionId,
+): boolean {
   return (
     cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
-      ?.kind === "submarine_uplink_trace_link_force_jack_out"
+      ?.kind === "trace_link_force_jack_out"
   );
 }
 
-function isSubmarineUplinkSource(
+function isTraceLinkForceJackOutSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
-  return isSubmarineUplinkDefinition(definitionFor(state, cardId).id);
+  return isTraceLinkForceJackOutDefinition(definitionFor(state, cardId).id);
 }
 
 export function installedTraceBaseLinkCardImplementation(
@@ -170,7 +172,9 @@ function cardImplementationQuoteForAbility(
     label: definition.title,
     baseLinkValue: effect.baseLink,
     creditCost,
-    forcesJackOutAfterEncounter: isSubmarineUplinkDefinition(definition.id),
+    forcesJackOutAfterEncounter: isTraceLinkForceJackOutDefinition(
+      definition.id,
+    ),
     ...(effect.rewardCreditsOnAvoidTrace
       ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
       : {}),
@@ -201,7 +205,7 @@ function quoteForAbility(
     ability,
   );
   if (!implementationQuote) return undefined;
-  if (isSubmarineUplinkSource(state, sourceCardInstanceId) && !state.run)
+  if (isTraceLinkForceJackOutSource(state, sourceCardInstanceId) && !state.run)
     return undefined;
   if (state.runner.credits < implementationQuote.creditCost) return undefined;
   return {

@@ -121,9 +121,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -185,16 +183,16 @@ import {
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "../abilities/run-fort-trigger-execution";
 import {
-  applyShellTradersStartOfTurn,
+  applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
-  shellTradersInstallCost,
-  shellTradersPreparedTargetIds,
-  shellTradersPrepareTargetIds,
+  delayedInstallCounterCost,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
@@ -202,10 +200,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -240,25 +235,23 @@ import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "../turn/runner-special-zone-install-actions";
 import {
   lookTopStackShowToCorpThenInstallMatchingTargets,
   searchStackInstallTargets,
-  sneakPreviewInstallableProgramIds,
-  sneakPreviewSourceOptions,
+  temporaryProgramInstallableProgramIds,
+  temporaryProgramInstallSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
-  startSelfModifyingCodeStackActivation,
-  startSneakPreviewSourceActivation,
+  startHiddenStackProgramInstallActivation,
+  startTemporaryProgramInstallSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {
   handleHiddenZoneSearchChoice,
@@ -282,29 +275,29 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
-  startCorporateNegotiatingCenterChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
   handleCorpInstallRezSequenceChoice,
-  resolveSecurityPurgeAgendaPurge,
-  startDataFortReclamationChoice,
-  startPriorityRequisitionChoice,
+  resolveAgendaPurgeInstallTargets,
+  startHqToNewRemoteInstallRezChoice,
+  startScoredAgendaFreeRezChoice,
   type CorpInstallRezSequenceHandlerHost,
 } from "../corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
 import {
@@ -343,14 +336,14 @@ import {
   type BreachStateHost,
 } from "../access/breach-state";
 import {
-  resolveMicrotechAiInterfacePreAccessChoice,
-  resolvePriorityWreckSpendChoice,
+  resolvePreAccessTopRdReorderChoice,
+  resolveSuccessfulRunCreditLossSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "../run/run-access-transition";
 import { type StartRunOptions } from "../run/run-core-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,
@@ -359,7 +352,7 @@ import {
   handleRunEndCleanup,
   recordDupreBreakUsage,
   resetBreakerStrength,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
@@ -381,16 +374,16 @@ import {
 } from "../run/run-duration-payment";
 import {
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
-  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  resolveActiveIceProgramTrashChoice as resolveActiveIceProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "../run/encounter-resolution";
 import {
-  applyRioDeJaneiroCityGridPassedIceTrigger,
-  isSubmarineUplinkSource,
-  markSubmarineUplinkJackOutAfterEncounter,
+  applyPassedIceRunEndTrigger,
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
-  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
 import {
@@ -398,9 +391,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -416,18 +407,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -446,14 +429,14 @@ import {
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
   resolveCorpRootRezEffect,
-  resolveSpeedTrapRezInterruptChoice,
+  resolveRezInterruptJackOutChoice,
   type RunRezWindowHost,
 } from "../run/run-rez-window";
 import {
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "../run/fort-pass-window";
 import {
@@ -541,15 +524,13 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  ACTION_ASSET_CARD_IDS,
-  COUNTER_ASSET_CARD_IDS,
-  COUNTER_OPERATION_CARD_IDS,
-  OVERADVANCE_AGENDA_CARD_IDS,
+  COUNTER_OPERATION_SOURCES,
+  OVERADVANCE_AGENDA_SOURCES,
   scoredAgendaCounterCreditPayload,
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_CARD_IDS,
-  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+  SCORED_REVEAL_AGENDA_SOURCES,
+  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
@@ -559,11 +540,10 @@ import {
   FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
   FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
   GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
-  INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  ADVANCEMENT_PLACEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -571,37 +551,33 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
+  TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE,
   EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-  CORP_HQ_AGENDA_REVEAL_CARD_ID,
-  CORP_HQ_SHUFFLE_DRAW_CARD_ID,
-  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
-  AUJOURD_OUI_RESOURCE_CARD_ID,
-  HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
-  HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
-  RUNNER_GRIP_TRASH_EVENT_CARD_ID,
-  RUNNER_STACK_TOP5_EVENT_CARD_ID,
-  SERVER_EXPOSE_PROGRAM_CARD_IDS,
-  SERVER_ICE_SWAP_UPGRADE_CARD_ID,
-  SHORT_CIRCUIT_RESOURCE_CARD_ID,
-  STACK_SEARCH_PROGRAM_CARD_IDS,
-  STACK_TOP_REORDER_RESOURCE_CARD_ID,
-  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  CORP_HQ_AGENDA_REVEAL_SOURCE,
+  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
+  AUJOURD_OUI_RESOURCE_SOURCE,
+  RUNNER_GRIP_TRASH_EVENT_SOURCE,
+  RUNNER_STACK_TOP5_EVENT_SOURCE,
+  SERVER_EXPOSE_PROGRAM_SOURCES,
+  SERVER_ICE_SWAP_UPGRADE_SOURCE,
+  SHORT_CIRCUIT_RESOURCE_SOURCE,
+  STACK_SEARCH_PROGRAM_SOURCES,
+  STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
@@ -621,12 +597,9 @@ import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
   corpInstalledEconomyActionProfileForPayload,
-  CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -663,25 +636,23 @@ import {
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
-  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-  RUNNER_RANDOM_PROGRAM_CARD_IDS,
+  BOARDWALK_RANDOM_PROGRAM_SOURCE,
+  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE,
+  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
 import {
-  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
-  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
-  TRACE_AWARE_RUN_EVENT_CARD_ID,
+  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
+  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
+  TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
   CRYBABY_ACCESS_COST_UPGRADE_ID,
   DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
   TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "../../mechanics/server-upgrades";
 import {
-  RUN_TAX_UPGRADE_CARD_IDS,
-  TAG_CONDITION_UPGRADE_CARD_IDS,
+  RUN_TAX_UPGRADE_SOURCES,
 } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -719,10 +690,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
 export function createEncounterMovementRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, any>,
+  runtime: Record<string, unknown>,
 ) {
   const {
     accessFlow,
@@ -732,7 +702,7 @@ export function createEncounterMovementRuntimeHosts(
     breakAbilityForLegalAction,
     effectiveSubtypesForCard,
     executeEffectCommands,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     finishRun,
     pumpAbilityForLegalAction,
     pumpAmountForLegalAction,
@@ -818,7 +788,13 @@ export function createEncounterMovementRuntimeHosts(
   ): void {
     const run = state.run;
     if (!run || run.phase !== "encounter_ice") return;
-    if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
+    if (
+      !icebreakerHasSpecial(
+        state,
+        breakerId,
+        "bartmoss_post_encounter_self_trash_check",
+      )
+    )
       return;
     const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter ?? [];
     if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
@@ -830,7 +806,14 @@ export function createEncounterMovementRuntimeHosts(
     breakerId: CardInstanceId,
   ): void {
     const run = state.run;
-    if (!run || !icebreakerHasSpecial(state, breakerId, "snowball_run_strength_per_successful_break"))
+    if (
+      !run ||
+      !icebreakerHasSpecial(
+        state,
+        breakerId,
+        "snowball_run_strength_per_successful_break",
+      )
+    )
       return;
     const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
     run.remainderStrengthBonusByBreaker = {
@@ -845,9 +828,9 @@ export function createEncounterMovementRuntimeHosts(
     special: NonNullable<RuntimeIcebreakerAbility["special"]>,
   ): boolean {
     if (!state.cardInstances[breakerId]) return false;
-    return icebreakerAbilitiesForDefinition(definitionFor(state, breakerId)).some(
-      (ability) => ability.special === special,
-    );
+    return icebreakerAbilitiesForDefinition(
+      definitionFor(state, breakerId),
+    ).some((ability) => ability.special === special);
   }
 
   function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
@@ -879,7 +862,8 @@ export function createEncounterMovementRuntimeHosts(
   }
 
   function encounterEntryHostForState(state: GameState): EncounterEntryHost {
-    return runFlow.encounterEntryHostForState(state);}
+    return runFlow.encounterEntryHostForState(state);
+  }
 
   function successfulRunInterventionHost(
     state: GameState,
@@ -887,7 +871,9 @@ export function createEncounterMovementRuntimeHosts(
     return runFlow.successfulRunInterventionHost(state);
   }
 
-  function encounterResolutionHostForState(state: GameState): EncounterResolutionHost {
+  function encounterResolutionHostForState(
+    state: GameState,
+  ): EncounterResolutionHost {
     return runFlow.encounterResolutionHostForState(state);
   }
 
@@ -931,7 +917,8 @@ export function createEncounterMovementRuntimeHosts(
         currentEncounterSubroutines: (iceDefinition) =>
           subroutinesForCurrentEncounter(state, iceDefinition),
         runRemainderStrengthBonusForBreaker,
-        finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
+        finishRun: (successful, legalAction) =>
+          finishRun(state, successful, legalAction),
       },
       breaker: {
         pumpAbilityForLegalAction: (legalAction) =>
@@ -980,7 +967,11 @@ export function createEncounterMovementRuntimeHosts(
       },
       payment: {
         spendRunnerRunCredits: (amount, breakerId) =>
-          spendRunnerRunCredits(runDurationPaymentHost(state), amount, breakerId),
+          spendRunnerRunCredits(
+            runDurationPaymentHost(state),
+            amount,
+            breakerId,
+          ),
       },
       fort: {
         shouldOpenAardvarkInterception: (breakerId) =>
@@ -1003,7 +994,8 @@ export function createEncounterMovementRuntimeHosts(
           ),
       },
       effects: {
-        executeEffectCommands: (commands) => executeEffectCommands(state, commands),
+        executeEffectCommands: (commands) =>
+          executeEffectCommands(state, commands),
         addRunnerFutureActionDebt: (amount) =>
           addRunnerFutureActionDebt(state, amount),
       },
@@ -1053,13 +1045,17 @@ export function createEncounterMovementRuntimeHosts(
       rez: {
         executeRezCard: (cardId, rootRez, legalAction) =>
           executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
-        expireCorporateRetreatInstallCreditAbilities: () =>
-          expireCorporateRetreatInstallCreditAbilities(state),
+        expireScoredAgendaInstallRezCreditAbilities: () =>
+          expireScoredAgendaInstallRezCreditAbilities(state),
       },
       run: {
         passCorpRunRootRezWindow: (legalAction) =>
-          passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction),
-        passApproachedIce: () => passApproachedIce(runMovementHostForState(state)),
+          passCorpRunRootRezWindow(
+            runRezWindowHostForState(state),
+            legalAction,
+          ),
+        passApproachedIce: () =>
+          passApproachedIce(runMovementHostForState(state)),
       },
     };
   }

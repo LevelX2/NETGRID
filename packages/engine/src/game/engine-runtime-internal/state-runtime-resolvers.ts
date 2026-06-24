@@ -197,16 +197,16 @@ import {
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "../abilities/run-fort-trigger-execution";
 import {
-  applyShellTradersStartOfTurn,
+  applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
-  shellTradersInstallCost,
-  shellTradersPreparedTargetIds,
-  shellTradersPrepareTargetIds,
+  delayedInstallCounterCost,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
@@ -257,20 +257,20 @@ import {
 } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "../turn/runner-special-zone-install-actions";
 import {
   lookTopStackShowToCorpThenInstallMatchingTargets,
   searchStackInstallTargets,
-  sneakPreviewInstallableProgramIds,
-  sneakPreviewSourceOptions,
+  temporaryProgramInstallableProgramIds,
+  temporaryProgramInstallSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
-  startSelfModifyingCodeStackActivation,
-  startSneakPreviewSourceActivation,
+  startHiddenStackProgramInstallActivation,
+  startTemporaryProgramInstallSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {
   handleHiddenZoneSearchChoice,
@@ -294,29 +294,29 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
-  startCorporateNegotiatingCenterChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
   handleCorpInstallRezSequenceChoice,
-  resolveSecurityPurgeAgendaPurge,
-  startDataFortReclamationChoice,
-  startPriorityRequisitionChoice,
+  resolveAgendaPurgeInstallTargets,
+  startHqToNewRemoteInstallRezChoice,
+  startScoredAgendaFreeRezChoice,
   type CorpInstallRezSequenceHandlerHost,
 } from "../corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
 import {
@@ -355,14 +355,14 @@ import {
   type BreachStateHost,
 } from "../access/breach-state";
 import {
-  resolveMicrotechAiInterfacePreAccessChoice,
-  resolvePriorityWreckSpendChoice,
+  resolvePreAccessTopRdReorderChoice,
+  resolveSuccessfulRunCreditLossSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "../run/run-access-transition";
 import { type StartRunOptions } from "../run/run-core-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,
@@ -371,7 +371,7 @@ import {
   handleRunEndCleanup,
   recordDupreBreakUsage,
   resetBreakerStrength,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
@@ -393,16 +393,16 @@ import {
 } from "../run/run-duration-payment";
 import {
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
-  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  resolveActiveIceProgramTrashChoice as resolveActiveIceProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "../run/encounter-resolution";
 import {
-  applyRioDeJaneiroCityGridPassedIceTrigger,
-  isSubmarineUplinkSource,
-  markSubmarineUplinkJackOutAfterEncounter,
+  applyPassedIceRunEndTrigger,
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
-  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
 import {
@@ -458,14 +458,14 @@ import {
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
   resolveCorpRootRezEffect,
-  resolveSpeedTrapRezInterruptChoice,
+  resolveRezInterruptJackOutChoice,
   type RunRezWindowHost,
 } from "../run/run-rez-window";
 import {
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "../run/fort-pass-window";
 import {
@@ -553,15 +553,13 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  ACTION_ASSET_CARD_IDS,
-  COUNTER_ASSET_CARD_IDS,
-  COUNTER_OPERATION_CARD_IDS,
-  OVERADVANCE_AGENDA_CARD_IDS,
+  COUNTER_OPERATION_SOURCES,
+  OVERADVANCE_AGENDA_SOURCES,
   scoredAgendaCounterCreditPayload,
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_CARD_IDS,
-  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+  SCORED_REVEAL_AGENDA_SOURCES,
+  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
@@ -571,11 +569,10 @@ import {
   FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
   FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
   GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
-  INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  ADVANCEMENT_PLACEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -583,37 +580,33 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
+  TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE,
   EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-  CORP_HQ_AGENDA_REVEAL_CARD_ID,
-  CORP_HQ_SHUFFLE_DRAW_CARD_ID,
-  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
-  AUJOURD_OUI_RESOURCE_CARD_ID,
-  HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
-  HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
-  RUNNER_GRIP_TRASH_EVENT_CARD_ID,
-  RUNNER_STACK_TOP5_EVENT_CARD_ID,
-  SERVER_EXPOSE_PROGRAM_CARD_IDS,
-  SERVER_ICE_SWAP_UPGRADE_CARD_ID,
-  SHORT_CIRCUIT_RESOURCE_CARD_ID,
-  STACK_SEARCH_PROGRAM_CARD_IDS,
-  STACK_TOP_REORDER_RESOURCE_CARD_ID,
-  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  CORP_HQ_AGENDA_REVEAL_SOURCE,
+  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
+  AUJOURD_OUI_RESOURCE_SOURCE,
+  RUNNER_GRIP_TRASH_EVENT_SOURCE,
+  RUNNER_STACK_TOP5_EVENT_SOURCE,
+  SERVER_EXPOSE_PROGRAM_SOURCES,
+  SERVER_ICE_SWAP_UPGRADE_SOURCE,
+  SHORT_CIRCUIT_RESOURCE_SOURCE,
+  STACK_SEARCH_PROGRAM_SOURCES,
+  STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
@@ -633,7 +626,6 @@ import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
   corpInstalledEconomyActionProfileForPayload,
-  CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
 import {
@@ -674,25 +666,23 @@ import {
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
-  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-  RUNNER_RANDOM_PROGRAM_CARD_IDS,
+  BOARDWALK_RANDOM_PROGRAM_SOURCE,
+  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE,
+  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
 import {
-  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
-  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
-  TRACE_AWARE_RUN_EVENT_CARD_ID,
+  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
+  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
+  TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
   CRYBABY_ACCESS_COST_UPGRADE_ID,
   DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
   TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "../../mechanics/server-upgrades";
 import {
-  RUN_TAX_UPGRADE_CARD_IDS,
-  TAG_CONDITION_UPGRADE_CARD_IDS,
+  RUN_TAX_UPGRADE_SOURCES,
 } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -737,20 +727,20 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     PROTEUS_ARMAGEDDON_ID,
     PROTEUS_SCALDAN_ID,
     PROTEUS_TAXMAN_ID,
-    PROTEUS_VIRAL_PIPELINE_ID,
+    PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID,
     RUNNER_EVENT_RESOLVERS,
     TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS,
     abilityMetadata,
     accessEffectHandlerHost,
     accessFlow,
     accessFlowHost,
-    acmeSavingsAndLoanObligationCount,
+    activeObligationCount,
     activatedCardImplementationExecutionHost,
     activeCrashEverettSourceId,
-    addAcmeSavingsAndLoanObligation,
+    addActiveObligation,
     addCounterToAllInstalledRunnerIcebreakers,
     addCurrentRunAccessCount,
-    addHackerTrackerTraceCounters,
+    addCorpTraceCounterPoolCounters,
     addRunnerFutureActionDebt,
     advanceableInstalledCardTargets,
     advancementDistributionOptions,
@@ -759,7 +749,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     appendRegionReplacementTrashEffect,
     appendResolvedEffectsToPayload,
     applyActionHostComposition,
-    applyAiBoonRunStart,
+    applyRunStartRandomStrengthBonus,
     applyCorpStartOfTurnEffects,
     applyEffectCommands,
     applyPurgeableRunnerVirusCorpStartEffects,
@@ -768,7 +758,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     applyRunnerForgoNextAction,
     applyRunnerStartOfTurnEffects,
     applyRunnerTraceCounterRunStartEffects,
-    applySystematicLayoffsAdvancementPlacement,
+    applyAdvancementCounterPlacement,
     archivesAccessRequiresDecisionOrEffect,
     assertBreakSubroutineCostQuoteValid,
     assertCorpIceInstallCostValid,
@@ -781,7 +771,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     automaticTagEffect,
     automaticTrashCardEffect,
     awardRunnerEventAgendaPoint,
-    backupProgramsOnMicrotechBeforeTrash,
+    backupProgramsOnTrashBackupHardwareBeforeTrash,
     boardStateActionExecutionHost,
     breachStateHost,
     breakAbilityForLegalAction,
@@ -789,7 +779,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     canInstallCorpRootCardInServer,
     canInstallRunnerProgramFromZone,
-    canOverlayProgramOnZetatechSoftwareInstaller,
+    canOverlayProgramOnInstalledProgramHost,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     cardHasSubtype,
     cardImplementationAgendaPointInstallCost,
@@ -799,7 +789,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     cardInstallCapabilitiesForDefinition,
     choiceAction,
     chooseCorpAgendasForPointCost,
-    citySurveillanceSourceIds,
+    drawTaxSourceIds,
     cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
     clearEdgerunnerTempsInstallFlags,
     clearValuPakProgramInstallFlags,
@@ -810,7 +800,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     consumeRunnerFutureActionDebt,
     consumeValuPakProgramInstallAction,
     continueRun,
-    continueV1921PlayfulAiLoop,
+    continueRandomDiceLoop,
     corpAgendaCounterOperationTarget,
     corpAgendaPointTotal,
     corpIceInstallAdditionalCost,
@@ -851,7 +841,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     encounterResolutionHostForState,
     encounterSpecialWindowHostForState,
     endTurn,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     exposeCorpCardInServer,
     exposeInstalledCorpCardForImplementation,
     exposeInstalledCorpCardLabel,
@@ -866,15 +856,15 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     fortPassWindowHostForState,
     fortRunSideFamiliesHostForState,
     gameCardImplementationRuntimeDepsHost,
-    hackerTrackerCardIds,
-    hackerTrackerCounterTotal,
-    hackerTrackerCounterType,
+    corpTraceCounterPoolSourceIds,
+    corpTraceCounterPoolTotal,
+    corpTraceCounterPoolCounterType,
     handForSide,
     hasCardImplementationMemoryUnitModifier,
     hasCorpUtilityKind,
     hasHiddenResourceAccessStartActions,
     hasInstallCapabilityKindForDefinition,
-    hasInstalledMicrotechTrodeSet,
+    hasInstalledRunnerApDamageReducerHardware,
     hasInstalledUniqueCardDefinition,
     hiddenReplacementLongtailForDefinition,
     hiddenZoneArrangeChoiceHandlerHost,
@@ -885,8 +875,8 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     hiddenZoneSearchChoiceHandlerHost,
     hiddenZoneSearchHandlerHostBase,
     hostedProgramStrengthModifier,
-    huntClubBbsExposeOptionLabel,
-    huntClubBbsExposeTargets,
+    multiExposeInstalledCorpCardOptionLabel,
+    multiExposeInstalledCorpCardTargets,
     iceChoiceLabelForSide,
     iceStrengthBonusFor,
     iceStrengthFor,
@@ -906,12 +896,12 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     installedRunnerProgramTrashOptionsForInstall,
     installedRunnerVirusSourceIds,
     installedVirusCounterTotalForDefinition,
-    isAcmeSavingsAndLoanDefinition,
-    isCitySurveillanceCard,
+    isObligationDebtDefinition,
+    isDrawTaxSourceDefinition,
     isCorpInstallableCardType,
-    isHackerTrackerCentralCard,
+    isCorpTraceCounterPoolSource,
     isInstalledCorpCardAdvanceable,
-    isInvestmentFirmCard,
+    isCorpInstalledEconomyCreditSource,
     isRegionUpgrade,
     isUniqueCard,
     isV097OrLater,
@@ -924,7 +914,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     legalActionHostComposition,
     mainActionHostComposition,
     mergeRunnerDrawSummary,
-    microtechTrodeSetBreakAdditionalCost,
+    runnerHardwareBreakSubroutineAdditionalCost,
     movableAdvancementSourceIds,
     moveAdvancementOptions,
     mustInstallInsideSubsidiaryDataFort,
@@ -934,20 +924,20 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     outermostIceExposures,
     outermostIceIndex,
     parseAdvancementDistributionValue,
-    parsePlayfulAiChoiceSource,
-    parsePlayfulAiSplit,
+    parseRandomDiceSplitChoiceSource,
+    parseRandomDiceSplit,
     parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
     passCurrentEncounteredIce,
     pendingChoiceResolutionHost,
     permanentIcebreakerStrengthCounterBonus,
     pickRunnerAgendaForAgendaPointCost,
     playCardExecutionHost,
-    playfulAiSplitOptions,
+    randomDiceSplitOptions,
     postMeatDamageHiddenResourceCandidates,
-    powerGridOverloadEligibleHardwareIds,
-    powerGridOverloadLegalActions,
-    powerGridOverloadTrashCountFromChoiceSource,
-    powerGridOverloadTrashCountFromPayload,
+    hardwareTrashByCounterEligibleHardwareIds,
+    hardwareTrashByCounterLegalActions,
+    hardwareTrashByCounterTrashCountFromChoiceSource,
+    hardwareTrashByCounterTrashCountFromPayload,
     poxCountersForServer,
     poxInstallTax,
     printedCostCardImplementationMakeRunEffect,
@@ -973,41 +963,41 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     remainingReplacementLongtailImplementationForDefinition,
     remainingReplacementLongtailKindForCard,
     remainingReplacementLongtailKindForDefinition,
-    removeAcmeSavingsAndLoanObligation,
+    removeActiveObligation,
     requireRunnerTagged,
     requiresDataFortInstallTarget,
-    resolveAcmeSavingsAndLoanEndOfCorpTurn,
+    resolveCorpObligationEndOfTurn,
     resolveAgendaCounterOperation,
-    resolveAnonymousTipDerezBlackIceChoice,
+    resolveDerezRezzedBlackIceChoice,
     resolveDelayedAccessEffects,
     resolveBlinkBreakSubroutineAction,
     resolveCardImplementationAccessPaymentChoice,
     resolveCardImplementationAdvancementDistributionChoice,
     resolveCardImplementationMoveAdvancementChoice,
     resolveChimeraDaemonTrashChoice,
-    resolveCoreCommandJettisonIceChoice,
+    resolvePayRezCostToTrashRezzedIceChoice,
     resolveCorpInstalledEconomyAction,
     resolveCrashEverettDrawChoice,
-    resolveDealWithMilitech,
+    resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveFieldReporterEndOfRunnerTurn,
-    resolveForgedActivationOrdersCorpChoice,
-    resolveForgedActivationOrdersTargetChoice,
-    resolveHuntClubBbsExposeChoice,
+    resolveCorpChoiceRezOrTrashIceDecisionChoice,
+    resolveCorpChoiceRezOrTrashIceTargetChoice,
+    resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
-    resolveInvestmentFirmCreditChoice,
-    resolveManagementShakeUpOperation,
-    resolveMitWestTier,
+    resolveCorpInstalledEconomyCreditChoice,
+    resolveCorpOperationAddAdvancementCounters,
+    resolveRunnerGripHeapStackShuffleDrawEvent,
     resolveMultiBreakSubroutinesAction,
     resolveEndTurnTagIfRunnerReceivedTag,
-    resolveOpenEndedMileageProgramReturnChoice,
+    resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolvePlayfulAiDiceLoopEvent,
+    resolveRandomDiceLoopEvent,
     resolvePostMeatDamageHiddenResourceChoice,
     resolvePostOnPlayGenericFollowups,
-    resolvePowerGridOverloadChoice,
-    resolvePowerGridOverloadOperation,
+    resolveHardwareTrashByCounterChoice,
+    resolveHardwareTrashByCounterOperation,
     resolveDelayedEndTurnDamageEffects,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
@@ -1016,15 +1006,15 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
     resolveRunnerTargetedEventImplementation,
-    resolveSecurityCodeWormChipTrashIceChoice,
+    resolveTrashUnrezzedIceChoice,
     resolveSetupMulliganChoice,
-    resolveSneakPreviewTemporaryInstallReturns,
-    resolveSystematicLayoffsAdvancementChoice,
-    resolveSystematicLayoffsAdvancementOperation,
+    resolveTemporaryProgramInstallReturns,
+    resolveAdvancementPlacementChoice,
+    resolveAdvancementPlacementOperation,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911CorporateDownsizing,
+    resolveScoredAgendaCorpRdTopReveal,
     resolveV1911RunnerHiddenZoneAbility,
-    resolveV1921PlayfulAiChoice,
+    resolveRandomDiceSplitChoice,
     returnRunnerInstalledCardToGrip,
     returnRunnerInstalledProgramsToGripForAccess,
     revealCorpRdTop,
@@ -1035,7 +1025,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     rezzedCorpRootCardIds,
     rezzedIceOutsideThisIceCount,
     rezzedInstalledIceIds,
-    rezzedInvestmentFirmIds,
+    rezzedCorpInstalledEconomyCreditSourceIds,
     rootInstallRezzesOnInstall,
     runAccessLegalActionHostComposition,
     runAccessTransitionHost,
@@ -1085,11 +1075,11 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     setupMulliganChoice,
     shouldOfferRunnerProgramTrashBeforeInstall,
-    shouldOpenInvestmentFirmCreditChoice,
+    shouldOpenCorpInstalledEconomyCreditChoice,
     shuffleCorpCardIntoRd,
     shuffleGripTrashAndStackThenDrawForCardImplementation,
     shuffleRunnerStack,
@@ -1097,26 +1087,26 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     sourcePartsForP334Choice,
     specialZoneHarnessActions,
     spendCorpAgendaPointCost,
-    spendHackerTrackerCounters,
+    spendCorpTraceCounterPoolCounters,
     spendRecurringTraceCreditPool,
     spendRunnerAccessTrashCredits,
     spyCountersForServer,
     stableSubtypeList,
-    startAnonymousTipDerezBlackIceChoice,
+    startDerezRezzedBlackIceChoice,
     startCardImplementationAdvancementDistributionChoice,
     startCardImplementationMoveAdvancementChoice,
-    startCoreCommandJettisonIceChoice,
+    startPayRezCostToTrashRezzedIceChoice,
     startCorpTurn,
     startCrashEverettDrawChoice,
     startDiscardPhase,
-    startExpertScheduleAnalyzerPostAccessChoice,
+    startPostAccessInstalledProgramChoice,
     startExposeInstalledCorpCardsChoice,
-    startForgedActivationOrdersTargetChoice,
-    startHuntClubBbsExposeChoice,
+    startCorpChoiceRezOrTrashIceChoice,
+    startMultiExposeInstalledCorpCardsChoice,
     startIncubatorTransformChoice,
-    startInvestmentFirmCreditChoice,
-    startOpenEndedMileageProgramReturnChoice,
-    startPowerGridOverloadChoice,
+    startCorpInstalledEconomyCreditChoice,
+    startPaidSourceReturnToGripChoice,
+    startHardwareTrashByCounterChoice,
     startRun,
     startRunActionExecutionHost,
     startRunnerHostingChoice,
@@ -1124,16 +1114,16 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     startRunnerPrivateLookChoice,
     startRunnerProgramTrashBeforeInstallChoice,
     startRunnerTurn,
-    startSecurityCodeWormChipTrashIceChoice,
-    startSelfModifyingCodeFreeMuChoice,
-    startSystematicLayoffsAdvancementChoice,
-    startV1921PlayfulAiChoice,
+    startTrashUnrezzedIceChoice,
+    startRunnerProgramFreeMemoryChoice,
+    startAdvancementPlacementChoice,
+    startRandomDiceSplitChoice,
     startVirusCounterRunnerPrivateLookAtStart,
     subroutinesForCurrentEncounter,
     successfulRunInterventionHost,
     swapCorpHqAndRdTop,
-    systematicLayoffsLegalActions,
-    systematicLayoffsPlacementOptions,
+    advancementPlacementLegalActions,
+    advancementPlacementOptions,
     takeSetupMulligan,
     traceCounterEffectDefinitionFor,
     traceOrchestrationHost,
@@ -1142,7 +1132,7 @@ export function createStateRuntimeResolvers(deps: RuntimeDeps) {
     trashCorpInstalledCardsInScoredSourceServer,
     trashFaceupRdCardsForCascade,
     trashOlderRegionUpgradesInServer,
-    trashPowerGridOverloadHardware,
+    trashHardwareByCounter,
     trashRunnerInstalledCardToHeap,
     trashRunnerInstalledProgram,
     triggerAbilityExecutionHost,
@@ -1507,13 +1497,13 @@ function totalCounters(state: GameState, counterType: CounterType): number {
     poxTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   let faitTotal = 0;
-  for (const amount of Object.values(state.faitAccompliCountersByServer ?? {})) {
+  for (const amount of Object.values(state.serverAgendaCostCountersByServer ?? {})) {
     faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   return cardCounterTotal + poxTotal + faitTotal;
 }
 
-function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
+function installedVirusCounterPurgePreserveSourceIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.resources
     .filter(
       (cardId) =>
@@ -1523,11 +1513,11 @@ function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
-function codeViralCachePurgePreserveTargets(
+function virusCounterPurgePreserveTargets(
   state: GameState,
-): Array<CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }> {
+): Array<VirusCounterPurgePreserveTarget & { optionId: string; publicLabel: string }> {
   const targets: Array<
-    CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }
+    VirusCounterPurgePreserveTarget & { optionId: string; publicLabel: string }
   > = [];
   for (const cardId of visibleVirusCounterTargetIds(state).sort()) {
     const amount = cardCounter(state, cardId, "virus");
@@ -1562,13 +1552,13 @@ function codeViralCachePurgePreserveTargets(
   return targets;
 }
 
-function startCodeViralCachePurgeChoice(
+function startVirusCounterPurgePreserveChoice(
   state: GameState,
   legalAction: LegalAction,
 ): boolean {
-  const sourceIds = installedCodeViralCacheIds(state);
+  const sourceIds = installedVirusCounterPurgePreserveSourceIds(state);
   if (sourceIds.length === 0) return false;
-  const targets = codeViralCachePurgePreserveTargets(state);
+  const targets = virusCounterPurgePreserveTargets(state);
   if (targets.length === 0) return false;
   const sourceCardId = sourceIds[0];
   state.pendingChoice = {
@@ -1600,9 +1590,9 @@ function startCodeViralCachePurgeChoice(
   return true;
 }
 
-function parseCodeViralCachePreserveOption(
+function parseVirusCounterPurgePreserveOption(
   optionId: string,
-): CodeViralCachePreserveTarget | undefined {
+): VirusCounterPurgePreserveTarget | undefined {
   const [kind, id, indexRaw] = optionId.split(":");
   const index = Number(indexRaw);
   if (!Number.isInteger(index) || index <= 0) return undefined;
@@ -1617,13 +1607,13 @@ function parseCodeViralCachePreserveOption(
   return undefined;
 }
 
-function restoreCodeViralCachePreservedCounters(
+function restorePurgePreservedVirusCounters(
   state: GameState,
   selectedOptionIds: string[],
 ): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
   const selectedTargets = selectedOptionIds
-    .map(parseCodeViralCachePreserveOption)
-    .filter((target): target is CodeViralCachePreserveTarget => Boolean(target));
+    .map(parseVirusCounterPurgePreserveOption)
+    .filter((target): target is VirusCounterPurgePreserveTarget => Boolean(target));
   if (selectedTargets.length !== selectedOptionIds.length)
     throw new Error("Die Virus-Counter-Erhaltungsauswahl ist ungueltig.");
   if (selectedTargets.length > 2)
@@ -1688,7 +1678,7 @@ function restoreCodeViralCachePreservedCounters(
   };
 }
 
-function resolveCodeViralCachePurgeChoice(
+function resolveVirusCounterPurgePreserveChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -1700,13 +1690,13 @@ function resolveCodeViralCachePurgeChoice(
   )
     throw new Error("Es ist keine Virus-Counter-Erhaltungs-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
-  if (!sourceCardId || !installedCodeViralCacheIds(state).includes(sourceCardId))
+  if (!sourceCardId || !installedVirusCounterPurgePreserveSourceIds(state).includes(sourceCardId))
     throw new Error("Die Replacement-Quelle ist nicht mehr installiert.");
   const selected = selectedChoiceIds(playerAction.selectedChoices);
   const legalOptionIds = new Set(choice.options.map((option) => option.id));
   if (selected.some((optionId) => !legalOptionIds.has(optionId)))
     throw new Error("Die Virus-Counter-Erhaltungsauswahl ist nicht legal.");
-  const result = restoreCodeViralCachePreservedCounters(state, selected);
+  const result = restorePurgePreservedVirusCounters(state, selected);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: definitionFor(state, sourceCardId).id,
@@ -1723,7 +1713,7 @@ function resolveCodeViralCachePurgeChoice(
   delete state.pendingChoice;
 }
 
-function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
+function installedProgramTrashBackupHardwareIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.hardware
     .filter(
       (cardId) =>
@@ -2062,13 +2052,13 @@ function refreshRecurringCredits(
     addVisibleCardCounter,
     spendVisibleCardCounter,
     totalCounters,
-    installedCodeViralCacheIds,
-    codeViralCachePurgePreserveTargets,
-    startCodeViralCachePurgeChoice,
-    parseCodeViralCachePreserveOption,
-    restoreCodeViralCachePreservedCounters,
-    resolveCodeViralCachePurgeChoice,
-    microtechBackupDriveIds,
+    installedVirusCounterPurgePreserveSourceIds,
+    virusCounterPurgePreserveTargets,
+    startVirusCounterPurgePreserveChoice,
+    parseVirusCounterPurgePreserveOption,
+    restorePurgePreservedVirusCounters,
+    resolveVirusCounterPurgePreserveChoice,
+    installedProgramTrashBackupHardwareIds,
     availableRunnerProgramInstallCredits,
     runnerCanPayInstallCost,
     runnerCostPenaltySupportCreditCapacity,

@@ -26,7 +26,7 @@ export const LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "resourceAbility",
   "runnerAbility",
   "delayedInstallAbility",
-  "acmeSavingsAndLoanAbility",
+  "obligationDebtAbility",
 ] as const;
 
 export type LegacyAbilityPayloadField =

@@ -67,7 +67,7 @@ export function createEventContextHostComposition(
     cardStrengthModifier: (state, cardId) =>
       mustInstance(state.cardInstances, cardId).strengthModifier +
       cards.hostedProgramStrengthModifier(state, cardId) -
-      cards.cardCounter(state, cardId, "pattel_antibody"),
+      cards.cardCounter(state, cardId, "breaker_strength_penalty"),
     creditCostForAction: context.creditCostForAction,
     definitionFor,
     pumpAmountForLegalAction: context.pumpAmountForLegalAction,

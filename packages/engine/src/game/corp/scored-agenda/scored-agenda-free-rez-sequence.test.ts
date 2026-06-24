@@ -9,30 +9,30 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  isPriorityRequisitionChoiceSource,
-  resolvePriorityRequisitionChoice,
-  startPriorityRequisitionChoice,
-} from "./priority-requisition-sequence";
+  isScoredAgendaFreeRezChoiceSource,
+  resolveScoredAgendaFreeRezChoice,
+  startScoredAgendaFreeRezChoice,
+} from "./scored-agenda-free-rez-sequence";
 import type { CorpInstallRezSequenceHandlerHost } from "./scored-agenda-sequence-host";
 
 describe("priority requisition sequence routing", () => {
   it("recognizes priority requisition choice sources", () => {
     expect(
-      isPriorityRequisitionChoiceSource(
-        "v162.priority_requisition:priority_agenda:8",
+      isScoredAgendaFreeRezChoiceSource(
+        "card_implementation.scored_agenda_free_rez:priority_agenda:8",
       ),
     ).toBe(true);
     expect(
-      isPriorityRequisitionChoiceSource(
-        "v1922.security_purge_install_targets:security_purge_agenda:ice_1:8",
+      isScoredAgendaFreeRezChoiceSource(
+        "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1:8",
       ),
     ).toBe(false);
   });
 
   it("uses actor-private labels but public option labels for free-rez candidates", () => {
-    const host = makePriorityRequisitionHost();
+    const host = makeScoredAgendaFreeRezHost();
 
-    startPriorityRequisitionChoice(host, "priority_agenda" as CardInstanceId);
+    startScoredAgendaFreeRezChoice(host, "priority_agenda" as CardInstanceId);
 
     expect(host.state.pendingChoice?.options).toMatchObject([
       {
@@ -43,43 +43,43 @@ describe("priority requisition sequence routing", () => {
       { label: "Überspringen", publicLabel: "Überspringen" },
     ]);
     expect(host.legalAction.payload).toMatchObject({
-      priorityRequisitionChoiceOpened: true,
-      priorityRequisitionCandidateCount: 1,
+      scoredAgendaFreeRezChoiceOpened: true,
+      scoredAgendaFreeRezCandidateCount: 1,
     });
     expect(JSON.stringify(host.legalAction.payload)).not.toContain("Archer");
   });
 
   it("resolves the selected ICE at no cost with explicit waived-cost payload", () => {
-    const host = makePriorityRequisitionHost({
+    const host = makeScoredAgendaFreeRezHost({
       pendingChoice: selectChoice(["ice_1" as CardInstanceId]),
       playerAction: {
         selectedChoices: { selectedOptionIds: ["card_ice_1"] },
       } as unknown as PlayerAction,
     });
 
-    const result = resolvePriorityRequisitionChoice(host);
+    const result = resolveScoredAgendaFreeRezChoice(host);
 
     expect(result.rezzedCardIds).toEqual(["ice_1"]);
     expect(host.state.cardInstances.ice_1?.rezzed).toBe(true);
     expect(host.state.corp.credits).toBe(5);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v162_priority_requisition_free_rez",
-      priorityRequisitionFreeRez: true,
-      priorityRequisitionTarget: "ice_1",
-      priorityRequisitionTargetDefinitionId: "ice_1_def",
+      hiddenZoneAction: "scored_agenda_free_rez",
+      scoredAgendaFreeRezFreeRez: true,
+      scoredAgendaFreeRezTarget: "ice_1",
+      scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
       rezCostPaid: 0,
     });
   });
 });
 
-type PriorityRequisitionHostInput = {
+type ScoredAgendaFreeRezHostInput = {
   pendingChoice?: ChoiceRequest;
   playerAction?: PlayerAction;
 };
 
-function makePriorityRequisitionHost(
-  input: PriorityRequisitionHostInput = {},
+function makeScoredAgendaFreeRezHost(
+  input: ScoredAgendaFreeRezHostInput = {},
 ): CorpInstallRezSequenceHandlerHost {
   const server = {
     id: "remote_1",
@@ -148,7 +148,7 @@ function makePriorityRequisitionHost(
       isRegionUpgrade: () => false,
       rootInstallRezzesOnInstall: () => false,
       rezCostForCard: () => 7,
-      isPriorityRequisitionCandidate: (cardId: CardInstanceId) =>
+      isScoredAgendaFreeRezCandidate: (cardId: CardInstanceId) =>
         cardId === "ice_1",
     },
     zones: {
@@ -175,7 +175,7 @@ function selectChoice(cardIds: CardInstanceId[]): ChoiceRequest {
   return {
     choiceId: "choice_priority",
     side: "corp",
-    source: "v162.priority_requisition:priority_agenda:8",
+    source: "card_implementation.scored_agenda_free_rez:priority_agenda:8",
     prompt: "Priority Requisition",
     kind: "select_cards",
     options: cardIds.map((cardId) => ({

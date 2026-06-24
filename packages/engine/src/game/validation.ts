@@ -170,15 +170,15 @@ export function validateGameState(state: GameState): ValidationResult {
   )
     errors.push("Run references missing approach expose source card.");
   if (
-    state.run?.viral15ActiveSourceIceId &&
-    !state.cardInstances[state.run.viral15ActiveSourceIceId]
+    state.run?.activeIceProgramTrashSourceIceId &&
+    !state.cardInstances[state.run.activeIceProgramTrashSourceIceId]
   )
-    errors.push("Run Viral 15 source references missing ice.");
+    errors.push("Run Active ICE Program Trash source references missing ice.");
   if (
-    state.run?.viral15PendingPassedIceId &&
-    !state.cardInstances[state.run.viral15PendingPassedIceId]
+    state.run?.activeIceProgramTrashPendingPassedIceId &&
+    !state.cardInstances[state.run.activeIceProgramTrashPendingPassedIceId]
   )
-    errors.push("Run Viral 15 pending passed ice references missing ice.");
+    errors.push("Run Active ICE Program Trash pending passed ice references missing ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
   if (state.run?.remainderStrengthBonusByBreaker) {
@@ -345,11 +345,11 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerTurnFlags.runLockActionsPending must be a non-negative integer.",
       );
   }
-  if (state.runnerTurnFlags?.fangRunLockCreditCost !== undefined) {
-    const pending = state.runnerTurnFlags.fangRunLockCreditCost;
+  if (state.runnerTurnFlags?.runnerRunLockCreditCost !== undefined) {
+    const pending = state.runnerTurnFlags.runnerRunLockCreditCost;
     if (!Number.isInteger(pending) || pending < 0)
       errors.push(
-        "runnerTurnFlags.fangRunLockCreditCost must be a non-negative integer.",
+        "runnerTurnFlags.runnerRunLockCreditCost must be a non-negative integer.",
       );
   }
   if (state.runnerAgendaPointsToForfeit !== undefined) {
@@ -359,11 +359,11 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerAgendaPointsToForfeit must be a non-negative integer.",
       );
   }
-  if (state.acmeSavingsAndLoanObligations !== undefined) {
-    const obligations = state.acmeSavingsAndLoanObligations;
+  if (state.activeObligationDebtCount !== undefined) {
+    const obligations = state.activeObligationDebtCount;
     if (!Number.isInteger(obligations) || obligations < 0)
       errors.push(
-        "acmeSavingsAndLoanObligations must be a non-negative integer.",
+        "activeObligationDebtCount must be a non-negative integer.",
       );
   }
   if (state.corpBonusAgendaPoints !== undefined) {

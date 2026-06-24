@@ -3718,7 +3718,7 @@ describe("MVP 0.3 AI controller contract", () => {
     );
 
     expect(corpInput.playerView.pendingChoice?.source).toContain(
-      "p3_56.too_many_doors_secret_spend",
+      "card_implementation.secret_spend_compare",
     );
     expect(corpInput.playerView.pendingChoice?.kind).toBe("bid_amount");
     expect(corpInput.legalActions.map((action) => action.type)).toEqual([
@@ -22859,7 +22859,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const jackOut = input.legalActions.find(
       (action) =>
         action.type === "jack_out" &&
-        action.payload?.v1922CorpIceAbility === "viral_15_jack_out_tax",
+        action.payload?.v1922CorpIceAbility === "jack_out_tax_after_passed_rezzed_ice",
     );
     const continueRun = input.legalActions.find(
       (action) => action.type === "continue_run",

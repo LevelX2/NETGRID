@@ -2,12 +2,12 @@ import type { CardDefinitionId, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { FreeProgramInstallExecutionResult } from "./free-program-install-execution";
 import {
-  applyMysteryBoxOncePerRunPlan,
-  applyMysteryBoxSourceTrashPlan,
-  applySneakPreviewTemporaryReturnPlan,
-  createMysteryBoxOncePerRunPlan,
-  createMysteryBoxPostInstallSideEffectPlan,
-  createSneakPreviewPostInstallSideEffectPlan,
+  applySourceOncePerRunPostInstallPlan,
+  applySourceTrashPostInstallPlan,
+  applyTemporaryProgramInstallReturnPlan,
+  createSourceOncePerRunPostInstallPlan,
+  createSourceTrashPostInstallSideEffectPlan,
+  createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
 
 const selectedProgramId = "selected_program" as CardInstanceId;
@@ -33,7 +33,7 @@ function execution(
 
 describe("hidden-zone post-install side effects", () => {
   it("plans and records Sneak Preview temporary return", () => {
-    const plan = createSneakPreviewPostInstallSideEffectPlan({
+    const plan = createTemporaryProgramInstallPostInstallSideEffectPlan({
       execution: execution({
         temporaryReturnNeeded: true,
         sourceTrashNeeded: false,
@@ -41,12 +41,12 @@ describe("hidden-zone post-install side effects", () => {
       sourceCardDefinitionId: sourceDefinitionId,
     });
     const records: unknown[] = [];
-    const result = applySneakPreviewTemporaryReturnPlan(plan, {
+    const result = applyTemporaryProgramInstallReturnPlan(plan, {
       recordTemporaryReturn: (record) => records.push(record),
     });
 
     expect(plan).toMatchObject({
-      kind: "sneak_preview",
+      kind: "temporary_program_install",
       installedProgramId,
       selectedProgramId,
       temporaryReturnNeeded: true,
@@ -61,13 +61,13 @@ describe("hidden-zone post-install side effects", () => {
   });
 
   it("does not create Sneak source-trash or once-per-run side effects", () => {
-    const plan = createSneakPreviewPostInstallSideEffectPlan({
+    const plan = createTemporaryProgramInstallPostInstallSideEffectPlan({
       execution: execution({ temporaryReturnNeeded: false }),
       sourceCardDefinitionId: sourceDefinitionId,
     });
     const records: unknown[] = [];
 
-    expect(applySneakPreviewTemporaryReturnPlan(plan, {
+    expect(applyTemporaryProgramInstallReturnPlan(plan, {
       recordTemporaryReturn: (record) => records.push(record),
     })).toEqual({ temporaryReturnRecorded: false });
     expect(plan.temporaryReturnRecord).toBeUndefined();
@@ -77,16 +77,16 @@ describe("hidden-zone post-install side effects", () => {
   });
 
   it("plans and applies Mystery Box source trash after install", () => {
-    const plan = createMysteryBoxPostInstallSideEffectPlan(
+    const plan = createSourceTrashPostInstallSideEffectPlan(
       execution({ sourceTrashNeeded: true }),
     );
     const trashed: CardInstanceId[] = [];
-    const result = applyMysteryBoxSourceTrashPlan(plan, {
+    const result = applySourceTrashPostInstallPlan(plan, {
       trashSource: (cardId) => trashed.push(cardId),
     });
 
     expect(plan).toEqual({
-      kind: "mystery_box",
+      kind: "revealed_stack_program_install",
       installedProgramId,
       selectedProgramId,
       sourceCardId,
@@ -100,30 +100,30 @@ describe("hidden-zone post-install side effects", () => {
 
   it("rejects Mystery Box source trash without a source id", () => {
     expect(() =>
-      createMysteryBoxPostInstallSideEffectPlan(
+      createSourceTrashPostInstallSideEffectPlan(
         execution({
           sourceCardId: undefined,
           sourceTrashNeeded: true,
         }),
       ),
-    ).toThrow("Mystery Box hat keine Source fuer Source-Trash im Plan.");
+    ).toThrow("Der Source-Trash-Plan hat keine Source-Karte.");
   });
 
   it("plans and applies Mystery Box once-per-run marker", () => {
     const otherSourceId = "other_source" as CardInstanceId;
-    const plan = createMysteryBoxOncePerRunPlan({
+    const plan = createSourceOncePerRunPostInstallPlan({
       sourceCardId,
       usedSourceIdsThisRun: [otherSourceId],
     });
     let marked: CardInstanceId[] = [];
-    const result = applyMysteryBoxOncePerRunPlan(plan, {
+    const result = applySourceOncePerRunPostInstallPlan(plan, {
       markUsedThisRun: (usedSourceIds) => {
         marked = usedSourceIds;
       },
     });
 
     expect(plan).toEqual({
-      kind: "mystery_box_once_per_run",
+      kind: "once_per_run_source_use",
       sourceCardId,
       usedSourceIdsThisRun: [otherSourceId],
       nextUsedSourceIdsThisRun: [otherSourceId, sourceCardId].sort(),
@@ -135,10 +135,10 @@ describe("hidden-zone post-install side effects", () => {
 
   it("rejects duplicate Mystery Box once-per-run source use", () => {
     expect(() =>
-      createMysteryBoxOncePerRunPlan({
+      createSourceOncePerRunPostInstallPlan({
         sourceCardId,
         usedSourceIdsThisRun: [sourceCardId],
       }),
-    ).toThrow("Mystery Box wurde in diesem Run bereits genutzt.");
+    ).toThrow("Die Source wurde in diesem Run bereits genutzt.");
   });
 });

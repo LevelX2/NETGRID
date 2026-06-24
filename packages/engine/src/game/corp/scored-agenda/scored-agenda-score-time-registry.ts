@@ -1,6 +1,6 @@
 import type { CardScoredAgendaImplementation } from "../../../ability-engine/definition-types";
-import { startScoredRezzedIceMarkModifierChoice } from "./ice-transmutation-sequence";
-import { resolveSecurityNetOptimizationOnScore } from "./security-net-optimization-sequence";
+import { startScoredRezzedIceMarkModifierChoice } from "./scored-rezzed-ice-mark-modifier-sequence";
+import { resolveScoredFortIceStrengthBonusOnScore } from "./scored-fort-ice-strength-bonus-sequence";
 import type {
   ScoredAgendaScoreTimeContext,
   ScoredAgendaScoreTimeResolver,
@@ -10,15 +10,15 @@ import { startScoredSubtypeRevealChoiceOrResolve } from "./subtype-reveal-econom
 export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeResolver[] =
   [
     {
-      id: "data_fort_reclamation_score_start",
+      id: "hq_to_new_remote_install_rez_score_start",
       kind: "score_install_hq_cards_into_new_remote_then_rez",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.startDataFortReclamation(cardId);
+        host.choices.startHqToNewRemoteInstallRez(cardId);
       },
     },
     {
-      id: "ice_transmutation_score_start",
+      id: "scored_rezzed_ice_mark_modifier_score_start",
       kind: "select_rezzed_ice_mark_modifier",
       mode: "choice_start",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
@@ -33,19 +33,19 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       },
     },
     {
-      id: "priority_requisition_score_start",
+      id: "scored_agenda_free_rez_score_start",
       kind: "score_rez_installed_ice_at_no_cost",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.startPriorityRequisition(cardId);
+        host.choices.startScoredAgendaFreeRez(cardId);
       },
     },
     {
-      id: "security_purge_score_start",
+      id: "agenda_purge_score_start",
       kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
       mode: "immediate_effect",
       resolveOnScore: ({ host, cardId }) => {
-        host.choices.resolveSecurityPurge(cardId);
+        host.choices.resolveAgendaPurge(cardId);
       },
     },
     {
@@ -65,7 +65,7 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
       },
     },
     {
-      id: "corporate_downsizing_score_start",
+      id: "scored_hq_agenda_shuffle_credits_score_start",
       kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
       mode: "delegated_host_choice",
       resolveOnScore: ({ host, cardId, scoredAgenda }) => {
@@ -73,19 +73,19 @@ export const SCORED_AGENDA_SCORE_TIME_RESOLVERS: readonly ScoredAgendaScoreTimeR
           scoredAgenda.kind !==
           "shuffle_selected_hq_agendas_into_rd_gain_credits"
         )
-          throw new Error("Corporate-Downsizing-Score-Time-Vertrag ungueltig.");
-        host.choices.startCorporateDownsizing(
+          throw new Error("HQ-Agenda-Shuffle-Score-Time-Vertrag ungueltig.");
+        host.choices.startScoredAgendaHqShuffleCredits(
           cardId,
           scoredAgenda.creditPerAgendaPoint,
         );
       },
     },
     {
-      id: "security_net_optimization_score_start",
+      id: "scored_fort_ice_strength_bonus_score_start",
       kind: "choose_fort_ice_strength_bonus",
       mode: "immediate_effect",
       resolveOnScore: ({ host, cardId, instanceBefore, legalAction }) => {
-        resolveSecurityNetOptimizationOnScore(
+        resolveScoredFortIceStrengthBonusOnScore(
           host,
           cardId,
           instanceBefore,

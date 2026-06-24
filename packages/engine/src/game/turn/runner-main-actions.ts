@@ -27,8 +27,8 @@ export type RunnerMainActionGenerationHost = {
     buildRunnerStackSearchProgramToGripAction: HostFn<LegalAction>;
     buildRunnerValuPakInstallAction: HostFn<LegalAction>;
     buildRunnerValuPakSequenceEndAction: HostFn<LegalAction>;
-    buildRunnerShellTradersSetAsideAction: HostFn<LegalAction>;
-    buildRunnerShellTradersRemoveCounterAction: HostFn<LegalAction>;
+    buildRunnerDelayedInstallSetAsideAction: HostFn<LegalAction>;
+    buildRunnerDelayedInstallRemoveCounterAction: HostFn<LegalAction>;
   };
   cards: {
     definitionFor: HostFn<any>;
@@ -66,7 +66,7 @@ export type RunnerMainActionGenerationHost = {
   };
   install: {
     shouldOfferRunnerProgramTrashBeforeInstall: HostFn<boolean>;
-    canOverlayProgramOnZetatechSoftwareInstaller: HostFn<boolean>;
+    canOverlayProgramOnInstalledProgramHost: HostFn<boolean>;
     canHostProgramOnDaemon: HostFn<boolean>;
     cardImplementationAgendaPointInstallCost: HostFn<number>;
     pickRunnerAgendaForAgendaPointCost: HostFn<string | undefined>;
@@ -82,17 +82,17 @@ export type RunnerMainActionGenerationHost = {
   };
   hiddenZone: {
     exposedCorpCardInServer: HostFn<string | undefined>;
-    topHostedProgramOnMicrotech: HostFn<string | undefined>;
-    microtechHostedProgramIds: HostFn<string[]>;
+    topHostedProgramOnHardware: HostFn<string | undefined>;
+    hostedProgramIdsOnHardware: HostFn<string[]>;
     topRunnerHeapCardId: HostFn<string | undefined>;
   };
   specialZones: {
     valuPakProgramInstallActionsRemaining: HostFn<number>;
     runnerInstallableProgramIdsForValuPak: HostFn<string[]>;
     specialZoneHarnessActions: HostFn<LegalAction[]>;
-    shellTradersPrepareTargetIds: HostFn<string[]>;
-    shellTradersInstallCost: HostFn<number>;
-    shellTradersPreparedTargetIds: HostFn<string[]>;
+    delayedInstallPrepareTargetIds: HostFn<string[]>;
+    delayedInstallCounterCost: HostFn<number>;
+    delayedInstallPreparedTargetIds: HostFn<string[]>;
   };
   cardImplementation: {
     runtimeDeps: unknown;
@@ -105,18 +105,17 @@ export type RunnerMainActionGenerationHost = {
   };
   constants: {
     RUNNER_EVENT_RESOLVERS: Record<string, any>;
-    STACK_SEARCH_PROGRAM_CARD_IDS: ReadonlySet<string>;
+    STACK_SEARCH_PROGRAM_SOURCES: ReadonlySet<string>;
     SELF_MODIFYING_CODE_ID: string;
-    SHORT_CIRCUIT_RESOURCE_CARD_ID: string;
-    AUJOURD_OUI_RESOURCE_CARD_ID: string;
-    SERVER_EXPOSE_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    STACK_TOP_REVEAL_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
+    SHORT_CIRCUIT_RESOURCE_SOURCE: string;
+    AUJOURD_OUI_RESOURCE_SOURCE: string;
+    SERVER_EXPOSE_PROGRAM_SOURCES: ReadonlySet<string>;
+    COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
-    BOARDWALK_RANDOM_PROGRAM_CARD_ID: string;
+    BOARDWALK_RANDOM_PROGRAM_SOURCE: string;
     MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: string;
-    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
-    STACK_TOP_REORDER_RESOURCE_CARD_ID: string;
+    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
+    STACK_TOP_REORDER_RESOURCE_SOURCE: string;
     JUNKYARD_BBS_ID: string;
     SHELL_TRADERS_ID: string;
     DANSHIS_SECOND_ID: string;
@@ -180,10 +179,10 @@ export function buildRunnerMainActions(
     host.actions.buildRunnerValuPakInstallAction;
   const buildRunnerValuPakSequenceEndAction =
     host.actions.buildRunnerValuPakSequenceEndAction;
-  const buildRunnerShellTradersSetAsideAction =
-    host.actions.buildRunnerShellTradersSetAsideAction;
-  const buildRunnerShellTradersRemoveCounterAction =
-    host.actions.buildRunnerShellTradersRemoveCounterAction;
+  const buildRunnerDelayedInstallSetAsideAction =
+    host.actions.buildRunnerDelayedInstallSetAsideAction;
+  const buildRunnerDelayedInstallRemoveCounterAction =
+    host.actions.buildRunnerDelayedInstallRemoveCounterAction;
   const definitionFor = host.cards.definitionFor;
   const mustServer = host.servers.mustServer;
   const serverChoiceDisplayLabel = host.servers.serverChoiceDisplayLabel;
@@ -215,11 +214,11 @@ export function buildRunnerMainActions(
   const runnerInstallableProgramIdsForValuPak =
     host.specialZones.runnerInstallableProgramIdsForValuPak;
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
-  const shellTradersPrepareTargetIds =
-    host.specialZones.shellTradersPrepareTargetIds;
-  const shellTradersInstallCost = host.specialZones.shellTradersInstallCost;
-  const shellTradersPreparedTargetIds =
-    host.specialZones.shellTradersPreparedTargetIds;
+  const delayedInstallPrepareTargetIds =
+    host.specialZones.delayedInstallPrepareTargetIds;
+  const delayedInstallCounterCost = host.specialZones.delayedInstallCounterCost;
+  const delayedInstallPreparedTargetIds =
+    host.specialZones.delayedInstallPreparedTargetIds;
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
@@ -230,8 +229,8 @@ export function buildRunnerMainActions(
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
-  const canOverlayProgramOnZetatechSoftwareInstaller =
-    host.install.canOverlayProgramOnZetatechSoftwareInstaller;
+  const canOverlayProgramOnInstalledProgramHost =
+    host.install.canOverlayProgramOnInstalledProgramHost;
   const canHostProgramOnDaemon = host.install.canHostProgramOnDaemon;
   const cardImplementationAgendaPointInstallCost =
     host.install.cardImplementationAgendaPointInstallCost;
@@ -252,38 +251,36 @@ export function buildRunnerMainActions(
     host.cardImplementation.pushActivatedActions;
   const runnerDrawActionContext = host.runner.runnerDrawActionContext;
   const exposedCorpCardInServer = host.hiddenZone.exposedCorpCardInServer;
-  const topHostedProgramOnMicrotech =
-    host.hiddenZone.topHostedProgramOnMicrotech;
-  const microtechHostedProgramIds = host.hiddenZone.microtechHostedProgramIds;
+  const topHostedProgramOnHardware =
+    host.hiddenZone.topHostedProgramOnHardware;
+  const hostedProgramIdsOnHardware = host.hiddenZone.hostedProgramIdsOnHardware;
   const runnerUtilityLongtailKindForCard =
     host.runner.runnerUtilityLongtailKindForCard;
   const uniqueDirectLongtailImplementationForCard =
     host.runner.uniqueDirectLongtailImplementationForCard;
   const topRunnerHeapCardId = host.hiddenZone.topRunnerHeapCardId;
   const RUNNER_EVENT_RESOLVERS = host.constants.RUNNER_EVENT_RESOLVERS;
-  const STACK_SEARCH_PROGRAM_CARD_IDS =
-    host.constants.STACK_SEARCH_PROGRAM_CARD_IDS;
+  const STACK_SEARCH_PROGRAM_SOURCES =
+    host.constants.STACK_SEARCH_PROGRAM_SOURCES;
   const SELF_MODIFYING_CODE_ID = host.constants.SELF_MODIFYING_CODE_ID;
-  const SHORT_CIRCUIT_RESOURCE_CARD_ID =
-    host.constants.SHORT_CIRCUIT_RESOURCE_CARD_ID;
-  const AUJOURD_OUI_RESOURCE_CARD_ID =
-    host.constants.AUJOURD_OUI_RESOURCE_CARD_ID;
-  const SERVER_EXPOSE_PROGRAM_CARD_IDS =
-    host.constants.SERVER_EXPOSE_PROGRAM_CARD_IDS;
-  const STACK_TOP_REVEAL_PROGRAM_CARD_IDS =
-    host.constants.STACK_TOP_REVEAL_PROGRAM_CARD_IDS;
-  const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID =
-    host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID;
+  const SHORT_CIRCUIT_RESOURCE_SOURCE =
+    host.constants.SHORT_CIRCUIT_RESOURCE_SOURCE;
+  const AUJOURD_OUI_RESOURCE_SOURCE =
+    host.constants.AUJOURD_OUI_RESOURCE_SOURCE;
+  const SERVER_EXPOSE_PROGRAM_SOURCES =
+    host.constants.SERVER_EXPOSE_PROGRAM_SOURCES;
+  const COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE =
+    host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE;
   const FAIT_ACCOMPLI_COUNTER_PROGRAM_ID =
     host.constants.FAIT_ACCOMPLI_COUNTER_PROGRAM_ID;
-  const BOARDWALK_RANDOM_PROGRAM_CARD_ID =
-    host.constants.BOARDWALK_RANDOM_PROGRAM_CARD_ID;
+  const BOARDWALK_RANDOM_PROGRAM_SOURCE =
+    host.constants.BOARDWALK_RANDOM_PROGRAM_SOURCE;
   const MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID =
     host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID;
-  const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID =
-    host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID;
-  const STACK_TOP_REORDER_RESOURCE_CARD_ID =
-    host.constants.STACK_TOP_REORDER_RESOURCE_CARD_ID;
+  const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE =
+    host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE;
+  const STACK_TOP_REORDER_RESOURCE_SOURCE =
+    host.constants.STACK_TOP_REORDER_RESOURCE_SOURCE;
   const JUNKYARD_BBS_ID = host.constants.JUNKYARD_BBS_ID;
   const SHELL_TRADERS_ID = host.constants.SHELL_TRADERS_ID;
   const DANSHIS_SECOND_ID = host.constants.DANSHIS_SECOND_ID;
@@ -326,7 +323,7 @@ export function buildRunnerMainActions(
     ];
   }
   const bonusRunPending =
-    flags.allNighterBonusRunPending === true ||
+    flags.bonusRunPending === true ||
     nextSequenceServerId !== undefined;
   if (
     !hasClicks &&
@@ -550,7 +547,7 @@ export function buildRunnerMainActions(
         ...state.runner.rig.hardware,
       ]) {
         if (
-          canOverlayProgramOnZetatechSoftwareInstaller(
+          canOverlayProgramOnInstalledProgramHost(
             state,
             hostId,
             definition,
@@ -763,12 +760,12 @@ export function buildRunnerMainActions(
       .sort()) {
       const definition = definitionFor(state, cardId);
       if (
-        STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
+        STACK_SEARCH_PROGRAM_SOURCES.has(definition.id) &&
         !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
-        (definition.id !== SHORT_CIRCUIT_RESOURCE_CARD_ID ||
+        (definition.id !== SHORT_CIRCUIT_RESOURCE_SOURCE ||
           state.runner.credits >= 1) &&
-        (definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+        (definition.id === AUJOURD_OUI_RESOURCE_SOURCE
           ? state.runner.stack.length > 0
           : state.runner.stack.some(
               (id) => definitionFor(state, id).type === "program",
@@ -779,16 +776,16 @@ export function buildRunnerMainActions(
             cardId,
             definition,
             mode:
-              definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+              definition.id === AUJOURD_OUI_RESOURCE_SOURCE
                 ? "top5_programs"
                 : "stack_program",
             creditCost:
-              definition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID ? 1 : 0,
+              definition.id === SHORT_CIRCUIT_RESOURCE_SOURCE ? 1 : 0,
           }),
         );
       }
       if (
-        SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
+        SERVER_EXPOSE_PROGRAM_SOURCES.has(definition.id) &&
         !cardImplementationForDefinitionId(definition.id) &&
         state.corp.servers.some(
           (server) => exposedCorpCardInServer(state, server.id) !== undefined,
@@ -814,23 +811,7 @@ export function buildRunnerMainActions(
         }
       }
       if (
-        STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(definition.id) &&
-        state.runner.stack.length > 0
-      ) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: Stack-Spitze revealn`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1911HiddenZoneAbility: "reveal_stack_top" },
-          ),
-        );
-      }
-      if (
-        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID &&
+        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE &&
         state.runner.stack.length > 0
       ) {
         actions.push(
@@ -870,7 +851,7 @@ export function buildRunnerMainActions(
           ),
         );
       }
-      if (definition.id === BOARDWALK_RANDOM_PROGRAM_CARD_ID) {
+      if (definition.id === BOARDWALK_RANDOM_PROGRAM_SOURCE) {
         actions.push(
           action(
             state,
@@ -893,9 +874,9 @@ export function buildRunnerMainActions(
       );
       if (
         definition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID &&
-        topHostedProgramOnMicrotech(state, cardId)
+        topHostedProgramOnHardware(state, cardId)
       ) {
-        const topHostedId = topHostedProgramOnMicrotech(state, cardId);
+        const topHostedId = topHostedProgramOnHardware(state, cardId);
         if (!topHostedId) continue;
         actions.push(
           action(
@@ -909,14 +890,14 @@ export function buildRunnerMainActions(
               cardId,
               targetProgramId: topHostedId,
               v1922RunnerHardwareAbility:
-                "microtech_backup_drive_return_top_hosted",
-              hostedProgramCount: microtechHostedProgramIds(state, cardId)
+                "return_top_hosted_program",
+              hostedProgramCount: hostedProgramIdsOnHardware(state, cardId)
                 .length,
             },
           ),
         );
       }
-      if (definition.id === QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID) {
+      if (definition.id === QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE) {
         actions.push(
           action(
             state,
@@ -964,7 +945,7 @@ export function buildRunnerMainActions(
         }
       }
       if (
-        definition.id === STACK_TOP_REORDER_RESOURCE_CARD_ID &&
+        definition.id === STACK_TOP_REORDER_RESOURCE_SOURCE &&
         !cardImplementationForDefinitionId(definition.id) &&
         state.runner.stack.length >= 2
       ) {
@@ -1029,7 +1010,7 @@ export function buildRunnerMainActions(
               [{ clicks: 1, credits: 1 }],
               {
                 cardId: resourceId,
-                resourceAbility: "junkyard_bbs_return_top_heap",
+                resourceAbility: "return_top_heap_card",
                 targetCardId,
                 targetCardDefinitionId: definitionFor(state, targetCardId).id,
                 sourceDefinitionId: JUNKYARD_BBS_ID,
@@ -1054,11 +1035,11 @@ export function buildRunnerMainActions(
         }
       }
       if (definition.id === SHELL_TRADERS_ID) {
-        for (const targetCardId of shellTradersPrepareTargetIds(state)) {
+        for (const targetCardId of delayedInstallPrepareTargetIds(state)) {
           const targetDefinition = definitionFor(state, targetCardId);
-          const shellCounterAmount = shellTradersInstallCost(targetDefinition);
+          const shellCounterAmount = delayedInstallCounterCost(targetDefinition);
           actions.push(
-            buildRunnerShellTradersSetAsideAction(state, {
+            buildRunnerDelayedInstallSetAsideAction(state, {
               sourceCardId: resourceId,
               sourceTitle: definition.title,
               sourceDefinitionId: SHELL_TRADERS_ID,
@@ -1069,10 +1050,10 @@ export function buildRunnerMainActions(
           );
         }
         if (state.runner.credits >= 1) {
-          for (const targetCardId of shellTradersPreparedTargetIds(state)) {
+          for (const targetCardId of delayedInstallPreparedTargetIds(state)) {
             const remainingCounters = cardCounter(state, targetCardId, "shell");
             actions.push(
-              buildRunnerShellTradersRemoveCounterAction(state, {
+              buildRunnerDelayedInstallRemoveCounterAction(state, {
                 sourceCardId: resourceId,
                 sourceTitle: definition.title,
                 sourceDefinitionId: SHELL_TRADERS_ID,
@@ -1103,7 +1084,7 @@ export function buildRunnerMainActions(
               [{ clicks: 1 }],
               {
                 cardId: resourceId,
-                resourceAbility: "danshis_second_id",
+                resourceAbility: "remove_tags_trash_resource",
                 removeTagAmount: amount,
                 trashOnUse: true,
               },
@@ -1130,9 +1111,9 @@ export function buildRunnerMainActions(
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
     );
-    const fangRunLockCreditCost = Math.max(
+    const runnerRunLockCreditCost = Math.max(
       0,
-      Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+      Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
     );
     const runCosts = [
       {
@@ -1153,7 +1134,7 @@ export function buildRunnerMainActions(
     if (
       hasClicks &&
       runLockActionsPending <= 0 &&
-      fangRunLockCreditCost <= 0 &&
+      runnerRunLockCreditCost <= 0 &&
       !rovingRunBlocked
     ) {
       if (
@@ -1228,7 +1209,7 @@ export function buildRunnerMainActions(
             bonusRunNoClick: true,
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
-              : flags.bodyweightDataCrecheExtraRunPending === true
+              : flags.successfulRunExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
             restrictedActionGrantActionType: "start_run",
@@ -1242,27 +1223,26 @@ export function buildRunnerMainActions(
       );
     }
   }
-  const fangRunLockCreditCost = Math.max(
+  const runnerRunLockCreditCost = Math.max(
     0,
-    Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+    Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
   );
   if (
     hasClicks &&
-    fangRunLockCreditCost > 0 &&
-    state.runner.credits >= fangRunLockCreditCost
+    runnerRunLockCreditCost > 0 &&
+    state.runner.credits >= runnerRunLockCreditCost
   ) {
     actions.push(
       action(
         state,
         "runner",
         "trigger_ability",
-        `Run-Sperre für ${fangRunLockCreditCost} Credits entfernen`,
+        `Run-Sperre für ${runnerRunLockCreditCost} Credits entfernen`,
         "game_rule",
-        [{ clicks: 1, credits: fangRunLockCreditCost }],
+        [{ clicks: 1, credits: runnerRunLockCreditCost }],
         {
-          v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
-          fangRunLockCreditCost,
-          runnerRunLockCreditCost: fangRunLockCreditCost,
+          v1920RunnerRunLockAbility: "pay_to_remove_run_lock",
+          runnerRunLockCreditCost,
           gainCreditsAmount: 0,
         },
       ),

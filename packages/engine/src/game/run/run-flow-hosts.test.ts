@@ -135,7 +135,7 @@ function hostFor(calls: string[]): RunFlowHost {
       advanceArchivesBreachPastNonDecisionCards: () =>
         calls.push("advanceArchivesBreach"),
       startRunnerPrivateLookChoice: () => true,
-      startExpertScheduleAnalyzerPostAccessChoice: () =>
+      startPostAccessInstalledProgramChoice: () =>
         calls.push("expertScheduleAnalyzer"),
     },
     run: {
@@ -147,14 +147,14 @@ function hostFor(calls: string[]): RunFlowHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
       openStartOfRunFortUtilityWindow: () => false,
     },
     trace: {
       calculateRunnerLink: () => 0,
       traceBidChoice: () => ({}) as never,
-      addHackerTrackerTraceCounters: () => 0,
-      hackerTrackerCounterTotal: () => 0,
+      addCorpTraceCounterPoolCounters: () => 0,
+      corpTraceCounterPoolTotal: () => 0,
       recurringTraceCreditPoolTotal: () => 0,
       rabbitTraceLimitReductionForIceTrace: () => 0,
       resolveTraceHardwareWreckerSuccess: () => ({}),
@@ -241,10 +241,10 @@ function hostFor(calls: string[]): RunFlowHost {
     callbacks: {
       finishRun: (_state, successful) => calls.push(`finishRun:${successful}`),
       drawCorpCards: () => calls.push("drawCorpCards"),
-      acmeSavingsAndLoanObligationCount: () => 0,
-      addAcmeSavingsAndLoanObligation: () => undefined,
+      activeObligationCount: () => 0,
+      addActiveObligation: () => undefined,
       applyRunnerForgoNextAction: () => undefined,
-      hasInstalledMicrotechTrodeSet: () => false,
+      hasInstalledRunnerApDamageReducerHardware: () => false,
       traceCounterEffectDefinitionFor: () => undefined,
       installedRunnerVirusSourceIds: () => [],
       virusCounterImplementationForCard: () => undefined,

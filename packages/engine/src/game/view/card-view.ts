@@ -23,24 +23,14 @@ import {
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { CASCADE_ID, SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
-import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
+import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
-
-const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
-const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
-const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
-const COCKROACH_ID = "onr_v1_013_cockroach";
-const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
-  COCKROACH_ID,
-  CASCADE_ID,
-  SKIVVISS_ID,
-]);
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  serverDifficultyIncreaseFromFaitAccompli,
+  serverDifficultyIncreaseFromRunCounters,
   serverDifficultyReductionFromUpgrades,
 };
 
@@ -75,7 +65,7 @@ function visibleKnownCardWithReferenceViewer(
           instance.strengthModifier +
           hostedProgramStrengthModifier(state, id) +
           runRemainderStrengthBonus -
-          pattelAntibodyStrengthPenalty(instance)
+          breakerStrengthPenaltyCounterAmount(instance)
       : undefined;
   const visibleStrengthModifier =
     visibleStrength !== undefined
@@ -208,27 +198,13 @@ export function counterDisplaysField(
     : {};
 }
 
-const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
-  "onr_v1_154_broker",
-  "onr_v1_178_short-term-contract",
-  "onr_v1_174_rigged-investments",
-  "onr_v1_309_bbs-whispering-campaign",
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_337_rockerboy-promotion",
-  "onr_v1_318_department-of-truth-enhancement",
-  "onr_v1_193_corporate-coup",
-  "onr_v1_198_detroit-police-contract",
-  "onr_v1_209_political-coup",
-]);
-
 function visibleCountersForKnownCard(
   definition: CardDefinition,
   instance: CardInstance,
 ): Partial<Record<CounterType, number>> | undefined {
   if (!instance.counters) return undefined;
   const counters = cloneCounters(instance.counters);
-  if (CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)) delete counters.virus;
+  if (corpProjectedVirusCounterKind(definition)) delete counters.virus;
   return counters;
 }
 
@@ -272,7 +248,8 @@ function storedCreditCounterDisplays(
   definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  if (!STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  if (!hasStoredCreditCounterDisplay(implementation)) return undefined;
   const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
   if (amount <= 0) return undefined;
   return [
@@ -323,10 +300,10 @@ function restrictedPoolCounterDisplays(
   definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  if (STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
   const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
   if (amount <= 0) return undefined;
   const implementation = cardImplementationForDefinitionId(definition.id);
+  if (hasStoredCreditCounterDisplay(implementation)) return undefined;
   const restrictedSource = implementation?.restrictedHostedCreditSource;
   const tracePoolSource = implementation?.fortRunWindows?.some(
     (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
@@ -359,6 +336,43 @@ function restrictedPoolCounterDisplays(
       },
     },
   ];
+}
+
+function hasStoredCreditCounterDisplay(
+  implementation: CardImplementationDefinition | undefined,
+): boolean {
+  if (!implementation || implementation.restrictedHostedCreditSource)
+    return false;
+  if (
+    implementation.fortRunWindows?.some(
+      (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
+    )
+  )
+    return false;
+  return implementationHasHostedCreditEconomy(implementation);
+}
+
+function implementationHasHostedCreditEconomy(
+  implementation: CardImplementationDefinition,
+): boolean {
+  const directEffects = [
+    ...(implementation.abilities ?? []).flatMap((ability) => ability.effects),
+    ...(implementation.lifecycle?.on_rez ?? []),
+    ...(implementation.lifecycle?.on_install ?? []),
+    ...(implementation.lifecycle?.on_score ?? []),
+    ...(implementation.lifecycle?.on_leave_play ?? []),
+  ];
+  const triggeredEffects = [
+    ...(implementation.lifecycle?.start_of_corp_turn ?? []),
+    ...(implementation.lifecycle?.start_of_runner_turn ?? []),
+    ...(implementation.lifecycle?.end_of_runner_turn ?? []),
+    ...(implementation.lifecycle?.on_runner_run_start ?? []),
+  ].flatMap((trigger) => trigger.effects);
+  return [...directEffects, ...triggeredEffects].some(
+    (effect) =>
+      effect.kind === "add_hosted_credits" ||
+      effect.kind === "take_hosted_credits",
+  );
 }
 
 function restrictedPoolDisplayLabel(
@@ -408,28 +422,22 @@ function specialCounterDisplays(
       counterType: "trauma",
       usageHint: "status_marker",
     }),
-    ...(CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)
+    ...(corpProjectedVirusCounterKind(definition)
       ? []
       : singleCounterDisplay(counters.virus, {
-          id: definition.id === COCKROACH_ID ? "cockroach" : "virus",
+          id: "virus",
           displayKind: "virus",
-          label:
-            definition.id === COCKROACH_ID
-              ? "Cockroach-Counter"
-              : "Virus-Counter",
-          ariaLabelName:
-            definition.id === COCKROACH_ID
-              ? "Cockroach-Counter"
-              : "Virus-Counter",
-          counterType: definition.id === COCKROACH_ID ? "cockroach" : "virus",
+          label: "Virus-Counter",
+          ariaLabelName: "Virus-Counter",
+          counterType: "virus",
           usageHint: "status_marker",
         })),
-    ...singleCounterDisplay(counters.data_raven, {
-      id: "data_raven",
+    ...singleCounterDisplay(counters.trace_tag_counter, {
+      id: "trace_tag_counter",
       displayKind: "trace",
       label: "Data-Raven-Counter",
       ariaLabelName: "Data-Raven-Counter",
-      counterType: "data_raven",
+      counterType: "trace_tag_counter",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.cerberus, {
@@ -472,28 +480,28 @@ function specialCounterDisplays(
       counterType: "power",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.doppelganger_antibody, {
-      id: "doppelganger_antibody",
+    ...singleCounterDisplay(counters.link_reduction_counter, {
+      id: "link_reduction_counter",
       displayKind: "generic_counter",
       label: "Doppelganger-Counter",
       ariaLabelName: "Doppelganger-Counter",
-      counterType: "doppelganger_antibody",
+      counterType: "link_reduction_counter",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.pattel_antibody, {
-      id: "pattel_antibody",
+    ...singleCounterDisplay(counters.breaker_strength_penalty, {
+      id: "breaker_strength_penalty",
       displayKind: "generic_counter",
-      label: "Pattel-Counter",
-      ariaLabelName: "Pattel-Counter",
-      counterType: "pattel_antibody",
+      label: "Breaker-Strafcounter",
+      ariaLabelName: "Breaker-Strafcounter",
+      counterType: "breaker_strength_penalty",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.mark, {
-      id: definition.type === "ice" ? "ice_transmutation" : "mark",
+      id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
       displayKind: "generic_counter",
-      label: definition.type === "ice" ? "Ice Transmutation" : "Mark-Counter",
+      label: definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
       ariaLabelName:
-        definition.type === "ice" ? "Ice Transmutation" : "Mark-Counter",
+        definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
       counterType: "mark",
       usageHint: "status_marker",
     }),
@@ -501,61 +509,97 @@ function specialCounterDisplays(
 }
 
 function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = skivvissCounterTotal(state);
-  if (amount <= 0) return undefined;
-  return [
-    {
-      id: "skivviss",
-      amount,
-      displayKind: "virus",
-      label: "Skivviss-Counter",
-      ariaLabel: `${amount} Skivviss-Counter auf der Korp`,
-      counterType: "virus",
-      usageHint: "status_marker",
-    },
-  ];
+  return corpProjectedVirusCounterDisplay(state, "draw_extra_cards_per_counter");
 }
 
 function cockroachCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = cockroachCounterTotal(state);
-  if (amount <= 0) return undefined;
-  return [
-    {
-      id: "cockroach",
-      amount,
-      displayKind: "virus",
-      label: "Cockroach-Counter",
-      ariaLabel: `${amount} Cockroach-Counter auf der Korp`,
-      counterType: "cockroach",
-      usageHint: "status_marker",
-    },
-  ];
+  return corpProjectedVirusCounterDisplay(
+    state,
+    "randomize_corp_hq_discards_at_threshold",
+  );
 }
 
 function cascadeCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = cascadeCounterTotal(state);
+  return corpProjectedVirusCounterDisplay(
+    state,
+    "trash_faceup_rd_cards_per_two_counters",
+  );
+}
+
+function corpProjectedVirusCounterDisplay(
+  state: GameState,
+  effectKind:
+    | "draw_extra_cards_per_counter"
+    | "randomize_corp_hq_discards_at_threshold"
+    | "trash_faceup_rd_cards_per_two_counters",
+): VisibleCard["counterDisplays"] {
+  const kind = corpProjectedVirusCounterKindForEffect(state, effectKind);
+  if (!kind) return undefined;
+  const amount = corpProjectedVirusCounterTotal(state, kind);
   if (amount <= 0) return undefined;
+  const label = projectedVirusCounterLabel(kind);
   return [
     {
-      id: "runner_virus_corp_cascade",
+      id: projectedVirusCounterDisplayId(kind),
       amount,
       displayKind: "virus",
-      label: "Cascade-Counter",
-      ariaLabel: `${amount} Cascade-Counter auf der Korp`,
-      counterType: "cascade",
+      label,
+      ariaLabel: `${amount} ${label} auf der Korp`,
+      counterType: kind as CounterType,
       usageHint: "status_marker",
     },
   ];
 }
 
-function cascadeCounterTotal(state: GameState): number {
+function corpProjectedVirusCounterKindForEffect(
+  state: GameState,
+  effectKind:
+    | "draw_extra_cards_per_counter"
+    | "randomize_corp_hq_discards_at_threshold"
+    | "trash_faceup_rd_cards_per_two_counters",
+): string | undefined {
+  for (const cardId of Object.keys(state.cardInstances)) {
+    const definition = definitionFor(state, cardId);
+    const implementation = cardImplementationForDefinitionId(definition.id);
+    const virusCounter = implementation?.virusCounter;
+    if (!virusCounter) continue;
+    if (
+      virusCounter.startOfCorpTurn?.kind === effectKind ||
+      virusCounter.continuousEffect?.kind === effectKind
+    )
+      return virusCounter.counterKind;
+  }
+  return undefined;
+}
+
+function corpProjectedVirusCounterKind(definition: CardDefinition): string | undefined {
+  const virusCounter = cardImplementationForDefinitionId(definition.id)?.virusCounter;
+  if (
+    virusCounter?.startOfCorpTurn?.kind === "draw_extra_cards_per_counter" ||
+    virusCounter?.startOfCorpTurn?.kind ===
+      "trash_faceup_rd_cards_per_two_counters" ||
+    virusCounter?.continuousEffect?.kind ===
+      "randomize_corp_hq_discards_at_threshold"
+  )
+    return virusCounter.counterKind;
+  return undefined;
+}
+
+function corpProjectedVirusCounterTotal(state: GameState, kind: string): number {
   const corpCounterAmount = Math.max(
     0,
-    Math.floor(Number(state.purgeableRunnerVirusCounters?.corp?.cascade ?? 0)),
+    Math.floor(
+      Number(
+        state.purgeableRunnerVirusCounters?.corp?.[
+          kind as PurgeableRunnerVirusCounterType
+        ] ?? 0,
+      ),
+    ),
   );
   const legacyCardCounterAmount = Object.keys(state.cardInstances).reduce(
     (sum, cardId) => {
-      if (definitionFor(state, cardId).id !== CASCADE_ID) return sum;
+      if (corpProjectedVirusCounterKind(definitionFor(state, cardId)) !== kind)
+        return sum;
       return sum + cardCounter(state, cardId, "virus");
     },
     0,
@@ -563,18 +607,16 @@ function cascadeCounterTotal(state: GameState): number {
   return corpCounterAmount + legacyCardCounterAmount;
 }
 
-function skivvissCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
+function projectedVirusCounterLabel(kind: string): string {
+  return `${kind
+    .split("_")
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ")}-Counter`;
 }
 
-function cockroachCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== COCKROACH_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
+function projectedVirusCounterDisplayId(kind: string): string {
+  return kind === "cascade" ? `runner_virus_corp_${kind}` : kind;
 }
 
 function badPublicityCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
@@ -729,8 +771,8 @@ function singleCounterDisplay(
   ];
 }
 
-function pattelAntibodyStrengthPenalty(instance: CardInstance): number {
-  return Math.max(0, Math.floor(instance.counters?.pattel_antibody ?? 0));
+function breakerStrengthPenaltyCounterAmount(instance: CardInstance): number {
+  return Math.max(0, Math.floor(instance.counters?.breaker_strength_penalty ?? 0));
 }
 
 export function visibleRunnerRigCardForViewer(
@@ -1008,7 +1050,7 @@ function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
   return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
-function serverDifficultyIncreaseFromFaitAccompli(
+function serverDifficultyIncreaseFromRunCounters(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {
@@ -1020,7 +1062,7 @@ function serverDifficultyIncreaseFromFaitAccompli(
     Math.floor(
       Math.max(
         0,
-        Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
+        Math.floor(state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0),
       ) / 2,
     ),
   );
@@ -1039,7 +1081,7 @@ function serverDifficultyReductionFromUpgrades(
     const instance = mustInstance(state.cardInstances, rootCardId);
     if (!instance.rezzed) return sum;
     const definitionId = definitionFor(state, rootCardId).id;
-    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(definitionId) ? sum + 1 : sum;
+    return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId) ? sum + 1 : sum;
   }, 0);
 }
 
@@ -1116,8 +1158,6 @@ function visibleStrengthModifierForKnownCard(
 }
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
-  const iceDefinition = definitionFor(state, iceId);
-  const iceSubtypes = effectiveSubtypesForCard(state, iceId, iceDefinition);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
@@ -1131,24 +1171,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       )
         bonus += scoredAgenda.amount;
       continue;
-    }
-    if (!scoredAgenda) {
-      if (
-        agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
-        iceServerId &&
-        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
-      )
-        bonus += 1;
-      if (
-        agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-        iceSubtypes.includes("code_gate")
-      )
-        bonus += 1;
-      if (
-        agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-        iceSubtypes.includes("wall")
-      )
-        bonus += 1;
     }
   }
   bonus += iceStrengthModifierBonusFor(state, iceId);

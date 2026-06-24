@@ -1703,9 +1703,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(priority.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(priority.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(priority.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v162_priority_requisition_free_rez",
-      priorityRequisitionFreeRez: true,
-      priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+      hiddenZoneAction: "scored_agenda_free_rez",
+      scoredAgendaFreeRezFreeRez: true,
+      scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
       rezCostPaid: 0,
     });
   });
@@ -3030,7 +3030,9 @@ describe("V1.7.0 Mechanikpaket D", () => {
       );
     }
     expect(
-      smithState.pendingChoice?.source.startsWith("v170.smiths_pawnshop"),
+      smithState.pendingChoice?.source.startsWith(
+        "runner.installed_resource_trash_for_credits",
+      ),
     ).toBe(true);
     expect(smithState.pendingChoice?.prompt).toContain("2 Credits");
     const forceShieldOption =
@@ -3052,7 +3054,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(smithState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
-      smithsPawnshopTriggered: true,
+      installedResourceTrashForCreditsTriggered: true,
       trashedCardDefinitionId: "onr_v1_028_force-shield",
       trashedCardTitle: "Force Shield",
       creditsGained: 2,
@@ -4556,15 +4558,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
     continueUntilBreakOrAccess();
     state = apply(state, "runner", (action) => action.type === "access_card");
 
-    expect(state.pendingChoice?.source).toContain("v181.pattels_virus");
+    expect(state.pendingChoice?.source).toContain("broken_ice.virus_counter");
     expect(state.pendingChoice?.options).toHaveLength(2);
     state = applyChoice(state, "runner", `card_${innerIceId}`);
 
     expect(state.cardInstances[innerIceId]?.counters?.virus).toBe(1);
     expect(state.cardInstances[outerIceId]?.counters?.virus ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v181RunnerProgramAbility: "pattels_virus_counter",
-      pattelsVirusCounterAdded: 1,
+      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      brokenIceVirusCounterAdded: 1,
       targetCardDefinitionId: "onr_v1_279_wall-of-static",
     });
   });
@@ -4658,11 +4660,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
       )?.counterDisplays,
     ).toEqual([
       expect.objectContaining({
-        id: "restrictive_net_zoning_install_cost_rd",
+        id: "corp_ice_install_cost_modifier_rd",
         amount: 2,
         label: "Install +",
-        ariaLabel:
-          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
         counterType: "install_cost_modifier",
       }),
     ]);
@@ -4671,11 +4672,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
         ?.counterDisplays,
     ).toEqual([
       expect.objectContaining({
-        id: "restrictive_net_zoning_install_cost_rd",
+        id: "corp_ice_install_cost_modifier_rd",
         amount: 2,
         label: "Install +",
-        ariaLabel:
-          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
         counterType: "install_cost_modifier",
       }),
     ]);
@@ -5887,7 +5887,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
 
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith("v190.die.onr_v1_275_vacuum-link.rewind."),
+        record.purpose.startsWith("v190.die.rewind_run_to_rezzed_ice_by_die."),
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -6611,7 +6611,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
   });
 
-  it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {
+  it("handles Polymer start-of-turn credits, HQ/Archives-Shuffle-Draw hidden-zone shuffle action and Data Naga program trash", () => {
     let state = toRunnerTurn(v192CardReleaseGame("v192-polymer-cfo-data-naga"));
     state.runner.credits = 20;
     state.corp.credits = 5;
@@ -6667,11 +6667,11 @@ describe("V1.9.2 Mechanikpaket K", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "ai_chief_financial_officer",
+        action.payload?.agendaAbility === "hq_archives_shuffle_draw",
     );
     expect(state.corp.archives).toHaveLength(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+      hiddenZoneAction: "hq_archives_shuffle_into_rd",
     });
 
     state = toRunnerTurnFromCorpMain(state);
@@ -7100,22 +7100,22 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.corp.credits).toBe(22);
     expect(state.corp.scoreArea).not.toContain(scoredAgendaId);
     expect(state.corp.archives).toContain(acmeId);
-    expect(state.acmeSavingsAndLoanObligations).toBe(1);
+    expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
       agendaPointCost: 1,
       gainedCredits: 12,
       selfTrashed: true,
-      acmeSavingsAndLoanObligationsAfter: 1,
+      obligationDebtCountAfter: 1,
     });
 
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(21);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanPaymentPaid: 1,
+      obligationDebtAbility: "end_of_turn_payment",
+      obligationDebtPaymentPaid: 1,
       corpCreditsAfter: 21,
     });
   });
@@ -7230,7 +7230,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(skipped.cardInstances[codeGateId]?.faceup).toBe(false);
     expect(skipped.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "superior_net_barriers_reveal_walls",
+      hiddenZoneAction: "scored_subtype_reveal_walls",
       revealedCount: 0,
       rezzedMatchingIceCount: 1,
       countedMatchingIceCount: 1,
@@ -7253,8 +7253,8 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "superior_net_barriers_reveal_walls",
-      agendaAbility: "superior_net_barriers",
+      hiddenZoneAction: "scored_subtype_reveal_walls",
+      agendaAbility: "scored_subtype_reveal",
       revealedCount: 2,
       rezzedMatchingIceCount: 1,
       countedMatchingIceCount: 3,
@@ -7325,12 +7325,12 @@ describe("V1.9.5 Mechanikpaket N", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
     expect(state.winner).toBe("runner");
-    expect(state.gameEndReason).toBe("acme_savings_and_loan_unpaid");
+    expect(state.gameEndReason).toBe("obligation_debt_unpaid");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanPaymentFailed: true,
-      gameEndReason: "acme_savings_and_loan_unpaid",
+      obligationDebtAbility: "end_of_turn_payment",
+      obligationDebtPaymentFailed: true,
+      gameEndReason: "obligation_debt_unpaid",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -7369,19 +7369,19 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+        action.payload?.obligationDebtAbility === "remove_obligation",
     );
 
     expect(state.corp.credits).toBe(creditsBefore - 12);
-    expect(state.acmeSavingsAndLoanObligations).toBe(0);
+    expect(state.activeObligationDebtCount).toBe(0);
     expect(state.corpBonusAgendaPoints).toBe(1);
     expect(agendaPoints(state, "corp")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      acmeSavingsAndLoanAbility: "remove_obligation",
-      acmeSavingsAndLoanPaymentPaid: 12,
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtPaymentPaid: 12,
       gainedAgendaPoints: 1,
-      acmeSavingsAndLoanObligationsAfter: 0,
+      obligationDebtCountAfter: 0,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -7416,7 +7416,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+        action.payload?.obligationDebtAbility === "remove_obligation",
     );
 
     const wrongSide = applyAction(state, {
@@ -7440,7 +7440,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
     const noObligation = structuredClone(state);
-    noObligation.acmeSavingsAndLoanObligations = 0;
+    noObligation.activeObligationDebtCount = 0;
     const missingObligation = applyAction(noObligation, {
       matchId: noObligation.matchId,
       side: "corp",
@@ -7507,7 +7507,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     expect(runnerBid).toBeDefined();
     state = applyChoice(state, "runner", String(runnerBid?.id));
 
-    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
     expect(state.runner.tags).toBe(1);
 
     state.activeSide = "corp";
@@ -7516,7 +7516,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     state.corp.clicks = 1;
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.tags).toBe(2);
-    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
   });
 });
 

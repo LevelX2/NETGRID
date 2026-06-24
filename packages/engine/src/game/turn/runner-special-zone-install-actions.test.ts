@@ -6,9 +6,9 @@ import type {
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {
-  buildRunnerSelfModifyingCodeInstallAction,
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerHiddenStackProgramInstallAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "./runner-special-zone-install-actions";
@@ -88,7 +88,7 @@ describe("runner special zone install action builders", () => {
       3,
     );
 
-    const setAside = buildRunnerShellTradersSetAsideAction(state, {
+    const setAside = buildRunnerDelayedInstallSetAsideAction(state, {
       sourceCardId,
       sourceTitle: "The Shell Traders",
       sourceDefinitionId,
@@ -96,7 +96,7 @@ describe("runner special zone install action builders", () => {
       targetDefinition,
       shellCounterAmount: 3,
     });
-    const removeCounter = buildRunnerShellTradersRemoveCounterAction(state, {
+    const removeCounter = buildRunnerDelayedInstallRemoveCounterAction(state, {
       sourceCardId,
       sourceTitle: "The Shell Traders",
       sourceDefinitionId,
@@ -129,7 +129,7 @@ describe("runner special zone install action builders", () => {
       },
       targetRequirements: [
         {
-          id: "shellTradersTarget",
+          id: "delayedInstallTarget",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.grip"],
@@ -160,7 +160,7 @@ describe("runner special zone install action builders", () => {
       },
       targetRequirements: [
         {
-          id: "shellTradersPreparedCard",
+          id: "delayedInstallPreparedCard",
           kind: "card",
           side: "runner",
           zoneScope: ["special.set_aside"],
@@ -180,14 +180,14 @@ describe("runner special zone install action builders", () => {
     const before = structuredClone(state);
     const sourceCardId = "self_modifying_code_source" as CardInstanceId;
 
-    const action = buildRunnerSelfModifyingCodeInstallAction(
+    const action = buildRunnerHiddenStackProgramInstallAction(
       state,
       sourceCardId,
     );
 
     expect(action).toMatchObject({
       actionId:
-        "runner.trigger_ability.self_modifying_code_source.self_modifying_code_source.self_modifying_code_install_program",
+        "runner.trigger_ability.self_modifying_code_source.self_modifying_code_source.hidden_stack_program_install",
       side: "runner",
       type: "trigger_ability",
       label: "Self-Modifying Code trashen: Programm aus Stack installieren",
@@ -195,14 +195,14 @@ describe("runner special zone install action builders", () => {
       costs: [],
       payload: {
         cardId: sourceCardId,
-        v1911HiddenZoneAbility: "self_modifying_code_install_program",
+        v1911HiddenZoneAbility: "hidden_stack_program_install",
         hiddenZoneBarrier: true,
       },
       abilityRef: {
         sourceCardInstanceId: sourceCardId,
-        abilityId: "self_modifying_code_install_program",
+        abilityId: "hidden_stack_program_install",
       },
-      effectRef: "effect.self_modifying_code_install_program",
+      effectRef: "effect.hidden_stack_program_install",
       targetRequirements: [],
       visibility: "private_to_actor",
     });

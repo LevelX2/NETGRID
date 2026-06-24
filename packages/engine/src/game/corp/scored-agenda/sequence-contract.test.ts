@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 import {
   isHqToNewRemoteInstallRezChoiceSource,
   isHqToNewRemoteInstallRezRezChoiceSource,
-} from "./data-fort-reclamation-sequence";
-import { isScoredIceMarkModifierChoiceSource } from "./ice-transmutation-sequence";
+} from "./hq-to-new-remote-install-rez-sequence";
+import { isScoredIceMarkModifierChoiceSource } from "./scored-rezzed-ice-mark-modifier-sequence";
 import { orderedFortRebuildPublicPayload } from "../../run/windows/ordered-fort-rebuild-sequence";
-import { isPriorityRequisitionChoiceSource } from "./priority-requisition-sequence";
+import { isScoredAgendaFreeRezChoiceSource } from "./scored-agenda-free-rez-sequence";
 import {
   resolveScoredAgendaSequenceChoice,
   SCORED_AGENDA_CHOICE_RESOLVERS,
@@ -24,7 +24,7 @@ import {
   applySequencePayloadPatch,
   corpSequenceContextPayload,
 } from "./scored-agenda-sequence-types";
-import { isSecurityPurgeInstallTargetChoiceSource } from "./security-purge-sequence";
+import { isAgendaPurgeInstallTargetChoiceSource } from "./agenda-purge-install-target-sequence";
 
 describe("scored agenda sequence contract matrix", () => {
   it("keeps score-time resolver kinds unique and explicit", () => {
@@ -35,12 +35,12 @@ describe("scored agenda sequence contract matrix", () => {
     expect(
       SCORED_AGENDA_SCORE_TIME_RESOLVERS.map((resolver) => resolver.id).sort(),
     ).toEqual([
-      "corporate_downsizing_score_start",
-      "data_fort_reclamation_score_start",
-      "ice_transmutation_score_start",
-      "priority_requisition_score_start",
-      "security_net_optimization_score_start",
-      "security_purge_score_start",
+      "agenda_purge_score_start",
+      "hq_to_new_remote_install_rez_score_start",
+      "scored_agenda_free_rez_score_start",
+      "scored_fort_ice_strength_bonus_score_start",
+      "scored_hq_agenda_shuffle_credits_score_start",
+      "scored_rezzed_ice_mark_modifier_score_start",
       "subtype_reveal_economy_score_start",
     ]);
     expect(
@@ -56,19 +56,19 @@ describe("scored agenda sequence contract matrix", () => {
     const cases = [
       {
         kind: "score_install_hq_cards_into_new_remote_then_rez",
-        id: "data_fort_reclamation_score_start",
+        id: "hq_to_new_remote_install_rez_score_start",
       },
       {
         kind: "select_rezzed_ice_mark_modifier",
-        id: "ice_transmutation_score_start",
+        id: "scored_rezzed_ice_mark_modifier_score_start",
       },
       {
         kind: "score_rez_installed_ice_at_no_cost",
-        id: "priority_requisition_score_start",
+        id: "scored_agenda_free_rez_score_start",
       },
       {
         kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
-        id: "security_purge_score_start",
+        id: "agenda_purge_score_start",
       },
       {
         kind: "reveal_installed_ice_subtype_for_credits",
@@ -76,11 +76,11 @@ describe("scored agenda sequence contract matrix", () => {
       },
       {
         kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
-        id: "corporate_downsizing_score_start",
+        id: "scored_hq_agenda_shuffle_credits_score_start",
       },
       {
         kind: "choose_fort_ice_strength_bonus",
-        id: "security_net_optimization_score_start",
+        id: "scored_fort_ice_strength_bonus_score_start",
       },
     ] as const;
 
@@ -117,8 +117,8 @@ describe("scored agenda sequence contract matrix", () => {
 
     expect(new Set(flowResolverIds).size).toBe(flowResolverIds.length);
     expect(flowResolverIds.sort()).toEqual([
-      "employee_empowerment_start_draw_flow_choice",
-      "ice_transmutation_flow_choice",
+      "scored_agenda_start_draw_flow_choice",
+      "scored_rezzed_ice_mark_modifier_flow_choice",
       "subtype_reveal_flow_choice",
     ]);
     expect(flowResolverIds.some((id) => installRezResolverIds.has(id))).toBe(
@@ -142,11 +142,11 @@ describe("scored agenda sequence contract matrix", () => {
     expect(new Set(directResolverIds).size).toBe(directResolverIds.length);
     expect(directResolverIds.sort()).toEqual([
       "add_counters_on_score_effect",
-      "corporate_retreat_score_effect",
       "fixed_bonus_agenda_points_score_effect",
       "gain_credits_on_score_effect",
       "overadvance_score_effects",
       "score_credit_swing_threshold_effect",
+      "scored_agenda_install_rez_credit_score_effect",
     ]);
     expect(directResolverIds.some((id) => reservedResolverIds.has(id))).toBe(
       false,
@@ -177,21 +177,21 @@ describe("scored agenda sequence contract matrix", () => {
   it("routes each registered choice source to exactly one resolver", () => {
     const cases: readonly { source: string; resolverId: string }[] = [
       {
-        source: "v162.priority_requisition:priority_agenda:8",
-        resolverId: "priority_requisition_choice",
+        source: "card_implementation.scored_agenda_free_rez:priority_agenda:8",
+        resolverId: "scored_agenda_free_rez_choice",
       },
       {
-        source: "v1922.data_fort_reclamation:data_fort_agenda:8",
-        resolverId: "data_fort_reclamation_install_choice",
+        source: "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
+        resolverId: "hq_to_new_remote_install_rez_install_choice",
       },
       {
-        source: "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:4:8",
-        resolverId: "data_fort_reclamation_rez_choice",
+        source: "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
+        resolverId: "hq_to_new_remote_rez_choice",
       },
       {
         source:
-          "v1922.security_purge_install_targets:security_purge_agenda:ice_1:8",
-        resolverId: "security_purge_target_choice",
+          "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1:8",
+        resolverId: "agenda_purge_target_choice",
       },
     ];
 
@@ -206,16 +206,16 @@ describe("scored agenda sequence contract matrix", () => {
   it("routes each registered scored-agenda flow choice source to exactly one resolver", () => {
     const cases: readonly { source: string; resolverId: string }[] = [
       {
-        source: "v162.scored_subtype_reveal:agenda_1:wall:2:8",
+        source: "scored_agenda.subtype_reveal:agenda_1:wall:2:8",
         resolverId: "subtype_reveal_flow_choice",
       },
       {
-        source: "v1920.ice_transmutation:transmutation_agenda:8",
-        resolverId: "ice_transmutation_flow_choice",
+        source: "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
+        resolverId: "scored_rezzed_ice_mark_modifier_flow_choice",
       },
       {
-        source: "v1912.employee_empowerment_start_draw:employee:8",
-        resolverId: "employee_empowerment_start_draw_flow_choice",
+        source: "scored_agenda.start_draw_choice:employee:8",
+        resolverId: "scored_agenda_start_draw_flow_choice",
       },
     ];
 
@@ -229,18 +229,18 @@ describe("scored agenda sequence contract matrix", () => {
 
   it("keeps source recognizers disjoint across representative sequences", () => {
     const recognizers = [
-      isPriorityRequisitionChoiceSource,
+      isScoredAgendaFreeRezChoiceSource,
       isHqToNewRemoteInstallRezChoiceSource,
       isHqToNewRemoteInstallRezRezChoiceSource,
-      isSecurityPurgeInstallTargetChoiceSource,
+      isAgendaPurgeInstallTargetChoiceSource,
       isScoredIceMarkModifierChoiceSource,
     ];
     const sources = [
-      "v162.priority_requisition:priority_agenda:8",
-      "v1922.data_fort_reclamation:data_fort_agenda:8",
-      "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:4:8",
-      "v1922.security_purge_install_targets:security_purge_agenda:ice_1:8",
-      "v1920.ice_transmutation:transmutation_agenda:8",
+      "card_implementation.scored_agenda_free_rez:priority_agenda:8",
+      "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:8",
+      "card_implementation.hq_to_new_remote_rez:data_fort_agenda:remote_1:4:8",
+      "card_implementation.agenda_purge_install_targets:agenda_purge_agenda:ice_1:8",
+      "scored_agenda.rezzed_ice_mark_modifier:transmutation_agenda:8",
     ];
 
     for (const source of sources) {
@@ -305,7 +305,7 @@ describe("scored agenda sequence contract matrix", () => {
     const result = applySequenceResolution(legalAction, {
       result: { handled: true },
       stateChanged: true,
-      payloadPatch: { priorityRequisitionChoiceOpened: false },
+      payloadPatch: { scoredAgendaFreeRezChoiceOpened: false },
     });
 
     expect(result).toEqual({
@@ -313,7 +313,7 @@ describe("scored agenda sequence contract matrix", () => {
       stateChanged: true,
       resolvedPayload: {
         existing: true,
-        priorityRequisitionChoiceOpened: false,
+        scoredAgendaFreeRezChoiceOpened: false,
       },
     });
     expect(legalAction.payload).toEqual(result.resolvedPayload);

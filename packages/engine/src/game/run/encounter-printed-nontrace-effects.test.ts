@@ -135,7 +135,7 @@ function makeHost(
     ),
     "onr_v1_272_too-many-doors": definition(
       "onr_v1_272_too-many-doors",
-      "Too Many Doors",
+      "Secret Spend Compare",
       "ice",
     ),
     cheap_program_def: definition("cheap_program_def", "Cheap Program", "program", {
@@ -393,7 +393,7 @@ describe("encounter printed non-trace effects boundary", () => {
     });
     expect(state.runnerTurnFlags?.runLockActionsPending).toBe(6);
     expect(legalAction.payload).toMatchObject({
-      v1922CorpIceAbility: "haunting_inquisition_run_lock",
+      v1922CorpIceAbility: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
       sourceDefinitionId: "haunting",
@@ -447,7 +447,7 @@ describe("encounter printed non-trace effects boundary", () => {
     const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
       definition: definition(
         "onr_v1_272_too-many-doors",
-        "Too Many Doors",
+        "Secret Spend Compare",
         "ice",
       ),
       subroutine: {

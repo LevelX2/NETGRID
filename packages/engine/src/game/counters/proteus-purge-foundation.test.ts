@@ -56,8 +56,8 @@ function proteusPurgeFixture(): GameState {
     ...state.cardInstances[state.corp.identity]!,
     counters: {
       virus: 4,
-      doppelganger_antibody: 2,
-      pattel_antibody: 1,
+      link_reduction_counter: 2,
+      breaker_strength_penalty: 1,
     },
   };
   return state;
@@ -119,8 +119,8 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     expect(next.purgeableRunnerVirusCounters).toBeUndefined();
     expect(next.cardInstances[next.corp.identity]?.counters).toMatchObject({
       virus: 4,
-      doppelganger_antibody: 2,
-      pattel_antibody: 1,
+      link_reduction_counter: 2,
+      breaker_strength_penalty: 1,
     });
     expect(next.corp.clicks).toBe(0);
     expect(next.corpActionDebt).toMatchObject({
@@ -310,7 +310,6 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
           kind: "counter_change",
           counterType: "pipe",
           amount: 2,
-          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
         }),
       ]),
     );

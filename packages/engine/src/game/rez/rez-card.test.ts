@@ -94,7 +94,7 @@ describe("rez card execution", () => {
         [assetId]: instance(assetId, assetDefinition.id, "serverRoot"),
       },
     });
-    state.acmeSavingsAndLoanObligations = 2;
+    state.activeObligationDebtCount = 2;
     state.corpBonusAgendaPoints = 1;
     const action = rezAction(assetId, { agendaPointCost: 1 });
 
@@ -110,8 +110,8 @@ describe("rez card execution", () => {
     expect(action.payload).toMatchObject({
       agendaPointCost: 1,
       agendaPointCostPaid: 1,
-      acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
-      acmeSavingsAndLoanObligationsBefore: 2,
+      obligationDebtAbility: "rez_with_agenda_point_cost",
+      obligationDebtCountBefore: 2,
       corpBonusAgendaPointsSpent: 1,
     });
   });
@@ -321,7 +321,7 @@ function testHost(
       },
     },
     corp: {
-      isAcmeSavingsAndLoanDefinition: (definitionId) =>
+      isObligationDebtDefinition: (definitionId) =>
         options.acmeDefinitions?.has(definitionId) ?? false,
       spendCorpAgendaPointCost: (requiredPoints) => {
         const paidPoints = Math.min(
@@ -338,8 +338,8 @@ function testHost(
           forfeitedAgendaDefinitionIds: [],
         };
       },
-      acmeSavingsAndLoanObligationCount: () =>
-        Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0)),
+      activeObligationCount: () =>
+        Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0)),
     },
     runner: {
       ensureTurnFlags: () =>

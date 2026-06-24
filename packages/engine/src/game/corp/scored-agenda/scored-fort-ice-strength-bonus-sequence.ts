@@ -7,7 +7,7 @@ import type {
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 
-export function resolveSecurityNetOptimizationOnScore(
+export function resolveScoredFortIceStrengthBonusOnScore(
   host: ScoredAgendaFlowHost,
   cardId: CardInstanceId,
   instanceBefore: CardInstance,
@@ -21,15 +21,15 @@ export function resolveSecurityNetOptimizationOnScore(
         ? instanceBefore.zone.serverId
         : undefined;
   if (!selectedServerId || selectedServerId === "new_remote")
-    throw new Error("Security Net Optimization braucht ein gueltiges Remote.");
+    throw new Error("Scored-Fort-Strength-Bonus braucht ein gueltiges Remote.");
   host.zones.mustServer(selectedServerId as Exclude<ServerId, "new_remote">);
   host.state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
     selectedServerId: selectedServerId as Exclude<ServerId, "new_remote">,
   };
   applySequencePayloadPatch(legalAction, {
-    securityNetOptimizationActive: true,
+    scoredFortIceStrengthBonusActive: true,
     selectedServerId,
-    securityNetOptimizationServerId: selectedServerId,
+    scoredFortIceStrengthBonusServerId: selectedServerId,
   });
 }

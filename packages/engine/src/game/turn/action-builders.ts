@@ -35,7 +35,7 @@ export function buildLegalAction(
     payload?.resourceAbility ||
     payload?.runnerAbility ||
     payload?.delayedInstallAbility ||
-    payload?.acmeSavingsAndLoanAbility ||
+    payload?.obligationDebtAbility ||
     (side === "runner" && type === "install_card")
       ? "public"
       : "private_to_actor";
@@ -160,15 +160,15 @@ export function makeActionId(
     parts.push(String(payload.stealCostSourceDefinitionIds));
   if (payload?.stealCostPersistedForCurrentAccess !== undefined)
     parts.push(String(payload.stealCostPersistedForCurrentAccess));
-  if (payload?.oliviaSalazarRezSourceCardId)
-    parts.push(String(payload.oliviaSalazarRezSourceCardId));
+  if (payload?.discountedRezSourceCardId)
+    parts.push(String(payload.discountedRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.secondTargetCardId)
     parts.push(String(payload.secondTargetCardId));
-  if (payload?.powerGridOverloadTrashCount)
-    parts.push(String(payload.powerGridOverloadTrashCount));
-  if (payload?.citySurveillanceDrawDecision)
-    parts.push(String(payload.citySurveillanceDrawDecision));
+  if (payload?.hardwareTrashByCounterTrashCount)
+    parts.push(String(payload.hardwareTrashByCounterTrashCount));
+  if (payload?.drawTaxDecision)
+    parts.push(String(payload.drawTaxDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
   if (payload?.approachIceExposeViewDecision)

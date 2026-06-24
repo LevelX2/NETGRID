@@ -11,7 +11,7 @@ import {
   appendUnpaidPayOrEndRunEffects,
   cleanupEncounterDurationMarkers,
   preparePayOrEndRunSubroutinePayment,
-  resolveFatalAttractorPostEncounter,
+  resolvePostEncounterNetDamage,
   type DamageSummary,
   type EncounterResolutionHost,
 } from "./encounter-resolution";
@@ -182,7 +182,7 @@ export function continueRun(
   }).ended;
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
-  resolveFatalAttractorPostEncounter(host.encounter.resolutionHost(), {
+  resolvePostEncounterNetDamage(host.encounter.resolutionHost(), {
     subroutines,
     damageSummaries,
     legalAction,

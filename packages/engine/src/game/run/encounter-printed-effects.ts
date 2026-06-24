@@ -29,7 +29,7 @@ export type EncounterPrintedEffectHost = {
       counterType: CounterType,
       amount: number,
     ) => void;
-    addHackerTrackerTraceCounters: () => number;
+    addCorpTraceCounterPoolCounters: () => number;
     calculateRunnerLink: () => number;
     cardCounter: (cardId: CardInstanceId, counterType: CounterType) => number;
     createDamageImminentEvent: (request: {
@@ -41,8 +41,8 @@ export type EncounterPrintedEffectHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
     finishRun: (successful: boolean) => void;
-    hasInstalledMicrotechTrodeSet: () => boolean;
-    hackerTrackerCounterTotal: () => number;
+    hasInstalledRunnerApDamageReducerHardware: () => boolean;
+    corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
       event: ImminentEvent,
@@ -184,7 +184,7 @@ export function resolvePrintedDamageSubroutine(
     damageType === "net" &&
     printedAmount > 1 &&
     cardHasSubtype(definition, "ap") &&
-    host.callbacks.hasInstalledMicrotechTrodeSet();
+    host.callbacks.hasInstalledRunnerApDamageReducerHardware();
   const damageAmount = microtechApNetReduction ? 1 : printedAmount;
   const event = host.callbacks.createDamageImminentEvent({
     damageId: `${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
@@ -195,7 +195,7 @@ export function resolvePrintedDamageSubroutine(
   if (microtechApNetReduction && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
+      runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
       sourceDefinitionId: MICROTECH_TRODE_SET_ID,
       printedDamageAmount: printedAmount,
       damageAmount,
@@ -278,7 +278,7 @@ export function startTraceFromPrintedSubroutine(
   const baseCorpBidMax =
     state.corp.credits +
     encounterTemporaryTraceCredits +
-    host.callbacks.hackerTrackerCounterTotal() +
+    host.callbacks.corpTraceCounterPoolTotal() +
     host.callbacks.recurringTraceCreditPoolTotal() +
     fortTraceBits;
   const rabbitTraceLimitReduction =
@@ -333,8 +333,8 @@ export function startTraceFromPrintedSubroutine(
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(fortTraceBitPoolSource
         ? {
-            parisCityGridPoolAvailable: fortTraceBits,
-            parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
+            fortTraceBitPoolAvailable: fortTraceBits,
+            fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
             sourceDefinitionId: sourceDefinition.id,
           }
         : {}),
@@ -380,7 +380,7 @@ export function applyPrintedTraceSuccessFollowups(
   const successful = result.successful;
   const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
   const hackerTrackerCountersAdded =
-    host.callbacks.addHackerTrackerTraceCounters();
+    host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewards(host, trace);
@@ -408,7 +408,7 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type === "end_run_trash_program_and_run_lock")
   ) {
     runnerRunLockCreditCost = trace.successEffect.amount;
-    host.callbacks.ensureRunnerTurnFlags().fangRunLockCreditCost =
+    host.callbacks.ensureRunnerTurnFlags().runnerRunLockCreditCost =
       runnerRunLockCreditCost;
     runnerRunEnded = true;
     if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
@@ -534,7 +534,6 @@ export function applyPrintedTraceSuccessFollowups(
       ? {
           fangRunEnded: true,
           runnerRunEnded: true,
-          fangRunLockCreditCost: runnerRunLockCreditCost,
           runnerRunLockCreditCost,
         }
       : {}),

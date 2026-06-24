@@ -143,7 +143,7 @@ export function publicContextForAction(
     "vacuumLinkRewindApplied",
     "vacuumLinkRewindRezzedIceBack",
     "vacuumLinkTargetIceIndex",
-    "oliviaSalazarRunEndDerez",
+    "temporaryDiscountedRunEndDerez",
     "derezzedCount",
     "runRootRezPass",
     "highlighterCounterCount",
@@ -188,14 +188,14 @@ export function publicContextForAction(
       if (typeof legalAction.payload.hiddenResourceSlotId === "string")
         context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
     }
-    if (legalAction.payload?.zetatechOverlayInstall === true) {
-      context.v1922RunnerProgramAbility = "zetatech_overlay_install";
-      context.zetatechOverlayInstall = true;
+    if (legalAction.payload?.programOverlayInstall === true) {
+      context.v1922RunnerProgramAbility = "program_overlay_install";
+      context.programOverlayInstall = true;
       if (typeof legalAction.payload.hostDefinitionId === "string")
         context.hostDefinitionId = legalAction.payload.hostDefinitionId;
-      if (typeof legalAction.payload.zetatechRecurringCreditsSpent === "number")
-        context.zetatechRecurringCreditsSpent =
-          legalAction.payload.zetatechRecurringCreditsSpent;
+      if (typeof legalAction.payload.hostedRecurringCreditsSpent === "number")
+        context.hostedRecurringCreditsSpent =
+          legalAction.payload.hostedRecurringCreditsSpent;
       if (typeof legalAction.payload.runnerCreditsAfter === "number")
         context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     }
@@ -221,8 +221,8 @@ export function publicContextForAction(
     context.v181RunnerProgramAbility =
       legalAction.payload.v181RunnerProgramAbility;
     for (const key of [
-      "pattelsVirusCandidateCount",
-      "pattelsVirusCounterAdded",
+      "brokenIceVirusCounterCandidateCount",
+      "brokenIceVirusCounterAdded",
       "poxCounterAdded",
       "poxCountersAfter",
       "faitCounterAdded",
@@ -234,9 +234,9 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.pattelsVirusChoiceOpened === "boolean")
-      context.pattelsVirusChoiceOpened =
-        legalAction.payload.pattelsVirusChoiceOpened;
+    if (typeof legalAction.payload.brokenIceVirusCounterChoiceOpened === "boolean")
+      context.brokenIceVirusCounterChoiceOpened =
+        legalAction.payload.brokenIceVirusCounterChoiceOpened;
     if (typeof legalAction.payload.targetCardDefinitionId === "string")
       context.targetCardDefinitionId =
         legalAction.payload.targetCardDefinitionId;
@@ -303,11 +303,11 @@ export function publicContextForAction(
       "effectiveTraceBidLimitAfterRez",
       "effectiveSubroutineCountAfterRez",
       "selectedSubtypesAfterRez",
-      "oliviaSalazarRezSourceCardId",
-      "oliviaSalazarRezSourceDefinitionId",
-      "oliviaSalazarRezCostBase",
-      "oliviaSalazarTemporaryDerez",
-      "oliviaSalazarRunEndDerez",
+      "discountedRezSourceCardId",
+      "discountedRezSourceDefinitionId",
+      "discountedRezCostBase",
+      "temporaryDerezAfterRun",
+      "temporaryDiscountedRunEndDerez",
       "encounterTaxForFutureIce",
       "encounterTaxPaid",
       "encounterTaxSource",
@@ -318,10 +318,10 @@ export function publicContextForAction(
       "hostedCreditsAdded",
       "hostedCreditsAfter",
       "remainingCounters",
-      "speedTrapSourceCardId",
+      "rezInterruptSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
-      "speedTrapChoiceOpened",
+      "rezInterruptChoiceOpened",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -363,12 +363,6 @@ export function publicContextForAction(
     legalAction.payload?.multiBreakSubroutines === true
   ) {
     context.multiBreakSubroutines = true;
-  }
-  if (
-    legalAction.type === "break_subroutine" &&
-    legalAction.payload?.pileDriverMultiBreak === true
-  ) {
-    context.pileDriverMultiBreak = true;
   }
   if (
     legalAction.type === "resolve_choice" &&
@@ -458,15 +452,15 @@ export function publicContextForAction(
       "preventedAmount",
       "preventedTags",
       "finalAmount",
-      "fullBodyConversionCorpBypassPaid",
-      "fullBodyConversionBypassCostPerDamage",
+      "damagePreventionBypassPaid",
+      "damagePreventionBypassCostPerDamage",
       "preservedCounterAmount",
       "remainingVirusCounters",
       "preservedCardDefinitionIds",
       "secretSpendRevealed",
       "secretSpendCorp",
       "secretSpendRunner",
-      "tooManyDoorsEndRun",
+      "secretSpendEndRun",
       "corpCreditsAfter",
       "runnerCreditsAfter",
       "passIceTrashProgramPrompt",
@@ -501,7 +495,7 @@ export function publicContextForAction(
       "tagsAdded",
       "preventedAmount",
       "v1919RunnerEventAbility",
-      "v1920RunnerProgramAbility",
+      "flatlineReplacementAbility",
       "coreDamageRemoved",
       "gripCardsLost",
       "drawnCards",
@@ -517,11 +511,11 @@ export function publicContextForAction(
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
       "cardDefinitionId",
-      "employeeEmpowermentStartDrawDecision",
-      "speedTrapSourceCardId",
+      "scoredAgendaStartDrawDecision",
+      "rezInterruptSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
-      "speedTrapUsed",
+      "rezInterruptUsed",
       "successfulRunWithoutAccess",
     ]) {
       const value = legalAction.payload?.[key];
@@ -545,7 +539,7 @@ export function publicContextForAction(
       "baseLinkValue",
       "runnerBid",
       "traceLinkCreditsSpent",
-      "hellsRunTraceCreditsSpent",
+      "bonusTraceLinkCreditsSpent",
       "runnerCreditsSpent",
       "traceLinkCreditSourceDefinitionIds",
       "runnerStrength",
@@ -561,9 +555,9 @@ export function publicContextForAction(
       "cryingCounterCount",
       "cryingLinkReduction",
       "corpCreditBid",
-      "parisCityGridPoolSpent",
-      "parisCityGridPoolRemaining",
-      "parisCityGridPoolServerId",
+      "fortTraceBitPoolSpent",
+      "fortTraceBitPoolRemaining",
+      "fortTraceBitPoolServerId",
       "recurringTraceCreditPoolSpent",
       "hackerTrackerCountersSpent",
       "hackerTrackerCountersAdded",
@@ -571,16 +565,15 @@ export function publicContextForAction(
       "temporaryTraceCreditsRemaining",
       "temporaryTraceCreditsSourceDefinitionId",
       "fangRunEnded",
-      "fangRunLockCreditCost",
-      "runnerRunEnded",
       "runnerRunLockCreditCost",
+      "runnerRunEnded",
       "traceSuccessEffect",
       "trashedCardDefinitionId",
       "trashedCardType",
       "trashedCount",
       "damageCannotBePrevented",
-      "smithsPawnshopTriggered",
-      "smithsPawnshopCardId",
+      "installedResourceTrashForCreditsTriggered",
+      "trashForCreditsSourceCardId",
       "trashedCardTitle",
       "creditsGained",
     ]) {
@@ -607,7 +600,7 @@ export function publicContextForAction(
       "encounterTaxForFutureIce",
       "encounterTaxPaid",
       "encounterTaxSource",
-      "tokyoChibaInfightingBonus",
+      "unsuccessfulRunCorpCreditBonus",
       "corpCreditsGained",
       "corpCreditsAfter",
       "jackOutAdditionalCost",
@@ -666,8 +659,8 @@ export function publicContextForAction(
       "runnerTagsAfter",
       "trashedResourceCount",
       "trashedResourceDefinitionIds",
-      "powerGridOverloadTrashCount",
-      "powerGridOverloadChoiceOpened",
+      "hardwareTrashByCounterTrashCount",
+      "hardwareTrashByCounterChoiceOpened",
       "eligibleHardwareCount",
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
@@ -687,9 +680,9 @@ export function publicContextForAction(
     context.flatline = legalAction.payload.flatline;
     if (typeof legalAction.payload.baseDamageAmount === "number")
       context.baseDamageAmount = legalAction.payload.baseDamageAmount;
-    if (typeof legalAction.payload.bioweaponsEngineeringModifier === "number")
-      context.bioweaponsEngineeringModifier =
-        legalAction.payload.bioweaponsEngineeringModifier;
+    if (typeof legalAction.payload.damageAmountModifier === "number")
+      context.damageAmountModifier =
+        legalAction.payload.damageAmountModifier;
     if (typeof legalAction.payload.coreDamageAfter === "number")
       context.coreDamageAfter = legalAction.payload.coreDamageAfter;
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
@@ -751,6 +744,27 @@ export function publicContextForAction(
       legalAction.payload?.corpActionDebtTotalAfter;
     context.corpClicksAfter = legalAction.payload?.corpClicksAfter;
   }
+  if (typeof legalAction.payload?.scoredAgendaFreeRezFreeRez === "boolean")
+    context.scoredAgendaFreeRezFreeRez =
+      legalAction.payload.scoredAgendaFreeRezFreeRez;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezChoiceOpened === "boolean")
+    context.scoredAgendaFreeRezChoiceOpened =
+      legalAction.payload.scoredAgendaFreeRezChoiceOpened;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezCandidateCount === "number")
+    context.scoredAgendaFreeRezCandidateCount =
+      legalAction.payload.scoredAgendaFreeRezCandidateCount;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezDeclined === "boolean")
+    context.scoredAgendaFreeRezDeclined =
+      legalAction.payload.scoredAgendaFreeRezDeclined;
+  if (typeof legalAction.payload?.scoredAgendaFreeRezTarget === "string")
+    context.scoredAgendaFreeRezTarget =
+      legalAction.payload.scoredAgendaFreeRezTarget;
+  if (
+    typeof legalAction.payload?.scoredAgendaFreeRezTargetDefinitionId ===
+    "string"
+  )
+    context.scoredAgendaFreeRezTargetDefinitionId =
+      legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
@@ -834,17 +848,38 @@ export function publicContextForAction(
     if (typeof legalAction.payload.corpCreditsSpent === "number")
       context.corpCreditsSpent = legalAction.payload.corpCreditsSpent;
     if (
-      typeof legalAction.payload.dataFortReclamationRezChoiceOpened ===
+      typeof legalAction.payload.hqToNewRemoteInstallRezRezChoiceOpened ===
       "boolean"
     )
-      context.dataFortReclamationRezChoiceOpened =
-        legalAction.payload.dataFortReclamationRezChoiceOpened;
+      context.hqToNewRemoteInstallRezRezChoiceOpened =
+        legalAction.payload.hqToNewRemoteInstallRezRezChoiceOpened;
     if (
-      typeof legalAction.payload.dataFortReclamationRezCandidateCount ===
+      typeof legalAction.payload.hqToNewRemoteInstallRezRezCandidateCount ===
       "number"
     )
-      context.dataFortReclamationRezCandidateCount =
-        legalAction.payload.dataFortReclamationRezCandidateCount;
+      context.hqToNewRemoteInstallRezRezCandidateCount =
+        legalAction.payload.hqToNewRemoteInstallRezRezCandidateCount;
+    if (typeof legalAction.payload.scoredAgendaFreeRezChoiceOpened === "boolean")
+      context.scoredAgendaFreeRezChoiceOpened =
+        legalAction.payload.scoredAgendaFreeRezChoiceOpened;
+    if (typeof legalAction.payload.scoredAgendaFreeRezCandidateCount === "number")
+      context.scoredAgendaFreeRezCandidateCount =
+        legalAction.payload.scoredAgendaFreeRezCandidateCount;
+    if (typeof legalAction.payload.scoredAgendaFreeRezFreeRez === "boolean")
+      context.scoredAgendaFreeRezFreeRez =
+        legalAction.payload.scoredAgendaFreeRezFreeRez;
+    if (typeof legalAction.payload.scoredAgendaFreeRezDeclined === "boolean")
+      context.scoredAgendaFreeRezDeclined =
+        legalAction.payload.scoredAgendaFreeRezDeclined;
+    if (typeof legalAction.payload.scoredAgendaFreeRezTarget === "string")
+      context.scoredAgendaFreeRezTarget =
+        legalAction.payload.scoredAgendaFreeRezTarget;
+    if (
+      typeof legalAction.payload.scoredAgendaFreeRezTargetDefinitionId ===
+      "string"
+    )
+      context.scoredAgendaFreeRezTargetDefinitionId =
+        legalAction.payload.scoredAgendaFreeRezTargetDefinitionId;
     if (typeof legalAction.payload.temporaryCreditsRemaining === "number")
       context.temporaryCreditsRemaining =
         legalAction.payload.temporaryCreditsRemaining;
@@ -1031,8 +1066,8 @@ export function publicContextForAction(
     "accessTrashBaseCost",
     "accessTrashCostModifier",
     "accessTrashTotalCost",
-    "scatterShotRecurringCreditsAvailable",
-    "scatterShotRecurringCreditsSpent",
+    "upgradeTrashRecurringCreditsAvailable",
+    "upgradeTrashRecurringCreditsSpent",
     "poltergeistRecurringCreditsAvailable",
     "poltergeistRecurringCreditsSpent",
     "runnerCreditsSpent",
@@ -1144,13 +1179,13 @@ export function publicContextForAction(
     "crashEverettDrawnCardCount",
     "returnedToStackTop",
     "runnerGripAfter",
-    "citySurveillanceSourceCount",
-    "citySurveillanceDrawDecision",
-    "citySurveillanceCreditsPaid",
-    "citySurveillanceTagsAdded",
-    "citySurveillanceTags",
-    "citySurveillanceProjectedDrawCount",
-    "acmeDebtActive",
+    "drawTaxSourceCount",
+    "drawTaxDecision",
+    "drawTaxCreditsPaid",
+    "drawTaxTagsAdded",
+    "drawTaxTags",
+    "drawTaxProjectedDrawCount",
+    "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
     "traceHostedCreditBoost",
@@ -1159,8 +1194,8 @@ export function publicContextForAction(
     "runSpendingCap",
     "runSpendingCapSpent",
     "runActionSpendingCapActive",
-    "powerGridOverloadTrashCount",
-    "powerGridOverloadChoiceOpened",
+    "hardwareTrashByCounterTrashCount",
+    "hardwareTrashByCounterChoiceOpened",
     "eligibleHardwareCount",
     "trashedHardwareCount",
     "trashedHardwareDefinitionIds",
@@ -1183,7 +1218,7 @@ export function publicContextForAction(
     "targetIcePositionLabel",
     "breakSubroutineBaseCost",
     "checkedIceCount",
-    "falseEchoCreditCost",
+    "successfulRunForceRezCreditCost",
     "rezzedIceCount",
     "rezCostPaid",
     "priorityRequisitionChoiceOpened",
@@ -1203,8 +1238,8 @@ export function publicContextForAction(
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
   }
-  if (legalAction.payload?.allNighterBonusRunOnFinish === true)
-    context.allNighterBonusRunOnFinish = true;
+  if (legalAction.payload?.bonusRunOnFinish === true)
+    context.bonusRunOnFinish = true;
   if (legalAction.payload?.sourceVisibility === "redacted") {
     delete context.sourceDefinitionId;
     delete context.sourceTitle;
@@ -1229,9 +1264,11 @@ export function publicContextForAction(
     context.ambushSkippedReason = legalAction.payload.ambushSkippedReason;
   if (typeof legalAction.payload?.onScoreGainCredits === "number")
     context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
-  if (typeof legalAction.payload?.securityNetOptimizationServerId === "string")
-    context.securityNetOptimizationServerId =
-      legalAction.payload.securityNetOptimizationServerId;
+  if (
+    typeof legalAction.payload?.scoredFortIceStrengthBonusServerId === "string"
+  )
+    context.scoredFortIceStrengthBonusServerId =
+      legalAction.payload.scoredFortIceStrengthBonusServerId;
   if (typeof legalAction.payload?.selectedServerId === "string")
     context.selectedServerId = legalAction.payload.selectedServerId;
   if (typeof legalAction.payload?.selectedServerLabel === "string")
@@ -1275,18 +1312,18 @@ export function publicContextForAction(
     context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number")
     context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
+  if (legalAction.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez") {
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
   }
-  if (legalAction.payload?.agendaAbility === "v1922_security_purge") {
-    context.agendaAbility = "v1922_security_purge";
+  if (legalAction.payload?.agendaAbility === "agenda_purge") {
+    context.agendaAbility = "agenda_purge";
     context.hiddenZoneBarrier = true;
     for (const key of [
       "hiddenZoneAction",
       "sourceDefinitionId",
-      "securityPurgeInstallContract",
+      "agendaPurgeInstallContract",
       "publicRevealDefinitionIds",
       "installedIceDefinitionIds",
       "installedIceServerLabels",
@@ -1301,15 +1338,15 @@ export function publicContextForAction(
       "pendingTrashCount",
       "installedIceCount",
       "trashedCount",
-      "securityPurgeTargetChoiceCount",
+      "agendaPurgeTargetChoiceCount",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "number") context[key] = value;
     }
     for (const key of [
-      "securityPurgeWaivesPrintedRezCosts",
-      "securityPurgeTargetChoiceOpened",
-      "securityPurgeTargetChoiceResolved",
+      "agendaPurgeWaivesPrintedRezCosts",
+      "agendaPurgeTargetChoiceOpened",
+      "agendaPurgeTargetChoiceResolved",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "boolean") context[key] = value;
@@ -1382,9 +1419,8 @@ export function publicContextForAction(
       context.chimeraDaemonDefinitionId =
         legalAction.payload.chimeraDaemonDefinitionId;
   }
-  if (typeof legalAction.payload?.acmeSavingsAndLoanAbility === "string") {
-    context.acmeSavingsAndLoanAbility =
-      legalAction.payload.acmeSavingsAndLoanAbility;
+  if (typeof legalAction.payload?.obligationDebtAbility === "string") {
+    context.obligationDebtAbility = legalAction.payload.obligationDebtAbility;
     for (const key of [
       "agendaPointCost",
       "agendaPointCostPaid",
@@ -1392,14 +1428,14 @@ export function publicContextForAction(
       "forfeitedAgendaDefinitionIds",
       "gainedCredits",
       "selfTrashed",
-      "acmeSavingsAndLoanObligations",
-      "acmeSavingsAndLoanObligationsBefore",
-      "acmeSavingsAndLoanObligationsAfter",
-      "acmeSavingsAndLoanCreditCost",
-      "acmeSavingsAndLoanPaymentDue",
-      "acmeSavingsAndLoanPaymentPaid",
-      "acmeSavingsAndLoanPaymentFailed",
-      "acmeSavingsAndLoanScoreAgendaPoints",
+      "activeObligationDebtCount",
+      "obligationDebtCountBefore",
+      "obligationDebtCountAfter",
+      "obligationDebtCreditCost",
+      "obligationDebtPaymentDue",
+      "obligationDebtPaymentPaid",
+      "obligationDebtPaymentFailed",
+      "obligationDebtScoreAgendaPoints",
       "gainedAgendaPoints",
       "corpBonusAgendaPointsAfter",
       "corpCreditsBefore",
@@ -1607,13 +1643,37 @@ export function publicContextForAction(
       context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
       context.remainingCounters = legalAction.payload.remainingCounters;
-    if (typeof legalAction.payload.faitAccompliServerCounters === "number")
-      context.faitAccompliServerCounters =
-        legalAction.payload.faitAccompliServerCounters;
+    if (typeof legalAction.payload.serverAgendaCostCounters === "number")
+      context.serverAgendaCostCounters =
+        legalAction.payload.serverAgendaCostCounters;
   }
   if (typeof legalAction.payload?.v1919RunnerEventAbility === "string") {
     context.v1919RunnerEventAbility =
       legalAction.payload.v1919RunnerEventAbility;
+    if (typeof legalAction.payload.agendaPointCostPaid === "number")
+      context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+    if (typeof legalAction.payload.removedTags === "number")
+      context.removedTags = legalAction.payload.removedTags;
+    if (typeof legalAction.payload.runnerTagsAfter === "number")
+      context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.futureAgendaPointForfeitPaid === "number")
+      context.futureAgendaPointForfeitPaid =
+        legalAction.payload.futureAgendaPointForfeitPaid;
+    if (
+      typeof legalAction.payload.futureAgendaPointForfeitPending === "number"
+    )
+      context.futureAgendaPointForfeitPending =
+        legalAction.payload.futureAgendaPointForfeitPending;
+    if (legalAction.payload.specialZone)
+      context.specialZone = legalAction.payload.specialZone;
+    if (legalAction.payload.specialZoneVisibility)
+      context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
+    if (legalAction.payload.specialZoneReason)
+      context.specialZoneReason = legalAction.payload.specialZoneReason;
+  }
+  if (typeof legalAction.payload?.flatlineReplacementAbility === "string") {
+    context.flatlineReplacementAbility =
+      legalAction.payload.flatlineReplacementAbility;
     if (typeof legalAction.payload.agendaPointCostPaid === "number")
       context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
     if (typeof legalAction.payload.removedTags === "number")
@@ -1656,13 +1716,9 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.v1920RunnerRunLockAbility === "string") {
     context.v1920RunnerRunLockAbility =
       legalAction.payload.v1920RunnerRunLockAbility;
-    if (typeof legalAction.payload.fangRunLockCreditCost === "number")
-      context.fangRunLockCreditCost = legalAction.payload.fangRunLockCreditCost;
     if (typeof legalAction.payload.runnerRunLockCreditCost === "number")
       context.runnerRunLockCreditCost =
         legalAction.payload.runnerRunLockCreditCost;
-    if (legalAction.payload.fangRunLockCleared === true)
-      context.fangRunLockCleared = true;
     if (legalAction.payload.runnerRunLockCleared === true)
       context.runnerRunLockCleared = true;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")
@@ -1704,8 +1760,8 @@ export function publicContextForAction(
       legalAction.payload.v1921RunnerProgramAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
-    if (typeof legalAction.payload.aiBoonRunStrength === "number")
-      context.aiBoonRunStrength = legalAction.payload.aiBoonRunStrength;
+    if (typeof legalAction.payload.runStartRandomStrengthBonus === "number")
+      context.runStartRandomStrengthBonus = legalAction.payload.runStartRandomStrengthBonus;
     if (typeof legalAction.payload.sourceDefinitionId === "string")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")
@@ -1839,26 +1895,26 @@ export function publicContextForAction(
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (
-      Array.isArray(legalAction.payload.playfulAiDieRolls) ||
-      typeof legalAction.payload.playfulAiDieRolls === "string"
+      Array.isArray(legalAction.payload.randomDiceLoopRolls) ||
+      typeof legalAction.payload.randomDiceLoopRolls === "string"
     )
-      context.playfulAiDieRolls = legalAction.payload.playfulAiDieRolls;
+      context.randomDiceLoopRolls = legalAction.payload.randomDiceLoopRolls;
     for (const key of [
-      "playfulAiGainedCredits",
-      "playfulAiSetAsideDice",
-      "playfulAiRolledDice",
-      "playfulAiDiceQueuedBeforeRolls",
-      "playfulAiDiceQueuedAfterRolls",
-      "playfulAiRemainingDice",
+      "randomDiceSplitGainedCredits",
+      "randomDiceSplitSetAsideDice",
+      "randomDiceLoopRolledDice",
+      "randomDiceLoopQueuedBeforeRolls",
+      "randomDiceLoopQueuedAfterRolls",
+      "randomDiceLoopRemainingDice",
       "runnerCreditsAfter",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.playfulAiChoiceOpened === "boolean")
-      context.playfulAiChoiceOpened = legalAction.payload.playfulAiChoiceOpened;
-    if (typeof legalAction.payload.playfulAiComplete === "boolean")
-      context.playfulAiComplete = legalAction.payload.playfulAiComplete;
+    if (typeof legalAction.payload.randomDiceSplitChoiceOpened === "boolean")
+      context.randomDiceSplitChoiceOpened = legalAction.payload.randomDiceSplitChoiceOpened;
+    if (typeof legalAction.payload.randomDiceLoopComplete === "boolean")
+      context.randomDiceLoopComplete = legalAction.payload.randomDiceLoopComplete;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")
