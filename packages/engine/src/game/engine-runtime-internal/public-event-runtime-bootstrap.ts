@@ -682,9 +682,9 @@ import {
   RUNNER_RANDOM_PROGRAM_CARD_IDS,
 } from "../../mechanics/random-effects";
 import {
-  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
-  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
-  TRACE_AWARE_RUN_EVENT_CARD_ID,
+  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
+  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
+  TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
   CRYBABY_ACCESS_COST_UPGRADE_ID,
@@ -1127,7 +1127,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID]: {
+  [RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE]: {
     name: "runner_event_run_with_replacement_overlap",
     requiresServer: true,
     resolve: (state, legalAction) => {
@@ -1143,7 +1143,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [RUN_ACCESS_PRESSURE_EVENT_CARD_ID]: {
+  [RUN_ACCESS_PRESSURE_EVENT_SOURCE]: {
     name: "runner_event_secret_spend_guess_targeted_bypass_run",
     canPlay: (state) => state.runner.credits >= 2,
     resolve: (state, legalAction) => {
@@ -1160,7 +1160,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [TRACE_AWARE_RUN_EVENT_CARD_ID]: {
+  [TRACE_AWARE_RUN_EVENT_SOURCE]: {
     name: "runner_event_trace_aware_run_access",
     requiresServer: true,
     resolve: (state, legalAction) => {

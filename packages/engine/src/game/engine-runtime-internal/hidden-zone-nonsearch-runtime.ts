@@ -18,7 +18,7 @@ export function createHiddenZoneNonSearchRuntime(
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
     SERVER_EXPOSE_PROGRAM_CARD_IDS,
     SHORT_CIRCUIT_RESOURCE_CARD_ID,
@@ -206,7 +206,7 @@ export function createHiddenZoneNonSearchRuntime(
       ...(playerAction ? { playerAction } : {}),
       constants: {
         corpArchivesToHqOperationCardId: CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-        runAccessPressureEventCardId: RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+        runAccessPressureEventCardId: RUN_ACCESS_PRESSURE_EVENT_SOURCE,
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
