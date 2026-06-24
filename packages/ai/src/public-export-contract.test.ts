@@ -152,6 +152,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-viral15-jack-out-score",
       "./runtime/runner-blink-recovery-score",
       "./runtime/runner-recovery-repeat-score",
+      "./runtime/runner-recovery-funding-need",
       "./runtime/runner-junkyard-bbs-recovery-score",
       "./runtime/runner-junkyard-bbs-recovery-target",
       "./runtime/runner-persistent-install-fit-score",

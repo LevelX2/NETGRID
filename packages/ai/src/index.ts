@@ -276,6 +276,10 @@ import {
   runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
 } from "./runtime/runner-recovery-repeat-score";
 import {
+  runnerRecoveryFundingNeedContext as buildRunnerRecoveryFundingNeedContext,
+  type RunnerRecoveryFundingNeedContext,
+} from "./runtime/runner-recovery-funding-need";
+import {
   runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
 } from "./runtime/runner-junkyard-bbs-recovery-score";
 import {
@@ -6013,26 +6017,14 @@ function runnerActionLooksLikeRecovery(
   return /recovery|trash_recovery|junkyard|heap|trash|bbs/.test(text);
 }
 
-function runnerRecoveryFundingNeedContext(input: AiDecisionInput): {
-  active: boolean;
-  reason: string;
-} {
-  if (runnerHandFundingTarget(input)) {
-    return { active: true, reason: "hand_funding_target" };
-  }
-  if (runnerBankHasConcreteFundingNeed(input)) {
-    return { active: true, reason: "concrete_bank_funding_need" };
-  }
-  if (
-    input.playerView.own.credits <= 2 &&
-    runnerHasKnownUnaffordableLegalRun(input)
-  ) {
-    return { active: true, reason: "known_unaffordable_run" };
-  }
-  if (input.playerView.own.credits <= 1) {
-    return { active: true, reason: "emergency_low_credits" };
-  }
-  return { active: false, reason: "none" };
+function runnerRecoveryFundingNeedContext(
+  input: AiDecisionInput,
+): RunnerRecoveryFundingNeedContext {
+  return buildRunnerRecoveryFundingNeedContext(input, {
+    handFundingTarget: runnerHandFundingTarget,
+    bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
+    hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+  });
 }
 
 function semanticRuntimeRecentRunnerRecoveryActions(
