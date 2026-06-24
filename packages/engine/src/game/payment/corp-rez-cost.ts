@@ -28,7 +28,6 @@ import type {
   CardRezCostModifierImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../../mechanics/agenda-operation-effects";
 import type { CostModifierQuote, CostQuote } from "./cost-quote";
 
 export { corpServerIdForInstalledCard } from "../../ability-engine/card-implementation-modifiers";
@@ -409,16 +408,9 @@ function definitionHasFortRunWindowKind(
 function isDiscountedRezSourceDefinition(
   definitionId: CardDefinitionId,
 ): boolean {
-  if (
-    definitionHasFortRunWindowKind(
-      definitionId,
-      "discounted_rez_ice_on_this_fort",
-    )
-  )
-    return true;
-  return (
-    !cardImplementationForDefinitionId(definitionId) &&
-    definitionId === OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID
+  return definitionHasFortRunWindowKind(
+    definitionId,
+    "discounted_rez_ice_on_this_fort",
   );
 }
 
