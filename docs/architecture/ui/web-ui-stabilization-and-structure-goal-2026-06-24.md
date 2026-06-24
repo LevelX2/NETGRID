@@ -210,7 +210,28 @@ Checks:
 
 ### Paket 6
 
-Offen.
+Entscheidung: Catalog-State, Filterableitungen, Listenfetch, Detailfetch und Detailcache wurden in `apps/web/features/catalog/useCatalogWorkspace.ts` verschoben.
+
+Schnitt:
+
+- `useCatalogWorkspace` besitzt Catalog-Suche, Side-/Status-/Set-/Rarity-/AI-/Type-/Blockstatus-Filter, sichtbare Cards, aktuelle Auswahl, Detailfetch, Detailcache und das Nachladen von Event-/Board-Kartendetails.
+- `page.tsx` erhält `catalogPanelProps`, `allCatalogCards`, `catalogDetailsById` und `ensureCatalogDetails`.
+- Deck-spezifische Nutzung bleibt im Root, fordert aber fehlende Catalog-Details nur noch über `ensureCatalogDetails` an.
+- `CatalogPanel` bleibt präsentational.
+
+Ergebnis:
+
+- `apps/web/app/page.tsx`: 4095 -> 3845 Zeilen.
+- Keine direkten Requests auf `/api/cards/catalog` mehr in `page.tsx`.
+- Hidden-Info-Projektionen bleiben unverändert; der Controller arbeitet nur mit bestehenden `PlayerView`-/PublicEvent-Daten und sichtbaren Catalog-Details.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 176 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
 
 ### Paket 7
 

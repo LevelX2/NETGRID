@@ -121,34 +121,10 @@ import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel }
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
-  CATALOG_STATUS_FILTER_KEYS,
-  CATALOG_STATUS_LABELS,
-  CATALOG_AI_HINT_FILTERS,
-  CATALOG_BLOCK_STATUS_FILTERS,
-  CATALOG_RARITY_FILTERS,
-  filterCatalogCardsByBlockStatus,
-  filterCatalogCardsByAiHint,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
-  catalogSetFilterOptions,
-  filterCatalogCardsByRarity,
-  filterCatalogCardsBySetId,
   filterCatalogCardsBySet,
-  filterCatalogCardsByType,
-  isCatalogVisibleCard,
-  nextCatalogSelection,
-  summarizeCatalogStatuses,
-  summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
-  summarizeCatalogTypeFilters,
-  summarizeCatalogBlockStatusFilters,
-  summarizeCatalogAiHintFilters,
-  type CatalogAiHintFilterKey,
-  type CatalogBlockStatusFilterKey,
-  type CatalogSetIdFilterOption,
-  type CatalogRarityFilterKey,
-  type CatalogStatusKey,
-  type CatalogTypeFilterState
 } from "./catalog-ui";
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
@@ -246,7 +222,7 @@ import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { UndoPanel } from "../features/app-shell/UndoPanel";
 import { OptionsPanel } from "../features/settings/OptionsPanel";
 import { CatalogPanel } from "../features/catalog/CatalogPanel";
-import type { CatalogCardDetail, CatalogCardSummary, CatalogListResponse } from "../features/catalog/catalog-types";
+import { useCatalogWorkspace } from "../features/catalog/useCatalogWorkspace";
 import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
 import type {
   DeckLibraryResponse,
@@ -455,32 +431,6 @@ type FocusedCard = {
   hiddenSide?: Side;
 };
 
-const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
-  ice: true,
-  agenda: true,
-  icebreaker: true,
-  asset: true,
-  upgrade: true,
-  operation: true,
-  event: true,
-  hardware: true,
-  resource: true,
-  program: true
-};
-
-const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
-  ice: false,
-  agenda: false,
-  icebreaker: false,
-  asset: false,
-  upgrade: false,
-  operation: false,
-  event: false,
-  hardware: false,
-  resource: false,
-  program: false
-};
-
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
@@ -528,22 +478,6 @@ export default function Page() {
   const [connection, setConnection] = useState<ConnectionState>("offline");
   const [notice, setNotice] = useState("");
   const [undoNotice, setUndoNotice] = useState("");
-  const [catalogSearch, setCatalogSearch] = useState("");
-  const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
-  const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
-  const [catalogExpertStatuses, setCatalogExpertStatuses] = useState(false);
-  const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
-  const [catalogSetFilter, setCatalogSetFilter] = useState("all");
-  const [catalogFiltersOpen, setCatalogFiltersOpen] = useState(false);
-  const [catalogBlockStatusFilter, setCatalogBlockStatusFilter] = useState<CatalogBlockStatusFilterKey>("all");
-  const [catalogRarityFilter, setCatalogRarityFilter] = useState<CatalogRarityFilterKey>("all");
-  const [catalogAiHintFilter, setCatalogAiHintFilter] = useState<CatalogAiHintFilterKey>("all");
-  const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
-  const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
-  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
-  const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(null);
-  const [allCatalogCards, setAllCatalogCards] = useState<CatalogCardSummary[]>([]);
-  const [catalogDetailsById, setCatalogDetailsById] = useState<Record<string, CatalogCardDetail>>({});
   const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
   const [runnerDeckSource, setRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
@@ -715,6 +649,16 @@ export default function Page() {
       setConnection,
       setNotice,
     });
+  const {
+    allCatalogCards,
+    catalogDetailsById,
+    catalogPanelProps,
+    ensureCatalogDetails,
+  } = useCatalogWorkspace(
+    payload
+      ? { eventTail: payload.eventTail, playerView: payload.playerView }
+      : null,
+  );
 
   useEffect(() => {
     lobbyRef.current = lobby;
@@ -1138,99 +1082,7 @@ export default function Page() {
     localDecksLoaded
   ]);
 
-  const blockStatusFilteredCatalogCards = useMemo(() => filterCatalogCardsByBlockStatus(catalogCards, catalogBlockStatusFilter), [catalogBlockStatusFilter, catalogCards]);
-  const catalogBlockStatusCounts = useMemo(() => summarizeCatalogBlockStatusFilters(catalogCards), [catalogCards]);
-  const catalogSetOptions = useMemo(() => catalogSetFilterOptions(blockStatusFilteredCatalogCards), [blockStatusFilteredCatalogCards]);
-  const setFilteredCatalogCards = useMemo(() => filterCatalogCardsBySetId(blockStatusFilteredCatalogCards, catalogSetFilter), [blockStatusFilteredCatalogCards, catalogSetFilter]);
-  const aiHintFilteredCatalogCards = useMemo(() => filterCatalogCardsByAiHint(setFilteredCatalogCards, catalogAiHintFilter), [setFilteredCatalogCards, catalogAiHintFilter]);
-  const rarityFilteredCatalogCards = useMemo(() => filterCatalogCardsByRarity(aiHintFilteredCatalogCards, catalogRarityFilter), [aiHintFilteredCatalogCards, catalogRarityFilter]);
-  const filteredCatalogCards = useMemo(() => filterCatalogCardsByType(rarityFilteredCatalogCards, catalogTypeFilters), [catalogTypeFilters, rarityFilteredCatalogCards]);
-  const filteredCatalogSummary = useMemo(() => summarizeCatalogStatuses(filteredCatalogCards), [filteredCatalogCards]);
-  const catalogAiHintCounts = useMemo(() => summarizeCatalogAiHintFilters(setFilteredCatalogCards), [setFilteredCatalogCards]);
-  const catalogRarityCounts = useMemo(() => summarizeCatalogRarityFilters(aiHintFilteredCatalogCards), [aiHintFilteredCatalogCards]);
-  const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(rarityFilteredCatalogCards), [rarityFilteredCatalogCards]);
-
   useEffect(() => {
-    if (catalogSetFilter === "all") return;
-    if (!catalogSetOptions.some((option) => option.key === catalogSetFilter)) setCatalogSetFilter("all");
-  }, [catalogSetFilter, catalogSetOptions]);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (catalogSearch.trim()) params.set("q", catalogSearch.trim());
-    if (catalogSide !== "all") params.set("side", catalogSide);
-    if (catalogStatus !== "all") params.set("status", catalogStatus);
-    void fetch(`/api/cards/catalog?${params.toString()}`, { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => {
-        const visibleCards = (data.cards ?? []).filter(isCatalogVisibleCard);
-        setCatalogCards(visibleCards);
-        setCatalogFilters(data.filters ?? null);
-        setSelectedCatalogId((current) => nextCatalogSelection(current, visibleCards, catalogTypeFilters));
-      })
-      .catch(() => {
-        setCatalogCards([]);
-        setCatalogFilters(null);
-        setSelectedCatalogId(null);
-      });
-  }, [catalogSearch, catalogSide, catalogStatus]);
-
-  useEffect(() => {
-    setSelectedCatalogId((current) => (current && filteredCatalogCards.some((card) => card.catalogCardId === current) ? current : filteredCatalogCards[0]?.catalogCardId ?? null));
-  }, [filteredCatalogCards]);
-
-  useEffect(() => {
-    if (!selectedCatalogId) {
-      setCatalogDetail(null);
-      return;
-    }
-    let ignore = false;
-    void fetch(`/api/cards/catalog/${encodeURIComponent(selectedCatalogId)}`, { cache: "no-store" })
-      .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-      .then((data) => {
-        if (!ignore) setCatalogDetail(data.card ?? null);
-      })
-      .catch(() => {
-        if (!ignore) setCatalogDetail(null);
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [selectedCatalogId]);
-
-  useEffect(() => {
-    const eventIds = (payload?.eventTail ?? []).flatMap(revealedEventCardIds);
-    const visibleIds = visibleKnownCardIds(payload?.playerView);
-    const missingIds = Array.from(new Set([...eventIds, ...visibleIds])).filter((cardId) => !catalogDetailsById[cardId]);
-    if (missingIds.length === 0) return;
-    let cancelled = false;
-    void Promise.all(
-      missingIds.map((cardId) =>
-        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
-          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-          .then((data) => data.card)
-          .catch(() => null)
-      )
-    ).then((details) => {
-      if (cancelled) return;
-      setCatalogDetailsById((current) => {
-        const next = { ...current };
-        details.forEach((detail) => {
-          if (detail) next[detail.catalogCardId] = detail;
-        });
-        return next;
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [payload?.eventTail, payload?.playerView, catalogDetailsById]);
-
-  useEffect(() => {
-    void fetch("/api/cards/catalog", { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => setAllCatalogCards((data.cards ?? []).filter(isCatalogVisibleCard)))
-      .catch(() => setAllCatalogCards([]));
     void fetch("/api/decks/snapshots", { cache: "no-store" })
       .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
       .then((data) => {
@@ -1799,56 +1651,14 @@ export default function Page() {
         const catalogCard = catalogCardById.get(cardId);
         return !catalogCard || catalogCard.type === "agenda";
       });
-    if (missingIds.length === 0) return;
-    let cancelled = false;
-    void Promise.all(
-      missingIds.map((cardId) =>
-        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
-          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-          .then((data) => data.card)
-          .catch(() => null)
-      )
-    ).then((details) => {
-      if (cancelled) return;
-      setCatalogDetailsById((current) => {
-        const next = { ...current };
-        details.forEach((detail) => {
-          if (detail) next[detail.catalogCardId] = detail;
-        });
-        return next;
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [entryTab, selectedLocalDeck, allCatalogCards, catalogDetailsById]);
+    void ensureCatalogDetails(missingIds);
+  }, [entryTab, selectedLocalDeck, allCatalogCards, catalogDetailsById, ensureCatalogDetails]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
     const missingIds = playableCatalogCards.map((card) => card.catalogCardId).filter((cardId) => !catalogDetailsById[cardId]);
-    if (missingIds.length === 0) return;
-    let cancelled = false;
-    void Promise.all(
-      missingIds.map((cardId) =>
-        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
-          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-          .then((data) => data.card)
-          .catch(() => null)
-      )
-    ).then((details) => {
-      if (cancelled) return;
-      setCatalogDetailsById((current) => {
-        const next = { ...current };
-        details.forEach((detail) => {
-          if (detail) next[detail.catalogCardId] = detail;
-        });
-        return next;
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [entryTab, playableCatalogCards, catalogDetailsById]);
+    void ensureCatalogDetails(missingIds);
+  }, [entryTab, playableCatalogCards, catalogDetailsById, ensureCatalogDetails]);
 
   useEffect(() => {
     if (!resultKey || !resultSummary) {
@@ -3429,41 +3239,7 @@ export default function Page() {
           </section>
           ) : null}
           {entryTab === "catalog" ? (
-            <CatalogPanel
-            cards={filteredCatalogCards}
-            detail={catalogDetail}
-            filters={catalogFilters}
-            search={catalogSearch}
-            side={catalogSide}
-            status={catalogStatus}
-            summary={filteredCatalogSummary}
-            setFilter={catalogSetFilter}
-            setOptions={catalogSetOptions}
-            selectedId={selectedCatalogId}
-            filtersOpen={catalogFiltersOpen}
-            showExpertStatuses={catalogExpertStatuses}
-            blockStatusCounts={catalogBlockStatusCounts}
-            blockStatusFilter={catalogBlockStatusFilter}
-            aiHintCounts={catalogAiHintCounts}
-            aiHintFilter={catalogAiHintFilter}
-            rarityCounts={catalogRarityCounts}
-            rarityFilter={catalogRarityFilter}
-            typeCounts={catalogTypeCounts}
-            typeFilters={catalogTypeFilters}
-            onSearch={setCatalogSearch}
-            onSide={setCatalogSide}
-            onStatus={setCatalogStatus}
-            onSetFilter={setCatalogSetFilter}
-            onSelect={setSelectedCatalogId}
-            onFiltersOpen={setCatalogFiltersOpen}
-            onToggleExpertStatuses={setCatalogExpertStatuses}
-            onBlockStatusFilter={setCatalogBlockStatusFilter}
-            onAiHintFilter={setCatalogAiHintFilter}
-            onRarity={setCatalogRarityFilter}
-            onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
-            onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
-            onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
-          />
+            <CatalogPanel {...catalogPanelProps} />
           ) : null}
           {entryTab === "decks" ? (
             <DeckEditorPanel
@@ -4003,41 +3779,7 @@ export default function Page() {
       ) : (
         <ActiveMatchWorkspaceArea
           workspace={activeMatchWorkspace}
-          catalogPanelProps={{
-            cards: filteredCatalogCards,
-            detail: catalogDetail,
-            filters: catalogFilters,
-            search: catalogSearch,
-            side: catalogSide,
-            status: catalogStatus,
-            summary: filteredCatalogSummary,
-            setFilter: catalogSetFilter,
-            setOptions: catalogSetOptions,
-            selectedId: selectedCatalogId,
-            filtersOpen: catalogFiltersOpen,
-            showExpertStatuses: catalogExpertStatuses,
-            blockStatusCounts: catalogBlockStatusCounts,
-            blockStatusFilter: catalogBlockStatusFilter,
-            aiHintCounts: catalogAiHintCounts,
-            aiHintFilter: catalogAiHintFilter,
-            rarityCounts: catalogRarityCounts,
-            rarityFilter: catalogRarityFilter,
-            typeCounts: catalogTypeCounts,
-            typeFilters: catalogTypeFilters,
-            onSearch: setCatalogSearch,
-            onSide: setCatalogSide,
-            onStatus: setCatalogStatus,
-            onSetFilter: setCatalogSetFilter,
-            onSelect: setSelectedCatalogId,
-            onFiltersOpen: setCatalogFiltersOpen,
-            onToggleExpertStatuses: setCatalogExpertStatuses,
-            onBlockStatusFilter: setCatalogBlockStatusFilter,
-            onAiHintFilter: setCatalogAiHintFilter,
-            onRarity: setCatalogRarityFilter,
-            onTypeFilter: (key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected })),
-            onSelectAllTypes: () => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS }),
-            onClearTypeFilters: () => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })
-          }}
+          catalogPanelProps={catalogPanelProps}
           deckEditorPanelProps={{
             localDecks,
             selectedDeck: selectedLocalDeck,
