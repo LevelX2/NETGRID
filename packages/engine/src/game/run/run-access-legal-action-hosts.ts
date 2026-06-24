@@ -5,7 +5,7 @@ import {
   type AccessFlowCompositionHost,
 } from "../access/access-flow-hosts";
 import { buildRunnerDuringRunCardImplementationActions } from "./card-implementation-run-actions";
-import { buildMysteryBoxRunActions } from "./encounter-actions";
+import { buildRevealedStackProgramInstallRunActions } from "./encounter-actions";
 import {
   createRunFlowAdapters,
   type RunFlowAdapters,
@@ -180,7 +180,7 @@ export function createRunAccessLegalActionHostComposition(
           cardImplementation.runCardImplementationActionHost(state),
         ).legalActions,
       hiddenStackInstallRunActions: (state, activeRun) =>
-        buildMysteryBoxRunActions(
+        buildRevealedStackProgramInstallRunActions(
           runFlow.runnerEncounterActionHostForState(state),
           activeRun,
         ),

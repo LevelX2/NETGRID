@@ -132,7 +132,7 @@ export function buildRunnerEncounterActions(
   const encounteredIceStrength = host.ice.strengthForIce(encounteredIceId);
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
-  actions.push(...selfModifyingCodeEncounterActions(host));
+  actions.push(...paidStackProgramInstallEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
     if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
@@ -572,7 +572,7 @@ export function buildRunnerMovementActions(
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
   actions.push(...host.callbacks.postPassSpecialWindowActions());
-  actions.push(...buildMysteryBoxRunActions(host, run));
+  actions.push(...buildRevealedStackProgramInstallRunActions(host, run));
   const jackOutAdditionalCost = host.payment.runJackOutAdditionalCost(run);
   if (host.payment.availableRunnerRunCredits() >= jackOutAdditionalCost) {
     actions.push(
@@ -609,7 +609,7 @@ export function buildRunnerMovementActions(
   return { handled: true, legalActions: actions };
 }
 
-function selfModifyingCodeEncounterActions(
+function paidStackProgramInstallEncounterActions(
   host: RunnerEncounterActionHost,
 ): LegalAction[] {
   const state = host.state;
@@ -891,7 +891,7 @@ function postPassPayOrEndRunActions(
   return actions;
 }
 
-export function buildMysteryBoxRunActions(
+export function buildRevealedStackProgramInstallRunActions(
   host: RunnerEncounterActionHost,
   run: ActiveRun,
 ): LegalAction[] {
@@ -926,7 +926,7 @@ export function buildMysteryBoxRunActions(
             .join(","),
           revealedProgramCount: programCount,
           hiddenZoneBarrier: true,
-          hiddenZoneAction: "mystery_box_stack_top5_reveal",
+          hiddenZoneAction: "revealed_stack_program_install_top5_reveal",
         },
       );
     });
