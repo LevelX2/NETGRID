@@ -1,9 +1,15 @@
+import { disinfectantIncImplementation } from "../card-implementations/onr-v1/corp/assets/disinfectant-inc";
+import { setupImplementation } from "../card-implementations/onr-v1/corp/assets/setup";
+import { trapImplementation } from "../card-implementations/onr-v1/corp/assets/trap";
+
 export const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
   "onr_v1_316_cowboy-sysop";
 
 export const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
-  "onr_v1_319_disinfectant-inc";
+  disinfectantIncImplementation.cardDefinitionId;
 
-export const SETUP_ACCESS_AMBUSH_ASSET_SOURCE = "onr_v1_340_setup";
+export const SETUP_ACCESS_AMBUSH_ASSET_SOURCE =
+  setupImplementation.cardDefinitionId;
 
-export const TRAP_ACCESS_AMBUSH_ASSET_SOURCE = "onr_v1_345_trap";
+export const TRAP_ACCESS_AMBUSH_ASSET_SOURCE =
+  trapImplementation.cardDefinitionId;
