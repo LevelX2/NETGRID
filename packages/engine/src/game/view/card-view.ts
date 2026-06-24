@@ -26,6 +26,7 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { CASCADE_ID, SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -207,20 +208,6 @@ export function counterDisplaysField(
     : {};
 }
 
-const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
-  "onr_v1_154_broker",
-  "onr_v1_178_short-term-contract",
-  "onr_v1_174_rigged-investments",
-  "onr_v1_309_bbs-whispering-campaign",
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_337_rockerboy-promotion",
-  "onr_v1_318_department-of-truth-enhancement",
-  "onr_v1_193_corporate-coup",
-  "onr_v1_198_detroit-police-contract",
-  "onr_v1_209_political-coup",
-]);
-
 function visibleCountersForKnownCard(
   definition: CardDefinition,
   instance: CardInstance,
@@ -271,7 +258,8 @@ function storedCreditCounterDisplays(
   definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  if (!STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  if (!hasStoredCreditCounterDisplay(implementation)) return undefined;
   const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
   if (amount <= 0) return undefined;
   return [
@@ -322,10 +310,10 @@ function restrictedPoolCounterDisplays(
   definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  if (STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
   const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
   if (amount <= 0) return undefined;
   const implementation = cardImplementationForDefinitionId(definition.id);
+  if (hasStoredCreditCounterDisplay(implementation)) return undefined;
   const restrictedSource = implementation?.restrictedHostedCreditSource;
   const tracePoolSource = implementation?.fortRunWindows?.some(
     (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
@@ -358,6 +346,43 @@ function restrictedPoolCounterDisplays(
       },
     },
   ];
+}
+
+function hasStoredCreditCounterDisplay(
+  implementation: CardImplementationDefinition | undefined,
+): boolean {
+  if (!implementation || implementation.restrictedHostedCreditSource)
+    return false;
+  if (
+    implementation.fortRunWindows?.some(
+      (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
+    )
+  )
+    return false;
+  return implementationHasHostedCreditEconomy(implementation);
+}
+
+function implementationHasHostedCreditEconomy(
+  implementation: CardImplementationDefinition,
+): boolean {
+  const directEffects = [
+    ...(implementation.abilities ?? []).flatMap((ability) => ability.effects),
+    ...(implementation.lifecycle?.on_rez ?? []),
+    ...(implementation.lifecycle?.on_install ?? []),
+    ...(implementation.lifecycle?.on_score ?? []),
+    ...(implementation.lifecycle?.on_leave_play ?? []),
+  ];
+  const triggeredEffects = [
+    ...(implementation.lifecycle?.start_of_corp_turn ?? []),
+    ...(implementation.lifecycle?.start_of_runner_turn ?? []),
+    ...(implementation.lifecycle?.end_of_runner_turn ?? []),
+    ...(implementation.lifecycle?.on_runner_run_start ?? []),
+  ].flatMap((trigger) => trigger.effects);
+  return [...directEffects, ...triggeredEffects].some(
+    (effect) =>
+      effect.kind === "add_hosted_credits" ||
+      effect.kind === "take_hosted_credits",
+  );
 }
 
 function restrictedPoolDisplayLabel(
