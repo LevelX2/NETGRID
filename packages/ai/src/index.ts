@@ -187,12 +187,10 @@ import {
 } from "./runtime/semantic-runtime-corp-remote-score";
 import {
   semanticRuntimeCorpPassiveScoreLinePenalty as buildSemanticRuntimeCorpPassiveScoreLinePenalty,
-  type SemanticRuntimeCorpPassiveScoreLineDependencies,
 } from "./runtime/semantic-runtime-corp-passive-scoreline";
 import {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment as buildSemanticRuntimeCorpAdvancementCounterPlacementAssessment,
   type CorpAdvancementCounterPlacementAssessment,
-  type SemanticRuntimeCorpAdvancementCounterDependencies,
 } from "./runtime/semantic-runtime-corp-advancement-counter";
 import {
   semanticRuntimeCorpActionIsScoreLine as buildSemanticRuntimeCorpActionIsScoreLine,
@@ -204,21 +202,15 @@ import {
   semanticRuntimeCorpRemoteIsProtected as buildSemanticRuntimeCorpRemoteIsProtected,
   semanticRuntimeCorpServer as buildSemanticRuntimeCorpServer,
   semanticRuntimeCorpVisibleServerCard as buildSemanticRuntimeCorpVisibleServerCard,
-  type SemanticRuntimeCorpBoardDependencies,
 } from "./runtime/semantic-runtime-corp-board";
 import {
   semanticRuntimeCorpScoreNowSafetyGate as buildSemanticRuntimeCorpScoreNowSafetyGate,
-  type SemanticRuntimeCorpScoreSafetyDependencies,
   type SemanticRuntimeCorpScoreSafetyGate,
 } from "./runtime/semantic-runtime-corp-score-safety";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
-import {
-  semanticRuntimeServerId,
-  type SemanticRuntimeScopeDependencies,
-} from "./runtime/semantic-runtime-scope";
+import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
   buildSemanticRuntimeChoices,
-  type SemanticRuntimeChoiceBuilderDependencies,
 } from "./runtime/semantic-runtime-choice-builder";
 import {
   semanticRuntimeActionExclusion as buildSemanticRuntimeActionExclusion,
@@ -3869,50 +3861,44 @@ const SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES: SemanticRuntimeCorpRemote
   actionCreditCost,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 };
-const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES: SemanticRuntimeCorpPassiveScoreLineDependencies =
-  {
-    scoreTerminalWindow: assessCorpScoreTerminalWindow,
-    actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-    rolesForAction,
-  };
-const SEMANTIC_RUNTIME_CORP_ADVANCEMENT_COUNTER_DEPENDENCIES: SemanticRuntimeCorpAdvancementCounterDependencies =
-  {
-    sourceDefinitionIdForAction,
-    normalizedRulesTextForDefinition,
-    actionCreditCost,
-    actionSourceCard: semanticRuntimeCorpActionSourceCard,
-    visibleServerCard: findVisibleCorpServerCard,
-    cardType: semanticRuntimeVisibleCardType,
-    cardAdvancementRequirement:
-      semanticRuntimeVisibleCardAdvancementRequirement,
-    teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
-  };
-const SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES: SemanticRuntimeCorpBoardDependencies =
-  {
-    serverId: semanticRuntimeServerId,
-    findVisibleCard,
-    findVisibleCorpServerCard,
-    rolesForAction,
-    isRemoteServerTarget,
-  };
-const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES: SemanticRuntimeCorpScoreSafetyDependencies =
-  {
-    scoreTerminalWindow: assessCorpScoreTerminalWindow,
-  };
-const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
+const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES = {
+  scoreTerminalWindow: assessCorpScoreTerminalWindow,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  rolesForAction,
+};
+const SEMANTIC_RUNTIME_CORP_ADVANCEMENT_COUNTER_DEPENDENCIES = {
+  sourceDefinitionIdForAction,
+  normalizedRulesTextForDefinition,
+  actionCreditCost,
+  actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  visibleServerCard: findVisibleCorpServerCard,
+  cardType: semanticRuntimeVisibleCardType,
+  cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
+  teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
+};
+const SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES = {
+  serverId: semanticRuntimeServerId,
+  findVisibleCard,
+  findVisibleCorpServerCard,
+  rolesForAction,
+  isRemoteServerTarget,
+};
+const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES = {
+  scoreTerminalWindow: assessCorpScoreTerminalWindow,
+};
+const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
 };
-const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES: SemanticRuntimeChoiceBuilderDependencies =
-  {
-    scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
-    actionExclusion: semanticRuntimeActionExclusion,
-    scoreBreakdown: semanticRuntimeScoreBreakdown,
-    actionCreditCost,
-    evidence: semanticRuntimeEvidence,
-    explanation: semanticRuntimeExplanation,
-    compareAction,
-  };
+const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
+  scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
+  actionExclusion: semanticRuntimeActionExclusion,
+  scoreBreakdown: semanticRuntimeScoreBreakdown,
+  actionCreditCost,
+  evidence: semanticRuntimeEvidence,
+  explanation: semanticRuntimeExplanation,
+  compareAction,
+};
 const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclusionDependencies =
   {
     planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
