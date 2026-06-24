@@ -294,6 +294,10 @@ import {
   visibleCardText as buildVisibleCardText,
 } from "./runtime/visible-card-heuristics";
 import {
+  runnerCardAddressesVisibleBreakerNeed as buildRunnerCardAddressesVisibleBreakerNeed,
+  visibleBreakerCardCanAddressIce as buildVisibleBreakerCardCanAddressIce,
+} from "./runtime/runner-visible-breaker-coverage";
+import {
   runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
 } from "./runtime/runner-junkyard-bbs-recovery-score";
 import {
@@ -6127,24 +6131,16 @@ function runnerCardAddressesVisibleBreakerNeed(
   input: AiDecisionInput,
   card: VisibleCard,
 ): boolean {
-  if (input.side !== "runner" || !isVisibleIcebreakerProgram(card))
-    return false;
-  return input.playerView.servers.some((server) => {
-    const assessment = assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    );
-    if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess) {
-      return false;
-    }
-    return server.ice.some(
-      (ice) =>
-        ice.known &&
-        ice.rezzed === true &&
-        visibleBreakerCardCanAddressIce(card, ice),
-    );
+  return buildRunnerCardAddressesVisibleBreakerNeed(input, card, {
+    isVisibleIcebreakerProgram,
+    knownPathAssessment: (runtimeInput, server) =>
+      assessKnownRezzedIcePath(
+        server.ice,
+        runtimeInput.playerView.own.rig ?? [],
+        runtimeInput.playerView.own.credits,
+        server.root,
+      ),
+    breakerCanAddressIce: visibleBreakerCardCanAddressIce,
   });
 }
 
@@ -6152,32 +6148,10 @@ function visibleBreakerCardCanAddressIce(
   breaker: VisibleCard,
   ice: VisibleCard,
 ): boolean {
-  const roles = visibleBreakerRolesForAi(breaker);
-  const breakerText = visibleCardTextForAi(breaker).toLowerCase();
-  if (
-    roles.includes("icebreaker") &&
-    /break (?:an? |one |\d+ )?ice subroutine|breaks? .*subroutine/.test(
-      breakerText,
-    )
-  ) {
-    return true;
-  }
-  const iceText = visibleCardTextForAi(ice).toLowerCase();
-  if (/wall|barrier/.test(iceText)) {
-    return (
-      roles.includes("fracter") || /fracter|wall|barrier/.test(breakerText)
-    );
-  }
-  if (/code gate|codegate/.test(iceText)) {
-    return (
-      roles.includes("decoder") ||
-      /decoder|code gate|codegate/.test(breakerText)
-    );
-  }
-  if (/sentry/.test(iceText)) {
-    return roles.includes("killer") || /killer|sentry/.test(breakerText);
-  }
-  return roles.length > 0 && /break/.test(breakerText);
+  return buildVisibleBreakerCardCanAddressIce(breaker, ice, {
+    visibleBreakerRoles: visibleBreakerRolesForAi,
+    visibleCardText: visibleCardTextForAi,
+  });
 }
 
 function visibleCardTextForAi(card: VisibleCard): string {
