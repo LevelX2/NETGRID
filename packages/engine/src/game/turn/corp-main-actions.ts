@@ -102,7 +102,6 @@ export type CorpMainActionGenerationHost = {
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
     ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
   };
 };
@@ -217,8 +216,6 @@ export function buildCorpMainActions(
   const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
     host.constants.DISINFECTANT_VIRUS_COUNTER_ASSET_ID;
   const COUNTER_UPGRADE_CARD_IDS = host.constants.COUNTER_UPGRADE_CARD_IDS;
-  const TAG_CONDITION_UPGRADE_CARD_IDS =
-    host.constants.TAG_CONDITION_UPGRADE_CARD_IDS;
   const ADVANCEMENT_PLACEMENT_OPERATION_ID =
     host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
 
@@ -755,27 +752,6 @@ export function buildCorpMainActions(
             v1918UpgradeAbility: "add_power_counter",
             counterType: "power",
             addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      state.runner.tags > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: getaggten Runner besteuern`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "tag_condition_credit",
-            gainCreditsAmount: 1,
           },
         ),
       );

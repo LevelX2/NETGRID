@@ -113,12 +113,3 @@ export const CORP_RUN_TAX_UPGRADE_CARD_IDS = cardIdsMatching(
       "block_stealth_bits_during_runs_on_this_fort",
     ]),
 );
-
-export const CORP_TAG_CONDITION_UPGRADE_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "upgrade") &&
-    hasFortRunWindowKind(implementation, [
-      "swap_unrezzed_fort_ice_with_hq_ice",
-      "corp_trace_bits_during_runs_on_this_fort",
-    ]),
-);

@@ -262,7 +262,6 @@ function testCorpMainHost(
       COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
       COUNTER_UPGRADE_CARD_IDS: new Set(),
-      TAG_CONDITION_UPGRADE_CARD_IDS: new Set(),
       ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
     },
   };

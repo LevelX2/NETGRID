@@ -159,7 +159,6 @@ export type CreditEconomyExecutionHost = {
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
     RUNNER_RANDOM_PROGRAM_CARD_IDS: ReadonlySet<string>;
     QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
@@ -474,42 +473,6 @@ export function handleCreditEconomyExecution(
     return handled(legalAction);
   }
   if (host.delegates.handleTraceOrchestrationAction(legalAction).handled) {
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1918UpgradeAbility === "tag_condition_credit") {
-    if (legalAction.side !== "corp")
-      throw new Error(
-        "Nur die Korp darf V1.9.18-Tag-Condition-Upgrades nutzen.",
-      );
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.18-Tag-Condition-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (
-      !host.constants.TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) ||
-      host.cards.hasCardImplementationForDefinition(definition.id)
-    )
-      throw new Error(
-        "Die V1.9.18-Tag-Condition-Faehigkeit passt nicht zur Karte.",
-      );
-    if (state.runner.tags <= 0)
-      throw new Error("Der Runner ist nicht getaggt.");
-    const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-    if (!Number.isInteger(gainAmount) || gainAmount !== 1)
-      throw new Error(
-        "V1.9.18-Tag-Condition-Upgrades gewaehrten in diesem WIP genau 1 Credit.",
-      );
-    host.credits.gain(state, "corp", gainAmount);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      gainedCredits: gainAmount,
-      corpCreditsAfter: state.corp.credits,
-      runnerTagsAfter: state.runner.tags,
-    };
     return handled(legalAction);
   }
   if (host.delegates.handleCorpSpecialDamageAbilityAction(legalAction).handled)

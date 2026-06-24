@@ -659,7 +659,6 @@ import {
 } from "../../mechanics/server-upgrades";
 import {
   RUN_TAX_UPGRADE_CARD_IDS,
-  TAG_CONDITION_UPGRADE_CARD_IDS,
 } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -846,7 +845,6 @@ export function createApplyActionRuntimeHosts(
         COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
         COUNTER_UPGRADE_CARD_IDS,
-        TAG_CONDITION_UPGRADE_CARD_IDS,
         RUNNER_RANDOM_PROGRAM_CARD_IDS,
         QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
         FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
