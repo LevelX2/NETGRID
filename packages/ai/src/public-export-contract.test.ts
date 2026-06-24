@@ -175,6 +175,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-economy-commitment-score",
       "./runtime/runner-bad-publicity-relevance-score",
       "./runtime/runner-bad-publicity-relevance-assessment",
+      "./runtime/runner-bad-publicity-relevance-context",
       "./runtime/runner-viral15-jack-out-score",
       "./runtime/runner-blink-recovery-score",
       "./runtime/runner-recovery-repeat-score",

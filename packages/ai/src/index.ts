@@ -247,12 +247,8 @@ import {
   runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents,
 } from "./runtime/runner-economy-commitment-score";
 import {
-  runnerBadPublicityRelevanceScoreComponent as buildRunnerBadPublicityRelevanceScoreComponent,
-} from "./runtime/runner-bad-publicity-relevance-score";
-import {
-  runnerBadPublicityRelevanceAssessment as buildRunnerBadPublicityRelevanceAssessment,
-  type RunnerBadPublicityRelevanceAssessment,
-} from "./runtime/runner-bad-publicity-relevance-assessment";
+  createRunnerBadPublicityRelevanceContext,
+} from "./runtime/runner-bad-publicity-relevance-context";
 import {
   runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
   type RunnerLoanLiabilityAssessment,
@@ -3739,7 +3735,10 @@ const {
   selectedChoicesForDecision,
   scrubEvidence,
 });
-const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES = {
+const {
+  runnerBadPublicityRelevanceAssessment,
+  runnerBadPublicityRelevanceScoreComponent,
+} = createRunnerBadPublicityRelevanceContext({
   sourceDefinitionIdForAction,
   selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
   actionCreditCost,
@@ -3755,7 +3754,7 @@ const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES = {
         ? stringRecordValue(effect as Record<string, unknown>, "target")
         : undefined,
   },
-};
+});
 const {
   runnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion,
@@ -6626,26 +6625,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function runnerBadPublicityRelevanceScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerBadPublicityRelevanceScoreComponent(input, action, {
-    assessment: runnerBadPublicityRelevanceAssessment,
-  });
-}
-
-function runnerBadPublicityRelevanceAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerBadPublicityRelevanceAssessment | undefined {
-  return buildRunnerBadPublicityRelevanceAssessment(
-    input,
-    action,
-    RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES,
   );
 }
 
