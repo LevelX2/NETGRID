@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps, GameState, LegalAction, PlayerAction, ChoiceRequest, Side, CardDefinition, CardDefinitionId, CardInstanceId, CorpServer, CounterType, DamageSummary, ResolvedGameEffect, ServerId, PendingChoiceResolutionHost, HiddenZoneSearchActivationHandlerHost, HiddenZoneSearchChoiceHandlerHost, HiddenZoneArrangeChoiceHandlerHost, HiddenZoneNonSearchChoiceHandlerHost, CorpZoneChoiceHandlerHost, CardRunnerEventLongtailImplementation } from "./runtime-shared";
 
 export function createTurnCorpRuntime(deps: RuntimeDeps) {

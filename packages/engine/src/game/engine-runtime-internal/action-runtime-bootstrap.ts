@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import {
   DEMO_CARDS_BY_ID,
@@ -717,6 +716,7 @@ import type {
   CardDamagePreventionSourceImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
+  CardInstallCapabilityImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
@@ -737,12 +737,13 @@ import {
   effectiveAgendaDifficultyDeps,
   pickRunnerAgendaForAgendaPointCost,
 } from "./runtime-bootstrap-support";
+import type { RuntimeDeps } from "./runtime-shared";
 import { RUNNER_EVENT_RESOLVERS } from "./public-event-runtime-bootstrap";
 
 export function configureActionRuntimeBootstrap({
   cardImplementationRuntimeDeps,
   runFlow,
-}) {
+}: Pick<RuntimeDeps, "cardImplementationRuntimeDeps" | "runFlow">) {
   const mainActionHostComposition = createMainActionHostComposition({
     actions: {
       buildLegalAction: action,
@@ -822,8 +823,6 @@ export function configureActionRuntimeBootstrap({
       corpAgendaPointTotal,
       hasCorpUtilityKind,
       uniqueDirectLongtailKindForDefinition,
-      corpInstalledEconomyActionProfileForDefinition,
-      corpInstalledEconomyActionPayload,
       filterActionsForRestrictedExtraActions:
         runtimeDelegates.filterActionsForRestrictedExtraActions,
     },
@@ -856,7 +855,7 @@ export function configureActionRuntimeBootstrap({
       canInstallCorpRootCardInNewRemote: (definition) =>
         !requiresDataFortInstallTarget(definition) &&
         !cardInstallCapabilitiesForDefinition(definition.id).some(
-          (capability) =>
+          (capability: CardInstallCapabilityImplementation) =>
             capability.kind === "install_only_in_hq_or_rd" ||
             capability.kind === "install_only_in_hq",
         ) &&
@@ -921,7 +920,6 @@ export function configureActionRuntimeBootstrap({
         hostedProgramIdsOnHardware(runFortTriggerExecutionHost(stateToRead), cardId),
       topRunnerHeapCardId,
       constants: {
-        CODE_VIRAL_CACHE_ID,
         COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
         COUNTER_UPGRADE_SOURCES,

@@ -89,6 +89,14 @@ Checks:
 - `corepack pnpm check:engine-cardimplementation-architecture-target`
 - `git diff --check`
 
+Abschluss 2026-06-24:
+- Runtime-Composition-Ports und Hidden-Zone-Linking sind explizit typisiert; offene Runtime-Bags, Proxy-DI und `@ts-nocheck` sind aus dem P2-Scope entfernt.
+- `corepack pnpm --filter @netgrid/engine typecheck`: grün.
+- `corepack pnpm --filter @netgrid/engine test`: grün, 173 Testdateien / 1519 Tests.
+- P2-Guard-Scans für `runtimeProxy`, `Record<string, unknown>`, Index-Signatures, `@ts-nocheck`, `any` und `unknown` im P2-Zielschnitt: keine Treffer.
+- `corepack pnpm check:engine-cardimplementation-architecture-target`: erwartbar weiter rot für P3-P5-Kategorien; P2-Kategorie `runtime escape hatches removed` steht bei `0`.
+- `git diff --check`: keine Whitespace-Fehler; nur CRLF-Normalisierungswarnungen für bestehende Dateien.
+
 Commit: `refactor(engine): type runtime composition ports`
 
 ### P3 Effect-Ausführung fachlich strukturieren

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import {
   DEMO_CARDS_BY_ID,
@@ -966,6 +965,10 @@ export function configureCardRuntimeBootstrap() {
     const server = mustServer(state, source.zone.serverId);
     if (server.kind !== "remote")
       throw new Error("Fort-Ersatz darf nur in einem Remote ausloesen.");
+    const targetServerId = server.id as Exclude<
+      ServerId,
+      "hq" | "rd" | "archives" | "new_remote"
+    >;
     if (!stateIsAtServerAfterPassingLastIceWindow(state, server))
       throw new Error("Fort-Ersatz darf nur nach der letzten ICE dieses Forts ausloesen.");
     const removedIce = server.ice.slice();
@@ -985,9 +988,9 @@ export function configureCardRuntimeBootstrap() {
         legalCandidates,
       );
       const payload = {
-        ...orderedFortRebuildPublicPayload({
-          sourceDefinitionId,
-          targetServerId: server.id,
+          ...orderedFortRebuildPublicPayload({
+            sourceDefinitionId,
+          targetServerId,
           removedCardCount: removedCount,
           replacementCardCount: 0,
           installedIceCount: 0,
@@ -1056,7 +1059,7 @@ export function configureCardRuntimeBootstrap() {
     const payload = {
       ...orderedFortRebuildPublicPayload({
         sourceDefinitionId,
-        targetServerId: server.id,
+        targetServerId,
         removedCardCount: removedCount,
         replacementCardCount: selected.length,
         installedIceCount: server.ice.length,
@@ -1386,7 +1389,7 @@ export function configureCardRuntimeBootstrap() {
       spendCredits(state, side, amount);
       const temporaryCredits = state.run?.corpRunTemporaryCredits;
       if (side !== "corp" || amount <= 0 || !temporaryCredits) return;
-      state.run.corpRunTemporaryCredits.remaining = Math.max(
+      temporaryCredits.remaining = Math.max(
         0,
         Math.floor(temporaryCredits.remaining ?? 0) - amount,
       );

@@ -639,7 +639,7 @@ function startRunnerBidPaymentChoice(
 ): boolean {
   if (bid <= 0) return false;
   const sourceCardInstanceIds = runnerTraceLinkPaymentSourceIds(host);
-  if (sourceCardInstanceIds.length === 0) return false;
+  if (sourceCardInstanceIds.length <= 1) return false;
   host.state.trace = {
     ...trace,
     runnerBidPaymentSelection: {

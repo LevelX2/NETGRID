@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import {
   DEMO_CARDS_BY_ID,
@@ -743,8 +742,11 @@ import {
   isV099OrLater,
   recurringTraceCreditPoolTotal,
 } from "./runtime-bootstrap-support";
+import type { RuntimeDeps } from "./runtime-shared";
 
-export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps }) {
+export function configureFlowRuntimeBootstrap({
+  cardImplementationRuntimeDeps,
+}: Pick<RuntimeDeps, "cardImplementationRuntimeDeps">) {
   function utilityInstalledOnFort(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
@@ -881,14 +883,19 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       openRunnerRunSpendCapChoice(state, rezzedSpendCapSourceIds[0]!, legalAction);
       return true;
     }
-    run.runStartInterventions = redirectSourceIds.map((cardId) => ({
-      kind: "start_run_redirect_to_source_fort",
-      originalServerId,
-      sourceCardInstanceId: cardId,
-      sourceDefinitionId: definitionFor(state, cardId).id,
-      targetServerId: mustInstance(state.cardInstances, cardId).zone.serverId,
-      costCredits: startRunRedirectCostCredits(state, cardId),
-    }));
+    run.runStartInterventions = redirectSourceIds.map((cardId) => {
+      const targetServerId = corpServerIdForInstalledCard(state, cardId);
+      if (!targetServerId)
+        throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+      return {
+        kind: "start_run_redirect_to_source_fort",
+        originalServerId,
+        sourceCardInstanceId: cardId,
+        sourceDefinitionId: definitionFor(state, cardId).id,
+        targetServerId,
+        costCredits: startRunRedirectCostCredits(state, cardId),
+      };
+    });
     state.pendingChoice = {
       choiceId: `corp_start_of_run_redirect_${state.stateVersion + 1}`,
       side: "corp",
@@ -897,13 +904,18 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       kind: "select_option",
       options: [
         { id: "pass", label: "Run nicht umlenken" },
-        ...redirectSourceIds.map((cardId) => ({
-          id: `redirect_${cardId}`,
-          label: `${definitionFor(state, cardId).title}: Run umlenken`,
-          publicLabel: "Start-of-run Redirect",
-          value: cardId,
-          serverId: mustInstance(state.cardInstances, cardId).zone.serverId,
-        })),
+        ...redirectSourceIds.map((cardId) => {
+          const targetServerId = corpServerIdForInstalledCard(state, cardId);
+          if (!targetServerId)
+            throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+          return {
+            id: `redirect_${cardId}`,
+            label: `${definitionFor(state, cardId).title}: Run umlenken`,
+            publicLabel: "Start-of-run Redirect",
+            value: cardId,
+            serverId: targetServerId,
+          };
+        }),
         ...reorderSourceIds.map((cardId) => ({
           id: `herman_${cardId}`,
           label: `${definitionFor(state, cardId).title}: ICE neu anordnen`,
@@ -954,7 +966,9 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
   ): void {
     const run = mustRun(state);
     const source = mustInstance(state.cardInstances, sourceCardId);
-    const serverId = source.zone.serverId;
+    const serverId = corpServerIdForInstalledCard(state, sourceCardId);
+    if (!serverId)
+      throw new Error("Die Spend-Cap-Quelle liegt nicht in einem Korp-Fort.");
     if (serverId !== run.attackedServerId)
       throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
     if (

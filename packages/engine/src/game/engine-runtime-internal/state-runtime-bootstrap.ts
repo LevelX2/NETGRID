@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import {
   DEMO_CARDS_BY_ID,
@@ -121,6 +120,7 @@ export {
 } from "../legal-actions";
 import {
   configureLegalActionHostComposition,
+  type LegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
 export {
@@ -146,6 +146,7 @@ import {
 } from "../turn/action-builders";
 import {
   createMainActionHostComposition,
+  type MainActionHostComposition,
   type MainActionHostCompositionHost,
 } from "../turn/main-action-hosts";
 import {
@@ -424,6 +425,8 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
+import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
+import type { CardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import {
   type HiddenZoneRuntimeDepsHost,
 } from "../card-implementation/hidden-zone-runtime-deps";
@@ -489,6 +492,7 @@ import {
 } from "../run/run-movement";
 import {
   createRunAccessLegalActionHostComposition,
+  type RunAccessLegalActionHostComposition,
   type RunAccessLegalActionHostCompositionHost,
 } from "../run/run-access-legal-action-hosts";
 import { type RunnerBreakerActionExecutionHost } from "../run/runner-breaker-action-execution";
@@ -777,8 +781,6 @@ import {
   applyEffectCommands,
   validateDeckDefinition,
 } from "./public-event-runtime-bootstrap";
-
-
 export function initializeStateRuntimeBootstrap({
   cardImplementationRuntimeDeps,
   cardImplementationEffectAdapters,
@@ -796,6 +798,31 @@ export function initializeStateRuntimeBootstrap({
   mainActionHostComposition,
   legalActionHostComposition,
   applyActionHostComposition,
+}: {
+  cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies;
+  cardImplementationEffectAdapters: CardImplementationEffectAdapters;
+  hiddenZoneRuntimeDepsHost: () => HiddenZoneRuntimeDepsHost;
+  traceRuntimeDepsHost: () => TraceRuntimeDepsHost;
+  installRezRuntimeDepsHost: () => InstallRezRuntimeDepsHost;
+  counterLifecycleRuntimeDepsHost: () => CounterLifecycleRuntimeDepsHost;
+  gameCardImplementationRuntimeDepsHost: () => GameCardImplementationRuntimeDepsHost;
+  resolveFortHqReplacementChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resolveSenatorialFieldTripChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  runAccessLegalActionHostComposition: RunAccessLegalActionHostComposition;
+  runFlow: RunAccessLegalActionHostComposition["runFlow"];
+  accessFlow: RunAccessLegalActionHostComposition["accessFlow"];
+  damageCoreHost: DamageCoreHost;
+  mainActionHostComposition: MainActionHostComposition;
+  legalActionHostComposition: LegalActionHostComposition;
+  applyActionHostComposition: ApplyActionHostCompositionHost;
 }) {
   const runtimeDomainDeps = {
     AUJOURD_OUI_RESOURCE_SOURCE,

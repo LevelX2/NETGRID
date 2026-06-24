@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import { proteusArmageddonImplementation } from "../../card-implementations/proteus/runner/programs/armageddon";
 import { proteusScaldanImplementation } from "../../card-implementations/proteus/runner/programs/scaldan";
@@ -543,6 +542,7 @@ import {
   additionalSubroutinesForIce,
   currentEncounterAdditionalSubroutinesForIce,
 } from "../../ability-engine/additional-subroutine-modifiers";
+import { rezzedCorpRootCardIds as rezzedCorpRootCardIdsFromState } from "../../ability-engine/card-implementation-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import {
   effectiveAgendaDifficulty,
@@ -752,8 +752,10 @@ export const PROTEUS_ARMAGEDDON_ID =
 // imports without changing existing score legality or revalidation ordering.
 export const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  serverDifficultyIncreaseFromRunCounters,
-  serverDifficultyReductionFromUpgrades,
+  serverDifficultyIncreaseFromRunCounters: (state, agendaId) =>
+    runtimeDelegates.serverDifficultyIncreaseFromRunCounters(state, agendaId),
+  serverDifficultyReductionFromUpgrades: (state, agendaId) =>
+    runtimeDelegates.serverDifficultyReductionFromUpgrades(state, agendaId),
 };
 
 export const DEFAULT_CONTROLLERS: {
@@ -801,7 +803,11 @@ export function finishRun(
   successful: boolean,
   legalAction?: LegalAction,
 ): void {
-  handleRunEndCleanup(runEndCleanupHost(state), successful, legalAction);
+  handleRunEndCleanup(
+    runtimeDelegates.runEndCleanupHost(state),
+    successful,
+    legalAction,
+  );
 }
 
 
@@ -832,8 +838,8 @@ export function cardImplementationAgendaPointInstallCost(
 }
 
 export function drawTaxSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state).filter((sourceId: CardInstanceId) =>
-    isDrawTaxSourceDefinition(state, sourceId),
+  return rezzedCorpRootCardIdsFromState(state).filter((sourceId: CardInstanceId) =>
+    runtimeDelegates.isDrawTaxSourceDefinition(state, sourceId),
   );
 }
 
@@ -950,10 +956,13 @@ type CorpAgendaPointCostResult = {
 
 
 export function recurringTraceCreditPoolSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state)
+  return rezzedCorpRootCardIdsFromState(state)
     .filter(
       (cardId: CardInstanceId) => {
-        const utility = corpUtilityImplementationForCard(state, cardId);
+        const utility = runtimeDelegates.corpUtilityImplementationForCard(
+          state,
+          cardId,
+        );
         return (
           utility?.kind === "recurring_trace_credit_pool" &&
           utility.counterType === "bit" &&
@@ -989,13 +998,15 @@ export function runnerInstalledHardwareTrashTarget(
 
 
 export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
-  encounterTemporaryTraceCreditsAvailable,
-  spendEncounterTemporaryTraceCredits,
+  encounterTemporaryTraceCreditsAvailable: (state, trace) =>
+    runtimeDelegates.encounterTemporaryTraceCreditsAvailable(state, trace),
+  spendEncounterTemporaryTraceCredits: (state, trace, amount) =>
+    runtimeDelegates.spendEncounterTemporaryTraceCredits(state, trace, amount),
   fortTraceBitPoolTotal: (state) =>
-    fortTraceBitPoolTotal(fortRunSideFamiliesHostForState(state)),
+    fortTraceBitPoolTotal(runtimeDelegates.fortRunSideFamiliesHostForState(state)),
   spendFortTraceBitPool: (state, sourceCardId, serverId, amount) =>
     spendFortTraceBitPool(
-      fortRunSideFamiliesHostForState(state),
+      runtimeDelegates.fortRunSideFamiliesHostForState(state),
       sourceCardId,
       serverId,
       amount,
@@ -1003,9 +1014,12 @@ export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
   corpCreditsAvailable: (state) => state.corp.credits,
   spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
   corpTraceBitPoolTotal: recurringTraceCreditPoolTotal,
-  spendCorpTraceBitPool: spendRecurringTraceCreditPool,
-  corpTraceCounterPoolTotal: corpTraceCounterPoolTotal,
-  spendCorpTraceCounterPool: spendCorpTraceCounterPoolCounters,
+  spendCorpTraceBitPool: (state, amount) =>
+    runtimeDelegates.spendRecurringTraceCreditPool(state, amount),
+  corpTraceCounterPoolTotal: (state) =>
+    runtimeDelegates.corpTraceCounterPoolTotal(state),
+  spendCorpTraceCounterPool: (state, amount) =>
+    runtimeDelegates.spendCorpTraceCounterPoolCounters(state, amount),
   cardCounter,
 };
 
@@ -1031,8 +1045,9 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
             : {}),
         };
       }),
-  hostedPaymentCredits,
-  spendHostedPaymentCredits,
+  hostedPaymentCredits: (state, cardId) => cardCounter(state, cardId, "bit"),
+  spendHostedPaymentCredits: (state, cardId, amount) =>
+    spendCardCounter(state, cardId, "bit", amount),
   runnerCreditsAvailable: (state) => state.runner.credits,
   spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
   recordRunnerRunCreditSpend: (state, amount) => {

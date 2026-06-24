@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -717,7 +716,11 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  AutomaticEffectCollector,
+  RestrictedActionFamily,
+  RuntimeDeps,
+} from "./runtime-shared";
 
 export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
   const {
@@ -1255,7 +1258,10 @@ function resolveDelayedEndTurnDamageEffects(state: GameState, legalAction: Legal
     flatline: damageSummary.flatline,
     sourceDefinitionId: dueEffects[0]!.sourceDefinitionId,
     sourceCount: dueEffects.length,
-    sourceCardInstanceIds: dueEffects.map((effect) => effect.sourceCardInstanceId).sort(),
+    sourceCardInstanceIds: dueEffects
+      .map((effect) => effect.sourceCardInstanceId)
+      .sort()
+      .join(","),
     ...(damageSummary.coreDamageAfter !== undefined
       ? { coreDamageAfter: damageSummary.coreDamageAfter }
       : {}),
@@ -2689,7 +2695,14 @@ function applyStartTurnRandomEffectTables(
     const randomPurpose = `start_turn_random_effect_table.${sourceDefinitionId}.runner_start.${state.stateVersion}.${sourceId}`;
     const dieRoll = rollDeterministicDie(state, randomPurpose);
     const outcome =
-      implementation.outcomes.find((candidate) => candidate.roll === dieRoll) ??
+      implementation.outcomes.find(
+        (
+          candidate: Extract<
+            CardRunnerUtilityLongtailImplementation,
+            { kind: "start_turn_random_effect_table" }
+          >["outcomes"][number],
+        ) => candidate.roll === dieRoll,
+      ) ??
       implementation.defaultOutcome;
     const grantsAction =
       outcome.kind === "trash_source_and_grant_persistent_extra_action";

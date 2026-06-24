@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -707,7 +706,10 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  RunnerTraceCounterEffectRuntime,
+  RuntimeDeps,
+} from "./runtime-shared";
 
 
 export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {

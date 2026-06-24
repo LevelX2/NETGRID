@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -695,6 +694,8 @@ import type {
   CardDamagePreventionSourceImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
+  CardFortCapacityModifierImplementation,
+  CardInstallCapabilityImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
@@ -718,6 +719,8 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
     fortCapacityModifiersForCard,
     mustInstallInsideSubsidiaryDataFort,
     rezCardHost,
+    runMovementHostForState,
+    runRezWindowHostForState,
   } = deps;
 
   function canInstallCorpRootCardInServer(
@@ -727,13 +730,17 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
   ): boolean {
     const installCapabilities = cardInstallCapabilitiesForDefinition(definition.id);
     if (
-      installCapabilities.some((capability) => capability.kind === "install_only_in_hq") &&
+      installCapabilities.some(
+        (capability: CardInstallCapabilityImplementation) =>
+          capability.kind === "install_only_in_hq",
+      ) &&
       server.id !== "hq"
     )
       return false;
     if (
       installCapabilities.some(
-        (capability) => capability.kind === "install_only_in_hq_or_rd",
+        (capability: CardInstallCapabilityImplementation) =>
+          capability.kind === "install_only_in_hq_or_rd",
       ) &&
       server.id !== "hq" &&
       server.id !== "rd"
@@ -774,11 +781,17 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
           sum +
           fortCapacityModifiersForCard(state, cardId)
             .filter(
-              (modifier) =>
+              (modifier: CardFortCapacityModifierImplementation) =>
                 modifier.kind === "additional_agenda_or_node_slot_inside_fort" &&
                 modifier.activeWhile === "installed",
             )
-            .reduce((innerSum, modifier) => innerSum + modifier.amount, 0)
+            .reduce(
+              (
+                innerSum: number,
+                modifier: CardFortCapacityModifierImplementation,
+              ) => innerSum + modifier.amount,
+              0,
+            )
         );
       }, 0)
     );

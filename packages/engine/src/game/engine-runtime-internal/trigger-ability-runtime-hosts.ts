@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -692,7 +691,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createTriggerAbilityRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  runtime: RuntimeDeps,
 ) {
   const {
     activeObligationCount,
@@ -927,9 +926,6 @@ export function createTriggerAbilityRuntimeHosts(
             hiddenZoneSearchActivationHandlerHost(state, legalAction),
             legalAction,
           ),
-      },
-      constants: {
-        CODE_VIRAL_CACHE_ID,
       },
     };
   }

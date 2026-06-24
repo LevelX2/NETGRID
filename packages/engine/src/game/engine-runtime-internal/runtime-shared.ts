@@ -7,6 +7,8 @@ import type {
   LegalAction,
   PlayerAction,
   ResolvedGameEffect,
+  RestrictedActionFamily,
+  ServerId,
   Side,
 } from "@netgrid/shared";
 import type { DamageSummary } from "../damage/damage-core";
@@ -20,22 +22,15 @@ import type {
 import type { PendingChoiceResolutionHost } from "../choices/pending-choice-resolution";
 import type { CardRunnerEventLongtailImplementation } from "../../ability-engine/definition-types";
 
-type RuntimeCallable = (...args: unknown[]) => unknown;
-type RuntimeBag = { [key: string]: unknown };
-
-// This is the first named slice of the staged RuntimeDeps surface. Keep adding
-// domain-specific keys here as bootstrap files lose their broad any bindings.
-export type CardRuntimeDeps = {
-  cardImplementationRuntimeDeps?: unknown;
-  executeEffectCommands?: RuntimeCallable;
-  hiddenZoneArrangeChoiceHandlerHost?: RuntimeCallable;
-  hiddenZoneNonSearchChoiceHandlerHost?: RuntimeCallable;
-  hiddenZoneSearchActivationHandlerHost?: RuntimeCallable;
-  hiddenZoneSearchChoiceHandlerHost?: RuntimeCallable;
-  pendingChoiceResolutionHost?: RuntimeCallable;
+// Runtime dependencies are the concrete composition-root surface. Do not
+// reintroduce string-index bags, proxy dispatch or generic member lookup here.
+export type RuntimeDeps = ReturnType<
+  typeof import("./state-runtime-bootstrap")["initializeStateRuntimeBootstrap"]
+> & {
+  turnCorpRuntime?: ReturnType<
+    typeof import("./turn-corp-runtime")["createTurnCorpRuntime"]
+  >;
 };
-
-export type RuntimeDeps = CardRuntimeDeps & RuntimeBag;
 export type {
   GameState,
   LegalAction,
@@ -46,8 +41,7 @@ export type {
 };
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
-export type { CorpServer, CounterType, DamageSummary, ResolvedGameEffect };
-export type ServerId = "hq" | "rd" | "archives" | "new_remote" | (string & {});
+export type { CorpServer, CounterType, DamageSummary, ResolvedGameEffect, RestrictedActionFamily, ServerId };
 export type {
   PendingChoiceResolutionHost,
   HiddenZoneSearchActivationHandlerHost,
@@ -58,22 +52,63 @@ export type {
   CardRunnerEventLongtailImplementation,
 };
 
-export function resolveRuntimeMember<T extends RuntimeCallable = RuntimeCallable>(
-  runtime: Record<string, unknown>,
-  property: string | symbol,
-): T {
-  const key = property as string;
-  const value = runtime[key];
-  if (value !== undefined && typeof value !== "function") return value as T;
-  return ((...args: unknown[]) =>
-    (runtime[key] as RuntimeCallable)(...args)) as T;
-}
-
-export function runtimeProxy<T extends object>(
-  runtime: Record<string, unknown>,
-): T {
-  return new Proxy(
-    {},
-    { get: (_target, property) => resolveRuntimeMember(runtime, property) },
-  ) as T;
-}
+export type ActiveRun = NonNullable<GameState["run"]>;
+export type DrawTaxDecision = "auto" | "pay" | "tag";
+export type RunnerDrawSummary = {
+  drawnCount: number;
+  drawnCardIds?: CardInstanceId[];
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
+  crashEverettSourceCardId?: CardInstanceId;
+  crashEverettChoiceOpened?: boolean;
+};
+export type RunnerEventResolver = {
+  name: string;
+  requiresServer?: boolean;
+  canPlay?: (state: GameState) => boolean;
+  canPlayForServer?: (state: GameState, serverId: ServerId) => boolean;
+  resolve: (state: GameState, legalAction: LegalAction) => void;
+};
+export type BreakSubroutineCostBreakdown = {
+  baseCost: number;
+  legacyRunAdditionalCost: number;
+  runnerHardwareAdditionalCost: number;
+  cardImplementationAdditionalCost: number;
+  additionalCost: number;
+  totalCost: number;
+  publicPayload: NonNullable<LegalAction["payload"]>;
+};
+export type CorpAgendaPointCostResult = {
+  paidPoints: number;
+  bonusPointsSpent: number;
+  forfeitedAgendaIds: CardInstanceId[];
+  forfeitedAgendaDefinitionIds: CardDefinitionId[];
+};
+export type RunnerTraceCounterEffectRuntime = {
+  counterType: CounterType;
+  sourceDefinitionId: CardDefinitionId;
+  amount?: number;
+  runStart?: {
+    amountPerCounter: number;
+    damageType: "brain" | "net";
+  };
+};
+export type VisibleCounterPayload = {
+  counterType: CounterType;
+  addedCounterAmount?: number;
+  removedCounterAmount?: number;
+  remainingCounters: number;
+};
+export type VirusCounterPurgePreserveTarget =
+  | {
+      kind: "card";
+      cardId: CardInstanceId;
+      index: number;
+    }
+  | {
+      kind: "pox";
+      serverId: Exclude<ServerId, "new_remote">;
+      index: number;
+    };
+export type AutomaticEffectCollector = ResolvedGameEffect[];

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -692,7 +691,11 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  RunnerDrawSummary,
+  RunnerEventResolver,
+  RuntimeDeps,
+} from "./runtime-shared";
 
 export function createCardRuntimeResolvers(deps: RuntimeDeps) {
   const {
@@ -1348,10 +1351,15 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     return runnerEventLongtailForDefinition(definition)?.kind;
   }
 
+  type GripInstallTemporaryCreditLongtail = Extract<
+    CardRunnerEventLongtailImplementation,
+    { kind: "grip_install_program_or_hardware_with_temporary_credits" }
+  >;
+
   function pro018GripInstallCandidates(
     state: GameState,
     sourceCardId: CardInstanceId,
-    longtail: CardRunnerEventLongtailImplementation,
+    longtail: GripInstallTemporaryCreditLongtail,
   ): CardInstanceId[] {
     const temporaryCredits = Math.max(
       0,
@@ -1360,7 +1368,12 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     return state.runner.grip.filter((cardId) => {
       if (cardId === sourceCardId) return false;
       const definition = definitionFor(state, cardId);
-      if (!(longtail.allowedTypes ?? []).includes(definition.type))
+      if (
+        definition.type !== "program" &&
+        definition.type !== "hardware"
+      )
+        return false;
+      if (!longtail.allowedTypes.includes(definition.type))
         return false;
       if (
         isUniqueCard(definition) &&
@@ -1383,7 +1396,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     state: GameState,
     legalAction: LegalAction,
     definition: CardDefinition,
-    longtail: CardRunnerEventLongtailImplementation,
+    longtail: GripInstallTemporaryCreditLongtail,
   ): void {
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
@@ -1403,6 +1416,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       side: "runner",
       source: `card_implementation.pro018_grip_install_temporary_credits:${sourceCardId}:${definition.id}:${longtail.temporaryCredits}:${state.stateVersion + 1}`,
       prompt: "Programm oder Hardware installieren",
+      kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
       options: state.runner.grip
@@ -1416,13 +1430,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
             ...(!candidates.includes(cardId) ? { selectable: false } : {}),
           };
         }),
-      visibility: "runner_private",
-      cardSearchPresentation: {
-        sourceZone: "grip",
-        selectableFilter: "program_or_hardware",
-        destination: "install",
-        showNonMatchingCards: true,
-      },
+      visibility: "hidden_info_barrier",
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -1454,6 +1462,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       side: "runner",
       source: `card_implementation.pro018_stack_install_run_cleanup:${sourceCardId}:${definition.id}:${String(legalAction.payload?.serverId ?? "hq")}:${state.stateVersion + 1}`,
       prompt: "Programm aus dem Stack installieren",
+      kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
       options: state.runner.stack.map((cardId) => {
@@ -1465,13 +1474,14 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
           ...(!candidates.includes(cardId) ? { selectable: false } : {}),
         };
       }),
-      visibility: "runner_private",
+      visibility: "hidden_info_barrier",
       cardSearchPresentation: {
         sourceZone: "stack",
         selectableFilter: "program",
         destination: "install_program",
         shuffleAfter: true,
         showNonMatchingCards: true,
+        reveal: "hidden",
       },
     };
     legalAction.payload = {

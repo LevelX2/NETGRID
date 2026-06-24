@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -693,7 +692,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCardLifecycleRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  runtime: RuntimeDeps,
 ) {
   const {
     PROTEUS_ARMAGEDDON_ID,
@@ -985,7 +984,6 @@ export function createCardLifecycleRuntimeHosts(
             cardId,
           ),
       },
-      constants: {},
     };
   }
 
@@ -1208,7 +1206,7 @@ export function createCardLifecycleRuntimeHosts(
     )
       throw new Error("Nicht genug Credits fuer die Programminstallation.");
     const options = installedRunnerProgramTrashOptionsForInstall(state).map(
-      (cardId) => {
+      (cardId: CardInstanceId) => {
         const optionDefinition = definitionFor(state, cardId);
         return {
           id: `card_${cardId}`,

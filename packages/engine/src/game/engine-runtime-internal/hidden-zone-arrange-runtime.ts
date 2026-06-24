@@ -1,10 +1,28 @@
-// @ts-nocheck
-import { runtimeProxy } from "./runtime-shared";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  CounterType,
+  CorpServer,
+  CorpZoneChoiceHandlerHost,
+  GameState,
+  HiddenZoneArrangeChoiceHandlerHost,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
+import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 export function createHiddenZoneArrangeRuntime(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  links: ChoiceHiddenZoneRuntimeLinks,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_SOURCE,
@@ -230,7 +248,7 @@ export function createHiddenZoneArrangeRuntime(
     startRandomDiceSplitChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = runtimeProxy<Record<string, unknown>>(runtime);
+  } = links;
 
   function hiddenZoneArrangeChoiceHandlerHost(
     state: GameState,

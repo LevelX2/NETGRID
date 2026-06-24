@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -692,7 +691,10 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CorpAgendaPointCostResult,
+  RuntimeDeps,
+} from "./runtime-shared";
 
 export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   const {
@@ -1709,10 +1711,11 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  type RuntimeObject = { [key: string]: unknown };
-
   function callTurnCorpRuntime(delegateName: string, args: any[]): any {
-    const delegate = (turnCorpRuntime as RuntimeObject)[delegateName];
+    const delegate = Object.getOwnPropertyDescriptor(
+      turnCorpRuntime,
+      delegateName,
+    )?.value;
     if (typeof delegate !== "function")
       throw new Error(`Turn-Corp-Runtime-Delegate fehlt: ${delegateName}.`);
     return delegate(...args);

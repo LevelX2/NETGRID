@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -718,7 +717,13 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  AutomaticEffectCollector,
+  RuntimeDeps,
+  VirusCounterPurgePreserveTarget,
+  VisibleCounterPayload,
+} from "./runtime-shared";
+import { cloneState } from "./runtime-bootstrap-support";
 
 export function createStateRuntimeResolvers(deps: RuntimeDeps) {
   const {
@@ -1164,7 +1169,7 @@ function resolveTraceHardwareWreckerSuccess(
   sourceDefinitionId: CardDefinitionId,
   sourceCardInstanceId: CardInstanceId,
   traceId: string,
-): Record<string, unknown> {
+): NonNullable<LegalAction["payload"]> {
   const targetHardwareId = runnerInstalledHardwareTrashTarget(state);
   const targetDefinitionId = targetHardwareId
     ? definitionFor(state, targetHardwareId).id
@@ -1198,7 +1203,7 @@ function resolveTraceTrashRunnerResourceSuccess(
   sourceCardInstanceId: CardInstanceId,
   traceId: string,
   targetCardId: CardInstanceId,
-): Record<string, unknown> {
+): NonNullable<LegalAction["payload"]> {
   if (!runnerLastTurnInstalledResourceIds(state).includes(targetCardId))
     throw new Error("Die Runner-Resource ist fuer diesen Trace nicht mehr legal.");
   const hiddenResource = isConcealedRunnerResource(state, targetCardId);
@@ -1561,6 +1566,8 @@ function startVirusCounterPurgePreserveChoice(
   const targets = virusCounterPurgePreserveTargets(state);
   if (targets.length === 0) return false;
   const sourceCardId = sourceIds[0];
+  if (!sourceCardId)
+    throw new Error("Keine installierte Virus-Purge-Erhaltungsquelle gefunden.");
   state.pendingChoice = {
     choiceId: `runner_virus_purge_replacement_${state.stateVersion + 1}`,
     side: "runner",

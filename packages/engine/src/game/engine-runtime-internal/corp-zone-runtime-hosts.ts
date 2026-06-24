@@ -1,10 +1,28 @@
-// @ts-nocheck
-import { runtimeProxy } from "./runtime-shared";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  CounterType,
+  CorpServer,
+  CorpZoneChoiceHandlerHost,
+  GameState,
+  HiddenZoneArrangeChoiceHandlerHost,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
+import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  links: ChoiceHiddenZoneRuntimeLinks,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_SOURCE,
@@ -209,7 +227,7 @@ export function createCorpZoneRuntimeHosts(
     startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
     takeSetupMulligan,
-  } = runtimeProxy<Record<string, unknown>>(runtime);
+  } = links;
 
   function corpZoneChoiceHandlerHost(
     state: GameState,
@@ -836,11 +854,11 @@ export function createCorpZoneRuntimeHosts(
       if (!legalTargets.has(cardId))
         throw new Error("Diese Multi-Expose-Choice darf dieses Ziel nicht exposen.");
     }
-    const labels = selectedIds.map((cardId) =>
+    const labels = selectedIds.map((cardId: CardInstanceId) =>
       multiExposeInstalledCorpCardOptionLabel(state, cardId),
     );
     const definitionIds = selectedIds.map(
-      (cardId) => definitionFor(state, cardId).id,
+      (cardId: CardInstanceId) => definitionFor(state, cardId).id,
     );
     delete state.pendingChoice;
     legalAction.payload = {
@@ -996,10 +1014,10 @@ export function createCorpZoneRuntimeHosts(
             "Diese installierte Korp-Karte darf in diesem Fort nicht exposed werden.",
           );
       }
-      const labels = selectedIds.map((cardId) =>
+      const labels = selectedIds.map((cardId: CardInstanceId) =>
         exposeInstalledCorpCardLabel(state, cardId),
       );
-      const definitions = selectedIds.map((cardId) =>
+      const definitions = selectedIds.map((cardId: CardInstanceId) =>
         definitionFor(state, cardId),
       );
       delete state.pendingChoice;
@@ -1013,10 +1031,10 @@ export function createCorpZoneRuntimeHosts(
         serverId,
         revealedCount: selectedIds.length,
         publicRevealDefinitionIds: definitions
-          .map((definition) => definition.id)
+          .map((definition: CardDefinition) => definition.id)
           .join(","),
         publicRevealTitles: definitions
-          .map((definition) => definition.title)
+          .map((definition: CardDefinition) => definition.title)
           .join("||"),
         exposedServerLabels: labels.join(","),
       };
@@ -1039,10 +1057,10 @@ export function createCorpZoneRuntimeHosts(
           "Diese installierte Korp-Karte darf nicht exposed werden.",
         );
     }
-    const labels = selectedIds.map((cardId) =>
+    const labels = selectedIds.map((cardId: CardInstanceId) =>
       exposeInstalledCorpCardLabel(state, cardId),
     );
-    const definitions = selectedIds.map((cardId) =>
+    const definitions = selectedIds.map((cardId: CardInstanceId) =>
       definitionFor(state, cardId),
     );
     delete state.pendingChoice;
@@ -1055,10 +1073,10 @@ export function createCorpZoneRuntimeHosts(
       sourceTitle: sourceDefinition.title,
       revealedCount: selectedIds.length,
       publicRevealDefinitionIds: definitions
-        .map((definition) => definition.id)
+        .map((definition: CardDefinition) => definition.id)
         .join(","),
       publicRevealTitles: definitions
-        .map((definition) => definition.title)
+        .map((definition: CardDefinition) => definition.title)
         .join("||"),
       exposedServerLabels: labels.join(","),
     };

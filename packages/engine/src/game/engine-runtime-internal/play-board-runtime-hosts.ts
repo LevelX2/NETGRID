@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -692,7 +691,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createPlayBoardRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown> = {},
+  runtime: RuntimeDeps = {} as RuntimeDeps,
 ) {
   const {
     RUNNER_EVENT_RESOLVERS,

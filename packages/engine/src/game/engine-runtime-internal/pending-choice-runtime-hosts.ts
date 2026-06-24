@@ -1,10 +1,28 @@
-// @ts-nocheck
-import { runtimeProxy } from "./runtime-shared";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  CounterType,
+  CorpServer,
+  CorpZoneChoiceHandlerHost,
+  GameState,
+  HiddenZoneArrangeChoiceHandlerHost,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
+import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  links: ChoiceHiddenZoneRuntimeLinks,
 ) {
   const {
     AUJOURD_OUI_RESOURCE_SOURCE,
@@ -235,7 +253,7 @@ export function createPendingChoiceRuntimeHosts(
     startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = runtimeProxy<Record<string, unknown>>(runtime);
+  } = links;
 
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
     runnerInstalledConnectionTrashBadPublicityChoiceSource ??
@@ -249,13 +267,20 @@ export function createPendingChoiceRuntimeHosts(
     if (run) delete run.runStartInterventions;
     state.activeSide = "runner";
     let advancedFromStart = false;
-    if (run && run.phase === "start") {
+    const runPhase = run?.phase as
+      | NonNullable<GameState["run"]>["phase"]
+      | "start"
+      | undefined;
+    if (run && runPhase === "start") {
       const server = mustServer(state, run.attackedServerId);
       if (server.ice.length > 0) {
         const iceIndex = server.ice.length - 1;
+        const approachedIceId = server.ice[iceIndex];
+        if (!approachedIceId)
+          throw new Error("Das angegriffene Fort hat keine ICE an dieser Position.");
         run.phase = "approach_ice";
         run.position = { kind: "ice", serverId: server.id, iceIndex };
-        run.approachedIceId = server.ice[iceIndex];
+        run.approachedIceId = approachedIceId;
       } else {
         run.phase = "approach_ice";
         run.position = { kind: "server", serverId: server.id };
@@ -299,6 +324,11 @@ export function createPendingChoiceRuntimeHosts(
     const run = state.run;
     if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
     const source = mustInstance(state.cardInstances, sourceCardId);
+    if (
+      source.zone.side !== "corp" ||
+      (source.zone.zone !== "serverRoot" && source.zone.zone !== "serverIce")
+    )
+      throw new Error("Die Spend-Cap-Quelle liegt nicht in einem Korp-Fort.");
     const serverId = source.zone.serverId;
     if (serverId !== run.attackedServerId)
       throw new Error(
@@ -503,9 +533,13 @@ export function createPendingChoiceRuntimeHosts(
         openRunSpendCapChoice(state, sourceCardId, legalAction);
         return;
       }
-      const targetServerId = mustInstance(state.cardInstances, sourceCardId)
-        .zone.serverId;
       const source = mustInstance(state.cardInstances, sourceCardId);
+      if (
+        source.zone.side !== "corp" ||
+        (source.zone.zone !== "serverRoot" && source.zone.zone !== "serverIce")
+      )
+        throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+      const targetServerId = source.zone.serverId;
       const intervention = startRunRedirectInterventionForSource(
         run,
         sourceCardId,
@@ -558,7 +592,7 @@ export function createPendingChoiceRuntimeHosts(
       if (
         selectedIds.length !== server.ice.length ||
         new Set(selectedIds).size !== selectedIds.length ||
-        selectedIds.some((cardId) => !server.ice.includes(cardId))
+        selectedIds.some((cardId: CardInstanceId) => !server.ice.includes(cardId))
       )
         throw new Error("Die Reorder-Auswahl ist nicht legal.");
       server.ice = selectedIds;

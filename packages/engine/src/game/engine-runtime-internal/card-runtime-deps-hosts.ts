@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -692,7 +691,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCardRuntimeDepsHosts(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  runtime: RuntimeDeps,
 ) {
   const {
     breakSubroutineCostBreakdown,
@@ -1273,12 +1272,12 @@ export function createCardRuntimeDepsHosts(
   } {
     const sourceDefinitionIds = rezzedCorpRootCardIds(state)
       .filter(
-        (cardId) =>
+        (cardId: CardInstanceId) =>
           definitionFor(state, cardId).id ===
             NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID ||
           hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
-      .map((cardId) => definitionFor(state, cardId).id);
+      .map((cardId: CardInstanceId) => definitionFor(state, cardId).id);
     return {
       amount: sourceDefinitionIds.length,
       sourceDefinitionIds,

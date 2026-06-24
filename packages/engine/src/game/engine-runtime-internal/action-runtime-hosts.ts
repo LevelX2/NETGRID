@@ -5,7 +5,7 @@ import { createPlayBoardRuntimeHosts } from "./play-board-runtime-hosts";
 import { createScoredEconomyRuntimeHosts } from "./scored-economy-runtime-hosts";
 
 export function createActionRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, unknown> = {};
+  const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
     createScoredEconomyRuntimeHosts(deps, runtime),

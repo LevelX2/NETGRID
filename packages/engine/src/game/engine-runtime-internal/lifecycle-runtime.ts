@@ -1,27 +1,29 @@
-// @ts-nocheck
 import type {
-  RuntimeDeps,
-  GameState,
-  LegalAction,
-  PlayerAction,
-  ChoiceRequest,
-  Side,
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
+  CardRunnerEventLongtailImplementation,
+  ChoiceRequest,
   CorpServer,
+  CorpZoneChoiceHandlerHost,
   CounterType,
   DamageSummary,
-  ResolvedGameEffect,
-  ServerId,
-  PendingChoiceResolutionHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
+  DrawTaxDecision,
+  GameState,
   HiddenZoneArrangeChoiceHandlerHost,
   HiddenZoneNonSearchChoiceHandlerHost,
-  CorpZoneChoiceHandlerHost,
-  CardRunnerEventLongtailImplementation,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  ResolvedGameEffect,
+  RunnerDrawSummary,
+  RuntimeDeps,
+  ServerId,
+  Side,
 } from "./runtime-shared";
+import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 
 export function createLifecycleRuntime(deps: RuntimeDeps) {
   const {
@@ -311,7 +313,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       state,
       cardId,
     ).some(
-      (cleanup) =>
+      (cleanup: CardLeavePlayCleanupImplementation) =>
         cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
         cleanup.target === "agenda_or_node_inside_same_fort",
     );
