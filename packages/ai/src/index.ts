@@ -166,12 +166,8 @@ import {
   semanticRuntimeEvidence as buildSemanticRuntimeEvidence,
 } from "./runtime/semantic-runtime-evidence";
 import {
-  semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine as buildSemanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-  semanticRuntimeCorpHasNakedScoreLine as buildSemanticRuntimeCorpHasNakedScoreLine,
-  semanticRuntimeCorpHasRemoteInstability as buildSemanticRuntimeCorpHasRemoteInstability,
-  semanticRuntimeCorpHasStabilizingAlternative as buildSemanticRuntimeCorpHasStabilizingAlternative,
-  semanticRuntimeCorpHasUnsafeRemoteScoreAction as buildSemanticRuntimeCorpHasUnsafeRemoteScoreAction,
-} from "./runtime/semantic-runtime-corp-risk";
+  createSemanticRuntimeCorpRiskContext,
+} from "./runtime/semantic-runtime-corp-risk-context";
 import {
   semanticRuntimeCorpHasRemoteRezFloorFundingNeed as buildSemanticRuntimeCorpHasRemoteRezFloorFundingNeed,
   semanticRuntimeCorpRemoteRezFloorAssessment as buildSemanticRuntimeCorpRemoteRezFloorAssessment,
@@ -3802,6 +3798,21 @@ const {
   rolesForAction,
   isRemoteServerTarget,
 });
+const {
+  semanticRuntimeCorpHasRemoteInstability,
+  semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
+  semanticRuntimeCorpHasStabilizingAlternative,
+  semanticRuntimeCorpHasNakedScoreLine,
+  semanticRuntimeCorpHasUnsafeRemoteScoreAction,
+} = createSemanticRuntimeCorpRiskContext({
+  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
+  isRemoteServerTarget,
+  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
+  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+  actionServerId: semanticRuntimeCorpActionServerId,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  server: semanticRuntimeCorpServer,
+});
 const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3826,17 +3837,6 @@ const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
-};
-const SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES = {
-  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  isRemoteServerTarget,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  actionWouldCreateUnsafeRemoteScoreLine:
-    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-  actionServerId: semanticRuntimeCorpActionServerId,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  server: semanticRuntimeCorpServer,
 };
 const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES = {
   actionServerId: semanticRuntimeCorpActionServerId,
@@ -6766,37 +6766,6 @@ function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
   );
 }
 
-function semanticRuntimeCorpHasRemoteInstability(
-  input: AiDecisionInput,
-): boolean {
-  return buildSemanticRuntimeCorpHasRemoteInstability(
-    input,
-    SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildSemanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpHasStabilizingAlternative(
-  input: AiDecisionInput,
-  excludedAction: LegalAction,
-): boolean {
-  return buildSemanticRuntimeCorpHasStabilizingAlternative(
-    input,
-    excludedAction,
-    SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES,
-  );
-}
-
 function semanticRuntimeEvidence(
   input: AiDecisionInput,
   action: LegalAction,
@@ -6892,22 +6861,6 @@ function semanticRuntimeCorpEvidence(
     input,
     action,
     SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpHasNakedScoreLine(input: AiDecisionInput): boolean {
-  return buildSemanticRuntimeCorpHasNakedScoreLine(
-    input,
-    SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
-  input: AiDecisionInput,
-): boolean {
-  return buildSemanticRuntimeCorpHasUnsafeRemoteScoreAction(
-    input,
-    SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES,
   );
 }
 
