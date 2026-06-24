@@ -2,8 +2,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("DamageImpactOverlay lifecycle", () => {
-  const pageSource = () =>
-    readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
   const overlaySource = () =>
     readFileSync(
       new URL("../features/actions/DamageImpactOverlay.tsx", import.meta.url),
@@ -11,10 +9,9 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
 
   it("requires manual confirmation instead of auto-dismissing damage impact", () => {
-    const page = pageSource();
     const source = overlaySource();
 
-    expect(page).not.toContain("setTimeout(() => setCurrentDamageImpact(null)");
+    expect(source).not.toContain("setTimeout(() => setCurrentDamageImpact(null)");
     expect(source).toContain('aria-label="Damage-Fenster bestätigen"');
     expect(source).toMatch(/<Check size=\{14\} \/>\s+Weiter\s+<\/button>/);
   });
@@ -37,5 +34,15 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain("`${damageTypeLabel(cue.damageType)} verhindert`");
     expect(source).toContain("!preventedDamage ? (");
     expect(source).toContain("Verhindert");
+  });
+
+  it("keeps queue, flatline, and core-damage copy explicit", () => {
+    const source = overlaySource();
+
+    expect(source).toContain("weitere Damage-Meldung");
+    expect(source).toContain('cue.flatline ? "Flatline"');
+    expect(source).toContain('type === "core"');
+    expect(source).toContain('"Core Damage"');
+    expect(source).toContain("runnerMaxHandSizeAfter");
   });
 });

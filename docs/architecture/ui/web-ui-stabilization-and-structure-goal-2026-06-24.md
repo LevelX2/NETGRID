@@ -133,7 +133,19 @@ Checks:
 
 ### Paket 2
 
-Offen.
+Entscheidung: Der Test bleibt ein gezielter Source-Vertragstest, liest aber nicht mehr `page.tsx`. Er prüft ausschließlich die aktuelle Feature-Datei `apps/web/features/actions/DamageImpactOverlay.tsx`.
+
+Begründung:
+
+- Für dieses Paket wurde keine neue Render-Test-Infrastruktur eingeführt.
+- Der alte Root-Dateipfad war als Architekturvertrag ungeeignet, weil `DamageImpactOverlay` bereits ausgelagert ist.
+- Die geprüften Verträge sind weiterhin behavior-orientiert: manuelle Bestätigung, keine Auto-Dismiss-Quelle, Null-Linie, Overkill, Prevented-State ohne Meter, Queue-Hinweis, Flatline- und Core-Damage-Copy.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web test -- damage-impact-overlay.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `git diff --check`: grün.
 
 ### Paket 3
 
