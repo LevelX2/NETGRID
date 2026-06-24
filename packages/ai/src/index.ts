@@ -209,9 +209,8 @@ import {
   runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
 } from "./runtime/runner-program-sacrifice-exclusion";
 import {
-  runnerBlinkRiskEvidenceForAction as buildRunnerBlinkRiskEvidenceForAction,
-  runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
-} from "./runtime/runner-blink-run-exclusion";
+  createRunnerBlinkRiskContext,
+} from "./runtime/runner-blink-risk-context";
 import {
   runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
 } from "./runtime/runner-blink-break-exclusion";
@@ -3759,11 +3758,16 @@ const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES = {
         : undefined,
   },
 };
-const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES = {
+const {
+  runnerBlinkRiskEvidenceForAction,
+  runnerBlinkRunExclusion,
+} = createRunnerBlinkRiskContext({
   multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runRiskAssessment: assessBlinkRiskForRunAction,
   breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
-};
+  shouldAvoidRun: (assessment) =>
+    blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+});
 const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
@@ -3918,13 +3922,7 @@ const {
   runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
   runnerRunTargetEvaluationForAction:
     semanticRuntimeRunnerRunTargetEvaluationForAction,
-  runnerBlinkRunExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
-    buildRunnerBlinkRunExclusion(runtimeInput, action, {
-      multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
-      runRiskAssessment: assessBlinkRiskForRunAction,
-      shouldAvoidRun: (assessment: unknown) =>
-        blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
-    }),
+  runnerBlinkRunExclusion,
   knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
   runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
   runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
@@ -6636,17 +6634,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function runnerBlinkRiskEvidenceForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  return buildRunnerBlinkRiskEvidenceForAction(
-    input,
-    action,
-    RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES,
   );
 }
 
