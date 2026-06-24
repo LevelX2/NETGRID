@@ -236,6 +236,13 @@ import {
   runnerLoanSpendKindRank as buildRunnerLoanSpendKindRank,
 } from "./runtime/runner-loan-spend-candidate";
 import {
+  runnerDefinitionIsHighRiskLoan as buildRunnerDefinitionIsHighRiskLoan,
+  runnerInstalledLoanCards as buildRunnerInstalledLoanCards,
+  runnerLoanDefinitionIdForAction as buildRunnerLoanDefinitionIdForAction,
+  runnerLoanSemanticEvidence as buildRunnerLoanSemanticEvidence,
+  runnerLoanValueHint as buildRunnerLoanValueHint,
+} from "./runtime/runner-loan-source";
+import {
   runnerLoanAllowedReason as buildRunnerLoanAllowedReason,
   runnerLoanBlockedReason as buildRunnerLoanBlockedReason,
   runnerLoanDebtRepaymentRisk as buildRunnerLoanDebtRepaymentRisk,
@@ -5625,7 +5632,7 @@ function runnerLoanLiabilityAssessment(
     loanDefinitionIdForAction: runnerLoanDefinitionIdForAction,
     installedLoanCards: runnerInstalledLoanCards,
     valueHint: (definitionId, key, fallback) =>
-      runnerLoanValueHint(
+      buildRunnerLoanValueHint(
         definitionId ? AI_HINTS.get(definitionId) : undefined,
         key,
         fallback,
@@ -5661,81 +5668,35 @@ function runnerLoanDefinitionIdForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): string | undefined {
-  if (action.type !== "install_card") return undefined;
-  const definitionId = sourceDefinitionIdForAction(input, action);
-  return runnerDefinitionIsHighRiskLoan(definitionId)
-    ? definitionId
-    : undefined;
+  return buildRunnerLoanDefinitionIdForAction(input, action, {
+    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
+    hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
+    sourceDefinitionIdForAction,
+  });
 }
 
 function runnerDefinitionIsHighRiskLoan(
   definitionId: string | undefined,
 ): boolean {
-  if (!definitionId) return false;
-  if (definitionId === LOAN_FROM_CHIBA_CARD_ID) return true;
-  const hint = AI_HINTS.get(definitionId);
-  const targets = new Set(
-    (hint?.effects ?? [])
-      .map((effect) =>
-        stringRecordValue(effect as Record<string, unknown>, "target"),
-      )
-      .filter((target): target is string => target !== undefined),
-  );
-  return (
-    targets.has("economy.high_risk_burst_credit") &&
-    targets.has("risk.debt_loss_condition") &&
-    targets.has("risk.lose_game_debt") &&
-    runnerLoanHintRiskTags(hint).includes("leave_play_penalty")
-  );
+  return buildRunnerDefinitionIsHighRiskLoan(definitionId, {
+    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
+    hintForDefinitionId: (id) => AI_HINTS.get(id),
+  });
 }
 
 function runnerInstalledLoanCards(input: AiDecisionInput): VisibleCard[] {
-  return (input.playerView.own.rig ?? []).filter((card) =>
-    runnerDefinitionIsHighRiskLoan(card.definitionId),
-  );
+  return buildRunnerInstalledLoanCards(input, {
+    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
+    hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
+  });
 }
 
 function runnerLoanSemanticEvidence(
   definitionId: string | undefined,
 ): string[] | undefined {
-  if (!definitionId) return undefined;
-  const hint = AI_HINTS.get(definitionId);
-  if (!hint) return [`loanSource:${definitionId}`];
-  const targets = sortedUnique(
-    (hint.effects ?? [])
-      .map((effect) =>
-        stringRecordValue(effect as Record<string, unknown>, "target"),
-      )
-      .filter((target): target is string => target !== undefined)
-      .filter(
-        (target) =>
-          target === "economy.high_risk_burst_credit" ||
-          target === "risk.debt_loss_condition" ||
-          target === "risk.lose_game_debt",
-      ),
-  );
-  return [
-    `loanSource:${definitionId}`,
-    ...runnerLoanHintRiskTags(hint).map((tag) => `loanRiskTag:${tag}`),
-    ...targets.map((target) => `loanSemantic:${target}`),
-  ];
-}
-
-function runnerLoanHintRiskTags(hint: AiCardHint | undefined): string[] {
-  const riskTags = (hint as (AiCardHint & { riskTags?: unknown }) | undefined)
-    ?.riskTags;
-  return Array.isArray(riskTags)
-    ? riskTags.filter((tag): tag is string => typeof tag === "string")
-    : [];
-}
-
-function runnerLoanValueHint(
-  hint: AiCardHint | undefined,
-  key: "installCreditGain" | "startOfTurnCreditLoss" | "leavePlayPayCost",
-  fallback: number,
-): number {
-  const value = hint?.valueHints?.[key];
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  return buildRunnerLoanSemanticEvidence(definitionId, {
+    hintForDefinitionId: (id) => AI_HINTS.get(id),
+  });
 }
 
 function runnerLoanRuntimeContext(
