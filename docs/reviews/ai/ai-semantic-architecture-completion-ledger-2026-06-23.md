@@ -1042,6 +1042,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` fünfundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-doctrine-score.ts` kapselt das Runner-Doctrine-Action-Gate inklusive Run-Target-Reachability-/Cost-Gate, Repeat-Run-Gate, Low-Value-Recovery-Gate und Remote-Contest-Delegation.
+  - `packages/ai/src/index.ts` behält RunTargetEvaluation-, RecentRunnerStartRuns-, LowValueRecoveryContext- und RemoteContestDoctrineGuard-Provider lokal und delegiert sie als explizite Dependencies.
+  - Kein neuer Public-Export-Contract-Eintrag nötig, weil `semantic-runtime-doctrine-score.ts` bereits als internes Runtime-Modul besteht.
+  - `packages/ai/src/index.ts` sank weiter von 31.357 auf 31.311 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

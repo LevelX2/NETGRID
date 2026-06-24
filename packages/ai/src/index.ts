@@ -449,15 +449,15 @@ import {
   semanticRuntimeDoctrineActionGate as buildSemanticRuntimeDoctrineActionGate,
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrineConsumerForPlan,
-  semanticRuntimeDoctrineGateAllowed,
-  semanticRuntimeDoctrineGateBlocked,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
   semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
+  semanticRuntimeRunnerDoctrineActionGate as buildSemanticRuntimeRunnerDoctrineActionGate,
   semanticRuntimeRunnerLowValueRecoveryContext as buildSemanticRuntimeRunnerLowValueRecoveryContext,
   type SemanticRuntimeDoctrineActionGateContext,
   type SemanticRuntimeDoctrineActionGateDependencies,
   type SemanticRuntimeCorpDoctrineWeightDependencies,
   type SemanticRuntimeDoctrineConsumer,
+  type SemanticRuntimeRunnerDoctrineActionGateDependencies,
   type SemanticRuntimeRunnerLowValueRecoveryContextDependencies,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
@@ -6727,6 +6727,19 @@ const SEMANTIC_RUNTIME_DOCTRINE_ACTION_GATE_DEPENDENCIES: SemanticRuntimeDoctrin
     corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
   };
 
+const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES: SemanticRuntimeRunnerDoctrineActionGateDependencies =
+  {
+    runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
+    recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+    runnerLowValueRecoveryContext: (input) =>
+      buildSemanticRuntimeRunnerLowValueRecoveryContext(
+        input,
+        SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
+      ),
+    runnerRemoteContestDoctrineGuard:
+      semanticRuntimeRunnerRemoteContestDoctrineGuard,
+  };
+
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
   planKey: string,
@@ -6775,73 +6788,14 @@ function semanticRuntimeRunnerDoctrineActionGate(
   consumer: SemanticRuntimeDoctrineConsumer,
   serverId: string | undefined,
 ): { allowed: boolean; evidence: string[] } {
-  if (action.type !== "start_run") {
-    return semanticRuntimeDoctrineGateBlocked(
-      planKey,
-      consumer,
-      "not_run_action",
-    );
-  }
-  if (!serverId) {
-    return semanticRuntimeDoctrineGateBlocked(
-      planKey,
-      consumer,
-      "missing_server",
-    );
-  }
-  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+  return buildSemanticRuntimeRunnerDoctrineActionGate(
     input,
     action,
+    planKey,
+    consumer,
     serverId,
+    SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES,
   );
-  if (
-    evaluation &&
-    (evaluation.pathPassability !== "reachable" ||
-      evaluation.creditsAfterRun < 0)
-  ) {
-    return semanticRuntimeDoctrineGateBlocked(
-      planKey,
-      consumer,
-      "cost_or_reachability_blocked",
-      [
-        `target:${serverId}`,
-        `path:${evaluation.pathPassability}`,
-        `credits_after:${evaluation.creditsAfterRun}`,
-      ],
-    );
-  }
-  if (
-    (consumer === "runner_pressure_rnd" || consumer === "runner_pressure_hq") &&
-    semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0
-  ) {
-    return semanticRuntimeDoctrineGateBlocked(
-      planKey,
-      consumer,
-      "repeated_no_progress_run",
-      [`target:${serverId}`],
-    );
-  }
-  const recoveryContext = buildSemanticRuntimeRunnerLowValueRecoveryContext(
-    input,
-    SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
-  );
-  if (recoveryContext.active) {
-    return semanticRuntimeDoctrineGateBlocked(
-      planKey,
-      consumer,
-      "low_value_recovery_context",
-      recoveryContext.evidence,
-    );
-  }
-  if (consumer === "runner_contest_remote") {
-    const remoteContestGate = semanticRuntimeRunnerRemoteContestDoctrineGuard(
-      input,
-      action,
-      serverId,
-    );
-    if (!remoteContestGate.allowed) return remoteContestGate;
-  }
-  return semanticRuntimeDoctrineGateAllowed(consumer);
 }
 
 function semanticRuntimeDoctrineSuppressedComponent(

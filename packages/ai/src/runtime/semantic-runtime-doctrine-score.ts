@@ -77,6 +77,32 @@ export type SemanticRuntimeDoctrineActionGateDependencies = {
   ) => SemanticRuntimeDoctrineGate;
 };
 
+export type SemanticRuntimeRunnerDoctrineActionGateDependencies = {
+  runnerRunTargetEvaluation: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    serverId: string,
+  ) =>
+    | {
+        pathPassability: string;
+        creditsAfterRun: number;
+      }
+    | undefined;
+  recentRunnerStartRunsOnServer: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => number;
+  runnerLowValueRecoveryContext: (input: AiDecisionInput) => {
+    active: boolean;
+    evidence: string[];
+  };
+  runnerRemoteContestDoctrineGuard: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    serverId: string,
+  ) => SemanticRuntimeDoctrineGate;
+};
+
 export function semanticRuntimeDoctrineClamp(
   consumer: SemanticRuntimeDoctrineConsumer,
 ): number {
@@ -302,4 +328,78 @@ export function semanticRuntimeRunnerLowValueRecoveryContext(
       `funding_context:${fundingNeed.reason}`,
     ],
   };
+}
+
+export function semanticRuntimeRunnerDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  serverId: string | undefined,
+  dependencies: SemanticRuntimeRunnerDoctrineActionGateDependencies,
+): SemanticRuntimeDoctrineGate {
+  if (action.type !== "start_run") {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "not_run_action",
+    );
+  }
+  if (!serverId) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "missing_server",
+    );
+  }
+  const evaluation = dependencies.runnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (
+    evaluation &&
+    (evaluation.pathPassability !== "reachable" ||
+      evaluation.creditsAfterRun < 0)
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "cost_or_reachability_blocked",
+      [
+        `target:${serverId}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+      ],
+    );
+  }
+  if (
+    (consumer === "runner_pressure_rnd" || consumer === "runner_pressure_hq") &&
+    dependencies.recentRunnerStartRunsOnServer(input, serverId) > 0
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "repeated_no_progress_run",
+      [`target:${serverId}`],
+    );
+  }
+  const recoveryContext = dependencies.runnerLowValueRecoveryContext(input);
+  if (recoveryContext.active) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "low_value_recovery_context",
+      recoveryContext.evidence,
+    );
+  }
+  if (consumer === "runner_contest_remote") {
+    const remoteContestGate = dependencies.runnerRemoteContestDoctrineGuard(
+      input,
+      action,
+      serverId,
+    );
+    if (!remoteContestGate.allowed) return remoteContestGate;
+  }
+  return semanticRuntimeDoctrineGateAllowed(consumer);
 }
