@@ -269,6 +269,11 @@ import {
   actionCreditCost,
 } from "./runtime/action-cost";
 import {
+  addStringsToCounter as addCardsToCounter,
+  addStringsToCounter as addKindsToCounter,
+  incrementStringCounter,
+} from "./runtime/counter";
+import {
   boundedSelectionCount,
   playfulAiGainValue,
   selectableChoiceOptions,
@@ -9932,18 +9937,6 @@ function incrementSkipReason(
   reason: CorpTagPunishSkipReason | undefined,
 ): void {
   counters[reason ?? "unknown"] += 1;
-}
-
-function addKindsToCounter(kinds: string[], counter: Record<string, number>) {
-  for (const kind of kinds) counter[kind] = (counter[kind] ?? 0) + 1;
-}
-
-function addCardsToCounter(cardIds: string[], counter: Record<string, number>) {
-  for (const cardId of cardIds) counter[cardId] = (counter[cardId] ?? 0) + 1;
-}
-
-function incrementStringCounter(counter: Record<string, number>, key: string) {
-  counter[key] = (counter[key] ?? 0) + 1;
 }
 
 function strongestCorpTagSourceOpportunity(
