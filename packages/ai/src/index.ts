@@ -276,12 +276,7 @@ import {
   visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
   visibleBreakerRoles as buildVisibleBreakerRoles,
 } from "./runtime/runner-visible-breaker-coverage";
-import {
-  runnerPersistentInstallEvidenceForAction as buildRunnerPersistentInstallEvidenceForAction,
-  runnerPersistentInstallEvaluationForAction as buildRunnerPersistentInstallEvaluationForAction,
-  runnerPersistentInstallFitScoreComponent as buildRunnerPersistentInstallFitScoreComponent,
-  runnerPersistentInstallLegacyScoreDelta as buildRunnerPersistentInstallLegacyScoreDelta,
-} from "./runtime/runner-persistent-install-fit-score";
+import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
 import {
   runnerMuPressureFundingScoreComponent as buildRunnerMuPressureFundingScoreComponent,
   runnerMuPressureInstallScoreComponent as buildRunnerMuPressureInstallScoreComponent,
@@ -3704,6 +3699,16 @@ const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
   rolesForAction,
   hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
 });
+const {
+  runnerPersistentInstallFitScoreComponent,
+  runnerPersistentInstallLegacyScoreDelta,
+  runnerPersistentInstallEvidenceForAction,
+  runnerPersistentInstallEvaluationForAction,
+} = createRunnerPersistentInstallContext({
+  deckCapabilities: deckCapabilitiesForInput,
+  strategicIntent: runnerStrategicIntentForInput,
+  handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
+});
 const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
@@ -5852,41 +5857,6 @@ function runnerHandFundingTarget(
     cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
     badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
     rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
-  });
-}
-
-function runnerPersistentInstallFitScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerPersistentInstallFitScoreComponent(input, action, {
-    evaluationForAction: runnerPersistentInstallEvaluationForAction,
-  });
-}
-
-function runnerPersistentInstallLegacyScoreDelta(
-  evaluation: ReturnType<typeof runnerPersistentInstallEvaluationForAction>,
-): number {
-  return buildRunnerPersistentInstallLegacyScoreDelta(evaluation);
-}
-
-function runnerPersistentInstallEvidenceForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  return buildRunnerPersistentInstallEvidenceForAction(input, action, {
-    evaluationForAction: runnerPersistentInstallEvaluationForAction,
-  });
-}
-
-function runnerPersistentInstallEvaluationForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-) {
-  return buildRunnerPersistentInstallEvaluationForAction(input, action, {
-    deckCapabilities: deckCapabilitiesForInput,
-    strategicIntent: runnerStrategicIntentForInput,
-    handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   });
 }
 

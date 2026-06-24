@@ -186,6 +186,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-junkyard-bbs-recovery-score",
       "./runtime/runner-junkyard-bbs-recovery-target",
       "./runtime/runner-persistent-install-fit-score",
+      "./runtime/runner-persistent-install-context",
       "./runtime/runner-mu-pressure-score",
       "./runtime/runner-mu-pressure-assessment",
       "./runtime/runner-mu-pressure-action-evidence",
