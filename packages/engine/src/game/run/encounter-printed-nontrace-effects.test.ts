@@ -393,7 +393,7 @@ describe("encounter printed non-trace effects boundary", () => {
     });
     expect(state.runnerTurnFlags?.runLockActionsPending).toBe(6);
     expect(legalAction.payload).toMatchObject({
-      v1922CorpIceAbility: "haunting_inquisition_run_lock",
+      v1922CorpIceAbility: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
       sourceDefinitionId: "haunting",

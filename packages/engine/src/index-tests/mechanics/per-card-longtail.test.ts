@@ -6151,7 +6151,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runnerTurnFlags?.runLockActionsPending).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      v1922CorpIceAbility: "haunting_inquisition_run_lock",
+      v1922CorpIceAbility: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
       sourceDefinitionId: "onr_v1_247_haunting-inquisition",

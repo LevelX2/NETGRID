@@ -329,7 +329,7 @@ function resolveDirectRunLockSubroutine(
   flags.runLockActionsPending =
     Math.max(0, Math.floor(flags.runLockActionsPending ?? 0)) + amount;
   legalActionPayload(options.legalAction, {
-    v1922CorpIceAbility: "haunting_inquisition_run_lock",
+    v1922CorpIceAbility: "direct_run_lock",
     runLockActionsAdded: amount,
     runLockActionsPending: flags.runLockActionsPending,
     sourceDefinitionId: options.definition.id,
