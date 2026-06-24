@@ -258,6 +258,7 @@ import {
   runnerLoanCriticalBreakerFundingNeed as buildRunnerLoanCriticalBreakerFundingNeed,
   runnerLoanEmergencyFundingNeed as buildRunnerLoanEmergencyFundingNeed,
 } from "./runtime/runner-loan-funding-need";
+import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
 } from "./runtime/runner-viral15-jack-out-score";
@@ -5780,26 +5781,6 @@ function runnerLoanEmergencyFundingNeed(
     isRunnerEconomyRole,
     hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
   });
-}
-
-function runnerProjectedCreditGainForAction(action: LegalAction): number {
-  const payload = action.payload ?? {};
-  const payloadValues = [
-    payload.gainCreditsAmount,
-    payload.gainedCredits,
-    payload.creditsGained,
-    payload.amount,
-  ].filter((value): value is number => typeof value === "number");
-  const payloadGain = Math.max(0, ...payloadValues);
-  if (action.type === "gain_credit") return Math.max(1, payloadGain);
-  if (
-    action.type === "trigger_ability" ||
-    action.type === "activated_card_ability" ||
-    action.type === "play_event"
-  ) {
-    return payloadGain;
-  }
-  return 0;
 }
 
 function actionClickCost(action: LegalAction): number {
