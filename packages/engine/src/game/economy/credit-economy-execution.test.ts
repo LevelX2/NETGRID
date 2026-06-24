@@ -270,7 +270,7 @@ function testHost(
       },
     },
     constants: {
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: "stack_reveal",
+      COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "stack_reveal",
       COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
       COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),

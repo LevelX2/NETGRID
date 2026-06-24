@@ -154,7 +154,7 @@ export type CreditEconomyExecutionHost = {
     nextRandom: (state: GameState, purpose: string) => number;
   };
   constants: {
-    COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
+    COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
@@ -201,7 +201,7 @@ export function handleCreditEconomyExecution(
       throw new Error("Die V1.9.12 Counter-Faehigkeit ist nicht installiert.");
     if (
       host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID
+      host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE
     )
       throw new Error("Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.");
     host.hiddenZone.revealRunnerStackTop(state, legalAction);

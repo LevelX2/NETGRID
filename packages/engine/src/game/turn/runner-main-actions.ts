@@ -105,17 +105,17 @@ export type RunnerMainActionGenerationHost = {
   };
   constants: {
     RUNNER_EVENT_RESOLVERS: Record<string, any>;
-    STACK_SEARCH_PROGRAM_CARD_IDS: ReadonlySet<string>;
+    STACK_SEARCH_PROGRAM_SOURCES: ReadonlySet<string>;
     SELF_MODIFYING_CODE_ID: string;
-    SHORT_CIRCUIT_RESOURCE_CARD_ID: string;
-    AUJOURD_OUI_RESOURCE_CARD_ID: string;
-    SERVER_EXPOSE_PROGRAM_CARD_IDS: ReadonlySet<string>;
-    COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: string;
+    SHORT_CIRCUIT_RESOURCE_SOURCE: string;
+    AUJOURD_OUI_RESOURCE_SOURCE: string;
+    SERVER_EXPOSE_PROGRAM_SOURCES: ReadonlySet<string>;
+    COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
     BOARDWALK_RANDOM_PROGRAM_CARD_ID: string;
     MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: string;
     QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
-    STACK_TOP_REORDER_RESOURCE_CARD_ID: string;
+    STACK_TOP_REORDER_RESOURCE_SOURCE: string;
     JUNKYARD_BBS_ID: string;
     SHELL_TRADERS_ID: string;
     DANSHIS_SECOND_ID: string;
@@ -260,17 +260,17 @@ export function buildRunnerMainActions(
     host.runner.uniqueDirectLongtailImplementationForCard;
   const topRunnerHeapCardId = host.hiddenZone.topRunnerHeapCardId;
   const RUNNER_EVENT_RESOLVERS = host.constants.RUNNER_EVENT_RESOLVERS;
-  const STACK_SEARCH_PROGRAM_CARD_IDS =
-    host.constants.STACK_SEARCH_PROGRAM_CARD_IDS;
+  const STACK_SEARCH_PROGRAM_SOURCES =
+    host.constants.STACK_SEARCH_PROGRAM_SOURCES;
   const SELF_MODIFYING_CODE_ID = host.constants.SELF_MODIFYING_CODE_ID;
-  const SHORT_CIRCUIT_RESOURCE_CARD_ID =
-    host.constants.SHORT_CIRCUIT_RESOURCE_CARD_ID;
-  const AUJOURD_OUI_RESOURCE_CARD_ID =
-    host.constants.AUJOURD_OUI_RESOURCE_CARD_ID;
-  const SERVER_EXPOSE_PROGRAM_CARD_IDS =
-    host.constants.SERVER_EXPOSE_PROGRAM_CARD_IDS;
-  const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID =
-    host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID;
+  const SHORT_CIRCUIT_RESOURCE_SOURCE =
+    host.constants.SHORT_CIRCUIT_RESOURCE_SOURCE;
+  const AUJOURD_OUI_RESOURCE_SOURCE =
+    host.constants.AUJOURD_OUI_RESOURCE_SOURCE;
+  const SERVER_EXPOSE_PROGRAM_SOURCES =
+    host.constants.SERVER_EXPOSE_PROGRAM_SOURCES;
+  const COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE =
+    host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE;
   const FAIT_ACCOMPLI_COUNTER_PROGRAM_ID =
     host.constants.FAIT_ACCOMPLI_COUNTER_PROGRAM_ID;
   const BOARDWALK_RANDOM_PROGRAM_CARD_ID =
@@ -279,8 +279,8 @@ export function buildRunnerMainActions(
     host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID;
   const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID =
     host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID;
-  const STACK_TOP_REORDER_RESOURCE_CARD_ID =
-    host.constants.STACK_TOP_REORDER_RESOURCE_CARD_ID;
+  const STACK_TOP_REORDER_RESOURCE_SOURCE =
+    host.constants.STACK_TOP_REORDER_RESOURCE_SOURCE;
   const JUNKYARD_BBS_ID = host.constants.JUNKYARD_BBS_ID;
   const SHELL_TRADERS_ID = host.constants.SHELL_TRADERS_ID;
   const DANSHIS_SECOND_ID = host.constants.DANSHIS_SECOND_ID;
@@ -760,12 +760,12 @@ export function buildRunnerMainActions(
       .sort()) {
       const definition = definitionFor(state, cardId);
       if (
-        STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
+        STACK_SEARCH_PROGRAM_SOURCES.has(definition.id) &&
         !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
-        (definition.id !== SHORT_CIRCUIT_RESOURCE_CARD_ID ||
+        (definition.id !== SHORT_CIRCUIT_RESOURCE_SOURCE ||
           state.runner.credits >= 1) &&
-        (definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+        (definition.id === AUJOURD_OUI_RESOURCE_SOURCE
           ? state.runner.stack.length > 0
           : state.runner.stack.some(
               (id) => definitionFor(state, id).type === "program",
@@ -776,16 +776,16 @@ export function buildRunnerMainActions(
             cardId,
             definition,
             mode:
-              definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+              definition.id === AUJOURD_OUI_RESOURCE_SOURCE
                 ? "top5_programs"
                 : "stack_program",
             creditCost:
-              definition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID ? 1 : 0,
+              definition.id === SHORT_CIRCUIT_RESOURCE_SOURCE ? 1 : 0,
           }),
         );
       }
       if (
-        SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
+        SERVER_EXPOSE_PROGRAM_SOURCES.has(definition.id) &&
         !cardImplementationForDefinitionId(definition.id) &&
         state.corp.servers.some(
           (server) => exposedCorpCardInServer(state, server.id) !== undefined,
@@ -811,7 +811,7 @@ export function buildRunnerMainActions(
         }
       }
       if (
-        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID &&
+        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE &&
         state.runner.stack.length > 0
       ) {
         actions.push(
@@ -945,7 +945,7 @@ export function buildRunnerMainActions(
         }
       }
       if (
-        definition.id === STACK_TOP_REORDER_RESOURCE_CARD_ID &&
+        definition.id === STACK_TOP_REORDER_RESOURCE_SOURCE &&
         !cardImplementationForDefinitionId(definition.id) &&
         state.runner.stack.length >= 2
       ) {

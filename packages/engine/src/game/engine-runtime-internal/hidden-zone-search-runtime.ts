@@ -7,12 +7,12 @@ export function createHiddenZoneSearchRuntime(
   runtime: Record<string, unknown>,
 ) {
   const {
-    AUJOURD_OUI_RESOURCE_CARD_ID,
+    AUJOURD_OUI_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,
     COCKROACH_ID,
-    CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-    CORP_HQ_AGENDA_REVEAL_CARD_ID,
-    CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+    CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+    CORP_HQ_AGENDA_REVEAL_SOURCE,
+    CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
     INITIAL_HAND_SIZE,
@@ -20,12 +20,12 @@ export function createHiddenZoneSearchRuntime(
     RONIN_AROUND_ID,
     RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_CARD_IDS,
-    SHORT_CIRCUIT_RESOURCE_CARD_ID,
+    SERVER_EXPOSE_PROGRAM_SOURCES,
+    SHORT_CIRCUIT_RESOURCE_SOURCE,
     SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_CARD_IDS,
-    STACK_TOP_REORDER_RESOURCE_CARD_ID,
+    STACK_SEARCH_PROGRAM_SOURCES,
+    STACK_TOP_REORDER_RESOURCE_SOURCE,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
     addCardCounter,
@@ -229,10 +229,10 @@ export function createHiddenZoneSearchRuntime(
       state,
       legalAction,
       constants: {
-        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_CARD_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
         randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
         temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
@@ -310,10 +310,10 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       constants: {
-        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_CARD_ID,
+        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
         randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
         temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
@@ -645,14 +645,14 @@ export function createHiddenZoneSearchRuntime(
     const sourceDefinition = definitionFor(state, sourceCardId);
     const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
     if (ability === "search_stack_program_to_grip") {
-      if (!STACK_SEARCH_PROGRAM_CARD_IDS.has(sourceDefinition.id))
+      if (!STACK_SEARCH_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
       if (cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error(
           "Diese Stack-Search-Ability wird deklarativ abgewickelt.",
         );
       spendCredits(state, "runner", creditCostForAction(legalAction));
-      if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID) {
+      if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE) {
         startAujourdOuiTop5Activation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           sourceCardId,
@@ -662,11 +662,11 @@ export function createHiddenZoneSearchRuntime(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           {
             sourcePrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
                 ? `runner.stack_search_to_grip:${sourceCardId}`
                 : "v1911.search_stack",
             choiceIdPrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
                 ? "runner_stack_search_to_grip"
                 : "v1911_search_stack",
           },
@@ -677,16 +677,16 @@ export function createHiddenZoneSearchRuntime(
         hiddenZoneBarrier: true,
         sourceDefinitionId: sourceDefinition.id,
         hiddenZoneAction:
-          sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+          sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE
             ? "v1911_aujourdoui_top5"
-            : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+            : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
               ? "runner_stack_search_to_grip"
               : "v1911_search_stack",
       };
       return;
     }
     if (ability === "expose_server_card") {
-      if (!SERVER_EXPOSE_PROGRAM_CARD_IDS.has(sourceDefinition.id))
+      if (!SERVER_EXPOSE_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
       if (cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error("Diese Expose-Ability wird deklarativ abgewickelt.");
@@ -719,7 +719,7 @@ export function createHiddenZoneSearchRuntime(
       return;
     }
     if (ability === "arrange_stack_top2") {
-      if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_CARD_ID)
+      if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_SOURCE)
         throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
       startRunnerStackArrangeChoice(
         hiddenZoneArrangeChoiceHandlerHost(state, legalAction),

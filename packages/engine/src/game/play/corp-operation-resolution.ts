@@ -20,8 +20,8 @@ import {
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { EDGERUNNER_TEMPS_INSTALL_OPERATION_ID } from "../../mechanics/longtail-card-effects";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
@@ -205,7 +205,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       host.state.corp.badPublicity += 1;
     },
   },
-  [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
+  [CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE]: {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (host) => host.state.corp.archives.length > 0,
     resolve: (host, legalAction) => {
@@ -213,13 +213,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
-          CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
+          CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE
       )
         throw new Error("Off-Site Backups fehlt als Quelle.");
       host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
     },
   },
-  [CORP_RD_TOP5_REORDER_OPERATION_CARD_ID]: {
+  [CORP_RD_TOP5_REORDER_OPERATION_SOURCE]: {
     name: "onr_v1922_corp_operation_private_rd_top5_reorder",
     canPlay: (host) => host.state.corp.rd.length >= 2,
     resolve: (host, legalAction) => {
@@ -227,7 +227,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
-          CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
+          CORP_RD_TOP5_REORDER_OPERATION_SOURCE
       )
         throw new Error("Planning Consultants fehlt als Quelle.");
       host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
