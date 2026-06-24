@@ -263,6 +263,10 @@ import {
   runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
 } from "./runtime/runner-repeated-run-target-score";
 import {
+  semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
+  semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
+} from "./runtime/semantic-runtime-doctrine-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7593,24 +7597,16 @@ function semanticRuntimeDoctrinePlanWeightComponent(
   planKey: string,
   consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
-  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
-  const clamp = semanticRuntimeDoctrineClamp(consumer);
-  const bounded = Math.max(-clamp, Math.min(clamp, raw));
-  const value = Math.round(bounded * 10);
-  if (value === 0) return undefined;
-  return {
-    key: "deck_doctrine_runtime_weight",
-    label: "DeckDoctrine-Runtime-Gewicht",
-    value,
-    reason: [
-      `plan:${planKey}`,
-      `raw:${raw}`,
-      `bounded:${bounded}`,
-      `consumer:${consumer}`,
-      `clamp:${clamp}`,
-      `tags:${input.ownDeckDoctrine?.archetypeTags.slice(0, 3).join(",") ?? "neutral"}`,
-    ].join("|"),
-  };
+  return buildSemanticRuntimeDoctrinePlanWeightComponent(
+    input,
+    planKey,
+    consumer,
+    {
+      rawWeight: semanticRuntimeDoctrineRawWeight,
+      clamp: semanticRuntimeDoctrineClamp,
+      scoreComponent: buildSemanticDecisionDebugScoreComponent,
+    },
+  );
 }
 
 function semanticRuntimeDoctrineRawWeight(
@@ -7846,11 +7842,8 @@ function semanticRuntimeDoctrineGateBlocked(
 function semanticRuntimeDoctrineSuppressedComponent(
   evidence: readonly string[],
 ): AiDecisionScoreComponent {
-  return buildSemanticDecisionDebugScoreComponent({
-    key: "deck_doctrine_runtime_weight_suppressed",
-    label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
-    value: 0,
-    reason: evidence.join("|"),
+  return buildSemanticRuntimeDoctrineSuppressedComponent(evidence, {
+    scoreComponent: buildSemanticDecisionDebugScoreComponent,
   });
 }
 

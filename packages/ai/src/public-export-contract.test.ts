@@ -151,6 +151,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-known-ice-path-score",
       "./runtime/runner-remote-score",
       "./runtime/runner-repeated-run-target-score",
+      "./runtime/semantic-runtime-doctrine-score",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
