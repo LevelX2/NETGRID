@@ -623,7 +623,6 @@ import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
   corpInstalledEconomyActionProfileForPayload,
-  CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
 import {
@@ -2404,17 +2403,6 @@ function applyCorpStartOfTurnEffects(
         });
       }
       continue;
-    }
-    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
-      credits(state, "corp", 1);
-      effects?.push(
-        automaticGainCreditsEffect(
-          `corp.start.recurring_asset.${cardId}`,
-          "corp",
-          1,
-          definitionId,
-        ),
-      );
     }
   }
   if (!state.pendingChoice)

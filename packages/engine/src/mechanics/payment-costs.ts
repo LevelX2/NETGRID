@@ -1,12 +1,3 @@
-import { investmentFirmImplementation } from "../card-implementations/onr-v1/corp/assets/investment-firm";
-
-export const INVESTMENT_FIRM_ASSET_CARD_ID =
-  investmentFirmImplementation.cardDefinitionId;
-
-export const CORP_RECURRING_ASSET_CARD_IDS = new Set<string>([
-  INVESTMENT_FIRM_ASSET_CARD_ID,
-]);
-
 export type EconomyActionProfile = {
   profileId: string;
   sourceDefinitionId: string;
