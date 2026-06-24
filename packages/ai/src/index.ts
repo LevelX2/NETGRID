@@ -199,12 +199,8 @@ import {
   runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
 } from "./runtime/runner-run-only-action-adjustment";
 import {
-  runnerSelfDamageGuardedDecision as buildRunnerSelfDamageGuardedDecision,
-  runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
-  runnerSelfDamageSurvivalAssessment as buildRunnerSelfDamageSurvivalAssessment,
-  runnerSelfDamageSurvivalExclusion as buildRunnerSelfDamageSurvivalExclusion,
-  type RunnerSelfDamageSurvivalAssessment,
-} from "./runtime/runner-self-damage-choice";
+  createRunnerSelfDamageContext,
+} from "./runtime/runner-self-damage-context";
 import {
   runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
 } from "./runtime/runner-program-sacrifice-exclusion";
@@ -3728,19 +3724,21 @@ const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
-const RUNNER_SELF_DAMAGE_SURVIVAL_ASSESSMENT_DEPENDENCIES = {
+const {
+  runnerSelfDamageGuardedDecision,
+  runnerSelfDamageImmediateWinSemanticChoice,
+  runnerSelfDamageSurvivalAssessment,
+  runnerSelfDamageSurvivalExclusion,
+} = createRunnerSelfDamageContext({
   sourceDefinitionIdForAction,
   hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-};
-const RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES = {
-  survivalAssessment: runnerSelfDamageSurvivalAssessment,
   scoreRunnerActions: (input: AiDecisionInput) => scoreActions(input, "runner"),
   compareAction,
   selectedChoicesForDecision,
   scrubEvidence,
-};
+});
 const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES = {
   sourceDefinitionIdForAction,
   selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
@@ -3901,10 +3899,7 @@ const {
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  runnerSelfDamageSurvivalExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
-    buildRunnerSelfDamageSurvivalExclusion(runtimeInput, action, {
-      survivalAssessment: runnerSelfDamageSurvivalAssessment,
-    }),
+  runnerSelfDamageSurvivalExclusion,
   runnerEncounterActionExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
     buildRunnerEncounterActionExclusion(runtimeInput, action, {
       blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
@@ -3964,10 +3959,7 @@ function chooseSemanticRuntimeAction(
       bestSemanticRuntimeChoice,
       bestSemanticRuntimeChoiceForTacticalPlanOverride,
       tacticalPlanMappedChoice,
-      runnerSelfDamageImmediateWinSemanticChoice: (runtimeInput, choices) =>
-        buildRunnerSelfDamageImmediateWinSemanticChoice(runtimeInput, choices, {
-          survivalAssessment: runnerSelfDamageSurvivalAssessment,
-        }),
+      runnerSelfDamageImmediateWinSemanticChoice,
       semanticRuntimeChoiceWithEvidence,
       tacticalPlanMappingOverrideEvidence,
       tacticalPlanRuntimeAlignedToChoice,
@@ -6634,28 +6626,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function runnerSelfDamageGuardedDecision(
-  input: AiDecisionInput,
-  decision: AiDecision,
-): AiDecision {
-  return buildRunnerSelfDamageGuardedDecision(
-    input,
-    decision,
-    RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES,
-  );
-}
-
-function runnerSelfDamageSurvivalAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerSelfDamageSurvivalAssessment | undefined {
-  return buildRunnerSelfDamageSurvivalAssessment(
-    input,
-    action,
-    RUNNER_SELF_DAMAGE_SURVIVAL_ASSESSMENT_DEPENDENCIES,
   );
 }
 
