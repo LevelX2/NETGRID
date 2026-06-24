@@ -202,6 +202,9 @@ import {
   createRunnerSelfDamageContext,
 } from "./runtime/runner-self-damage-context";
 import {
+  createRunnerBaselinePlanGuardContext,
+} from "./runtime/runner-baseline-plan-guard-context";
+import {
   createRunnerBlinkRiskContext,
 } from "./runtime/runner-blink-risk-context";
 import {
@@ -3595,6 +3598,13 @@ const {
   selectedChoicesForDecision,
   scrubEvidence,
 });
+const {
+  runnerHasConditionalPaymentContinueDecision,
+  baselineShellTradersPlanIsVisible,
+} = createRunnerBaselinePlanGuardContext({
+  delayedInstallAbilityForAction,
+  runnerHasInstalledPrograms,
+});
 const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
 const {
   runnerStrategicIntentForInput,
@@ -4886,57 +4896,6 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
-
-function runnerHasConditionalPaymentContinueDecision(
-  input: AiDecisionInput,
-  action: LegalAction | undefined,
-): boolean {
-  if (!action || action.type !== "continue_run") return false;
-  if (action.payload?.encounterContinue !== true) return false;
-  const payOrTrashProgramPayment = Number(
-    action.payload?.payOrTrashProgramSubroutinePayment ?? 0,
-  );
-  const payOrEndRunPayment = Number(
-    action.payload?.payOrEndRunSubroutinePayment ?? 0,
-  );
-  const hasConditionalTrashPay =
-    Number.isFinite(payOrTrashProgramPayment) &&
-    payOrTrashProgramPayment > 0 &&
-    typeof action.payload?.payOrTrashProgramSubroutineIndexes === "string";
-  const hasConditionalEndRunPay =
-    Number.isFinite(payOrEndRunPayment) &&
-    payOrEndRunPayment > 0 &&
-    typeof action.payload?.payOrEndRunSubroutineIndexes === "string";
-  if (!hasConditionalTrashPay && !hasConditionalEndRunPay) return false;
-  return runnerHasInstalledPrograms(input);
-}
-
-function baselineShellTradersPlanIsVisible(
-  input: AiDecisionInput,
-  decision: AiDecision,
-): boolean {
-  if (
-    decision.reasonCode !== "runner.shell_traders.prepare_install" &&
-    decision.reasonCode !== "runner.shell_traders.remove_counter"
-  )
-    return false;
-  const action = input.legalActions.find(
-    (candidate) => candidate.actionId === decision.actionId,
-  );
-  if (!action || action.type !== "trigger_ability") return false;
-  if (
-    delayedInstallAbilityForAction(action) !== "set_aside_from_grip" &&
-    delayedInstallAbilityForAction(action) !== "remove_shell_counter"
-  )
-    return false;
-  if (action.source === "basic_action" || action.source === "game_rule")
-    return false;
-  return Boolean(
-    input.playerView.own.rig?.some(
-      (card) => card.known && card.instanceId === action.source,
-    ),
-  );
-}
 
 export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
   const serialized = JSON.stringify(input);
