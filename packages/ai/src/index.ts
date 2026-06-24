@@ -209,6 +209,9 @@ import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
 import {
+  runnerMultiRunEventExclusion as buildRunnerMultiRunEventExclusion,
+} from "./runtime/runner-multi-run-event-exclusion";
+import {
   runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents,
   runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents,
 } from "./runtime/runner-economy-commitment-score";
@@ -6428,19 +6431,9 @@ function semanticRuntimeRunnerMultiRunEventExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const assessment = runnerMultiRunEventAssessment(input, action);
-  if (!assessment || assessment.canTakeRun) return undefined;
-  return {
-    key:
-      assessment.phase === "followup_run"
-        ? "multi_run_followup_no_plausible_run"
-        : "multi_run_event_no_plausible_first_run",
-    label:
-      assessment.phase === "followup_run"
-        ? "All-Nighter-Folgerun ohne plausibles Ziel"
-        : "All-Nighter ohne plausibles erstes Run-Ziel",
-    reason: sortedUnique(assessment.evidence).join("|"),
-  };
+  return buildRunnerMultiRunEventExclusion(input, action, {
+    assessment: runnerMultiRunEventAssessment,
+  });
 }
 
 function runnerMultiRunEventAssessment(
