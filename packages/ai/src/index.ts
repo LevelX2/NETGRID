@@ -225,6 +225,9 @@ import {
   runnerLoanRunFundingContext as buildRunnerLoanRunFundingContext,
 } from "./runtime/runner-loan-run-funding-context";
 import {
+  runnerLoanRuntimeContext as buildRunnerLoanRuntimeContext,
+} from "./runtime/runner-loan-runtime-context";
+import {
   runnerInstalledLoanActionSpend as buildRunnerInstalledLoanActionSpend,
   runnerLoanProjectedSpendAfterLoan as buildRunnerLoanProjectedSpendAfterLoan,
 } from "./runtime/runner-loan-projected-spend";
@@ -5740,46 +5743,14 @@ function runnerLoanRuntimeContext(
   runFunding: RunnerLoanRunFundingContext;
   evidence: string[];
 } {
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(
-    input,
-    deckCapabilities,
-  );
-  const handDevelopmentEvaluations = evaluateRunnerHandDevelopment({
-    input,
-    deckCapabilities,
-    strategicIntent,
+  return buildRunnerLoanRuntimeContext(input, creditsAfterLoan, {
+    deckCapabilitiesForInput,
+    strategicIntentForInput: runnerStrategicIntentForInput,
+    handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
+    economyPosture: buildRunnerEconomyPosture,
+    runTargets: evaluateRunnerRunTargets,
+    runFundingContext: buildRunnerLoanRunFundingContext,
   });
-  const economyPosture = buildRunnerEconomyPosture({
-    input,
-    deckCapabilities,
-    strategicIntent,
-    handDevelopmentEvaluations,
-  });
-  const runTargets = evaluateRunnerRunTargets({
-    input,
-    deckCapabilities,
-    strategicIntent,
-    handDevelopmentEvaluations,
-  });
-  const runFunding = buildRunnerLoanRunFundingContext({
-    input,
-    runTargets,
-    creditsAfterLoan,
-    desiredCreditReserve: economyPosture.desiredCreditReserve,
-    contestReserve: economyPosture.creditReservePolicy.contestReserve,
-  });
-  return {
-    desiredCreditReserve: economyPosture.desiredCreditReserve,
-    contestReserve: economyPosture.creditReservePolicy.contestReserve,
-    runFunding,
-    evidence: [
-      `loanRuntimeEconomyRecommendation:${economyPosture.recommendation}`,
-      `loanRuntimeCreditBase:${economyPosture.creditBasePlan.recommendation}`,
-      `loanRuntimeFundingNeed:${economyPosture.fundingNeed}`,
-      `loanRuntimeHandBlocked:${economyPosture.creditBasePlan.usefulHandCardsBlockedByCredits}`,
-    ],
-  };
 }
 
 function runnerLoanProjectedSpendAfterLoan(
