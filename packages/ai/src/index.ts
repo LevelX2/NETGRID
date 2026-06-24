@@ -53,11 +53,7 @@ import {
   evaluateRunnerOpeningHand,
   type AiDeckDoctrineDeckSnapshot,
 } from "./deck-doctrine";
-import {
-  buildDeckCapabilityProfile,
-  buildDeckCapabilityProfileFromInput,
-  type DeckCapabilityProfile,
-} from "./deck-capabilities";
+import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import {
   type RunnerStrategicIntentProfile,
@@ -123,7 +119,6 @@ import {
   FORBIDDEN_AI_INPUT_FIELDS,
   buildAiDecisionInput,
   selectAiDecisionSideForState,
-  type AiDecisionInputWithDeckCapabilities,
   type AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
 import {
@@ -146,6 +141,7 @@ import {
 import {
   createSemanticRuntimeDecisionContext,
 } from "./runtime/semantic-runtime-decision-context";
+import { createDeckCapabilitiesContext } from "./runtime/deck-capabilities-context";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -3599,6 +3595,7 @@ const {
   selectedChoicesForDecision,
   scrubEvidence,
 });
+const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
 const {
   runnerStrategicIntentForInput,
 } = createRunnerStrategicIntentContext();
@@ -4247,15 +4244,6 @@ function runnerRunPayoffCompletionCandidate(
       `credits_after_run:${evaluation.creditsAfterRun}`,
     ],
   };
-}
-
-function deckCapabilitiesForInput(
-  input: AiDecisionInput,
-): DeckCapabilityProfile {
-  return (
-    (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
-    buildDeckCapabilityProfileFromInput(input)
-  );
 }
 
 const {

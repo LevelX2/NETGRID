@@ -213,6 +213,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-known-ice-path-score",
       "./runtime/runner-remote-score",
       "./runtime/runner-repeated-run-target-score",
+      "./runtime/deck-capabilities-context",
       "./runtime/runner-run-components-context",
       "./runtime/runner-run-history",
       "./runtime/runner-recent-history-context",
