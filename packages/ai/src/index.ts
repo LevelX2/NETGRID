@@ -322,6 +322,14 @@ import {
   runnerMuPressureInstallScoreComponent as buildRunnerMuPressureInstallScoreComponent,
 } from "./runtime/runner-mu-pressure-score";
 import {
+  runnerMuPressureEvidence as buildRunnerMuPressureEvidence,
+  runnerMuPressureReason as buildRunnerMuPressureReason,
+  runnerMuPressureSeverity as buildRunnerMuPressureSeverity,
+  runnerMuPressureSeverityBonus as buildRunnerMuPressureSeverityBonus,
+  runnerMuPressureSeverityFundingBonus as buildRunnerMuPressureSeverityFundingBonus,
+  type RunnerMuPressureAssessment,
+} from "./runtime/runner-mu-pressure-policy";
+import {
   runnerRunTargetGuidanceScoreComponent as buildRunnerRunTargetGuidanceScoreComponent,
 } from "./runtime/runner-run-target-guidance-score";
 import {
@@ -11016,26 +11024,6 @@ type RunnerProgramInstallTrashAssessment = {
   evidence: string[];
 };
 
-type RunnerMuPressureSeverity = "none" | "low" | "medium" | "high" | "critical";
-
-type RunnerMuPressureAssessment = {
-  memoryUsed: number;
-  memoryLimit: number;
-  memoryAvailable: number;
-  pendingProgramInstallMemory: number;
-  muAfterInstall: number;
-  requiresProgramTrash: boolean;
-  criticalProgramSacrificeRisk: boolean;
-  usefulProgramsInHand: number;
-  memorySupportLegalActions: number;
-  affordableMemorySupportActions: number;
-  memorySupportInHand: number;
-  memorySupportSearchable: boolean;
-  missingCreditsForCheapestMemorySupport?: number;
-  severity: RunnerMuPressureSeverity;
-  evidence: string[];
-};
-
 function runnerMuPressureAssessment(
   input: AiDecisionInput,
 ): RunnerMuPressureAssessment {
@@ -11107,7 +11095,7 @@ function runnerMuPressureAssessment(
   const memorySupportSearchable = input.legalActions.some((action) =>
     runnerMemorySupportSearchAction(input, action),
   );
-  const severity = runnerMuPressureSeverity({
+  const severity = buildRunnerMuPressureSeverity({
     memoryAvailable,
     pendingProgramInstallMemory,
     requiresProgramTrash,
@@ -11116,7 +11104,7 @@ function runnerMuPressureAssessment(
     memorySupportInHand: memorySupportCardsInHand.length,
     memorySupportLegalActions: memorySupportLegalActions.length,
   });
-  const evidence = runnerMuPressureEvidence({
+  const evidence = buildRunnerMuPressureEvidence({
     memoryUsed,
     memoryLimit,
     memoryAvailable,
@@ -11192,7 +11180,9 @@ function runnerMuPressureInstallPriorityBonus(
   ) {
     return { value: 0, evidence: [], assessment };
   }
-  const severityBonus = runnerMuPressureSeverityBonus(assessment.severity);
+  const severityBonus = buildRunnerMuPressureSeverityBonus(
+    assessment.severity,
+  );
   const value = Math.min(
     1500,
     severityBonus +
@@ -11228,7 +11218,7 @@ function runnerMuPressureFundingPriorityBonus(
   ) {
     return { value: 0, evidence: [], assessment };
   }
-  const severityBonus = runnerMuPressureSeverityFundingBonus(
+  const severityBonus = buildRunnerMuPressureSeverityFundingBonus(
     assessment.severity,
   );
   const value = Math.min(
@@ -11277,126 +11267,10 @@ function runnerMuPressureActionEvidence(
   ]);
 }
 
-function runnerMuPressureSeverity(context: {
-  memoryAvailable: number;
-  pendingProgramInstallMemory: number;
-  requiresProgramTrash: boolean;
-  criticalProgramSacrificeRisk: boolean;
-  usefulProgramsInHand: number;
-  memorySupportInHand: number;
-  memorySupportLegalActions: number;
-}): RunnerMuPressureSeverity {
-  const hasUsefulProgramPressure =
-    context.usefulProgramsInHand > 0 ||
-    context.pendingProgramInstallMemory > context.memoryAvailable ||
-    context.requiresProgramTrash;
-  if (!hasUsefulProgramPressure) return "none";
-  if (context.criticalProgramSacrificeRisk) return "critical";
-  if (context.requiresProgramTrash) return "high";
-  if (context.memoryAvailable <= 0 && context.usefulProgramsInHand > 0)
-    return "high";
-  if (context.memoryAvailable <= 1 && context.usefulProgramsInHand > 0)
-    return "medium";
-  if (context.pendingProgramInstallMemory > context.memoryAvailable)
-    return "medium";
-  return "none";
-}
-
-function runnerMuPressureSeverityBonus(
-  severity: RunnerMuPressureSeverity,
-): number {
-  switch (severity) {
-    case "critical":
-      return 1040;
-    case "high":
-      return 820;
-    case "medium":
-      return 460;
-    case "low":
-      return 140;
-    case "none":
-      return 0;
-  }
-}
-
-function runnerMuPressureSeverityFundingBonus(
-  severity: RunnerMuPressureSeverity,
-): number {
-  switch (severity) {
-    case "critical":
-      return 860;
-    case "high":
-      return 700;
-    case "medium":
-      return 360;
-    case "low":
-      return 120;
-    case "none":
-      return 0;
-  }
-}
-
-function runnerMuPressureEvidence(
-  assessment: Omit<RunnerMuPressureAssessment, "evidence">,
-): string[] {
-  if (assessment.severity === "none") return [];
-  return sortedUnique([
-    `runner_mu_pressure_severity:${assessment.severity}`,
-    `runner_memory_used:${assessment.memoryUsed}`,
-    `runner_memory_limit:${assessment.memoryLimit}`,
-    `runner_memory_available:${assessment.memoryAvailable}`,
-    `runner_pending_program_install_memory:${assessment.pendingProgramInstallMemory}`,
-    `runner_mu_after_install:${assessment.muAfterInstall}`,
-    `runner_program_install_requires_trash:${assessment.requiresProgramTrash}`,
-    `runner_critical_program_sacrifice_risk:${assessment.criticalProgramSacrificeRisk}`,
-    `runner_useful_programs_in_hand:${assessment.usefulProgramsInHand}`,
-    `runner_memory_support_legal_actions:${assessment.memorySupportLegalActions}`,
-    `runner_memory_support_affordable_actions:${assessment.affordableMemorySupportActions}`,
-    `runner_memory_support_in_hand:${assessment.memorySupportInHand}`,
-    `runner_memory_support_searchable:${assessment.memorySupportSearchable}`,
-    ...(assessment.missingCreditsForCheapestMemorySupport !== undefined
-      ? [
-          `runner_memory_support_missing_credits:${assessment.missingCreditsForCheapestMemorySupport}`,
-        ]
-      : []),
-    ...runnerMuPressureReasonTags(assessment),
-  ]);
-}
-
 function runnerMuPressureReason(
   assessment: RunnerMuPressureAssessment,
 ): string {
-  return [
-    assessment.severity,
-    `memory_available:${assessment.memoryAvailable}`,
-    `useful_programs:${assessment.usefulProgramsInHand}`,
-    `memory_support:${assessment.affordableMemorySupportActions}`,
-  ].join("|");
-}
-
-function runnerMuPressureReasonTags(
-  assessment: Omit<RunnerMuPressureAssessment, "evidence">,
-): string[] {
-  return [
-    ...(assessment.memoryAvailable <= 0 && assessment.usefulProgramsInHand > 0
-      ? ["runner_mu_pressure_reason:full_mu_with_useful_programs"]
-      : []),
-    ...(assessment.memoryAvailable === 1 && assessment.usefulProgramsInHand > 0
-      ? ["runner_mu_pressure_reason:low_mu_with_useful_programs"]
-      : []),
-    ...(assessment.requiresProgramTrash
-      ? ["runner_mu_pressure_reason:program_install_requires_trash"]
-      : []),
-    ...(assessment.criticalProgramSacrificeRisk
-      ? ["runner_mu_pressure_reason:critical_sacrifice_alternative"]
-      : []),
-    ...(assessment.affordableMemorySupportActions > 0
-      ? ["runner_mu_pressure_reason:memory_support_affordable"]
-      : []),
-    ...(assessment.missingCreditsForCheapestMemorySupport !== undefined
-      ? ["runner_mu_pressure_reason:memory_support_missing_credits"]
-      : []),
-  ];
+  return buildRunnerMuPressureReason(assessment);
 }
 
 function isRunnerProgramInstallActionForMuPressure(
