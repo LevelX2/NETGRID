@@ -29,8 +29,6 @@ import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scori
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 
-const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
-const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
   COCKROACH_ID,
@@ -1140,8 +1138,6 @@ function visibleStrengthModifierForKnownCard(
 }
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
-  const iceDefinition = definitionFor(state, iceId);
-  const iceSubtypes = effectiveSubtypesForCard(state, iceId, iceDefinition);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
@@ -1155,18 +1151,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       )
         bonus += scoredAgenda.amount;
       continue;
-    }
-    if (!scoredAgenda) {
-      if (
-        agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-        iceSubtypes.includes("code_gate")
-      )
-        bonus += 1;
-      if (
-        agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-        iceSubtypes.includes("wall")
-      )
-        bonus += 1;
     }
   }
   bonus += iceStrengthModifierBonusFor(state, iceId);
