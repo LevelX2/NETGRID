@@ -92,7 +92,7 @@ export function buildRunnerDelayedInstallSetAsideAction(
     {
       targetRequirements: [
         {
-          id: "shellTradersTarget",
+          id: "delayedInstallTarget",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.grip"],
@@ -129,7 +129,7 @@ export function buildRunnerDelayedInstallRemoveCounterAction(
     {
       targetRequirements: [
         {
-          id: "shellTradersPreparedCard",
+          id: "delayedInstallPreparedCard",
           kind: "card",
           side: "runner",
           zoneScope: ["special.set_aside"],

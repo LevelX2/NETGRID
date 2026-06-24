@@ -129,7 +129,7 @@ describe("runner special zone install action builders", () => {
       },
       targetRequirements: [
         {
-          id: "shellTradersTarget",
+          id: "delayedInstallTarget",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.grip"],
@@ -160,7 +160,7 @@ describe("runner special zone install action builders", () => {
       },
       targetRequirements: [
         {
-          id: "shellTradersPreparedCard",
+          id: "delayedInstallPreparedCard",
           kind: "card",
           side: "runner",
           zoneScope: ["special.set_aside"],
