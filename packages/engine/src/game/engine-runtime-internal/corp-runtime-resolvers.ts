@@ -528,13 +528,13 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  COUNTER_OPERATION_CARD_IDS,
-  OVERADVANCE_AGENDA_CARD_IDS,
+  COUNTER_OPERATION_SOURCES,
+  OVERADVANCE_AGENDA_SOURCES,
   scoredAgendaCounterCreditPayload,
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_CARD_IDS,
-  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+  SCORED_REVEAL_AGENDA_SOURCES,
+  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
@@ -656,7 +656,7 @@ import {
   TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "../../mechanics/server-upgrades";
 import {
-  RUN_TAX_UPGRADE_CARD_IDS,
+  RUN_TAX_UPGRADE_SOURCES,
 } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -1513,7 +1513,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     const targetAgendaId = corpAgendaCounterOperationTarget(state);
     if (!targetAgendaId)
       throw new Error("Die V1.9.19-Counter-Operation findet kein Agenda-Ziel.");
-    if (!COUNTER_OPERATION_CARD_IDS.has(sourceDefinitionId))
+    if (!COUNTER_OPERATION_SOURCES.has(sourceDefinitionId))
       throw new Error("Die V1.9.19-Counter-Operation passt nicht zur Quelle.");
     addCardCounter(state, targetAgendaId, "power", 1);
     legalAction.payload = {

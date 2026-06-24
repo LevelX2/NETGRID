@@ -24,7 +24,7 @@ import {
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
-import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
+import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 
@@ -1081,7 +1081,7 @@ function serverDifficultyReductionFromUpgrades(
     const instance = mustInstance(state.cardInstances, rootCardId);
     if (!instance.rezzed) return sum;
     const definitionId = definitionFor(state, rootCardId).id;
-    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(definitionId) ? sum + 1 : sum;
+    return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId) ? sum + 1 : sum;
   }, 0);
 }
 

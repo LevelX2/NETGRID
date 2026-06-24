@@ -84,7 +84,7 @@ function hasFortRunWindowKind(
   );
 }
 
-export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
+export const CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "operation") &&
     hasEffectKind(implementation, [
@@ -93,19 +93,19 @@ export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
     ]),
 );
 
-export const CORP_FORT_RUN_WINDOW_UPGRADE_CARD_IDS = cardIdsMatching(
+export const CORP_FORT_RUN_WINDOW_UPGRADE_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&
     (implementation.fortRunWindows?.length ?? 0) > 0,
 );
 
-export const CORP_TRACE_ASSET_CARD_IDS = cardIdsMatching(
+export const CORP_TRACE_ASSET_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "asset") &&
     hasEffectKind(implementation, ["trace"]),
 );
 
-export const CORP_RUN_TAX_UPGRADE_CARD_IDS = cardIdsMatching(
+export const CORP_RUN_TAX_UPGRADE_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&
     hasFortRunWindowKind(implementation, [
