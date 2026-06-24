@@ -281,6 +281,7 @@ import {
   sortedUnique,
 } from "./runtime/collection";
 import { fnv1a } from "./runtime/stable-hash";
+import { scoreConfidence as confidence } from "./runtime/score-confidence";
 import {
   evidenceNumber,
   evidenceValue,
@@ -28355,8 +28356,4 @@ function isRedactionSafeCaseAnalysis(
 
 function isHoldoutSeed(seed: string): boolean {
   return SOAK_SEEDS.holdoutSeeds.includes(seed);
-}
-
-function confidence(score: number): number {
-  return Math.max(0.1, Math.min(0.99, round(score / 1000)));
 }
