@@ -224,6 +224,9 @@ import {
 import {
   runnerFollowupScoreComponents,
 } from "./runtime/runner-followup-score";
+import {
+  runnerLoanLiabilityScoreComponent,
+} from "./runtime/runner-loan-liability-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5698,22 +5701,6 @@ function semanticRuntimeRunnerScoreComponents(
     ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId),
   );
   return components;
-}
-
-function runnerLoanLiabilityScoreComponent(
-  assessment: RunnerLoanLiabilityAssessment | undefined,
-): AiDecisionScoreComponent | undefined {
-  if (!assessment || assessment.scoreValue === 0) return undefined;
-  return {
-    key: assessment.loanInstallAction
-      ? "runner_loan_liability_assessment"
-      : "runner_installed_loan_liability_reserve",
-    label: assessment.loanInstallAction
-      ? "Loan-Liability"
-      : "Loan-Rueckzahlungsreserve",
-    value: assessment.scoreValue,
-    reason: sortedUnique(assessment.evidence).join("|"),
-  };
 }
 
 function runnerLoanLiabilityAssessment(
