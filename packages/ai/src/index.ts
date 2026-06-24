@@ -157,8 +157,8 @@ import {
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import {
-  semanticRuntimeRunnerEvidence as buildSemanticRuntimeRunnerEvidence,
-} from "./runtime/semantic-runtime-runner-evidence";
+  createSemanticRuntimeRunnerEvidenceContext,
+} from "./runtime/semantic-runtime-runner-evidence-context";
 import {
   createSemanticRuntimeCorpEvidenceContext,
 } from "./runtime/semantic-runtime-corp-evidence-context";
@@ -3764,7 +3764,7 @@ const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES = {
   runRiskAssessment: assessBlinkRiskForRunAction,
   breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
 };
-const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES = {
+const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
   programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
@@ -3776,7 +3776,7 @@ const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES = {
   loanLiabilityAssessment: runnerLoanLiabilityAssessment,
   persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
   remoteTrashAccessContext: runnerRemoteTrashAccessContext,
-};
+});
 const {
   semanticRuntimeCorpActionServerId,
   semanticRuntimeCorpServer,
@@ -6636,17 +6636,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeRunnerEvidence(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  return buildSemanticRuntimeRunnerEvidence(
-    input,
-    action,
-    SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES,
   );
 }
 
