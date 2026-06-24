@@ -227,6 +227,9 @@ import {
 import {
   runnerLoanLiabilityScoreComponent,
 } from "./runtime/runner-loan-liability-score";
+import {
+  runnerRecoveryCommitmentScoreComponents,
+} from "./runtime/runner-recovery-commitment-score";
 import { runnerSemanticGoalFitScoreComponent } from "./runtime/runner-goal-fit-score";
 import {
   bestSemanticRuntimeChoice,
@@ -5604,55 +5607,23 @@ function semanticRuntimeRunnerScoreComponents(
       handFundingTarget: runnerHandFundingTarget,
     }),
   );
-  if (action.type === "gain_credit") {
-    const muPressureFunding = runnerMuPressureFundingScoreComponent(
-      input,
-      action,
-    );
-    if (muPressureFunding) components.push(muPressureFunding);
-  }
-  const handBufferComponent = runnerHandBufferNeedScoreComponent(
-    input,
-    action,
-  );
-  if (handBufferComponent) {
-    components.push(handBufferComponent);
-  }
-  const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(
-    input,
-    action,
-  );
-  if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
-  const junkyardRecoveryComponent = runnerJunkyardBbsRecoveryScoreComponent(
-    input,
-    action,
-  );
-  if (junkyardRecoveryComponent) components.push(junkyardRecoveryComponent);
-  const lowValueRecoveryRepeatComponent =
-    runnerLowValueRecoveryRepeatScoreComponent(input, action);
-  if (lowValueRecoveryRepeatComponent) {
-    components.push(lowValueRecoveryRepeatComponent);
-  }
-  const viral15JackOutComponent = runnerViral15JackOutScoreComponent(
-    input,
-    action,
-  );
-  if (viral15JackOutComponent) components.push(viral15JackOutComponent);
-  const lateNoFundingCreditRepeatComponent =
-    runnerLateNoFundingCreditRepeatScoreComponent(input, action);
-  if (lateNoFundingCreditRepeatComponent) {
-    components.push(lateNoFundingCreditRepeatComponent);
-  }
-  const multiRunEventComponent = runnerMultiRunEventScoreComponent(
-    input,
-    action,
-  );
-  if (multiRunEventComponent) components.push(multiRunEventComponent);
   components.push(
-    ...runnerBankInvestmentCommitmentScoreComponents(input, action),
-  );
-  components.push(
-    ...runnerNoRunEconomyCommitmentScoreComponents(input, action),
+    ...runnerRecoveryCommitmentScoreComponents(input, action, {
+      muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
+      handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
+      blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
+      junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
+      lowValueRecoveryRepeatScoreComponent:
+        runnerLowValueRecoveryRepeatScoreComponent,
+      viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
+      lateNoFundingCreditRepeatScoreComponent:
+        runnerLateNoFundingCreditRepeatScoreComponent,
+      multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
+      bankInvestmentCommitmentScoreComponents:
+        runnerBankInvestmentCommitmentScoreComponents,
+      noRunEconomyCommitmentScoreComponents:
+        runnerNoRunEconomyCommitmentScoreComponents,
+    }),
   );
   components.push(
     ...runnerInstallScoreComponents(
