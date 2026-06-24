@@ -288,6 +288,12 @@ import {
   runnerRecentRecoveryActions as buildRunnerRecentRecoveryActions,
 } from "./runtime/runner-recovery-history";
 import {
+  runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
+  runnerCardLooksLikeCreditPayout as buildRunnerCardLooksLikeCreditPayout,
+  visibleCardPlayOrInstallCost as buildVisibleCardPlayOrInstallCost,
+  visibleCardText as buildVisibleCardText,
+} from "./runtime/visible-card-heuristics";
+import {
   runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
 } from "./runtime/runner-junkyard-bbs-recovery-score";
 import {
@@ -6096,42 +6102,24 @@ function runnerPersistentInstallEvaluationForAction(
 }
 
 function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
-  const definition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
-    : undefined;
-  const direct = card.installCost ?? card.cost ?? card.rezCost;
-  if (typeof direct === "number" && Number.isFinite(direct)) {
-    return Math.max(0, direct);
-  }
-  return Math.max(
-    0,
-    definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0,
-  );
+  return buildVisibleCardPlayOrInstallCost(card, visibleCardDefinition(card));
 }
 
 function runnerCardLooksLikeCreditPayout(card: VisibleCard): boolean {
-  const definition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
-    : undefined;
-  const mechanics = definition?.mechanics ?? [];
-  if (mechanics.some((mechanic) => mechanic.includes("gain_credits"))) {
-    return true;
-  }
-  return /gain\s+\[?\d+\]?\s+credits/i.test(visibleCardTextForAi(card));
+  return buildRunnerCardLooksLikeCreditPayout(
+    card,
+    visibleCardDefinition(card),
+  );
 }
 
 function runnerBadPublicityOrTraceTechCard(
   card: VisibleCard | undefined,
   roles: readonly string[] = [],
 ): boolean {
-  const text = card ? visibleCardTextForAi(card) : "";
-  return (
-    roles.some(
-      (role) =>
-        role.includes("bad_publicity") ||
-        role.includes("trace") ||
-        role.includes("bad-publicity"),
-    ) || /bad publicity|bad_publicity|trace/i.test(text)
+  return buildRunnerBadPublicityOrTraceTechCard(
+    card,
+    roles,
+    card ? visibleCardDefinition(card) : undefined,
   );
 }
 
@@ -6193,21 +6181,11 @@ function visibleBreakerCardCanAddressIce(
 }
 
 function visibleCardTextForAi(card: VisibleCard): string {
-  const definition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
-    : undefined;
-  return [
-    card.title,
-    card.definitionId,
-    ...(card.subtypes ?? []),
-    card.rulesText,
-    definition?.title,
-    ...(definition?.subtypes ?? []),
-    definition?.rulesText,
-    ...(definition?.mechanics ?? []),
-  ]
-    .filter(Boolean)
-    .join(" ");
+  return buildVisibleCardText(card, visibleCardDefinition(card));
+}
+
+function visibleCardDefinition(card: VisibleCard) {
+  return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
 }
 
 function semanticRuntimeRunnerAccessTrashComponents(
