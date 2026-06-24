@@ -2095,7 +2095,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "pump_breaker",
       cardDefinitionId: "onr_v1_037_japanese-water-torture",
-      v1922RunnerProgramAbility: "japanese_water_torture_future_action_debt",
+      v1922RunnerProgramAbility: "variable_pump_future_action_debt",
       futureActionDebtAdded: 1,
       futureActionDebtPending: 3,
       breakerStrengthAfter: 5,
