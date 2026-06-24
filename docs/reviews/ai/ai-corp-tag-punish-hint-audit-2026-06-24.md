@@ -13,7 +13,7 @@ Die Prüfung bleibt side-safe: Hints beschreiben nur öffentlich bekannte Karten
 - `onr_v1_283_audit-of-call-records`: war als Economy-Recovery markiert, hat aber Tag-/Trace-Druck ohne Credit-Effekt. Economy-PlanRole entfernt.
 - `onr_v1_284_chance-observation`: war als Economy-Recovery markiert, hat aber Tag-/Trace-Druck ohne Credit-Effekt. Economy-PlanRole entfernt.
 - `onr_v1_287_datapool-by-zetatech`: war als Economy-Recovery markiert, erzeugt aber zusätzliche Tags bei bereits getaggtem Runner. Korrektur auf `punish_tagged_runner` plus `bait_runner`.
-- `onr_v1_306_trojan-horse`: war als Economy-Recovery markiert, erzeugt aber nur einen Tag nach Agenda-Diebstahl. Economy-PlanRole entfernt.
+- `onr_v1_306_trojan-horse`: war als Economy-Recovery markiert, erzeugt aber nur einen Tag nach Agenda-Diebstahl. Economy-PlanRole entfernt; die Karte bleibt als Tag-Fenster-/Punish-Enabler über `punish_tagged_runner` plus `bait_runner` planbar.
 
 ## Bewusst unverändert
 

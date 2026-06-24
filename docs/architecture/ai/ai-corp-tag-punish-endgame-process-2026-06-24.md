@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress` seit 2026-06-24.
+`review_ready_for_main_integration` seit 2026-06-24.
 
 ## Quelle/Vorgabe
 
@@ -68,7 +68,9 @@ Stoppe ohne Workaround, wenn eine Umsetzung erfordern würde:
 
 ## State Machine
 
-`process_prepared` -> `evidence_committed` -> `hint_audit_committed` -> `behavior_committed` -> `review_committed` -> `integrated_or_blocked` -> `goal_complete`
+`process_prepared` -> `evidence_committed` -> `hint_audit_committed` -> `behavior_committed` -> `review_committed`
+
+Der nachgelagerte Controller-Schritt ist die lokale Integration des Arbeitsbranches nach `main` oder die Dokumentation eines Integrationsblockers.
 
 ## Paketfolge
 
