@@ -178,9 +178,8 @@ import {
   semanticRuntimeCorpPassiveScoreLinePenalty as buildSemanticRuntimeCorpPassiveScoreLinePenalty,
 } from "./runtime/semantic-runtime-corp-passive-scoreline";
 import {
-  semanticRuntimeCorpAdvancementCounterPlacementAssessment as buildSemanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  type CorpAdvancementCounterPlacementAssessment,
-} from "./runtime/semantic-runtime-corp-advancement-counter";
+  createSemanticRuntimeCorpAdvancementCounterContext,
+} from "./runtime/semantic-runtime-corp-advancement-counter-context";
 import {
   createSemanticRuntimeCorpBoardContext,
 } from "./runtime/semantic-runtime-corp-board-context";
@@ -3839,6 +3838,18 @@ const {
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
 });
+const {
+  semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+} = createSemanticRuntimeCorpAdvancementCounterContext({
+  sourceDefinitionIdForAction,
+  normalizedRulesTextForDefinition,
+  actionCreditCost,
+  actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  visibleServerCard: findVisibleCorpServerCard,
+  cardType: semanticRuntimeVisibleCardType,
+  cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
+  teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
+});
 const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext({
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3868,16 +3879,6 @@ const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   rolesForAction,
-};
-const SEMANTIC_RUNTIME_CORP_ADVANCEMENT_COUNTER_DEPENDENCIES = {
-  sourceDefinitionIdForAction,
-  normalizedRulesTextForDefinition,
-  actionCreditCost,
-  actionSourceCard: semanticRuntimeCorpActionSourceCard,
-  visibleServerCard: findVisibleCorpServerCard,
-  cardType: semanticRuntimeVisibleCardType,
-  cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
-  teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
 };
 const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
@@ -6644,17 +6645,6 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
-
-function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpAdvancementCounterPlacementAssessment | undefined {
-  return buildSemanticRuntimeCorpAdvancementCounterPlacementAssessment(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_ADVANCEMENT_COUNTER_DEPENDENCIES,
-  );
-}
 
 function normalizedRulesTextForDefinition(definitionId: string): string {
   return buildNormalizedRulesTextForDefinition(
