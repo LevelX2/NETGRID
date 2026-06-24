@@ -5889,7 +5889,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
 
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith("v190.die.onr_v1_275_vacuum-link.rewind."),
+        record.purpose.startsWith("v190.die.rewind_run_to_rezzed_ice_by_die."),
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;

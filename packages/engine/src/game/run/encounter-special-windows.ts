@@ -46,7 +46,7 @@ export type SecretSpendCompareResult = EncounterSpecialWindowResult & {
   revealed?: boolean;
 };
 
-export type VacuumLinkRepositionResult = EncounterSpecialWindowResult & {
+export type RezzedIceRewindResult = EncounterSpecialWindowResult & {
   dieRoll?: number;
   repositionIceId?: CardInstanceId;
   repositionIndex?: number;
@@ -114,7 +114,7 @@ export function resolveEncounterSpecialWindowSubroutine(
     return { handled: true, suspended: true, stateChanged: true };
   }
   if (subroutine.type === "rewind_run_to_rezzed_ice_by_die")
-    return resolveVacuumLinkRewindSubroutine(host, legalAction);
+    return resolveRezzedIceRewindSubroutine(host, legalAction);
   return { handled: false };
 }
 
@@ -216,7 +216,7 @@ export function resolveSecretSpendCompareChoice(
     secretSpendRevealed: true,
     secretSpendCorp: corpSpend,
     secretSpendRunner: selected,
-    tooManyDoorsEndRun: endRun,
+    secretSpendEndRun: endRun,
     corpCreditsAfter: state.corp.credits,
     runnerCreditsAfter: state.runner.credits,
     sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
@@ -231,16 +231,16 @@ export function resolveSecretSpendCompareChoice(
   };
 }
 
-export function resolveVacuumLinkRewindSubroutine(
+export function resolveRezzedIceRewindSubroutine(
   host: EncounterSpecialWindowHost,
   legalAction?: LegalAction,
-): VacuumLinkRepositionResult {
+): RezzedIceRewindResult {
   const state = host.state;
   const run = mustRun(state);
   if (!run.encounteredIceId)
-    throw new Error("Vacuum-Link-Rewind benötigt einen aktiven ICE-Encounter.");
+    throw new Error("Rezzed-ICE-Rewind benötigt einen aktiven ICE-Encounter.");
   if (run.position.kind !== "ice")
-    throw new Error("Vacuum-Link-Rewind erwartet eine ICE-Position.");
+    throw new Error("Rezzed-ICE-Rewind erwartet eine ICE-Position.");
   const server = mustServer(state, run.position.serverId);
   const currentIndex =
     server.ice[run.position.iceIndex] === run.encounteredIceId
@@ -248,14 +248,14 @@ export function resolveVacuumLinkRewindSubroutine(
       : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
   if (currentIndex < 0)
     throw new Error(
-      "Vacuum-Link-Rewind konnte das Encounter-ICE nicht finden.",
+      "Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.",
     );
 
-  const randomPurpose = `${definitionFor(state, run.encounteredIceId).id}.rewind.${run.runId}.${run.encounteredIceId}`;
+  const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
   const die = rollDie(host, randomPurpose);
-  legalActionPayload(legalAction, { vacuumLinkDieRoll: die });
+  legalActionPayload(legalAction, { rezzedIceRewindDieRoll: die });
   if (die >= 4) {
-    legalActionPayload(legalAction, { vacuumLinkRewindApplied: false });
+    legalActionPayload(legalAction, { rezzedIceRewindApplied: false });
     return {
       handled: true,
       dieRoll: die,
@@ -278,7 +278,7 @@ export function resolveVacuumLinkRewindSubroutine(
   const targetIceId = mustArrayValue(
     server.ice,
     targetIndex,
-    "Vacuum-Link-Ziel-ICE fehlt.",
+    "Rezzed-ICE-Rewind-Ziel-ICE fehlt.",
   );
 
   const {
@@ -300,10 +300,10 @@ export function resolveVacuumLinkRewindSubroutine(
   state.activeSide = "runner";
   host.callbacks?.resetBreakerStrength?.();
   legalActionPayload(legalAction, {
-    vacuumLinkRewindApplied: true,
-    vacuumLinkRewindRezzedIceBack: die,
-    vacuumLinkTargetIceId: targetIceId,
-    vacuumLinkTargetIceIndex: targetIndex,
+    rezzedIceRewindApplied: true,
+    rezzedIceRewindRezzedIceBack: die,
+    rezzedIceRewindTargetIceId: targetIceId,
+    rezzedIceRewindTargetIceIndex: targetIndex,
   });
   return {
     handled: true,

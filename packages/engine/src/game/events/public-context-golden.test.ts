@@ -413,7 +413,7 @@ describe("PublicContext golden payload gate", () => {
           secretSpendRevealed: true,
           secretSpendRunner: 2,
           sourceDefinitionId: "onr_v1_272_too-many-doors",
-          tooManyDoorsEndRun: true,
+          secretSpendEndRun: true,
         },
       }),
     );
@@ -425,7 +425,7 @@ describe("PublicContext golden payload gate", () => {
       secretSpendRevealed: true,
       secretSpendRunner: 2,
       sourceDefinitionId: "onr_v1_272_too-many-doors",
-      tooManyDoorsEndRun: true,
+      secretSpendEndRun: true,
     });
   });
 

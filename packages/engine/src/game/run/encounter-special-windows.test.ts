@@ -13,7 +13,7 @@ import {
   resolveEncounterSpecialWindowSubroutine,
   resolveFullyBrokenPassedIceTrash,
   resolveSecretSpendCompareChoice,
-  resolveVacuumLinkRewindSubroutine,
+  resolveRezzedIceRewindSubroutine,
   fullyBrokenPassedIceTrashPostPassActions,
 } from "./encounter-special-windows";
 
@@ -199,7 +199,7 @@ describe("encounter special windows boundary", () => {
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 2,
-      tooManyDoorsEndRun: true,
+      secretSpendEndRun: true,
       corpCreditsAfter: 4,
       runnerCreditsAfter: 4,
     });
@@ -221,7 +221,7 @@ describe("encounter special windows boundary", () => {
       },
     });
 
-    const result = resolveVacuumLinkRewindSubroutine(host, legalAction);
+    const result = resolveRezzedIceRewindSubroutine(host, legalAction);
 
     expect(result).toMatchObject({
       handled: true,
@@ -231,7 +231,7 @@ describe("encounter special windows boundary", () => {
       repositionIndex: 2,
     });
     expect(purposes).toEqual([
-      "onr_v1_272_too-many-doors.rewind.run_1.ice_current",
+      "rewind_run_to_rezzed_ice_by_die.run_1.ice_current",
     ]);
     expect(state.run).toMatchObject({
       phase: "movement",
@@ -241,18 +241,18 @@ describe("encounter special windows boundary", () => {
       resolvedSubroutineIndexes: [],
     });
     expect(legalAction.payload).toMatchObject({
-      vacuumLinkDieRoll: 2,
-      vacuumLinkRewindApplied: true,
-      vacuumLinkRewindRezzedIceBack: 2,
-      vacuumLinkTargetIceId: "ice_outer",
-      vacuumLinkTargetIceIndex: 2,
+      rezzedIceRewindDieRoll: 2,
+      rezzedIceRewindApplied: true,
+      rezzedIceRewindRezzedIceBack: 2,
+      rezzedIceRewindTargetIceId: "ice_outer",
+      rezzedIceRewindTargetIceIndex: 2,
     });
   });
 
   it("leaves Vacuum Link in place on die 4 without reposition side effects", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
-    const result = resolveVacuumLinkRewindSubroutine(
+    const result = resolveRezzedIceRewindSubroutine(
       encounterSpecialWindowHost(state, { rollDie: () => 4 }),
       legalAction,
     );
@@ -268,8 +268,8 @@ describe("encounter special windows boundary", () => {
       iceIndex: 0,
     });
     expect(legalAction.payload).toMatchObject({
-      vacuumLinkDieRoll: 4,
-      vacuumLinkRewindApplied: false,
+      rezzedIceRewindDieRoll: 4,
+      rezzedIceRewindApplied: false,
     });
   });
 
