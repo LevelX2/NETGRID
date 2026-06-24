@@ -205,6 +205,10 @@ import {
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { runnerScoreComponents as buildRunnerScoreComponents } from "./runtime/runner-score-components";
 import {
+  runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent,
+  runnerMultiRunEventScoreValue,
+} from "./runtime/runner-multi-run-event-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -5564,7 +5568,10 @@ function semanticRuntimeRunnerScoreComponents(
         viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
         lateNoFundingCreditRepeatScoreComponent:
           runnerLateNoFundingCreditRepeatScoreComponent,
-        multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
+        multiRunEventScoreComponent: (input, action) =>
+          buildRunnerMultiRunEventScoreComponent(input, action, {
+            assessment: runnerMultiRunEventAssessment,
+          }),
         bankInvestmentCommitmentScoreComponents:
           runnerBankInvestmentCommitmentScoreComponents,
         noRunEconomyCommitmentScoreComponents:
@@ -6522,23 +6529,6 @@ function semanticRuntimeRunnerMultiRunEventExclusion(
   };
 }
 
-function runnerMultiRunEventScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  const assessment = runnerMultiRunEventAssessment(input, action);
-  if (!assessment) return undefined;
-  return {
-    key: "runner_multi_run_event_gate",
-    label:
-      assessment.phase === "followup_run"
-        ? "All-Nighter-Folgerun"
-        : "All-Nighter-Run-Gate",
-    value: assessment.value,
-    reason: sortedUnique(assessment.evidence).join("|"),
-  };
-}
-
 function runnerMultiRunEventAssessment(
   input: AiDecisionInput,
   action: LegalAction,
@@ -6723,16 +6713,6 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
       input.playerView.own.credits >= trashCost + 1
     );
   });
-}
-
-function runnerMultiRunEventScoreValue(
-  phase: RunnerMultiRunEventAssessment["phase"],
-  payoffClass: RunnerMultiRunEventAssessment["payoffClass"],
-  canTakeRun: boolean,
-): number {
-  if (!canTakeRun) return -2200;
-  if (phase === "followup_run") return payoffClass === "high_payoff" ? 220 : 80;
-  return payoffClass === "high_payoff" ? 2100 : 1400;
 }
 
 function runnerBlinkRecoveryScoreComponent(
