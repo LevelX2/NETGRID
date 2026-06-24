@@ -266,7 +266,7 @@ import {
 } from "./runtime/runner-central-memory-context";
 import { createRunnerRunComponentsContext } from "./runtime/runner-run-components-context";
 import {
-  runnerKnownIcePathReason as buildRunnerKnownIcePathReason,
+  runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason,
 } from "./runtime/runner-known-ice-path-score";
 import {
   createRunnerRecentHistoryContext,
@@ -3941,7 +3941,6 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
 };
-const semanticRuntimeKnownIcePathReason = buildRunnerKnownIcePathReason;
 const {
   semanticRuntimeKnownCentralPayoffExclusion,
   semanticRuntimeRunnerEmptyRemoteExclusion,
