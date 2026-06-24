@@ -260,6 +260,9 @@ import {
   runnerRemoteScoreComponents as buildRunnerRemoteScoreComponents,
 } from "./runtime/runner-remote-score";
 import {
+  runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
+} from "./runtime/runner-repeated-run-target-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7324,29 +7327,10 @@ function semanticRuntimeRepeatedRunTargetComponents(
   input: AiDecisionInput,
   serverId: string | undefined,
 ): AiDecisionScoreComponent[] {
-  if (!serverId) return [];
-  const recentRuns = semanticRuntimeRecentRunnerStartRunsOnServer(
-    input,
-    serverId,
-  );
-  if (recentRuns <= 0) return [];
-  const penalty =
-    serverId === "hq"
-      ? Math.min(4200, recentRuns * 2600)
-      : serverId === "rd"
-        ? Math.min(4200, recentRuns * 2600)
-        : isRemoteServerTarget(serverId)
-          ? Math.min(2400, recentRuns * 1400)
-          : 0;
-  if (penalty === 0) return [];
-  return [
-    {
-      key: "runner_recent_same_server_runs",
-      label: "Wiederholtes Run-Ziel",
-      value: -penalty,
-      reason: `${serverId}:${recentRuns}`,
-    },
-  ];
+  return buildRunnerRepeatedRunTargetScoreComponents(input, serverId, {
+    recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+    isRemoteServerTarget,
+  });
 }
 
 function semanticRuntimeRecentRunnerStartRunsOnServer(
