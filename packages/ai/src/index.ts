@@ -265,6 +265,10 @@ import {
   createRunnerRunTargetGuidanceContext,
 } from "./runtime/runner-run-target-guidance-context";
 import {
+  actionClickCost,
+  actionCreditCost,
+} from "./runtime/action-cost";
+import {
   createRunnerCentralMemoryContext,
 } from "./runtime/runner-central-memory-context";
 import { createRunnerRunComponentsContext } from "./runtime/runner-run-components-context";
@@ -4673,17 +4677,6 @@ const {
   isRemoteServerTarget,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
 });
-
-function actionClickCost(action: LegalAction): number {
-  return Math.max(
-    1,
-    action.costs.reduce(
-      (sum, cost) =>
-        sum + (Number.isFinite(cost.clicks) ? (cost.clicks ?? 0) : 0),
-      0,
-    ),
-  );
-}
 
 function visibleCardDefinition(card: VisibleCard) {
   return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
@@ -27716,14 +27709,6 @@ function remoteTrashCostBucket(cost: number): "0_1" | "2_3" | "4_5" | "6_plus" {
   if (cost <= 3) return "2_3";
   if (cost <= 5) return "4_5";
   return "6_plus";
-}
-
-function actionCreditCost(action: LegalAction): number {
-  return action.costs.reduce(
-    (sum, cost) =>
-      sum + (Number.isFinite(cost.credits) ? (cost.credits ?? 0) : 0),
-    0,
-  );
 }
 
 function isRunnerEconomyAction(
