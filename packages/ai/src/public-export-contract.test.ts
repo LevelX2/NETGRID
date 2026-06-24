@@ -204,6 +204,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-program-install-trash-context",
       "./runtime/runner-program-install-trash-policy",
       "./runtime/runner-run-target-guidance-score",
+      "./runtime/runner-run-target-guidance-context",
       "./runtime/runner-access-trash-score",
       "./runtime/runner-central-memory-score",
       "./runtime/runner-central-memory-context",

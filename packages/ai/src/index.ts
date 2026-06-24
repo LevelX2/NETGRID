@@ -265,8 +265,8 @@ import {
   type RunnerProgramInstallTrashAssessment,
 } from "./runtime/runner-program-install-trash-policy";
 import {
-  runnerRunTargetGuidanceScoreComponent as buildRunnerRunTargetGuidanceScoreComponent,
-} from "./runtime/runner-run-target-guidance-score";
+  createRunnerRunTargetGuidanceContext,
+} from "./runtime/runner-run-target-guidance-context";
 import {
   createRunnerCentralMemoryContext,
 } from "./runtime/runner-central-memory-context";
@@ -4732,6 +4732,14 @@ function semanticRuntimeRunnerScore(
 
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
+const {
+  semanticRuntimeRunnerRunTargetGuidanceComponent,
+} = createRunnerRunTargetGuidanceContext({
+  evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
+  guidanceValue: runnerRunTargetSemanticGuidanceValue,
+  isRemoteServerTarget,
+  remoteRootTrashCost: remoteRootTrashCostForMetrics,
+});
 
 function semanticRuntimeRunnerScoreComponents(
   input: AiDecisionInput,
@@ -4817,39 +4825,6 @@ function actionClickCost(action: LegalAction): number {
       0,
     ),
   );
-}
-
-function semanticRuntimeRunnerRunTargetGuidanceComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerRunTargetGuidanceScoreComponent(input, action, {
-    evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
-    guidanceValue: runnerRunTargetSemanticGuidanceValue,
-    visibleHighPayoffRunOverride: semanticRuntimeRunnerVisibleHighPayoffRunOverride,
-  });
-}
-
-function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  if (input.side !== "runner" || action.type !== "start_run") return false;
-  const serverId = semanticRuntimeServerId(action);
-  if (!serverId || !isRemoteServerTarget(serverId)) return false;
-  const server = input.playerView.servers.find((entry) => entry.id === serverId);
-  if (!server) return false;
-  return server.root.some((card) => {
-    if (!card.known) return false;
-    if (card.type === "agenda") return true;
-    if ((card.advancementCounters ?? 0) > 0) return true;
-    if (card.type !== "asset" && card.type !== "upgrade") return false;
-    const trashCost = remoteRootTrashCostForMetrics(card);
-    return (
-      trashCost !== undefined &&
-      input.playerView.own.credits >= trashCost + 1
-    );
-  });
 }
 
 function visibleCardDefinition(card: VisibleCard) {
