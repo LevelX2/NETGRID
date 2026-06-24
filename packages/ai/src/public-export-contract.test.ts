@@ -125,6 +125,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-archives-exclusion",
       "./runtime/runner-source-card-answer-role",
       "./runtime/runner-hand-buffer-need",
+      "./runtime/runner-hand-funding-target",
       "./runtime/runner-tag-cleanup-score",
       "./runtime/runner-credit-need-score",
       "./runtime/runner-install-score",
