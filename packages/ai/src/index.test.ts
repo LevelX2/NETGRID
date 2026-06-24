@@ -3324,6 +3324,80 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Killer");
   });
 
+  it("prioritizes trashing Diplomatic Immunity over low-credit economy in a tagged meat-damage plan", () => {
+    if (
+      !createRuntimeCardsById()[DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST] ||
+      !createRuntimeCardsById()["onr_v1_302_scorched-earth"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-trash-diplomatic-immunity",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: {
+        ...V095_RUNNER_DECK,
+        id: "demo_runner_095_diplomatic_immunity",
+        cards: [
+          ...V095_RUNNER_DECK.cards,
+          { id: DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST, quantity: 1 },
+        ],
+      },
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_scorched_earth",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveRunnerResourceToRig(state, DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST);
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 2;
+    state.runner.tags = 1;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const diplomaticTrash = input.legalActions.find(
+      (action) =>
+        action.type === "trash_resource" &&
+        action.payload?.cardId ===
+          input.playerView.opponent.rig?.find(
+            (card) =>
+              card.definitionId === DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST,
+          )?.instanceId,
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(diplomaticTrash).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!diplomaticTrash || !gain)
+      throw new Error("Missing Diplomatic Immunity trash fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [gain, diplomaticTrash],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(diplomaticTrash.actionId);
+    expect(debugText).toContain("corp_tagged_damage_prevention_resource_trash");
+    expect(debugText).toContain("runner_resource_diplomatic_immunity:true");
+    expect(debugText).toContain("cancel_blocked:true");
+    expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("chooses V0.96 Trace bids from side-safe PlayerView choices", () => {
     let state = traceCorpBidState("ai-v096-trace");
     const corpInput = buildAiDecisionInput(state, "corp", {
@@ -7583,7 +7657,8 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
         sourceDefinitionFromInput(input, action) === "simple_fracter",
     );
     const runHq = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const gain = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -7620,10 +7695,16 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       (state) => {
         state.runner.credits = 6;
         ensureRemoteServer(state, "remote_1");
-        const agendaId = putCorpRootInServer(state, "remote_1", "simple_agenda", 0, {
-          faceup: true,
-          rezzed: true,
-        });
+        const agendaId = putCorpRootInServer(
+          state,
+          "remote_1",
+          "simple_agenda",
+          0,
+          {
+            faceup: true,
+            rezzed: true,
+          },
+        );
         state.cardInstances[agendaId] = {
           ...state.cardInstances[agendaId]!,
           faceup: true,
@@ -16478,10 +16559,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     const rdRun = repeatInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const hqRun = repeatInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const gainCredit = repeatInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -16500,12 +16583,15 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const remoteRunTarget = evaluateRunnerRunTargets({
       input: scopedRepeatInput,
     }).find((evaluation) => evaluation.targetServerId === "remote_1");
-    const repeatCandidate = generateRunnerPlanCandidates(scopedRepeatInput).find(
+    const repeatCandidate = generateRunnerPlanCandidates(
+      scopedRepeatInput,
+    ).find(
       (candidate) =>
         candidate.kind === "contest_remote" &&
         candidate.steps.some((step) => step.targetServerId === "remote_1"),
     );
-    if (!repeatCandidate) throw new Error("Missing repeated Holovid remote run");
+    if (!repeatCandidate)
+      throw new Error("Missing repeated Holovid remote run");
     const repeatScore = evaluateRunnerPlan(scopedRepeatInput, repeatCandidate);
     const repeatDecision = chooseRunnerAction(scopedRepeatInput, {
       persistTacticalPlanMemory: false,
@@ -22859,7 +22945,8 @@ describe("V1.4.2 belief state and opponent model", () => {
     const jackOut = input.legalActions.find(
       (action) =>
         action.type === "jack_out" &&
-        action.payload?.v1922CorpIceAbility === "jack_out_tax_after_passed_rezzed_ice",
+        action.payload?.v1922CorpIceAbility ===
+          "jack_out_tax_after_passed_rezzed_ice",
     );
     const continueRun = input.legalActions.find(
       (action) => action.type === "continue_run",
@@ -27171,6 +27258,8 @@ const V094_CORP_DECK: DeckDefinition = {
     { id: "simple_barrier_ice", quantity: 2 },
   ],
 };
+
+const DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST = "onr_v1_160_diplomatic-immunity";
 
 const V111_CORP_DECK: DeckDefinition = {
   ...V094_CORP_DECK,

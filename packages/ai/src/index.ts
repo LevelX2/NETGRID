@@ -6414,6 +6414,7 @@ function semanticRuntimeRunnerScore(
 }
 
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
+const DIPLOMATIC_IMMUNITY_CARD_ID = "onr_v1_160_diplomatic-immunity";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 
@@ -9804,6 +9805,11 @@ function semanticRuntimeCorpScoreComponents(
       });
     }
   }
+  const resourceTrashPressure = corpTaggedDamagePreventionResourceTrashPressure(
+    input,
+    action,
+  );
+  if (resourceTrashPressure) components.push(resourceTrashPressure);
   const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
@@ -9826,6 +9832,194 @@ function semanticRuntimeCorpScoreComponents(
     });
   }
   return components;
+}
+
+function corpTaggedDamagePreventionResourceTrashPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.type !== "trash_resource")
+    return undefined;
+  const runnerTags = input.playerView.opponent.tags;
+  if (runnerTags <= 0) return undefined;
+  const target = corpVisibleRunnerRigTrashTarget(input, action);
+  if (!target?.definitionId) return undefined;
+  const prevention = runnerDamagePreventionResourceProfile(target);
+  if (!prevention) return undefined;
+  const damagePayoff = corpVisibleDamagePayoffProfile(input);
+  const cancelBlocked =
+    target.definitionId === DIPLOMATIC_IMMUNITY_CARD_ID &&
+    input.playerView.own.agendaPoints < 1;
+  const value =
+    prevention.globalMeatPrevention && cancelBlocked
+      ? 1850
+      : prevention.globalMeatPrevention
+        ? 1250
+        : prevention.damagePrevention
+          ? 650
+          : 0;
+  if (value <= 0) return undefined;
+
+  return {
+    key: "corp_tagged_damage_prevention_resource_trash",
+    label: "Damage-Prävention trashen",
+    value: value + (damagePayoff.meatDamagePayoff ? 450 : 0),
+    reason: [
+      `runner_tags:${runnerTags}`,
+      `target_definition:${target.definitionId}`,
+      `global_meat_prevention:${prevention.globalMeatPrevention}`,
+      `corp_agenda_points:${input.playerView.own.agendaPoints}`,
+      `cancel_blocked:${cancelBlocked}`,
+      `corp_meat_damage_payoff:${damagePayoff.meatDamagePayoff}`,
+      ...prevention.evidence,
+      ...damagePayoff.evidence,
+    ].join("|"),
+  };
+}
+
+function corpVisibleRunnerRigTrashTarget(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  const payload = action.payload ?? {};
+  const targetCardId =
+    typeof payload.targetCardId === "string"
+      ? payload.targetCardId
+      : typeof payload.resourceId === "string"
+        ? payload.resourceId
+        : typeof payload.cardId === "string"
+          ? payload.cardId
+          : undefined;
+  const targetDefinitionId =
+    typeof payload.targetCardDefinitionId === "string"
+      ? payload.targetCardDefinitionId
+      : undefined;
+  const visibleRunnerRig = input.playerView.opponent.rig ?? [];
+  if (targetCardId) {
+    const byId = visibleRunnerRig.find(
+      (card) => card.known && card.instanceId === targetCardId,
+    );
+    if (byId) return byId;
+  }
+  if (targetDefinitionId) {
+    return visibleRunnerRig.find(
+      (card) => card.known && card.definitionId === targetDefinitionId,
+    );
+  }
+  return undefined;
+}
+
+function runnerDamagePreventionResourceProfile(card: VisibleCard):
+  | {
+      damagePrevention: boolean;
+      globalMeatPrevention: boolean;
+      evidence: string[];
+    }
+  | undefined {
+  if (card.type !== "resource") return undefined;
+  const definitionId = card.definitionId;
+  const roles = rolesForCardId(definitionId);
+  const hint = definitionId ? AI_HINTS.get(definitionId) : undefined;
+  const definition = definitionId
+    ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+    : undefined;
+  const text = [
+    card.title,
+    card.rulesText,
+    cardDefinitionText(definition),
+    ...roles,
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...cardDefinitionMechanics(definition),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const damagePrevention =
+    /damage_prevention|prevent(?:s)? .*damage|prevent .*meat damage/.test(text);
+  const globalMeatPrevention =
+    definitionId === DIPLOMATIC_IMMUNITY_CARD_ID ||
+    /prevent(?:s)? (?:all|any amount of) meat damage|all_meat_damage_prevention/.test(
+      text,
+    );
+  if (!damagePrevention && !globalMeatPrevention) return undefined;
+  return {
+    damagePrevention,
+    globalMeatPrevention,
+    evidence: [
+      "runner_resource_damage_prevention_visible:true",
+      ...(globalMeatPrevention
+        ? ["runner_resource_global_meat_prevention:true"]
+        : []),
+      ...(definitionId === DIPLOMATIC_IMMUNITY_CARD_ID
+        ? ["runner_resource_diplomatic_immunity:true"]
+        : []),
+    ],
+  };
+}
+
+function corpVisibleDamagePayoffProfile(input: AiDecisionInput): {
+  meatDamagePayoff: boolean;
+  evidence: string[];
+} {
+  const visibleOwnCards = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ].filter((card) => card.known && card.definitionId);
+  const meatDamagePayoff = visibleOwnCards.some((card) => {
+    const definitionId = card.definitionId;
+    if (!definitionId) return false;
+    const roles = rolesForCardId(definitionId);
+    const hint = AI_HINTS.get(definitionId);
+    const definition =
+      RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
+    const text = [
+      card.title,
+      card.rulesText,
+      cardDefinitionText(definition),
+      ...roles,
+      ...(hint?.roles ?? []),
+      ...(hint?.planRoles ?? []),
+      ...cardDefinitionMechanics(definition),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return /meat damage|damage\.corp_tagged_meat_payoff|corp\.damage_kill|tag_punish/.test(
+      text,
+    );
+  });
+  return {
+    meatDamagePayoff,
+    evidence: meatDamagePayoff
+      ? ["corp_visible_meat_damage_payoff:true"]
+      : ["corp_visible_meat_damage_payoff:false"],
+  };
+}
+
+function cardDefinitionText(
+  definition:
+    | (typeof RUNTIME_CARDS)[string]
+    | (typeof DEMO_CARDS_BY_ID)[string]
+    | undefined,
+): string | undefined {
+  if (!definition) return undefined;
+  if ("rulesText" in definition) return definition.rulesText;
+  return definition.text;
+}
+
+function cardDefinitionMechanics(
+  definition:
+    | (typeof RUNTIME_CARDS)[string]
+    | (typeof DEMO_CARDS_BY_ID)[string]
+    | undefined,
+): string[] {
+  if (!definition || !("mechanics" in definition)) return [];
+  return Array.isArray(definition.mechanics) ? definition.mechanics : [];
 }
 
 type CorpAdvancementCounterPlacementProfile = {
@@ -11607,10 +11801,7 @@ function baselineShellTradersPlanIsVisible(
   );
   if (!action || action.type !== "trigger_ability") return false;
   const ability = shellTradersAbility(action);
-  if (
-    ability !== "set_aside_from_grip" &&
-    ability !== "remove_shell_counter"
-  )
+  if (ability !== "set_aside_from_grip" && ability !== "remove_shell_counter")
     return false;
   if (action.source === "basic_action" || action.source === "game_rule")
     return false;
@@ -15031,7 +15222,8 @@ function runnerViral15JackOutScoreComponent(
   if (
     input.side !== "runner" ||
     action.type !== "jack_out" ||
-    action.payload?.v1922CorpIceAbility !== "jack_out_tax_after_passed_rezzed_ice"
+    action.payload?.v1922CorpIceAbility !==
+      "jack_out_tax_after_passed_rezzed_ice"
   ) {
     return undefined;
   }
