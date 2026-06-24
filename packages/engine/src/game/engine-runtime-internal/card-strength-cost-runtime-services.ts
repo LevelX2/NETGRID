@@ -577,7 +577,7 @@ import {
   STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,

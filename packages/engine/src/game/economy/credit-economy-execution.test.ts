@@ -273,7 +273,7 @@ function testHost(
       COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "stack_reveal",
       COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
       DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
-      COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),
+      COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
       RUNNER_RANDOM_PROGRAM_SOURCES: new Set(["random_program"]),
       QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
       FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",

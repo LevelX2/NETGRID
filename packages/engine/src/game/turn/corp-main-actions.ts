@@ -96,7 +96,7 @@ export type CorpMainActionGenerationHost = {
   constants: {
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
-    COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
+    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
     ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
   };
 };
@@ -200,7 +200,7 @@ export function buildCorpMainActions(
     host.constants.COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID;
   const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
     host.constants.DISINFECTANT_VIRUS_COUNTER_ASSET_ID;
-  const COUNTER_UPGRADE_CARD_IDS = host.constants.COUNTER_UPGRADE_CARD_IDS;
+  const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
   const ADVANCEMENT_PLACEMENT_OPERATION_ID =
     host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
 
@@ -688,7 +688,7 @@ export function buildCorpMainActions(
         );
       }
     }
-    if (COUNTER_UPGRADE_CARD_IDS.has(definition.id)) {
+    if (COUNTER_UPGRADE_SOURCES.has(definition.id)) {
       actions.push(
         action(
           state,

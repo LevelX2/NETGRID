@@ -577,7 +577,7 @@ import {
   STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
 import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
@@ -835,7 +835,7 @@ export function createApplyActionRuntimeHosts(
         COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
         COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-        COUNTER_UPGRADE_CARD_IDS,
+        COUNTER_UPGRADE_SOURCES,
         RUNNER_RANDOM_PROGRAM_SOURCES,
         QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE,
         FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,

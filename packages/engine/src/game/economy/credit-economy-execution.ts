@@ -157,7 +157,7 @@ export type CreditEconomyExecutionHost = {
     COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
     COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
     DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
-    COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
+    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
     RUNNER_RANDOM_PROGRAM_SOURCES: ReadonlySet<string>;
     QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
@@ -405,7 +405,7 @@ export function handleCreditEconomyExecution(
         "Die V1.9.18-Upgrade-Counter-Faehigkeit ist nicht rezzed installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.COUNTER_UPGRADE_CARD_IDS.has(definition.id))
+    if (!host.constants.COUNTER_UPGRADE_SOURCES.has(definition.id))
       throw new Error("Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.");
     const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
     if (!Number.isInteger(addAmount) || addAmount !== 1)

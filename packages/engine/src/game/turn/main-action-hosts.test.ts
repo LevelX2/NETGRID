@@ -396,7 +396,7 @@ function hostFor(
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
         COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
         DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
-        COUNTER_UPGRADE_CARD_IDS: new Set(),
+        COUNTER_UPGRADE_SOURCES: new Set(),
         ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
         RUNNER_EVENT_RESOLVERS: {},
         STACK_SEARCH_PROGRAM_SOURCES: new Set(),
