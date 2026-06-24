@@ -269,6 +269,7 @@ import {
 import {
   actionClickCost,
   actionCreditCost,
+  nonNegativeActionCreditCost as simulationActionCreditCost,
 } from "./runtime/action-cost";
 import {
   addStringsToCounter as addCardsToCounter,
@@ -27999,13 +28000,6 @@ function rezCostForDefinitionId(definitionId: string | undefined): number {
     DEMO_CARDS_BY_ID[definitionId]?.rezCost ??
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
-  );
-}
-
-function simulationActionCreditCost(action: LegalAction): number {
-  return action.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
-    0,
   );
 }
 

@@ -18,3 +18,10 @@ export function actionCreditCost(action: LegalAction): number {
     0,
   );
 }
+
+export function nonNegativeActionCreditCost(action: LegalAction): number {
+  return action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
+    0,
+  );
+}
