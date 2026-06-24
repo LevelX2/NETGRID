@@ -216,6 +216,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-recent-history-context",
       "./runtime/visible-card-heuristics",
       "./runtime/runner-visible-breaker-coverage",
+      "./runtime/runner-visible-card-context",
       "./runtime/semantic-runtime-doctrine-score",
       "./runtime/semantic-runtime-corp-doctrine-context",
       "./runtime/semantic-runtime-runner-doctrine-context",

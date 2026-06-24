@@ -238,14 +238,10 @@ import {
 } from "./runtime/runner-viral15-jack-out-context";
 import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
-  runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
-  runnerCardLooksLikeCreditPayout as buildRunnerCardLooksLikeCreditPayout,
   safeNonNegativeInteger as buildSafeNonNegativeInteger,
   normalizedRulesTextForDefinition as buildNormalizedRulesTextForDefinition,
   visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
   visibleCardAdvancementRequirement as buildVisibleCardAdvancementRequirement,
-  visibleCardPlayOrInstallCost as buildVisibleCardPlayOrInstallCost,
-  visibleCardText as buildVisibleCardText,
   visibleCardType as buildVisibleCardType,
   visibleCounterValue as buildVisibleCounterValue,
   visibleIceRezCost as buildVisibleIceRezCost,
@@ -253,11 +249,12 @@ import {
   visibleMemoryCost as buildVisibleMemoryCost,
 } from "./runtime/visible-card-heuristics";
 import {
-  runnerCardAddressesVisibleBreakerNeed as buildRunnerCardAddressesVisibleBreakerNeed,
-  visibleBreakerCardCanAddressIce as buildVisibleBreakerCardCanAddressIce,
   visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
   visibleBreakerRoles as buildVisibleBreakerRoles,
 } from "./runtime/runner-visible-breaker-coverage";
+import {
+  createRunnerVisibleCardContext,
+} from "./runtime/runner-visible-card-context";
 import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
 import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
 import {
@@ -3625,6 +3622,24 @@ const {
   },
 });
 const {
+  visibleCardPlayOrInstallCostForAi,
+  runnerCardLooksLikeCreditPayout,
+  runnerBadPublicityOrTraceTechCard,
+  runnerCardAddressesVisibleBreakerNeed,
+  visibleBreakerCardCanAddressIce,
+} = createRunnerVisibleCardContext({
+  visibleCardDefinition,
+  isVisibleIcebreakerProgram,
+  knownPathAssessment: (runtimeInput, server) =>
+    assessKnownRezzedIcePath(
+      server.ice,
+      runtimeInput.playerView.own.rig ?? [],
+      runtimeInput.playerView.own.credits,
+      server.root,
+    ),
+  visibleBreakerRoles: visibleBreakerRolesForAi,
+});
+const {
   semanticRuntimeRunnerMultiRunEventExclusion,
   runnerMultiRunEventAssessment,
   runnerMultiRunTargetEvaluation,
@@ -4835,59 +4850,6 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
       input.playerView.own.credits >= trashCost + 1
     );
   });
-}
-
-function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
-  return buildVisibleCardPlayOrInstallCost(card, visibleCardDefinition(card));
-}
-
-function runnerCardLooksLikeCreditPayout(card: VisibleCard): boolean {
-  return buildRunnerCardLooksLikeCreditPayout(
-    card,
-    visibleCardDefinition(card),
-  );
-}
-
-function runnerBadPublicityOrTraceTechCard(
-  card: VisibleCard | undefined,
-  roles: readonly string[] = [],
-): boolean {
-  return buildRunnerBadPublicityOrTraceTechCard(
-    card,
-    roles,
-    card ? visibleCardDefinition(card) : undefined,
-  );
-}
-
-function runnerCardAddressesVisibleBreakerNeed(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): boolean {
-  return buildRunnerCardAddressesVisibleBreakerNeed(input, card, {
-    isVisibleIcebreakerProgram,
-    knownPathAssessment: (runtimeInput, server) =>
-      assessKnownRezzedIcePath(
-        server.ice,
-        runtimeInput.playerView.own.rig ?? [],
-        runtimeInput.playerView.own.credits,
-        server.root,
-      ),
-    breakerCanAddressIce: visibleBreakerCardCanAddressIce,
-  });
-}
-
-function visibleBreakerCardCanAddressIce(
-  breaker: VisibleCard,
-  ice: VisibleCard,
-): boolean {
-  return buildVisibleBreakerCardCanAddressIce(breaker, ice, {
-    visibleBreakerRoles: visibleBreakerRolesForAi,
-    visibleCardText: visibleCardTextForAi,
-  });
-}
-
-function visibleCardTextForAi(card: VisibleCard): string {
-  return buildVisibleCardText(card, visibleCardDefinition(card));
 }
 
 function visibleCardDefinition(card: VisibleCard) {
