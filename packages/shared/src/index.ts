@@ -995,13 +995,13 @@ export type RunState = {
     | "runner_gain_agenda_point";
   badPublicityRunAftermath?:
     | {
-        kind: "live_news_feed";
+        kind: "successful_run_draw_event";
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;
       }
     | {
-        kind: "subliminal_corruption";
+        kind: "bad_publicity_run_replacement";
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;
@@ -1213,7 +1213,7 @@ export type RunState = {
     announcedSpendCap: number;
     spentDuringRun: number;
   };
-  promisesPromisesAgendaPointBonus?: {
+  nextAgendaAccessAgendaPointBonus?: {
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
     amount: 1;
@@ -1436,10 +1436,10 @@ export type GameState = {
     trashedNodeLastTurn?: boolean;
     trashedAdvertisementThisTurn?: boolean;
     trashedTransactionsThisTurn?: boolean;
-    prearrangedDropPending?: boolean;
-    promisesPromisesNextAgendaAccess?: boolean;
-    promisesPromisesSourceDefinitionId?: CardDefinitionId;
-    promisesPromisesSourceTitle?: string;
+    nextAgendaAccessCreditGainPending?: boolean;
+    nextAgendaAccessAgendaPointPending?: boolean;
+    nextAgendaAccessAgendaPointSourceDefinitionId?: CardDefinitionId;
+    nextAgendaAccessAgendaPointSourceTitle?: string;
     pendingSequences?: MultiServerSuccessSequenceState[];
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];

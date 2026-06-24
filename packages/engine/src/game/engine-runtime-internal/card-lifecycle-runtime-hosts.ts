@@ -1022,13 +1022,13 @@ export function createCardLifecycleRuntimeHosts(
     legalAction: LegalAction,
   ): void {
     const effects = onPlayCardImplementationEffects(definition);
-    const remoteDetonatorEffect = effects.find(
+    const remoteServerTrashTagSequenceEffect = effects.find(
       (effect) =>
         effect.kind ===
         "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
     );
-    if (remoteDetonatorEffect) {
-      const tagAmount = remoteDetonatorEffect.tagAmount;
+    if (remoteServerTrashTagSequenceEffect) {
+      const tagAmount = remoteServerTrashTagSequenceEffect.tagAmount;
       if (!Number.isInteger(tagAmount) || tagAmount <= 0)
         throw new Error("Remote-Detonator-Tagmenge ist ungueltig.");
       const serverId = state.runnerTurnFlags?.lastSuccessfulRunServerId;
@@ -1044,7 +1044,7 @@ export function createCardLifecycleRuntimeHosts(
       state.runner.tags += tagAmount;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        remoteDetonatorResolved: true,
+        remoteServerTrashTagSequenceResolved: true,
         serverId,
         trashedRezzedIceCount: trashedDefinitionIds.length,
         trashedCount: trashedDefinitionIds.length,

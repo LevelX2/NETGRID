@@ -845,7 +845,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
   ): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
-      "hacker_tracker_trace_bits"
+      "trace_bit_counter_pool_asset"
     );
   }
 
@@ -912,7 +912,7 @@ export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
     cardId: CardInstanceId,
   ): "bit" | "power" {
     return remainingReplacementLongtailImplementationForCard(state, cardId)
-      ?.kind === "hacker_tracker_trace_bits"
+      ?.kind === "trace_bit_counter_pool_asset"
       ? "bit"
       : "power";
   }

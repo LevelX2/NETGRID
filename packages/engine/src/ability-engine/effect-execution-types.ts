@@ -281,7 +281,7 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
+  badPublicityRunAftermath?: "successful_run_draw_event" | "bad_publicity_run_replacement";
   activeSequence?: MultiServerSuccessSequenceState;
 };
 

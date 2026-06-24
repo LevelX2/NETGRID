@@ -117,7 +117,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
       sourceDefinitionId: definition.id,
     };
   }
-  if (implementation?.kind === "schlaghund_tag_die_meat_damage") {
+  if (implementation?.kind === "tag_threshold_meat_damage_asset") {
     return {
       handled: true,
       actions: [
@@ -265,7 +265,7 @@ function handleSchlaghundAction(
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForDefinition(definition.id);
-  if (implementation?.kind !== "schlaghund_tag_die_meat_damage")
+  if (implementation?.kind !== "tag_threshold_meat_damage_asset")
     throw new Error(
       "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
     );

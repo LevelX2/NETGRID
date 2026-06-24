@@ -651,7 +651,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     const dropBefore = state.runner.credits;
     const drop = playEventAction(state, "onr_proteus_118_prearranged-drop");
     state = drop.state;
-    expect(state.runnerTurnFlags?.prearrangedDropPending).toBe(true);
+    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(true);
     state = apply(
       state,
       "runner",
@@ -661,7 +661,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.runner.credits).toBe(dropBefore - drop.creditCost + 6);
-    expect(state.runnerTurnFlags?.prearrangedDropPending).toBe(false);
+    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(false);
   });
 
   it("starts All-Hands and Rush Hour central runs with +3 access and noisy breaker lock", () => {
@@ -809,7 +809,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
     expect(state.corp.archives).toContain(iceId);
     expect(state.runner.tags).toBe(3);
-    const remoteDetonatorEffect =
+    const remoteServerTrashTagSequenceEffect =
       cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")?.abilities
         ?.flatMap((ability) => ("effects" in ability ? ability.effects : []))
         .find(
@@ -817,7 +817,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
             effect.kind ===
             "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
         );
-    expect(remoteDetonatorEffect).toMatchObject({ tagAmount: 3 });
+    expect(remoteServerTrashTagSequenceEffect).toMatchObject({ tagAmount: 3 });
     expect(state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3)).toBe(
       true,
     );

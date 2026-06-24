@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const hackerTrackerCentralImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_325_hacker-tracker-central",
   remainingReplacementLongtail: {
-    kind: "hacker_tracker_trace_bits",
+    kind: "trace_bit_counter_pool_asset",
     counterType: "bit",
     addAfterTrace: 1,
     traceStrengthAndLimitPerBit: 1,

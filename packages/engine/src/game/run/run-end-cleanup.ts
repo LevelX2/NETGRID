@@ -455,7 +455,7 @@ function applyBadPublicityRunAftermath(
   const aftermath = run.badPublicityRunAftermath;
   if (!aftermath) return;
   let badPublicityAdded = 0;
-  if (aftermath.kind === "live_news_feed") {
+  if (aftermath.kind === "successful_run_draw_event") {
     if (!successful) return;
     const tagAmount = 2;
     host.state.runner.tags += tagAmount;

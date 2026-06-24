@@ -475,7 +475,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     const before = structuredClone(state);
 
     state = playRunnerEvent(state, sourceId, "hq");
-    expect(state.run?.badPublicityRunAftermath?.kind).toBe("live_news_feed");
+    expect(state.run?.badPublicityRunAftermath?.kind).toBe("successful_run_draw_event");
     state = takeRunnerAction(state, (action) => action.type === "continue_run");
     expect(state.run?.encounteredBlackIceCount).toBe(1);
     expect(state.run?.encounteredIceId).toBe(blackIceId);
@@ -526,7 +526,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     const before = structuredClone(state);
 
     state = playRunnerEvent(state, sourceId, "remote_1");
-    expect(state.run?.badPublicityRunAftermath?.kind).toBe("subliminal_corruption");
+    expect(state.run?.badPublicityRunAftermath?.kind).toBe("bad_publicity_run_replacement");
     state = trashAccessedCard(state);
 
     expect(state.corp.badPublicity).toBe(1);

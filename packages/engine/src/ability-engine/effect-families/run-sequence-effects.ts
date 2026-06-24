@@ -157,10 +157,10 @@ export function executeRunSequenceEffect(
         stoleAgendaThisTurn: false,
         stoleAgendaLastTurn: false,
       };
-      state.runnerTurnFlags.prearrangedDropPending = true;
+      state.runnerTurnFlags.nextAgendaAccessCreditGainPending = true;
       mergePublicPayload(publicPayload, {
-        prearrangedDropPending: true,
-        prearrangedDropCreditGain: effect.amount,
+        nextAgendaAccessCreditGainPending: true,
+        nextAgendaAccessCreditGainAmount: effect.amount,
       });
       return true;
     }
@@ -173,14 +173,14 @@ export function executeRunSequenceEffect(
         stoleAgendaThisTurn: false,
         stoleAgendaLastTurn: false,
       };
-      state.runnerTurnFlags.promisesPromisesNextAgendaAccess = true;
+      state.runnerTurnFlags.nextAgendaAccessAgendaPointPending = true;
       if (context.sourceDefinitionId)
-        state.runnerTurnFlags.promisesPromisesSourceDefinitionId =
+        state.runnerTurnFlags.nextAgendaAccessAgendaPointSourceDefinitionId =
           context.sourceDefinitionId;
       if (context.sourceTitle)
-        state.runnerTurnFlags.promisesPromisesSourceTitle = context.sourceTitle;
+        state.runnerTurnFlags.nextAgendaAccessAgendaPointSourceTitle = context.sourceTitle;
       mergePublicPayload(publicPayload, {
-        promisesPromisesPending: true,
+        nextAgendaAccessAgendaPointPending: true,
         agendaPointBonus: effect.amount,
       });
       return true;
@@ -241,7 +241,7 @@ export function executeRunSequenceEffect(
         effect.visibility,
       );
       mergePublicPayload(publicPayload, {
-        remoteDetonatorRequested: true,
+        remoteServerTrashTagSequenceRequested: true,
         tagsAdded: effect.tagAmount,
       });
       return true;

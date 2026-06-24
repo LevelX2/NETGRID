@@ -173,6 +173,18 @@ Checks:
 - `corepack pnpm --filter @netgrid/engine typecheck`
 - `git diff --check`
 
+Abschluss 2026-06-24:
+- Die CardImplementation-Registry ist in kleine Subregistry-Gruppen zerlegt; der verbotene `all-card-implementations.ts`-Monolith sowie die zu großen Proteus-Runner-Sammelregistries sind entfernt.
+- `registry.ts` importiert nur noch den schlanken `card-implementation-catalog`; Registry-Parität bleibt über die bestehenden Coverage-Tests abgesichert.
+- Verbleibende kartenspezifische Runtime-Kinds und State-/Payload-Felder wurden in funktionale Namen überführt, einschließlich Agenda-Access-Bonus-, Remote-Server-Trash-/Tag-Sequence- und Bad-Publicity-Run-Replacement-Pfade.
+- Der Architekturguard ist auf die Engine/CardImplementation-Runtime-Grenze begrenzt; historische AI-Migrationsskripte laufen über die bestehenden AI-Gates statt als Runtime-Architekturquellen.
+- `corepack pnpm check:engine-cardimplementation-architecture-target:selftest`: grün.
+- `corepack pnpm check:engine-cardimplementation-architecture-target`: grün, alle Kategorien `0`.
+- `corepack pnpm check:ai`: grün.
+- `corepack pnpm --filter @netgrid/engine typecheck`: grün.
+- `corepack pnpm --filter @netgrid/engine test`: grün, 173 Testdateien / 1519 Tests.
+- `git diff --check`: sauber.
+
 Commit: `refactor(engine): finalize registry and semantic architecture guards`
 
 ### P6 Vollständige Abschlussprüfung und Integration

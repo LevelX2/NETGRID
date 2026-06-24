@@ -98,7 +98,7 @@ export function ensureRunnerTurnFlags(
     trashedNodeLastTurn: false,
     trashedAdvertisementThisTurn: false,
     trashedTransactionsThisTurn: false,
-    prearrangedDropPending: false,
+    nextAgendaAccessCreditGainPending: false,
     installedResourceIdsThisTurn: [],
     installedResourceIdsLastTurn: [],
     successfulHqRunThisTurn: false,
@@ -131,7 +131,7 @@ export function ensureRunnerTurnFlags(
   flags.trashedNodeLastTurn ??= false;
   flags.trashedAdvertisementThisTurn ??= false;
   flags.trashedTransactionsThisTurn ??= false;
-  flags.prearrangedDropPending ??= false;
+  flags.nextAgendaAccessCreditGainPending ??= false;
   flags.installedResourceIdsThisTurn ??= [];
   flags.installedResourceIdsLastTurn ??= [];
   flags.successfulHqRunThisTurn ??= false;

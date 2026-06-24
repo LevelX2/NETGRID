@@ -549,7 +549,7 @@ export function handleCreditEconomyExecution(
       state,
       sourceCardId,
     );
-    if (implementation?.kind !== "databroker_agenda_point_credits")
+    if (implementation?.kind !== "agenda_point_for_credits_resource")
       throw new Error("Die Databroker-Faehigkeit passt nicht zur Karte.");
     const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
     const expectedAgendaCost = implementation.agendaPointCost;

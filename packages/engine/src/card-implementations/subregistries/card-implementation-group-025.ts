@@ -1,4 +1,7 @@
 import type { CardImplementationDefinition } from "../types";
+import { proteusSunburstCranialInterfaceImplementation } from "../proteus/runner/hardware/sunburst-cranial-interface";
+import { proteusPoisonedWaterSupplyImplementation } from "../proteus/runner/events/poisoned-water-supply";
+import { proteusStakeoutImplementation } from "../proteus/runner/events/stakeout";
 import { proteusArmageddonImplementation } from "../proteus/runner/programs/armageddon";
 import { proteusBlackWidowImplementation } from "../proteus/runner/programs/black-widow";
 import { proteusBigFrackinGunImplementation } from "../proteus/runner/programs/big-frackin-gun";
@@ -16,16 +19,11 @@ import { proteusLockjawImplementation } from "../proteus/runner/programs/lockjaw
 import { proteusMorphingToolImplementation } from "../proteus/runner/programs/morphing-tool";
 import { proteusRedecoratorImplementation } from "../proteus/runner/programs/redecorator";
 import { proteusScaldanImplementation } from "../proteus/runner/programs/scaldan";
-import { proteusSkeletonPasskeysImplementation } from "../proteus/runner/programs/skeleton-passkeys";
-import { proteusSkullcapImplementation } from "../proteus/runner/programs/skullcap";
-import { proteusTaxmanImplementation } from "../proteus/runner/programs/taxman";
-import { proteusVienna22Implementation } from "../proteus/runner/programs/vienna-22";
-import { proteusViralPipelineImplementation } from "../proteus/runner/programs/viral-pipeline";
-import { proteusWreckingBallImplementation } from "../proteus/runner/programs/wrecking-ball";
 
-// Subregistries are catalog-only. They group declarative card files and must
-// not execute abilities or add runtime conditions.
-export const PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS = [
+export const CARD_IMPLEMENTATION_GROUP_025 = [
+  proteusSunburstCranialInterfaceImplementation,
+  proteusPoisonedWaterSupplyImplementation,
+  proteusStakeoutImplementation,
   proteusArmageddonImplementation,
   proteusBlackWidowImplementation,
   proteusBigFrackinGunImplementation,
@@ -43,10 +41,4 @@ export const PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS = [
   proteusMorphingToolImplementation,
   proteusRedecoratorImplementation,
   proteusScaldanImplementation,
-  proteusSkeletonPasskeysImplementation,
-  proteusSkullcapImplementation,
-  proteusTaxmanImplementation,
-  proteusVienna22Implementation,
-  proteusViralPipelineImplementation,
-  proteusWreckingBallImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];

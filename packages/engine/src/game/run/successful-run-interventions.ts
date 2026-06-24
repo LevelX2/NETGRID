@@ -973,7 +973,7 @@ export function applyDirectSuccessfulRunTriggers(
       (cardId) =>
         uniqueDirectLongtailKindForDefinition(
           host.cards.definitionFor(cardId).id,
-        ) === "karl_successful_run_credit",
+        ) === "successful_run_credit_resource",
     );
   if (karlSources.length === 0) return { handled: false };
   let gainedCredits = 0;
@@ -982,7 +982,7 @@ export function applyDirectSuccessfulRunTriggers(
     const implementation = uniqueDirectLongtailImplementationForDefinition(
       host.cards.definitionFor(sourceId).id,
     );
-    if (implementation?.kind !== "karl_successful_run_credit") continue;
+    if (implementation?.kind !== "successful_run_credit_resource") continue;
     host.credits.gainRunner(implementation.amount);
     gainedCredits += implementation.amount;
     sourceDefinitionIds.push(host.cards.definitionFor(sourceId).id);

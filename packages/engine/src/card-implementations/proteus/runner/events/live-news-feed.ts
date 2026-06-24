@@ -12,7 +12,7 @@ export const proteusLiveNewsFeedImplementation: CardImplementationDefinition = {
         {
           kind: "make_run",
           target: { kind: "chosen_server" },
-          badPublicityRunAftermath: "live_news_feed",
+          badPublicityRunAftermath: "successful_run_draw_event",
           visibility: "public",
         },
       ],

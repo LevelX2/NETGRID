@@ -968,7 +968,7 @@ export function buildRunnerMainActions(
         state,
         resourceId,
       );
-      if (uniqueDirectLongtail?.kind === "databroker_agenda_point_credits") {
+      if (uniqueDirectLongtail?.kind === "agenda_point_for_credits_resource") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
           const agendaPointCost = uniqueDirectLongtail.agendaPointCost;

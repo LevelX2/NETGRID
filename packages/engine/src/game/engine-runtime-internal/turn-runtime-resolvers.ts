@@ -1303,7 +1303,7 @@ function endTurn(
     flags.trashedNodeThisTurn = false;
     flags.trashedAdvertisementThisTurn = false;
     flags.trashedTransactionsThisTurn = false;
-    flags.prearrangedDropPending = false;
+    flags.nextAgendaAccessCreditGainPending = false;
     flags.installedResourceIdsLastTurn = (
       flags.installedResourceIdsThisTurn ?? []
     ).slice();
@@ -2180,10 +2180,10 @@ function startRunnerTurn(
   flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
   flags.trashedAdvertisementThisTurn = false;
   flags.trashedTransactionsThisTurn = false;
-  flags.prearrangedDropPending = false;
-  flags.promisesPromisesNextAgendaAccess = false;
-  delete flags.promisesPromisesSourceDefinitionId;
-  delete flags.promisesPromisesSourceTitle;
+  flags.nextAgendaAccessCreditGainPending = false;
+  flags.nextAgendaAccessAgendaPointPending = false;
+  delete flags.nextAgendaAccessAgendaPointSourceDefinitionId;
+  delete flags.nextAgendaAccessAgendaPointSourceTitle;
   flags.damagePreventionUsage = {};
   flags.abilityUsedSourceIdsByLimitKey = {};
   flags.startOfTurnFloatingCreditsApplied = false;

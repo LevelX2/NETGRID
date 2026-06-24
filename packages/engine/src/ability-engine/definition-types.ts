@@ -1063,7 +1063,7 @@ export type CardAbilityCostImplementation =
 
 export type CardUniqueDirectLongtailImplementation =
   | {
-      kind: "karl_successful_run_credit";
+      kind: "successful_run_credit_resource";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -1073,7 +1073,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "databroker_agenda_point_credits";
+      kind: "agenda_point_for_credits_resource";
       agendaPointCost: 1;
       gainCredits: 10;
       trashSource: true;
@@ -1091,7 +1091,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "nevinyrral_action_and_lose_on_rezzed_leave";
+      kind: "rezzed_leave_action_gain_asset";
       actionGain: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -1104,7 +1104,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "schlaghund_tag_die_meat_damage";
+      kind: "tag_threshold_meat_damage_asset";
       damageType: Extract<DamageType, "meat">;
       damageAmount: 10;
       trashSourceOnSuccess: true;
@@ -1113,7 +1113,7 @@ export type CardUniqueDirectLongtailImplementation =
 
 export type CardRemainingReplacementLongtailImplementation =
   | {
-      kind: "crash_everett_draw_extra_choose_trash_or_top";
+      kind: "hidden_draw_keep_or_top_replacement";
       extraDraw: 1;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -1147,14 +1147,14 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "hacker_tracker_trace_bits";
+      kind: "trace_bit_counter_pool_asset";
       counterType: Extract<CounterType, "bit">;
       addAfterTrace: 1;
       traceStrengthAndLimitPerBit: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "crybaby_crying_counter";
+      kind: "link_reduction_counter_upgrade";
       counterType: Extract<CounterType, "crying">;
       linkReductionPerCounter: 2;
       removeCost: 2;
@@ -1719,7 +1719,7 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
+  badPublicityRunAftermath?: "successful_run_draw_event" | "bad_publicity_run_replacement";
   visibility: EventVisibilityClass;
 };
 

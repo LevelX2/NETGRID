@@ -10,7 +10,7 @@ export const crashEverettInventiveFixerImplementation: CardImplementationDefinit
       controller: "runner",
     },
     remainingReplacementLongtail: {
-      kind: "crash_everett_draw_extra_choose_trash_or_top",
+      kind: "hidden_draw_keep_or_top_replacement",
       extraDraw: 1,
       visibility: "hidden_info_barrier",
     },
