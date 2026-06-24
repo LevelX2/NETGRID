@@ -338,11 +338,9 @@ import {
 import {
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
   programSacrificeCandidate as buildProgramSacrificeCandidate,
-  programSacrificeCategory,
   runnerProgramInstallDisplacementPenalty,
-  runnerProgramInstallTrashAssessmentEvidence,
+  runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
   sacrificeCandidateLabel,
-  selectedProgramSacrificeCandidates,
   type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runtime/runner-program-install-trash-policy";
@@ -11390,10 +11388,6 @@ function runnerProgramInstallTrashAssessmentFromCards(
   const memoryUsed = safeNonNegativeInteger(input.playerView.own.memoryUsed);
   const memoryLimit = safeNonNegativeInteger(input.playerView.own.memoryLimit);
   const sourceMemoryCost = visibleMemoryCostForAi(source);
-  const requiredMemoryToFree = Math.max(
-    0,
-    memoryUsed + sourceMemoryCost - memoryLimit,
-  );
   const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
   const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(
     input.playerView.own.rig ?? [],
@@ -11414,35 +11408,12 @@ function runnerProgramInstallTrashAssessmentFromCards(
     : (input.playerView.own.rig ?? []).map((card) =>
         programSacrificeCandidateForAi(input, card, installedBreakerRoleCounts),
       );
-  const sortedCandidates = candidates
-    .filter((candidate) => candidate.memoryCost > 0)
-    .sort(
-      (left, right) =>
-        right.score - left.score ||
-        right.memoryCost - left.memoryCost ||
-        sacrificeCandidateLabel(left).localeCompare(
-          sacrificeCandidateLabel(right),
-          "de",
-        ),
-    );
-  const selection = selectedProgramSacrificeCandidates(
-    sortedCandidates,
-    requiredMemoryToFree,
-  );
-  const evidence = runnerProgramInstallTrashAssessmentEvidence({
-    requiredMemoryToFree,
-    candidates: sortedCandidates,
-    selection,
+  return buildRunnerProgramInstallTrashAssessmentFromCards({
+    memoryUsed,
+    memoryLimit,
+    sourceMemoryCost,
+    candidates,
   });
-  return {
-    memoryRequired: requiredMemoryToFree > 0,
-    requiredMemoryToFree,
-    candidates: sortedCandidates,
-    selectedCandidates: selection.selectedCandidates,
-    memoryFreedBySelectedCandidates: selection.memoryFreed,
-    canFreeRequiredMemory: selection.canFreeRequiredMemory,
-    evidence,
-  };
 }
 
 function programSacrificeCandidateForAi(

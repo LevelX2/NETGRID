@@ -143,6 +143,47 @@ export function programSacrificeCandidateIsRedundant(
   return breakerRoles.every((role) => (roleCounts.get(role) ?? 0) > 1);
 }
 
+export function runnerProgramInstallTrashAssessmentFromCards(params: {
+  memoryUsed: number;
+  memoryLimit: number;
+  sourceMemoryCost: number;
+  candidates: readonly ProgramSacrificeCandidate[];
+}): RunnerProgramInstallTrashAssessment {
+  const requiredMemoryToFree = Math.max(
+    0,
+    params.memoryUsed + params.sourceMemoryCost - params.memoryLimit,
+  );
+  const sortedCandidates = [...params.candidates]
+    .filter((candidate) => candidate.memoryCost > 0)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        right.memoryCost - left.memoryCost ||
+        sacrificeCandidateLabel(left).localeCompare(
+          sacrificeCandidateLabel(right),
+          "de",
+        ),
+    );
+  const selection = selectedProgramSacrificeCandidates(
+    sortedCandidates,
+    requiredMemoryToFree,
+  );
+  const evidence = runnerProgramInstallTrashAssessmentEvidence({
+    requiredMemoryToFree,
+    candidates: sortedCandidates,
+    selection,
+  });
+  return {
+    memoryRequired: requiredMemoryToFree > 0,
+    requiredMemoryToFree,
+    candidates: sortedCandidates,
+    selectedCandidates: selection.selectedCandidates,
+    memoryFreedBySelectedCandidates: selection.memoryFreed,
+    canFreeRequiredMemory: selection.canFreeRequiredMemory,
+    evidence,
+  };
+}
+
 export type ProgramSacrificeCandidateDependencies = {
   visibleMemoryCost: (card: VisibleCard | undefined) => number;
   rolesForCardId: (definitionId: string | undefined) => readonly string[];
