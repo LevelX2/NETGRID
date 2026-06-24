@@ -218,9 +218,8 @@ import {
 } from "./runtime/runner-source-card-answer-role-context";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import {
-  runnerHandFundingTarget as buildRunnerHandFundingTarget,
-  type RunnerHandFundingTarget,
-} from "./runtime/runner-hand-funding-target";
+  createRunnerHandFundingContext,
+} from "./runtime/runner-hand-funding-context";
 import { runnerScoreComponents as buildRunnerScoreComponents } from "./runtime/runner-score-components";
 import {
   runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent,
@@ -3679,6 +3678,15 @@ const {
   actionCreditCost,
   isVisibleIcebreakerProgram,
 });
+const { runnerHandFundingTarget } = createRunnerHandFundingContext({
+  rolesForCardId,
+  visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
+  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+  isRunnerEconomyRole,
+  cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
+  badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+  rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
+});
 const {
   runnerPersistentInstallFitScoreComponent,
   runnerPersistentInstallLegacyScoreDelta,
@@ -4826,20 +4834,6 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
       trashCost !== undefined &&
       input.playerView.own.credits >= trashCost + 1
     );
-  });
-}
-
-function runnerHandFundingTarget(
-  input: AiDecisionInput,
-): RunnerHandFundingTarget | undefined {
-  return buildRunnerHandFundingTarget(input, {
-    rolesForCardId,
-    visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-    cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-    isRunnerEconomyRole,
-    cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
-    badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-    rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
   });
 }
 

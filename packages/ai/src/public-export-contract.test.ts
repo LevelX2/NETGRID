@@ -152,6 +152,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-source-card-answer-role",
       "./runtime/runner-source-card-answer-role-context",
       "./runtime/runner-hand-buffer-need",
+      "./runtime/runner-hand-funding-context",
       "./runtime/runner-hand-funding-target",
       "./runtime/runner-tag-cleanup-score",
       "./runtime/runner-credit-need-score",
