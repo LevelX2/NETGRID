@@ -1,0 +1,120 @@
+import type {
+  AiDecisionInput,
+  AiDecisionScoreComponent,
+  LegalAction,
+} from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { runnerBasicActionPenaltyScoreComponents } from "./runner-basic-action-penalty-score";
+import {
+  runnerCreditNeedScoreComponents,
+  type RunnerCreditNeedScoreDependencies,
+} from "./runner-credit-need-score";
+import {
+  runnerFollowupScoreComponents,
+  type RunnerFollowupScoreDependencies,
+} from "./runner-followup-score";
+import {
+  runnerInstallScoreComponents,
+  type RunnerInstallScoreDependencies,
+} from "./runner-install-score";
+import {
+  runnerLoanLiabilityScoreComponent,
+  type RunnerLoanLiabilityScoreAssessment,
+} from "./runner-loan-liability-score";
+import {
+  runnerRecoveryCommitmentScoreComponents,
+  type RunnerRecoveryCommitmentScoreDependencies,
+} from "./runner-recovery-commitment-score";
+import {
+  runnerSemanticGoalFitScoreComponent,
+  type RunnerGoalFitScoreDependencies,
+} from "./runner-goal-fit-score";
+import {
+  runnerStartRunScoreComponents,
+  type RunnerStartRunScoreDependencies,
+} from "./runner-start-run-score";
+import {
+  runnerDirectTagCleanupFallbackScoreComponent,
+  runnerTagCleanupScoreComponent,
+} from "./runner-tag-cleanup-score";
+
+export type RunnerScoreComponentsDependencies = {
+  loanLiabilityAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => RunnerLoanLiabilityScoreAssessment | undefined;
+  goalFit: RunnerGoalFitScoreDependencies;
+  handFundingTarget: RunnerCreditNeedScoreDependencies["handFundingTarget"];
+  recoveryCommitment: RunnerRecoveryCommitmentScoreDependencies;
+  install: RunnerInstallScoreDependencies;
+  startRun: RunnerStartRunScoreDependencies;
+  followup: RunnerFollowupScoreDependencies;
+};
+
+export function runnerScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  dependencies: RunnerScoreComponentsDependencies,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
+  const loanLiabilityAssessment = dependencies.loanLiabilityAssessment(
+    input,
+    action,
+  );
+  const loanLiabilityComponent = runnerLoanLiabilityScoreComponent(
+    loanLiabilityAssessment,
+  );
+  if (loanLiabilityComponent) components.push(loanLiabilityComponent);
+  const tagCleanup = runnerTagCleanupScoreComponent(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
+  if (tagCleanup) components.push(tagCleanup);
+  const goalFit = runnerSemanticGoalFitScoreComponent(
+    input,
+    action,
+    scopeId,
+    actionSemanticCandidate,
+    dependencies.goalFit,
+  );
+  if (goalFit) components.push(goalFit);
+  const tagCleanupFallback = runnerDirectTagCleanupFallbackScoreComponent(
+    input,
+    action,
+    tagCleanup,
+  );
+  if (tagCleanupFallback) components.push(tagCleanupFallback);
+  components.push(
+    ...runnerCreditNeedScoreComponents(input, action, {
+      handFundingTarget: dependencies.handFundingTarget,
+    }),
+  );
+  components.push(
+    ...runnerRecoveryCommitmentScoreComponents(
+      input,
+      action,
+      dependencies.recoveryCommitment,
+    ),
+  );
+  components.push(
+    ...runnerInstallScoreComponents(
+      input,
+      action,
+      { loanInstallAction: loanLiabilityAssessment?.loanInstallAction === true },
+      dependencies.install,
+    ),
+  );
+  components.push(
+    ...runnerStartRunScoreComponents(input, action, dependencies.startRun),
+  );
+  components.push(
+    ...runnerFollowupScoreComponents(input, action, dependencies.followup),
+  );
+  components.push(
+    ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId),
+  );
+  return components;
+}
