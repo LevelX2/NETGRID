@@ -163,8 +163,8 @@ import {
   createSemanticRuntimeCorpEvidenceContext,
 } from "./runtime/semantic-runtime-corp-evidence-context";
 import {
-  semanticRuntimeEvidence as buildSemanticRuntimeEvidence,
-} from "./runtime/semantic-runtime-evidence";
+  createSemanticRuntimeEvidenceContext,
+} from "./runtime/semantic-runtime-evidence-context";
 import {
   createSemanticRuntimeCorpRiskContext,
 } from "./runtime/semantic-runtime-corp-risk-context";
@@ -3882,11 +3882,11 @@ const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
 });
-const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
+const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
-};
+});
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -6650,19 +6650,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeEvidence(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-): string[] {
-  return buildSemanticRuntimeEvidence(
-    input,
-    action,
-    scopeId,
-    SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES,
   );
 }
 

@@ -115,6 +115,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-corp-evidence",
       "./runtime/semantic-runtime-corp-evidence-context",
       "./runtime/semantic-runtime-evidence",
+      "./runtime/semantic-runtime-evidence-context",
       "./runtime/semantic-runtime-corp-risk",
       "./runtime/semantic-runtime-corp-risk-context",
       "./runtime/semantic-runtime-corp-rez-floor",
