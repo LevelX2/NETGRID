@@ -250,7 +250,16 @@ Checks:
 
 ### Paket 8
 
-Offen.
+Entscheidung: Kein CSS-Move in diesem Paket.
+
+Begründung:
+
+- `apps/web/app/globals.css` umfasst zu Beginn 11195 Zeilen und steuert viele überlappende UI-Domänen, Responsive-Regeln und Z-Index-Flächen.
+- Ein reiner Dateisplit ohne Selektoränderung wäre nur dann risikoarm, wenn die bisherige Reihenfolge automatisiert inventarisiert und mit visuellen Desktop-/Mobile-Screenshots gegengeprüft wird.
+- Die bisherigen Paket-Gates decken TypeScript, Unit-Tests, Build und Whitespace ab, aber keine visuelle Kaskadenregression.
+- Das Ziel dieses Goal war bereits technisch grün und strukturell bei Utilities, Transport und Catalog verbessert; ein CSS-Schnitt würde den grünen Stand ohne zwingenden Bugfix riskieren.
+
+Restaufgabe: CSS-Domänensplit als eigenes Paket mit vorherigem Reihenfolge-Inventar, unveränderter Importreihenfolge und Browser-Screenshotvergleich für Matchstart, aktives Match, Decks, Catalog, Chronicle, Overlays und schmale Viewports.
 
 ## Abschlusskriterien
 
