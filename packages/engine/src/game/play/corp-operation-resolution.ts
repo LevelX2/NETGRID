@@ -537,7 +537,11 @@ export function resolveCorpUtilityOperation(
     case "encounter_tag": {
       if (!host.corp.runnerStoleAgendaLastTurn())
         throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
-      host.damage.addRunnerTagsWithPrevention(legalAction, 1, "trojan_horse");
+      host.damage.addRunnerTagsWithPrevention(
+        legalAction,
+        1,
+        "corp_operation_encounter_tag",
+      );
       return;
     }
     case "gain_credits_from_stolen_agenda_advancement_history": {
