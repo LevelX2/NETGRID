@@ -48023,6 +48023,15 @@
             "corp.ambush_bluff"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "punish_tagged_runner",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
       "warningCategories": [],

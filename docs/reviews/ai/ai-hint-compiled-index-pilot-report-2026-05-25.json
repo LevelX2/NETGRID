@@ -21904,7 +21904,7 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": ["bait_runner", "protect_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -22019,7 +22019,7 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": ["bait_runner", "protect_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -22314,7 +22314,7 @@
         "side": "corp",
         "cardType": "operation",
         "roles": ["operation", "tag_punishment_operation", "tag_punishment"],
-        "planRoles": ["bait_runner", "recover_economy"],
+        "planRoles": ["bait_runner", "punish_tagged_runner"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -23736,7 +23736,7 @@
         "side": "corp",
         "cardType": "operation",
         "roles": ["operation", "tag_enabler", "tag_operation"],
-        "planRoles": ["bait_runner", "recover_economy"],
+        "planRoles": ["bait_runner", "punish_tagged_runner"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {

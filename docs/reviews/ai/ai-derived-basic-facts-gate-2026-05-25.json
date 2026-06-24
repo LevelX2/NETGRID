@@ -21053,8 +21053,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "protect_hq",
-          "recover_economy"
+          "protect_hq"
         ],
         "effects": [
           {
@@ -21182,8 +21181,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "protect_hq",
-          "recover_economy"
+          "protect_hq"
         ],
         "effects": [
           {
@@ -21509,7 +21507,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {
@@ -23079,7 +23077,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {

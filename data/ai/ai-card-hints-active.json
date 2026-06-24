@@ -15873,7 +15873,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["operation", "tag_enabler", "tag_operation"],
-      "planRoles": ["bait_runner"],
+      "planRoles": ["punish_tagged_runner", "bait_runner"],
       "requiredMechanics": [
         "play_operation",
         "runner_stole_agenda_last_turn",

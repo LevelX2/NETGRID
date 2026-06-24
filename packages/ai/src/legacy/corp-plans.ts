@@ -44,7 +44,10 @@ import {
   structuredRemoteRoleConflictWithLegacy,
   structuredRemoteRoleSafetyBonusForServer,
 } from "../remote-role-ontology-consumer";
-import { classifyTagPunishLegalActionFromOntology } from "../tag-punish-ontology-consumer";
+import {
+  classifyTagPunishLegalActionFromOntology,
+  classifyTagPunishPayoffFromOntology,
+} from "../tag-punish-ontology-consumer";
 
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 
@@ -54,6 +57,7 @@ export type CorpPlanKind =
   | "build_scoring_remote"
   | "protect_hq"
   | "protect_rnd"
+  | "create_tag_window"
   | "recover_economy"
   | "bait_runner";
 
@@ -913,6 +917,11 @@ export function generateCorpPlanCandidates(
     ),
     buildCandidate(
       input,
+      "create_tag_window",
+      actions.filter((action) => corpTagSourcePlanAction(input, action)),
+    ),
+    buildCandidate(
+      input,
       "recover_economy",
       actions.filter(
         (action) =>
@@ -1034,6 +1043,7 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const tagWindow = evaluateCorpTagWindowPlan(input, candidate);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const score =
@@ -1063,6 +1073,7 @@ export function evaluateCorpPlan(
     centralIcePortfolio.score +
     hqDensity.score +
     outcomeFollowup.score +
+    tagWindow.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(
@@ -1085,6 +1096,7 @@ export function evaluateCorpPlan(
     ...scoringHorizon.evidence,
     ...effectiveRemoteSafety.evidence,
     ...outcomeFollowup.evidence,
+    ...tagWindow.evidence,
     ...(input.ownDeckDoctrine
       ? [
           `doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`,
@@ -1148,6 +1160,13 @@ export function evaluateCorpPlan(
         outcomeFollowup.score,
         1,
         firstReason(outcomeFollowup.reasons),
+      ],
+      [
+        "tagWindow",
+        "Tag-Fenster",
+        tagWindow.score,
+        1,
+        firstReason(tagWindow.reasons),
       ],
       [
         "economyReserve",
@@ -1324,6 +1343,7 @@ export function evaluateCorpPlan(
       ...strategicLine.reasons,
       ...effectiveRemoteSafety.reasons,
       ...outcomeFollowup.reasons,
+      ...tagWindow.reasons,
       ...scoreConversion.reasons,
       ...protectionToScore.reasons,
       ...scoreWindowCompression.reasons,
@@ -4084,9 +4104,10 @@ function corpPlanKindForStrategicLine(
     case "fast_advance_or_counter_ops":
     case "score_closeout":
       return "score_next_turn";
-    case "tag_trace_punish":
     case "bait_and_punish":
       return "bait_runner";
+    case "tag_trace_punish":
+      return "create_tag_window";
   }
 }
 
@@ -8504,6 +8525,8 @@ function actionPriority(
       corpFutureRunIceOrderingActionBonus(input, action) +
       corpCentralIcePortfolioActionPriorityBonus(input, action, context)
     );
+  if (kind === "create_tag_window" && corpTagSourcePlanAction(input, action))
+    return 112 + corpTagSourceActionPriorityBonus(input, action);
   if (
     kind === "recover_economy" &&
     extraActionOperation?.basicCreditFollowupOnly &&
@@ -8620,6 +8643,142 @@ function actionPriority(
   if (action.type === "draw_card") return 45;
   if (action.type === "end_turn") return 5;
   return 20;
+}
+
+function evaluateCorpTagWindowPlan(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+): CorpPlanEvaluatorResult {
+  if (candidate.kind !== "create_tag_window")
+    return { score: 0, reasons: [], evidence: [] };
+  const actions = actionsForCandidate(input, candidate).filter((action) =>
+    corpTagSourcePlanAction(input, action),
+  );
+  if (actions.length === 0)
+    return {
+      score: 0,
+      reasons: ["tag_window_no_source"],
+      evidence: ["tag_window_source_actions:0"],
+    };
+
+  const timingWindows = actions.filter((action) =>
+    corpTagSourceHasImmediateTimingWindow(input, action),
+  ).length;
+  const payoffContext = actions.some((action) =>
+    corpTagSourceHasPayoffContext(input, action),
+  );
+  const traceSources = actions.filter(
+    (action) =>
+      corpTagPunishOntologyAssessmentForAction(input, action)?.isTraceTagSource,
+  ).length;
+  const runnerAgendaPressure =
+    input.playerView.opponent.agendaPoints >= 2 ||
+    input.playerView.agendaPointsToWin -
+      input.playerView.opponent.agendaPoints <=
+      4;
+  const score =
+    175 +
+    Math.min(actions.length, 3) * 20 +
+    timingWindows * 95 +
+    (payoffContext ? 80 : 0) +
+    (traceSources > 0 ? 30 : 0) +
+    (runnerAgendaPressure ? 35 : 0);
+
+  return {
+    score,
+    reasons: [
+      "tag_window_source_available",
+      ...(timingWindows > 0 ? ["tag_window_timing_active"] : []),
+      ...(payoffContext ? ["tag_window_payoff_context"] : []),
+    ],
+    evidence: [
+      `tag_window_source_actions:${actions.length}`,
+      `tag_window_timing_windows:${timingWindows}`,
+      `tag_window_payoff_context:${payoffContext}`,
+      `tag_window_trace_sources:${traceSources}`,
+      `tag_window_runner_agenda_pressure:${runnerAgendaPressure}`,
+      `runner_tags:${input.playerView.opponent.tags}`,
+    ],
+  };
+}
+
+function corpTagSourcePlanAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (!assessment?.isTagSource) return false;
+  if (input.playerView.opponent.tags > 0) return false;
+  return (
+    corpTagSourceHasImmediateTimingWindow(input, action) ||
+    corpTagSourceHasPayoffContext(input, action)
+  );
+}
+
+function corpTagSourceHasImmediateTimingWindow(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  const hint = AI_HINTS.get(assessment?.sourceDefinitionId ?? "");
+  return Boolean(
+    hint?.conditions?.some(
+      (condition) => condition.kind === "requires_stolen_agenda_last_turn",
+    ),
+  );
+}
+
+function corpTagSourceHasPayoffContext(
+  input: AiDecisionInput,
+  sourceAction: LegalAction,
+): boolean {
+  if (
+    input.legalActions.some((action) => {
+      if (action.actionId === sourceAction.actionId) return false;
+      return (
+        corpTagPunishOntologyAssessmentForAction(input, action)?.profile
+          .payoff === true
+      );
+    })
+  )
+    return true;
+
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ].some(
+    (card) =>
+      card.known &&
+      Boolean(classifyTagPunishPayoffFromOntology(card.definitionId)),
+  );
+}
+
+function corpTagSourceActionPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (!assessment?.isTagSource) return 0;
+  return (
+    (corpTagSourceHasImmediateTimingWindow(input, action) ? 28 : 0) +
+    (corpTagSourceHasPayoffContext(input, action) ? 24 : 0) +
+    (assessment.isTraceTagSource
+      ? Math.round(corpTraceTagExpectedSuccessEstimate(input) * 42)
+      : 14) +
+    (action.type === "play_operation" ? 8 : 0)
+  );
+}
+
+function corpTraceTagExpectedSuccessEstimate(input: AiDecisionInput): number {
+  if (input.playerView.own.credits >= input.playerView.opponent.credits + 2)
+    return 1;
+  if (input.playerView.own.credits >= input.playerView.opponent.credits)
+    return 0.5;
+  return 0.25;
 }
 
 function corpInstalledEconomyPriority(
@@ -9167,6 +9326,8 @@ function baseScoreForPlan(kind: CorpPlanKind): number {
     case "protect_hq":
     case "protect_rnd":
       return 190;
+    case "create_tag_window":
+      return 285;
     case "recover_economy":
       return 230;
     case "bait_runner":
@@ -9218,6 +9379,8 @@ function expectedBenefitsForPlan(kind: CorpPlanKind): string[] {
       return ["benefit:hq_defense"];
     case "protect_rnd":
       return ["benefit:rd_defense"];
+    case "create_tag_window":
+      return ["benefit:create_tag_window"];
     case "recover_economy":
       return ["benefit:credit_reserve"];
     case "bait_runner":
@@ -9230,6 +9393,8 @@ function visibleRisksForPlan(kind: CorpPlanKind, roles: string[]): string[] {
   if (kind === "build_scoring_remote" || kind === "score_next_turn")
     risks.push("risk:remote_access");
   if (kind === "bait_runner") risks.push("risk:asset_access");
+  if (kind === "create_tag_window")
+    risks.push("risk:tag_source_requires_followup");
   if (roles.length === 0 && kind !== "recover_economy" && kind !== "score_now")
     risks.push("risk:no_ai_role");
   return risks;
@@ -9555,6 +9720,8 @@ function explanationForPlan(kind: CorpPlanDebug["planKind"]): string {
       return "Die Corp schützt HQ gegen sichtbaren Zentralserverdruck.";
     case "protect_rnd":
       return "Die Corp schützt R&D gegen sichtbaren Zentralserverdruck.";
+    case "create_tag_window":
+      return "Die Corp erzeugt aus legalen sichtbaren Aktionen ein Tag-Fenster für vorhandene Payoffs.";
     case "recover_economy":
       return "Die Corp priorisiert ihre sichtbare Credit-Reserve.";
     case "bait_runner":

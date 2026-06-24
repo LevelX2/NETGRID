@@ -3485,6 +3485,171 @@ describe("MVP 0.3 AI controller contract", () => {
     );
   });
 
+  it("prioritizes endgame tag-punish resource trash over economy and slow ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_182_submarine-uplink"] ||
+      !runtimeCards["onr_v1_243_fetch-4-0-1"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-punish-endgame-resource-trash",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: {
+        ...V095_RUNNER_DECK,
+        id: "demo_runner_095_submarine_uplink",
+        cards: [
+          ...V095_RUNNER_DECK.cards,
+          { id: "onr_v1_182_submarine-uplink", quantity: 1 },
+        ],
+      },
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_tag_punish_setup",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const resourceId = moveRunnerResourceToRig(
+      state,
+      "onr_v1_182_submarine-uplink",
+    );
+    scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+    moveCorpCardToHq(state, "onr_v1_243_fetch-4-0-1");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 4;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const resourceTrash = input.legalActions.find(
+      (action) =>
+        action.type === "trash_resource" &&
+        action.payload?.cardId === resourceId,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const fetchInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_243_fetch-4-0-1",
+    );
+    expect(resourceTrash).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(fetchInstall).toBeDefined();
+    if (!resourceTrash || !gain || !fetchInstall)
+      throw new Error("Missing tag-punish resource trash fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [fetchInstall, gain, resourceTrash],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === fetchInstall.actionId,
+    );
+
+    expect(decision.actionId).toBe(resourceTrash.actionId);
+    expect(debugText).toContain("corp_tag_punish_endgame_resource_trash");
+    expect(debugText).toContain("runner_resource_trace_defense_visible:true");
+    expect(debugText).toContain("tag_punish_endgame_active:true");
+    expect(
+      installAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_tag_punish_endgame_slow_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("funds visible tag-punish payoffs instead of continuing slow ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_302_scorched-earth"] ||
+      !runtimeCards["simple_barrier_ice"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-punish-payoff-funding",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_scorched_funding",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 2;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const iceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    expect(gain).toBeDefined();
+    expect(iceInstall).toBeDefined();
+    if (!gain || !iceInstall)
+      throw new Error("Missing tag-punish funding fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [iceInstall, gain],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === iceInstall.actionId,
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(debugText).toContain("corp_tag_punish_payoff_funding");
+    expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
+    expect(
+      installAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_tag_punish_endgame_slow_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("does not promote Schlaghund tagged meat damage when Runner has no tags", () => {
     const runtimeCards = createRuntimeCardsById();
     if (!runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST]) return;
