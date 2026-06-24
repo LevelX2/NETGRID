@@ -158,7 +158,6 @@ import {
 } from "./runtime/semantic-runtime-score-components";
 import {
   semanticRuntimeRunnerEvidence as buildSemanticRuntimeRunnerEvidence,
-  type SemanticRuntimeRunnerEvidenceDependencies,
 } from "./runtime/semantic-runtime-runner-evidence";
 import {
   semanticRuntimeCorpEvidence as buildSemanticRuntimeCorpEvidence,
@@ -166,7 +165,6 @@ import {
 } from "./runtime/semantic-runtime-corp-evidence";
 import {
   semanticRuntimeEvidence as buildSemanticRuntimeEvidence,
-  type SemanticRuntimeEvidenceDependencies,
 } from "./runtime/semantic-runtime-evidence";
 import {
   semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine as buildSemanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
@@ -235,9 +233,7 @@ import {
   runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalAssessment as buildRunnerSelfDamageSurvivalAssessment,
   runnerSelfDamageSurvivalExclusion as buildRunnerSelfDamageSurvivalExclusion,
-  type RunnerSelfDamageGuardedDecisionDependencies,
   type RunnerSelfDamageSurvivalAssessment,
-  type RunnerSelfDamageSurvivalAssessmentDependencies,
 } from "./runtime/runner-self-damage-choice";
 import {
   runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
@@ -245,7 +241,6 @@ import {
 import {
   runnerBlinkRiskEvidenceForAction as buildRunnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
-  type RunnerBlinkRiskEvidenceDependencies,
 } from "./runtime/runner-blink-run-exclusion";
 import {
   runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
@@ -292,7 +287,6 @@ import {
 import {
   runnerBadPublicityRelevanceAssessment as buildRunnerBadPublicityRelevanceAssessment,
   type RunnerBadPublicityRelevanceAssessment,
-  type RunnerBadPublicityRelevanceAssessmentDependencies,
 } from "./runtime/runner-bad-publicity-relevance-assessment";
 import {
   runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
@@ -3760,56 +3754,54 @@ const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
-const RUNNER_SELF_DAMAGE_SURVIVAL_ASSESSMENT_DEPENDENCIES: RunnerSelfDamageSurvivalAssessmentDependencies =
-  {
-    sourceDefinitionIdForAction,
-    hintEffectsForCard: (definitionId) => AI_HINTS.get(definitionId)?.effects,
-    fakedHitCardId: FAKED_HIT_CARD_ID,
-    badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  };
-const RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES: RunnerSelfDamageGuardedDecisionDependencies =
-  {
-    survivalAssessment: runnerSelfDamageSurvivalAssessment,
-    scoreRunnerActions: (input) => scoreActions(input, "runner"),
-    compareAction,
-    selectedChoicesForDecision,
-    scrubEvidence,
-  };
-const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES: RunnerBadPublicityRelevanceAssessmentDependencies =
-  {
-    sourceDefinitionIdForAction,
-    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-    actionCreditCost,
-    fakedHitCardId: FAKED_HIT_CARD_ID,
-    cardSupport: {
-      rolesForCardId,
-      hintEffectsForCard: (definitionId) => AI_HINTS.get(definitionId)?.effects,
-      rulesTextForCard: (definitionId) =>
-        DEMO_CARDS_BY_ID[definitionId]?.rulesText,
-      effectTarget: (effect) => stringRecordValue(effect, "target"),
-    },
-  };
-const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES: RunnerBlinkRiskEvidenceDependencies =
-  {
-    multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
-    runRiskAssessment: assessBlinkRiskForRunAction,
-    breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
-  };
-const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES: SemanticRuntimeRunnerEvidenceDependencies =
-  {
-    programInstallTrashAssessmentForAction:
-      runnerProgramInstallTrashAssessmentForAction,
-    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
-    muPressureActionEvidence: runnerMuPressureActionEvidence,
-    bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
-    noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
-    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-    blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
-    loanLiabilityAssessment: runnerLoanLiabilityAssessment,
-    persistentInstallEvidenceForAction:
-      runnerPersistentInstallEvidenceForAction,
-    remoteTrashAccessContext: runnerRemoteTrashAccessContext,
-  };
+const RUNNER_SELF_DAMAGE_SURVIVAL_ASSESSMENT_DEPENDENCIES = {
+  sourceDefinitionIdForAction,
+  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
+  fakedHitCardId: FAKED_HIT_CARD_ID,
+  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
+};
+const RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES = {
+  survivalAssessment: runnerSelfDamageSurvivalAssessment,
+  scoreRunnerActions: (input: AiDecisionInput) => scoreActions(input, "runner"),
+  compareAction,
+  selectedChoicesForDecision,
+  scrubEvidence,
+};
+const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES = {
+  sourceDefinitionIdForAction,
+  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+  actionCreditCost,
+  fakedHitCardId: FAKED_HIT_CARD_ID,
+  cardSupport: {
+    rolesForCardId,
+    hintEffectsForCard: (definitionId: string) =>
+      AI_HINTS.get(definitionId)?.effects,
+    rulesTextForCard: (definitionId: string) =>
+      DEMO_CARDS_BY_ID[definitionId]?.rulesText,
+    effectTarget: (effect: unknown) =>
+      effect && typeof effect === "object"
+        ? stringRecordValue(effect as Record<string, unknown>, "target")
+        : undefined,
+  },
+};
+const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES = {
+  multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
+  runRiskAssessment: assessBlinkRiskForRunAction,
+  breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
+};
+const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES = {
+  programInstallTrashAssessmentForAction:
+    runnerProgramInstallTrashAssessmentForAction,
+  programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+  muPressureActionEvidence: runnerMuPressureActionEvidence,
+  bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
+  noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
+  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+  blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
+  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+  persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
+  remoteTrashAccessContext: runnerRemoteTrashAccessContext,
+};
 const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES: SemanticRuntimeCorpEvidenceDependencies<
   NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
 > = {
@@ -3833,12 +3825,11 @@ const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES: SemanticRuntimeCorpEvidenceDe
     advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
 };
-const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES: SemanticRuntimeEvidenceDependencies =
-  {
-    serverId: semanticRuntimeServerId,
-    runnerEvidence: semanticRuntimeRunnerEvidence,
-    corpEvidence: semanticRuntimeCorpEvidence,
-  };
+const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
+  serverId: semanticRuntimeServerId,
+  runnerEvidence: semanticRuntimeRunnerEvidence,
+  corpEvidence: semanticRuntimeCorpEvidence,
+};
 const SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES: SemanticRuntimeCorpRiskDependencies<
   NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
 > = {
