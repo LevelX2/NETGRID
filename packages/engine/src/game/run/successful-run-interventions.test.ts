@@ -598,7 +598,7 @@ describe("successful run interventions", () => {
           v1922RunnerProgramAbility: "successful_run_reverse_ice",
         }),
         expect.objectContaining({
-          runnerUtilityAbility: "i_spy_put_spy_counter",
+          runnerUtilityAbility: "successful_run_fort_counter_expose",
         }),
       ]),
     );
@@ -636,7 +636,7 @@ describe("successful run interventions", () => {
     };
     const iSpyAction = actions.find(
       (action) =>
-        action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter",
+        action.payload?.runnerUtilityAbility === "successful_run_fort_counter_expose",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, iSpyAction);
     expect(fixture.trashedRunnerIds).toEqual(["i_spy"]);

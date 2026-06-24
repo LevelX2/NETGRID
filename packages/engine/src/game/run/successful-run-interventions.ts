@@ -409,7 +409,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              runnerUtilityAbility: "i_spy_put_spy_counter",
+              runnerUtilityAbility: "successful_run_fort_counter_expose",
               counterType: "spy",
             },
           ),
@@ -424,20 +424,26 @@ export function resolveSuccessfulRunFollowupAbility(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
-  if (legalAction.payload?.v1922RunnerProgramAbility === "successful_run_force_rez")
-    return resolveFalseEchoForceRez(host, legalAction);
+  if (
+    legalAction.payload?.v1922RunnerProgramAbility ===
+    "successful_run_force_rez"
+  )
+    return resolveSuccessfulRunForceRez(host, legalAction);
   if (
     legalAction.payload?.v1922RunnerProgramAbility ===
     "successful_run_reverse_ice"
   )
-    return resolveNetspaceInverterReverseIce(host, legalAction);
+    return resolveSuccessfulRunReverseIce(host, legalAction);
   if (
     legalAction.payload?.v1919RunnerProgramAbility ===
     "successful_run_remote_counter"
   )
-    return resolveFaitAccompliSuccessfulRunCounter(host, legalAction);
-  if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter")
-    return resolveISpyPutSpyCounter(host, legalAction);
+    return resolveSuccessfulRunRemoteCounter(host, legalAction);
+  if (
+    legalAction.payload?.runnerUtilityAbility ===
+    "successful_run_fort_counter_expose"
+  )
+    return resolveSuccessfulRunFortCounterExpose(host, legalAction);
   if (
     legalAction.payload?.proteusRunnerVirusFollowup ===
     "doom_counter_instead_of_rd_access"
@@ -1048,7 +1054,7 @@ export function applySuccessfulRunExtraRunFollowup(
   };
 }
 
-function resolveFalseEchoForceRez(
+function resolveSuccessfulRunForceRez(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1128,7 +1134,7 @@ function resolveFalseEchoForceRez(
   };
 }
 
-function resolveNetspaceInverterReverseIce(
+function resolveSuccessfulRunReverseIce(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1188,7 +1194,7 @@ function resolveNetspaceInverterReverseIce(
   };
 }
 
-function resolveFaitAccompliSuccessfulRunCounter(
+function resolveSuccessfulRunRemoteCounter(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1250,7 +1256,7 @@ function resolveFaitAccompliSuccessfulRunCounter(
   };
 }
 
-function resolveISpyPutSpyCounter(
+function resolveSuccessfulRunFortCounterExpose(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
