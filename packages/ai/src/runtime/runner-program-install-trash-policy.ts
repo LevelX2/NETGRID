@@ -142,3 +142,111 @@ export function programSacrificeCandidateIsRedundant(
   if (breakerRoles.length === 0) return false;
   return breakerRoles.every((role) => (roleCounts.get(role) ?? 0) > 1);
 }
+
+export type ProgramSacrificeCandidateDependencies = {
+  visibleMemoryCost: (card: VisibleCard | undefined) => number;
+  rolesForCardId: (definitionId: string | undefined) => readonly string[];
+  visibleBreakerRoles: (card: VisibleCard) => readonly string[];
+  isRunnerPressureRole: (role: string) => boolean;
+  isRunnerEconomyRole: (role: string) => boolean;
+  visibleCounterValue: (card: VisibleCard | undefined) => number;
+  visibleInstallCost: (card: VisibleCard | undefined) => number;
+  isRedundant: (
+    card: VisibleCard | undefined,
+    breakerRoles: readonly string[],
+  ) => boolean;
+};
+
+export function programSacrificeCandidate(
+  card: VisibleCard | undefined,
+  installedBreakerRoleCounts: ReadonlyMap<string, number>,
+  option: ProgramSacrificeCandidate["option"] | undefined,
+  dependencies: ProgramSacrificeCandidateDependencies,
+): ProgramSacrificeCandidate {
+  const memoryCost = dependencies.visibleMemoryCost(card);
+  const roles = dependencies.rolesForCardId(card?.definitionId);
+  const breakerRoles = card ? dependencies.visibleBreakerRoles(card) : [];
+  const protectedRole =
+    breakerRoles.length > 0 &&
+    breakerRoles.some((role) => installedBreakerRoleCounts.get(role) === 1);
+  const reasonCategories: string[] = [];
+  let sacrificePenalty = 40;
+
+  if (protectedRole) {
+    sacrificePenalty += 1500;
+    reasonCategories.push("unique_breaker_coverage");
+  } else if (
+    breakerRoles.length > 0 ||
+    roles.some((role) => role.startsWith("breaker_"))
+  ) {
+    sacrificePenalty += 420;
+    reasonCategories.push("breaker_coverage");
+  }
+
+  if (roles.some(dependencies.isRunnerPressureRole)) {
+    sacrificePenalty += 420;
+    reasonCategories.push("run_or_access_payoff");
+  }
+  if (roles.some(dependencies.isRunnerEconomyRole)) {
+    sacrificePenalty += 280;
+    reasonCategories.push("economy_engine");
+  }
+  if (
+    roles.some((role) =>
+      [
+        "draw",
+        "setup",
+        "build_rig",
+        "memory",
+        "memory_support",
+        "defense",
+        "protection",
+        "hosting",
+        "recovery",
+        "search",
+      ].some((needle) => role === needle || role.includes(needle)),
+    )
+  ) {
+    sacrificePenalty += 210;
+    reasonCategories.push("setup_or_support_role");
+  }
+
+  const counterValue = dependencies.visibleCounterValue(card);
+  if (counterValue > 0) {
+    sacrificePenalty += Math.min(240, 80 + counterValue * 25);
+    reasonCategories.push("counters_or_stored_value");
+  }
+
+  const installCost = dependencies.visibleInstallCost(card);
+  if (installCost > 0) {
+    sacrificePenalty += Math.min(220, installCost * 25);
+    reasonCategories.push("sunk_install_cost");
+  }
+
+  const redundant = dependencies.isRedundant(card, breakerRoles);
+  if (redundant) {
+    sacrificePenalty = Math.max(20, sacrificePenalty - 260);
+    reasonCategories.push("redundant_or_replaceable");
+  }
+  if (reasonCategories.length === 0) reasonCategories.push("low_visible_role");
+
+  const category = programSacrificeCategory(sacrificePenalty, protectedRole);
+  const acceptable = category === "low" || category === "medium";
+  return {
+    ...(option ? { option } : {}),
+    ...(card ? { card } : {}),
+    memoryCost,
+    protectedRole,
+    sacrificePenalty,
+    category,
+    acceptable,
+    score: memoryCost * 70 - sacrificePenalty + (redundant ? 120 : 0),
+    reasonCategories: sortedUnique(reasonCategories),
+  };
+}
+
+function sortedUnique(values: string[]): string[] {
+  return [...new Set(values)].sort((left, right) =>
+    left.localeCompare(right),
+  );
+}

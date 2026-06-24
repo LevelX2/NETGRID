@@ -337,6 +337,7 @@ import {
 } from "./runtime/runner-mu-pressure-memory-support";
 import {
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
+  programSacrificeCandidate as buildProgramSacrificeCandidate,
   programSacrificeCategory,
   runnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentEvidence,
@@ -11452,90 +11453,17 @@ function programSacrificeCandidateForAi(
     AiDecisionInput["playerView"]["pendingChoice"]
   >["options"][number],
 ): ProgramSacrificeCandidate {
-  const memoryCost = visibleMemoryCostForAi(card);
-  const roles = rolesForCardId(card?.definitionId);
-  const breakerRoles = card ? visibleBreakerRolesForAi(card) : [];
-  const protectedRole =
-    breakerRoles.length > 0 &&
-    breakerRoles.some((role) => installedBreakerRoleCounts.get(role) === 1);
-  const reasonCategories: string[] = [];
-  let sacrificePenalty = 40;
-
-  if (protectedRole) {
-    sacrificePenalty += 1500;
-    reasonCategories.push("unique_breaker_coverage");
-  } else if (
-    breakerRoles.length > 0 ||
-    roles.some((role) => role.startsWith("breaker_"))
-  ) {
-    sacrificePenalty += 420;
-    reasonCategories.push("breaker_coverage");
-  }
-
-  if (roles.some(isRunnerPressureRole)) {
-    sacrificePenalty += 420;
-    reasonCategories.push("run_or_access_payoff");
-  }
-  if (roles.some(isRunnerEconomyRole)) {
-    sacrificePenalty += 280;
-    reasonCategories.push("economy_engine");
-  }
-  if (
-    roles.some((role) =>
-      [
-        "draw",
-        "setup",
-        "build_rig",
-        "memory",
-        "memory_support",
-        "defense",
-        "protection",
-        "hosting",
-        "recovery",
-        "search",
-      ].some((needle) => role === needle || role.includes(needle)),
-    )
-  ) {
-    sacrificePenalty += 210;
-    reasonCategories.push("setup_or_support_role");
-  }
-
-  const counterValue = visibleCounterValueForAi(card);
-  if (counterValue > 0) {
-    sacrificePenalty += Math.min(240, 80 + counterValue * 25);
-    reasonCategories.push("counters_or_stored_value");
-  }
-
-  const installCost = visibleInstallCostForAi(card);
-  if (installCost > 0) {
-    sacrificePenalty += Math.min(220, installCost * 25);
-    reasonCategories.push("sunk_install_cost");
-  }
-
-  const redundant = programSacrificeCandidateIsRedundant(
-    input,
-    card,
-    breakerRoles,
-  );
-  if (redundant) {
-    sacrificePenalty = Math.max(20, sacrificePenalty - 260);
-    reasonCategories.push("redundant_or_replaceable");
-  }
-  if (reasonCategories.length === 0) reasonCategories.push("low_visible_role");
-
-  const category = programSacrificeCategory(sacrificePenalty, protectedRole);
-  const acceptable = category === "low" || category === "medium";
-  return {
-    ...(option ? { option } : {}),
-    ...(card ? { card } : {}),
-    memoryCost,
-    protectedRole,
-    sacrificePenalty,
-    category,
-    acceptable,
-    score: memoryCost * 70 - sacrificePenalty + (redundant ? 120 : 0),
-    reasonCategories: sortedUnique(reasonCategories),
-  };
+  return buildProgramSacrificeCandidate(card, installedBreakerRoleCounts, option, {
+    visibleMemoryCost: visibleMemoryCostForAi,
+    rolesForCardId,
+    visibleBreakerRoles: visibleBreakerRolesForAi,
+    isRunnerPressureRole,
+    isRunnerEconomyRole,
+    visibleCounterValue: visibleCounterValueForAi,
+    visibleInstallCost: visibleInstallCostForAi,
+    isRedundant: (candidate, breakerRoles) =>
+      programSacrificeCandidateIsRedundant(input, candidate, breakerRoles),
+  });
 }
 
 function programSacrificeCandidateIsRedundant(
