@@ -449,7 +449,6 @@ import {
 import {
   runnerRecentBasicCreditActions as buildRunnerRecentBasicCreditActions,
   runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
-  type RunnerRecentStartRunsOnServerDependencies,
 } from "./runtime/runner-run-history";
 import {
   semanticRuntimeCorpDoctrineWeight as buildSemanticRuntimeCorpDoctrineWeight,
@@ -463,13 +462,7 @@ import {
   semanticRuntimeRunnerLowValueRecoveryContext as buildSemanticRuntimeRunnerLowValueRecoveryContext,
   semanticRuntimeRunnerRemoteContestDoctrineGuard as buildSemanticRuntimeRunnerRemoteContestDoctrineGuard,
   type SemanticRuntimeDoctrineActionGateContext,
-  type SemanticRuntimeDoctrineActionGateDependencies,
-  type SemanticRuntimeCorpDoctrineWeightDependencies,
   type SemanticRuntimeDoctrineConsumer,
-  type SemanticRuntimeRunnerDoctrineActionGateDependencies,
-  type SemanticRuntimeRunnerDoctrineRunWeightDependencies,
-  type SemanticRuntimeRunnerLowValueRecoveryContextDependencies,
-  type SemanticRuntimeRunnerRemoteContestDoctrineGuardDependencies,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
   semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
@@ -6534,62 +6527,54 @@ function semanticRuntimeCorpScoreNowSafetyGate(
   );
 }
 
-const SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES: SemanticRuntimeCorpDoctrineWeightDependencies<SemanticRuntimeDoctrineConsumer> =
-  {
-    rawWeight: semanticRuntimeDoctrineRawWeight,
-    actionGate: semanticRuntimeDoctrineActionGate,
-    suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
-    planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-  };
+const SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES = {
+  rawWeight: semanticRuntimeDoctrineRawWeight,
+  actionGate: semanticRuntimeDoctrineActionGate,
+  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
+  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
+};
 
-const SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES: SemanticRuntimeRunnerLowValueRecoveryContextDependencies =
-  {
-    recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
-    recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
-  };
+const SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES = {
+  recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
+  recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
+};
 
-const SEMANTIC_RUNTIME_DOCTRINE_ACTION_GATE_DEPENDENCIES: SemanticRuntimeDoctrineActionGateDependencies =
-  {
-    actionCreditCost,
-    runnerDoctrineActionGate: semanticRuntimeRunnerDoctrineActionGate,
-    corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-  };
+const SEMANTIC_RUNTIME_DOCTRINE_ACTION_GATE_DEPENDENCIES = {
+  actionCreditCost,
+  runnerDoctrineActionGate: semanticRuntimeRunnerDoctrineActionGate,
+  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
+};
 
-const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES: SemanticRuntimeRunnerDoctrineActionGateDependencies =
-  {
-    runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
-    recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-    runnerLowValueRecoveryContext: (input) =>
-      buildSemanticRuntimeRunnerLowValueRecoveryContext(
-        input,
-        SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
-      ),
-    runnerRemoteContestDoctrineGuard:
-      semanticRuntimeRunnerRemoteContestDoctrineGuard,
-  };
+const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES = {
+  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
+  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+  runnerLowValueRecoveryContext: (input: AiDecisionInput) =>
+    buildSemanticRuntimeRunnerLowValueRecoveryContext(
+      input,
+      SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
+    ),
+  runnerRemoteContestDoctrineGuard: semanticRuntimeRunnerRemoteContestDoctrineGuard,
+};
 
-const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES: SemanticRuntimeRunnerDoctrineRunWeightDependencies =
-  {
-    isRemoteServerTarget,
-    rawWeight: semanticRuntimeDoctrineRawWeight,
-    actionGate: semanticRuntimeDoctrineActionGate,
-    suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
-    planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-  };
+const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES = {
+  isRemoteServerTarget,
+  rawWeight: semanticRuntimeDoctrineRawWeight,
+  actionGate: semanticRuntimeDoctrineActionGate,
+  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
+  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
+};
 
-const SEMANTIC_RUNTIME_RUNNER_REMOTE_CONTEST_DOCTRINE_GUARD_DEPENDENCIES: SemanticRuntimeRunnerRemoteContestDoctrineGuardDependencies =
-  {
-    isRemoteServerTarget,
-    runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
-    recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-  };
+const SEMANTIC_RUNTIME_RUNNER_REMOTE_CONTEST_DOCTRINE_GUARD_DEPENDENCIES = {
+  isRemoteServerTarget,
+  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
+  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+};
 
-const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES: RunnerRecentStartRunsOnServerDependencies =
-  {
-    publicHistory: mergedAiPublicHistory,
-    eventVersion: aiEventVersion,
-    serverIdFromEvent: aiServerIdFromEvent,
-  };
+const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES = {
+  publicHistory: mergedAiPublicHistory,
+  eventVersion: aiEventVersion,
+  serverIdFromEvent: aiServerIdFromEvent,
+};
 
 const RUNNER_LATE_NO_FUNDING_CREDIT_SAFE_PROGRESS_TARGETS_DEPENDENCIES = {
   closeout: bestTrueCentralCloseoutProfileForMetrics,
