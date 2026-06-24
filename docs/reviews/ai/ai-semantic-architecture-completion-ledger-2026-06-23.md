@@ -1689,6 +1689,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hunderteinundsechzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-doctrine-score.ts` kapselt zusätzlich die Doctrine-Score-Composition für RawWeight, PlanWeightComponent und SuppressedComponent über einen Context-Factory-Adapter.
+  - `packages/ai/src/index.ts` erzeugt den internen Doctrine-Score-Context vor den Runner-/Corp-Doctrine-Kontexten und entfernt die lokalen Doctrine-Score-Wrapper.
+  - `packages/ai/src/index.ts` sank weiter von 28.665 auf 28.638 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

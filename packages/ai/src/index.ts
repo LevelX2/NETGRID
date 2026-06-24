@@ -271,10 +271,7 @@ import {
   createRunnerStrategicIntentContext,
 } from "./runtime/runner-strategic-intent-context";
 import {
-  semanticRuntimeDoctrineClamp,
-  semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
-  semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
-  type SemanticRuntimeDoctrineConsumer,
+  createSemanticRuntimeDoctrineScoreContext,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
   createSemanticRuntimeRunnerDoctrineContext,
@@ -4768,6 +4765,14 @@ const {
 });
 
 const {
+  semanticRuntimeDoctrineRawWeight,
+  semanticRuntimeDoctrinePlanWeightComponent,
+  semanticRuntimeDoctrineSuppressedComponent,
+} = createSemanticRuntimeDoctrineScoreContext({
+  scoreComponent: buildSemanticDecisionDebugScoreComponent,
+});
+
+const {
   semanticRuntimeDoctrineActionGate,
   semanticRuntimeRunnerDoctrineActionGate,
   semanticRuntimeRunnerDoctrineRunWeight,
@@ -4853,38 +4858,6 @@ const {
       runnerBadPublicityRelevanceScoreComponent,
   },
 });
-
-function semanticRuntimeDoctrinePlanWeightComponent(
-  input: AiDecisionInput,
-  planKey: string,
-  consumer: SemanticRuntimeDoctrineConsumer,
-): AiDecisionScoreComponent | undefined {
-  return buildSemanticRuntimeDoctrinePlanWeightComponent(
-    input,
-    planKey,
-    consumer,
-    {
-      rawWeight: semanticRuntimeDoctrineRawWeight,
-      clamp: semanticRuntimeDoctrineClamp,
-      scoreComponent: buildSemanticDecisionDebugScoreComponent,
-    },
-  );
-}
-
-function semanticRuntimeDoctrineRawWeight(
-  input: AiDecisionInput,
-  planKey: string,
-): number {
-  return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
-}
-
-function semanticRuntimeDoctrineSuppressedComponent(
-  evidence: readonly string[],
-): AiDecisionScoreComponent {
-  return buildSemanticRuntimeDoctrineSuppressedComponent(evidence, {
-    scoreComponent: buildSemanticDecisionDebugScoreComponent,
-  });
-}
 
 const {
   semanticRuntimeCorpScore,

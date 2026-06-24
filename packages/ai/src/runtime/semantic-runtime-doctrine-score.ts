@@ -27,6 +27,69 @@ export type SemanticRuntimeDoctrineScoreDependencies<TConsumer extends string> =
   ) => AiDecisionScoreComponent;
 };
 
+export type SemanticRuntimeDoctrineScoreContextDependencies = {
+  scoreComponent: (
+    input: SemanticDecisionDebugScoreComponentInput,
+  ) => AiDecisionScoreComponent;
+};
+
+export type SemanticRuntimeDoctrineScoreContext = {
+  semanticRuntimeDoctrineRawWeight: (
+    input: AiDecisionInput,
+    planKey: string,
+  ) => number;
+  semanticRuntimeDoctrinePlanWeightComponent: (
+    input: AiDecisionInput,
+    planKey: string,
+    consumer: SemanticRuntimeDoctrineConsumer,
+  ) => AiDecisionScoreComponent | undefined;
+  semanticRuntimeDoctrineSuppressedComponent: (
+    evidence: readonly string[],
+  ) => AiDecisionScoreComponent;
+};
+
+export function createSemanticRuntimeDoctrineScoreContext(
+  dependencies: SemanticRuntimeDoctrineScoreContextDependencies,
+): SemanticRuntimeDoctrineScoreContext {
+  function semanticRuntimeDoctrineRawWeight(
+    input: AiDecisionInput,
+    planKey: string,
+  ): number {
+    return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
+  }
+
+  function planWeightComponent(
+    input: AiDecisionInput,
+    planKey: string,
+    consumer: SemanticRuntimeDoctrineConsumer,
+  ): AiDecisionScoreComponent | undefined {
+    return semanticRuntimeDoctrinePlanWeightComponent(
+      input,
+      planKey,
+      consumer,
+      {
+        rawWeight: semanticRuntimeDoctrineRawWeight,
+        clamp: semanticRuntimeDoctrineClamp,
+        scoreComponent: dependencies.scoreComponent,
+      },
+    );
+  }
+
+  function suppressedComponent(
+    evidence: readonly string[],
+  ): AiDecisionScoreComponent {
+    return semanticRuntimeDoctrineSuppressedComponent(evidence, {
+      scoreComponent: dependencies.scoreComponent,
+    });
+  }
+
+  return {
+    semanticRuntimeDoctrineRawWeight,
+    semanticRuntimeDoctrinePlanWeightComponent: planWeightComponent,
+    semanticRuntimeDoctrineSuppressedComponent: suppressedComponent,
+  };
+}
+
 export type SemanticRuntimeDoctrineGate = {
   allowed: boolean;
   evidence: string[];
