@@ -251,6 +251,9 @@ import {
   runnerRndMemoryScoreComponents as buildRunnerRndMemoryScoreComponents,
 } from "./runtime/runner-central-memory-score";
 import {
+  runnerArchivesScoreComponents as buildRunnerArchivesScoreComponents,
+} from "./runtime/runner-archives-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7241,48 +7244,10 @@ function semanticRuntimeRunnerArchivesComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (
-    semanticRuntimeRunnerRunTargetEvaluationForAction(input, action)
-      ?.accessServerId !== "archives"
-  )
-    return [];
-  const root = server?.root ?? [];
-  const knownRoot = root.filter(
-    (card) => card.known && typeof card.definitionId === "string",
-  );
-  const knownAgenda = knownRoot.some((card) => {
-    const definitionId = card.definitionId;
-    return (
-      card.type === "agenda" ||
-      (definitionId !== undefined &&
-        definitionTypeForMetrics(definitionId) === "agenda")
-    );
+  return buildRunnerArchivesScoreComponents(input, action, server, {
+    evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
+    definitionType: definitionTypeForMetrics,
   });
-  const hiddenArchivesCount = Math.max(
-    0,
-    input.playerView.opponent.discardCount - knownRoot.length,
-  );
-  if (knownAgenda) {
-    return [
-      {
-        key: "runner_archives_visible_agenda",
-        label: "Archives offene Agenda",
-        value: 1250,
-        reason: "known_archives_agenda",
-      },
-    ];
-  }
-  if (hiddenArchivesCount > 0) {
-    return [
-      {
-        key: "runner_archives_hidden_cards",
-        label: "Archives verdeckte Karten",
-        value: 700,
-        reason: `hidden_archives:${hiddenArchivesCount}`,
-      },
-    ];
-  }
-  return [];
 }
 
 function semanticRuntimeRunnerKnownIcePathComponents(
