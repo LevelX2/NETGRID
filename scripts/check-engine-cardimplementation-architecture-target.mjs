@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const maxFindingsPerCheck = 30;
+const selfTest = process.argv.includes("--self-test");
 
 const scannedRoots = [
   "packages/engine/src/ability-engine",
@@ -13,10 +16,50 @@ const scannedRoots = [
   "packages/shared/src",
 ];
 
-const productionExtensions = new Set([".ts", ".mts", ".mjs"]);
-const maxFindingsPerCheck = 30;
+const productionExtensions = new Set([".ts", ".tsx", ".mts", ".mjs", ".js"]);
+const tsNoCheckScopes = [
+  "packages/engine/src/game/engine-runtime-internal/",
+  "packages/engine/src/game/card-implementation/",
+  "packages/engine/src/ability-engine/",
+];
+const runtimeEscapeScopes = tsNoCheckScopes;
 
-const checks = [];
+const allowedCardNameContexts = [
+  "packages/engine/src/card-implementations/onr-v1/",
+  "packages/engine/src/card-implementations/proteus/",
+  "packages/engine/src/card-implementations/subregistries/",
+];
+
+const knownCardSpecificRuntimeTokens = [
+  "karl_successful_run_credit",
+  "databroker_agenda_point_credits",
+  "nevinyrral_action_and_lose_on_rezzed_leave",
+  "schlaghund_tag_die_meat_damage",
+  "crash_everett_draw_extra_choose_trash_or_top",
+  "hacker_tracker_trace_bits",
+  "crybaby_crying_counter",
+  "prearrangedDrop",
+  "promisesPromises",
+  "remoteDetonator",
+  "live_news_feed",
+  "subliminal_corruption",
+  "silver_lining_recovery",
+  "shell_traders_delayed_install",
+  "some_card_name_special",
+];
+
+const roleLineLimits = [
+  {
+    name: "registry aggregator",
+    match: (file) => file.includes("/card-implementations/") && file.includes("registr"),
+    limit: 220,
+  },
+  {
+    name: "effect family",
+    match: (file) => file.includes("/ability-engine/effect-families/"),
+    limit: 360,
+  },
+];
 
 function toRepoPath(path) {
   return relative(repoRoot, path).split(sep).join("/");
@@ -26,61 +69,44 @@ function readRepoFile(path) {
   return readFileSync(resolve(repoRoot, path), "utf8");
 }
 
-function listFiles(root) {
-  const start = resolve(repoRoot, root);
-  const result = [];
-  function visit(directory) {
-    for (const entry of readdirSync(directory)) {
-      const absolute = resolve(directory, entry);
-      const stats = statSync(absolute);
-      if (stats.isDirectory()) {
-        if (
-          entry === "node_modules" ||
-          entry === "dist" ||
-          entry === "coverage" ||
-          entry === ".next"
-        ) {
-          continue;
-        }
-        visit(absolute);
-      } else if (productionExtensions.has(extname(entry))) {
-        result.push(toRepoPath(absolute));
-      }
-    }
-  }
-  visit(start);
-  return result;
+function trackedFiles() {
+  const output = execFileSync("git", ["ls-files", ...scannedRoots], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  return output
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .filter((file) => productionExtensions.has(extname(file)))
+    .filter((file) => !file.includes("/node_modules/"))
+    .sort();
 }
 
-const sourceFiles = scannedRoots.flatMap(listFiles).sort();
-const cardNameProblemCategories = new Set([
-  "functional_kind_uses_card_name",
-  "runtime_state_field_uses_card_name",
-  "payload_key_uses_card_name",
-  "resolver_function_uses_card_name",
-  "mechanics_constant_controls_behavior_by_card_id",
-  "new_unclassified_card_name_leak",
-]);
-const functionalCardNameFiles = new Set([
-  "packages/engine/src/ability-engine/definition-types.ts",
-  "packages/shared/src/index.ts",
-]);
+function filesystemSources() {
+  return trackedFiles().map((file) => ({
+    file,
+    text: readRepoFile(file),
+  }));
+}
 
 function lineNumber(text, index) {
   return text.slice(0, index).split(/\r?\n/).length;
 }
 
-function addCheck(name, findings) {
-  checks.push({ name, findings });
+function lineText(text, line) {
+  return text.split(/\r?\n/)[line - 1]?.trim() ?? "";
 }
 
 function snippet(text, index) {
-  const line = text.slice(index).split(/\r?\n/, 1)[0] ?? "";
-  return line.trim().slice(0, 180);
+  return text.slice(index).split(/\r?\n/, 1)[0]?.trim().slice(0, 180) ?? "";
 }
 
 function pushFinding(findings, file, line, message, detail) {
   findings.push({ file, line, message, detail });
+}
+
+function startsWithAny(file, prefixes) {
+  return prefixes.some((prefix) => file.startsWith(prefix));
 }
 
 function isTestOrFixture(file) {
@@ -93,30 +119,34 @@ function isTestOrFixture(file) {
   );
 }
 
-function isCatalogOrCardImplementationContext(file) {
-  return (
-    file === "packages/shared/src/index.ts" ||
-    file.startsWith("packages/engine/src/card-implementations/onr-v1/") ||
-    file.startsWith("packages/engine/src/card-implementations/proteus/") ||
-    file.startsWith("packages/engine/src/card-implementations/subregistries/") ||
-    file === "packages/engine/src/card-implementations/registry.ts" ||
-    file.endsWith("/coverage.ts") ||
-    file.endsWith("/types.ts") ||
-    file.endsWith("/helpers.ts")
-  );
-}
-
-function isCardCatalogPath(file) {
-  return file.startsWith("packages/engine/src/card-implementations/");
-}
-
 function isCommentOnly(line) {
   const trimmed = line.trim();
   return trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*");
 }
 
-function lineText(text, line) {
-  return text.split(/\r?\n/)[line - 1]?.trim() ?? "";
+function isCardImplementationFile(file) {
+  return startsWithAny(file, allowedCardNameContexts);
+}
+
+function isCatalogOrAllowedCardContext(file, line) {
+  if (isTestOrFixture(file)) return true;
+  if (isCardImplementationFile(file)) return true;
+  if (file === "packages/engine/src/card-implementations/coverage.ts") return true;
+  if (file === "packages/shared/src/index.ts") {
+    return (
+      line.includes("id:") ||
+      line.includes("title:") ||
+      line.includes("text:") ||
+      line.includes("flavorText:") ||
+      line.includes("mechanics:")
+    );
+  }
+  if (file.includes("/card-implementations/") && line.includes("cardDefinitionId")) {
+    return true;
+  }
+  if (line.includes("cardDefinitionId:")) return true;
+  if (line.includes("from \"./") && file.includes("/card-implementations/")) return true;
+  return isCommentOnly(line);
 }
 
 function wordsFor(value) {
@@ -132,9 +162,7 @@ function camelCase(words) {
   return words
     .map((word, index) => {
       const lower = word.toLowerCase();
-      return index === 0
-        ? lower
-        : `${lower[0].toUpperCase()}${lower.slice(1)}`;
+      return index === 0 ? lower : `${lower[0]?.toUpperCase() ?? ""}${lower.slice(1)}`;
     })
     .join("");
 }
@@ -177,8 +205,8 @@ function variantsForWords(words) {
   const camel = camelCase(words);
   variants.add(camel);
   variants.add(upperFirst(camel));
-  if (lowerWords[0] === "the" && words.length > 1) {
-    for (const value of variantsForWords(words.slice(1))) variants.add(value);
+  if (lowerWords[0] === "the" && lowerWords.length > 1) {
+    for (const variant of variantsForWords(words.slice(1))) variants.add(variant);
   }
   return variants;
 }
@@ -187,353 +215,460 @@ function definitionSlugForId(id) {
   return id.replace(/^onr_(?:v1|proteus)_\d+_/, "");
 }
 
-function deriveCardNameTokens() {
-  const sharedIndex = readRepoFile("packages/shared/src/index.ts");
-  const cards = [];
+function deriveCardNameTokens(sources) {
+  const shared = sources.find((source) => source.file === "packages/shared/src/index.ts");
+  const tokens = new Map();
+  for (const token of knownCardSpecificRuntimeTokens) {
+    tokens.set(token, { token, title: "known card-specific runtime token" });
+  }
+  if (!shared) return [...tokens.values()].sort((a, b) => a.token.localeCompare(b.token));
+
   const pattern =
     /id:\s*"(?<id>onr_(?:v1|proteus)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
-  let match = pattern.exec(sharedIndex);
+  let match = pattern.exec(shared.text);
   while (match) {
-    cards.push({ id: match.groups.id, title: match.groups.title });
-    match = pattern.exec(sharedIndex);
-  }
-
-  const tokens = new Map();
-  for (const card of cards) {
+    const id = match.groups.id;
+    const title = match.groups.title;
     const variants = new Set([
-      ...variantsForWords(wordsFor(card.title)),
-      ...variantsForWords(wordsFor(definitionSlugForId(card.id))),
+      ...variantsForWords(wordsFor(title)),
+      ...variantsForWords(wordsFor(definitionSlugForId(id))),
     ]);
     for (const token of variants) {
       if (!meaningfulToken(token) || tokens.has(token)) continue;
-      tokens.set(token, { token, cardId: card.id, title: card.title });
+      tokens.set(token, { token, title, cardId: id });
     }
+    match = pattern.exec(shared.text);
   }
   return [...tokens.values()].sort((a, b) => a.token.localeCompare(b.token));
 }
 
-function isDerivedAllowedCardNameContext(file, line) {
-  if (isTestOrFixture(file)) return true;
-  if (isCatalogOrCardImplementationContext(file)) return true;
-  if (isCommentOnly(line)) return true;
-  if (line.includes("cardDefinitionId")) return true;
-  if (line.includes("card-implementations/")) return true;
-  if (line.includes("Implementation.")) return true;
-  if (file === "packages/shared/src/index.ts") {
-    return (
-      line.includes("id:") ||
-      line.includes("title:") ||
-      line.includes("text:") ||
-      line.includes("flavorText:") ||
-      line.includes("mechanics:")
-    );
-  }
-  return false;
-}
-
-function classifyCardNameOccurrence({ file, token, line }) {
-  if (isTestOrFixture(file)) return "test_only_card_name";
-  if (file === "packages/engine/src/card-implementations/registry.ts") {
-    return "allowed_catalog_reference";
-  }
-  if (isCardCatalogPath(file)) {
-    if (line.includes("cardDefinitionId") || isCommentOnly(line)) {
-      return "allowed_catalog_reference";
-    }
-    return line.includes("kind:")
-      ? "functional_kind_uses_card_name"
-      : "allowed_catalog_reference";
-  }
-  if (line.includes("kind:")) return "functional_kind_uses_card_name";
-  if (line.includes("runnerUtilityAbility") || line.includes("corpAbility")) {
-    return "payload_key_uses_card_name";
-  }
-  if (line.match(/\bfunction\s+resolve[A-Z]/) || line.match(/\bconst\s+resolve[A-Z]/)) {
-    return "resolver_function_uses_card_name";
-  }
-  if (
-    functionalCardNameFiles.has(file) &&
-    (line.includes("?:") || line.includes(": {") || line.includes("= {"))
-  ) {
-    return "runtime_state_field_uses_card_name";
-  }
-  if (token === token.toUpperCase() && line.includes(token)) {
-    return "mechanics_constant_controls_behavior_by_card_id";
-  }
-  if (file.includes("/game/") || file.includes("/mechanics/")) {
-    return "runtime_state_field_uses_card_name";
-  }
-  return "new_unclassified_card_name_leak";
-}
-
-function checkCardSpecificRuntimeLeaks() {
-  const tokens = deriveCardNameTokens();
+function collectTsNoCheckFindings(sources) {
   const findings = [];
-  for (const file of sourceFiles) {
-    if (file === "scripts/check-engine-cardimplementation-architecture-target.mjs") continue;
-    const text = readRepoFile(file);
-    for (const tokenInfo of tokens) {
-      let index = text.indexOf(tokenInfo.token);
-      while (index >= 0) {
-        const line = lineNumber(text, index);
-        const lineSnippet = lineText(text, line);
-        if (isDerivedAllowedCardNameContext(file, lineSnippet)) {
-          index = text.indexOf(tokenInfo.token, index + tokenInfo.token.length);
-          continue;
-        }
-        const category = classifyCardNameOccurrence({
-          file,
-          token: tokenInfo.token,
-          line: lineSnippet,
-        });
-        if (!cardNameProblemCategories.has(category)) {
-          index = text.indexOf(tokenInfo.token, index + tokenInfo.token.length);
-          continue;
-        }
-        pushFinding(
-          findings,
-          file,
-          line,
-          category,
-          `${tokenInfo.token} (${tokenInfo.cardId}, ${tokenInfo.title}) :: ${lineSnippet}`,
-        );
-        index = text.indexOf(tokenInfo.token, index + tokenInfo.token.length);
-      }
+  for (const { file, text } of sources) {
+    if (!startsWithAny(file, tsNoCheckScopes) || isTestOrFixture(file)) continue;
+    const regex = /@ts-nocheck/g;
+    let match = regex.exec(text);
+    while (match) {
+      pushFinding(findings, file, lineNumber(text, match.index), "@ts-nocheck in productive architecture scope", snippet(text, match.index));
+      match = regex.exec(text);
     }
   }
-  addCheck("card-specific productive runtime leaks", findings);
+  return findings;
 }
 
-function checkRuntimeEscapeHatches() {
+function collectRuntimeEscapeFindings(sources) {
   const findings = [];
   const patterns = [
     {
-      name: "RuntimeDeps Record escape hatch",
-      regex: /RuntimeDeps[^=\n]*=\s*[\s\S]{0,120}?Record<string,\s*unknown>/g,
+      message: "open string index signature for runtime dependencies",
+      regex: /\[[A-Za-z_$][A-Za-z0-9_$]*:\s*string\]\s*:\s*(?:unknown|any|RuntimeCallable|[^;{}]+)/g,
     },
     {
-      name: "Record<string, any>",
-      regex: /Record<string,\s*any>/g,
+      message: "Record<string, unknown> runtime dependency bag",
+      regex: /Record\s*<\s*string\s*,\s*unknown\s*>/g,
     },
     {
-      name: "generic RuntimeFunction any signature",
-      regex: /RuntimeFunction\s*=\s*\([^)]*any\[\][^)]*\)\s*=>\s*any/g,
+      message: "Record<string, any> runtime dependency bag",
+      regex: /Record\s*<\s*string\s*,\s*any\s*>/g,
     },
     {
-      name: "runtimeBinding property bag",
-      regex: /\bruntimeBinding\b/g,
+      message: "generic runtime bag type alias",
+      regex: /type\s+[A-Za-z0-9_$]*(?:Runtime)?Bag[A-Za-z0-9_$]*\s*=/g,
     },
     {
-      name: "broad as any cast",
-      regex: /\bas\s+any\b/g,
+      message: "general callable runtime bag",
+      regex: /(?:RuntimeCallable|CallableBag|FunctionBag)|\(\s*\.\.\.[^)]*:\s*(?:unknown|any)\[\]\s*\)\s*=>\s*(?:unknown|any)/g,
+    },
+    {
+      message: "dynamic string property resolution",
+      regex: /\[[A-Za-z_$][A-Za-z0-9_$]*\s+as\s+keyof|\[[A-Za-z_$][A-Za-z0-9_$]*\]\s*(?:\(|;|,|\?|\.)/g,
+      requiresRuntimeContext: true,
+    },
+    {
+      message: "Proxy-based runtime dependency dispatch",
+      regex: /\bnew\s+Proxy\b|\bruntimeProxy\b/g,
+    },
+    {
+      message: "general runtime member resolver",
+      regex: /\bresolveRuntimeMember\b|\blookupCapability\b|\bresolveCapability\b/g,
+    },
+    {
+      message: "broad cast bypasses runtime contract",
+      regex: /\bas\s+(?:any|Record\s*<\s*string\s*,\s*(?:unknown|any)\s*>)/g,
     },
   ];
 
-  for (const file of sourceFiles) {
-    if (
-      isTestOrFixture(file) ||
-      (!file.startsWith("packages/engine/src/game/engine-runtime-internal/") &&
-        !file.startsWith("packages/engine/src/game/card-implementation/"))
-    ) {
-      continue;
-    }
-    const text = readRepoFile(file);
+  for (const { file, text } of sources) {
+    if (isTestOrFixture(file) || !startsWithAny(file, runtimeEscapeScopes)) continue;
     for (const pattern of patterns) {
       let match = pattern.regex.exec(text);
       while (match) {
-        pushFinding(
-          findings,
-          file,
-          lineNumber(text, match.index),
-          pattern.name,
-          snippet(text, match.index),
-        );
+        const detail = snippet(text, match.index);
+        if (
+          pattern.requiresRuntimeContext &&
+          !/\b(runtime|deps|capabilit|member|lookup|resolve|binding)\b/i.test(detail)
+        ) {
+          match = pattern.regex.exec(text);
+          continue;
+        }
+        pushFinding(findings, file, lineNumber(text, match.index), pattern.message, detail);
         match = pattern.regex.exec(text);
       }
     }
   }
-  addCheck("runtime escape hatches removed", findings);
+  return findings;
 }
 
-function effectImplementationTypeNames() {
-  const text = readRepoFile("packages/engine/src/ability-engine/definition-types.ts");
+function effectKindsByTypeName(sources) {
+  const definition = sources.find(
+    (source) => source.file === "packages/engine/src/ability-engine/definition-types.ts",
+  );
+  if (!definition) return new Map();
   const union = /export type CardEffectImplementation =(?<body>[\s\S]*?);/m.exec(
-    text,
+    definition.text,
   )?.groups?.body;
-  if (!union) return [];
-  return [...union.matchAll(/\|\s*(?<name>[A-Za-z0-9]+EffectImplementation)\b/g)]
-    .map((match) => match.groups.name)
-    .sort();
-}
-
-function effectKindsByTypeName() {
-  const text = readRepoFile("packages/engine/src/ability-engine/definition-types.ts");
-  const kindsByTypeName = new Map();
-  for (const typeName of effectImplementationTypeNames()) {
-    const typePattern = new RegExp(
+  if (!union) return new Map();
+  const typeNames = [...union.matchAll(/\|\s*(?<name>[A-Za-z0-9]+EffectImplementation)\b/g)].map(
+    (match) => match.groups.name,
+  );
+  const result = new Map();
+  for (const typeName of typeNames) {
+    const body = new RegExp(
       `export type ${typeName} =(?<body>[\\s\\S]*?);\\r?\\n`,
       "m",
-    );
-    const body = typePattern.exec(text)?.groups?.body;
-    if (!body) continue;
-    const kind = /kind:\s*"(?<kind>[^"]+)"/.exec(body)?.groups?.kind;
-    if (kind) kindsByTypeName.set(typeName, kind);
+    ).exec(definition.text)?.groups?.body;
+    const kind = body ? /kind:\s*"(?<kind>[^"]+)"/.exec(body)?.groups?.kind : undefined;
+    if (kind) result.set(typeName, kind);
   }
-  return kindsByTypeName;
+  return result;
 }
 
-function checkEffectInterpreterDispatch() {
+function collectEffectFamilyFindings(sources) {
   const findings = [];
-  const interpreterPath = "packages/engine/src/ability-engine/effect-interpreter.ts";
-  const interpreter = readRepoFile(interpreterPath);
-  for (const regex of [/switch\s*\(\s*effect\.kind\s*\)/g, /\bcase\s+"[^"]+"/g]) {
-    let match = regex.exec(interpreter);
-    while (match) {
-      pushFinding(
-        findings,
-        interpreterPath,
-        lineNumber(interpreter, match.index),
-        "effect interpreter still contains concrete kind dispatch",
-        snippet(interpreter, match.index),
-      );
-      match = regex.exec(interpreter);
-    }
-  }
-
-  const familyFiles = sourceFiles.filter((file) =>
-    file.startsWith("packages/engine/src/ability-engine/effect-families/"),
+  const familySources = sources.filter((source) =>
+    source.file.startsWith("packages/engine/src/ability-engine/effect-families/"),
   );
-  const familyText = familyFiles.map(readRepoFile).join("\n");
-  const kinds = effectKindsByTypeName();
-  for (const [typeName, kind] of kinds) {
-    if (!new RegExp(`["']${kind}["']`).test(familyText)) {
-      pushFinding(
-        findings,
-        "packages/engine/src/ability-engine/definition-types.ts",
-        1,
-        "CardEffect kind is not covered by an effect family module",
-        `${kind} (${typeName})`,
-      );
+  for (const { file, text } of familySources) {
+    const basename = file.split("/").at(-1) ?? file;
+    if (/context-effects(?:-part-\d+)?\.ts$/.test(basename)) {
+      pushFinding(findings, file, 1, "numbered or catch-all context effect family", basename);
     }
-  }
-  addCheck("effect interpreter family dispatch target", findings);
-}
-
-function checkRegistryIndirection() {
-  const findings = [];
-  const registryPath = "packages/engine/src/card-implementations/registry.ts";
-  const registry = readRepoFile(registryPath);
-  const directImportPattern = /from\s+["']\.\/(?:onr-v1|proteus)\//g;
-  let match = directImportPattern.exec(registry);
-  while (match) {
-    pushFinding(
-      findings,
-      registryPath,
-      lineNumber(registry, match.index),
-      "registry imports card implementation families directly",
-      snippet(registry, match.index),
-    );
-    match = directImportPattern.exec(registry);
-  }
-  addCheck("registry uses subregistries only", findings);
-}
-
-function checkMechanicsCardIdBehavior() {
-  const findings = [];
-  const behaviorScopes = sourceFiles.filter(
-    (file) =>
-      !isTestOrFixture(file) &&
-      (file.startsWith("packages/engine/src/mechanics/") ||
-        file.startsWith("packages/engine/src/game/") ||
-        file.startsWith("packages/shared/src/")) &&
-      !isCatalogOrCardImplementationContext(file),
-  );
-
-  const patterns = [
-    {
-      name: "card-id set or constant controls behavior",
-      regex: /\b[A-Z][A-Z0-9_]*_CARD_IDS?\b|\bnew Set<[^>]*CardDefinitionId[^>]*>\s*\(/g,
-    },
-    {
-      name: "direct ONR/Proteus card id branch in runtime mechanics",
-      regex: /["']onr_(?:v1|proteus)_\d+_[^"']+["']/g,
-    },
-  ];
-
-  for (const file of behaviorScopes) {
-    const text = readRepoFile(file);
-    for (const pattern of patterns) {
-      let match = pattern.regex.exec(text);
-      while (match) {
-        pushFinding(
-          findings,
-          file,
-          lineNumber(text, match.index),
-          pattern.name,
-          snippet(text, match.index),
-        );
-        match = pattern.regex.exec(text);
-      }
-    }
-  }
-  addCheck("mechanics avoid card-id behavior branches", findings);
-}
-
-function checkReplacementMonoliths() {
-  const findings = [];
-  const productionRuntimeFiles = sourceFiles.filter(
-    (file) =>
-      !isTestOrFixture(file) &&
-      (file.startsWith("packages/engine/src/game/card-implementation/") ||
-        file.startsWith("packages/engine/src/ability-engine/")) &&
-      !file.endsWith("definition-types.ts"),
-  );
-
-  for (const file of productionRuntimeFiles) {
-    const lines = readRepoFile(file).split(/\r?\n/).length;
-    const threshold = file.endsWith("effect-interpreter.ts") ? 240 : 420;
-    if (lines > threshold) {
+    const acceptedKindMatches = [...text.matchAll(/case\s+"([^"]+)"|kind\s*===\s*"([^"]+)"/g)];
+    const uniqueKinds = new Set(acceptedKindMatches.map((match) => match[1] ?? match[2]));
+    if (uniqueKinds.size > 12) {
       pushFinding(
         findings,
         file,
         1,
-        "module exceeds target size guard",
-        `${lines} lines > ${threshold}`,
+        "effect family accepts too many kinds for one responsibility",
+        `${uniqueKinds.size} kinds`,
       );
     }
   }
-  addCheck("no replacement monoliths", findings);
+
+  const interpreter = sources.find(
+    (source) => source.file === "packages/engine/src/ability-engine/effect-interpreter.ts",
+  );
+  if (interpreter) {
+    for (const regex of [/switch\s*\(\s*effect\.kind\s*\)/g, /\bcase\s+"[^"]+"/g]) {
+      let match = regex.exec(interpreter.text);
+      while (match) {
+        pushFinding(
+          findings,
+          interpreter.file,
+          lineNumber(interpreter.text, match.index),
+          "central interpreter contains concrete effect kind dispatch",
+          snippet(interpreter.text, match.index),
+        );
+        match = regex.exec(interpreter.text);
+      }
+    }
+  }
+
+  const kinds = effectKindsByTypeName(sources);
+  const ownerByKind = new Map();
+  for (const { file, text } of familySources) {
+    for (const kind of kinds.values()) {
+      if (new RegExp(`["']${kind}["']`).test(text)) {
+        const owners = ownerByKind.get(kind) ?? [];
+        owners.push(file);
+        ownerByKind.set(kind, owners);
+      }
+    }
+  }
+  for (const [typeName, kind] of kinds) {
+    const owners = ownerByKind.get(kind) ?? [];
+    if (owners.length === 0) {
+      pushFinding(
+        findings,
+        "packages/engine/src/ability-engine/definition-types.ts",
+        1,
+        "CardEffect kind has no effect-family owner",
+        `${kind} (${typeName})`,
+      );
+    } else if (owners.length > 1) {
+      pushFinding(
+        findings,
+        "packages/engine/src/ability-engine/definition-types.ts",
+        1,
+        "CardEffect kind has multiple effect-family owners",
+        `${kind}: ${owners.join(", ")}`,
+      );
+    }
+  }
+  return findings;
 }
 
-checkCardSpecificRuntimeLeaks();
-checkRuntimeEscapeHatches();
-checkEffectInterpreterDispatch();
-checkRegistryIndirection();
-checkMechanicsCardIdBehavior();
-checkReplacementMonoliths();
+function collectCardSpecificRuntimeNameFindings(sources) {
+  const findings = [];
+  const tokens = deriveCardNameTokens(sources);
+  const productionSources = sources.filter(
+    ({ file }) =>
+      !isTestOrFixture(file) &&
+      file !== "scripts/check-engine-cardimplementation-architecture-target.mjs",
+  );
 
-const failingChecks = checks.filter((check) => check.findings.length > 0);
-const summary = Object.fromEntries(
-  checks.map((check) => [check.name, check.findings.length]),
-);
-
-console.log("NETGRID Engine CardImplementation Architecture Target Check");
-console.log(JSON.stringify(summary, null, 2));
-
-for (const check of failingChecks) {
-  console.log(`\n[FAIL] ${check.name}: ${check.findings.length}`);
-  for (const finding of check.findings.slice(0, maxFindingsPerCheck)) {
-    console.log(
-      `- ${finding.file}:${finding.line} ${finding.message}: ${finding.detail}`,
-    );
+  for (const { file, text } of productionSources) {
+    for (const tokenInfo of tokens) {
+      let index = text.indexOf(tokenInfo.token);
+      while (index >= 0) {
+        const line = lineNumber(text, index);
+        const currentLine = lineText(text, line);
+        if (isCatalogOrAllowedCardContext(file, currentLine)) {
+          index = text.indexOf(tokenInfo.token, index + tokenInfo.token.length);
+          continue;
+        }
+        const suspiciousContext =
+          currentLine.includes("kind:") ||
+          currentLine.includes("payload") ||
+          currentLine.includes("Payload") ||
+          currentLine.includes("source") ||
+          currentLine.includes("Source") ||
+          currentLine.includes("resolver") ||
+          currentLine.includes("Resolver") ||
+          currentLine.includes("Ability") ||
+          currentLine.includes("runtime") ||
+          file.includes("/mechanics/") ||
+          file.includes("/game/") ||
+          file.includes("/ai/") ||
+          file.startsWith("scripts/");
+        if (suspiciousContext) {
+          pushFinding(
+            findings,
+            file,
+            line,
+            "card-specific name appears in productive runtime or semantic logic",
+            `${tokenInfo.token}${tokenInfo.cardId ? ` (${tokenInfo.cardId})` : ""}: ${currentLine}`,
+          );
+        }
+        index = text.indexOf(tokenInfo.token, index + tokenInfo.token.length);
+      }
+    }
   }
-  if (check.findings.length > maxFindingsPerCheck) {
-    console.log(`- ... ${check.findings.length - maxFindingsPerCheck} more`);
+  return findings;
+}
+
+function collectCardIdBehaviorFindings(sources) {
+  const findings = [];
+  const patterns = [
+    {
+      message: "card-id set or constant can control behavior",
+      regex: /\b[A-Z][A-Z0-9_]*(?:_CARD_ID|_CARD_IDS|_DEFINITION_ID|_DEFINITION_IDS)\b|\bnew\s+Set\s*<\s*[^>]*CardDefinitionId[^>]*>\s*\(/g,
+    },
+    {
+      message: "direct ONR/Proteus definition id in productive rule path",
+      regex: /["']onr_(?:v1|proteus)_\d+_[^"']+["']/g,
+    },
+  ];
+  for (const { file, text } of sources) {
+    if (isTestOrFixture(file) || isCardImplementationFile(file)) continue;
+    if (file.includes("/compatibility/") || file.includes("payload-compatibility")) continue;
+    if (
+      !(
+        file.startsWith("packages/engine/src/game/") ||
+        file.startsWith("packages/engine/src/mechanics/") ||
+        file.startsWith("packages/shared/src/") ||
+        file.startsWith("packages/ai/src/") ||
+        file.startsWith("scripts/")
+      )
+    ) {
+      continue;
+    }
+    for (const pattern of patterns) {
+      let match = pattern.regex.exec(text);
+      while (match) {
+        const line = lineText(text, lineNumber(text, match.index));
+        if (!isCatalogOrAllowedCardContext(file, line)) {
+          pushFinding(findings, file, lineNumber(text, match.index), pattern.message, line);
+        }
+        match = pattern.regex.exec(text);
+      }
+    }
+  }
+  return findings;
+}
+
+function collectRegistryFindings(sources) {
+  const findings = [];
+  for (const { file, text } of sources) {
+    if (!file.startsWith("packages/engine/src/card-implementations/")) continue;
+    const basename = file.split("/").at(-1) ?? file;
+    if (/all-card-implementations\.(?:ts|js|mjs)$/.test(basename)) {
+      pushFinding(findings, file, 1, "registry replacement monolith is forbidden", basename);
+    }
+    const directCardImports = [
+      ...text.matchAll(/from\s+["'](?:\.\.\/)*((?:onr-v1|proteus)\/[^"']+)["']/g),
+    ].filter((match) => match[1].split("/").length >= 4);
+    if (directCardImports.length > 20) {
+      pushFinding(
+        findings,
+        file,
+        1,
+        "registry aggregator imports too many individual card implementations",
+        `${directCardImports.length} direct card imports`,
+      );
+    }
+  }
+  return findings;
+}
+
+function collectReplacementMonolithFindings(sources) {
+  const findings = [];
+  for (const { file, text } of sources) {
+    if (isTestOrFixture(file)) continue;
+    const role = roleLineLimits.find((candidate) => candidate.match(file));
+    if (!role) continue;
+    const lines = text.split(/\r?\n/).length;
+    if (lines > role.limit) {
+      pushFinding(
+        findings,
+        file,
+        1,
+        `${role.name} module exceeds role limit`,
+        `${lines} lines > ${role.limit}`,
+      );
+    }
+  }
+  return findings;
+}
+
+function analyzeSources(sources) {
+  return [
+    {
+      name: "@ts-nocheck in productive architecture scope",
+      findings: collectTsNoCheckFindings(sources),
+    },
+    {
+      name: "runtime escape hatches removed",
+      findings: collectRuntimeEscapeFindings(sources),
+    },
+    {
+      name: "effect families are domain-owned and exhaustive",
+      findings: collectEffectFamilyFindings(sources),
+    },
+    {
+      name: "card-specific productive runtime names",
+      findings: collectCardSpecificRuntimeNameFindings(sources),
+    },
+    {
+      name: "active card-id rule decisions removed",
+      findings: collectCardIdBehaviorFindings(sources),
+    },
+    {
+      name: "registry uses real grouped registries",
+      findings: collectRegistryFindings(sources),
+    },
+    {
+      name: "no replacement monoliths",
+      findings: collectReplacementMonolithFindings(sources),
+    },
+  ];
+}
+
+function runSelfTest() {
+  const sources = [
+    {
+      file: "packages/shared/src/index.ts",
+      text: 'export const DEMO_CARDS = [{\n  id: "onr_v1_001_hacker_tracker",\n  title: "Hacker Tracker",\n}];\n',
+    },
+    {
+      file: "packages/engine/src/game/engine-runtime-internal/synthetic-runtime.ts",
+      text: `// @ts-nocheck
+type ArbitraryBag = { [key: string]: unknown };
+type CallableBag = (...args: unknown[]) => unknown;
+const runtime: Record<string, unknown> = {};
+function lookupCapability(name: string) {
+  return (runtime as any)[name];
+}
+const proxy = new Proxy({}, { get: (_target, property) => runtime[property as string] });
+const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
+`,
+    },
+    {
+      file: "packages/engine/src/ability-engine/effect-families/context-effects-part-7.ts",
+      text: 'export function execute(effect) { if (effect.kind === "some_card_name_special") return; }\n',
+    },
+    {
+      file: "packages/engine/src/card-implementations/subregistries/all-card-implementations.ts",
+      text: Array.from({ length: 25 }, (_, index) => `import { card${index} } from "../onr-v1/corp/assets/card-${index}";`).join("\n"),
+    },
+    {
+      file: "scripts/synthetic-ai-semantic-check.mjs",
+      text: 'const profile = { kind: "hacker_tracker_trace_bits" };\n',
+    },
+  ];
+  const checks = analyzeSources(sources);
+  const required = new Map([
+    ["@ts-nocheck in productive architecture scope", "@ts-nocheck"],
+    ["runtime escape hatches removed", "runtime escape hatch"],
+    ["effect families are domain-owned and exhaustive", "context effect family"],
+    ["card-specific productive runtime names", "card-specific runtime name"],
+    ["active card-id rule decisions removed", "card-id rule decision"],
+    ["registry uses real grouped registries", "all-card registry monolith"],
+  ]);
+  const failures = [];
+  for (const [checkName, label] of required) {
+    const check = checks.find((candidate) => candidate.name === checkName);
+    if (!check || check.findings.length === 0) failures.push(label);
+  }
+  if (failures.length > 0) {
+    console.error(`Architecture guard self-test failed: ${failures.join(", ")}`);
+    process.exit(1);
+  }
+  console.log("Architecture guard self-test passed.");
+}
+
+function runCheck() {
+  const checks = analyzeSources(filesystemSources());
+  const summary = Object.fromEntries(
+    checks.map((check) => [check.name, check.findings.length]),
+  );
+  const failingChecks = checks.filter((check) => check.findings.length > 0);
+
+  console.log("NETGRID Engine CardImplementation Architecture Target Check");
+  console.log(JSON.stringify(summary, null, 2));
+
+  for (const check of failingChecks) {
+    console.log(`\n[FAIL] ${check.name}: ${check.findings.length}`);
+    for (const finding of check.findings.slice(0, maxFindingsPerCheck)) {
+      console.log(
+        `- ${finding.file}:${finding.line} ${finding.message}: ${finding.detail}`,
+      );
+    }
+    if (check.findings.length > maxFindingsPerCheck) {
+      console.log(`- ... ${check.findings.length - maxFindingsPerCheck} more`);
+    }
+  }
+
+  if (failingChecks.length > 0) {
+    process.exitCode = 1;
+  } else {
+    console.log("\n[PASS] Engine CardImplementation architecture target reached.");
   }
 }
 
-if (failingChecks.length > 0) {
-  process.exitCode = 1;
+if (selfTest) {
+  runSelfTest();
 } else {
-  console.log("\n[PASS] Engine CardImplementation architecture target reached.");
+  runCheck();
 }

@@ -96,7 +96,7 @@ function makeHost(legalAction?: LegalAction) {
             }
           : cardId === "dog"
             ? {
-                kind: "schlaghund_tag_die_meat_damage",
+                kind: "tag_threshold_meat_damage_asset",
                 damageType: "meat",
                 damageAmount: 10,
                 trashSourceOnSuccess: true,
@@ -115,7 +115,7 @@ function makeHost(legalAction?: LegalAction) {
             }
           : definitionId === definitions.dog!.id
             ? {
-                kind: "schlaghund_tag_die_meat_damage",
+                kind: "tag_threshold_meat_damage_asset",
                 damageType: "meat",
                 damageAmount: 10,
                 trashSourceOnSuccess: true,

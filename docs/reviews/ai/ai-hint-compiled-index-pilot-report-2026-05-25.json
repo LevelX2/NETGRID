@@ -14781,7 +14781,7 @@
             "kind": "draw",
             "resource": "cards",
             "scope": "runner",
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
             "timing": "persistent"
           },
           {
@@ -14790,7 +14790,7 @@
             "kind": "survival_payoff",
             "resource": "cards",
             "scope": "runner",
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
             "timing": "persistent"
           }
         ]
@@ -25577,7 +25577,7 @@
             "kind": "trace_credit",
             "resource": "credits",
             "scope": "corp",
-            "source": "implementation.remainingReplacementLongtail.hacker_tracker_trace_bits",
+            "source": "implementation.remainingReplacementLongtail.trace_bit_counter_pool_asset",
             "timing": "persistent"
           }
         ],

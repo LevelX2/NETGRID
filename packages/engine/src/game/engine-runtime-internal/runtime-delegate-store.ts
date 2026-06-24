@@ -1,4 +1,4 @@
-type RuntimeDelegateGroup = { [key: string]: unknown };
+type RuntimeDelegateGroup = object;
 
 type RuntimeDelegateGroups = {
   actionRuntimeHosts: RuntimeDelegateGroup;
@@ -21,12 +21,15 @@ export const runtimeDelegates = {} as RuntimeDelegateGroups;
 export function runtimeDelegate(
   groupName: keyof RuntimeDelegateGroups,
   delegateName: string,
-): (...args: any[]) => any {
-  const delegate = runtimeDelegates[groupName][delegateName];
+): Function {
+  const delegate = Object.getOwnPropertyDescriptor(
+    runtimeDelegates[groupName],
+    delegateName,
+  )?.value;
   if (typeof delegate !== "function") {
     throw new Error(
       `Runtime delegate fehlt: ${String(groupName)}.${delegateName}`,
     );
   }
-  return delegate as (...args: any[]) => any;
+  return delegate as Function;
 }

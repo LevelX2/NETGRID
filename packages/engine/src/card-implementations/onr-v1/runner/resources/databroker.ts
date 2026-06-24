@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const databrokerImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_159_databroker",
   uniqueDirectLongtail: {
-    kind: "databroker_agenda_point_credits",
+    kind: "agenda_point_for_credits_resource",
     agendaPointCost: 1,
     gainCredits: 10,
     trashSource: true,

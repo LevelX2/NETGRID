@@ -163,7 +163,7 @@ describe("known visible ICE run risk", () => {
       ],
       effect: {
         type: "add_counter",
-        counterType: "data_raven",
+        counterType: "trace_tag_counter",
         amount: 1,
       } satisfies TraceSuccessEffect,
     },

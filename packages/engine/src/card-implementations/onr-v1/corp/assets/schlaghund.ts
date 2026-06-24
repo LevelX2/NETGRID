@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const schlaghundImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_339_schlaghund",
   uniqueDirectLongtail: {
-    kind: "schlaghund_tag_die_meat_damage",
+    kind: "tag_threshold_meat_damage_asset",
     damageType: "meat",
     damageAmount: 10,
     trashSourceOnSuccess: true,

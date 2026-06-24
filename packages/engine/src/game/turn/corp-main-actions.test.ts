@@ -252,10 +252,10 @@ function testCorpMainHost(
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
     constants: {
-      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
-      DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
+      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
+      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
       COUNTER_UPGRADE_SOURCES: new Set(),
-      ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
+      ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
     },
   };
 }

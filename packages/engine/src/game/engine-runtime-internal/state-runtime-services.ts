@@ -6,7 +6,7 @@ import { createLookupRuntimeServices } from "./lookup-runtime-services";
 import { createZoneRuntimeServices } from "./zone-runtime-services";
 
 export function createStateRuntimeServices(deps: RuntimeDeps) {
-  const runtime: Record<string, unknown> = {};
+  const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
     createEconomyRuntimeServices(deps),

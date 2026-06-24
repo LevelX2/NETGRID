@@ -155,12 +155,12 @@ export type CreditEconomyExecutionHost = {
   };
   constants: {
     COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
-    COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
-    DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
+    INSTALLED_CARD_LIMIT_ASSET_SOURCE: string;
+    VIRUS_COUNTER_ASSET_SOURCE: string;
     COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
     RUNNER_RANDOM_PROGRAM_SOURCES: ReadonlySet<string>;
-    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
-    FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
+    RANDOM_RESOURCE_SOURCE: string;
+    COUNTER_GAIN_PROGRAM_SOURCE: string;
   };
 };
 
@@ -289,7 +289,7 @@ export function handleCreditEconomyExecution(
         "Die V1.9.17-installed-card-Asset-Faehigkeit ist nicht rezzed installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (definition.id !== host.constants.COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID)
+    if (definition.id !== host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE)
       throw new Error(
         "Die V1.9.17-installed-card-Faehigkeit passt nicht zur Karte.",
       );
@@ -362,7 +362,7 @@ export function handleCreditEconomyExecution(
         "Die V1.9.17-Virus-Counter-Asset-Faehigkeit ist nicht rezzed installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (definition.id !== host.constants.DISINFECTANT_VIRUS_COUNTER_ASSET_ID)
+    if (definition.id !== host.constants.VIRUS_COUNTER_ASSET_SOURCE)
       throw new Error(
         "Die V1.9.17-Virus-Counter-Faehigkeit passt nicht zur Karte.",
       );
@@ -485,7 +485,7 @@ export function handleCreditEconomyExecution(
     const definition = host.cards.definitionFor(state, sourceCardId);
     if (
       definition.id !==
-      host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE
+      host.constants.RANDOM_RESOURCE_SOURCE
     )
       throw new Error(
         "Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.",
@@ -512,7 +512,7 @@ export function handleCreditEconomyExecution(
         "Die V1.9.19-Programm-Counter-Faehigkeit ist nicht installiert.",
       );
     const definition = host.cards.definitionFor(state, sourceCardId);
-    if (definition.id !== host.constants.FAIT_ACCOMPLI_COUNTER_PROGRAM_ID)
+    if (definition.id !== host.constants.COUNTER_GAIN_PROGRAM_SOURCE)
       throw new Error(
         "Die V1.9.19-Programm-Counter-Faehigkeit passt nicht zur Karte.",
       );
@@ -549,7 +549,7 @@ export function handleCreditEconomyExecution(
       state,
       sourceCardId,
     );
-    if (implementation?.kind !== "databroker_agenda_point_credits")
+    if (implementation?.kind !== "agenda_point_for_credits_resource")
       throw new Error("Die Databroker-Faehigkeit passt nicht zur Karte.");
     const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
     const expectedAgendaCost = implementation.agendaPointCost;

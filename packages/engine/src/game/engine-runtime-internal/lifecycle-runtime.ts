@@ -1,31 +1,33 @@
-// @ts-nocheck
 import type {
-  RuntimeDeps,
-  GameState,
-  LegalAction,
-  PlayerAction,
-  ChoiceRequest,
-  Side,
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
+  CardRunnerEventLongtailImplementation,
+  ChoiceRequest,
   CorpServer,
+  CorpZoneChoiceHandlerHost,
   CounterType,
   DamageSummary,
-  ResolvedGameEffect,
-  ServerId,
-  PendingChoiceResolutionHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
+  DrawTaxDecision,
+  GameState,
   HiddenZoneArrangeChoiceHandlerHost,
   HiddenZoneNonSearchChoiceHandlerHost,
-  CorpZoneChoiceHandlerHost,
-  CardRunnerEventLongtailImplementation,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  ResolvedGameEffect,
+  RunnerDrawSummary,
+  RuntimeDeps,
+  ServerId,
+  Side,
 } from "./runtime-shared";
+import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 
 export function createLifecycleRuntime(deps: RuntimeDeps) {
   const {
-    MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+    HOST_RETURN_HARDWARE_SOURCE,
     NEVINYRRAL_ID,
     cardHasSubtype,
     cardImplementationForDefinitionId,
@@ -166,7 +168,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
         cardHasSubtype(hostDefinition, "daemon")) ||
       runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
         "replace_installed_program_trash_with_host_on_source" ||
-      hostDefinition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
+      hostDefinition.id === HOST_RETURN_HARDWARE_SOURCE
     )
       return false;
     return true;
@@ -311,13 +313,13 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       state,
       cardId,
     ).some(
-      (cleanup) =>
+      (cleanup: CardLeavePlayCleanupImplementation) =>
         cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
         cleanup.target === "agenda_or_node_inside_same_fort",
     );
     const rezzedNevinyrralLeftPlay =
       (uniqueDirectLongtailKindForDefinition(definition.id) ===
-        "nevinyrral_action_and_lose_on_rezzed_leave" ||
+        "rezzed_leave_action_gain_asset" ||
         (definition.id === NEVINYRRAL_ID &&
           !cardImplementationForDefinitionId(definition.id))) &&
       instance.rezzed === true;
@@ -442,7 +444,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       .filter(
         (cardId) =>
           remainingReplacementLongtailKindForCard(state, cardId) ===
-          "crash_everett_draw_extra_choose_trash_or_top",
+          "hidden_draw_keep_or_top_replacement",
       )
       .sort()[0];
   }
@@ -530,7 +532,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       remainingReplacementLongtailKindForCard(
         state,
         sourceCardId as CardInstanceId,
-      ) !== "crash_everett_draw_extra_choose_trash_or_top"
+      ) !== "hidden_draw_keep_or_top_replacement"
     )
       throw new Error("Crash Everett ist nicht mehr installiert.");
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";

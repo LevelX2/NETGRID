@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import {
   DEMO_CARDS_BY_ID,
@@ -574,65 +573,65 @@ import {
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
-  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-  ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
-  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-  FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
-  GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
-  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
-  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
-  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  ADVANCEMENT_PLACEMENT_OPERATION_ID,
-  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
-  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+  FLATLINE_REPLACEMENT_EVENT_SOURCE,
+  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
+  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
+  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
+  COUNTER_GAIN_PROGRAM_SOURCE,
+  COUNTER_CREDIT_OPERATION_SOURCE,
+  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
+  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
+  AGENDA_ADVANCE_OPERATION_SOURCE,
+  ECONOMY_RECOVERY_OPERATION_SOURCE,
+  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
+  TEAM_COUNTER_OPERATION_SOURCE,
+  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
+  ACCESS_NET_DAMAGE_ASSET_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-  DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
-  TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
+  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
+  VIRUS_COUNTER_ASSET_SOURCE,
+  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
+  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
   ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE,
-  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  CORP_HQ_AGENDA_REVEAL_SOURCE,
-  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+  ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  HQ_AGENDA_REVEAL_ASSET_SOURCE,
+  RD_TOP5_REORDER_OPERATION_SOURCE,
   COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  AUJOURD_OUI_RESOURCE_SOURCE,
-  RUNNER_GRIP_TRASH_EVENT_SOURCE,
-  RUNNER_STACK_TOP5_EVENT_SOURCE,
+  DAILY_CREDIT_RESOURCE_SOURCE,
+  GRIP_TRASH_EVENT_SOURCE,
+  STACK_TOP5_EVENT_SOURCE,
   SERVER_EXPOSE_PROGRAM_SOURCES,
   SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  SHORT_CIRCUIT_RESOURCE_SOURCE,
+  PAID_STACK_SEARCH_RESOURCE_SOURCE,
   STACK_SEARCH_PROGRAM_SOURCES,
   STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
-import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
+import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
-  ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
-  CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
-  EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
-  FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
-  JAPANESE_WATER_TORTURE_BREAKER_ID,
-  MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-  MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
-  OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
-  RABBIT_HQ_INTERFACE_PROGRAM_ID,
-  SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
-  SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
-  VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
-  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+  BLACK_ICE_DEREZ_EVENT_SOURCE,
+  HQ_ICE_JETTISON_EVENT_SOURCE,
+  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
+  FORCE_REZ_EVENT_SOURCE,
+  BREAKER_DISABLE_PROGRAM_SOURCE,
+  HOST_RETURN_HARDWARE_SOURCE,
+  INSTALLED_CARD_TRASH_EVENT_SOURCE,
+  TAG_RETURN_EVENT_SOURCE,
+  HQ_INTERFACE_PROGRAM_SOURCE,
+  HQ_CARD_TRASH_EVENT_SOURCE,
+  HQ_ACCESS_RETAIN_EVENT_SOURCE,
+  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
+  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
@@ -680,7 +679,7 @@ import {
 } from "../../compatibility/runtime-compatibility";
 import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
-  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE,
+  RANDOM_RESOURCE_SOURCE,
   RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
 import {
@@ -689,10 +688,10 @@ import {
   TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
-  CRYBABY_ACCESS_COST_UPGRADE_ID,
-  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+  ACCESS_COST_UPGRADE_SOURCE,
+  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
 import {
   RUN_TAX_UPGRADE_SOURCES,
@@ -743,8 +742,11 @@ import {
   isV099OrLater,
   recurringTraceCreditPoolTotal,
 } from "./runtime-bootstrap-support";
+import type { RuntimeDeps } from "./runtime-shared";
 
-export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps }) {
+export function configureFlowRuntimeBootstrap({
+  cardImplementationRuntimeDeps,
+}: Pick<RuntimeDeps, "cardImplementationRuntimeDeps">) {
   function utilityInstalledOnFort(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
@@ -881,14 +883,19 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       openRunnerRunSpendCapChoice(state, rezzedSpendCapSourceIds[0]!, legalAction);
       return true;
     }
-    run.runStartInterventions = redirectSourceIds.map((cardId) => ({
-      kind: "start_run_redirect_to_source_fort",
-      originalServerId,
-      sourceCardInstanceId: cardId,
-      sourceDefinitionId: definitionFor(state, cardId).id,
-      targetServerId: mustInstance(state.cardInstances, cardId).zone.serverId,
-      costCredits: startRunRedirectCostCredits(state, cardId),
-    }));
+    run.runStartInterventions = redirectSourceIds.map((cardId) => {
+      const targetServerId = corpServerIdForInstalledCard(state, cardId);
+      if (!targetServerId)
+        throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+      return {
+        kind: "start_run_redirect_to_source_fort",
+        originalServerId,
+        sourceCardInstanceId: cardId,
+        sourceDefinitionId: definitionFor(state, cardId).id,
+        targetServerId,
+        costCredits: startRunRedirectCostCredits(state, cardId),
+      };
+    });
     state.pendingChoice = {
       choiceId: `corp_start_of_run_redirect_${state.stateVersion + 1}`,
       side: "corp",
@@ -897,13 +904,18 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       kind: "select_option",
       options: [
         { id: "pass", label: "Run nicht umlenken" },
-        ...redirectSourceIds.map((cardId) => ({
-          id: `redirect_${cardId}`,
-          label: `${definitionFor(state, cardId).title}: Run umlenken`,
-          publicLabel: "Start-of-run Redirect",
-          value: cardId,
-          serverId: mustInstance(state.cardInstances, cardId).zone.serverId,
-        })),
+        ...redirectSourceIds.map((cardId) => {
+          const targetServerId = corpServerIdForInstalledCard(state, cardId);
+          if (!targetServerId)
+            throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+          return {
+            id: `redirect_${cardId}`,
+            label: `${definitionFor(state, cardId).title}: Run umlenken`,
+            publicLabel: "Start-of-run Redirect",
+            value: cardId,
+            serverId: targetServerId,
+          };
+        }),
         ...reorderSourceIds.map((cardId) => ({
           id: `herman_${cardId}`,
           label: `${definitionFor(state, cardId).title}: ICE neu anordnen`,
@@ -954,7 +966,9 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
   ): void {
     const run = mustRun(state);
     const source = mustInstance(state.cardInstances, sourceCardId);
-    const serverId = source.zone.serverId;
+    const serverId = corpServerIdForInstalledCard(state, sourceCardId);
+    if (!serverId)
+      throw new Error("Die Spend-Cap-Quelle liegt nicht in einem Korp-Fort.");
     if (serverId !== run.attackedServerId)
       throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
     if (
@@ -1239,17 +1253,17 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       runCardImplementationActionHost,
     },
     constants: {
-      setup: SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
-      trap: TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
-      crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
-      taggedRunnerMeatDamageUpgrade: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-      accessNetDamageUpgrade: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-      oncePerRunAccessTraceUpgrade: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+      setup: ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
+      trap: ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
+      crybaby: ACCESS_COST_UPGRADE_SOURCE,
+      taggedRunnerMeatDamageUpgrade: ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
+      accessNetDamageUpgrade: ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
+      oncePerRunAccessTraceUpgrade: ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
       hardwareTrashByAdvancementAsset:
-        CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-      programTrashByAdvancementAsset: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-      advancementCoreDamageAsset: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-      advancementNetDamageAsset: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+        ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
+      programTrashByAdvancementAsset: ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
+      advancementCoreDamageAsset: ACCESS_CORE_DAMAGE_ASSET_SOURCE,
+      advancementNetDamageAsset: ACCESS_NET_DAMAGE_ASSET_SOURCE,
       chimera: CHIMERA_ID,
     },
     callbacks: {

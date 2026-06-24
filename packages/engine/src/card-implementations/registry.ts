@@ -6,9 +6,9 @@
  */
 import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardImplementationDefinition } from "./types";
-import { ALL_CARD_IMPLEMENTATIONS } from "./subregistries/all-card-implementations";
+import { CARD_IMPLEMENTATION_CATALOG } from "./subregistries/card-implementation-catalog";
 
-export const CARD_IMPLEMENTATIONS = ALL_CARD_IMPLEMENTATIONS;
+export const CARD_IMPLEMENTATIONS = CARD_IMPLEMENTATION_CATALOG;
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, CardImplementationDefinition>

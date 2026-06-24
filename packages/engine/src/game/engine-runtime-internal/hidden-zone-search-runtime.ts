@@ -1,18 +1,36 @@
-// @ts-nocheck
-import { runtimeProxy } from "./runtime-shared";
-import type { RuntimeDeps } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  CounterType,
+  CorpServer,
+  CorpZoneChoiceHandlerHost,
+  GameState,
+  HiddenZoneArrangeChoiceHandlerHost,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  HiddenZoneSearchActivationHandlerHost,
+  HiddenZoneSearchChoiceHandlerHost,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
+import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
-  runtime: Record<string, unknown>,
+  links: ChoiceHiddenZoneRuntimeLinks,
 ) {
   const {
-    AUJOURD_OUI_RESOURCE_SOURCE,
+    DAILY_CREDIT_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,
     COCKROACH_ID,
-    CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
-    CORP_HQ_AGENDA_REVEAL_SOURCE,
-    CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+    ARCHIVES_TO_HQ_OPERATION_SOURCE,
+    HQ_AGENDA_REVEAL_ASSET_SOURCE,
+    RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
     DEMO_CARDS_BY_ID,
     INITIAL_HAND_SIZE,
@@ -21,7 +39,7 @@ export function createHiddenZoneSearchRuntime(
     RUN_ACCESS_PRESSURE_EVENT_SOURCE,
     SELF_MODIFYING_CODE_ID,
     SERVER_EXPOSE_PROGRAM_SOURCES,
-    SHORT_CIRCUIT_RESOURCE_SOURCE,
+    PAID_STACK_SEARCH_RESOURCE_SOURCE,
     SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
     STACK_SEARCH_PROGRAM_SOURCES,
@@ -219,7 +237,7 @@ export function createHiddenZoneSearchRuntime(
     startRandomDiceSplitChoice,
     takeSetupMulligan,
     trashCorpInstalledCardsInScoredSourceServer,
-  } = runtimeProxy<Record<string, unknown>>(runtime);
+  } = links;
 
   function hiddenZoneSearchHandlerHostBase(
     state: GameState,
@@ -229,10 +247,10 @@ export function createHiddenZoneSearchRuntime(
       state,
       legalAction,
       constants: {
-        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
+        topStackTakeMatchingSourceId: DAILY_CREDIT_RESOURCE_SOURCE,
         randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
+        stackSearchGripSourceId: PAID_STACK_SEARCH_RESOURCE_SOURCE,
         temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
@@ -310,10 +328,10 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       constants: {
-        topStackTakeMatchingSourceId: AUJOURD_OUI_RESOURCE_SOURCE,
+        topStackTakeMatchingSourceId: DAILY_CREDIT_RESOURCE_SOURCE,
         randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: SHORT_CIRCUIT_RESOURCE_SOURCE,
+        stackSearchGripSourceId: PAID_STACK_SEARCH_RESOURCE_SOURCE,
         temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
       },
       cards: {
@@ -652,7 +670,7 @@ export function createHiddenZoneSearchRuntime(
           "Diese Stack-Search-Ability wird deklarativ abgewickelt.",
         );
       spendCredits(state, "runner", creditCostForAction(legalAction));
-      if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE) {
+      if (sourceDefinition.id === DAILY_CREDIT_RESOURCE_SOURCE) {
         startAujourdOuiTop5Activation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           sourceCardId,
@@ -662,11 +680,11 @@ export function createHiddenZoneSearchRuntime(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           {
             sourcePrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+              sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
                 ? `runner.stack_search_to_grip:${sourceCardId}`
                 : "v1911.search_stack",
             choiceIdPrefix:
-              sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+              sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
                 ? "runner_stack_search_to_grip"
                 : "v1911_search_stack",
           },
@@ -677,9 +695,9 @@ export function createHiddenZoneSearchRuntime(
         hiddenZoneBarrier: true,
         sourceDefinitionId: sourceDefinition.id,
         hiddenZoneAction:
-          sourceDefinition.id === AUJOURD_OUI_RESOURCE_SOURCE
+          sourceDefinition.id === DAILY_CREDIT_RESOURCE_SOURCE
             ? "v1911_aujourdoui_top5"
-            : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_SOURCE
+            : sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
               ? "runner_stack_search_to_grip"
               : "v1911_search_stack",
       };

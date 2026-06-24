@@ -51,6 +51,8 @@ import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-host
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
 import { initializeRuntimeDelegates } from "./runtime-delegates";
+import type { RuntimeDeps } from "./runtime-shared";
+import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 describe("engine runtime internal domains", () => {
   it("do not import public facades or become dependencies of deep game modules", () => {
@@ -120,123 +122,125 @@ describe("engine runtime internal domains", () => {
   });
 
   it("exposes the staged domain factories", () => {
+    const deps = {} as RuntimeDeps;
+    const links = {} as ChoiceHiddenZoneRuntimeLinks;
     expect(
-      typeof createChoiceHiddenZoneRuntime({}).pendingChoiceResolutionHost,
+      typeof createChoiceHiddenZoneRuntime(deps).pendingChoiceResolutionHost,
     ).toBe("function");
     expect(
-      typeof createPendingChoiceRuntimeHosts({}, {})
+      typeof createPendingChoiceRuntimeHosts(deps, links)
         .pendingChoiceResolutionHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneSearchRuntime({}, {})
+      typeof createHiddenZoneSearchRuntime(deps, links)
         .hiddenZoneSearchChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneArrangeRuntime({}, {})
+      typeof createHiddenZoneArrangeRuntime(deps, links)
         .hiddenZoneArrangeChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneNonSearchRuntime({}, {})
+      typeof createHiddenZoneNonSearchRuntime(deps, links)
         .hiddenZoneNonSearchChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneNonSearchDiceLoopRuntime({})
+      typeof createHiddenZoneNonSearchDiceLoopRuntime(deps)
         .resolveRandomDiceLoopEvent,
     ).toBe("function");
     expect(
-      typeof createCorpZoneRuntimeHosts({}, {}).corpZoneChoiceHandlerHost,
+      typeof createCorpZoneRuntimeHosts(deps, links).corpZoneChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createCardRuntimeDepsHosts({}, {}).subroutinesForCurrentEncounter,
+      typeof createCardRuntimeDepsHosts(deps, deps).subroutinesForCurrentEncounter,
     ).toBe("function");
     expect(
-      typeof createTriggerAbilityRuntimeHosts({}, {})
+      typeof createTriggerAbilityRuntimeHosts(deps, deps)
         .triggerAbilityExecutionHost,
     ).toBe("function");
-    expect(typeof createCardLifecycleRuntimeHosts({}, {}).installCardHost).toBe(
+    expect(typeof createCardLifecycleRuntimeHosts(deps, deps).installCardHost).toBe(
       "function",
     );
     expect(
-      typeof createActivatedCardRuntimeHosts({}, {})
+      typeof createActivatedCardRuntimeHosts(deps, deps)
         .activatedCardImplementationExecutionHost,
     ).toBe("function");
     expect(
-      typeof createLifecycleRuntime({}).trashRunnerInstalledCardToHeap,
+      typeof createLifecycleRuntime(deps).trashRunnerInstalledCardToHeap,
     ).toBe("function");
     expect(
-      typeof createTurnCorpRuntime({}).advancementDistributionOptions,
+      typeof createTurnCorpRuntime(deps).advancementDistributionOptions,
     ).toBe("function");
-    expect(typeof createActionRuntimeHosts({}).scoredAgendaFlowHost).toBe(
+    expect(typeof createActionRuntimeHosts(deps).scoredAgendaFlowHost).toBe(
       "function",
     );
-    expect(typeof createApplyActionRuntimeHosts({}).turnBasicExecutionHost).toBe(
+    expect(typeof createApplyActionRuntimeHosts(deps).turnBasicExecutionHost).toBe(
       "function",
     );
     expect(
-      typeof createLegalActionRuntimeHosts({}, {})
+      typeof createLegalActionRuntimeHosts(deps, deps)
         .corpRunnerActionPaidWindowActions,
     ).toBe("function");
     expect(
-      typeof createScoredEconomyRuntimeHosts({}, {}).scoredAgendaAbilityHost,
+      typeof createScoredEconomyRuntimeHosts(deps, deps).scoredAgendaAbilityHost,
     ).toBe("function");
-    expect(typeof createPlayBoardRuntimeHosts({}).playCardExecutionHost).toBe(
+    expect(typeof createPlayBoardRuntimeHosts(deps).playCardExecutionHost).toBe(
       "function",
     );
-    expect(typeof createCardRuntimeHosts({}).installCardHost).toBe("function");
+    expect(typeof createCardRuntimeHosts(deps).installCardHost).toBe("function");
     expect(
-      typeof createCardRuntimeResolvers({})
+      typeof createCardRuntimeResolvers(deps)
         .cardImplementationRunnerEventResolver,
     ).toBe("function");
     expect(
-      typeof createChoiceHiddenZoneResolvers({}).startRunnerPrivateLookChoice,
+      typeof createChoiceHiddenZoneResolvers(deps).startRunnerPrivateLookChoice,
     ).toBe("function");
     expect(
-      typeof createCorpRuntimeResolvers({}).resolveHardwareTrashByCounterOperation,
+      typeof createCorpRuntimeResolvers(deps).resolveHardwareTrashByCounterOperation,
     ).toBe("function");
-    expect(typeof createFlowRuntimeHosts({}).runMovementHostForState).toBe(
+    expect(typeof createFlowRuntimeHosts(deps).runMovementHostForState).toBe(
       "function",
     );
-    expect(typeof createRunFlowRuntimeHosts({}, {}).startRun).toBe("function");
+    expect(typeof createRunFlowRuntimeHosts(deps, deps).startRun).toBe("function");
     expect(
-      typeof createDamageTraceRuntimeHosts({}).traceCounterEffectDefinitionFor,
+      typeof createDamageTraceRuntimeHosts(deps).traceCounterEffectDefinitionFor,
     ).toBe("function");
     expect(
-      typeof createInstallRezRuntimeHosts({}).canInstallCorpRootCardInServer,
+      typeof createInstallRezRuntimeHosts(deps).canInstallCorpRootCardInServer,
     ).toBe("function");
     expect(
-      typeof createEncounterMovementRuntimeHosts({}, {})
+      typeof createEncounterMovementRuntimeHosts(deps, deps)
         .runnerEncounterActionHostForState,
     ).toBe("function");
-    expect(typeof createAccessFlowRuntimeHosts({}).accessFlowHost).toBe(
+    expect(typeof createAccessFlowRuntimeHosts(deps).accessFlowHost).toBe(
       "function",
     );
-    expect(typeof createStateCorpRuntimeResolvers({}).spendRecurringTraceCreditPool).toBe(
+    expect(typeof createStateCorpRuntimeResolvers(deps).spendRecurringTraceCreditPool).toBe(
       "function",
     );
-    expect(typeof createStateRuntimeResolvers({}).executeEffectCommands).toBe(
+    expect(typeof createStateRuntimeResolvers(deps).executeEffectCommands).toBe(
       "function",
     );
-    expect(typeof createStateRuntimeServices({}).canHostProgramOnDaemon).toBe(
+    expect(typeof createStateRuntimeServices(deps).canHostProgramOnDaemon).toBe(
       "function",
     );
     expect(
-      typeof createEconomyRuntimeServices({}).runnerInstallableProgramIdsForValuPak,
+      typeof createEconomyRuntimeServices(deps).runnerInstallableProgramIdsForValuPak,
     ).toBe("function");
-    expect(typeof createLookupRuntimeServices({}).canHostProgramOnDaemon).toBe(
+    expect(typeof createLookupRuntimeServices(deps).canHostProgramOnDaemon).toBe(
       "function",
     );
     expect(
-      typeof createCardStrengthCostRuntimeServices({}, {})
+      typeof createCardStrengthCostRuntimeServices(deps, deps)
         .breakSubroutineCostBreakdown,
     ).toBe("function");
     expect(
-      typeof createCounterTurnRuntimeServices({}, {}).cockroachCounterTotal,
+      typeof createCounterTurnRuntimeServices(deps, deps).cockroachCounterTotal,
     ).toBe("function");
-    expect(typeof createZoneRuntimeServices({}).corpIceInstallTotalCost).toBe(
+    expect(typeof createZoneRuntimeServices(deps).corpIceInstallTotalCost).toBe(
       "function",
     );
     expect(
-      typeof createTurnRuntimeResolvers({}).applyCorpStartOfTurnEffects,
+      typeof createTurnRuntimeResolvers(deps).applyCorpStartOfTurnEffects,
     ).toBe("function");
     expect(typeof initializeRuntimeDelegates).toBe("function");
     expect(typeof configureCardRuntimeBootstrap).toBe("function");

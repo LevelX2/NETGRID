@@ -2224,7 +2224,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/crash_everett_draw_extra_choose_trash_or_top/.test(implementationText)) {
+  if (/hidden_draw_keep_or_top_replacement/.test(implementationText)) {
     addEffect(facts, {
       kind: "draw",
       timing: "persistent",
@@ -2232,7 +2232,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       resource: "cards",
       amount: propertyNumber(implementationText, "extraDraw"),
       source:
-        "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+        "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
     });
     addEffect(facts, {
       kind: "survival_payoff",
@@ -2241,7 +2241,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       resource: "cards",
       amount: propertyNumber(implementationText, "extraDraw"),
       source:
-        "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+        "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
     });
     facts.derivationNotes.push(
       "Crash Everett extra draw and choose-trash/top replacement are represented without hidden hand or stack identities.",
@@ -3392,7 +3392,7 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/hacker_tracker_trace_bits/.test(implementationText)) {
+  if (/trace_bit_counter_pool_asset/.test(implementationText)) {
     addEffect(facts, {
       kind: "trace_credit",
       timing: "persistent",
@@ -3400,7 +3400,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       resource: "credits",
       amount: propertyNumber(implementationText, "traceStrengthAndLimitPerBit"),
       source:
-        "implementation.remainingReplacementLongtail.hacker_tracker_trace_bits",
+        "implementation.remainingReplacementLongtail.trace_bit_counter_pool_asset",
     });
   }
 
@@ -3474,7 +3474,7 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /i_got_a_rock_tagged_meat_damage|tagged_meat_damage|schlaghund_tag_die_meat_damage/.test(
+    /i_got_a_rock_tagged_meat_damage|tagged_meat_damage|tag_threshold_meat_damage_asset/.test(
       implementationText,
     )
   ) {

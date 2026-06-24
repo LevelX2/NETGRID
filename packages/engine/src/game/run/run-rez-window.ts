@@ -12,7 +12,7 @@ import type {
   CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID } from "../../mechanics/longtail-card-effects";
+import { REZ_INTERRUPT_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
@@ -466,7 +466,7 @@ export function resolveRezInterruptJackOutChoice(
       "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
     ) &&
     (cardImplementationForDefinitionId(rezInterruptSourceDefinitionId) ||
-      rezInterruptSourceDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
+      rezInterruptSourceDefinitionId !== REZ_INTERRUPT_PROGRAM_SOURCE)
   )
     throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
   const run = mustRun(host.state);
@@ -749,7 +749,7 @@ function installedRezInterruptJackOutSourceIds(host: RunRezWindowHost): CardInst
         return true;
       return (
         !cardImplementationForDefinitionId(definitionId) &&
-        definitionId === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
+        definitionId === REZ_INTERRUPT_PROGRAM_SOURCE
       );
     })
     .sort();

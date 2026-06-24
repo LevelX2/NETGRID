@@ -10,7 +10,7 @@ export const karlDeVeresCorporateStoogeImplementation: CardImplementationDefinit
       controller: "runner",
     },
     uniqueDirectLongtail: {
-      kind: "karl_successful_run_credit",
+      kind: "successful_run_credit_resource",
       amount: 1,
       visibility: "public",
     },

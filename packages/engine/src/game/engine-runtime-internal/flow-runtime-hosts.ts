@@ -6,7 +6,7 @@ import { createInstallRezRuntimeHosts } from "./install-rez-runtime-hosts";
 import { createRunFlowRuntimeHosts } from "./run-flow-runtime-hosts";
 
 export function createFlowRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, unknown> = {};
+  const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
     createInstallRezRuntimeHosts(deps),

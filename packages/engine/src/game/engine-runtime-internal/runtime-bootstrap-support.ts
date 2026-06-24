@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as runtimeDelegates from "./runtime-delegates";
 import { proteusArmageddonImplementation } from "../../card-implementations/proteus/runner/programs/armageddon";
 import { proteusScaldanImplementation } from "../../card-implementations/proteus/runner/programs/scaldan";
@@ -543,6 +542,7 @@ import {
   additionalSubroutinesForIce,
   currentEncounterAdditionalSubroutinesForIce,
 } from "../../ability-engine/additional-subroutine-modifiers";
+import { rezzedCorpRootCardIds as rezzedCorpRootCardIdsFromState } from "../../ability-engine/card-implementation-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import {
   effectiveAgendaDifficulty,
@@ -576,65 +576,65 @@ import {
   SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
-  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-  ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
-  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-  FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
-  GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
-  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
-  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
-  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  ADVANCEMENT_PLACEMENT_OPERATION_ID,
-  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
-  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+  FLATLINE_REPLACEMENT_EVENT_SOURCE,
+  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
+  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
+  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
+  COUNTER_GAIN_PROGRAM_SOURCE,
+  COUNTER_CREDIT_OPERATION_SOURCE,
+  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
+  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
+  AGENDA_ADVANCE_OPERATION_SOURCE,
+  ECONOMY_RECOVERY_OPERATION_SOURCE,
+  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
+  TEAM_COUNTER_OPERATION_SOURCE,
+  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
+  ACCESS_NET_DAMAGE_ASSET_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-  DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
-  TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
+  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
+  VIRUS_COUNTER_ASSET_SOURCE,
+  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
+  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
   ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE,
-  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  CORP_HQ_AGENDA_REVEAL_SOURCE,
-  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+  ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  HQ_AGENDA_REVEAL_ASSET_SOURCE,
+  RD_TOP5_REORDER_OPERATION_SOURCE,
   COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
-  AUJOURD_OUI_RESOURCE_SOURCE,
-  RUNNER_GRIP_TRASH_EVENT_SOURCE,
-  RUNNER_STACK_TOP5_EVENT_SOURCE,
+  DAILY_CREDIT_RESOURCE_SOURCE,
+  GRIP_TRASH_EVENT_SOURCE,
+  STACK_TOP5_EVENT_SOURCE,
   SERVER_EXPOSE_PROGRAM_SOURCES,
   SERVER_ICE_SWAP_UPGRADE_SOURCE,
-  SHORT_CIRCUIT_RESOURCE_SOURCE,
+  PAID_STACK_SEARCH_RESOURCE_SOURCE,
   STACK_SEARCH_PROGRAM_SOURCES,
   STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
-import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
+import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
-  ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
-  CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
-  EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
-  FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
-  JAPANESE_WATER_TORTURE_BREAKER_ID,
-  MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-  MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
-  OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
-  RABBIT_HQ_INTERFACE_PROGRAM_ID,
-  SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
-  SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
-  VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
-  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+  BLACK_ICE_DEREZ_EVENT_SOURCE,
+  HQ_ICE_JETTISON_EVENT_SOURCE,
+  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
+  FORCE_REZ_EVENT_SOURCE,
+  BREAKER_DISABLE_PROGRAM_SOURCE,
+  HOST_RETURN_HARDWARE_SOURCE,
+  INSTALLED_CARD_TRASH_EVENT_SOURCE,
+  TAG_RETURN_EVENT_SOURCE,
+  HQ_INTERFACE_PROGRAM_SOURCE,
+  HQ_CARD_TRASH_EVENT_SOURCE,
+  HQ_ACCESS_RETAIN_EVENT_SOURCE,
+  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
+  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
@@ -682,7 +682,7 @@ import {
 } from "../../compatibility/runtime-compatibility";
 import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
-  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE,
+  RANDOM_RESOURCE_SOURCE,
   RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
 import {
@@ -691,10 +691,10 @@ import {
   TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
-  CRYBABY_ACCESS_COST_UPGRADE_ID,
-  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+  ACCESS_COST_UPGRADE_SOURCE,
+  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
 import {
   RUN_TAX_UPGRADE_SOURCES,
@@ -752,8 +752,10 @@ export const PROTEUS_ARMAGEDDON_ID =
 // imports without changing existing score legality or revalidation ordering.
 export const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  serverDifficultyIncreaseFromRunCounters,
-  serverDifficultyReductionFromUpgrades,
+  serverDifficultyIncreaseFromRunCounters: (state, agendaId) =>
+    runtimeDelegates.serverDifficultyIncreaseFromRunCounters(state, agendaId),
+  serverDifficultyReductionFromUpgrades: (state, agendaId) =>
+    runtimeDelegates.serverDifficultyReductionFromUpgrades(state, agendaId),
 };
 
 export const DEFAULT_CONTROLLERS: {
@@ -777,7 +779,7 @@ export const DEFAULT_CONTROLLERS: {
 export type ActiveRun = NonNullable<GameState["run"]>;
 export type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 export const INITIAL_HAND_SIZE = 5;
-export const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
+export const TAG_REMOVAL_RECURRING_CREDIT_SOURCES = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
@@ -801,7 +803,11 @@ export function finishRun(
   successful: boolean,
   legalAction?: LegalAction,
 ): void {
-  handleRunEndCleanup(runEndCleanupHost(state), successful, legalAction);
+  handleRunEndCleanup(
+    runtimeDelegates.runEndCleanupHost(state),
+    successful,
+    legalAction,
+  );
 }
 
 
@@ -832,8 +838,8 @@ export function cardImplementationAgendaPointInstallCost(
 }
 
 export function drawTaxSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state).filter((sourceId: CardInstanceId) =>
-    isDrawTaxSourceDefinition(state, sourceId),
+  return rezzedCorpRootCardIdsFromState(state).filter((sourceId: CardInstanceId) =>
+    runtimeDelegates.isDrawTaxSourceDefinition(state, sourceId),
   );
 }
 
@@ -950,10 +956,13 @@ type CorpAgendaPointCostResult = {
 
 
 export function recurringTraceCreditPoolSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state)
+  return rezzedCorpRootCardIdsFromState(state)
     .filter(
       (cardId: CardInstanceId) => {
-        const utility = corpUtilityImplementationForCard(state, cardId);
+        const utility = runtimeDelegates.corpUtilityImplementationForCard(
+          state,
+          cardId,
+        );
         return (
           utility?.kind === "recurring_trace_credit_pool" &&
           utility.counterType === "bit" &&
@@ -989,13 +998,15 @@ export function runnerInstalledHardwareTrashTarget(
 
 
 export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
-  encounterTemporaryTraceCreditsAvailable,
-  spendEncounterTemporaryTraceCredits,
+  encounterTemporaryTraceCreditsAvailable: (state, trace) =>
+    runtimeDelegates.encounterTemporaryTraceCreditsAvailable(state, trace),
+  spendEncounterTemporaryTraceCredits: (state, trace, amount) =>
+    runtimeDelegates.spendEncounterTemporaryTraceCredits(state, trace, amount),
   fortTraceBitPoolTotal: (state) =>
-    fortTraceBitPoolTotal(fortRunSideFamiliesHostForState(state)),
+    fortTraceBitPoolTotal(runtimeDelegates.fortRunSideFamiliesHostForState(state)),
   spendFortTraceBitPool: (state, sourceCardId, serverId, amount) =>
     spendFortTraceBitPool(
-      fortRunSideFamiliesHostForState(state),
+      runtimeDelegates.fortRunSideFamiliesHostForState(state),
       sourceCardId,
       serverId,
       amount,
@@ -1003,9 +1014,12 @@ export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
   corpCreditsAvailable: (state) => state.corp.credits,
   spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
   corpTraceBitPoolTotal: recurringTraceCreditPoolTotal,
-  spendCorpTraceBitPool: spendRecurringTraceCreditPool,
-  corpTraceCounterPoolTotal: corpTraceCounterPoolTotal,
-  spendCorpTraceCounterPool: spendCorpTraceCounterPoolCounters,
+  spendCorpTraceBitPool: (state, amount) =>
+    runtimeDelegates.spendRecurringTraceCreditPool(state, amount),
+  corpTraceCounterPoolTotal: (state) =>
+    runtimeDelegates.corpTraceCounterPoolTotal(state),
+  spendCorpTraceCounterPool: (state, amount) =>
+    runtimeDelegates.spendCorpTraceCounterPoolCounters(state, amount),
   cardCounter,
 };
 
@@ -1031,8 +1045,9 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
             : {}),
         };
       }),
-  hostedPaymentCredits,
-  spendHostedPaymentCredits,
+  hostedPaymentCredits: (state, cardId) => cardCounter(state, cardId, "bit"),
+  spendHostedPaymentCredits: (state, cardId, amount) =>
+    spendCardCounter(state, cardId, "bit", amount),
   runnerCreditsAvailable: (state) => state.runner.credits,
   spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
   recordRunnerRunCreditSpend: (state, amount) => {

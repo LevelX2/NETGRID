@@ -26,7 +26,7 @@ export const crybabyImplementation: CardImplementationDefinition = {
     },
   ],
   remainingReplacementLongtail: {
-    kind: "crybaby_crying_counter",
+    kind: "link_reduction_counter_upgrade",
     counterType: "crying",
     linkReductionPerCounter: 2,
     removeCost: 2,

@@ -11,7 +11,7 @@ import {
 } from "@netgrid/shared";
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE } from "../../compatibility/runtime-compatibility";
-import { ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID } from "../../mechanics/longtail-card-effects";
+import { ACTIVE_ICE_TRASH_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   payEncounterSubroutineRunCost,
   runDurationPaymentHost,
@@ -528,7 +528,7 @@ export function startActiveIceProgramTrashChoice(
   const run = mustRun(state);
   const sourceIceId = run.activeIceProgramTrashSourceIceId;
   if (!sourceIceId) return { handled: false };
-  if (definitionFor(state, sourceIceId).id !== ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID)
+  if (definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE)
     throw new Error("Active-ICE-Program-Trash-Quelle ist ungueltig.");
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -540,14 +540,14 @@ export function startActiveIceProgramTrashChoice(
   if (programOptions.length === 0) {
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "active_ice_program_trash",
-      sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
       activeIceProgramTrashChoiceOpened: false,
       trashedCount: 0,
     });
     return {
       handled: true,
       choiceOpened: false,
-      sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
     };
   }
   state.pendingChoice = {
@@ -564,7 +564,7 @@ export function startActiveIceProgramTrashChoice(
   };
   legalActionPayload(legalAction, {
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
     activeIceProgramTrashChoiceOpened: true,
     activeIceProgramTrashCandidateCount: programOptions.length,
     hiddenZoneBarrier: true,
@@ -573,7 +573,7 @@ export function startActiveIceProgramTrashChoice(
   return {
     handled: true,
     choiceOpened: true,
-    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
     stateChanged: true,
   };
 }
@@ -647,7 +647,7 @@ export function resolveActiveIceProgramTrashChoice(
   if (
     !sourceIceId ||
     !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID
+    definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE
   )
     throw new Error("Active-ICE-Program-Trash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -666,7 +666,7 @@ export function resolveActiveIceProgramTrashChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "active_ice_program_trash",
     trashedCount: 1,
@@ -674,7 +674,7 @@ export function resolveActiveIceProgramTrashChoice(
   };
   return {
     handled: true,
-    sourceDefinitionId: ACTIVE_ICE_PROGRAM_TRASH_SOURCE_ID,
+    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
     stateChanged: true,
   };
 }

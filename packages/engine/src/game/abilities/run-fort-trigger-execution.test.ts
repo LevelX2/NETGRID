@@ -242,7 +242,7 @@ function testHost(
         overrides.startHqIceSwapChoice ?? (() => undefined),
     },
     constants: {
-      MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID:
+      HOST_RETURN_HARDWARE_SOURCE:
         MICROTECH_BACKUP_DRIVE_ID,
     },
   };

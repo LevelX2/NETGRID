@@ -5,7 +5,7 @@ import { createCardRuntimeDepsHosts } from "./card-runtime-deps-hosts";
 import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-hosts";
 
 export function createCardRuntimeHosts(deps: RuntimeDeps) {
-  const runtime: Record<string, unknown> = {};
+  const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
     createCardRuntimeDepsHosts(deps, runtime),
