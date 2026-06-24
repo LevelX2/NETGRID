@@ -187,6 +187,7 @@ import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
   createSemanticRuntimeChoiceBuilderContext,
 } from "./runtime/semantic-runtime-choice-builder-context";
+import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
@@ -4891,10 +4892,6 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 function numberRecordValue(value: unknown, key: string): number | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "number" ? record[key] : undefined;
-}
-
-function semanticRuntimeExplanation(side: Side, scopeId: string): string {
-  return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
 }
 
 function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
