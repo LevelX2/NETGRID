@@ -115,6 +115,14 @@ Checks:
 - `corepack pnpm check:engine-cardimplementation-architecture-target`
 - `git diff --check`
 
+Abschluss 2026-06-24:
+- Nummerierte `context-effects-part-*`-Dateien und der Catch-all-Context-Dispatcher sind durch fachlich benannte Effect-Familien ersetzt.
+- Jede `CardEffectImplementation.kind` hat genau einen Effect-Family-Owner; die P3-Kategorie `effect families are domain-owned and exhaustive` steht bei `0`.
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/ability-engine src/game/card-implementation src/index-tests/mechanics/trace-tags-resources.test.ts src/index-tests/mechanics/per-card-longtail.test.ts`: grün, 12 Testdateien / 118 Tests.
+- `corepack pnpm --filter @netgrid/engine typecheck`: grün.
+- `corepack pnpm --filter @netgrid/engine test`: grün, 173 Testdateien / 1519 Tests.
+- `corepack pnpm check:engine-cardimplementation-architecture-target`: erwartbar weiter rot für P4/P5-Kategorien; P3-Kategorie steht bei `0`.
+
 Commit: `refactor(engine): split effect execution into domain families`
 
 ### P4 Longtail-, State-, Payload- und Karten-ID-Regelpfade migrieren

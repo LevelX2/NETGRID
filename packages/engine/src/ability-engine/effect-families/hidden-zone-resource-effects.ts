@@ -1,7 +1,7 @@
 import type { MultiServerSuccessSequenceState } from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeContextEffectPart4(
+export function executeHiddenZoneResourceEffect(
   input: CardEffectFamilyInput,
 ): boolean {
   const {

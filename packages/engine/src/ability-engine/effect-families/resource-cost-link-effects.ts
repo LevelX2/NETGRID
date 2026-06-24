@@ -1,7 +1,7 @@
 import type { MultiServerSuccessSequenceState } from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeContextEffectPart5(
+export function executeResourceCostLinkEffect(
   input: CardEffectFamilyInput,
 ): boolean {
   const {
