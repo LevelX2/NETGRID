@@ -134,10 +134,6 @@ import {
 import {
   buildSemanticDecisionDebugScoreComponent,
 } from "./diagnostics/decision-debug";
-import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "./diagnostics/coverage-selection-debug";
-import { buildSemanticRuntimeActionAlternatives } from "./diagnostics/semantic-runtime-action-alternatives";
-import { buildSemanticRuntimeRankedAlternatives } from "./diagnostics/semantic-runtime-ranked-alternatives";
-import { buildSemanticRuntimeDecisionDebug } from "./diagnostics/semantic-runtime-decision-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
@@ -327,6 +323,7 @@ import {
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
+import { createSemanticRuntimeDebugContext } from "./runtime/semantic-runtime-debug-context";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -4239,111 +4236,6 @@ function runnerStrategicIntentForInput(
   );
 }
 
-function semanticRuntimeDecisionDebug(
-  input: AiDecisionInput,
-  selected: SemanticRuntimeChoice,
-  rankedChoices: SemanticRuntimeChoice[],
-  legacyDecision: AiDecision,
-  legacyActionType: LegalAction["type"] | undefined,
-  planRuntime: TacticalPlanRuntimeResult,
-): AiDecisionDebug {
-  const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
-    input,
-    selected.action,
-    planRuntime,
-  );
-  const selectedSemanticScoreBreakdown = semanticRuntimeScoreBreakdown(
-    input,
-    selected.action,
-    selected.scopeId,
-  );
-  const rankedAlternatives = semanticRuntimeRankedAlternatives(
-    input,
-    rankedChoices,
-    selected.action.actionId,
-  );
-  const actionAlternatives = semanticRuntimeActionAlternatives(
-    input,
-    rankedChoices,
-    selected.action.actionId,
-    planRuntime,
-  );
-  return buildSemanticRuntimeDecisionDebug({
-    input,
-    selected,
-    legacyDecision,
-    ...(legacyActionType ? { legacyActionType } : {}),
-    planRuntime,
-    ...(coverageSelectionDebug
-      ? { coverageSelection: coverageSelectionDebug }
-      : {}),
-    selectedScoreBreakdown: selectedSemanticScoreBreakdown,
-    rankedAlternatives,
-    actionAlternatives,
-  });
-}
-
-function semanticRuntimeRankedAlternatives(
-  input: AiDecisionInput,
-  rankedChoices: SemanticRuntimeChoice[],
-  selectedActionId: string,
-): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
-  return buildSemanticRuntimeRankedAlternatives({
-    rankedChoices,
-    selectedActionId,
-    scoreBreakdownForChoice: (choice) =>
-      semanticRuntimeScoreBreakdown(
-        input,
-        choice.action,
-        choice.scopeId,
-        choice.exclusion,
-      ),
-  });
-}
-
-function semanticRuntimeActionAlternatives(
-  input: AiDecisionInput,
-  rankedChoices: SemanticRuntimeChoice[],
-  selectedActionId: string,
-  planRuntime: TacticalPlanRuntimeResult,
-): NonNullable<AiDecisionDebug["actionAlternatives"]> {
-  const selectedChoice = rankedChoices.find(
-    (choice) => choice.action.actionId === selectedActionId,
-  );
-  const coverageSelection = selectedChoice
-    ? semanticRuntimeCoverageSelectionDebug(
-        input,
-        selectedChoice.action,
-        planRuntime,
-      )
-    : undefined;
-  return buildSemanticRuntimeActionAlternatives({
-    rankedChoices,
-    selectedActionId,
-    planRuntime,
-    ...(coverageSelection ? { coverageSelection } : {}),
-    sourceTitleForChoice: (choice) =>
-      semanticRuntimeVisibleSourceCard(input, choice.action)?.title,
-    scoreBreakdownForChoice: (choice) =>
-      semanticRuntimeScoreBreakdown(
-        input,
-        choice.action,
-        choice.scopeId,
-        choice.exclusion,
-      ),
-  });
-}
-
-function semanticRuntimeCoverageSelectionDebug(
-  input: AiDecisionInput,
-  action: LegalAction,
-  planRuntime: TacticalPlanRuntimeResult,
-): SemanticRuntimeCoverageSelectionDebug | undefined {
-  return buildSemanticRuntimeCoverageSelectionDebug(input, action, planRuntime, {
-    visibleSourceCard: semanticRuntimeVisibleSourceCard,
-  });
-}
-
 function semanticRuntimeScoreBreakdown(
   input: AiDecisionInput,
   action: LegalAction,
@@ -4374,6 +4266,14 @@ function semanticRuntimeScoreBreakdown(
     },
   });
 }
+
+const {
+  semanticRuntimeDecisionDebug,
+  semanticRuntimeCoverageSelectionDebug,
+} = createSemanticRuntimeDebugContext({
+  scoreBreakdown: semanticRuntimeScoreBreakdown,
+  visibleSourceCard: semanticRuntimeVisibleSourceCard,
+});
 
 type VisibleEncounterSubroutine = NonNullable<
   NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
