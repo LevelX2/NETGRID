@@ -198,9 +198,6 @@ import {
   createRunnerSelfDamageContext,
 } from "./runtime/runner-self-damage-context";
 import {
-  runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
-} from "./runtime/runner-program-sacrifice-exclusion";
-import {
   createRunnerBlinkRiskContext,
 } from "./runtime/runner-blink-risk-context";
 import {
@@ -259,10 +256,6 @@ import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-cont
 import {
   createRunnerProgramInstallTrashContext,
 } from "./runtime/runner-program-install-trash-context";
-import {
-  runnerProgramInstallDisplacementPenalty,
-  type RunnerProgramInstallTrashAssessment,
-} from "./runtime/runner-program-install-trash-policy";
 import {
   createRunnerRunTargetGuidanceContext,
 } from "./runtime/runner-run-target-guidance-context";
@@ -3767,6 +3760,8 @@ const {
   selectedRunnerForcedProgramTrashOptionIds,
   runnerProgramInstallTrashAssessment,
   runnerProgramInstallTrashAssessmentForAction,
+  runnerProgramInstallDisplacementPenalty,
+  runnerProgramSacrificeExclusion,
 } = createRunnerProgramInstallTrashContext({
   safeNonNegativeInteger,
   visibleMemoryCost: visibleMemoryCostForAi,
@@ -3958,14 +3953,7 @@ const {
       pumpViabilityAssessment,
       breakAccessPathAssessment,
     }),
-  runnerProgramSacrificeExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
-    buildRunnerProgramSacrificeExclusion(runtimeInput, action, {
-      assessmentForAction: runnerProgramInstallTrashAssessmentForAction,
-      displacementPenalty: (assessment: unknown) =>
-        runnerProgramInstallDisplacementPenalty(
-          assessment as RunnerProgramInstallTrashAssessment | undefined,
-        ),
-    }),
+  runnerProgramSacrificeExclusion,
   runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
   runnerRunTargetEvaluationForAction:
     semanticRuntimeRunnerRunTargetEvaluationForAction,

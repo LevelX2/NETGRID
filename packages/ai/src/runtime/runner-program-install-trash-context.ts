@@ -2,11 +2,14 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import {
   programSacrificeCandidate as buildProgramSacrificeCandidate,
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
+  runnerProgramInstallDisplacementPenalty as buildRunnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
   sacrificeCandidateLabel,
   type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runner-program-install-trash-policy";
+import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
+import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 type PendingChoiceOptions = PendingChoice["options"];
@@ -48,6 +51,13 @@ export type RunnerProgramInstallTrashContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerProgramInstallTrashAssessment | undefined;
+  runnerProgramInstallDisplacementPenalty: (
+    assessment: RunnerProgramInstallTrashAssessment | undefined,
+  ) => number;
+  runnerProgramSacrificeExclusion: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeExclusion | undefined;
 };
 
 export function createRunnerProgramInstallTrashContext(
@@ -228,10 +238,33 @@ export function createRunnerProgramInstallTrashContext(
     );
   }
 
+  function runnerProgramInstallDisplacementPenalty(
+    assessment: RunnerProgramInstallTrashAssessment | undefined,
+  ): number {
+    return buildRunnerProgramInstallDisplacementPenalty(assessment);
+  }
+
+  function runnerProgramSacrificeExclusion(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): SemanticRuntimeExclusion | undefined {
+    const assessment = runnerProgramInstallTrashAssessmentForAction(
+      input,
+      action,
+    );
+    return buildRunnerProgramSacrificeExclusion(input, action, {
+      assessmentForAction: () => assessment,
+      displacementPenalty: () =>
+        runnerProgramInstallDisplacementPenalty(assessment),
+    });
+  }
+
   return {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallDisplacementPenalty,
+    runnerProgramSacrificeExclusion,
   };
 }

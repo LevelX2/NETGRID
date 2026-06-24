@@ -1570,6 +1570,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertachtundvierzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-program-install-trash-context.ts` kapselt zusätzlich Program-Install-DisplacementPenalty und Program-Sacrifice-Exclusion auf Basis des dort erzeugten Action-Assessments.
+  - `packages/ai/src/index.ts` nutzt Penalty und Exclusion aus dem Program-Install-Trash-Context und entfernt den lokalen Program-Sacrifice-Exclusion-Adapter samt Cast.
+  - `packages/ai/src/index.ts` sank weiter von 28.789 auf 28.777 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
