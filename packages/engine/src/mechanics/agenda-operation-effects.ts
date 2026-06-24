@@ -27,8 +27,6 @@ export const ADVANCEMENT_PLACEMENT_OPERATION_ID =
 export const TEAM_RESTRUCTURING_COUNTER_OPERATION_ID =
   "onr_v1_305_team-restructuring";
 
-export const CHICAGO_BRANCH_COUNTER_ASSET_ID = "onr_v1_312_chicago-branch";
-
 export const CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_315_corprunners-shattered-remains";
 
@@ -40,8 +38,6 @@ export const INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID =
 
 export const VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_346_vacant-soulkiller";
-
-export const VAPOR_OPS_COUNTER_ASSET_ID = "onr_v1_347_vapor-ops";
 
 export const VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_348_virus-test-site";
