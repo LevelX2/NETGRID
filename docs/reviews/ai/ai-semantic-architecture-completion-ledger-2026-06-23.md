@@ -807,6 +807,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` einundsiebzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/visible-card-heuristics.ts` kapselt zusätzlich sichtbare Counter-Werte, Install-/Memory-Kosten, `safeNonNegativeInteger` und die sichtbare InstanceId-Kartenmap.
+  - `packages/ai/src/index.ts` behält nur Wrapper für bestehende lokale Call-Sites und delegiert die Utility-Logik.
+  - `packages/ai/src/index.ts` sank weiter von 33.199 auf 33.181 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

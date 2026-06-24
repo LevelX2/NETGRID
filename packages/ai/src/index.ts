@@ -290,8 +290,13 @@ import {
 import {
   runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
   runnerCardLooksLikeCreditPayout as buildRunnerCardLooksLikeCreditPayout,
+  safeNonNegativeInteger as buildSafeNonNegativeInteger,
+  visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
   visibleCardPlayOrInstallCost as buildVisibleCardPlayOrInstallCost,
   visibleCardText as buildVisibleCardText,
+  visibleCounterValue as buildVisibleCounterValue,
+  visibleInstallCost as buildVisibleInstallCost,
+  visibleMemoryCost as buildVisibleMemoryCost,
 } from "./runtime/visible-card-heuristics";
 import {
   runnerCardAddressesVisibleBreakerNeed as buildRunnerCardAddressesVisibleBreakerNeed,
@@ -11941,30 +11946,19 @@ function programSacrificeCandidateIsRedundant(
 }
 
 function visibleCounterValueForAi(card: VisibleCard | undefined): number {
-  if (!card) return 0;
-  const counters = Object.values(card.counters ?? {}).reduce(
-    (sum, value) => sum + (typeof value === "number" ? Math.max(0, value) : 0),
-    0,
-  );
-  return counters + (card.counterDisplays?.length ?? 0);
+  return buildVisibleCounterValue(card);
 }
 
 function visibleInstallCostForAi(card: VisibleCard | undefined): number {
-  if (!card) return 0;
-  const value = card.installCost ?? card.cost;
-  return typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.floor(value))
-    : 0;
+  return buildVisibleInstallCost(card);
 }
 
 function visibleMemoryCostForAi(card: VisibleCard | undefined): number {
-  return safeNonNegativeInteger(card?.memoryCost);
+  return buildVisibleMemoryCost(card);
 }
 
 function safeNonNegativeInteger(value: number | undefined): number {
-  return typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.floor(value))
-    : 0;
+  return buildSafeNonNegativeInteger(value);
 }
 
 function sacrificeCandidateLabel(candidate: ProgramSacrificeCandidate): string {
@@ -11979,19 +11973,7 @@ function sacrificeCandidateLabel(candidate: ProgramSacrificeCandidate): string {
 function visibleCardsByInstanceIdForAi(
   view: PlayerView,
 ): Map<string, VisibleCard> {
-  const cards = [
-    view.own.identity,
-    ...view.own.gripOrHq,
-    ...view.own.heapOrArchives,
-    ...view.own.scoreArea,
-    ...(view.own.rig ?? []),
-    view.opponent.identity,
-    ...view.opponent.scoreArea,
-    ...(view.opponent.rig ?? []),
-    ...(view.opponent.discardCards ?? []),
-    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
-  ];
-  return new Map(cards.map((card) => [card.instanceId, card]));
+  return buildVisibleCardsByInstanceId(view);
 }
 
 function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
