@@ -592,10 +592,10 @@ describe("successful run interventions", () => {
     expect(actions.map((action) => action.payload)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          v1922RunnerProgramAbility: "false_echo_force_rez",
+          v1922RunnerProgramAbility: "successful_run_force_rez",
         }),
         expect.objectContaining({
-          v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+          v1922RunnerProgramAbility: "successful_run_reverse_ice",
         }),
         expect.objectContaining({
           runnerUtilityAbility: "i_spy_put_spy_counter",
@@ -605,13 +605,13 @@ describe("successful run interventions", () => {
 
     const falseEchoAction = actions.find(
       (action) =>
-        action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
+        action.payload?.v1922RunnerProgramAbility === "successful_run_force_rez",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, falseEchoAction);
     expect(fixture.state.runner.credits).toBe(3);
     expect(fixture.state.corp.credits).toBe(4);
     expect(falseEchoAction.payload).toMatchObject({
-      falseEchoCreditCost: 2,
+      successfulRunForceRezCreditCost: 2,
       checkedIceCount: 2,
       rezzedIceCount: 2,
       rezCostPaid: 6,
@@ -625,7 +625,7 @@ describe("successful run interventions", () => {
     const netspaceAction = actions.find(
       (action) =>
         action.payload?.v1922RunnerProgramAbility ===
-        "netspace_inverter_reverse_ice",
+        "successful_run_reverse_ice",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, netspaceAction);
     expect(fixture.servers[0]!.ice).toEqual(beforeOrder.reverse());

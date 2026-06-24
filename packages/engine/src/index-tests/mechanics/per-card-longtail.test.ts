@@ -3176,7 +3176,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
+        action.payload?.v1922RunnerProgramAbility === "successful_run_force_rez",
     );
     expect(falseEcho.costs[0]?.credits).toBe(2);
     const stale = applyAction(state, {
@@ -3199,11 +3199,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.cardInstances[innerIce]?.rezzed).toBe(true);
     expect(state.cardInstances[outerIce]?.rezzed).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerProgramAbility: "false_echo_force_rez",
+      v1922RunnerProgramAbility: "successful_run_force_rez",
       checkedIceCount: 2,
       rezzedIceCount: 2,
       rezCostPaid: 5,
-      falseEchoCreditCost: 2,
+      successfulRunForceRezCreditCost: 2,
       runnerCreditsAfter: 8,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -3220,7 +3220,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.v1922RunnerProgramAbility ===
-          "netspace_inverter_reverse_ice",
+          "successful_run_reverse_ice",
     );
     reverseState = apply(
       reverseState,
@@ -3231,7 +3231,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       reverseState.corp.servers.find((server) => server.id === "remote_1")?.ice,
     ).toEqual([outerIce, innerIce]);
     expect(reverseState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+      v1922RunnerProgramAbility: "successful_run_reverse_ice",
       iceCount: 2,
       serverIceOrderReversed: true,
     });

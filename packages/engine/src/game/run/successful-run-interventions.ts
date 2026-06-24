@@ -253,8 +253,8 @@ export function buildSuccessfulRunFollowupActions(
           {
             cardId: sourceCardId,
             serverId: server.id,
-            v1922RunnerProgramAbility: "false_echo_force_rez",
-            falseEchoCreditCost: abilityCost,
+            v1922RunnerProgramAbility: "successful_run_force_rez",
+            successfulRunForceRezCreditCost: abilityCost,
             unrezzedIceCount: unrezzedCount,
           },
         ),
@@ -366,7 +366,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+              v1922RunnerProgramAbility: "successful_run_reverse_ice",
               iceCount: server.ice.length,
             },
           ),
@@ -387,7 +387,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
+              v1919RunnerProgramAbility: "successful_run_remote_counter",
               counterType: "power",
               addCounterAmount: 1,
             },
@@ -424,16 +424,16 @@ export function resolveSuccessfulRunFollowupAbility(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
-  if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez")
+  if (legalAction.payload?.v1922RunnerProgramAbility === "successful_run_force_rez")
     return resolveFalseEchoForceRez(host, legalAction);
   if (
     legalAction.payload?.v1922RunnerProgramAbility ===
-    "netspace_inverter_reverse_ice"
+    "successful_run_reverse_ice"
   )
     return resolveNetspaceInverterReverseIce(host, legalAction);
   if (
     legalAction.payload?.v1919RunnerProgramAbility ===
-    "fait_accompli_successful_run_counter"
+    "successful_run_remote_counter"
   )
     return resolveFaitAccompliSuccessfulRunCounter(host, legalAction);
   if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter")
@@ -1111,7 +1111,7 @@ function resolveFalseEchoForceRez(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId,
-    falseEchoCreditCost: abilityCost,
+    successfulRunForceRezCreditCost: abilityCost,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     checkedIceCount: checkedIceIds.length,
     rezzedIceCount: rezzedCount,
