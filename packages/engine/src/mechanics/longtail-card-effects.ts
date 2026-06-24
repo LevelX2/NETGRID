@@ -22,8 +22,6 @@ export const SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID =
 export const VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID =
   "onr_v1_117_valu-pak-software-bundle";
 
-export const NEWSGROUP_FILTER_CREDIT_PROGRAM_ID = "onr_v1_045_newsgroup-filter";
-
 export const JAPANESE_WATER_TORTURE_BREAKER_ID =
   "onr_v1_037_japanese-water-torture";
 
@@ -33,8 +31,6 @@ export const ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID =
 export const RABBIT_HQ_INTERFACE_PROGRAM_ID = "onr_v1_051_rabbit";
 
 export const SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID = "onr_v1_057_scatter-shot";
-
-export const ARTEMIS_2020_STRENGTH_HARDWARE_ID = "onr_v1_122_artemis-2020";
 
 export const COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID =
   "onr_v1_124_corolla-speed-chip";
@@ -46,30 +42,8 @@ export const NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID =
 
 export const SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID = "onr_v1_067_speed-trap";
 
-export const ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID =
-  "onr_v1_119_arasaka-portable-prototype";
-
 export const MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID =
   "onr_v1_131_microtech-backup-drive";
-
-export const PANDORAS_DECK_LINK_HARDWARE_ID = "onr_v1_136_pandoras-deck";
-
-export const CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID =
-  "onr_v1_195_corporate-retreat";
-
-export const CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID =
-  "onr_v1_196_corporate-war";
-
-export const DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID =
-  "onr_v1_197_data-fort-reclamation";
-
-export const MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID =
-  "onr_v1_206_marine-arcology";
-
-export const POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID =
-  "onr_v1_210_political-overthrow";
-
-export const SECURITY_PURGE_PURGE_AGENDA_ID = "onr_v1_216_security-purge";
 
 export const EDGERUNNER_TEMPS_INSTALL_OPERATION_ID =
   "onr_v1_289_edgerunner-inc-temps";
