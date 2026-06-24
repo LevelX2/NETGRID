@@ -444,8 +444,14 @@ import {
   runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
 } from "./runtime/runner-repeated-run-target-score";
 import {
+  semanticRuntimeCorpDoctrineWeight as buildSemanticRuntimeCorpDoctrineWeight,
+  semanticRuntimeCorpScoreNowDoctrineWeight as buildSemanticRuntimeCorpScoreNowDoctrineWeight,
+  semanticRuntimeDoctrineClamp,
+  semanticRuntimeDoctrineConsumerForPlan,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
   semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
+  type SemanticRuntimeCorpDoctrineWeightDependencies,
+  type SemanticRuntimeDoctrineConsumer,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
   semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
@@ -6661,30 +6667,24 @@ function semanticRuntimeCorpDoctrineWeight(
   planKey: string,
   consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "corp" || input.ownDeckDoctrine?.side !== "corp")
-    return undefined;
-  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
-  const gate = semanticRuntimeDoctrineActionGate(
+  return buildSemanticRuntimeCorpDoctrineWeight(
     input,
     action,
     planKey,
     consumer,
+    SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES,
   );
-  if (raw > 0 && !gate.allowed) {
-    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
-  }
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
 }
 
 function semanticRuntimeCorpScoreNowDoctrineWeight(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  return semanticRuntimeCorpDoctrineWeight(
+  return buildSemanticRuntimeCorpScoreNowDoctrineWeight(
     input,
     action,
-    "score_now",
     "corp_score_now",
+    SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES,
   );
 }
 
@@ -6699,13 +6699,13 @@ function semanticRuntimeCorpScoreNowSafetyGate(
   );
 }
 
-type SemanticRuntimeDoctrineConsumer =
-  | "corp_score_now"
-  | "corp_score_next_turn"
-  | "corp_build_scoring_remote"
-  | "runner_pressure_rnd"
-  | "runner_pressure_hq"
-  | "runner_contest_remote";
+const SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES: SemanticRuntimeCorpDoctrineWeightDependencies<SemanticRuntimeDoctrineConsumer> =
+  {
+    rawWeight: semanticRuntimeDoctrineRawWeight,
+    actionGate: semanticRuntimeDoctrineActionGate,
+    suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
+    planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
+  };
 
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
@@ -6729,44 +6729,6 @@ function semanticRuntimeDoctrineRawWeight(
   planKey: string,
 ): number {
   return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
-}
-
-function semanticRuntimeDoctrineClamp(
-  consumer: SemanticRuntimeDoctrineConsumer,
-): number {
-  switch (consumer) {
-    case "corp_score_now":
-      return 24;
-    case "corp_score_next_turn":
-    case "corp_build_scoring_remote":
-      return 18;
-    case "runner_pressure_rnd":
-    case "runner_pressure_hq":
-      return 12;
-    case "runner_contest_remote":
-      return 9;
-  }
-}
-
-function semanticRuntimeDoctrineConsumerForPlan(
-  planKey: string,
-): SemanticRuntimeDoctrineConsumer {
-  switch (planKey) {
-    case "score_now":
-      return "corp_score_now";
-    case "score_next_turn":
-      return "corp_score_next_turn";
-    case "build_scoring_remote":
-      return "corp_build_scoring_remote";
-    case "pressure_rnd":
-      return "runner_pressure_rnd";
-    case "pressure_hq":
-      return "runner_pressure_hq";
-    case "contest_remote":
-      return "runner_contest_remote";
-    default:
-      throw new Error(`Unknown semantic runtime doctrine plan ${planKey}`);
-  }
 }
 
 function semanticRuntimeDoctrineActionGate(
