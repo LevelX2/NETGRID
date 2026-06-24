@@ -296,21 +296,7 @@ import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit
 import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
 } from "./runtime/runner-viral15-jack-out-score";
-import {
-  runnerBlinkRecoveryScoreComponent as buildRunnerBlinkRecoveryScoreComponent,
-} from "./runtime/runner-blink-recovery-score";
-import {
-  runnerLateNoFundingCreditRepeatScoreComponent as buildRunnerLateNoFundingCreditRepeatScoreComponent,
-  runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
-} from "./runtime/runner-recovery-repeat-score";
-import {
-  runnerRecoveryFundingNeedContext as buildRunnerRecoveryFundingNeedContext,
-  type RunnerRecoveryFundingNeedContext,
-} from "./runtime/runner-recovery-funding-need";
-import {
-  runnerActionLooksLikeRecovery as buildRunnerActionLooksLikeRecovery,
-  runnerRecentRecoveryActions as buildRunnerRecentRecoveryActions,
-} from "./runtime/runner-recovery-history";
+import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
   runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
   runnerCardLooksLikeCreditPayout as buildRunnerCardLooksLikeCreditPayout,
@@ -332,14 +318,6 @@ import {
   visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
   visibleBreakerRoles as buildVisibleBreakerRoles,
 } from "./runtime/runner-visible-breaker-coverage";
-import {
-  runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
-} from "./runtime/runner-junkyard-bbs-recovery-score";
-import {
-  runnerJunkyardBbsRecoveryAction as buildRunnerJunkyardBbsRecoveryAction,
-  runnerJunkyardBbsRecoveryTarget as buildRunnerJunkyardBbsRecoveryTarget,
-  runnerJunkyardBbsRecoveryTargetAssessment as buildRunnerJunkyardBbsRecoveryTargetAssessment,
-} from "./runtime/runner-junkyard-bbs-recovery-target";
 import {
   runnerPersistentInstallEvidenceForAction as buildRunnerPersistentInstallEvidenceForAction,
   runnerPersistentInstallEvaluationForAction as buildRunnerPersistentInstallEvaluationForAction,
@@ -6054,127 +6032,6 @@ function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
   });
 }
 
-function runnerBlinkRecoveryScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerBlinkRecoveryScoreComponent(input, action, {
-    targetServerId: semanticRuntimeServerId,
-    assessment: runnerBlinkRecoveryAssessment,
-    rolesForAction,
-  });
-}
-
-function runnerLowValueRecoveryRepeatScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerLowValueRecoveryRepeatScoreComponent(input, action, {
-    actionLooksLikeRecovery: runnerActionLooksLikeRecovery,
-    recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
-    fundingNeedContext: runnerRecoveryFundingNeedContext,
-    sourceDefinitionId: sourceDefinitionIdForAction,
-  });
-}
-
-function runnerLateNoFundingCreditRepeatScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerLateNoFundingCreditRepeatScoreComponent(input, action, {
-    recentBasicCreditActions: semanticRuntimeRecentRunnerBasicCreditActions,
-    fundingNeedContext: runnerRecoveryFundingNeedContext,
-    safeProgressTargets: runnerLateNoFundingCreditSafeProgressTargets,
-  });
-}
-
-function runnerJunkyardBbsRecoveryScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerJunkyardBbsRecoveryScoreComponent(input, action, {
-    isRecoveryAction: isRunnerJunkyardBbsRecoveryAction,
-    target: runnerJunkyardBbsRecoveryTarget,
-    rolesForCardId,
-    targetAssessment: runnerJunkyardBbsRecoveryTargetAssessment,
-    actionClickCost,
-    actionCreditCost,
-  });
-}
-
-function isRunnerJunkyardBbsRecoveryAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildRunnerJunkyardBbsRecoveryAction(input, action, {
-    junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
-    returnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
-    sourceDefinitionIdForAction,
-  });
-}
-
-function runnerJunkyardBbsRecoveryTarget(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  return buildRunnerJunkyardBbsRecoveryTarget(input, action, {
-    findVisibleCard,
-  });
-}
-
-function runnerJunkyardBbsRecoveryTargetAssessment(
-  input: AiDecisionInput,
-  target: VisibleCard | undefined,
-  targetDefinitionId: string | undefined,
-  targetRoles: readonly string[],
-): { value: number; evidence: string[] } {
-  return buildRunnerJunkyardBbsRecoveryTargetAssessment(
-    input,
-    target,
-    targetDefinitionId,
-    targetRoles,
-    {
-      cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-      isRunnerPressureRole,
-      isRunnerEconomyRole,
-      fundingNeedContext: runnerRecoveryFundingNeedContext,
-      badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-    },
-  );
-}
-
-function runnerActionLooksLikeRecovery(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildRunnerActionLooksLikeRecovery(input, action, {
-    sourceCard: (runtimeInput, runtimeAction) =>
-      findVisibleCard(runtimeInput, runtimeAction.source),
-    rolesForAction,
-  });
-}
-
-function runnerRecoveryFundingNeedContext(
-  input: AiDecisionInput,
-): RunnerRecoveryFundingNeedContext {
-  return buildRunnerRecoveryFundingNeedContext(input, {
-    handFundingTarget: runnerHandFundingTarget,
-    bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
-    hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
-  });
-}
-
-function semanticRuntimeRecentRunnerRecoveryActions(
-  input: AiDecisionInput,
-  action?: LegalAction,
-): number {
-  return buildRunnerRecentRecoveryActions(input, action, {
-    publicHistory: mergedAiPublicHistory,
-    eventVersion: aiEventVersion,
-    sourceDefinitionIdForAction,
-  });
-}
-
 function runnerHandFundingTarget(
   input: AiDecisionInput,
 ): RunnerHandFundingTarget | undefined {
@@ -6380,6 +6237,38 @@ const {
   closeout: bestTrueCentralCloseoutProfileForMetrics,
   pressureReadyTargets: (input: AiDecisionInput) =>
     assessRunnerPressureReadyForMetrics(input).readyTargets,
+});
+
+const {
+  runnerBlinkRecoveryScoreComponent,
+  runnerLowValueRecoveryRepeatScoreComponent,
+  runnerLateNoFundingCreditRepeatScoreComponent,
+  runnerJunkyardBbsRecoveryScoreComponent,
+  runnerActionLooksLikeRecovery,
+  runnerRecoveryFundingNeedContext,
+  semanticRuntimeRecentRunnerRecoveryActions,
+} = createRunnerRecoveryContext({
+  targetServerId: semanticRuntimeServerId,
+  blinkAssessment: runnerBlinkRecoveryAssessment,
+  rolesForAction,
+  sourceDefinitionIdForAction,
+  recentBasicCreditActions: semanticRuntimeRecentRunnerBasicCreditActions,
+  safeProgressTargets: runnerLateNoFundingCreditSafeProgressTargets,
+  handFundingTarget: runnerHandFundingTarget,
+  bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
+  hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+  publicHistory: mergedAiPublicHistory,
+  eventVersion: aiEventVersion,
+  findVisibleCard,
+  rolesForCardId,
+  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+  isRunnerPressureRole,
+  isRunnerEconomyRole,
+  badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+  actionClickCost,
+  actionCreditCost,
+  junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
+  junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
 });
 
 const {
