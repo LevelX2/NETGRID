@@ -23,6 +23,26 @@ export type SemanticRuntimePlanMemoryExclusionDependencies = {
   ) => string[];
 };
 
+export type SemanticRuntimePlanMemoryExclusionContext = {
+  semanticRuntimePlanMemoryActionExclusion: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeExclusion | undefined;
+};
+
+export function createSemanticRuntimePlanMemoryExclusionContext(
+  dependencies: SemanticRuntimePlanMemoryExclusionDependencies,
+): SemanticRuntimePlanMemoryExclusionContext {
+  function actionExclusion(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): SemanticRuntimeExclusion | undefined {
+    return semanticRuntimePlanMemoryActionExclusion(input, action, dependencies);
+  }
+
+  return { semanticRuntimePlanMemoryActionExclusion: actionExclusion };
+}
+
 export function semanticRuntimePlanMemoryActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,

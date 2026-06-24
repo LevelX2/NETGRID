@@ -207,7 +207,7 @@ import {
   createRunnerEncounterActionExclusionContext,
 } from "./runtime/runner-encounter-action-exclusion";
 import {
-  semanticRuntimePlanMemoryActionExclusion as buildSemanticRuntimePlanMemoryActionExclusion,
+  createSemanticRuntimePlanMemoryExclusionContext,
 } from "./runtime/semantic-runtime-plan-memory-exclusion";
 import { createRunnerSimpleExclusionsContext } from "./runtime/runner-simple-exclusions-context";
 import {
@@ -3756,6 +3756,14 @@ const {
   isRunnerRigInstallAction,
 });
 const {
+  semanticRuntimePlanMemoryActionExclusion,
+} = createSemanticRuntimePlanMemoryExclusionContext({
+  previousPlan: getTacticalPlanMemorySnapshot,
+  isRunnerBankCashOutAction,
+  runnerBankCashOutIsUsefulNow,
+  runnerBankInvestmentCommitmentEvidence,
+});
+const {
   selectedRunnerProgramInstallTrashOptionIds,
   selectedRunnerForcedProgramTrashOptionIds,
   runnerProgramInstallTrashAssessment,
@@ -4665,18 +4673,6 @@ function isEndRunSubroutine(subroutine: VisibleEncounterSubroutine): boolean {
     subroutine.type === "end_the_run" ||
     subroutine.type === "end_the_run_unless_runner_pays"
   );
-}
-
-function semanticRuntimePlanMemoryActionExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  return buildSemanticRuntimePlanMemoryActionExclusion(input, action, {
-    previousPlan: getTacticalPlanMemorySnapshot,
-    isRunnerBankCashOutAction,
-    runnerBankCashOutIsUsefulNow,
-    runnerBankInvestmentCommitmentEvidence,
-  });
 }
 
 function runnerCardMechanicsForAi(definitionId: string): string[] {
