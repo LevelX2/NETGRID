@@ -19,6 +19,25 @@ export type RunnerPersistentInstallFitScoreDependencies = {
   ) => RunnerPersistentInstallEvaluation | undefined;
 };
 
+export type RunnerPersistentInstallEvaluationForActionDependencies<
+  TDeckCapabilities,
+  TStrategicIntent,
+> = {
+  deckCapabilities: (input: AiDecisionInput) => TDeckCapabilities;
+  strategicIntent: (
+    input: AiDecisionInput,
+    deckCapabilities: TDeckCapabilities,
+  ) => TStrategicIntent;
+  handDevelopmentEvaluations: (params: {
+    input: AiDecisionInput;
+    deckCapabilities: TDeckCapabilities;
+    strategicIntent: TStrategicIntent;
+  }) => readonly {
+    legalActionId?: string;
+    persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
+  }[];
+};
+
 export function runnerPersistentInstallFitScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
@@ -67,6 +86,36 @@ export function runnerPersistentInstallEvidenceForAction(
     `persistentInstallFinalFit:${evaluation.finalInstallFit}`,
     ...evaluation.evidence.slice(0, 16),
   ];
+}
+
+export function runnerPersistentInstallEvaluationForAction<
+  TDeckCapabilities,
+  TStrategicIntent,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerPersistentInstallEvaluationForActionDependencies<
+    TDeckCapabilities,
+    TStrategicIntent
+  >,
+): RunnerPersistentInstallEvaluation | undefined {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    action.type !== "install_card"
+  ) {
+    return undefined;
+  }
+  const deckCapabilities = dependencies.deckCapabilities(input);
+  const strategicIntent = dependencies.strategicIntent(input, deckCapabilities);
+  return dependencies
+    .handDevelopmentEvaluations({
+      input,
+      deckCapabilities,
+      strategicIntent,
+    })
+    .find((evaluation) => evaluation.legalActionId === action.actionId)
+    ?.persistentInstallEvaluation;
 }
 
 function sortedUnique(values: string[]): string[] {

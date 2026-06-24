@@ -384,6 +384,7 @@ import {
 } from "./runtime/runner-junkyard-bbs-recovery-target";
 import {
   runnerPersistentInstallEvidenceForAction as buildRunnerPersistentInstallEvidenceForAction,
+  runnerPersistentInstallEvaluationForAction as buildRunnerPersistentInstallEvaluationForAction,
   runnerPersistentInstallFitScoreComponent as buildRunnerPersistentInstallFitScoreComponent,
   runnerPersistentInstallLegacyScoreDelta as buildRunnerPersistentInstallLegacyScoreDelta,
 } from "./runtime/runner-persistent-install-fit-score";
@@ -6294,24 +6295,11 @@ function runnerPersistentInstallEvaluationForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ) {
-  if (
-    input.side !== "runner" ||
-    action.side !== "runner" ||
-    action.type !== "install_card"
-  ) {
-    return undefined;
-  }
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(
-    input,
-    deckCapabilities,
-  );
-  return evaluateRunnerHandDevelopment({
-    input,
-    deckCapabilities,
-    strategicIntent,
-  }).find((evaluation) => evaluation.legalActionId === action.actionId)
-    ?.persistentInstallEvaluation;
+  return buildRunnerPersistentInstallEvaluationForAction(input, action, {
+    deckCapabilities: deckCapabilitiesForInput,
+    strategicIntent: runnerStrategicIntentForInput,
+    handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
+  });
 }
 
 function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {

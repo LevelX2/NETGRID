@@ -1102,6 +1102,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertunderster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-persistent-install-fit-score.ts` kapselt die Persistent-Install-Evaluation-For-Action-Orchestrierung inklusive Runner-/Action-Gate, DeckCapabilities-, StrategicIntent- und HandDevelopment-Delegation.
+  - `packages/ai/src/index.ts` behält DeckCapabilities-, StrategicIntent- und HandDevelopment-Provider lokal und delegiert sie als explizite Dependencies.
+  - Kein neuer Public-Export-Contract-Eintrag nötig, weil `runner-persistent-install-fit-score.ts` bereits als internes Runtime-Modul gesperrt ist.
+  - `packages/ai/src/index.ts` sank weiter von 31.207 auf 31.195 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
