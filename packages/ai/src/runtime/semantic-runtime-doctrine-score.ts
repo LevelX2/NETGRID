@@ -58,6 +58,25 @@ export type SemanticRuntimeRunnerLowValueRecoveryContextDependencies = {
   };
 };
 
+export type SemanticRuntimeDoctrineActionGateContext = {
+  serverId?: string | undefined;
+};
+
+export type SemanticRuntimeDoctrineActionGateDependencies = {
+  actionCreditCost: (action: LegalAction) => number;
+  runnerDoctrineActionGate: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    planKey: string,
+    consumer: SemanticRuntimeDoctrineConsumer,
+    serverId: string | undefined,
+  ) => SemanticRuntimeDoctrineGate;
+  corpScoreNowSafetyGate: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeDoctrineGate;
+};
+
 export function semanticRuntimeDoctrineClamp(
   consumer: SemanticRuntimeDoctrineConsumer,
 ): number {
@@ -121,6 +140,73 @@ export function semanticRuntimeDoctrineGateBlocked(
       ...evidence,
     ],
   };
+}
+
+export function semanticRuntimeDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  dependencies: SemanticRuntimeDoctrineActionGateDependencies,
+  context: SemanticRuntimeDoctrineActionGateContext = {},
+): SemanticRuntimeDoctrineGate {
+  if (
+    !input.legalActions.some(
+      (legalAction) => legalAction.actionId === action.actionId,
+    )
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "illegal_action",
+      [`action:${action.actionId}`],
+    );
+  }
+  if (action.side !== input.side) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "side_mismatch",
+      [`input_side:${input.side}`, `action_side:${action.side}`],
+    );
+  }
+  const cost = dependencies.actionCreditCost(action);
+  if (cost > input.playerView.own.credits) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "cost_blocked", [
+      `credits:${input.playerView.own.credits}`,
+      `cost:${cost}`,
+    ]);
+  }
+
+  if (
+    consumer === "runner_pressure_rnd" ||
+    consumer === "runner_pressure_hq" ||
+    consumer === "runner_contest_remote"
+  ) {
+    return dependencies.runnerDoctrineActionGate(
+      input,
+      action,
+      planKey,
+      consumer,
+      context.serverId,
+    );
+  }
+  if (consumer === "corp_score_now") {
+    const scoreGate = dependencies.corpScoreNowSafetyGate(input, action);
+    if (!scoreGate.allowed) {
+      return semanticRuntimeDoctrineGateBlocked(
+        planKey,
+        consumer,
+        "unsafe_score",
+        [
+          "corp_scoreline_safety_gate_blocks_doctrine:true",
+          "score_now_doctrine_suppressed:true",
+          ...scoreGate.evidence,
+        ],
+      );
+    }
+  }
+  return semanticRuntimeDoctrineGateAllowed(consumer);
 }
 
 export function semanticRuntimeDoctrinePlanWeightComponent<
