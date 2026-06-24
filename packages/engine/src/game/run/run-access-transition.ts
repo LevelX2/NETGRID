@@ -690,7 +690,7 @@ function applyArchivesFaceupToRdReplacement(
   );
   const shuffled = host.rng.shuffleStateIds(
     faceupIds,
-    `p3_33.record_reconstructor.${run.runId}`,
+    `p3_33.archives_faceup_to_rd_replacement.${run.runId}`,
   );
   const moveCount = Math.min(
     Math.max(0, Math.floor(run.successfulRunArchivesMoveCount ?? 2)),
