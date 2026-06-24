@@ -13,7 +13,7 @@ import {
   handlePostPassProgramTrashChoices,
   passedIceFollowupMarkersForCurrentIce,
   preparePayOrEndRunSubroutinePayment,
-  resolveFatalAttractorPostEncounter,
+  resolvePostEncounterNetDamage,
   resolveRunDurationMarkerSubroutine,
   startActiveIceProgramTrashChoice,
   type DamageSummary,
@@ -263,7 +263,7 @@ describe("encounter resolution boundary", () => {
     const dealt: unknown[] = [];
     let damagePayload: DamageSummary | undefined;
 
-    const result = resolveFatalAttractorPostEncounter(encounterResolutionHost(state), {
+    const result = resolvePostEncounterNetDamage(encounterResolutionHost(state), {
       subroutines,
       damageSummaries: [],
       dealDamage: (input) => {
@@ -285,7 +285,7 @@ describe("encounter resolution boundary", () => {
     expect(result).toMatchObject({ handled: true, stateChanged: true });
     expect(dealt).toEqual([
       {
-        damageId: "run_1.ice_1.fatal_attractor",
+        damageId: "run_1.ice_1.post_encounter_net_damage",
         damageType: "net",
         amount: 3,
         source: "subroutine:onr_v1_242_fatal-attractor:next_encounter",
@@ -301,7 +301,7 @@ describe("encounter resolution boundary", () => {
     fullyBroken.run!.fatalDamageAmountForEncounter = 3;
     fullyBroken.run!.brokenSubroutineIndexes = [0];
     const fullyBrokenDealt: unknown[] = [];
-    resolveFatalAttractorPostEncounter(encounterResolutionHost(fullyBroken), {
+    resolvePostEncounterNetDamage(encounterResolutionHost(fullyBroken), {
       subroutines,
       damageSummaries: [],
       dealDamage: (input) => {

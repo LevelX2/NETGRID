@@ -416,7 +416,7 @@ export function appendUnpaidPayOrEndRunEffects(
   return { ended };
 }
 
-export function resolveFatalAttractorPostEncounter(
+export function resolvePostEncounterNetDamage(
   host: EncounterResolutionHost,
   options: {
     subroutines: readonly EncounterSubroutine[];
@@ -445,7 +445,7 @@ export function resolveFatalAttractorPostEncounter(
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
       const summary = options.dealDamage({
-        damageId: `${run.runId}.${encounteredIceId}.fatal_attractor`,
+        damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
         source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
