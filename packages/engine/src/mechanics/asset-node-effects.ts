@@ -4,6 +4,6 @@ export const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
 export const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
   "onr_v1_319_disinfectant-inc";
 
-export const SETUP_ACCESS_AMBUSH_ASSET_CARD_ID = "onr_v1_340_setup";
+export const SETUP_ACCESS_AMBUSH_ASSET_SOURCE = "onr_v1_340_setup";
 
-export const TRAP_ACCESS_AMBUSH_ASSET_CARD_ID = "onr_v1_345_trap";
+export const TRAP_ACCESS_AMBUSH_ASSET_SOURCE = "onr_v1_345_trap";

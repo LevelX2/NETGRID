@@ -592,8 +592,8 @@ import {
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
+  TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
   ABLATIVE_COUNTER_HARDWARE_CARD_ID,
@@ -1239,8 +1239,8 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       runCardImplementationActionHost,
     },
     constants: {
-      setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-      trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+      setup: SETUP_ACCESS_AMBUSH_ASSET_SOURCE,
+      trap: TRAP_ACCESS_AMBUSH_ASSET_SOURCE,
       crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
       taggedRunnerMeatDamageUpgrade: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
       accessNetDamageUpgrade: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
