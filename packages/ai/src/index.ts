@@ -214,7 +214,6 @@ import {
 } from "./runtime/semantic-runtime-choice-builder";
 import {
   semanticRuntimeActionExclusion as buildSemanticRuntimeActionExclusion,
-  type SemanticRuntimeActionExclusionDependencies,
 } from "./runtime/semantic-runtime-action-exclusion";
 import {
   runnerRunActionSpendingCapAssessment,
@@ -3899,45 +3898,44 @@ const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
   explanation: semanticRuntimeExplanation,
   compareAction,
 };
-const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES: SemanticRuntimeActionExclusionDependencies =
-  {
-    planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
-    corpAdvancementCounterPlacementAssessment:
-      semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    runnerSelfDamageSurvivalExclusion: (runtimeInput, action) =>
-      buildRunnerSelfDamageSurvivalExclusion(runtimeInput, action, {
-        survivalAssessment: runnerSelfDamageSurvivalAssessment,
-      }),
-    runnerEncounterActionExclusion: (runtimeInput, action) =>
-      buildRunnerEncounterActionExclusion(runtimeInput, action, {
-        blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
-        pumpViabilityAssessment,
-        breakAccessPathAssessment,
-      }),
-    runnerProgramSacrificeExclusion: (runtimeInput, action) =>
-      buildRunnerProgramSacrificeExclusion(runtimeInput, action, {
-        assessmentForAction: runnerProgramInstallTrashAssessmentForAction,
-        displacementPenalty: (assessment) =>
-          runnerProgramInstallDisplacementPenalty(
-            assessment as RunnerProgramInstallTrashAssessment | undefined,
-          ),
-      }),
-    runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
-    runnerRunTargetEvaluationForAction:
-      semanticRuntimeRunnerRunTargetEvaluationForAction,
-    runnerBlinkRunExclusion: (runtimeInput, action) =>
-      buildRunnerBlinkRunExclusion(runtimeInput, action, {
-        multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
-        runRiskAssessment: assessBlinkRiskForRunAction,
-        shouldAvoidRun: (assessment) =>
-          blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
-      }),
-    knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
-    runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
-    runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
-    isRemoteServerTarget,
-    knownIcePathReason: semanticRuntimeKnownIcePathReason,
-  };
+const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES = {
+  planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
+  corpAdvancementCounterPlacementAssessment:
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+  runnerSelfDamageSurvivalExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
+    buildRunnerSelfDamageSurvivalExclusion(runtimeInput, action, {
+      survivalAssessment: runnerSelfDamageSurvivalAssessment,
+    }),
+  runnerEncounterActionExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
+    buildRunnerEncounterActionExclusion(runtimeInput, action, {
+      blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+      pumpViabilityAssessment,
+      breakAccessPathAssessment,
+    }),
+  runnerProgramSacrificeExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
+    buildRunnerProgramSacrificeExclusion(runtimeInput, action, {
+      assessmentForAction: runnerProgramInstallTrashAssessmentForAction,
+      displacementPenalty: (assessment: unknown) =>
+        runnerProgramInstallDisplacementPenalty(
+          assessment as RunnerProgramInstallTrashAssessment | undefined,
+        ),
+    }),
+  runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
+  runnerRunTargetEvaluationForAction:
+    semanticRuntimeRunnerRunTargetEvaluationForAction,
+  runnerBlinkRunExclusion: (runtimeInput: AiDecisionInput, action: LegalAction) =>
+    buildRunnerBlinkRunExclusion(runtimeInput, action, {
+      multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
+      runRiskAssessment: assessBlinkRiskForRunAction,
+      shouldAvoidRun: (assessment: unknown) =>
+        blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+    }),
+  knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
+  runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
+  runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
+  isRemoteServerTarget,
+  knownIcePathReason: semanticRuntimeKnownIcePathReason,
+};
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
