@@ -74,7 +74,7 @@ function visibleKnownCardWithReferenceViewer(
           instance.strengthModifier +
           hostedProgramStrengthModifier(state, id) +
           runRemainderStrengthBonus -
-          pattelAntibodyStrengthPenalty(instance)
+          breakerStrengthPenaltyCounterAmount(instance)
       : undefined;
   const visibleStrengthModifier =
     visibleStrength !== undefined
@@ -482,8 +482,8 @@ function specialCounterDisplays(
     ...singleCounterDisplay(counters.breaker_strength_penalty, {
       id: "breaker_strength_penalty",
       displayKind: "generic_counter",
-      label: "Pattel-Counter",
-      ariaLabelName: "Pattel-Counter",
+      label: "Breaker-Strafcounter",
+      ariaLabelName: "Breaker-Strafcounter",
       counterType: "breaker_strength_penalty",
       usageHint: "status_marker",
     }),
@@ -728,7 +728,7 @@ function singleCounterDisplay(
   ];
 }
 
-function pattelAntibodyStrengthPenalty(instance: CardInstance): number {
+function breakerStrengthPenaltyCounterAmount(instance: CardInstance): number {
   return Math.max(0, Math.floor(instance.counters?.breaker_strength_penalty ?? 0));
 }
 
