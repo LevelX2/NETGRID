@@ -4644,26 +4644,6 @@ function runnerCardMechanicsForAi(definitionId: string): string[] {
   ];
 }
 
-function semanticRuntimeBaseScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-): number {
-  return semanticRuntimeScoreFromComponents(
-    semanticRuntimeScoreBreakdown(input, action, scopeId),
-  );
-}
-
-function semanticRuntimeRunnerScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-): number {
-  return semanticRuntimeScoreFromComponents(
-    semanticRuntimeRunnerScoreComponents(input, action, scopeId),
-  );
-}
-
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 const {
