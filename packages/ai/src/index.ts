@@ -201,7 +201,7 @@ import {
   createRunnerBlinkRiskContext,
 } from "./runtime/runner-blink-risk-context";
 import {
-  runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
+  createRunnerBlinkBreakExclusionContext,
 } from "./runtime/runner-blink-break-exclusion";
 import {
   createRunnerEncounterActionExclusionContext,
@@ -3941,6 +3941,13 @@ const {
   definitionType: definitionTypeForMetrics,
 });
 const {
+  semanticRuntimeRunnerBlinkBreakExclusion,
+} = createRunnerBlinkBreakExclusionContext({
+  riskAssessment: blinkRiskAssessmentForEncounterBreak,
+  shouldAvoidRun: (assessment) =>
+    blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+});
+const {
   runnerEncounterActionExclusion,
 } = createRunnerEncounterActionExclusionContext({
   blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
@@ -4312,17 +4319,6 @@ const {
 type VisibleEncounterSubroutine = NonNullable<
   NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
 >;
-
-function semanticRuntimeRunnerBlinkBreakExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  return buildRunnerBlinkBreakExclusion(input, action, {
-    riskAssessment: blinkRiskAssessmentForEncounterBreak,
-    shouldAvoidRun: (assessment) =>
-      blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
-  });
-}
 
 function blinkRiskAssessmentForEncounterBreak(
   input: AiDecisionInput,

@@ -16,6 +16,26 @@ export type RunnerBlinkBreakExclusionDependencies = {
   ) => boolean;
 };
 
+export type RunnerBlinkBreakExclusionContext = {
+  semanticRuntimeRunnerBlinkBreakExclusion: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeExclusion | undefined;
+};
+
+export function createRunnerBlinkBreakExclusionContext(
+  dependencies: RunnerBlinkBreakExclusionDependencies,
+): RunnerBlinkBreakExclusionContext {
+  function semanticRuntimeRunnerBlinkBreakExclusion(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): SemanticRuntimeExclusion | undefined {
+    return runnerBlinkBreakExclusion(input, action, dependencies);
+  }
+
+  return { semanticRuntimeRunnerBlinkBreakExclusion };
+}
+
 export function runnerBlinkBreakExclusion(
   input: AiDecisionInput,
   action: LegalAction,
