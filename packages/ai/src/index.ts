@@ -143,6 +143,9 @@ import {
 } from "./runtime/semantic-runtime-decision-context";
 import { createDeckCapabilitiesContext } from "./runtime/deck-capabilities-context";
 import {
+  createSemanticRuntimeVisibleCardContext,
+} from "./runtime/semantic-runtime-visible-card-context";
+import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
@@ -236,10 +239,7 @@ import {
   safeNonNegativeInteger as buildSafeNonNegativeInteger,
   normalizedRulesTextForDefinition as buildNormalizedRulesTextForDefinition,
   visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
-  visibleCardAdvancementRequirement as buildVisibleCardAdvancementRequirement,
-  visibleCardType as buildVisibleCardType,
   visibleCounterValue as buildVisibleCounterValue,
-  visibleIceRezCost as buildVisibleIceRezCost,
   visibleInstallCost as buildVisibleInstallCost,
   visibleMemoryCost as buildVisibleMemoryCost,
 } from "./runtime/visible-card-heuristics";
@@ -3869,6 +3869,14 @@ const {
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 });
 const {
+  semanticRuntimeVisibleCardType,
+  semanticRuntimeVisibleCardAdvancementRequirement,
+  semanticRuntimeVisibleIceRezCost,
+} = createSemanticRuntimeVisibleCardContext({
+  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
+  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
+});
+const {
   semanticRuntimeCorpRemoteRezFloorAssessment,
   semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
 } = createSemanticRuntimeCorpRezFloorContext({
@@ -4906,37 +4914,6 @@ function normalizedRulesTextForDefinition(definitionId: string): string {
   return buildNormalizedRulesTextForDefinition(
     RUNTIME_CARDS[definitionId],
     DEMO_CARDS_BY_ID[definitionId],
-  );
-}
-
-function semanticRuntimeVisibleCardType(card: VisibleCard): string | undefined {
-  const definitionId = card.definitionId;
-  return buildVisibleCardType(
-    card,
-    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
-    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeVisibleCardAdvancementRequirement(
-  card: VisibleCard,
-): number | undefined {
-  const definitionId = card.definitionId;
-  return buildVisibleCardAdvancementRequirement(
-    card,
-    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
-    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeVisibleIceRezCost(
-  card: VisibleCard,
-): number | undefined {
-  const definitionId = card.definitionId;
-  return buildVisibleIceRezCost(
-    card,
-    definitionId ? RUNTIME_CARDS[definitionId] : undefined,
-    definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
   );
 }
 
