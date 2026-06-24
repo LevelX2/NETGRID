@@ -4660,11 +4660,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
       )?.counterDisplays,
     ).toEqual([
       expect.objectContaining({
-        id: "restrictive_net_zoning_install_cost_rd",
+        id: "corp_ice_install_cost_modifier_rd",
         amount: 2,
         label: "Install +",
-        ariaLabel:
-          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
         counterType: "install_cost_modifier",
       }),
     ]);
@@ -4673,11 +4672,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
         ?.counterDisplays,
     ).toEqual([
       expect.objectContaining({
-        id: "restrictive_net_zoning_install_cost_rd",
+        id: "corp_ice_install_cost_modifier_rd",
         amount: 2,
         label: "Install +",
-        ariaLabel:
-          "R&D: ICE-Installationskosten +2 durch Restrictive Net Zoning.",
+        ariaLabel: "R&D: ICE-Installationskosten +2 durch Runner-Effekt.",
         counterType: "install_cost_modifier",
       }),
     ]);
