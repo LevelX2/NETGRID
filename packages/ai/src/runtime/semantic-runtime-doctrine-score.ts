@@ -121,6 +121,27 @@ export type SemanticRuntimeRunnerDoctrineRunWeightDependencies = {
   ) => AiDecisionScoreComponent | undefined;
 };
 
+export type SemanticRuntimeRunnerRemoteContestEvaluation = {
+  knownAccessState: string;
+  accessPayoff: string;
+  pathPassability: string;
+  creditsAfterRun: number;
+  recommendation: string;
+};
+
+export type SemanticRuntimeRunnerRemoteContestDoctrineGuardDependencies = {
+  isRemoteServerTarget: (serverId: string | undefined) => boolean;
+  runnerRunTargetEvaluation: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    serverId: string,
+  ) => SemanticRuntimeRunnerRemoteContestEvaluation | undefined;
+  recentRunnerStartRunsOnServer: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => number;
+};
+
 export function semanticRuntimeDoctrineClamp(
   consumer: SemanticRuntimeDoctrineConsumer,
 ): number {
@@ -448,4 +469,88 @@ export function semanticRuntimeRunnerDoctrineRunWeight(
     return dependencies.suppressedComponent(gate.evidence);
   }
   return dependencies.planWeightComponent(input, planKey, consumer);
+}
+
+export function semanticRuntimeRunnerRemoteContestDoctrineGuard(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string | undefined,
+  dependencies: SemanticRuntimeRunnerRemoteContestDoctrineGuardDependencies,
+): SemanticRuntimeDoctrineGate {
+  if (!serverId || !dependencies.isRemoteServerTarget(serverId)) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:not_remote",
+      ],
+    };
+  }
+  const evaluation = dependencies.runnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (!evaluation) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:missing_evaluation",
+      ],
+    };
+  }
+  const knownNoPayoff =
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoff === "known_low_value";
+  const blocked =
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.creditsAfterRun < 0;
+  const repeated =
+    dependencies.recentRunnerStartRunsOnServer(input, serverId) > 0;
+  const plausiblePayoff =
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    (evaluation.accessPayoff === "unknown" &&
+      evaluation.recommendation === "run_now");
+  if (
+    knownNoPayoff ||
+    blocked ||
+    (repeated && !plausiblePayoff) ||
+    !plausiblePayoff
+  ) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        ...(knownNoPayoff ? ["runner_known_remote_no_payoff_guard:true"] : []),
+        `deck_doctrine_remote_contest_suppressed_reason:${
+          knownNoPayoff
+            ? "known_no_payoff"
+            : blocked
+              ? "blocked_or_unreachable"
+              : repeated
+                ? "repeated_without_payoff"
+                : "no_plausible_payoff"
+        }`,
+        `target:${serverId}`,
+        `known_access:${evaluation.knownAccessState}`,
+        `payoff:${evaluation.accessPayoff}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+        `repeated_remote:${repeated}`,
+      ],
+    };
+  }
+  return {
+    allowed: true,
+    evidence: [
+      "deck_doctrine_remote_contest_allowed:true",
+      `target:${serverId}`,
+      `payoff:${evaluation.accessPayoff}`,
+    ],
+  };
 }
