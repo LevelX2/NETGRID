@@ -161,7 +161,6 @@ import {
 } from "./runtime/semantic-runtime-runner-evidence";
 import {
   semanticRuntimeCorpEvidence as buildSemanticRuntimeCorpEvidence,
-  type SemanticRuntimeCorpEvidenceDependencies,
 } from "./runtime/semantic-runtime-corp-evidence";
 import {
   semanticRuntimeEvidence as buildSemanticRuntimeEvidence,
@@ -172,18 +171,15 @@ import {
   semanticRuntimeCorpHasRemoteInstability as buildSemanticRuntimeCorpHasRemoteInstability,
   semanticRuntimeCorpHasStabilizingAlternative as buildSemanticRuntimeCorpHasStabilizingAlternative,
   semanticRuntimeCorpHasUnsafeRemoteScoreAction as buildSemanticRuntimeCorpHasUnsafeRemoteScoreAction,
-  type SemanticRuntimeCorpRiskDependencies,
 } from "./runtime/semantic-runtime-corp-risk";
 import {
   semanticRuntimeCorpHasRemoteRezFloorFundingNeed as buildSemanticRuntimeCorpHasRemoteRezFloorFundingNeed,
   semanticRuntimeCorpRemoteRezFloorAssessment as buildSemanticRuntimeCorpRemoteRezFloorAssessment,
-  type SemanticRuntimeCorpRezFloorDependencies,
 } from "./runtime/semantic-runtime-corp-rez-floor";
 import {
   semanticRuntimeCorpAdvanceRemoteScore as buildSemanticRuntimeCorpAdvanceRemoteScore,
   semanticRuntimeCorpInstallRemoteScore as buildSemanticRuntimeCorpInstallRemoteScore,
   semanticRuntimeCorpShouldBuildProtectedScoreRemote as buildSemanticRuntimeCorpShouldBuildProtectedScoreRemote,
-  type SemanticRuntimeCorpRemoteScoreDependencies,
 } from "./runtime/semantic-runtime-corp-remote-score";
 import {
   semanticRuntimeCorpPassiveScoreLinePenalty as buildSemanticRuntimeCorpPassiveScoreLinePenalty,
@@ -3793,27 +3789,24 @@ const SEMANTIC_RUNTIME_RUNNER_EVIDENCE_DEPENDENCIES = {
   persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
   remoteTrashAccessContext: runnerRemoteTrashAccessContext,
 };
-const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES: SemanticRuntimeCorpEvidenceDependencies<
-  NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
-> = {
-    emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-    hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
-    hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
-    hasUnsafeRemoteScoreAction: semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-    hasRemoteRezFloorFundingNeed:
-      semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-    advancementCounterPlacementAssessment:
-      semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    passiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-    actionServerId: semanticRuntimeCorpActionServerId,
-    server: semanticRuntimeCorpServer,
-    remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-    isRemoteServerTarget,
-    shouldBuildProtectedScoreRemote:
-      semanticRuntimeCorpShouldBuildProtectedScoreRemote,
-    actionWouldCreateUnsafeRemoteScoreLine:
-      semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-    advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
+  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
+  hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
+  hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
+  hasUnsafeRemoteScoreAction: semanticRuntimeCorpHasUnsafeRemoteScoreAction,
+  hasRemoteRezFloorFundingNeed: semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
+  advancementCounterPlacementAssessment:
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+  passiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
+  actionServerId: semanticRuntimeCorpActionServerId,
+  server: semanticRuntimeCorpServer,
+  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
+  isRemoteServerTarget,
+  shouldBuildProtectedScoreRemote:
+    semanticRuntimeCorpShouldBuildProtectedScoreRemote,
+  actionWouldCreateUnsafeRemoteScoreLine:
+    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
 };
 const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
@@ -3821,9 +3814,7 @@ const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
 };
-const SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES: SemanticRuntimeCorpRiskDependencies<
-  NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
-> = {
+const SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES = {
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   isRemoteServerTarget,
   remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
@@ -3834,9 +3825,7 @@ const SEMANTIC_RUNTIME_CORP_RISK_DEPENDENCIES: SemanticRuntimeCorpRiskDependenci
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   server: semanticRuntimeCorpServer,
 };
-const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES: SemanticRuntimeCorpRezFloorDependencies<
-  NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
-> = {
+const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES = {
   actionServerId: semanticRuntimeCorpActionServerId,
   isRemoteServerTarget,
   server: semanticRuntimeCorpServer,
@@ -3846,9 +3835,7 @@ const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES: SemanticRuntimeCorpRezFloorD
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
 };
-const SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES: SemanticRuntimeCorpRemoteScoreDependencies<
-  NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
-> = {
+const SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES = {
   actionServerId: semanticRuntimeCorpActionServerId,
   server: semanticRuntimeCorpServer,
   hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
