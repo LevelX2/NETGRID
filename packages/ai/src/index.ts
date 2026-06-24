@@ -192,8 +192,8 @@ import {
   buildSemanticRuntimeChoices,
 } from "./runtime/semantic-runtime-choice-builder";
 import {
-  semanticRuntimeActionExclusion as buildSemanticRuntimeActionExclusion,
-} from "./runtime/semantic-runtime-action-exclusion";
+  createSemanticRuntimeActionExclusionContext,
+} from "./runtime/semantic-runtime-action-exclusion-context";
 import {
   runnerRunActionSpendingCapAssessment,
   runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
@@ -3891,16 +3891,9 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
 };
-const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
-  scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
-  actionExclusion: semanticRuntimeActionExclusion,
-  scoreBreakdown: semanticRuntimeScoreBreakdown,
-  actionCreditCost,
-  evidence: semanticRuntimeEvidence,
-  explanation: semanticRuntimeExplanation,
-  compareAction,
-};
-const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES = {
+const {
+  semanticRuntimeActionExclusion,
+} = createSemanticRuntimeActionExclusionContext({
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -3937,6 +3930,15 @@ const SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES = {
   runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
+});
+const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
+  scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
+  actionExclusion: semanticRuntimeActionExclusion,
+  scoreBreakdown: semanticRuntimeScoreBreakdown,
+  actionCreditCost,
+  evidence: semanticRuntimeEvidence,
+  explanation: semanticRuntimeExplanation,
+  compareAction,
 };
 
 function chooseSemanticRuntimeAction(
@@ -4385,17 +4387,6 @@ function semanticRuntimeScoreBreakdown(
       actionCreditCost,
     },
   });
-}
-
-function semanticRuntimeActionExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  return buildSemanticRuntimeActionExclusion(
-    input,
-    action,
-    SEMANTIC_RUNTIME_ACTION_EXCLUSION_DEPENDENCIES,
-  );
 }
 
 type VisibleEncounterSubroutine = NonNullable<
