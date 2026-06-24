@@ -631,7 +631,6 @@ import {
   INCUBATOR_ID,
   JUNKYARD_BBS_ID,
   MICROTECH_TRODE_SET_ID,
-  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
   MYSTERY_BOX_ID,
   NEVINYRRAL_ID,
   PATTELS_VIRUS_ID,
@@ -1075,6 +1074,10 @@ export function createCardLifecycleRuntimeHosts(
     legalAction: LegalAction,
   ): void {
     const cardId = String(legalAction.payload?.cardId);
+    const sourceDefinitionId = mustInstance(
+      state.cardInstances,
+      cardId,
+    ).definitionId;
     removeFromAllZones(state, cardId);
     const specialZones = ensureSpecialZones(state);
     specialZones.removedFromGame.push(cardId);
@@ -1099,7 +1102,7 @@ export function createCardLifecycleRuntimeHosts(
     state.runner.stack = shuffleStateIds(
       state,
       allIds,
-      `${MIT_WEST_TIER_REMOVED_FROM_GAME_REASON}:${state.stateVersion + 1}`,
+      `${sourceDefinitionId}.shuffle_grip_heap_stack:${state.stateVersion + 1}`,
     );
     for (const id of state.runner.stack) {
       state.cardInstances[id] = {
@@ -1112,10 +1115,10 @@ export function createCardLifecycleRuntimeHosts(
       ...(legalAction.payload ?? {}),
       cardId,
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
+      hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
       specialZone: "removed_from_game",
       specialZoneVisibility: "public",
-      specialZoneReason: MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
+      specialZoneReason: sourceDefinitionId,
     };
     applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
   }
@@ -1129,7 +1132,9 @@ export function createCardLifecycleRuntimeHosts(
     removePlayedCardFromGame: true,
   ): { publicPayload: Record<string, string | number | boolean> } {
     if (removePlayedCardFromGame !== true)
-      throw new Error("MIT West Tier muss aus dem Spiel entfernt werden.");
+      throw new Error(
+        "Diese Shuffle-Draw-Implementierung muss die ausgespielte Karte aus dem Spiel entfernen.",
+      );
     removeFromAllZones(state, sourceCardId);
     const specialZones = ensureSpecialZones(state);
     specialZones.removedFromGame.push(sourceCardId);
