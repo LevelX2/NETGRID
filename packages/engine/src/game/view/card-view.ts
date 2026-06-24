@@ -488,11 +488,11 @@ function specialCounterDisplays(
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.mark, {
-      id: definition.type === "ice" ? "ice_transmutation" : "mark",
+      id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
       displayKind: "generic_counter",
-      label: definition.type === "ice" ? "Ice Transmutation" : "Mark-Counter",
+      label: definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
       ariaLabelName:
-        definition.type === "ice" ? "Ice Transmutation" : "Mark-Counter",
+        definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
       counterType: "mark",
       usageHint: "status_marker",
     }),
