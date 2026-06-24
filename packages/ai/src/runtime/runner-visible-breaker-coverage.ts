@@ -78,3 +78,35 @@ export function visibleBreakerCardCanAddressIce(
   }
   return roles.length > 0 && /break/.test(breakerText);
 }
+
+export function visibleBreakerRoleCounts(
+  cards: readonly VisibleCard[],
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const card of cards) {
+    for (const role of visibleBreakerRoles(card)) {
+      counts.set(role, (counts.get(role) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
+export function visibleBreakerRoles(card: VisibleCard): string[] {
+  const subtypes = (card.subtypes ?? []).map((subtype) =>
+    subtype.toLowerCase(),
+  );
+  const roles = new Set<string>();
+  if (subtypes.includes("fracter") || card.definitionId === "simple_fracter") {
+    roles.add("fracter");
+  }
+  if (subtypes.includes("decoder") || card.definitionId === "simple_decoder") {
+    roles.add("decoder");
+  }
+  if (subtypes.includes("killer") || card.definitionId === "simple_killer") {
+    roles.add("killer");
+  }
+  if (subtypes.includes("icebreaker") && roles.size === 0) {
+    roles.add("icebreaker");
+  }
+  return [...roles].sort();
+}

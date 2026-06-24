@@ -296,6 +296,8 @@ import {
 import {
   runnerCardAddressesVisibleBreakerNeed as buildRunnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce as buildVisibleBreakerCardCanAddressIce,
+  visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
+  visibleBreakerRoles as buildVisibleBreakerRoles,
 } from "./runtime/runner-visible-breaker-coverage";
 import {
   runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
@@ -12013,28 +12015,11 @@ function runnerViral15JackOutScoreComponent(
 function visibleBreakerRoleCountsForAi(
   cards: VisibleCard[],
 ): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const card of cards) {
-    for (const role of visibleBreakerRolesForAi(card))
-      counts.set(role, (counts.get(role) ?? 0) + 1);
-  }
-  return counts;
+  return buildVisibleBreakerRoleCounts(cards);
 }
 
 function visibleBreakerRolesForAi(card: VisibleCard): string[] {
-  const subtypes = (card.subtypes ?? []).map((subtype) =>
-    subtype.toLowerCase(),
-  );
-  const roles = new Set<string>();
-  if (subtypes.includes("fracter") || card.definitionId === "simple_fracter")
-    roles.add("fracter");
-  if (subtypes.includes("decoder") || card.definitionId === "simple_decoder")
-    roles.add("decoder");
-  if (subtypes.includes("killer") || card.definitionId === "simple_killer")
-    roles.add("killer");
-  if (subtypes.includes("icebreaker") && roles.size === 0)
-    roles.add("icebreaker");
-  return [...roles].sort();
+  return buildVisibleBreakerRoles(card);
 }
 
 function selectedDiscardChoiceOptionIds(
