@@ -12,8 +12,8 @@ import type {
   Side,
 } from "@netgrid/shared";
 import {
-  isP358FortressRespecificationChoiceSource,
-  isP358NewBloodReorderChoiceSource,
+  isP358ConcealAndReorderInstalledIceChoiceSource,
+  isP358SuccessfulRunFortIceReorderChoiceSource,
 } from "../../compatibility/payload-compatibility";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
@@ -105,9 +105,9 @@ export function handleHiddenZoneArrangeChoice(
     source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
   )
     return resolveRunnerStackTop5Choice(host);
-  if (isP358FortressRespecificationChoiceSource(source))
+  if (isP358SuccessfulRunFortIceReorderChoiceSource(source))
     return resolveSuccessfulRunFortIceReorderChoice(host);
-  if (isP358NewBloodReorderChoiceSource(source))
+  if (isP358ConcealAndReorderInstalledIceChoiceSource(source))
     return resolveConcealAndReorderInstalledIceChoice(host);
   return { handled: false };
 }
@@ -311,11 +311,11 @@ export function startCorpRdTopReorderChoice(
   sourceCardId: CardInstanceId,
 ): void {
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (!isPlanningConsultantsSource(host, sourceCardId))
-    throw new Error("Die R&D-Reorder-Quelle ist nicht Planning Consultants.");
+  if (!isCorpRdTopReorderSource(host, sourceCardId))
+    throw new Error("Die R&D-Reorder-Quelle passt nicht zur Karte.");
   const topCards = host.state.corp.rd.slice(0, 5);
   if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer Planning Consultants.");
+    throw new Error("Nicht genug Karten fuer die R&D-Reorder-Choice.");
   host.state.pendingChoice = {
     choiceId: `v1922_corp_rd_arrange_top5_${host.state.stateVersion + 1}`,
     side: "corp",
@@ -347,11 +347,11 @@ export function startSuccessfulRunFortIceReorderChoice(
   const flags = host.callbacks.runnerTurnFlags();
   if (!flags.successfulRunThisTurn)
     throw new Error(
-      "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
+      "Die Fort-ICE-Reorder-Choice benoetigt einen erfolgreichen Run in diesem Zug.",
     );
   const serverId = flags.lastSuccessfulRunServerId;
   if (!serverId)
-    throw new Error("Kein letzter erfolgreicher Fort fuer Fortress Respecification.");
+    throw new Error("Kein letzter erfolgreicher Fort fuer die Fort-ICE-Reorder-Choice.");
   const server = host.servers.mustServer(serverId);
   if (server.ice.length < 2) {
     host.legalAction.payload = {
@@ -626,9 +626,9 @@ function resolveCorpRdTopReorderChoice(
   if (!choice.source.startsWith("v1922.corp_rd_arrange_top5"))
     throw new Error("Es ist keine V1.9.22-R&D-Reorder-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
-  if (!sourceCardId || !isPlanningConsultantsSource(host, sourceCardId))
+  if (!sourceCardId || !isCorpRdTopReorderSource(host, sourceCardId))
     throw new Error(
-      "Die V1.9.22-R&D-Reorder-Choice gehoert nicht zu Planning Consultants.",
+      "Die V1.9.22-R&D-Reorder-Choice gehoert nicht zur passenden Karte.",
     );
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   reorderCorpRdTop(host, selectedIds, choice.options.length, {
@@ -651,23 +651,23 @@ function resolveSuccessfulRunFortIceReorderChoice(
 ): HiddenZoneArrangeChoiceHandlerResult {
   const choice = requireChoice(
     host,
-    "Es ist keine Fortress-Respecification-Choice offen.",
+    "Es ist keine Fort-ICE-Reorder-Choice offen.",
   );
-  if (!isP358FortressRespecificationChoiceSource(choice.source))
-    throw new Error("Es ist keine Fortress-Respecification-Choice offen.");
+  if (!isP358SuccessfulRunFortIceReorderChoiceSource(choice.source))
+    throw new Error("Es ist keine Fort-ICE-Reorder-Choice offen.");
   const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (
     host.cards.hiddenReplacementLongtailKind(sourceDefinition.id) !==
     "successful_run_fort_ice_reorder"
   )
-    throw new Error("Die Fortress-Respecification-Quelle passt nicht zur Karte.");
+    throw new Error("Die Fort-ICE-Reorder-Quelle passt nicht zur Karte.");
   const server = host.servers.mustServer(serverId);
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   validateReorderSelection(
     server.ice,
     selectedIds,
-    "Die Fortress-Respecification-Reihenfolge ist nicht legal.",
+    "Die Fort-ICE-Reorder-Reihenfolge ist nicht legal.",
   );
   server.ice = [...selectedIds];
   server.ice.forEach((cardId) => {
@@ -701,23 +701,26 @@ function resolveSuccessfulRunFortIceReorderChoice(
 function resolveConcealAndReorderInstalledIceChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine New-Blood-Reorder-Choice offen.");
-  if (!isP358NewBloodReorderChoiceSource(choice.source))
-    throw new Error("Es ist keine New-Blood-Reorder-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine ICE-Conceal-Reorder-Choice offen.",
+  );
+  if (!isP358ConcealAndReorderInstalledIceChoiceSource(choice.source))
+    throw new Error("Es ist keine ICE-Conceal-Reorder-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (
     host.cards.hiddenReplacementLongtailKind(sourceDefinition.id) !==
     "conceal_and_reorder_installed_ice"
   )
-    throw new Error("Die New-Blood-Quelle passt nicht zur Karte.");
+    throw new Error("Die ICE-Conceal-Reorder-Quelle passt nicht zur Karte.");
   const slots = installedIceSlots(host);
   const currentIds = slots.map((slot) => slot.cardId);
   const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
   validateReorderSelection(
     currentIds,
     selectedIds,
-    "Die New-Blood-Reihenfolge ist nicht legal.",
+    "Die ICE-Conceal-Reorder-Reihenfolge ist nicht legal.",
   );
   slots.forEach((slot, index) => {
     const cardId = selectedIds[index]!;
@@ -815,7 +818,7 @@ function topRunnerHeapCardId(
   return host.state.runner.heap.at(-1);
 }
 
-function isPlanningConsultantsSource(
+function isCorpRdTopReorderSource(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): boolean {

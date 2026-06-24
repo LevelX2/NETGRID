@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
-  isP358FortressRespecificationChoiceSource,
+  isP358ConcealAndReorderInstalledIceChoiceSource,
   isP358HiddenReplacementCompatibilityChoiceSource,
-  isP358NewBloodReorderChoiceSource,
+  isP358SuccessfulRunFortIceReorderChoiceSource,
   isSecretSpendGuessTargetedBypassRunChoiceSource,
   isReplayCompatibilityActionPayload,
 } from "./payload-compatibility";
@@ -49,7 +49,7 @@ describe("P3.71 PendingChoice replay compatibility marker stability", () => {
       ),
     ).toBe(true);
     expect(
-      isP358FortressRespecificationChoiceSource(
+      isP358SuccessfulRunFortIceReorderChoiceSource(
         "hidden_zone.successful_run_fort_ice_reorder:source:rd:1",
       ),
     ).toBe(true);
@@ -59,7 +59,9 @@ describe("P3.71 PendingChoice replay compatibility marker stability", () => {
       ),
     ).toBe(true);
     expect(
-      isP358NewBloodReorderChoiceSource("hidden_zone.conceal_and_reorder_installed_ice:source:1"),
+      isP358ConcealAndReorderInstalledIceChoiceSource(
+        "hidden_zone.conceal_and_reorder_installed_ice:source:1",
+      ),
     ).toBe(true);
     expect(
       isP358HiddenReplacementCompatibilityChoiceSource("p3_59.future_marker"),
