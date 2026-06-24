@@ -12,6 +12,7 @@ export type {
   CorpTracePaymentSourceKind,
   RunnerTracePaymentBreakdown,
   RunnerTracePaymentDependencies,
+  RunnerTraceLinkCreditSelection,
   RunnerTracePaymentPurpose,
   RunnerTracePaymentQuote,
   RunnerTracePaymentReceipt,

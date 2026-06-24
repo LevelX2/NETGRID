@@ -148,6 +148,100 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("lets the Runner choose trace-link credit allocation before paying a trace bid", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const linkAId = "link_a" as CardInstanceId;
+    const linkBId = "link_b" as CardInstanceId;
+    const linkADefinition = definition("link_a_definition", "hardware");
+    const linkBDefinition = definition("link_b_definition", "resource");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [linkAId]: instance(linkAId, linkADefinition.id, "runner"),
+        [linkBId]: instance(linkBId, linkBDefinition.id, "runner"),
+      },
+      runnerHardware: [linkAId],
+      runnerResources: [linkBId],
+    });
+    state.runner.credits = 5;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceStrength: 8,
+      runnerLink: 0,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 12);
+    const hostedCredits = new Map<CardInstanceId, number>([
+      [linkAId, 5],
+      [linkBId, 2],
+    ]);
+    const action = actionFor("runner", "resolve_choice");
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [linkADefinition.id]: linkADefinition,
+        [linkBDefinition.id]: linkBDefinition,
+      },
+      testCalls(),
+      {
+        runnerTraceLinkCreditSourceIds: [linkAId, linkBId],
+        hostedCredits,
+      },
+    );
+
+    resolveTraceChoice(host, action, playerChoice("bid_8"));
+
+    expect(state.trace?.runnerBidPaymentSelection).toMatchObject({
+      bid: 8,
+      sourceIndex: 0,
+      allocations: [],
+    });
+    expect(state.pendingChoice).toMatchObject({
+      source: `trace_runner_bid_payment:trace_1:${linkAId}`,
+      prompt: "link_a_definition fuer Runner Link-Bid nutzen (Bid 8)",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_1",
+      "bid_2",
+      "bid_3",
+      "bid_4",
+      "bid_5",
+    ]);
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_3"),
+    );
+
+    expect(state.trace?.runnerBidPaymentSelection).toMatchObject({
+      bid: 8,
+      sourceIndex: 1,
+      allocations: [{ sourceCardInstanceId: linkAId, amount: 3 }],
+    });
+    expect(state.pendingChoice).toMatchObject({
+      source: `trace_runner_bid_payment:trace_1:${linkBId}`,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_0",
+      "bid_1",
+      "bid_2",
+    ]);
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_1"),
+    );
+
+    expect(hostedCredits.get(linkAId)).toBe(2);
+    expect(hostedCredits.get(linkBId)).toBe(1);
+    expect(state.runner.credits).toBe(1);
+    expect(state.trace).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("opens a trace success cancel window from a real successful trace result", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
@@ -432,6 +526,7 @@ function instance(
 
 function minimalState(input: {
   cardInstances: Record<CardInstanceId, CardInstance>;
+  runnerHardware?: CardInstanceId[];
   runnerPrograms?: CardInstanceId[];
   runnerResources?: CardInstanceId[];
 }): GameState {
@@ -453,8 +548,8 @@ function minimalState(input: {
       memoryUsed: 0,
       memoryLimit: 4,
       rig: {
+        hardware: [...(input.runnerHardware ?? [])],
         programs: [...(input.runnerPrograms ?? [])],
-        hardware: [],
         resources: [...(input.runnerResources ?? [])],
       },
     },
@@ -574,6 +669,8 @@ function testHost(
     successCancelSourceId?: CardInstanceId;
     parisTraceDefinitionId?: CardDefinitionId;
     rezzedCorpRootCardIds?: CardInstanceId[];
+    runnerTraceLinkCreditSourceIds?: CardInstanceId[];
+    hostedCredits?: Map<CardInstanceId, number>;
   } = {},
 ): TraceOrchestrationHost {
   const definitionFor = (cardId: CardInstanceId) => {
@@ -602,9 +699,19 @@ function testHost(
     cardCounter: () => 0,
   };
   const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
-    runnerTraceLinkCreditSources: () => [],
-    hostedPaymentCredits: () => 0,
-    spendHostedPaymentCredits: () => undefined,
+    runnerTraceLinkCreditSources: () =>
+      (options.runnerTraceLinkCreditSourceIds ?? []).map((cardId) => ({
+        sourceCardInstanceId: cardId,
+        sourceDefinitionId: state.cardInstances[cardId]!.definitionId,
+      })),
+    hostedPaymentCredits: (_targetState, cardId) =>
+      options.hostedCredits?.get(cardId) ?? 0,
+    spendHostedPaymentCredits: (_targetState, cardId, amount) => {
+      options.hostedCredits?.set(
+        cardId,
+        (options.hostedCredits.get(cardId) ?? 0) - amount,
+      );
+    },
     runnerCreditsAvailable: (targetState) => targetState.runner.credits,
     spendRunnerCredits: (targetState, amount) => {
       targetState.runner.credits -= amount;
@@ -675,8 +782,9 @@ function testHost(
     payment: {
       corpTracePaymentDeps,
       runnerTracePaymentDeps,
-      runnerTraceLinkCreditSourceIds: () => [],
-      hostedPaymentCredits: () => 0,
+      runnerTraceLinkCreditSourceIds: () =>
+        options.runnerTraceLinkCreditSourceIds ?? [],
+      hostedPaymentCredits: (cardId) => options.hostedCredits?.get(cardId) ?? 0,
       spendRunnerCredits: (amount) => {
         state.runner.credits -= amount;
       },

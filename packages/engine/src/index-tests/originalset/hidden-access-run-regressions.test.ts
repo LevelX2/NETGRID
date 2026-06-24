@@ -1780,6 +1780,11 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = applyChoice(state, "corp", "bid_0");
     expect(state.pendingChoice?.options.some((option) => option.id === "bid_3")).toBe(true);
     state = applyChoice(state, "runner", "bid_3");
+    expect(state.pendingChoice?.source).toContain("trace_runner_bid_payment:");
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_3",
+    ]);
+    state = applyChoice(state, "runner", "bid_3");
     expect(pkId && cardCounterAmount(state, pkId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({

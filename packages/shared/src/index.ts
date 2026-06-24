@@ -1137,7 +1137,9 @@ export type RunState = {
   };
   runStartRandomStrengthSourceCardId?: CardInstanceId;
   runStartRandomStrengthBonus?: number;
-  runStartRandomStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
+  runStartRandomStrengthBonusByBreaker?: Partial<
+    Record<CardInstanceId, number>
+  >;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -1292,6 +1294,15 @@ export type TraceState = {
     amount: number;
     timing: "trace_base_link_window" | "trace_post_bid_link_window";
   }>;
+  runnerBidPaymentSelection?: {
+    bid: number;
+    sourceCardInstanceIds: CardInstanceId[];
+    sourceIndex: number;
+    allocations: Array<{
+      sourceCardInstanceId: CardInstanceId;
+      amount: number;
+    }>;
+  };
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -8428,7 +8439,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     rulesText:
       "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Active ICE Program Trash, unless Runner jacks out.",
-    subroutines: [onrSetRunActiveIceProgramTrash("onr_v1_276_active_ice_program_trash_run_modifier")],
+    subroutines: [
+      onrSetRunActiveIceProgramTrash(
+        "onr_v1_276_active_ice_program_trash_run_modifier",
+      ),
+    ],
     mechanics: [
       "run_modifier",
       "jack_out_tax",
