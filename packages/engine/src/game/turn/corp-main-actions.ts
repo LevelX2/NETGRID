@@ -104,8 +104,6 @@ export type CorpMainActionGenerationHost = {
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
     TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
     COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
-    INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID: string;
-    ACTION_ASSET_CARD_IDS: ReadonlySet<string>;
     ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
   };
 };
@@ -223,9 +221,6 @@ export function buildCorpMainActions(
   const TAG_CONDITION_UPGRADE_CARD_IDS =
     host.constants.TAG_CONDITION_UPGRADE_CARD_IDS;
   const COUNTER_ASSET_CARD_IDS = host.constants.COUNTER_ASSET_CARD_IDS;
-  const INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID =
-    host.constants.INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID;
-  const ACTION_ASSET_CARD_IDS = host.constants.ACTION_ASSET_CARD_IDS;
   const ADVANCEMENT_PLACEMENT_OPERATION_ID =
     host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
 
@@ -804,55 +799,6 @@ export function buildCorpMainActions(
             v1919AssetAbility: "add_power_counter",
             counterType: "power",
             addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      definition.id === INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      const advancementCounterCount = Math.max(
-        0,
-        Math.floor(mustInstance(state.cardInstances, assetId).advancementCounters),
-      );
-      const gainCreditsAmount = advancementCounterCount * 4;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${gainCreditsAmount} Credits und trashen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "gain_credits",
-            advancementCounterCount,
-            gainCreditsAmount,
-            trashOnUse: true,
-          },
-        ),
-      );
-    }
-    if (
-      ACTION_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      uniqueDirectLongtailKindForDefinition(definition.id) !==
-        "nevinyrral_action_and_lose_on_rezzed_leave"
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 2 Aktionen nehmen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1920AssetAbility: "gain_actions",
-            gainedActions: 2,
           },
         ),
       );

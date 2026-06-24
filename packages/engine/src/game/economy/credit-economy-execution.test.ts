@@ -112,47 +112,6 @@ describe("credit economy execution", () => {
     });
   });
 
-  it("executes Information Laundering credit payout and self-trash", () => {
-    const state = createGame({
-      seed: "arch-69-credit-economy-information-laundering",
-      setupMode: "completed",
-    });
-    state.corp.clicks = 3;
-    state.corp.credits = 2;
-    const sourceCardId = "corp_info_laundering" as CardInstanceId;
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      "information_laundering",
-      "corp",
-      2,
-    );
-    const trashed: CardInstanceId[] = [];
-    const action = gainCreditAction(state, "corp", {
-      v1919AssetAbility: "gain_credits",
-      cardId: sourceCardId,
-      gainCreditsAmount: 8,
-    });
-
-    handleCreditEconomyExecution(
-      testHost(state, {
-        rezzedRootCardIds: [sourceCardId],
-        trashCorpInstalledCardToArchives: (cardId) => trashed.push(cardId),
-      }),
-      action,
-    );
-
-    expect(state.corp.clicks).toBe(2);
-    expect(state.corp.credits).toBe(10);
-    expect(trashed).toEqual([sourceCardId]);
-    expect(action.payload).toMatchObject({
-      v1919AssetAbility: "gain_credits",
-      advancementCounterCount: 2,
-      gainedCredits: 8,
-      selfTrashed: true,
-      corpCreditsAfter: 10,
-    });
-  });
-
   it("does not import from the public engine index", () => {
     const source = readFileSync(
       new URL("./credit-economy-execution.ts", import.meta.url),
@@ -320,9 +279,6 @@ function testHost(
       COUNTER_UPGRADE_CARD_IDS: new Set(["counter_upgrade"]),
       TAG_CONDITION_UPGRADE_CARD_IDS: new Set(["tag_condition"]),
       COUNTER_ASSET_CARD_IDS: new Set(["counter_asset"]),
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
-        "information_laundering",
-      ACTION_ASSET_CARD_IDS: new Set(["action_asset"]),
       RUNNER_RANDOM_PROGRAM_CARD_IDS: new Set(["random_program"]),
       QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: "quest_for_cattekin",
       FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",

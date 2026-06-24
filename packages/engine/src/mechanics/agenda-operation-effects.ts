@@ -33,9 +33,6 @@ export const CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID =
 export const EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_323_experimental-ai";
 
-export const INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID =
-  "onr_v1_328_information-laundering";
-
 export const VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_346_vacant-soulkiller";
 

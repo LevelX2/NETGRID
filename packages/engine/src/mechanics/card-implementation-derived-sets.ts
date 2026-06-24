@@ -102,12 +102,6 @@ export const CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS = cardIdsMatching(
     ]),
 );
 
-export const CORP_ACTION_ASSET_CARD_IDS = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "asset") &&
-    hasEffectKind(implementation, ["gain_actions"]),
-);
-
 export const CORP_FORT_RUN_WINDOW_UPGRADE_CARD_IDS = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&

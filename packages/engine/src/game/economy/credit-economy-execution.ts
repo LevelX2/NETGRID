@@ -161,8 +161,6 @@ export type CreditEconomyExecutionHost = {
     COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
     TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
     COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
-    INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID: string;
-    ACTION_ASSET_CARD_IDS: ReadonlySet<string>;
     RUNNER_RANDOM_PROGRAM_CARD_IDS: ReadonlySet<string>;
     QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: string;
     FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
@@ -545,76 +543,6 @@ export function handleCreditEconomyExecution(
         sourceCardId,
         "power",
       ),
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1919AssetAbility === "gain_credits") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.19-Asset-Economy nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.19-Asset-Economy-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (
-      definition.id !==
-      host.constants.INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID
-    )
-      throw new Error(
-        "Die V1.9.19-Asset-Economy-Faehigkeit passt nicht zur Karte.",
-      );
-    const advancementCounterCount = Math.max(
-      0,
-      Math.floor(
-        host.cards.mustInstance(state.cardInstances, sourceCardId)
-          .advancementCounters,
-      ),
-    );
-    const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-    const expectedGain = advancementCounterCount * 4;
-    if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
-      throw new Error(
-        "Information Laundering gewaehrt 4 Credits pro Advancement-Counter.",
-      );
-    host.credits.gain(state, "corp", gainAmount);
-    host.corp.trashInstalledCardToArchives(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      advancementCounterCount,
-      gainedCredits: gainAmount,
-      selfTrashed: true,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1920AssetAbility === "gain_actions") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.20-Asset-Action-Economy nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.20-Asset-Action-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.ACTION_ASSET_CARD_IDS.has(definition.id))
-      throw new Error(
-        "Die V1.9.20-Asset-Action-Faehigkeit passt nicht zur Karte.",
-      );
-    const gainedActions = Number(legalAction.payload?.gainedActions ?? 0);
-    if (!Number.isInteger(gainedActions) || gainedActions !== 2)
-      throw new Error(
-        "V1.9.20-Action-Assets gewaehrten in diesem WIP genau 2 Aktionen.",
-      );
-    state.corp.clicks += gainedActions;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      gainedActions,
-      corpClicksAfter: state.corp.clicks,
     };
     return handled(legalAction);
   }

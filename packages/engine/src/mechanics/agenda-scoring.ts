@@ -6,7 +6,6 @@ import {
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
 } from "./agenda-operation-effects";
 import {
-  CORP_ACTION_ASSET_CARD_IDS,
   CORP_ADVANCEMENT_COUNTER_ASSET_CARD_IDS,
   CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS,
   CORP_FORT_RUN_WINDOW_UPGRADE_CARD_IDS,
@@ -29,8 +28,6 @@ export const COUNTER_ASSET_CARD_IDS = CORP_ADVANCEMENT_COUNTER_ASSET_CARD_IDS;
 
 export const COUNTER_OPERATION_CARD_IDS =
   CORP_ADVANCEMENT_COUNTER_OPERATION_CARD_IDS;
-
-export const ACTION_ASSET_CARD_IDS = CORP_ACTION_ASSET_CARD_IDS;
 
 // Keep these IDs imported until the remaining agenda-difficulty naming is
 // migrated. The derived sets above are the preferred pattern for new mechanics.

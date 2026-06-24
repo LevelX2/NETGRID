@@ -264,9 +264,6 @@ function testCorpMainHost(
       COUNTER_UPGRADE_CARD_IDS: new Set(),
       TAG_CONDITION_UPGRADE_CARD_IDS: new Set(),
       COUNTER_ASSET_CARD_IDS: new Set(),
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
-        "information_laundering",
-      ACTION_ASSET_CARD_IDS: new Set(),
       ADVANCEMENT_PLACEMENT_OPERATION_ID: "systematic_layoffs",
     },
   };
