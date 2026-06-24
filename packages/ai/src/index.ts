@@ -160,8 +160,8 @@ import {
   semanticRuntimeRunnerEvidence as buildSemanticRuntimeRunnerEvidence,
 } from "./runtime/semantic-runtime-runner-evidence";
 import {
-  semanticRuntimeCorpEvidence as buildSemanticRuntimeCorpEvidence,
-} from "./runtime/semantic-runtime-corp-evidence";
+  createSemanticRuntimeCorpEvidenceContext,
+} from "./runtime/semantic-runtime-corp-evidence-context";
 import {
   semanticRuntimeEvidence as buildSemanticRuntimeEvidence,
 } from "./runtime/semantic-runtime-evidence";
@@ -3839,7 +3839,7 @@ const {
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
 });
-const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
+const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext({
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
   hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
@@ -3858,7 +3858,7 @@ const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
     semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
-};
+});
 const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
@@ -6790,17 +6790,6 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 function numberRecordValue(value: unknown, key: string): number | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "number" ? record[key] : undefined;
-}
-
-function semanticRuntimeCorpEvidence(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  return buildSemanticRuntimeCorpEvidence(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES,
-  );
 }
 
 function semanticRuntimeExplanation(side: Side, scopeId: string): string {
