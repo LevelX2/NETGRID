@@ -1,18 +1,20 @@
 import type { DamageType } from "@netgrid/shared";
-import { armoredFridgeImplementation } from "../card-implementations/onr-v1/runner/hardware/armored-fridge";
-import { dermatechBodyplatingImplementation } from "../card-implementations/onr-v1/runner/hardware/dermatech-bodyplating";
-import { fullBodyConversionImplementation } from "../card-implementations/onr-v1/runner/hardware/full-body-conversion";
-import { greenKnightSurgeBuffersImplementation } from "../card-implementations/onr-v1/runner/hardware/green-knight-surge-buffers";
-import { lifesaverNanosurgeonsImplementation } from "../card-implementations/onr-v1/runner/hardware/lifesaver-nanosurgeons";
-import { nasukoCycleImplementation } from "../card-implementations/onr-v1/runner/hardware/nasuko-cycle";
-import { techtronicaUtilitySuitImplementation } from "../card-implementations/onr-v1/runner/hardware/techtronica-utility-suit";
-import { evilTwinImplementation } from "../card-implementations/onr-v1/runner/programs/evil-twin";
-import { emergencySelfConstructImplementation } from "../card-implementations/onr-v1/runner/programs/emergency-self-construct";
-import { forceShieldImplementation } from "../card-implementations/onr-v1/runner/programs/force-shield";
-import { joanOfArcImplementation } from "../card-implementations/onr-v1/runner/programs/joan-of-arc";
-import { shieldImplementation } from "../card-implementations/onr-v1/runner/programs/shield";
-import { diplomaticImmunityImplementation } from "../card-implementations/onr-v1/runner/resources/diplomatic-immunity";
-import { traumaTeamImplementation } from "../card-implementations/onr-v1/runner/resources/trauma-team";
+import {
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
+  CORE_DAMAGE_PREVENTION_HARDWARE_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
+  DUAL_DAMAGE_BUFFER_PROGRAM_SOURCE,
+  MEAT_ARMOR_HARDWARE_SOURCE,
+  MEAT_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  NET_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  NET_MEAT_DAMAGE_PREVENTION_HARDWARE_SOURCE,
+  NET_MEAT_UTILITY_HARDWARE_SOURCE,
+  NET_SURGE_BUFFER_HARDWARE_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  SINGLE_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  TWO_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+} from "../compatibility/runtime-compatibility";
 
 export type RuntimeDamagePreventionProfile = {
   maxPerTurn: number;
@@ -20,34 +22,29 @@ export type RuntimeDamagePreventionProfile = {
   priority: number;
 };
 
-export const DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_SOURCE =
-  diplomaticImmunityImplementation.cardDefinitionId;
-
-export const ABLATIVE_COUNTER_HARDWARE_SOURCE =
-  armoredFridgeImplementation.cardDefinitionId;
+export {
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+};
 
 export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
-
-export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_SOURCE =
-  fullBodyConversionImplementation.cardDefinitionId;
-
-export const EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID =
-  emergencySelfConstructImplementation.cardDefinitionId;
 
 export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
   Record<string, RuntimeDamagePreventionProfile>
 > = {
-  [evilTwinImplementation.cardDefinitionId]: {
+  [DUAL_DAMAGE_BUFFER_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net", "core"],
     priority: 90,
   },
-  [forceShieldImplementation.cardDefinitionId]: {
+  [TWO_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net", "core"],
     priority: 100,
   },
-  [joanOfArcImplementation.cardDefinitionId]: {
+  [SINGLE_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "core"],
     priority: 120,
@@ -57,42 +54,42 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["meat"],
     priority: 120,
   },
-  [dermatechBodyplatingImplementation.cardDefinitionId]: {
+  [MEAT_ARMOR_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["meat"],
     priority: 110,
   },
-  [greenKnightSurgeBuffersImplementation.cardDefinitionId]: {
+  [NET_SURGE_BUFFER_HARDWARE_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 121,
   },
-  [EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID]: {
+  [SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["meat"],
     priority: 118,
   },
-  [lifesaverNanosurgeonsImplementation.cardDefinitionId]: {
+  [CORE_DAMAGE_PREVENTION_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["core"],
     priority: 121,
   },
-  [nasukoCycleImplementation.cardDefinitionId]: {
+  [NET_MEAT_DAMAGE_PREVENTION_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],
     priority: 122,
   },
-  [techtronicaUtilitySuitImplementation.cardDefinitionId]: {
+  [NET_MEAT_UTILITY_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],
     priority: 124,
   },
-  [traumaTeamImplementation.cardDefinitionId]: {
+  [MEAT_DAMAGE_PREVENTION_RESOURCE_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["meat"],
     priority: 128,
   },
-  [shieldImplementation.cardDefinitionId]: {
+  [NET_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 131,

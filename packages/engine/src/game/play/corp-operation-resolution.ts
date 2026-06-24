@@ -12,18 +12,18 @@ import type {
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
-  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
-  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
-  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  ADVANCEMENT_PLACEMENT_OPERATION_ID,
-  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
+  COUNTER_CREDIT_OPERATION_SOURCE,
+  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
+  AGENDA_ADVANCE_OPERATION_SOURCE,
+  ECONOMY_RECOVERY_OPERATION_SOURCE,
+  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
+  TEAM_COUNTER_OPERATION_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  CORP_RD_TOP5_REORDER_OPERATION_SOURCE,
+  ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  RD_TOP5_REORDER_OPERATION_SOURCE,
 } from "../../mechanics/hidden-zone";
-import { EDGERUNNER_TEMPS_INSTALL_OPERATION_ID } from "../../mechanics/longtail-card-effects";
+import { RUNNER_CARD_INSTALL_OPERATION_SOURCE } from "../../mechanics/longtail-card-effects";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
@@ -205,7 +205,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       host.state.corp.badPublicity += 1;
     },
   },
-  [CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE]: {
+  [ARCHIVES_TO_HQ_OPERATION_SOURCE]: {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (host) => host.state.corp.archives.length > 0,
     resolve: (host, legalAction) => {
@@ -213,13 +213,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
-          CORP_ARCHIVES_TO_HQ_OPERATION_SOURCE
+          ARCHIVES_TO_HQ_OPERATION_SOURCE
       )
         throw new Error("Off-Site Backups fehlt als Quelle.");
       host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
     },
   },
-  [CORP_RD_TOP5_REORDER_OPERATION_SOURCE]: {
+  [RD_TOP5_REORDER_OPERATION_SOURCE]: {
     name: "onr_v1922_corp_operation_private_rd_top5_reorder",
     canPlay: (host) => host.state.corp.rd.length >= 2,
     resolve: (host, legalAction) => {
@@ -227,13 +227,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
-          CORP_RD_TOP5_REORDER_OPERATION_SOURCE
+          RD_TOP5_REORDER_OPERATION_SOURCE
       )
         throw new Error("Planning Consultants fehlt als Quelle.");
       host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
     },
   },
-  [EDGERUNNER_TEMPS_INSTALL_OPERATION_ID]: {
+  [RUNNER_CARD_INSTALL_OPERATION_SOURCE]: {
     name: "onr_v1922_corp_operation_install_action_bundle",
     canPlay: (host) =>
       host.state.corp.hq.some((cardId) =>
@@ -258,7 +258,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
           side: "corp",
           sourceCardInstanceId: sourceCardId,
           sourceDefinitionId:
-            EDGERUNNER_TEMPS_INSTALL_OPERATION_ID as CardDefinitionId,
+            RUNNER_CARD_INSTALL_OPERATION_SOURCE as CardDefinitionId,
           actionType: "install_card",
           remainingActions: 3,
           costProfile: "extra_click",
@@ -277,22 +277,22 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID]: {
+  [COUNTER_CREDIT_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_add_power_counter",
     canPlay: (host) => corpAgendaCounterOperationTarget(host) !== undefined,
     resolve: (host, legalAction) =>
       host.board.resolveAgendaCounterOperation(
         legalAction,
-        FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID as CardDefinitionId,
+        COUNTER_CREDIT_OPERATION_SOURCE as CardDefinitionId,
       ),
   },
-  [MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID]: {
+  [ADVANCEMENT_REASSIGN_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_add_three_advancement_counters",
     canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
     resolve: (host, legalAction) =>
       host.board.resolveCorpOperationAddAdvancementCounters(legalAction),
   },
-  [PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID]: {
+  [AGENDA_ADVANCE_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_advance_installed_agenda",
     canPlay: (host) => host.board.installedAgendaOperationTarget() !== undefined,
     resolve: (host, legalAction) => {
@@ -313,7 +313,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID]: {
+  [ECONOMY_RECOVERY_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_gain_credits_3",
     resolve: (host, legalAction) => {
       host.economy.gainCorpCredits(3);
@@ -325,19 +325,19 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [ADVANCEMENT_PLACEMENT_OPERATION_ID]: {
+  [ADVANCEMENT_PLACEMENT_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_add_two_advancement_counters",
     canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
     resolve: (host, legalAction) =>
       host.board.resolveAdvancementPlacementOperation(legalAction),
   },
-  [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
+  [TEAM_COUNTER_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_add_power_counter",
     canPlay: (host) => corpAgendaCounterOperationTarget(host) !== undefined,
     resolve: (host, legalAction) =>
       host.board.resolveAgendaCounterOperation(
         legalAction,
-        TEAM_RESTRUCTURING_COUNTER_OPERATION_ID as CardDefinitionId,
+        TEAM_COUNTER_OPERATION_SOURCE as CardDefinitionId,
       ),
   },
 };

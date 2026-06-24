@@ -7807,7 +7807,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
     subroutines: [
-      onrSetRunEncounterTax("onr_v1_222_ball_and_chain_encounter_tax", 2),
+      onrSetRunEncounterTax("catalog_onr_v1_222_ball_and_chain_encounter_tax", 2),
     ],
     mechanics: ["encounter_tax", "run_modifier"],
   }),
@@ -7819,8 +7819,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 0,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_223_banpei_trash_program"),
-      onrEtr("onr_v1_223_banpei_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_223_banpei_trash_program"),
+      onrEtr("catalog_onr_v1_223_banpei_etr"),
     ],
     mechanics: [
       "trash_installed_program",
@@ -7837,9 +7837,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 4 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
-      onrNetDamage("onr_v1_224_bolter_cluster_net_damage", 4),
+      onrNetDamage("catalog_onr_v1_224_bolter_cluster_net_damage", 4),
       onrSetNextEncounterNoBreakSubroutines(
-        "onr_v1_224_bolter_cluster_next_ice_no_break",
+        "catalog_onr_v1_224_bolter_cluster_next_ice_no_break",
       ),
     ],
     mechanics: ["damage", "flatline", "next_encounter_penalty", "run_modifier"],
@@ -7853,7 +7853,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
     subroutines: [
-      onrSetRunFutureStrengthBonus("onr_v1_225_canis_major_future_strength", 2),
+      onrSetRunFutureStrengthBonus("catalog_onr_v1_225_canis_major_future_strength", 2),
     ],
     mechanics: ["encounter_ice_strength_bonus", "run_modifier"],
   }),
@@ -7866,7 +7866,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, all further ice is encountered at +1 strength.",
     subroutines: [
-      onrSetRunFutureStrengthBonus("onr_v1_226_canis_minor_future_strength", 1),
+      onrSetRunFutureStrengthBonus("catalog_onr_v1_226_canis_minor_future_strength", 1),
     ],
     mechanics: ["encounter_ice_strength_bonus", "run_modifier"],
   }),
@@ -7880,7 +7880,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
     subroutines: [
       onrSetNextEncounterFatalDamage(
-        "onr_v1_242_fatal_attractor_next_encounter",
+        "catalog_onr_v1_242_fatal_attractor_next_encounter",
         3,
       ),
     ],
@@ -7896,7 +7896,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
     subroutines: [
       {
-        ...onrSetNextEncounterLock("onr_v1_268_shock_r_next_encounter_lock"),
+        ...onrSetNextEncounterLock("catalog_onr_v1_268_shock_r_next_encounter_lock"),
         breakTags: ["stun"],
       },
     ],
@@ -7911,7 +7911,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Roll a die. If you roll a 1, 2, or 3, Runner resumes the run from that many pieces of rezzed ice back, or jacks out. If there are not that many pieces of ice, Runner returns to the first piece of ice.",
     subroutines: [
-      onrRewindRunToRezzedIceByDie("onr_v1_275_vacuum_link_rewind"),
+      onrRewindRunToRezzedIceByDie("catalog_onr_v1_275_vacuum_link_rewind"),
     ],
     mechanics: ["deterministic_die_roll", "run_rewind", "jack_out_window"],
   }),
@@ -7924,9 +7924,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
     subroutines: [
-      onrCoreDamage("onr_v1_229_code_corpse_core_damage_1", 1),
-      onrCoreDamage("onr_v1_229_code_corpse_core_damage_2", 1),
-      onrEtr("onr_v1_229_code_corpse_etr"),
+      onrCoreDamage("catalog_onr_v1_229_code_corpse_core_damage_1", 1),
+      onrCoreDamage("catalog_onr_v1_229_code_corpse_core_damage_2", 1),
+      onrEtr("catalog_onr_v1_229_code_corpse_etr"),
     ],
     mechanics: ["damage", "core_damage", "flatline", "end_the_run"],
   }),
@@ -7938,9 +7938,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     rulesText: "End the run.\nEnd the run.\nEnd the run.",
     subroutines: [
-      onrEtr("onr_v1_230_cortical_scanner_etr_1"),
-      onrEtr("onr_v1_230_cortical_scanner_etr_2"),
-      onrEtr("onr_v1_230_cortical_scanner_etr_3"),
+      onrEtr("catalog_onr_v1_230_cortical_scanner_etr_1"),
+      onrEtr("catalog_onr_v1_230_cortical_scanner_etr_2"),
+      onrEtr("catalog_onr_v1_230_cortical_scanner_etr_3"),
     ],
     mechanics: ["end_the_run"],
   }),
@@ -7952,8 +7952,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
     subroutines: [
-      onrCoreDamage("onr_v1_231_cortical_scrub_core_damage", 1),
-      onrEtr("onr_v1_231_cortical_scrub_etr"),
+      onrCoreDamage("catalog_onr_v1_231_cortical_scrub_core_damage", 1),
+      onrEtr("catalog_onr_v1_231_cortical_scrub_etr"),
     ],
     mechanics: ["damage", "core_damage", "flatline", "end_the_run"],
   }),
@@ -7964,7 +7964,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 4,
     strength: 3,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_232_crystal_wall_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_232_crystal_wall_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -7975,8 +7975,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 2,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_233_d_arc_knight_trash_program"),
-      onrEtr("onr_v1_233_d_arc_knight_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_233_d_arc_knight_trash_program"),
+      onrEtr("catalog_onr_v1_233_d_arc_knight_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
   }),
@@ -7989,9 +7989,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
-      onrNetDamage("onr_v1_234_data_darts_net_damage", 3),
+      onrNetDamage("catalog_onr_v1_234_data_darts_net_damage", 3),
       onrSetNextEncounterNoBreakSubroutines(
-        "onr_v1_234_data_darts_next_ice_no_break",
+        "catalog_onr_v1_234_data_darts_next_ice_no_break",
       ),
     ],
     mechanics: [
@@ -8010,8 +8010,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 5,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_235_data_naga_trash_program"),
-      onrEtr("onr_v1_235_data_naga_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_235_data_naga_trash_program"),
+      onrEtr("catalog_onr_v1_235_data_naga_etr"),
     ],
     mechanics: [
       "trash_installed_program",
@@ -8055,7 +8055,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     strength: 0,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_237_data_wall_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_237_data_wall_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8065,7 +8065,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     strength: 1,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_238_data_wall_2_0_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_238_data_wall_2_0_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8076,8 +8076,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 2,
     rulesText: "End the run.\nEnd the run.",
     subroutines: [
-      onrEtr("onr_v1_239_endless_corridor_etr_1"),
-      onrEtr("onr_v1_239_endless_corridor_etr_2"),
+      onrEtr("catalog_onr_v1_239_endless_corridor_etr_1"),
+      onrEtr("catalog_onr_v1_239_endless_corridor_etr_2"),
     ],
     mechanics: ["end_the_run"],
   }),
@@ -8106,7 +8106,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     strength: 0,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_244_filter_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_244_filter_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8116,7 +8116,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 4,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_245_fire_wall_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8128,8 +8128,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Runner cannot make runs with their next six actions.\n[Subroutine] End the run.",
     subroutines: [
-      onrSetRunnerRunLockActions("onr_v1_247_haunting_inquisition_run_lock", 6),
-      onrEtr("onr_v1_247_haunting_inquisition_etr"),
+      onrSetRunnerRunLockActions("catalog_onr_v1_247_haunting_inquisition_run_lock", 6),
+      onrEtr("catalog_onr_v1_247_haunting_inquisition_etr"),
     ],
     mechanics: [
       "run_modifier",
@@ -8164,8 +8164,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 1,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_250_ice_pick_willie_trash_program"),
-      onrEtr("onr_v1_250_ice_pick_willie_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_250_ice_pick_willie_trash_program"),
+      onrEtr("catalog_onr_v1_250_ice_pick_willie_etr"),
     ],
     mechanics: ["trash_installed_program", "end_the_run"],
   }),
@@ -8178,7 +8178,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, Runner cannot jack out.\n[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
     subroutines: [
-      onrSetRunJackOutLock("onr_v1_251_jack_attack_run_jack_out_lock"),
+      onrSetRunJackOutLock("catalog_onr_v1_251_jack_attack_run_jack_out_lock"),
       {
         id: "onr_v1_251_jack_attack_trace",
         type: "initiate_trace",
@@ -8202,7 +8202,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 4,
     strength: 4,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_252_keeper_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_252_keeper_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8213,8 +8213,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 2,
     rulesText: "Do 1 net damage. End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_253_laser_wire_net_damage", 1),
-      onrEtr("onr_v1_253_laser_wire_etr"),
+      onrNetDamage("catalog_onr_v1_253_laser_wire_net_damage", 1),
+      onrEtr("catalog_onr_v1_253_laser_wire_etr"),
     ],
     mechanics: ["damage", "flatline", "end_the_run"],
   }),
@@ -8227,10 +8227,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
     subroutines: [
-      onrCoreDamage("onr_v1_254_liche_core_damage_1", 1),
-      onrCoreDamage("onr_v1_254_liche_core_damage_2", 1),
-      onrCoreDamage("onr_v1_254_liche_core_damage_3", 1),
-      onrEtr("onr_v1_254_liche_etr"),
+      onrCoreDamage("catalog_onr_v1_254_liche_core_damage_1", 1),
+      onrCoreDamage("catalog_onr_v1_254_liche_core_damage_2", 1),
+      onrCoreDamage("catalog_onr_v1_254_liche_core_damage_3", 1),
+      onrEtr("catalog_onr_v1_254_liche_etr"),
     ],
     mechanics: ["damage", "core_damage", "flatline", "end_the_run"],
   }),
@@ -8241,7 +8241,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 5,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_256_mazer_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_256_mazer_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8252,8 +8252,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 4,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_257_nerve_labyrinth_net_damage", 2),
-      onrEtr("onr_v1_257_nerve_labyrinth_etr"),
+      onrNetDamage("catalog_onr_v1_257_nerve_labyrinth_net_damage", 2),
+      onrEtr("catalog_onr_v1_257_nerve_labyrinth_etr"),
     ],
     mechanics: ["damage", "flatline", "end_the_run"],
   }),
@@ -8266,9 +8266,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
-      onrNetDamage("onr_v1_258_neural_blade_net_damage", 1),
+      onrNetDamage("catalog_onr_v1_258_neural_blade_net_damage", 1),
       onrSetNextEncounterNoBreakSubroutines(
-        "onr_v1_258_neural_blade_next_ice_no_break",
+        "catalog_onr_v1_258_neural_blade_next_ice_no_break",
       ),
     ],
     mechanics: ["damage", "flatline", "next_encounter_penalty", "run_modifier"],
@@ -8280,7 +8280,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 3,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_259_in_the_face_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_259_in_the_face_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8290,7 +8290,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     strength: 2,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_261_quandary_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_261_quandary_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8301,8 +8301,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_262_razor_wire_net_damage", 2),
-      onrEtr("onr_v1_262_razor_wire_etr"),
+      onrNetDamage("catalog_onr_v1_262_razor_wire_net_damage", 2),
+      onrEtr("catalog_onr_v1_262_razor_wire_etr"),
     ],
     mechanics: ["damage", "flatline", "end_the_run"],
   }),
@@ -8314,8 +8314,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 4,
     rulesText: "End the run. End the run.",
     subroutines: [
-      onrEtr("onr_v1_263_reinforced_wall_etr_1"),
-      onrEtr("onr_v1_263_reinforced_wall_etr_2"),
+      onrEtr("catalog_onr_v1_263_reinforced_wall_etr_1"),
+      onrEtr("catalog_onr_v1_263_reinforced_wall_etr_2"),
     ],
     mechanics: ["end_the_run"],
   }),
@@ -8326,7 +8326,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 6,
     strength: 5,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_265_rock_is_strong_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_265_rock_is_strong_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8336,7 +8336,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 3,
     strength: 3,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_266_scramble_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_266_scramble_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8347,8 +8347,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 4,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_267_sentinels_prime_trash_program"),
-      onrEtr("onr_v1_267_sentinels_prime_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_267_sentinels_prime_trash_program"),
+      onrEtr("catalog_onr_v1_267_sentinels_prime_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
   }),
@@ -8360,8 +8360,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 5,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_269_shotgun_wire_net_damage", 2),
-      onrEtr("onr_v1_269_shotgun_wire_etr"),
+      onrNetDamage("catalog_onr_v1_269_shotgun_wire_net_damage", 2),
+      onrEtr("catalog_onr_v1_269_shotgun_wire_etr"),
     ],
     mechanics: ["damage", "flatline", "end_the_run"],
   }),
@@ -8372,7 +8372,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     strength: 1,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_270_sleeper_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_270_sleeper_etr")],
     mechanics: ["end_the_run"],
   }),
   onrIce({
@@ -8385,10 +8385,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] End the run, and Runner forgoes his or her next action.",
     subroutines: [
       {
-        ...onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"),
+        ...onrSetRunnerForgoNextAction("catalog_onr_v1_271_tko_2_0_forgo_next_action"),
         breakTags: ["knockout"],
       },
-      onrEtr("onr_v1_271_tko_2_0_etr"),
+      onrEtr("catalog_onr_v1_271_tko_2_0_etr"),
     ],
     mechanics: ["end_the_run", "action_economy", "run_modifier"],
   }),
@@ -8401,7 +8401,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Secretly spend 0, 1, or 2; Runner does the same. Then reveal how much each of you spent. End the run unless the Corp spent at least as many credits as Runner spent.",
     subroutines: [
-      onrReorderCorpRdTop2("onr_v1_272_too_many_doors_reorder_rd_top2"),
+      onrReorderCorpRdTop2("catalog_onr_v1_272_too_many_doors_reorder_rd_top2"),
     ],
     mechanics: ["reorder_rd", "hidden_zone_tool"],
   }),
@@ -8414,7 +8414,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, each later encountered ice gains an additional end-the-run subroutine.",
     subroutines: [
-      onrSetRunFutureEndTheRunSubroutine("onr_v1_274_tutor_future_end_the_run"),
+      onrSetRunFutureEndTheRunSubroutine("catalog_onr_v1_274_tutor_future_end_the_run"),
     ],
     mechanics: ["run_modifier", "end_the_run", "per_card_longtail"],
   }),
@@ -8426,8 +8426,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("onr_v1_273_triggerman_trash_program"),
-      onrEtr("onr_v1_273_triggerman_etr"),
+      onrTrashInstalledProgram("catalog_onr_v1_273_triggerman_trash_program"),
+      onrEtr("catalog_onr_v1_273_triggerman_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
   }),
@@ -8441,7 +8441,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Active ICE Program Trash, unless Runner jacks out.",
     subroutines: [
       onrSetRunActiveIceProgramTrash(
-        "onr_v1_276_active_ice_program_trash_run_modifier",
+        "catalog_onr_v1_276_active_ice_program_trash_run_modifier",
       ),
     ],
     mechanics: [
@@ -8461,7 +8461,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] For the remainder of the run, the Runner must pay 1 additional credit to break each ice subroutine.",
     subroutines: [
       onrSetRunBreakSubroutineCostModifier(
-        "onr_v1_277_virizz_break_cost_modifier",
+        "catalog_onr_v1_277_virizz_break_cost_modifier",
         1,
       ),
     ],
@@ -8476,9 +8476,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
     subroutines: [
-      onrCoreDamage("onr_v1_280_zombie_core_damage_1", 1),
-      onrCoreDamage("onr_v1_280_zombie_core_damage_2", 1),
-      onrEtr("onr_v1_280_zombie_etr"),
+      onrCoreDamage("catalog_onr_v1_280_zombie_core_damage_1", 1),
+      onrCoreDamage("catalog_onr_v1_280_zombie_core_damage_2", 1),
+      onrEtr("catalog_onr_v1_280_zombie_etr"),
     ],
     mechanics: [
       "damage",
@@ -8496,10 +8496,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 6,
     rulesText: "Do 2 net damage. Do 2 net damage. End the run. End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_278_wall_of_ice_net_damage_1", 2),
-      onrNetDamage("onr_v1_278_wall_of_ice_net_damage_2", 2),
-      onrEtr("onr_v1_278_wall_of_ice_etr_1"),
-      onrEtr("onr_v1_278_wall_of_ice_etr_2"),
+      onrNetDamage("catalog_onr_v1_278_wall_of_ice_net_damage_1", 2),
+      onrNetDamage("catalog_onr_v1_278_wall_of_ice_net_damage_2", 2),
+      onrEtr("catalog_onr_v1_278_wall_of_ice_etr_1"),
+      onrEtr("catalog_onr_v1_278_wall_of_ice_etr_2"),
     ],
     mechanics: ["damage", "flatline", "end_the_run"],
   }),
@@ -8510,7 +8510,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 3,
     strength: 2,
     rulesText: "End the run.",
-    subroutines: [onrEtr("onr_v1_279_wall_of_static_etr")],
+    subroutines: [onrEtr("catalog_onr_v1_279_wall_of_static_etr")],
     mechanics: ["end_the_run"],
   }),
   {
@@ -9289,7 +9289,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 3 Net damage.\n[Subroutine] Trace 5 - If trace is successful, give Runner a Cerberus counter. Each Cerberus counter does 2 Net damage at the start of each run. Runner may remove a Cerberus counter by taking an action to spend 4.\n[Subroutine] End the run.",
     subroutines: [
-      onrNetDamage("onr_v1_227_cerberus_net_damage", 3),
+      onrNetDamage("catalog_onr_v1_227_cerberus_net_damage", 3),
       {
         id: "onr_v1_227_cerberus_trace",
         type: "initiate_trace",
@@ -9300,7 +9300,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
           amount: 1,
         },
       },
-      onrEtr("onr_v1_227_cerberus_etr"),
+      onrEtr("catalog_onr_v1_227_cerberus_etr"),
     ],
     mechanics: [
       "trace",
@@ -9322,9 +9322,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Do 1 brain damage.\n[Subroutine] Do 1 Net damage.\n[Subroutine] For the remainder of the run, all ice is encountered at +1 strength.\n[Subroutine] Trace 5 - If trace is successful, give Runner a Mastiff counter.\n[Subroutine] End the run.",
     subroutines: [
-      onrCoreDamage("onr_v1_255_mastiff_core_damage", 1),
-      onrNetDamage("onr_v1_255_mastiff_net_damage", 1),
-      onrSetRunFutureStrengthBonus("onr_v1_255_mastiff_strength_bonus", 1),
+      onrCoreDamage("catalog_onr_v1_255_mastiff_core_damage", 1),
+      onrNetDamage("catalog_onr_v1_255_mastiff_net_damage", 1),
+      onrSetRunFutureStrengthBonus("catalog_onr_v1_255_mastiff_strength_bonus", 1),
       {
         id: "onr_v1_255_mastiff_trace",
         type: "initiate_trace",
@@ -9335,7 +9335,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
           amount: 1,
         },
       },
-      onrEtr("onr_v1_255_mastiff_etr"),
+      onrEtr("catalog_onr_v1_255_mastiff_etr"),
     ],
     mechanics: [
       "trace",

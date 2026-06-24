@@ -39,7 +39,7 @@ export type RunFortTriggerExecutionHost = {
     startHqIceSwapChoice: (legalAction: LegalAction) => void;
   };
   constants: {
-    MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: string;
+    HOST_RETURN_HARDWARE_SOURCE: string;
   };
 };
 
@@ -138,7 +138,7 @@ function resolveTopHostedProgramReturn(
     throw new Error("Microtech Backup Drive ist nicht installiert.");
   if (
     host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
+    host.constants.HOST_RETURN_HARDWARE_SOURCE
   )
     throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
   const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
@@ -162,7 +162,7 @@ function resolveTopHostedProgramReturn(
     ...(legalAction.payload ?? {}),
     v1922RunnerHardwareAbility: "return_top_hosted_program",
     sourceDefinitionId:
-      host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+      host.constants.HOST_RETURN_HARDWARE_SOURCE,
     returnedCardDefinitionId: targetDefinitionId,
     returnedToGrip: true,
     hostedProgramCountAfter: hostedProgramIdsOnHardware(host, sourceCardId)

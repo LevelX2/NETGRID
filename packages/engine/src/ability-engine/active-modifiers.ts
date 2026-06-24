@@ -21,10 +21,7 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
-import { virizzImplementation } from "../card-implementations/onr-v1/corp/ice/virizz";
-
-const VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID =
-  virizzImplementation.cardDefinitionId;
+import { BREAK_COST_MODIFIER_SOURCE } from "../compatibility/runtime-compatibility";
 
 export type ActiveModifierDuration =
   | "encounter"
@@ -296,8 +293,8 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
   const breakCostAmount = positiveInteger(run.breakSubroutineAdditionalCost);
   if (breakCostAmount > 0) {
     modifiers.push({
-      id: `run.break_subroutine_cost.${VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID}`,
-      sourceDefinitionId: VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID,
+      id: `run.break_subroutine_cost.${BREAK_COST_MODIFIER_SOURCE}`,
+      sourceDefinitionId: BREAK_COST_MODIFIER_SOURCE,
       kind: "break_subroutine_cost",
       side: "runner",
       amount: breakCostAmount,

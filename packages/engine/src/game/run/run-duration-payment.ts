@@ -17,8 +17,8 @@ import {
   ZZ22_SPEED_CHIP_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID,
-  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+  RUN_STRENGTH_HARDWARE_SOURCE,
+  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -64,7 +64,7 @@ export type RunSpendingCapResult = {
   runSpendingCapUsed?: number;
 };
 
-const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
+const TAG_REMOVAL_RECURRING_CREDIT_SOURCES = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
@@ -231,7 +231,7 @@ export function runnerRunRecurringCreditSourceIds(
     const definition = definitionFor(state, cardId);
     if (
       definition.id === ZZ22_SPEED_CHIP_ID ||
-      definition.id === COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID
+      definition.id === RUN_STRENGTH_HARDWARE_SOURCE
     ) {
       return Boolean(
         state.run &&
@@ -241,8 +241,8 @@ export function runnerRunRecurringCreditSourceIds(
       );
     }
     if (
-      definition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID ||
-      TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(definition.id)
+      definition.id === PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE ||
+      TAG_REMOVAL_RECURRING_CREDIT_SOURCES.has(definition.id)
     ) {
       return false;
     }

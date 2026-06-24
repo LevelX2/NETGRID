@@ -27,7 +27,7 @@ import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/de
 
 export function createLifecycleRuntime(deps: RuntimeDeps) {
   const {
-    MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+    HOST_RETURN_HARDWARE_SOURCE,
     NEVINYRRAL_ID,
     cardHasSubtype,
     cardImplementationForDefinitionId,
@@ -168,7 +168,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
         cardHasSubtype(hostDefinition, "daemon")) ||
       runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
         "replace_installed_program_trash_with_host_on_source" ||
-      hostDefinition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
+      hostDefinition.id === HOST_RETURN_HARDWARE_SOURCE
     )
       return false;
     return true;

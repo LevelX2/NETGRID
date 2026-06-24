@@ -26,10 +26,10 @@ import {
 import { maxHandSize } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+  FLATLINE_REPLACEMENT_EVENT_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import type {
@@ -1470,10 +1470,10 @@ function replacementChoice(
         id: candidate.candidateId,
         label:
           candidate.sourceRef.definitionId ===
-          ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
+          FLATLINE_REPLACEMENT_EVENT_SOURCE
             ? "Arasaka Owns You spielen"
             : candidate.sourceRef.definitionId ===
-                EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID
+                SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
               ? "Emergency Self-Construct ausloesen"
               : isIdentityDonorReplacementCandidateForChoice(candidate)
                 ? "Identity Donor spielen"
@@ -2021,13 +2021,13 @@ export function resolveReplacementChoice(
     );
   if (
     candidate.sourceRef.definitionId ===
-    ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
+    FLATLINE_REPLACEMENT_EVENT_SOURCE
   ) {
     resolveGripFlatlineTagReplacement(state, legalAction, event, candidate);
     clearReplacementState(state);
     return;
   }
-  if (candidate.sourceRef.definitionId === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID) {
+  if (candidate.sourceRef.definitionId === SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE) {
     resolveInstalledFlatlinePreventionReplacement(
       state,
       legalAction,
@@ -2193,9 +2193,9 @@ function resolveGripFlatlineTagReplacement(
     originalAmount,
     preventedAmount: originalAmount,
     flatlineReplacementAbility: "flatline_tag_replacement_from_grip",
-    sourceDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-    cardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-    trashedCardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+    sourceDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
+    cardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
+    trashedCardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
     coreDamageRemoved,
     drawnCards,
     gainedCredits: 10,
@@ -2217,7 +2217,7 @@ function resolveInstalledFlatlinePreventionReplacement(
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.rig.programs.includes(cardId))
     throw new Error("Die installierte Flatline-Prevention ist nicht installiert.");
-  if (definitionFor(state, cardId).id !== EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID)
+  if (definitionFor(state, cardId).id !== SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE)
     throw new Error("Die installierte Flatline-Prevention-Quelle passt nicht.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
@@ -2248,9 +2248,9 @@ function resolveInstalledFlatlinePreventionReplacement(
     originalAmount,
     preventedAmount: originalAmount,
     flatlineReplacementAbility: "installed_flatline_prevention",
-    sourceDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-    cardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-    trashedCardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    sourceDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+    cardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+    trashedCardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
     coreDamageRemoved,
     gripCardsLost,
     runnerActionsPerTurnOverride: state.runnerActionsPerTurnOverride,

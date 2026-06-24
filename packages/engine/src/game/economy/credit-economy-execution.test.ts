@@ -271,12 +271,12 @@ function testHost(
     },
     constants: {
       COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "stack_reveal",
-      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
-      DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
+      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
+      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
       COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
       RUNNER_RANDOM_PROGRAM_SOURCES: new Set(["random_program"]),
-      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
-      FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",
+      RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
+      COUNTER_GAIN_PROGRAM_SOURCE: "fait_accompli",
     },
   };
 }

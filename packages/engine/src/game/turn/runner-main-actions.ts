@@ -107,14 +107,14 @@ export type RunnerMainActionGenerationHost = {
     RUNNER_EVENT_RESOLVERS: Record<string, any>;
     STACK_SEARCH_PROGRAM_SOURCES: ReadonlySet<string>;
     SELF_MODIFYING_CODE_ID: string;
-    SHORT_CIRCUIT_RESOURCE_SOURCE: string;
-    AUJOURD_OUI_RESOURCE_SOURCE: string;
+    PAID_STACK_SEARCH_RESOURCE_SOURCE: string;
+    DAILY_CREDIT_RESOURCE_SOURCE: string;
     SERVER_EXPOSE_PROGRAM_SOURCES: ReadonlySet<string>;
     COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: string;
-    FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: string;
+    COUNTER_GAIN_PROGRAM_SOURCE: string;
     BOARDWALK_RANDOM_PROGRAM_SOURCE: string;
-    MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: string;
-    QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE: string;
+    HOST_RETURN_HARDWARE_SOURCE: string;
+    RANDOM_RESOURCE_SOURCE: string;
     STACK_TOP_REORDER_RESOURCE_SOURCE: string;
     JUNKYARD_BBS_ID: string;
     SHELL_TRADERS_ID: string;
@@ -263,22 +263,22 @@ export function buildRunnerMainActions(
   const STACK_SEARCH_PROGRAM_SOURCES =
     host.constants.STACK_SEARCH_PROGRAM_SOURCES;
   const SELF_MODIFYING_CODE_ID = host.constants.SELF_MODIFYING_CODE_ID;
-  const SHORT_CIRCUIT_RESOURCE_SOURCE =
-    host.constants.SHORT_CIRCUIT_RESOURCE_SOURCE;
-  const AUJOURD_OUI_RESOURCE_SOURCE =
-    host.constants.AUJOURD_OUI_RESOURCE_SOURCE;
+  const PAID_STACK_SEARCH_RESOURCE_SOURCE =
+    host.constants.PAID_STACK_SEARCH_RESOURCE_SOURCE;
+  const DAILY_CREDIT_RESOURCE_SOURCE =
+    host.constants.DAILY_CREDIT_RESOURCE_SOURCE;
   const SERVER_EXPOSE_PROGRAM_SOURCES =
     host.constants.SERVER_EXPOSE_PROGRAM_SOURCES;
   const COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE =
     host.constants.COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE;
-  const FAIT_ACCOMPLI_COUNTER_PROGRAM_ID =
-    host.constants.FAIT_ACCOMPLI_COUNTER_PROGRAM_ID;
+  const COUNTER_GAIN_PROGRAM_SOURCE =
+    host.constants.COUNTER_GAIN_PROGRAM_SOURCE;
   const BOARDWALK_RANDOM_PROGRAM_SOURCE =
     host.constants.BOARDWALK_RANDOM_PROGRAM_SOURCE;
-  const MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID =
-    host.constants.MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID;
-  const QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE =
-    host.constants.QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE;
+  const HOST_RETURN_HARDWARE_SOURCE =
+    host.constants.HOST_RETURN_HARDWARE_SOURCE;
+  const RANDOM_RESOURCE_SOURCE =
+    host.constants.RANDOM_RESOURCE_SOURCE;
   const STACK_TOP_REORDER_RESOURCE_SOURCE =
     host.constants.STACK_TOP_REORDER_RESOURCE_SOURCE;
   const JUNKYARD_BBS_ID = host.constants.JUNKYARD_BBS_ID;
@@ -763,9 +763,9 @@ export function buildRunnerMainActions(
         STACK_SEARCH_PROGRAM_SOURCES.has(definition.id) &&
         !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
-        (definition.id !== SHORT_CIRCUIT_RESOURCE_SOURCE ||
+        (definition.id !== PAID_STACK_SEARCH_RESOURCE_SOURCE ||
           state.runner.credits >= 1) &&
-        (definition.id === AUJOURD_OUI_RESOURCE_SOURCE
+        (definition.id === DAILY_CREDIT_RESOURCE_SOURCE
           ? state.runner.stack.length > 0
           : state.runner.stack.some(
               (id) => definitionFor(state, id).type === "program",
@@ -776,11 +776,11 @@ export function buildRunnerMainActions(
             cardId,
             definition,
             mode:
-              definition.id === AUJOURD_OUI_RESOURCE_SOURCE
+              definition.id === DAILY_CREDIT_RESOURCE_SOURCE
                 ? "top5_programs"
                 : "stack_program",
             creditCost:
-              definition.id === SHORT_CIRCUIT_RESOURCE_SOURCE ? 1 : 0,
+              definition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE ? 1 : 0,
           }),
         );
       }
@@ -831,7 +831,7 @@ export function buildRunnerMainActions(
         );
       }
       if (
-        definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
+        definition.id === COUNTER_GAIN_PROGRAM_SOURCE &&
         state.runner.scoreArea.length > 0
       ) {
         actions.push(
@@ -873,7 +873,7 @@ export function buildRunnerMainActions(
         definition,
       );
       if (
-        definition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID &&
+        definition.id === HOST_RETURN_HARDWARE_SOURCE &&
         topHostedProgramOnHardware(state, cardId)
       ) {
         const topHostedId = topHostedProgramOnHardware(state, cardId);
@@ -897,7 +897,7 @@ export function buildRunnerMainActions(
           ),
         );
       }
-      if (definition.id === QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_SOURCE) {
+      if (definition.id === RANDOM_RESOURCE_SOURCE) {
         actions.push(
           action(
             state,

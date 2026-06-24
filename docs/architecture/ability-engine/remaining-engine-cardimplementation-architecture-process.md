@@ -143,6 +143,17 @@ Checks:
 - `corepack pnpm check:engine-cardimplementation-architecture-target`
 - `git diff --check`
 
+Abschluss 2026-06-24:
+- Longtail-, Damage-, Agenda-/Operation-, Hidden-Zone-, Server-Upgrade-, Run-Access-, Asset-/Node-, Random- und Global-Modifier-Marker importieren keine konkreten CardImplementation-Dateien mehr; stabile Legacy-Werte liegen in `packages/engine/src/compatibility/runtime-compatibility.ts`.
+- Produktive Engine-/Mechanics-/Ability-Pfade verwenden funktionsbezogene Source-/Profilnamen statt kartenspezifischer Runtime-Namen oder `_DEFINITION_ID(S)`-Regelkeys.
+- Shared-Catalog-interne Subroutine-/Modifier-IDs sind auf `catalog_onr_*` normalisiert, damit technische Catalog-IDs nicht als aktive Karten-ID-Regelentscheidungen auftreten.
+- Lokale Guard-Auswertung für produktive Engine-/Mechanics-/Ability-/Shared-Pfade: keine verbleibenden P4-relevanten card-specific Runtime-Namen und keine aktiven Engine-Definition-ID-Regelkeys; der Gesamtguard bleibt erwartbar rot für P5-AI/Scripts sowie Registry-/Monolith-Zuschnitt.
+- `corepack pnpm --filter @netgrid/engine typecheck`: grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`: grün.
+- `corepack pnpm --filter @netgrid/engine test`: grün, 173 Testdateien / 1519 Tests.
+- `corepack pnpm check:engine-cardimplementation-architecture-target`: erwartbar weiter rot; Reststand `card-specific productive runtime names: 1941`, `active card-id rule decisions removed: 1583`, `registry uses real grouped registries: 4`, `no replacement monoliths: 28`.
+- `git diff --check`: sauber.
+
 Commit: `refactor(engine): remove card specific runtime rule paths`
 
 ### P5 Registry, AI-/Semantik-Consumer, Modulgrenzen und dauerhafte Kommentare

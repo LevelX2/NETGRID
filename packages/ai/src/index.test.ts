@@ -706,7 +706,7 @@ describe("MVP 0.3 AI controller contract", () => {
       iceDefinitionId: "onr_v1_232_crystal-wall",
       effectiveStrength: 3,
       subroutines: [
-        { id: "onr_v1_232_crystal_wall_etr", type: "end_the_run" },
+        { id: "catalog_onr_v1_232_crystal_wall_etr", type: "end_the_run" },
         {
           id: "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
           type: "end_the_run_unless_runner_pays",
@@ -810,7 +810,7 @@ describe("MVP 0.3 AI controller contract", () => {
         effectiveStrength: 5,
         subroutines: [
           {
-            id: "onr_v1_274_tutor_future_end_the_run",
+            id: "catalog_onr_v1_274_tutor_future_end_the_run",
             type: "set_run_future_end_the_run_subroutine",
             unbrokenRunEffect: { addsFutureEndTheRunSubroutines: 1 },
           },

@@ -18,7 +18,7 @@ import {
   ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
 } from "../../mechanics/damage-prevention";
-import { ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID } from "../../mechanics/longtail-card-effects";
+import { PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE } from "../../mechanics/longtail-card-effects";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import {
@@ -408,7 +408,7 @@ function installRunnerCard(
       ...(legalAction.payload ?? {}),
       v1922RunnerProgramAbility: "program_overlay_install",
       programOverlayInstall: true,
-      hostDefinitionId: ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+      hostDefinitionId: PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
       hostedRecurringCreditsSpent:
         programOverlayInstall && hostOnCardId
           ? Math.max(

@@ -9,7 +9,7 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import { POLTERGEIST_ID } from "../../compatibility/runtime-compatibility";
-import { SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID } from "../../mechanics/longtail-card-effects";
+import { UPGRADE_TRASH_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
@@ -516,7 +516,7 @@ function upgradeTrashRecurringCreditSourceIds(
       const definition = host.cards.definitionFor(cardId);
       return (
         !host.payment.isRestrictedHostedCreditSource(definition) &&
-        definition.id === SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID &&
+        definition.id === UPGRADE_TRASH_PROGRAM_SOURCE &&
         host.counters.cardCounter(cardId, "recurring_credit") > 0
       );
     }),

@@ -19,10 +19,10 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import { FAIT_ACCOMPLI_COUNTER_PROGRAM_ID } from "../../mechanics/agenda-operation-effects";
+import { COUNTER_GAIN_PROGRAM_SOURCE } from "../../mechanics/agenda-operation-effects";
 import {
-  FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
-  NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
+  SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE,
+  ICE_ORDER_REVERSAL_PROGRAM_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 
@@ -234,7 +234,7 @@ export function buildSuccessfulRunFollowupActions(
     const forceRezFollowup =
       hasSuccessfulRunForceRezFollowup(definition.id) ||
       (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID);
+        definition.id === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE);
     if (forceRezFollowup) {
       const server = host.servers.mustServer(run.attackedServerId);
       const unrezzedCount = server.ice.filter(
@@ -354,7 +354,7 @@ export function buildSuccessfulRunFollowupActions(
         (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
       ) ||
       (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
+        definition.id === ICE_ORDER_REVERSAL_PROGRAM_SOURCE)
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind !== "archives" && server.ice.length > 1) {
@@ -374,7 +374,7 @@ export function buildSuccessfulRunFollowupActions(
       }
     }
     if (
-      definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
+      definition.id === COUNTER_GAIN_PROGRAM_SOURCE &&
       !cardImplementationForDefinitionId(definition.id)?.virusCounter
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
@@ -1081,7 +1081,7 @@ function resolveSuccessfulRunForceRez(
     !hasSuccessfulRunForceRezFollowup(sourceDefinitionId) &&
     !(
       !cardImplementationForDefinitionId(sourceDefinitionId) &&
-      sourceDefinitionId === FALSE_ECHO_FORCE_REZ_PROGRAM_ID
+      sourceDefinitionId === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE
     )
   )
     throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
@@ -1167,7 +1167,7 @@ function resolveSuccessfulRunReverseIce(
     ) ?? false;
   if (
     !reverseFollowup &&
-    sourceDefinition.id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID
+    sourceDefinition.id !== ICE_ORDER_REVERSAL_PROGRAM_SOURCE
   )
     throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
@@ -1223,7 +1223,7 @@ function resolveSuccessfulRunRemoteCounter(
     throw new Error("Fait Accompli ist nicht installiert.");
   if (
     host.cards.definitionFor(sourceCardId).id !==
-    FAIT_ACCOMPLI_COUNTER_PROGRAM_ID
+    COUNTER_GAIN_PROGRAM_SOURCE
   )
     throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
@@ -1239,7 +1239,7 @@ function resolveSuccessfulRunRemoteCounter(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     addedCounterAmount: 1,
     remainingCounters: host.counters.cardCounter(sourceCardId, "power"),
@@ -1249,7 +1249,7 @@ function resolveSuccessfulRunRemoteCounter(
   return {
     handled: true,
     sourceCardId,
-    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
     counterPlaced: true,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),

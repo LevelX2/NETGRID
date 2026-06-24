@@ -94,10 +94,10 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
-    DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
+    INSTALLED_CARD_LIMIT_ASSET_SOURCE: string;
+    VIRUS_COUNTER_ASSET_SOURCE: string;
     COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
-    ADVANCEMENT_PLACEMENT_OPERATION_ID: string;
+    ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: string;
   };
 };
 
@@ -196,13 +196,13 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
-    host.constants.COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID;
-  const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
-    host.constants.DISINFECTANT_VIRUS_COUNTER_ASSET_ID;
+  const INSTALLED_CARD_LIMIT_ASSET_SOURCE =
+    host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE;
+  const VIRUS_COUNTER_ASSET_SOURCE =
+    host.constants.VIRUS_COUNTER_ASSET_SOURCE;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
-  const ADVANCEMENT_PLACEMENT_OPERATION_ID =
-    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_ID;
+  const ADVANCEMENT_PLACEMENT_OPERATION_SOURCE =
+    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_SOURCE;
 
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
@@ -447,7 +447,7 @@ export function buildCorpMainActions(
         actions.push(...hardwareTrashByCounterLegalActions(state, id, definition));
         continue;
       }
-      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_ID) {
+      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_SOURCE) {
         actions.push(...advancementPlacementLegalActions(state, id, definition));
         continue;
       }
@@ -664,7 +664,7 @@ export function buildCorpMainActions(
       }
     }
     if (
-      definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID &&
+      definition.id === VIRUS_COUNTER_ASSET_SOURCE &&
       !hasCorpUtilityKind(state, assetId, "counter_prevention_replacement")
     ) {
       for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
