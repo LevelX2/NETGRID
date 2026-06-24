@@ -237,7 +237,6 @@ import {
 import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
   safeNonNegativeInteger as buildSafeNonNegativeInteger,
-  normalizedRulesTextForDefinition as buildNormalizedRulesTextForDefinition,
   visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
   visibleCounterValue as buildVisibleCounterValue,
   visibleInstallCost as buildVisibleInstallCost,
@@ -3869,6 +3868,7 @@ const {
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 });
 const {
+  normalizedRulesTextForDefinition,
   semanticRuntimeVisibleCardType,
   semanticRuntimeVisibleCardAdvancementRequirement,
   semanticRuntimeVisibleIceRezCost,
@@ -4909,13 +4909,6 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
-
-function normalizedRulesTextForDefinition(definitionId: string): string {
-  return buildNormalizedRulesTextForDefinition(
-    RUNTIME_CARDS[definitionId],
-    DEMO_CARDS_BY_ID[definitionId],
-  );
-}
 
 function stringRecordValue(value: unknown, key: string): string | undefined {
   const record = value as Record<string, unknown>;

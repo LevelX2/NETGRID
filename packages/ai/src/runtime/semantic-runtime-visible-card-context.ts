@@ -1,5 +1,6 @@
 import type { VisibleCard } from "@netgrid/shared";
 import {
+  normalizedRulesTextForDefinition as buildNormalizedRulesTextForDefinition,
   visibleCardAdvancementRequirement as buildVisibleCardAdvancementRequirement,
   visibleCardType as buildVisibleCardType,
   visibleIceRezCost as buildVisibleIceRezCost,
@@ -15,6 +16,7 @@ export type SemanticRuntimeVisibleCardContextDependencies = {
 };
 
 export type SemanticRuntimeVisibleCardContext = {
+  normalizedRulesTextForDefinition: (definitionId: string) => string;
   semanticRuntimeVisibleCardType: (
     card: VisibleCard,
   ) => string | undefined;
@@ -29,6 +31,13 @@ export type SemanticRuntimeVisibleCardContext = {
 export function createSemanticRuntimeVisibleCardContext(
   dependencies: SemanticRuntimeVisibleCardContextDependencies,
 ): SemanticRuntimeVisibleCardContext {
+  function normalizedRulesTextForDefinition(definitionId: string): string {
+    return buildNormalizedRulesTextForDefinition(
+      dependencies.runtimeDefinition(definitionId),
+      dependencies.demoDefinition(definitionId),
+    );
+  }
+
   function semanticRuntimeVisibleCardType(
     card: VisibleCard,
   ): string | undefined {
@@ -63,6 +72,7 @@ export function createSemanticRuntimeVisibleCardContext(
   }
 
   return {
+    normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
     semanticRuntimeVisibleIceRezCost,
