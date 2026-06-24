@@ -208,6 +208,11 @@ import {
   semanticRuntimeCorpVisibleServerCard as buildSemanticRuntimeCorpVisibleServerCard,
   type SemanticRuntimeCorpBoardDependencies,
 } from "./runtime/semantic-runtime-corp-board";
+import {
+  semanticRuntimeCorpScoreNowSafetyGate as buildSemanticRuntimeCorpScoreNowSafetyGate,
+  type SemanticRuntimeCorpScoreSafetyDependencies,
+  type SemanticRuntimeCorpScoreSafetyGate,
+} from "./runtime/semantic-runtime-corp-score-safety";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import {
   semanticRuntimeServerId,
@@ -3882,6 +3887,10 @@ const SEMANTIC_RUNTIME_CORP_BOARD_DEPENDENCIES: SemanticRuntimeCorpBoardDependen
     rolesForAction,
     isRemoteServerTarget,
   };
+const SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES: SemanticRuntimeCorpScoreSafetyDependencies =
+  {
+    scoreTerminalWindow: assessCorpScoreTerminalWindow,
+  };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -6682,61 +6691,12 @@ function semanticRuntimeCorpScoreNowDoctrineWeight(
 function semanticRuntimeCorpScoreNowSafetyGate(
   input: AiDecisionInput,
   action: LegalAction,
-): { allowed: boolean; evidence: string[] } {
-  if (
-    input.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "score_agenda"
-  ) {
-    return {
-      allowed: false,
-      evidence: ["unsafe_score_unknown_higher_priority"],
-    };
-  }
-  const terminal = assessCorpScoreTerminalWindow(input);
-  const scoreLegal = terminal.scoreActionIds.includes(action.actionId);
-  const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
-  return {
-    allowed: reasons.length === 0,
-    evidence:
-      reasons.length === 0
-        ? [
-            "corp_scoreline_safety_gate_passed:true",
-            `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
-            `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
-          ]
-        : reasons,
-  };
-}
-
-function semanticRuntimeCorpUnsafeScoreReasons(
-  terminal: ReturnType<typeof assessCorpScoreTerminalWindow>,
-  scoreLegal: boolean,
-): string[] {
-  const reasons: string[] = [];
-  if (!terminal.terminalWindow || !scoreLegal) {
-    reasons.push("unsafe_score_unknown_higher_priority");
-  }
-  if (terminal.blockedByCredits) {
-    reasons.push("unsafe_score_insufficient_rez_reserve");
-  }
-  if (terminal.blockedByCheapContest) {
-    reasons.push("unsafe_score_cheap_contest_available");
-  }
-  if (terminal.blockedByRunnerContest) {
-    reasons.push("unsafe_score_runner_access_threat_high");
-  }
-  if (terminal.blockedByHqThreat) {
-    reasons.push("unsafe_score_hq_or_rnd_threat");
-  }
-  if (
-    terminal.runnerAccessThreatHigh &&
-    terminal.protectedRemoteIds.length === 0
-  ) {
-    reasons.push("unsafe_score_unprotected_remote");
-    reasons.push("unsafe_score_missing_protected_remote_signal");
-  }
-  return sortedUnique(reasons);
+): SemanticRuntimeCorpScoreSafetyGate {
+  return buildSemanticRuntimeCorpScoreNowSafetyGate(
+    input,
+    action,
+    SEMANTIC_RUNTIME_CORP_SCORE_SAFETY_DEPENDENCIES,
+  );
 }
 
 type SemanticRuntimeDoctrineConsumer =
