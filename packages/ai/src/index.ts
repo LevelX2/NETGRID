@@ -235,13 +235,7 @@ import {
   runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent,
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
-import {
-  runnerMultiRunEventAssessment as buildRunnerMultiRunEventAssessment,
-  type RunnerMultiRunEventAssessment,
-} from "./runtime/runner-multi-run-event-assessment";
-import {
-  runnerMultiRunEventExclusion as buildRunnerMultiRunEventExclusion,
-} from "./runtime/runner-multi-run-event-exclusion";
+import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
 import { createRunnerBankInvestmentContext } from "./runtime/runner-bank-investment-context";
 import { createRunnerNoRunEconomyContext } from "./runtime/runner-no-run-economy-context";
 import {
@@ -3667,6 +3661,23 @@ const {
   },
 });
 const {
+  semanticRuntimeRunnerMultiRunEventExclusion,
+  runnerMultiRunEventAssessment,
+  runnerMultiRunTargetEvaluation,
+  semanticRuntimeRunnerRunTargetEvaluation,
+  semanticRuntimeRunnerRunTargetEvaluationForAction,
+} = createRunnerMultiRunContext({
+  allNighterDefinitionId: ALL_NIGHTER_CARD_ID,
+  sourceDefinitionIdForAction,
+  targetServerId: semanticRuntimeServerId,
+  payoffClass: runnerRunTargetMultiRunPayoffClass,
+  canTakeRun: runnerRunTargetPlausibleForMultiRun,
+  scoreValue: runnerMultiRunEventScoreValue,
+  deckCapabilitiesForInput,
+  strategicIntentForInput: runnerStrategicIntentForInput,
+  runTargets: evaluateRunnerRunTargets,
+});
+const {
   runnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion,
 } = createRunnerBlinkRiskContext({
@@ -4898,104 +4909,6 @@ function actionClickCost(action: LegalAction): number {
       0,
     ),
   );
-}
-
-function semanticRuntimeRunnerMultiRunEventExclusion(
-  input: AiDecisionInput,
-  action: LegalAction,
-): SemanticRuntimeExclusion | undefined {
-  return buildRunnerMultiRunEventExclusion(input, action, {
-    assessment: runnerMultiRunEventAssessment,
-  });
-}
-
-function runnerMultiRunEventAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerMultiRunEventAssessment | undefined {
-  return buildRunnerMultiRunEventAssessment(input, action, {
-    allNighterDefinitionId: ALL_NIGHTER_CARD_ID,
-    sourceDefinitionIdForAction,
-    targetServerId: semanticRuntimeServerId,
-    targetEvaluation: runnerMultiRunTargetEvaluation,
-    payoffClass: runnerRunTargetMultiRunPayoffClass,
-    canTakeRun: runnerRunTargetPlausibleForMultiRun,
-    scoreValue: runnerMultiRunEventScoreValue,
-  });
-}
-
-function runnerMultiRunTargetEvaluation(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string,
-): RunnerRunTargetEvaluation | undefined {
-  const runAction: LegalAction = {
-    ...action,
-    payload: {
-      ...(action.payload ?? {}),
-      serverId: targetServerId,
-    },
-  };
-  const scopedInput: AiDecisionInput = {
-    ...input,
-    legalActions: [runAction],
-    playerView: {
-      ...input.playerView,
-      legalActions: [runAction],
-    },
-  };
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(
-    input,
-    deckCapabilities,
-  );
-  return evaluateRunnerRunTargets({
-    input: scopedInput,
-    deckCapabilities,
-    strategicIntent,
-  })[0];
-}
-
-function semanticRuntimeRunnerRunTargetEvaluation(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string,
-): RunnerRunTargetEvaluation | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  return runnerMultiRunTargetEvaluation(input, action, targetServerId);
-}
-
-function semanticRuntimeRunnerRunTargetEvaluationForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerRunTargetEvaluation | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const targetServerId = semanticRuntimeServerId(action);
-  if (targetServerId) {
-    return semanticRuntimeRunnerRunTargetEvaluation(
-      input,
-      action,
-      targetServerId,
-    );
-  }
-  const scopedInput: AiDecisionInput = {
-    ...input,
-    legalActions: [action],
-    playerView: {
-      ...input.playerView,
-      legalActions: [action],
-    },
-  };
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const strategicIntent = runnerStrategicIntentForInput(
-    input,
-    deckCapabilities,
-  );
-  return evaluateRunnerRunTargets({
-    input: scopedInput,
-    deckCapabilities,
-    strategicIntent,
-  })[0];
 }
 
 function semanticRuntimeRunnerRunTargetGuidanceComponent(
