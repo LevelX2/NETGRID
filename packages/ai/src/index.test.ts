@@ -3398,6 +3398,148 @@ describe("MVP 0.3 AI controller contract", () => {
     );
   });
 
+  it("prioritizes Schlaghund tagged meat damage over economy and generic ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST] ||
+      !runtimeCards[FULL_BODY_CONVERSION_CARD_ID_FOR_TEST] ||
+      !runtimeCards[DERMATECH_BODYPLATING_CARD_ID_FOR_TEST] ||
+      !runtimeCards["onr_v1_243_fetch-4-0-1"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-schlaghund-tagged-meat-payoff",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_schlaghund",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: SCHLAGHUND_CARD_ID_FOR_TEST, quantity: 2 },
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    putCorpRootInServer(state, "remote_1", SCHLAGHUND_CARD_ID_FOR_TEST, 0, {
+      faceup: true,
+      rezzed: true,
+    });
+    moveCorpCardToHq(state, "onr_v1_243_fetch-4-0-1");
+    addRunnerHardwareToRigForTest(state, FULL_BODY_CONVERSION_CARD_ID_FOR_TEST);
+    addRunnerHardwareToRigForTest(
+      state,
+      DERMATECH_BODYPLATING_CARD_ID_FOR_TEST,
+    );
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 1;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const schlaghund = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          SCHLAGHUND_CARD_ID_FOR_TEST,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const fetchInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_243_fetch-4-0-1",
+    );
+    expect(schlaghund).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(fetchInstall).toBeDefined();
+    if (!schlaghund || !gain || !fetchInstall)
+      throw new Error("Missing Schlaghund tagged meat damage fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [fetchInstall, gain, schlaghund],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(schlaghund.actionId);
+    expect(decision.reasonCode).toBe("corp.semantic.corp_tag_punish");
+    expect(debugText).toContain("corp_tagged_meat_damage_payoff_pressure");
+    expect(debugText).toContain("corp_tagged_meat_damage_payoff:true");
+    expect(debugText).toContain("source_definition:onr_v1_339_schlaghund");
+    expect(debugText).toContain("runner_tags:7");
+    expect(debugText).toContain("runner_full_body_conversion_visible:true");
+    expect(debugText).toContain("runner_dermatech_bodyplating_visible:true");
+    expect(debugText).toContain("prevention_pressure:true");
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("does not promote Schlaghund tagged meat damage when Runner has no tags", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (!runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-schlaghund-untagged",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_schlaghund_untagged",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: SCHLAGHUND_CARD_ID_FOR_TEST, quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    putCorpRootInServer(state, "remote_1", SCHLAGHUND_CARD_ID_FOR_TEST, 0, {
+      faceup: true,
+      rezzed: true,
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 1;
+    state.runner.tags = 0;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const schlaghund = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          SCHLAGHUND_CARD_ID_FOR_TEST,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing basic gain-credit action");
+    if (!schlaghund) return;
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [gain, schlaghund],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(debugText).not.toContain("corp_tagged_meat_damage_payoff_pressure");
+  });
+
   it("chooses V0.96 Trace bids from side-safe PlayerView choices", () => {
     let state = traceCorpBidState("ai-v096-trace");
     const corpInput = buildAiDecisionInput(state, "corp", {
@@ -27260,6 +27402,10 @@ const V094_CORP_DECK: DeckDefinition = {
 };
 
 const DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST = "onr_v1_160_diplomatic-immunity";
+const SCHLAGHUND_CARD_ID_FOR_TEST = "onr_v1_339_schlaghund";
+const FULL_BODY_CONVERSION_CARD_ID_FOR_TEST = "onr_v1_127_full-body-conversion";
+const DERMATECH_BODYPLATING_CARD_ID_FOR_TEST =
+  "onr_v1_125_dermatech-bodyplating";
 
 const V111_CORP_DECK: DeckDefinition = {
   ...V094_CORP_DECK,

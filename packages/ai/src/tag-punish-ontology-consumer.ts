@@ -220,6 +220,7 @@ function tagPunishProfileFromHint(
 function canActionCarryTagPunish(action: LegalAction): boolean {
   return (
     action.type === "play_operation" ||
+    action.type === "gain_credit" ||
     action.type === "activated_card_ability" ||
     action.type === "trigger_ability" ||
     action.type === "trash_resource" ||

@@ -6216,6 +6216,12 @@ function semanticRuntimeScopeForAction(
   action: LegalAction,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): string {
+  if (
+    input.side === "corp" &&
+    corpTagPunishOntologyAssessmentForAction(input, action)?.isPunishPayoff
+  ) {
+    return "corp_tag_punish";
+  }
   const candidateScope = semanticRuntimeScopeFromActionSemanticCandidate(
     action,
     actionSemanticCandidate,
@@ -6416,6 +6422,8 @@ function semanticRuntimeRunnerScore(
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const DIPLOMATIC_IMMUNITY_CARD_ID = "onr_v1_160_diplomatic-immunity";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
+const FULL_BODY_CONVERSION_CARD_ID = "onr_v1_127_full-body-conversion";
+const DERMATECH_BODYPLATING_CARD_ID = "onr_v1_125_dermatech-bodyplating";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
@@ -9810,6 +9818,12 @@ function semanticRuntimeCorpScoreComponents(
     action,
   );
   if (resourceTrashPressure) components.push(resourceTrashPressure);
+  const taggedMeatDamagePayoffPressure = corpTaggedMeatDamagePayoffPressure(
+    input,
+    action,
+  );
+  if (taggedMeatDamagePayoffPressure)
+    components.push(taggedMeatDamagePayoffPressure);
   const passiveScoreLinePenalty = semanticRuntimeCorpPassiveScoreLinePenalty(
     input,
     action,
@@ -9998,6 +10012,195 @@ function corpVisibleDamagePayoffProfile(input: AiDecisionInput): {
     evidence: meatDamagePayoff
       ? ["corp_visible_meat_damage_payoff:true"]
       : ["corp_visible_meat_damage_payoff:false"],
+  };
+}
+
+type RunnerVisibleMeatPreventionProfile = {
+  fullBodyConversions: number;
+  flatPrevention: number;
+  globalMeatPrevention: boolean;
+  preventionPressure: boolean;
+  evidence: string[];
+};
+
+function corpTaggedMeatDamagePayoffPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (!assessment?.isPunishPayoff || assessment.payoffKind !== "damage")
+    return undefined;
+  const runnerTags = input.playerView.opponent.tags;
+  if (runnerTags <= 0) return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const rawDamage = corpTaggedMeatDamageAmountForAction(input, action);
+  if (rawDamage <= 0) return undefined;
+  const prevention = runnerVisibleMeatPreventionProfile(input);
+  const chancePercent = corpTaggedMeatDamageChancePercent(
+    sourceDefinitionId,
+    runnerTags,
+  );
+  if (chancePercent <= 0) return undefined;
+  const corpCredits = input.playerView.own.credits;
+  const clickPressure = Math.max(1, input.playerView.own.clicks);
+  const fullBodyCreditLeak =
+    prevention.fullBodyConversions > 0
+      ? Math.min(rawDamage, corpCredits)
+      : rawDamage;
+  const immediateNetDamage = Math.max(
+    0,
+    Math.min(rawDamage, fullBodyCreditLeak) - prevention.flatPrevention,
+  );
+  const handCount = input.playerView.opponent.handCount;
+  const nearKill =
+    immediateNetDamage >= handCount ||
+    (rawDamage >= handCount && runnerTags >= 4 && chancePercent >= 67);
+  const preventionPressure =
+    prevention.preventionPressure &&
+    rawDamage >= 4 &&
+    runnerTags >= 2 &&
+    clickPressure >= 2;
+  if (immediateNetDamage <= 0 && !preventionPressure && !nearKill)
+    return undefined;
+
+  const damageValue = Math.min(1850, rawDamage * 95);
+  const tagReliability = Math.min(700, runnerTags * 90);
+  const chanceValue = Math.round(chancePercent * 6);
+  const killValue = nearKill ? 950 : handCount <= 3 ? 450 : 0;
+  const pressureValue = preventionPressure ? 650 : 0;
+  const preventionPenalty =
+    prevention.fullBodyConversions > 0
+      ? 500
+      : prevention.flatPrevention > 0
+        ? Math.min(300, prevention.flatPrevention * 120)
+        : 0;
+  const value = Math.max(
+    0,
+    damageValue +
+      tagReliability +
+      chanceValue +
+      killValue +
+      pressureValue -
+      preventionPenalty,
+  );
+  if (value <= 0) return undefined;
+
+  return {
+    key: "corp_tagged_meat_damage_payoff_pressure",
+    label: "Tag-Meat-Damage-Payoff",
+    value,
+    reason: [
+      "corp_tagged_meat_damage_payoff:true",
+      `source_definition:${sourceDefinitionId || "unknown"}`,
+      `runner_tags:${runnerTags}`,
+      `raw_meat_damage:${rawDamage}`,
+      `success_chance_percent:${chancePercent}`,
+      `runner_hand_count:${handCount}`,
+      `corp_credits:${corpCredits}`,
+      `estimated_immediate_net_meat_damage:${immediateNetDamage}`,
+      `near_kill:${nearKill}`,
+      `prevention_pressure:${preventionPressure}`,
+      ...assessment.evidence,
+      ...prevention.evidence,
+    ].join("|"),
+  };
+}
+
+function corpTaggedMeatDamageAmountForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const payloadDamage = numberRecordValue(action.payload ?? {}, "damageAmount");
+  if (payloadDamage !== undefined && payloadDamage > 0) return payloadDamage;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const hintDamage = AI_HINTS.get(sourceDefinitionId)?.effects?.find(
+    (effect) => effect.kind === "damage" && effect.scope === "runner",
+  )?.amount;
+  if (typeof hintDamage === "number" && hintDamage > 0) return hintDamage;
+  const definition =
+    RUNTIME_CARDS[sourceDefinitionId] ?? DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const text = [
+    cardDefinitionText(definition),
+    ...rolesForCardId(sourceDefinitionId),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const match = text.match(/(?:do|does|inflicts?)\s+(\d+)\s+meat damage/);
+  return match?.[1] ? Number(match[1]) : 0;
+}
+
+function corpTaggedMeatDamageChancePercent(
+  sourceDefinitionId: string,
+  runnerTags: number,
+): number {
+  if (sourceDefinitionId === "onr_v1_339_schlaghund") {
+    return Math.max(
+      0,
+      Math.min(100, Math.floor((Math.min(runnerTags, 6) / 6) * 100)),
+    );
+  }
+  return 100;
+}
+
+function runnerVisibleMeatPreventionProfile(
+  input: AiDecisionInput,
+): RunnerVisibleMeatPreventionProfile {
+  const visibleRig = input.playerView.opponent.rig ?? [];
+  let fullBodyConversions = 0;
+  let flatPrevention = 0;
+  let globalMeatPrevention = false;
+  const evidence: string[] = [];
+
+  for (const card of visibleRig) {
+    if (!card.known || !card.definitionId) continue;
+    const definition =
+      RUNTIME_CARDS[card.definitionId] ?? DEMO_CARDS_BY_ID[card.definitionId];
+    const text = [
+      card.title,
+      card.rulesText,
+      cardDefinitionText(definition),
+      ...rolesForCardId(card.definitionId),
+      ...cardDefinitionMechanics(definition),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    if (
+      card.definitionId === FULL_BODY_CONVERSION_CARD_ID ||
+      /prevents all meat damage.*corp pays|corp pays.*meat damage/.test(text)
+    ) {
+      fullBodyConversions += 1;
+      globalMeatPrevention = true;
+      evidence.push("runner_full_body_conversion_visible:true");
+      continue;
+    }
+    if (
+      card.definitionId === DERMATECH_BODYPLATING_CARD_ID ||
+      /prevents? 1 meat damage each turn/.test(text)
+    ) {
+      flatPrevention += 1;
+      evidence.push("runner_dermatech_bodyplating_visible:true");
+      continue;
+    }
+    if (/prevent(?:s)? .*meat damage/.test(text)) {
+      flatPrevention += 1;
+      evidence.push(`runner_meat_prevention_visible:${card.definitionId}`);
+    }
+  }
+
+  return {
+    fullBodyConversions,
+    flatPrevention,
+    globalMeatPrevention,
+    preventionPressure: fullBodyConversions > 0 || flatPrevention > 0,
+    evidence: [
+      `runner_visible_full_body_conversion_count:${fullBodyConversions}`,
+      `runner_visible_flat_meat_prevention:${flatPrevention}`,
+      `runner_visible_global_meat_prevention:${globalMeatPrevention}`,
+      ...evidence,
+    ],
   };
 }
 
