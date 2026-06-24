@@ -36,6 +36,37 @@ export function runnerRecentStartRunsOnServer(
   return count;
 }
 
+export function runnerRecentBasicCreditActions(
+  input: AiDecisionInput,
+  dependencies: Pick<
+    RunnerRecentStartRunsOnServerDependencies,
+    "publicHistory" | "eventVersion"
+  >,
+): number {
+  const history = dependencies.publicHistory(input);
+  let count = 0;
+  let seenRunnerActions = 0;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (input.playerView.stateVersion - dependencies.eventVersion(event) > 18)
+      break;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (runnerRunProgressEvent(actionType)) break;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (actor !== "runner") continue;
+    seenRunnerActions += 1;
+    if (actionType === "gain_credit") count += 1;
+    if (seenRunnerActions >= 8) break;
+  }
+  return count;
+}
+
 export function runnerRunProgressEvent(actionType: string): boolean {
   return (
     actionType === "steal_agenda" ||

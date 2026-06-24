@@ -444,8 +444,8 @@ import {
   runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
 } from "./runtime/runner-repeated-run-target-score";
 import {
+  runnerRecentBasicCreditActions as buildRunnerRecentBasicCreditActions,
   runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
-  runnerRunProgressEvent,
   type RunnerRecentStartRunsOnServerDependencies,
 } from "./runtime/runner-run-history";
 import {
@@ -6167,27 +6167,10 @@ function runnerLateNoFundingCreditSafeProgressTargets(
 function semanticRuntimeRecentRunnerBasicCreditActions(
   input: AiDecisionInput,
 ): number {
-  const history = mergedAiPublicHistory(input);
-  let count = 0;
-  let seenRunnerActions = 0;
-  for (let index = history.length - 1; index >= 0; index -= 1) {
-    const event = history[index]!;
-    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
-    const actionType =
-      typeof event.publicPayload.actionType === "string"
-        ? event.publicPayload.actionType
-        : event.type;
-    if (runnerRunProgressEvent(actionType)) break;
-    const actor =
-      typeof event.publicPayload.actor === "string"
-        ? event.publicPayload.actor
-        : undefined;
-    if (actor !== "runner") continue;
-    seenRunnerActions += 1;
-    if (actionType === "gain_credit") count += 1;
-    if (seenRunnerActions >= 8) break;
-  }
-  return count;
+  return buildRunnerRecentBasicCreditActions(
+    input,
+    RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES,
+  );
 }
 
 function runnerJunkyardBbsRecoveryScoreComponent(
