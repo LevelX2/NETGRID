@@ -448,10 +448,14 @@ import {
   semanticRuntimeCorpScoreNowDoctrineWeight as buildSemanticRuntimeCorpScoreNowDoctrineWeight,
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrineConsumerForPlan,
+  semanticRuntimeDoctrineGateAllowed,
+  semanticRuntimeDoctrineGateBlocked,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
   semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
+  semanticRuntimeRunnerLowValueRecoveryContext as buildSemanticRuntimeRunnerLowValueRecoveryContext,
   type SemanticRuntimeCorpDoctrineWeightDependencies,
   type SemanticRuntimeDoctrineConsumer,
+  type SemanticRuntimeRunnerLowValueRecoveryContextDependencies,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
   semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
@@ -6707,6 +6711,12 @@ const SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES: SemanticRuntimeCorpDoc
     planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
   };
 
+const SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES: SemanticRuntimeRunnerLowValueRecoveryContextDependencies =
+  {
+    recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
+    recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
+  };
+
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
   planKey: string,
@@ -6798,10 +6808,7 @@ function semanticRuntimeDoctrineActionGate(
       );
     }
   }
-  return {
-    allowed: true,
-    evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`],
-  };
+  return semanticRuntimeDoctrineGateAllowed(consumer);
 }
 
 function semanticRuntimeRunnerDoctrineActionGate(
@@ -6857,7 +6864,10 @@ function semanticRuntimeRunnerDoctrineActionGate(
       [`target:${serverId}`],
     );
   }
-  const recoveryContext = semanticRuntimeRunnerLowValueRecoveryContext(input);
+  const recoveryContext = buildSemanticRuntimeRunnerLowValueRecoveryContext(
+    input,
+    SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
+  );
   if (recoveryContext.active) {
     return semanticRuntimeDoctrineGateBlocked(
       planKey,
@@ -6874,46 +6884,7 @@ function semanticRuntimeRunnerDoctrineActionGate(
     );
     if (!remoteContestGate.allowed) return remoteContestGate;
   }
-  return {
-    allowed: true,
-    evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`],
-  };
-}
-
-function semanticRuntimeRunnerLowValueRecoveryContext(input: AiDecisionInput): {
-  active: boolean;
-  evidence: string[];
-} {
-  const recentRecovery = semanticRuntimeRecentRunnerRecoveryActions(input);
-  if (recentRecovery <= 1) return { active: false, evidence: [] };
-  const fundingNeed = runnerRecoveryFundingNeedContext(input);
-  if (fundingNeed.active) return { active: false, evidence: [] };
-  return {
-    active: true,
-    evidence: [
-      `recent_recovery:${recentRecovery}`,
-      "funding_need:false",
-      `funding_context:${fundingNeed.reason}`,
-    ],
-  };
-}
-
-function semanticRuntimeDoctrineGateBlocked(
-  planKey: string,
-  consumer: SemanticRuntimeDoctrineConsumer,
-  reason: string,
-  evidence: string[] = [],
-): { allowed: boolean; evidence: string[] } {
-  return {
-    allowed: false,
-    evidence: [
-      "deck_doctrine_runtime_gate_suppressed:true",
-      `plan:${planKey}`,
-      `consumer:${consumer}`,
-      `deck_doctrine_runtime_gate_reason:${reason}`,
-      ...evidence,
-    ],
-  };
+  return semanticRuntimeDoctrineGateAllowed(consumer);
 }
 
 function semanticRuntimeDoctrineSuppressedComponent(

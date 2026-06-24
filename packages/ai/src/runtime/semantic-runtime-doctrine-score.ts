@@ -50,6 +50,14 @@ export type SemanticRuntimeCorpDoctrineWeightDependencies<
   ) => AiDecisionScoreComponent | undefined;
 };
 
+export type SemanticRuntimeRunnerLowValueRecoveryContextDependencies = {
+  recentRecoveryActions: (input: AiDecisionInput) => number;
+  recoveryFundingNeedContext: (input: AiDecisionInput) => {
+    active: boolean;
+    reason: string;
+  };
+};
+
 export function semanticRuntimeDoctrineClamp(
   consumer: SemanticRuntimeDoctrineConsumer,
 ): number {
@@ -86,6 +94,33 @@ export function semanticRuntimeDoctrineConsumerForPlan(
     default:
       throw new Error(`Unknown semantic runtime doctrine plan ${planKey}`);
   }
+}
+
+export function semanticRuntimeDoctrineGateAllowed(
+  consumer: SemanticRuntimeDoctrineConsumer,
+): SemanticRuntimeDoctrineGate {
+  return {
+    allowed: true,
+    evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`],
+  };
+}
+
+export function semanticRuntimeDoctrineGateBlocked(
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  reason: string,
+  evidence: string[] = [],
+): SemanticRuntimeDoctrineGate {
+  return {
+    allowed: false,
+    evidence: [
+      "deck_doctrine_runtime_gate_suppressed:true",
+      `plan:${planKey}`,
+      `consumer:${consumer}`,
+      `deck_doctrine_runtime_gate_reason:${reason}`,
+      ...evidence,
+    ],
+  };
 }
 
 export function semanticRuntimeDoctrinePlanWeightComponent<
@@ -163,4 +198,22 @@ export function semanticRuntimeCorpScoreNowDoctrineWeight<
     consumer,
     dependencies,
   );
+}
+
+export function semanticRuntimeRunnerLowValueRecoveryContext(
+  input: AiDecisionInput,
+  dependencies: SemanticRuntimeRunnerLowValueRecoveryContextDependencies,
+): { active: boolean; evidence: string[] } {
+  const recentRecovery = dependencies.recentRecoveryActions(input);
+  if (recentRecovery <= 1) return { active: false, evidence: [] };
+  const fundingNeed = dependencies.recoveryFundingNeedContext(input);
+  if (fundingNeed.active) return { active: false, evidence: [] };
+  return {
+    active: true,
+    evidence: [
+      `recent_recovery:${recentRecovery}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+    ],
+  };
 }
