@@ -274,6 +274,13 @@ import {
   incrementStringCounter,
 } from "./runtime/counter";
 import {
+  eventMayChangeArchives as aiEventMayChangeArchives,
+  eventVersion as aiEventVersion,
+  findLastHistoryIndex as findLastAiHistoryIndex,
+  isArchivesAccessEvent as isAiArchivesAccessEvent,
+  serverIdFromEvent as aiServerIdFromEvent,
+} from "./runtime/public-event-history";
+import {
   boundedSelectionCount,
   playfulAiGainValue,
   selectableChoiceOptions,
@@ -10720,66 +10727,6 @@ function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
   return [...byId.values()].sort(
     (left, right) => aiEventVersion(left) - aiEventVersion(right),
   );
-}
-
-function findLastAiHistoryIndex<T>(
-  values: T[],
-  predicate: (value: T) => boolean,
-): number {
-  for (let index = values.length - 1; index >= 0; index -= 1) {
-    if (predicate(values[index]!)) return index;
-  }
-  return -1;
-}
-
-function isAiArchivesAccessEvent(event: PublicGameEvent): boolean {
-  return (
-    event.publicPayload.actionType === "access_card" &&
-    aiServerIdFromEvent(event) === "archives"
-  );
-}
-
-function aiEventMayChangeArchives(event: PublicGameEvent): boolean {
-  const payload = event.publicPayload;
-  if (
-    payload.discardZone === "archives" ||
-    payload.hiddenZoneAction === "discard_phase"
-  )
-    return true;
-  const actionType =
-    typeof payload.actionType === "string" ? payload.actionType : event.type;
-  return (
-    actionType === "trash_accessed_card" ||
-    actionType === "trash_card" ||
-    actionType === "play_operation"
-  );
-}
-
-function aiServerIdFromEvent(event: PublicGameEvent): string | undefined {
-  const payload = event.publicPayload;
-  if (typeof payload.serverId === "string") return payload.serverId;
-  if (typeof payload.server === "string") return payload.server;
-  if (typeof payload.targetServerId === "string") return payload.targetServerId;
-  if (typeof payload.attackedServerId === "string")
-    return payload.attackedServerId;
-  const label =
-    typeof payload.serverLabel === "string"
-      ? payload.serverLabel
-      : typeof payload.serverName === "string"
-        ? payload.serverName
-        : undefined;
-  if (!label) return undefined;
-  const normalized = label.toLowerCase();
-  if (normalized === "r&d" || normalized === "rd") return "rd";
-  if (normalized === "hq" || normalized === "headquarters") return "hq";
-  if (normalized === "archives" || normalized === "archive") return "archives";
-  return undefined;
-}
-
-function aiEventVersion(event: PublicGameEvent): number {
-  return typeof event.stateVersionAfter === "number"
-    ? event.stateVersionAfter
-    : 0;
 }
 
 function runnerRunReasonCode(
