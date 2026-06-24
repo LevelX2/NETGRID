@@ -232,6 +232,10 @@ import {
   runnerLoanProjectedSpendAfterLoan as buildRunnerLoanProjectedSpendAfterLoan,
 } from "./runtime/runner-loan-projected-spend";
 import {
+  runnerLoanSpendCandidateKind as buildRunnerLoanSpendCandidateKind,
+  runnerLoanSpendKindRank as buildRunnerLoanSpendKindRank,
+} from "./runtime/runner-loan-spend-candidate";
+import {
   runnerLoanAllowedReason as buildRunnerLoanAllowedReason,
   runnerLoanBlockedReason as buildRunnerLoanBlockedReason,
   runnerLoanDebtRepaymentRisk as buildRunnerLoanDebtRepaymentRisk,
@@ -5769,8 +5773,13 @@ function runnerLoanProjectedSpendAfterLoan(
       definitionIsHighRiskLoan: runnerDefinitionIsHighRiskLoan,
       visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
       rolesForCardId,
-      spendCandidateKind: runnerLoanSpendCandidateKind,
-      spendKindRank: runnerLoanSpendKindRank,
+      spendCandidateKind: (input, card, roles) =>
+        buildRunnerLoanSpendCandidateKind(input, card, roles, {
+          cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+          isRunnerEconomyRole,
+          isRunnerPressureRole,
+        }),
+      spendKindRank: buildRunnerLoanSpendKindRank,
     },
   );
 }
@@ -5782,60 +5791,6 @@ function runnerInstalledLoanActionSpend(
     actionCreditCost,
     projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   });
-}
-
-type RunnerLoanSpendCandidateKind =
-  | "critical_breaker"
-  | "direct_plan"
-  | "generic_setup"
-  | "ignore";
-
-function runnerLoanSpendCandidateKind(
-  input: AiDecisionInput,
-  card: VisibleCard,
-  roles: readonly string[],
-): RunnerLoanSpendCandidateKind {
-  if (roles.some((role) => role.startsWith("breaker_"))) {
-    return runnerCardAddressesVisibleBreakerNeed(input, card)
-      ? "critical_breaker"
-      : "direct_plan";
-  }
-  if (roles.some((role) => isRunnerPressureRole(role))) return "direct_plan";
-  if (
-    roles.some(
-      (role) =>
-        role === "memory" ||
-        role === "memory_support" ||
-        role === "setup" ||
-        role === "build_rig" ||
-        isRunnerEconomyRole(role) ||
-        role.includes("draw") ||
-        role.includes("search"),
-    )
-  ) {
-    return "generic_setup";
-  }
-  if (
-    card.type === "program" ||
-    card.type === "hardware" ||
-    card.type === "resource"
-  ) {
-    return "generic_setup";
-  }
-  return "ignore";
-}
-
-function runnerLoanSpendKindRank(kind: RunnerLoanSpendCandidateKind): number {
-  switch (kind) {
-    case "critical_breaker":
-      return 4;
-    case "direct_plan":
-      return 3;
-    case "generic_setup":
-      return 2;
-    case "ignore":
-      return 0;
-  }
 }
 
 function runnerLoanCriticalBreakerFundingNeed(
