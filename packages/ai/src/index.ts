@@ -280,6 +280,7 @@ import {
   minNumberOrZero as minDefined,
   sortedUnique,
 } from "./runtime/collection";
+import { fnv1a } from "./runtime/stable-hash";
 import {
   evidenceNumber,
   evidenceValue,
@@ -28354,15 +28355,6 @@ function isRedactionSafeCaseAnalysis(
 
 function isHoldoutSeed(seed: string): boolean {
   return SOAK_SEEDS.holdoutSeeds.includes(seed);
-}
-
-function fnv1a(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
 function confidence(score: number): number {
