@@ -275,6 +275,11 @@ import {
   incrementStringCounter,
 } from "./runtime/counter";
 import {
+  countValue as countTag,
+  minNumberOrZero as minDefined,
+  sortedUnique,
+} from "./runtime/collection";
+import {
   evidenceNumber,
   evidenceValue,
   hasEvidenceFlag,
@@ -28346,16 +28351,8 @@ function isRedactionSafeCaseAnalysis(
   );
 }
 
-function countTag(tags: string[], tag: string): number {
-  return tags.filter((candidate) => candidate === tag).length;
-}
-
 function isHoldoutSeed(seed: string): boolean {
   return SOAK_SEEDS.holdoutSeeds.includes(seed);
-}
-
-function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort();
 }
 
 function fnv1a(value: string): string {
@@ -28365,10 +28362,6 @@ function fnv1a(value: string): string {
     hash = Math.imul(hash, 0x01000193);
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
-function minDefined(values: number[]): number {
-  return values.length > 0 ? Math.min(...values) : 0;
 }
 
 function confidence(score: number): number {

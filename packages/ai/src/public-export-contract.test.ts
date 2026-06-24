@@ -137,6 +137,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-explanation",
       "./runtime/record-value",
       "./runtime/action-cost",
+      "./runtime/collection",
       "./runtime/counter",
       "./runtime/evidence-value",
       "./runtime/number-rounding",
