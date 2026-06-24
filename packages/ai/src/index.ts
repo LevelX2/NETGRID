@@ -235,8 +235,8 @@ import {
 import { createRunnerLoanContext } from "./runtime/runner-loan-context";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
-  runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
-} from "./runtime/runner-viral15-jack-out-score";
+  createRunnerViral15JackOutContext,
+} from "./runtime/runner-viral15-jack-out-context";
 import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
   runnerBadPublicityOrTraceTechCard as buildRunnerBadPublicityOrTraceTechCard,
@@ -3672,6 +3672,12 @@ const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
   isRunnerPressureRole,
   rolesForAction,
   hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+});
+const {
+  runnerViral15JackOutScoreComponent,
+} = createRunnerViral15JackOutContext({
+  actionCreditCost,
+  isVisibleIcebreakerProgram,
 });
 const {
   runnerPersistentInstallFitScoreComponent,
@@ -7675,16 +7681,6 @@ function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
     card.type === "program" &&
     visibleBreakerRolesForAi(card).length > 0
   );
-}
-
-function runnerViral15JackOutScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerViral15JackOutScoreComponent(input, action, {
-    actionCreditCost,
-    isVisibleIcebreakerProgram,
-  });
 }
 
 function visibleBreakerRoleCountsForAi(
