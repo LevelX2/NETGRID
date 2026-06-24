@@ -12,6 +12,33 @@ export type RunnerRunOnlyActionAdjustmentDependencies = {
   compareAction: (left: LegalAction, right: LegalAction) => number;
 };
 
+export type RunnerRunOnlyActionContext = {
+  runnerRunOnlyActionAdjustedSemanticChoice: (
+    input: AiDecisionInput,
+    rankedChoices: readonly SemanticRuntimeChoice[],
+    selectedChoice: SemanticRuntimeChoice,
+  ) => SemanticRuntimeRunOnlyActionAdjustment;
+};
+
+export function createRunnerRunOnlyActionContext(
+  dependencies: RunnerRunOnlyActionAdjustmentDependencies,
+): RunnerRunOnlyActionContext {
+  function adjustedSemanticChoice(
+    input: AiDecisionInput,
+    rankedChoices: readonly SemanticRuntimeChoice[],
+    selectedChoice: SemanticRuntimeChoice,
+  ): SemanticRuntimeRunOnlyActionAdjustment {
+    return runnerRunOnlyActionAdjustedSemanticChoice(
+      input,
+      rankedChoices,
+      selectedChoice,
+      dependencies,
+    );
+  }
+
+  return { runnerRunOnlyActionAdjustedSemanticChoice: adjustedSemanticChoice };
+}
+
 export function runnerRunOnlyActionAdjustedSemanticChoice(
   input: AiDecisionInput,
   rankedChoices: readonly SemanticRuntimeChoice[],

@@ -191,8 +191,8 @@ import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
 import {
+  createRunnerRunOnlyActionContext,
   runnerRunActionSpendingCapAssessment,
-  runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
 } from "./runtime/runner-run-only-action-adjustment";
 import {
   createRunnerSelfDamageContext,
@@ -3601,6 +3601,11 @@ const {
   scrubEvidence,
 });
 const {
+  runnerRunOnlyActionAdjustedSemanticChoice,
+} = createRunnerRunOnlyActionContext({
+  compareAction,
+});
+const {
   runnerBadPublicityRelevanceAssessment,
   runnerBadPublicityRelevanceScoreComponent,
 } = createRunnerBadPublicityRelevanceContext({
@@ -4010,17 +4015,7 @@ function chooseSemanticRuntimeAction(
       semanticRuntimeChoiceWithEvidence,
       tacticalPlanMappingOverrideEvidence,
       tacticalPlanRuntimeAlignedToChoice,
-      runnerRunOnlyActionAdjustedSemanticChoice: (
-        runtimeInput,
-        rankedChoices,
-        selectedChoice,
-      ) =>
-        buildRunnerRunOnlyActionAdjustedSemanticChoice(
-          runtimeInput,
-          rankedChoices,
-          selectedChoice,
-          { compareAction },
-        ),
+      runnerRunOnlyActionAdjustedSemanticChoice,
       semanticRuntimeCoverageSelectionDebug,
       selectedChoicesForDecision,
       rememberTacticalPlanRuntime,
