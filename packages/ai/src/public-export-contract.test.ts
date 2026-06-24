@@ -117,6 +117,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-corp-risk",
       "./runtime/semantic-runtime-corp-risk-context",
       "./runtime/semantic-runtime-corp-rez-floor",
+      "./runtime/semantic-runtime-corp-rez-floor-context",
       "./runtime/semantic-runtime-corp-remote-score",
       "./runtime/semantic-runtime-corp-remote-score-context",
       "./runtime/semantic-runtime-corp-passive-scoreline",

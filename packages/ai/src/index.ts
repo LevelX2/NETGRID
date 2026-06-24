@@ -169,9 +169,8 @@ import {
   createSemanticRuntimeCorpRiskContext,
 } from "./runtime/semantic-runtime-corp-risk-context";
 import {
-  semanticRuntimeCorpHasRemoteRezFloorFundingNeed as buildSemanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-  semanticRuntimeCorpRemoteRezFloorAssessment as buildSemanticRuntimeCorpRemoteRezFloorAssessment,
-} from "./runtime/semantic-runtime-corp-rez-floor";
+  createSemanticRuntimeCorpRezFloorContext,
+} from "./runtime/semantic-runtime-corp-rez-floor-context";
 import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
@@ -3827,6 +3826,19 @@ const {
   actionCreditCost,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 });
+const {
+  semanticRuntimeCorpRemoteRezFloorAssessment,
+  semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
+} = createSemanticRuntimeCorpRezFloorContext({
+  actionServerId: semanticRuntimeCorpActionServerId,
+  isRemoteServerTarget,
+  server: semanticRuntimeCorpServer,
+  actionCreditCost,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+  visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
+});
 const SEMANTIC_RUNTIME_CORP_EVIDENCE_DEPENDENCIES = {
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
@@ -3851,16 +3863,6 @@ const SEMANTIC_RUNTIME_EVIDENCE_DEPENDENCIES = {
   serverId: semanticRuntimeServerId,
   runnerEvidence: semanticRuntimeRunnerEvidence,
   corpEvidence: semanticRuntimeCorpEvidence,
-};
-const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES = {
-  actionServerId: semanticRuntimeCorpActionServerId,
-  isRemoteServerTarget,
-  server: semanticRuntimeCorpServer,
-  actionCreditCost,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
 };
 const SEMANTIC_RUNTIME_CORP_PASSIVE_SCORELINE_DEPENDENCIES = {
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
@@ -6702,17 +6704,6 @@ function semanticRuntimeCorpPassiveScoreLinePenalty(
   );
 }
 
-function semanticRuntimeCorpRemoteRezFloorAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-){
-  return buildSemanticRuntimeCorpRemoteRezFloorAssessment(
-    input,
-    action,
-    SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES,
-  );
-}
-
 function semanticRuntimeVisibleIceRezCost(
   card: VisibleCard,
 ): number | undefined {
@@ -6721,15 +6712,6 @@ function semanticRuntimeVisibleIceRezCost(
     card,
     definitionId ? RUNTIME_CARDS[definitionId] : undefined,
     definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined,
-  );
-}
-
-function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
-  input: AiDecisionInput,
-): boolean {
-  return buildSemanticRuntimeCorpHasRemoteRezFloorFundingNeed(
-    input,
-    SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES,
   );
 }
 
