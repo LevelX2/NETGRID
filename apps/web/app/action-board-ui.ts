@@ -1608,14 +1608,17 @@ function normalizeBreakerRulesText(value: string): string {
   return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
-export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {
+export function groupRunnerRigCards(
+  cards: VisibleCard[],
+  options: { includeEmptyProgramGroup?: boolean } = {}
+): Array<{ key: string; label: string; cards: VisibleCard[] }> {
   const groups = [
     { key: "program", label: "Programme", cards: cards.filter((card) => card.type === "program") },
     { key: "hardware", label: "Hardware", cards: cards.filter((card) => card.type === "hardware") },
     { key: "resource", label: "Ressourcen", cards: cards.filter((card) => card.type === "resource") },
     { key: "other", label: "Sonstiges", cards: cards.filter((card) => card.type !== "program" && card.type !== "hardware" && card.type !== "resource") }
   ];
-  return groups.filter((group) => group.cards.length > 0);
+  return groups.filter((group) => group.cards.length > 0 || (group.key === "program" && options.includeEmptyProgramGroup));
 }
 
 export function runnerRigMemorySummary(view: PlayerView, owner: "own" | "opponent"): { used: number; limit: number; text: string; ariaLabel: string } | null {

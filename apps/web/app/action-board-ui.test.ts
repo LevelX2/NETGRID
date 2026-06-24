@@ -452,6 +452,14 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(groups.flatMap((group) => group.cards.map((entry) => entry.instanceId))).toEqual(["program_1", "hardware_1", "resource_1"]);
   });
 
+  it("can keep the Runner program group visible for an empty MU display", () => {
+    const defaultGroups = groupRunnerRigCards([]);
+    const visibleProgramGroups = groupRunnerRigCards([], { includeEmptyProgramGroup: true });
+
+    expect(defaultGroups).toEqual([]);
+    expect(visibleProgramGroups).toEqual([{ key: "program", label: "Programme", cards: [] }]);
+  });
+
   it("summarizes public Runner MU for the Corp rig view", () => {
     const corpView = view("corp", {
       opponent: {

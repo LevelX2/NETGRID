@@ -200,23 +200,27 @@ export function ActiveRunnerZoneBoard({
                     ) : null}
                   </div>
                   <div className="cards rigGroupCards rigGroupCardsFull">
-                    {group.cards.map((card) => {
-                      const displayCard = enrichCard(card);
-                      return (
-                        <CardView
-                          key={card.instanceId}
-                          card={displayCard}
-                          displayMode={cardDisplayMode}
-                          selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                          actions={cardActionsFor(card)}
-                          actionDisabled={actionDisabled}
-                          {...fieldChoiceCardProps(card)}
-                          onAction={onAction}
-                          onFocus={onFocus}
-                          onActionContextSelect={onActionContextSelect}
-                        />
-                      );
-                    })}
+                    {group.cards.length > 0 ? (
+                      group.cards.map((card) => {
+                        const displayCard = enrichCard(card);
+                        return (
+                          <CardView
+                            key={card.instanceId}
+                            card={displayCard}
+                            displayMode={cardDisplayMode}
+                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                            actions={cardActionsFor(card)}
+                            actionDisabled={actionDisabled}
+                            {...fieldChoiceCardProps(card)}
+                            onAction={onAction}
+                            onFocus={onFocus}
+                            onActionContextSelect={onActionContextSelect}
+                          />
+                        );
+                      })
+                    ) : (
+                      <span className="rigProgramEmptyPlaceholder" aria-hidden="true" />
+                    )}
                   </div>
                 </div>
               ))}

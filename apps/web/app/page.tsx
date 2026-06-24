@@ -1432,7 +1432,7 @@ export default function Page() {
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const activeRunIceId = activeView ? activeRunIceInstanceId(activeView) : null;
   const hiddenContextHint = activeView ? runHiddenContextActionHint(activeView, legalActionSplit.contextualActions) : null;
-  const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? []) : [];
+  const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? [], { includeEmptyProgramGroup: Boolean(runnerRigMemorySummary(activeView, "own")) }) : [];
   const scoreAreaCardsBySide = (side: Side): VisibleCard[] => {
     if (!activeView) return [];
     return side === activeView.side ? activeView.own.scoreArea : activeView.opponent.scoreArea;

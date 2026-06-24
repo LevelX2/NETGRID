@@ -222,8 +222,8 @@ export function RunnerRigStrip({
   const [rigCollapsed, setRigCollapsed] = useState(false);
   if (opponentSide(view.side) !== "runner") return null;
   const runnerRig = view.opponent.rig ?? [];
-  const groups = groupRunnerRigCards(runnerRig);
   const memorySummary = runnerRigMemorySummary(view, "opponent");
+  const groups = groupRunnerRigCards(runnerRig, { includeEmptyProgramGroup: Boolean(memorySummary) });
   const cardActionsForRig = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
@@ -261,25 +261,29 @@ export function RunnerRigStrip({
                 ) : null}
               </div>
               <div className="cards rigGroupCards rigGroupCardsMini">
-                {group.cards.map((card) => {
-                  const displayCard = enrichVisibleCard(card, cardDetailsById);
-                  return (
-                    <CardView
-                      key={card.instanceId}
-                      card={displayCard}
-                      compact
-                      displayMode={displayMode}
-                      selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                      actions={cardActionsForRig(card)}
-                      actionDisabled={actionDisabled}
-                      actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
-                      {...fieldChoiceCardProps?.(card)}
-                      onFocus={onFocus}
-                      onActionContextSelect={onActionContext}
-                      onAction={onAction}
-                    />
-                  );
-                })}
+                {group.cards.length > 0 ? (
+                  group.cards.map((card) => {
+                    const displayCard = enrichVisibleCard(card, cardDetailsById);
+                    return (
+                      <CardView
+                        key={card.instanceId}
+                        card={displayCard}
+                        compact
+                        displayMode={displayMode}
+                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                        actions={cardActionsForRig(card)}
+                        actionDisabled={actionDisabled}
+                        actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                        {...fieldChoiceCardProps?.(card)}
+                        onFocus={onFocus}
+                        onActionContextSelect={onActionContext}
+                        onAction={onAction}
+                      />
+                    );
+                  })
+                ) : (
+                  <span className="rigProgramEmptyPlaceholder compact" aria-hidden="true" />
+                )}
               </div>
             </div>
           ))}
