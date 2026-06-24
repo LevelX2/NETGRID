@@ -444,6 +444,11 @@ import {
   runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
 } from "./runtime/runner-repeated-run-target-score";
 import {
+  runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
+  runnerRunProgressEvent,
+  type RunnerRecentStartRunsOnServerDependencies,
+} from "./runtime/runner-run-history";
+import {
   semanticRuntimeCorpDoctrineWeight as buildSemanticRuntimeCorpDoctrineWeight,
   semanticRuntimeCorpScoreNowDoctrineWeight as buildSemanticRuntimeCorpScoreNowDoctrineWeight,
   semanticRuntimeDoctrineActionGate as buildSemanticRuntimeDoctrineActionGate,
@@ -6172,7 +6177,7 @@ function semanticRuntimeRecentRunnerBasicCreditActions(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
+    if (runnerRunProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
@@ -6521,37 +6526,10 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
   input: AiDecisionInput,
   serverId: string,
 ): number {
-  let count = 0;
-  const history = mergedAiPublicHistory(input);
-  let seenRunnerActions = 0;
-  for (let index = history.length - 1; index >= 0; index -= 1) {
-    const event = history[index]!;
-    const actionType =
-      typeof event.publicPayload.actionType === "string"
-        ? event.publicPayload.actionType
-        : event.type;
-    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
-    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
-    const actor =
-      typeof event.publicPayload.actor === "string"
-        ? event.publicPayload.actor
-        : undefined;
-    if (actor !== "runner" || actionType !== "start_run") continue;
-    seenRunnerActions += 1;
-    const target = aiServerIdFromEvent(event);
-    if (target === serverId) count += 1;
-    if (seenRunnerActions >= 8) break;
-  }
-  return count;
-}
-
-function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
-  return (
-    actionType === "steal_agenda" ||
-    actionType === "score_agenda" ||
-    actionType === "trash_accessed_card" ||
-    actionType === "advance_card" ||
-    actionType === "install_card"
+  return buildRunnerRecentStartRunsOnServer(
+    input,
+    serverId,
+    RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES,
   );
 }
 
@@ -6667,6 +6645,13 @@ const SEMANTIC_RUNTIME_RUNNER_REMOTE_CONTEST_DOCTRINE_GUARD_DEPENDENCIES: Semant
     isRemoteServerTarget,
     runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
     recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+  };
+
+const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES: RunnerRecentStartRunsOnServerDependencies =
+  {
+    publicHistory: mergedAiPublicHistory,
+    eventVersion: aiEventVersion,
+    serverIdFromEvent: aiServerIdFromEvent,
   };
 
 function semanticRuntimeDoctrinePlanWeightComponent(
