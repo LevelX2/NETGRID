@@ -199,14 +199,15 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       source: `trace_runner_bid_payment:trace_1:${linkAId}`,
-      prompt: "link_a_definition fuer Runner Link-Bid nutzen (Bid 8)",
+      prompt:
+        "link_a_definition fuer Runner Link-Bid nutzen (bisher 0/8 Gesamtbid)",
     });
-    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "bid_1",
-      "bid_2",
-      "bid_3",
-      "bid_4",
-      "bid_5",
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "1 Link-Bit (1/8 Gesamtbid)",
+      "2 Link-Bits (2/8 Gesamtbid)",
+      "3 Link-Bits (3/8 Gesamtbid)",
+      "4 Link-Bits (4/8 Gesamtbid)",
+      "5 Link-Bits (5/8 Gesamtbid)",
     ]);
 
     resolveTraceChoice(
@@ -222,11 +223,13 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       source: `trace_runner_bid_payment:trace_1:${linkBId}`,
+      prompt:
+        "link_b_definition fuer Runner Link-Bid nutzen (bisher 3/8 Gesamtbid)",
     });
-    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "bid_0",
-      "bid_1",
-      "bid_2",
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Link-Bits (3/8 Gesamtbid)",
+      "1 Link-Bit (4/8 Gesamtbid)",
+      "2 Link-Bits (5/8 Gesamtbid)",
     ]);
 
     resolveTraceChoice(

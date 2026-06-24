@@ -253,6 +253,7 @@ export function traceBidChoice(
   traceId: string,
   prompt: string,
   maxBid: number,
+  optionUnit = "Credits",
 ): ChoiceRequest {
   const boundedMax = Math.max(0, Math.floor(maxBid));
   return {
@@ -263,8 +264,8 @@ export function traceBidChoice(
     kind: "bid_amount",
     options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
       id: `bid_${amount}`,
-      label: `${amount} Credits`,
-      publicLabel: `${amount} Credits`,
+      label: `${amount} ${optionUnit}`,
+      publicLabel: `${amount} ${optionUnit}`,
       value: amount,
     })),
     minSelections: 1,
@@ -344,12 +345,16 @@ function resolveTraceCorpBid(
     ...baseLinkTrace,
     status: "runner_bid",
   };
+  const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits + runnerTraceLinkCredits(host),
+    runnerTraceLinkCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    state.runner.credits + runnerTraceLinkCreditCapacity,
+    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
   );
   state.activeSide = "runner";
   legalAction.payload = {
@@ -415,12 +420,18 @@ function openTraceRunnerBidChoice(
     ...trace,
     status: "runner_bid",
   };
+  const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
+  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength;
+  const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    `Runner Link-Bid wählen (Trace ${trace.traceStrength ?? trace.baseTraceStrength}, Link ${trace.runnerLink ?? calculateRunnerLink(host)})`,
-    state.runner.credits + runnerTraceLinkCredits(host),
+    runnerTraceLinkCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    state.runner.credits + runnerTraceLinkCreditCapacity,
+    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
   );
   state.activeSide = "runner";
 }
@@ -1234,8 +1245,8 @@ function openRunnerBidPaymentChoice(host: TraceOrchestrationHost): void {
     )
     .map((amount) => ({
       id: `bid_${amount}`,
-      label: `${amount} Link-Bit${amount === 1 ? "" : "s"}`,
-      publicLabel: `${amount} Link-Bit${amount === 1 ? "" : "s"}`,
+      label: `${amount} Link-Bit${amount === 1 ? "" : "s"} (${selectedSoFar + amount}/${selection.bid} Gesamtbid)`,
+      publicLabel: `${amount} Link-Bit${amount === 1 ? "" : "s"} (${selectedSoFar + amount}/${selection.bid} Gesamtbid)`,
       value: amount,
     }));
   if (options.length === 0)
@@ -1244,7 +1255,7 @@ function openRunnerBidPaymentChoice(host: TraceOrchestrationHost): void {
     choiceId: `${trace.traceId}.runner.bid_payment.${sourceCardInstanceId}.${state.stateVersion + 1}`,
     side: "runner",
     source: `trace_runner_bid_payment:${trace.traceId}:${sourceCardInstanceId}`,
-    prompt: `${sourceDefinition.title} fuer Runner Link-Bid nutzen (Bid ${selection.bid})`,
+    prompt: `${sourceDefinition.title} fuer Runner Link-Bid nutzen (bisher ${selectedSoFar}/${selection.bid} Gesamtbid)`,
     kind: "bid_amount",
     options,
     minSelections: 1,
