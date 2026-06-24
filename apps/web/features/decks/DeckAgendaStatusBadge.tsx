@@ -2,7 +2,7 @@
 
 import { Award } from "lucide-react";
 
-import { type DeckAgendaStatus } from "../../app/deck-editor-ui";
+import { type DeckAgendaStatus } from "./deck-editor-model";
 
 const AgendaIcon = Award;
 

@@ -3,7 +3,7 @@
 import { Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
 
-import { type DeckAgendaStatus } from "../../app/deck-editor-ui";
+import { type DeckAgendaStatus } from "./deck-editor-model";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import {
   DECK_TABLE_CARD_WIDTH_MAX,

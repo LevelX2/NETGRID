@@ -162,7 +162,28 @@ Hinweis: `next build` schaltet `apps/web/next-env.d.ts` lokal von `./.next/dev/t
 
 ### Paket 4
 
-Offen. Die Import-/Verantwortungsmatrix wird vor Moves neu mit gezielten, reproduzierbaren Suchbefehlen ermittelt.
+Entscheidung: Kein Big-Bang-Schnitt an `action-board-ui.ts`. Stattdessen wurden drei reine, häufig von Features genutzte Helfer an Feature-Zielorte verschoben und die alten `app`-Dateien als Re-Export-Shims erhalten.
+
+Import-/Verantwortungsmatrix:
+
+| Alter Ort | Neuer Ort | Verantwortung | Ergebnis |
+| --- | --- | --- | --- |
+| `apps/web/app/card-image-service.ts` | `apps/web/features/cards/card-image-service.ts` | Card-Image-URL und Bildkomponente | Feature-Konsumenten importieren direkt aus `features/cards` |
+| `apps/web/app/catalog-ui.ts` | `apps/web/features/catalog/catalog-model.ts` | Catalog-Filter, Statuslabels, Set-/Rarity-Helfer | Catalog-, Cards- und Deck-Features importieren direkt aus `features/catalog` |
+| `apps/web/app/deck-editor-ui.ts` | `apps/web/features/decks/deck-editor-model.ts` | Deck-Agenda-Regel und Statusberechnung | Deck-Features importieren direkt aus `features/decks` |
+
+Nicht geschnitten:
+
+- `action-board-ui.ts` bleibt vorerst als größerer Präsentationsvertrag bestehen, weil mehrere Board-/Action-/Card-Features daran hängen und ein weiterer Schnitt ein eigenes Paket braucht.
+- `action-cues.ts` bleibt vorerst im `app`-Bereich, weil es Chronicle-, Highlight-, Sound- und Damage-Cue-Ableitungen kombiniert und für Paket 5/7 sauberer bewertet werden sollte.
+- `chronicle.ts` bleibt vorerst als bestehender Formatierungsvertrag bestehen.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test -- card-image-service.test.ts catalog-ui.test.ts deck-editor-ui.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 424 Tests.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 174 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
 
 ### Paket 5
 

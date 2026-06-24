@@ -21,7 +21,7 @@ import {
   type IceModifierBadgeView,
   type InactiveCardZone
 } from "../../app/action-board-ui";
-import { CardImage } from "../../app/card-image-service";
+import { CardImage } from "./card-image-service";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,

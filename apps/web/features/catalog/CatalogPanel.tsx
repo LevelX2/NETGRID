@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, Search, SlidersHorizontal, X } from "lucide-rea
 import { useEffect, useRef, useState } from "react";
 import type { Side } from "@netgrid/shared";
 
-import { CardImage } from "../../app/card-image-service";
+import { CardImage } from "../cards/card-image-service";
 import {
   CATALOG_AI_HINT_FILTERS,
   CATALOG_BLOCK_STATUS_FILTERS,
@@ -16,7 +16,7 @@ import {
   type CatalogRarityFilterKey,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
-} from "../../app/catalog-ui";
+} from "./catalog-model";
 import { type CatalogAiInspector } from "../../app/ai-hint-inspector-ui";
 import {
   HardwareImageOverlay,

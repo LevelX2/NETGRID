@@ -1,7 +1,7 @@
 import type { Side } from "@netgrid/shared";
 
 import type { CatalogAiInspector } from "../../app/ai-hint-inspector-ui";
-import type { CatalogAiInspectorSummary, CatalogStatusKey, CatalogStatuses } from "../../app/catalog-ui";
+import type { CatalogAiInspectorSummary, CatalogStatusKey, CatalogStatuses } from "./catalog-model";
 
 export type CatalogAiHints = {
   roles: string[];

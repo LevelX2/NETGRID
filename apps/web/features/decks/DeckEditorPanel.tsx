@@ -5,7 +5,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { DeckPublicMetadata, Side } from "@netgrid/shared";
 
-import { deckAgendaStatusForEditor } from "../../app/deck-editor-ui";
+import { deckAgendaStatusForEditor } from "./deck-editor-model";
 import { type DeckStrategyProfileViewerResponse } from "../../app/deck-strategy-profile-ui";
 import {
   CATALOG_RARITY_FILTERS,
@@ -21,7 +21,7 @@ import {
   type CatalogSetFilterKey,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
-} from "../../app/catalog-ui";
+} from "../catalog/catalog-model";
 import {
   DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
   LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY

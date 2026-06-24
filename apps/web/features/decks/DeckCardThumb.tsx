@@ -1,6 +1,6 @@
 "use client";
 
-import { CardImage } from "../../app/card-image-service";
+import { CardImage } from "../cards/card-image-service";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,

@@ -1,7 +1,7 @@
 import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 
-import { catalogSetDetailLabel, catalogSetShortLabelForSetId } from "../../app/catalog-ui";
-import { localCardImageUrl } from "../../app/card-image-service";
+import { catalogSetDetailLabel, catalogSetShortLabelForSetId } from "../catalog/catalog-model";
+import { localCardImageUrl } from "./card-image-service";
 import { visibleKnownCardRulesText } from "../../app/card-text-source";
 
 type CardViewCatalogDetail = {

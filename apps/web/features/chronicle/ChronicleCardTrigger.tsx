@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { shouldActivateChronicleCardTouchDoubleTap } from "../../app/chronicleInteraction";
-import { CardImage } from "../../app/card-image-service";
+import { CardImage } from "../cards/card-image-service";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,

@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import { localCardImageUrl } from "../../app/card-image-service";
+import { localCardImageUrl } from "./card-image-service";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,

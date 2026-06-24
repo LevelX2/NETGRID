@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
-import { CardImage } from "../../app/card-image-service";
-import { catalogSetDetailLabel } from "../../app/catalog-ui";
+import { catalogSetDetailLabel } from "../catalog/catalog-model";
+import { CardImage } from "../cards/card-image-service";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,
