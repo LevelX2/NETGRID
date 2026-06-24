@@ -225,6 +225,10 @@ import {
   runnerBlinkRecoveryScoreComponent as buildRunnerBlinkRecoveryScoreComponent,
 } from "./runtime/runner-blink-recovery-score";
 import {
+  runnerLateNoFundingCreditRepeatScoreComponent as buildRunnerLateNoFundingCreditRepeatScoreComponent,
+  runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
+} from "./runtime/runner-recovery-repeat-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -6646,67 +6650,23 @@ function runnerLowValueRecoveryRepeatScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (!runnerActionLooksLikeRecovery(input, action)) return undefined;
-  const recentRepeats = semanticRuntimeRecentRunnerRecoveryActions(
-    input,
-    action,
-  );
-  if (recentRepeats <= 0) return undefined;
-  const fundingNeed = runnerRecoveryFundingNeedContext(input);
-  if (fundingNeed.active) return undefined;
-  const penalty = Math.min(520, 180 + recentRepeats * 140);
-  return {
-    key: "runner_low_value_recovery_repeat",
-    label: "Recovery-Wiederholung",
-    value: -penalty,
-    reason: [
-      `recent_recovery:${recentRepeats}`,
-      "funding_need:false",
-      `funding_context:${fundingNeed.reason}`,
-      `source:${sourceDefinitionIdForAction(input, action) || action.type}`,
-    ].join("|"),
-  };
+  return buildRunnerLowValueRecoveryRepeatScoreComponent(input, action, {
+    actionLooksLikeRecovery: runnerActionLooksLikeRecovery,
+    recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
+    fundingNeedContext: runnerRecoveryFundingNeedContext,
+    sourceDefinitionId: sourceDefinitionIdForAction,
+  });
 }
 
 function runnerLateNoFundingCreditRepeatScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  if (action.type !== "gain_credit") return undefined;
-  const recentCredits = semanticRuntimeRecentRunnerBasicCreditActions(input);
-  if (recentCredits <= 0) return undefined;
-  const fundingNeed = runnerRecoveryFundingNeedContext(input);
-  if (fundingNeed.active) return undefined;
-  // Late credit repeats are only penalized when a public, safe central
-  // closeout exists; reserve-building for unsafe or stale paths stays legal.
-  const pressureReadyTargets =
-    runnerLateNoFundingCreditSafeProgressTargets(input);
-  if (pressureReadyTargets.length === 0) return undefined;
-  const credits = input.playerView.own.credits;
-  if (credits < 3 && recentCredits < 2) return undefined;
-  const penalty = Math.min(
-    860,
-    260 + recentCredits * 180 + Math.max(0, credits - 4) * 60,
-  );
-  return {
-    key: "runner_late_no_funding_credit_repeat",
-    label: "Credit-Wiederholung ohne Funding Need",
-    value: -penalty,
-    reason: [
-      `recent_basic_credits:${recentCredits}`,
-      "funding_need:false",
-      `funding_context:${fundingNeed.reason}`,
-      `safe_progress_targets:${pressureReadyTargets
-        .map((target) => target.serverId)
-        .join(",")}`,
-      `safe_progress_target_types:${pressureReadyTargets
-        .map((target) => target.targetType)
-        .join(",")}`,
-      `credits:${credits}`,
-    ].join("|"),
-  };
+  return buildRunnerLateNoFundingCreditRepeatScoreComponent(input, action, {
+    recentBasicCreditActions: semanticRuntimeRecentRunnerBasicCreditActions,
+    fundingNeedContext: runnerRecoveryFundingNeedContext,
+    safeProgressTargets: runnerLateNoFundingCreditSafeProgressTargets,
+  });
 }
 
 function runnerLateNoFundingCreditSafeProgressTargets(
