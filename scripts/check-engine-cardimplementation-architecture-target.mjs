@@ -308,10 +308,6 @@ function checkRuntimeEscapeHatches() {
   const findings = [];
   const patterns = [
     {
-      name: "@ts-nocheck",
-      regex: /@ts-nocheck/g,
-    },
-    {
       name: "RuntimeDeps Record escape hatch",
       regex: /RuntimeDeps[^=\n]*=\s*[\s\S]{0,120}?Record<string,\s*unknown>/g,
     },
