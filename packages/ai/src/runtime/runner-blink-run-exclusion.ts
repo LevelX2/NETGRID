@@ -24,6 +24,22 @@ export type RunnerBlinkRunExclusionDependencies = {
   shouldAvoidRun: (assessment: RunnerBlinkRiskAssessment | undefined) => boolean;
 };
 
+export type RunnerBlinkRiskEvidenceDependencies = {
+  multiRunTargetEvaluation: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    targetServerId: string,
+  ) => RunnerBlinkMultiRunEvaluation | undefined;
+  runRiskAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => RunnerBlinkRiskAssessment | undefined;
+  breakRiskAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => RunnerBlinkRiskAssessment | undefined;
+};
+
 export function runnerBlinkRunExclusion(
   input: AiDecisionInput,
   action: LegalAction,
@@ -52,6 +68,29 @@ export function runnerBlinkRunExclusion(
       "why_blink_run_blocked:self_net_damage_buffer_too_low",
     ]).join("|"),
   };
+}
+
+export function runnerBlinkRiskEvidenceForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerBlinkRiskEvidenceDependencies,
+): string[] {
+  if (input.side !== "runner") return [];
+  if (action.type === "start_run") {
+    const targetServerId = semanticRuntimeServerId(action);
+    if (!targetServerId) return [];
+    const evaluation = dependencies.multiRunTargetEvaluation(
+      input,
+      action,
+      targetServerId,
+    );
+    return (
+      evaluation?.blinkRiskAssessment?.evidence ??
+      dependencies.runRiskAssessment(input, action)?.evidence ??
+      []
+    );
+  }
+  return dependencies.breakRiskAssessment(input, action)?.evidence ?? [];
 }
 
 function sortedUnique(values: string[]): string[] {

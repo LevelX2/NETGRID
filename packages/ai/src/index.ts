@@ -186,7 +186,9 @@ import {
   runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion,
 } from "./runtime/runner-program-sacrifice-exclusion";
 import {
+  runnerBlinkRiskEvidenceForAction as buildRunnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion as buildRunnerBlinkRunExclusion,
+  type RunnerBlinkRiskEvidenceDependencies,
 } from "./runtime/runner-blink-run-exclusion";
 import {
   runnerBlinkBreakExclusion as buildRunnerBlinkBreakExclusion,
@@ -3712,6 +3714,12 @@ const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES: RunnerBadPublicity
         DEMO_CARDS_BY_ID[definitionId]?.rulesText,
       effectTarget: (effect) => stringRecordValue(effect, "target"),
     },
+  };
+const RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES: RunnerBlinkRiskEvidenceDependencies =
+  {
+    multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
+    runRiskAssessment: assessBlinkRiskForRunAction,
+    breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
   };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
@@ -8012,22 +8020,11 @@ function runnerBlinkRiskEvidenceForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): string[] {
-  if (input.side !== "runner") return [];
-  if (action.type === "start_run") {
-    const targetServerId = semanticRuntimeServerId(action);
-    if (!targetServerId) return [];
-    const evaluation = runnerMultiRunTargetEvaluation(
-      input,
-      action,
-      targetServerId,
-    );
-    return (
-      evaluation?.blinkRiskAssessment?.evidence ??
-      assessBlinkRiskForRunAction(input, action)?.evidence ??
-      []
-    );
-  }
-  return blinkRiskAssessmentForEncounterBreak(input, action)?.evidence ?? [];
+  return buildRunnerBlinkRiskEvidenceForAction(
+    input,
+    action,
+    RUNNER_BLINK_RISK_EVIDENCE_DEPENDENCIES,
+  );
 }
 
 function runnerSelfDamageGuardedDecision(
