@@ -209,6 +209,10 @@ import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
 import {
+  runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents,
+  runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents,
+} from "./runtime/runner-economy-commitment-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -4496,64 +4500,14 @@ function runnerBankInvestmentCommitmentScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  if (input.side !== "runner" || action.side !== "runner") return [];
-  const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
-  if (!assessment.active && assessment.status === "inactive") return [];
-
-  if (isRunnerBankBuildAction(input, action)) {
-    return [
-      {
-        key: "runner_bank_investment_commitment",
-        label: "Bank-Commitment",
-        value: assessment.buildBankPriority,
-        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  if (isRunnerBankCashOutAction(input, action)) {
-    return [
-      {
-        key: "runner_bank_cashout_gate",
-        label: "Bank-Auszahlung",
-        value: assessment.cashOutPriority,
-        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  if (isRunnerBankInstallAction(input, action)) {
-    const value = assessment.status === "install_deferred" ? -1600 : 350;
-    return [
-      {
-        key: "runner_bank_install_commitment",
-        label: "Bank-Install-Commitment",
-        value,
-        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  if (
-    action.type === "start_run" &&
-    assessment.active &&
-    assessment.buildActionLegal &&
-    assessment.buildBankPriority > 0
-  ) {
-    const runOverride = runnerBankCommitmentRunOverride(input, action);
-    return [
-      {
-        key: runOverride
-          ? "runner_bank_commitment_run_override"
-          : "runner_bank_commitment_build_over_low_run",
-        label: "Bank-Commitment vs. Run",
-        value: runOverride ? 950 : -1800,
-        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  return [];
+  return buildRunnerBankInvestmentCommitmentScoreComponents(input, action, {
+    assessment: runnerBankInvestmentCommitmentAssessment,
+    evidence: runnerBankInvestmentCommitmentEvidence,
+    isBuildAction: isRunnerBankBuildAction,
+    isCashOutAction: isRunnerBankCashOutAction,
+    isInstallAction: isRunnerBankInstallAction,
+    runOverride: runnerBankCommitmentRunOverride,
+  });
 }
 
 function runnerBankInvestmentCommitmentEvidence(
@@ -5129,52 +5083,12 @@ function runnerNoRunEconomyCommitmentScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  if (input.side !== "runner" || action.side !== "runner") return [];
-  const assessment = runnerNoRunEconomyCommitmentAssessment(input, action);
-  if (!assessment.active && assessment.status === "inactive") return [];
-
-  if (isRunnerNoRunEconomyInstallAction(input, action)) {
-    return [
-      {
-        key: "runner_no_run_economy_install_commitment",
-        label: "No-Run-Economy-Install",
-        value: assessment.status === "install_deferred" ? -1450 : 420,
-        reason: runnerNoRunEconomyCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  if (action.type === "start_run" && assessment.runBreaksCommitment) {
-    const allowed = assessment.runOverride !== undefined;
-    return [
-      {
-        key: allowed
-          ? "runner_no_run_economy_run_override"
-          : "runner_no_run_economy_run_penalty",
-        label: "No-Run-Economy-Commitment",
-        value: allowed ? 950 : assessment.noRunCommitmentPenalty,
-        reason: runnerNoRunEconomyCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  if (
-    assessment.active &&
-    (action.type === "gain_credit" ||
-      action.type === "draw_card" ||
-      isRunnerRigInstallAction(input, action))
-  ) {
-    return [
-      {
-        key: "runner_no_run_economy_setup_hold",
-        label: "No-Run-Setup-Hold",
-        value: action.type === "draw_card" ? 230 : 310,
-        reason: runnerNoRunEconomyCommitmentEvidence(input, action).join("|"),
-      },
-    ];
-  }
-
-  return [];
+  return buildRunnerNoRunEconomyCommitmentScoreComponents(input, action, {
+    assessment: runnerNoRunEconomyCommitmentAssessment,
+    evidence: runnerNoRunEconomyCommitmentEvidence,
+    isInstallAction: isRunnerNoRunEconomyInstallAction,
+    isRigInstallAction: isRunnerRigInstallAction,
+  });
 }
 
 function runnerNoRunEconomyCommitmentEvidence(
