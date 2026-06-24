@@ -51,6 +51,36 @@ export type RunnerScoreComponentsDependencies = {
   followup: RunnerFollowupScoreDependencies;
 };
 
+export type RunnerScoreComponentsContext = {
+  semanticRuntimeRunnerScoreComponents: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
+  ) => AiDecisionScoreComponent[];
+};
+
+export function createRunnerScoreComponentsContext(
+  dependencies: RunnerScoreComponentsDependencies,
+): RunnerScoreComponentsContext {
+  function semanticRuntimeRunnerScoreComponents(
+    input: AiDecisionInput,
+    action: LegalAction,
+    scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
+  ): AiDecisionScoreComponent[] {
+    return runnerScoreComponents(
+      input,
+      action,
+      scopeId,
+      actionSemanticCandidate,
+      dependencies,
+    );
+  }
+
+  return { semanticRuntimeRunnerScoreComponents };
+}
+
 export function runnerScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,

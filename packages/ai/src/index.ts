@@ -217,7 +217,9 @@ import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer
 import {
   createRunnerHandFundingContext,
 } from "./runtime/runner-hand-funding-context";
-import { runnerScoreComponents as buildRunnerScoreComponents } from "./runtime/runner-score-components";
+import {
+  createRunnerScoreComponentsContext,
+} from "./runtime/runner-score-components";
 import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
@@ -4718,78 +4720,6 @@ const {
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
 });
 
-function semanticRuntimeRunnerScoreComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-  actionSemanticCandidate?: ActionSemanticCandidate,
-): AiDecisionScoreComponent[] {
-  return buildRunnerScoreComponents(
-    input,
-    action,
-    scopeId,
-    actionSemanticCandidate,
-    {
-      loanLiabilityAssessment: runnerLoanLiabilityAssessment,
-      goalFit: {
-        sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
-        runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
-        runTargetEvaluationForAction:
-          semanticRuntimeRunnerRunTargetEvaluationForAction,
-      },
-      handFundingTarget: runnerHandFundingTarget,
-      recoveryCommitment: {
-        muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
-        handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
-        blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
-        junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
-        lowValueRecoveryRepeatScoreComponent:
-          runnerLowValueRecoveryRepeatScoreComponent,
-        viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
-        lateNoFundingCreditRepeatScoreComponent:
-          runnerLateNoFundingCreditRepeatScoreComponent,
-        multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
-        bankInvestmentCommitmentScoreComponents:
-          runnerBankInvestmentCommitmentScoreComponents,
-        noRunEconomyCommitmentScoreComponents:
-          runnerNoRunEconomyCommitmentScoreComponents,
-      },
-      install: {
-        rolesForAction,
-        sourceCard: (input, action) => findVisibleCard(input, action.source),
-        muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
-        persistentInstallFitScoreComponent:
-          runnerPersistentInstallFitScoreComponent,
-        isRunnerEconomyRole,
-        isRunnerPressureRole,
-        badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-        programInstallTrashAssessmentForAction:
-          runnerProgramInstallTrashAssessmentForAction,
-        programInstallDisplacementPenalty:
-          runnerProgramInstallDisplacementPenalty,
-      },
-      startRun: {
-        serverId: semanticRuntimeServerId,
-        doctrineRunWeight: semanticRuntimeRunnerDoctrineRunWeight,
-        hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
-        rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
-        archivesComponents: semanticRuntimeRunnerArchivesComponents,
-        isRemoteServerTarget,
-        remoteComponents: semanticRuntimeRunnerRemoteComponents,
-        knownIcePathComponents: semanticRuntimeRunnerKnownIcePathComponents,
-        repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
-      },
-      followup: {
-        runTargetGuidanceComponent:
-          semanticRuntimeRunnerRunTargetGuidanceComponent,
-        accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
-        badPublicityRelevanceScoreComponent:
-          runnerBadPublicityRelevanceScoreComponent,
-      },
-    },
-  );
-}
-
 function actionClickCost(action: LegalAction): number {
   return Math.max(
     1,
@@ -4920,6 +4850,65 @@ const {
   actionGate: semanticRuntimeDoctrineActionGate,
   suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
   planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
+});
+const {
+  semanticRuntimeRunnerScoreComponents,
+} = createRunnerScoreComponentsContext({
+  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+  goalFit: {
+    sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
+    runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
+    runTargetEvaluationForAction:
+      semanticRuntimeRunnerRunTargetEvaluationForAction,
+  },
+  handFundingTarget: runnerHandFundingTarget,
+  recoveryCommitment: {
+    muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
+    handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
+    blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
+    junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
+    lowValueRecoveryRepeatScoreComponent:
+      runnerLowValueRecoveryRepeatScoreComponent,
+    viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
+    lateNoFundingCreditRepeatScoreComponent:
+      runnerLateNoFundingCreditRepeatScoreComponent,
+    multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
+    bankInvestmentCommitmentScoreComponents:
+      runnerBankInvestmentCommitmentScoreComponents,
+    noRunEconomyCommitmentScoreComponents:
+      runnerNoRunEconomyCommitmentScoreComponents,
+  },
+  install: {
+    rolesForAction,
+    sourceCard: (input, action) => findVisibleCard(input, action.source),
+    muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
+    persistentInstallFitScoreComponent:
+      runnerPersistentInstallFitScoreComponent,
+    isRunnerEconomyRole,
+    isRunnerPressureRole,
+    badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+    programInstallTrashAssessmentForAction:
+      runnerProgramInstallTrashAssessmentForAction,
+    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+  },
+  startRun: {
+    serverId: semanticRuntimeServerId,
+    doctrineRunWeight: semanticRuntimeRunnerDoctrineRunWeight,
+    hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
+    rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
+    archivesComponents: semanticRuntimeRunnerArchivesComponents,
+    isRemoteServerTarget,
+    remoteComponents: semanticRuntimeRunnerRemoteComponents,
+    knownIcePathComponents: semanticRuntimeRunnerKnownIcePathComponents,
+    repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
+  },
+  followup: {
+    runTargetGuidanceComponent:
+      semanticRuntimeRunnerRunTargetGuidanceComponent,
+    accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
+    badPublicityRelevanceScoreComponent:
+      runnerBadPublicityRelevanceScoreComponent,
+  },
 });
 
 function semanticRuntimeDoctrinePlanWeightComponent(
