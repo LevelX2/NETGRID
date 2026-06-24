@@ -1,4 +1,4 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { bestSemanticRuntimeChoice } from "./semantic-choice-ranking";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
 import type {
@@ -45,6 +45,29 @@ export type RunnerSelfDamageChoiceDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerSelfDamageSurvivalAssessment | undefined;
+};
+
+type RunnerSelfDamageGuardedDecisionChoice = {
+  action: LegalAction | undefined;
+  score: number;
+  evidence: string[];
+  confidence?: number;
+};
+
+export type RunnerSelfDamageGuardedDecisionDependencies = {
+  survivalAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => RunnerSelfDamageSurvivalAssessment | undefined;
+  scoreRunnerActions: (
+    input: AiDecisionInput,
+  ) => readonly RunnerSelfDamageGuardedDecisionChoice[];
+  compareAction: (left: LegalAction, right: LegalAction) => number;
+  selectedChoicesForDecision: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecision["selectedChoices"] | undefined;
+  scrubEvidence: (evidence: readonly string[]) => string[];
 };
 
 export function runnerSelfDamageSurvivalAssessment(
@@ -127,6 +150,100 @@ export function runnerSelfDamageSurvivalAssessment(
   };
 }
 
+export function runnerSelfDamageGuardedDecision(
+  input: AiDecisionInput,
+  decision: AiDecision,
+  dependencies: RunnerSelfDamageGuardedDecisionDependencies,
+): AiDecision {
+  if (input.side !== "runner") return decision;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === decision.actionId,
+  );
+  if (!selectedAction) return decision;
+  const assessment = dependencies.survivalAssessment(input, selectedAction);
+  if (!assessment) return decision;
+  if (assessment.survivesSelfDamage) {
+    return decisionWithSelfDamageEvidence(decision, assessment, dependencies);
+  }
+  if (assessment.immediateWinByAction) {
+    return decisionWithSelfDamageEvidence(decision, assessment, dependencies);
+  }
+
+  const fallbackChoice = dependencies
+    .scoreRunnerActions(input)
+    .filter(
+      (
+        choice,
+      ): choice is RunnerSelfDamageGuardedDecisionChoice & {
+        action: LegalAction;
+      } => {
+        if (!choice.action) return false;
+        const candidateAssessment = dependencies.survivalAssessment(
+          input,
+          choice.action,
+        );
+        return (
+          !candidateAssessment ||
+          candidateAssessment.survivesSelfDamage ||
+          candidateAssessment.immediateWinByAction
+        );
+      },
+    )
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        dependencies.compareAction(left.action, right.action),
+    )[0];
+
+  if (!fallbackChoice?.action) {
+    return {
+      ...decision,
+      evidence: dependencies.scrubEvidence([
+        ...(decision.evidence ?? []),
+        ...assessment.evidence,
+        "self_damage_guard_no_safe_legal_alternative",
+      ]),
+    };
+  }
+
+  const selectedChoices = dependencies.selectedChoicesForDecision(
+    input,
+    fallbackChoice.action,
+  );
+  return {
+    actionId: fallbackChoice.action.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    reasonCode: "runner.self_damage.safe_alternative",
+    explanation:
+      "Der Runner vermeidet eine legale Self-Damage-Aktion, die ohne unmittelbaren Sieg zur Flatline fuehren wuerde.",
+    consideredActionIds: input.legalActions
+      .map((action) => action.actionId)
+      .sort(),
+    fallbackUsed: false,
+    evidence: dependencies.scrubEvidence([
+      ...(decision.evidence ?? []),
+      ...assessment.evidence,
+      "self_damage_guarded_legacy_decision:true",
+      `self_damage_guard_fallback_action:${fallbackChoice.action.actionId}`,
+      ...fallbackChoice.evidence,
+    ]),
+    ...(decision.decisionDebug
+      ? { decisionDebug: decision.decisionDebug }
+      : {}),
+    ...(decision.timeoutUsed !== undefined
+      ? { timeoutUsed: decision.timeoutUsed }
+      : {}),
+    profileId: input.profileId,
+    difficulty: input.difficulty,
+    ...(fallbackChoice.confidence !== undefined
+      ? { confidence: fallbackChoice.confidence }
+      : decision.confidence !== undefined
+        ? { confidence: decision.confidence }
+        : {}),
+    reason: "runner.self_damage.safe_alternative",
+  };
+}
+
 export function runnerSelfDamageImmediateWinSemanticChoice(
   input: AiDecisionInput,
   choices: readonly SemanticRuntimeChoice[],
@@ -163,6 +280,20 @@ export function runnerSelfDamageSurvivalExclusion(
     key: "self_damage_flatline_risk",
     label: "Self-Damage-Flatline-Risiko",
     reason: sortedUnique(assessment.evidence).join("|"),
+  };
+}
+
+function decisionWithSelfDamageEvidence(
+  decision: AiDecision,
+  assessment: RunnerSelfDamageSurvivalAssessment,
+  dependencies: Pick<RunnerSelfDamageGuardedDecisionDependencies, "scrubEvidence">,
+): AiDecision {
+  return {
+    ...decision,
+    evidence: dependencies.scrubEvidence([
+      ...(decision.evidence ?? []),
+      ...assessment.evidence,
+    ]),
   };
 }
 

@@ -174,9 +174,11 @@ import {
   runnerRunOnlyActionAdjustedSemanticChoice as buildRunnerRunOnlyActionAdjustedSemanticChoice,
 } from "./runtime/runner-run-only-action-adjustment";
 import {
+  runnerSelfDamageGuardedDecision as buildRunnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice as buildRunnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalAssessment as buildRunnerSelfDamageSurvivalAssessment,
   runnerSelfDamageSurvivalExclusion as buildRunnerSelfDamageSurvivalExclusion,
+  type RunnerSelfDamageGuardedDecisionDependencies,
   type RunnerSelfDamageSurvivalAssessment,
   type RunnerSelfDamageSurvivalAssessmentDependencies,
 } from "./runtime/runner-self-damage-choice";
@@ -3688,6 +3690,14 @@ const RUNNER_SELF_DAMAGE_SURVIVAL_ASSESSMENT_DEPENDENCIES: RunnerSelfDamageSurvi
     hintEffectsForCard: (definitionId) => AI_HINTS.get(definitionId)?.effects,
     fakedHitCardId: FAKED_HIT_CARD_ID,
     badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
+  };
+const RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES: RunnerSelfDamageGuardedDecisionDependencies =
+  {
+    survivalAssessment: runnerSelfDamageSurvivalAssessment,
+    scoreRunnerActions: (input) => scoreActions(input, "runner"),
+    compareAction,
+    selectedChoicesForDecision,
+    scrubEvidence,
   };
 const RUNNER_BAD_PUBLICITY_RELEVANCE_ASSESSMENT_DEPENDENCIES: RunnerBadPublicityRelevanceAssessmentDependencies =
   {
@@ -8024,97 +8034,11 @@ function runnerSelfDamageGuardedDecision(
   input: AiDecisionInput,
   decision: AiDecision,
 ): AiDecision {
-  if (input.side !== "runner") return decision;
-  const selectedAction = input.legalActions.find(
-    (action) => action.actionId === decision.actionId,
-  );
-  if (!selectedAction) return decision;
-  const assessment = runnerSelfDamageSurvivalAssessment(input, selectedAction);
-  if (!assessment) return decision;
-  if (assessment.survivesSelfDamage) {
-    return decisionWithSelfDamageEvidence(decision, assessment);
-  }
-  if (assessment.immediateWinByAction)
-    return decisionWithSelfDamageEvidence(decision, assessment);
-
-  const fallbackChoice = scoreActions(input, "runner")
-    .filter((choice): choice is RankedChoice & { action: LegalAction } => {
-      if (!choice.action) return false;
-      const candidateAssessment = runnerSelfDamageSurvivalAssessment(
-        input,
-        choice.action,
-      );
-      return (
-        !candidateAssessment ||
-        candidateAssessment.survivesSelfDamage ||
-        candidateAssessment.immediateWinByAction
-      );
-    })
-    .sort(
-      (left, right) =>
-        right.score - left.score || compareAction(left.action, right.action),
-    )[0];
-
-  if (!fallbackChoice?.action) {
-    return {
-      ...decision,
-      evidence: scrubEvidence([
-        ...(decision.evidence ?? []),
-        ...assessment.evidence,
-        "self_damage_guard_no_safe_legal_alternative",
-      ]),
-    };
-  }
-
-  const selectedChoices = selectedChoicesForDecision(
+  return buildRunnerSelfDamageGuardedDecision(
     input,
-    fallbackChoice.action,
+    decision,
+    RUNNER_SELF_DAMAGE_GUARDED_DECISION_DEPENDENCIES,
   );
-  return {
-    actionId: fallbackChoice.action.actionId,
-    ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: "runner.self_damage.safe_alternative",
-    explanation:
-      "Der Runner vermeidet eine legale Self-Damage-Aktion, die ohne unmittelbaren Sieg zur Flatline fuehren wuerde.",
-    consideredActionIds: input.legalActions
-      .map((action) => action.actionId)
-      .sort(),
-    fallbackUsed: false,
-    evidence: scrubEvidence([
-      ...(decision.evidence ?? []),
-      ...assessment.evidence,
-      "self_damage_guarded_legacy_decision:true",
-      `self_damage_guard_fallback_action:${fallbackChoice.action.actionId}`,
-      ...fallbackChoice.evidence,
-    ]),
-    ...(decision.decisionDebug
-      ? { decisionDebug: decision.decisionDebug }
-      : {}),
-    ...(decision.timeoutUsed !== undefined
-      ? { timeoutUsed: decision.timeoutUsed }
-      : {}),
-    profileId: input.profileId,
-    difficulty: input.difficulty,
-    ...(fallbackChoice.confidence !== undefined
-      ? { confidence: fallbackChoice.confidence }
-      : decision.confidence !== undefined
-        ? { confidence: decision.confidence }
-        : {}),
-    reason: "runner.self_damage.safe_alternative",
-  };
-}
-
-function decisionWithSelfDamageEvidence(
-  decision: AiDecision,
-  assessment: RunnerSelfDamageSurvivalAssessment,
-): AiDecision {
-  return {
-    ...decision,
-    evidence: scrubEvidence([
-      ...(decision.evidence ?? []),
-      ...assessment.evidence,
-    ]),
-  };
 }
 
 function runnerSelfDamageSurvivalAssessment(
