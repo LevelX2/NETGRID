@@ -1412,6 +1412,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertzweiunddreißigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-run-components-context.ts` kapselt die Runner-Run-Komponenten-Composition für Access-Trash, Archives, Known-ICE-Path, Remote-Root und Repeated-Run-Target-Komponenten.
+  - `packages/ai/src/index.ts` erzeugt den internen Run-Komponenten-Context nach der Recent-History-Composition; `semanticRuntimeKnownIcePathReason` bleibt als früher Alias für Action-Exclusion- und Encounter-Diagnostik verfügbar.
+  - `packages/ai/src/public-export-contract.test.ts` sperrt den neuen internen Runtime-Modulpfad gegen versehentliche Public-Facade-Exporte.
+  - `packages/ai/src/index.ts` sank weiter von 30.341 auf 30.286 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

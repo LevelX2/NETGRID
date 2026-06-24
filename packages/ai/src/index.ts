@@ -321,24 +321,12 @@ import {
   runnerRunTargetGuidanceScoreComponent as buildRunnerRunTargetGuidanceScoreComponent,
 } from "./runtime/runner-run-target-guidance-score";
 import {
-  runnerAccessTrashScoreComponents as buildRunnerAccessTrashScoreComponents,
-} from "./runtime/runner-access-trash-score";
-import {
   createRunnerCentralMemoryContext,
 } from "./runtime/runner-central-memory-context";
-import {
-  runnerArchivesScoreComponents as buildRunnerArchivesScoreComponents,
-} from "./runtime/runner-archives-score";
+import { createRunnerRunComponentsContext } from "./runtime/runner-run-components-context";
 import {
   runnerKnownIcePathReason as buildRunnerKnownIcePathReason,
-  runnerKnownIcePathScoreComponents as buildRunnerKnownIcePathScoreComponents,
 } from "./runtime/runner-known-ice-path-score";
-import {
-  runnerRemoteScoreComponents as buildRunnerRemoteScoreComponents,
-} from "./runtime/runner-remote-score";
-import {
-  runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
-} from "./runtime/runner-repeated-run-target-score";
 import {
   createRunnerRecentHistoryContext,
 } from "./runtime/runner-recent-history-context";
@@ -3843,6 +3831,7 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
   isRemoteServerTarget,
   runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
 };
+const semanticRuntimeKnownIcePathReason = buildRunnerKnownIcePathReason;
 const {
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionContext({
@@ -5958,15 +5947,6 @@ function visibleCardDefinition(card: VisibleCard) {
   return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
 }
 
-function semanticRuntimeRunnerAccessTrashComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent[] {
-  return buildRunnerAccessTrashScoreComponents(input, action, {
-    trashAccessContext: runnerRemoteTrashAccessContext,
-  });
-}
-
 const {
   semanticRuntimeRunnerRndMemoryComponents,
   semanticRuntimeRunnerHqMemoryComponents,
@@ -5981,71 +5961,6 @@ const {
   staleKnownHqRepeatRunPenalty,
 });
 
-function semanticRuntimeRunnerArchivesComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): AiDecisionScoreComponent[] {
-  return buildRunnerArchivesScoreComponents(input, action, server, {
-    evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
-    definitionType: definitionTypeForMetrics,
-  });
-}
-
-function semanticRuntimeRunnerKnownIcePathComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): AiDecisionScoreComponent[] {
-  return buildRunnerKnownIcePathScoreComponents(input, action, server, {
-    assessment: (input, server) =>
-      assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
-        server.root,
-      ),
-    reason: semanticRuntimeKnownIcePathReason,
-  });
-}
-
-function semanticRuntimeKnownIcePathReason(
-  assessment: KnownRezzedIcePathAssessment,
-  serverId: string,
-): string {
-  return buildRunnerKnownIcePathReason(assessment, serverId);
-}
-
-function semanticRuntimeRunnerRemoteComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
-): AiDecisionScoreComponent[] {
-  void action;
-  return buildRunnerRemoteScoreComponents(input, server, {
-    definitionType: definitionTypeForMetrics,
-    rootTrashCost: remoteRootTrashCostForMetrics,
-    candidateMemory: (input, server) => {
-      return server
-        ? reconstructBeliefState(input)
-            .runnerOpponentModel?.hiddenRemoteCandidateMemory.slice()
-            .reverse()
-            .find((entry) => entry.serverId === server.id)
-        : undefined;
-    },
-  });
-}
-
-function semanticRuntimeRepeatedRunTargetComponents(
-  input: AiDecisionInput,
-  serverId: string | undefined,
-): AiDecisionScoreComponent[] {
-  return buildRunnerRepeatedRunTargetScoreComponents(input, serverId, {
-    recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-    isRemoteServerTarget,
-  });
-}
-
 const {
   runnerLateNoFundingCreditSafeProgressTargets,
   semanticRuntimeRecentRunnerBasicCreditActions,
@@ -6057,6 +5972,36 @@ const {
   closeout: bestTrueCentralCloseoutProfileForMetrics,
   pressureReadyTargets: (input: AiDecisionInput) =>
     assessRunnerPressureReadyForMetrics(input).readyTargets,
+});
+
+const {
+  semanticRuntimeRunnerAccessTrashComponents,
+  semanticRuntimeRunnerArchivesComponents,
+  semanticRuntimeRunnerKnownIcePathComponents,
+  semanticRuntimeRunnerRemoteComponents,
+  semanticRuntimeRepeatedRunTargetComponents,
+} = createRunnerRunComponentsContext({
+  trashAccessContext: runnerRemoteTrashAccessContext,
+  evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
+  definitionType: definitionTypeForMetrics,
+  knownIcePathAssessment: (input, server) =>
+    assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    ),
+  rootTrashCost: remoteRootTrashCostForMetrics,
+  candidateMemory: (input, server) => {
+    return server
+      ? reconstructBeliefState(input)
+          .runnerOpponentModel?.hiddenRemoteCandidateMemory.slice()
+          .reverse()
+          .find((entry) => entry.serverId === server.id)
+      : undefined;
+  },
+  recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+  isRemoteServerTarget,
 });
 
 const {
