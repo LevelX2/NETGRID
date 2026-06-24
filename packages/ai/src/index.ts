@@ -219,6 +219,9 @@ import {
   runnerBadPublicityRelevanceScoreComponent as buildRunnerBadPublicityRelevanceScoreComponent,
 } from "./runtime/runner-bad-publicity-relevance-score";
 import {
+  runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
+} from "./runtime/runner-loan-liability-assessment";
+import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
 } from "./runtime/runner-viral15-jack-out-score";
 import {
@@ -5588,184 +5591,32 @@ function runnerLoanLiabilityAssessment(
   input: AiDecisionInput,
   action: LegalAction,
 ): RunnerLoanLiabilityAssessment | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const loanDefinitionId = runnerLoanDefinitionIdForAction(input, action);
-  const loanInstallAction = loanDefinitionId !== undefined;
-  const installedLoan = runnerInstalledLoanCards(input)[0];
-  const loanAlreadyInstalled = installedLoan !== undefined;
-  if (!loanInstallAction && !loanAlreadyInstalled) return undefined;
-
-  const hint = AI_HINTS.get(
-    loanDefinitionId ?? installedLoan?.definitionId ?? "",
-  );
-  const installCreditGain = loanInstallAction
-    ? runnerLoanValueHint(hint, "installCreditGain", 12)
-    : 0;
-  const startTurnCreditLoss = runnerLoanValueHint(
-    hint,
-    "startOfTurnCreditLoss",
-    1,
-  );
-  const leavePlayPayCost = runnerLoanValueHint(hint, "leavePlayPayCost", 10);
-  const currentCredits = input.playerView.own.credits;
-  const actionCreditGain = runnerProjectedCreditGainForAction(action);
-  const actionCreditSpend = actionCreditCost(action);
-  const creditsAfterLoan = loanInstallAction
-    ? currentCredits + installCreditGain - actionCreditSpend
-    : currentCredits;
-  const runtimeContext = runnerLoanRuntimeContext(input, creditsAfterLoan);
-  const projectedSpend = loanInstallAction
-    ? runnerLoanProjectedSpendAfterLoan(input, action, creditsAfterLoan)
-    : runnerInstalledLoanActionSpend(action);
-  const creditsAfterPlannedSpend = loanInstallAction
-    ? creditsAfterLoan - projectedSpend.plannedSpendAfterLoan
-    : currentCredits + actionCreditGain - actionCreditSpend;
-  const currentGamePhase = runnerLoanGamePhase(input);
-  const resourceTrashRisk = runnerLoanResourceTrashRisk(input);
-  const criticalBreakerFunding = loanInstallAction
-    ? runnerLoanCriticalBreakerFundingNeed(
-        input,
-        creditsAfterLoan,
-        runtimeContext.runFunding.remoteScoreThreat !== "none",
-      )
-    : { active: false, evidence: [] };
-  const emergencyFunding =
-    loanInstallAction &&
-    runnerLoanEmergencyFundingNeed(input, runtimeContext.desiredCreditReserve);
-  const activeFundingNeed =
-    runtimeContext.runFunding.remoteContestFunding ||
-    runtimeContext.runFunding.knownAgendaFunding ||
-    runtimeContext.runFunding.closeoutFunding ||
-    criticalBreakerFunding.active ||
-    emergencyFunding;
-  const genericSetupOnly =
-    loanInstallAction &&
-    !activeFundingNeed &&
-    projectedSpend.genericSetupSpendAfterLoan > 0;
-  const loanUseCase = runnerLoanUseCase({
-    loanInstallAction,
-    activeFundingNeed,
-    remoteContestFunding: runtimeContext.runFunding.remoteContestFunding,
-    knownAgendaFunding: runtimeContext.runFunding.knownAgendaFunding,
-    closeoutFunding: runtimeContext.runFunding.closeoutFunding,
-    criticalBreakerFunding: criticalBreakerFunding.active,
-    emergencyFunding,
-    genericSetupOnly,
-    action,
-    currentCredits,
-    leavePlayPayCost,
-    creditsAfterPlannedSpend,
-    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+  return buildRunnerLoanLiabilityAssessment(input, action, {
+    loanDefinitionIdForAction: runnerLoanDefinitionIdForAction,
+    installedLoanCards: runnerInstalledLoanCards,
+    valueHint: (definitionId, key, fallback) =>
+      runnerLoanValueHint(
+        definitionId ? AI_HINTS.get(definitionId) : undefined,
+        key,
+        fallback,
+      ),
+    projectedCreditGainForAction: runnerProjectedCreditGainForAction,
+    actionCreditCost,
+    runtimeContext: runnerLoanRuntimeContext,
+    projectedSpendAfterLoan: runnerLoanProjectedSpendAfterLoan,
+    installedLoanActionSpend: runnerInstalledLoanActionSpend,
+    gamePhase: runnerLoanGamePhase,
+    resourceTrashRisk: runnerLoanResourceTrashRisk,
+    criticalBreakerFundingNeed: runnerLoanCriticalBreakerFundingNeed,
+    emergencyFundingNeed: runnerLoanEmergencyFundingNeed,
+    useCase: runnerLoanUseCase,
+    debtRepaymentRisk: runnerLoanDebtRepaymentRisk,
+    liabilitySeverity: runnerLoanLiabilitySeverity,
+    scoreValue: runnerLoanLiabilityScoreValue,
+    allowedReason: runnerLoanAllowedReason,
+    blockedReason: runnerLoanBlockedReason,
+    semanticEvidence: runnerLoanSemanticEvidence,
   });
-  const debtRepaymentRisk = runnerLoanDebtRepaymentRisk({
-    creditsAfterPlannedSpend,
-    leavePlayPayCost,
-    startTurnCreditLoss,
-    resourceTrashRisk,
-  });
-  const liabilitySeverity = runnerLoanLiabilitySeverity({
-    loanUseCase,
-    debtRepaymentRisk,
-    currentGamePhase,
-    activeFundingNeed,
-    creditsAfterPlannedSpend,
-    desiredCreditReserve: runtimeContext.desiredCreditReserve,
-    resourceTrashRisk,
-  });
-  const scoreValue = runnerLoanLiabilityScoreValue({
-    loanInstallAction,
-    loanUseCase,
-    liabilitySeverity,
-    debtRepaymentRisk,
-    currentGamePhase,
-    activeFundingNeed,
-    currentCredits,
-    leavePlayPayCost,
-    creditsAfterPlannedSpend,
-    desiredCreditReserve: runtimeContext.desiredCreditReserve,
-    plannedSpendAfterLoan: projectedSpend.plannedSpendAfterLoan,
-    genericSetupSpendAfterLoan: projectedSpend.genericSetupSpendAfterLoan,
-    action,
-  });
-  const allowedDespiteRisk = runnerLoanAllowedReason(loanUseCase);
-  const blockedOrDeferred = runnerLoanBlockedReason({
-    loanUseCase,
-    activeFundingNeed,
-    currentGamePhase,
-    creditsAfterPlannedSpend,
-    desiredCreditReserve: runtimeContext.desiredCreditReserve,
-    genericSetupOnly,
-    resourceTrashRisk,
-  });
-  const evidence = sortedUnique([
-    "loanLiabilityAssessment:true",
-    `loanAction:${loanInstallAction ? "install" : "installed_liability"}`,
-    `loanUseCase:${loanUseCase}`,
-    `currentCredits:${currentCredits}`,
-    `installCreditGain:${installCreditGain}`,
-    `creditsAfterLoan:${creditsAfterLoan}`,
-    `plannedSpendAfterLoan:${projectedSpend.plannedSpendAfterLoan}`,
-    `projectedCreditsAfterPlannedSpend:${creditsAfterPlannedSpend}`,
-    `desiredCreditReserve:${runtimeContext.desiredCreditReserve}`,
-    `contestReserve:${runtimeContext.contestReserve}`,
-    `currentGamePhase:${currentGamePhase}`,
-    `remoteScoreThreat:${runtimeContext.runFunding.remoteScoreThreat}`,
-    `knownAgendaPayoff:${runtimeContext.runFunding.knownAgendaPayoff}`,
-    `activeFundingNeed:${activeFundingNeed}`,
-    `debtRepaymentRisk:${debtRepaymentRisk}`,
-    `leavePlayPayCost:${leavePlayPayCost}`,
-    `startTurnCreditLoss:${startTurnCreditLoss}`,
-    `resourceTrashRisk:${resourceTrashRisk}`,
-    `liabilitySeverity:${liabilitySeverity}`,
-    `loanScoreValue:${scoreValue}`,
-    "loan_not_build_credit_base:true",
-    ...(runnerLoanSemanticEvidence(
-      loanDefinitionId ?? installedLoan?.definitionId,
-    ) ?? []),
-    ...runtimeContext.evidence,
-    ...runtimeContext.runFunding.evidence,
-    ...projectedSpend.evidence,
-    ...criticalBreakerFunding.evidence,
-    ...(genericSetupOnly ? ["loanUseCaseEvidence:generic_setup_only"] : []),
-    ...(projectedSpend.genericSetupSpendAfterLoan > 0 &&
-    creditsAfterPlannedSpend < runtimeContext.desiredCreditReserve
-      ? [
-          "loan_overextended_setup_spend:true",
-          "credits_after_loan_spend_below_reserve:true",
-        ]
-      : []),
-    ...(allowedDespiteRisk
-      ? [`why_loan_allowed_despite_risk:${allowedDespiteRisk}`]
-      : []),
-    ...(blockedOrDeferred
-      ? [`why_loan_blocked_or_deferred:${blockedOrDeferred}`]
-      : []),
-  ]);
-
-  return {
-    loanLiabilityAssessment: true,
-    loanInstallAction,
-    loanAlreadyInstalled,
-    currentCredits,
-    installCreditGain,
-    creditsAfterLoan,
-    plannedSpendAfterLoan: projectedSpend.plannedSpendAfterLoan,
-    creditsAfterPlannedSpend,
-    desiredCreditReserve: runtimeContext.desiredCreditReserve,
-    contestReserve: runtimeContext.contestReserve,
-    currentGamePhase,
-    remoteScoreThreat: runtimeContext.runFunding.remoteScoreThreat,
-    knownAgendaPayoff: runtimeContext.runFunding.knownAgendaPayoff,
-    activeFundingNeed,
-    debtRepaymentRisk,
-    leavePlayPayCost,
-    startTurnCreditLoss,
-    resourceTrashRisk,
-    liabilitySeverity,
-    loanUseCase,
-    scoreValue,
-    evidence,
-  };
 }
 
 function runnerLoanDefinitionIdForAction(
