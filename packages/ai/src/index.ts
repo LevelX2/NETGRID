@@ -189,8 +189,8 @@ import {
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import {
-  buildSemanticRuntimeChoices,
-} from "./runtime/semantic-runtime-choice-builder";
+  createSemanticRuntimeChoiceBuilderContext,
+} from "./runtime/semantic-runtime-choice-builder-context";
 import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
@@ -3931,7 +3931,7 @@ const {
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
-const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
+const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
   scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
   actionExclusion: semanticRuntimeActionExclusion,
   scoreBreakdown: semanticRuntimeScoreBreakdown,
@@ -3939,7 +3939,7 @@ const SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES = {
   evidence: semanticRuntimeEvidence,
   explanation: semanticRuntimeExplanation,
   compareAction,
-};
+});
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -3952,12 +3952,7 @@ function chooseSemanticRuntimeAction(
     lazyLegacyDecision,
     options,
     {
-      semanticRuntimeChoices: (runtimeInput, actionSemanticCandidates) =>
-        buildSemanticRuntimeChoices(
-          runtimeInput,
-          actionSemanticCandidates,
-          SEMANTIC_RUNTIME_CHOICE_BUILDER_DEPENDENCIES,
-        ),
+      semanticRuntimeChoices,
       semanticRuntimeChoiceIsReactive,
       buildActionSemanticCandidates,
       getTacticalPlanMemorySnapshot,
