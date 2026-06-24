@@ -232,6 +232,11 @@ import {
   runnerJunkyardBbsRecoveryScoreComponent as buildRunnerJunkyardBbsRecoveryScoreComponent,
 } from "./runtime/runner-junkyard-bbs-recovery-score";
 import {
+  runnerPersistentInstallEvidenceForAction as buildRunnerPersistentInstallEvidenceForAction,
+  runnerPersistentInstallFitScoreComponent as buildRunnerPersistentInstallFitScoreComponent,
+  runnerPersistentInstallLegacyScoreDelta as buildRunnerPersistentInstallLegacyScoreDelta,
+} from "./runtime/runner-persistent-install-fit-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -7037,48 +7042,24 @@ function runnerPersistentInstallFitScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const evaluation = runnerPersistentInstallEvaluationForAction(input, action);
-  if (!evaluation) return undefined;
-  const scoreValue =
-    evaluation.finalInstallFit < 0
-      ? evaluation.finalInstallFit
-      : Math.min(250, Math.round(evaluation.finalInstallFit / 4));
-  return {
-    key: "runner_persistent_install_fit",
-    label: "Install-Grenznutzen",
-    value: scoreValue,
-    reason: sortedUnique([
-      `stackability:${evaluation.stackabilityClass}`,
-      `delta:${evaluation.capabilityDelta}`,
-      `duplicate:${evaluation.duplicateRole}`,
-      `fit:${evaluation.finalInstallFit}`,
-    ]).join("|"),
-  };
+  return buildRunnerPersistentInstallFitScoreComponent(input, action, {
+    evaluationForAction: runnerPersistentInstallEvaluationForAction,
+  });
 }
 
 function runnerPersistentInstallLegacyScoreDelta(
   evaluation: ReturnType<typeof runnerPersistentInstallEvaluationForAction>,
 ): number {
-  if (!evaluation) return 0;
-  return evaluation.finalInstallFit < 0
-    ? evaluation.finalInstallFit
-    : Math.min(180, Math.round(evaluation.finalInstallFit / 5));
+  return buildRunnerPersistentInstallLegacyScoreDelta(evaluation);
 }
 
 function runnerPersistentInstallEvidenceForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): string[] {
-  const evaluation = runnerPersistentInstallEvaluationForAction(input, action);
-  if (!evaluation) return [];
-  return [
-    "persistentInstallEvaluation:true",
-    `persistentInstallStackability:${evaluation.stackabilityClass}`,
-    `persistentInstallCapabilityDelta:${evaluation.capabilityDelta}`,
-    `persistentInstallDuplicateRole:${evaluation.duplicateRole}`,
-    `persistentInstallFinalFit:${evaluation.finalInstallFit}`,
-    ...evaluation.evidence.slice(0, 16),
-  ];
+  return buildRunnerPersistentInstallEvidenceForAction(input, action, {
+    evaluationForAction: runnerPersistentInstallEvaluationForAction,
+  });
 }
 
 function runnerPersistentInstallEvaluationForAction(
