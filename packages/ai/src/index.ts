@@ -188,6 +188,7 @@ import {
   createSemanticRuntimeChoiceBuilderContext,
 } from "./runtime/semantic-runtime-choice-builder-context";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
+import { stringRecordValue } from "./runtime/record-value";
 import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
@@ -4883,16 +4884,6 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
-
-function stringRecordValue(value: unknown, key: string): string | undefined {
-  const record = value as Record<string, unknown>;
-  return typeof record[key] === "string" ? record[key] : undefined;
-}
-
-function numberRecordValue(value: unknown, key: string): number | undefined {
-  const record = value as Record<string, unknown>;
-  return typeof record[key] === "number" ? record[key] : undefined;
-}
 
 function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
   return (
