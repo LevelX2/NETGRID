@@ -1122,6 +1122,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertdritter Struktur-Schnitt:
+  - `packages/ai/src/index.ts` bündelt die doppelte Runner-Central-Memory-Dependency-Verkabelung für R&D- und HQ-Memory-Komponenten in einer gemeinsamen lokalen Composition-Konstante.
+  - Das bestehende `packages/ai/src/runtime/runner-central-memory-score.ts` bleibt die Score-Logik-Autorität; der Schnitt reduziert lokale Provider-Duplikation ohne neue öffentliche Exporte.
+  - Kein neuer Public-Export-Contract-Eintrag nötig, weil kein neuer interner Modulpfad entstand.
+  - `packages/ai/src/index.ts` sank weiter von 31.176 auf 31.169 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

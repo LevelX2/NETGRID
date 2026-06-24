@@ -6369,36 +6369,29 @@ function semanticRuntimeRunnerAccessTrashComponents(
   });
 }
 
+const RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES = {
+  rndTopFreshness: (input: AiDecisionInput) =>
+    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
+  staleKnownRndRepeatRunPenalty,
+  rndFreshRepeatRunBoost,
+  hqHandMemory: (input: AiDecisionInput) =>
+    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
+  definitionType: definitionTypeForMetrics,
+  staleKnownHqRepeatRunPenalty,
+};
+
 function semanticRuntimeRunnerRndMemoryComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  return buildRunnerRndMemoryScoreComponents(input, action, {
-    rndTopFreshness: (input) =>
-      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
-    staleKnownRndRepeatRunPenalty,
-    rndFreshRepeatRunBoost,
-    hqHandMemory: (input) =>
-      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
-    definitionType: definitionTypeForMetrics,
-    staleKnownHqRepeatRunPenalty,
-  });
+  return buildRunnerRndMemoryScoreComponents(input, action, RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES);
 }
 
 function semanticRuntimeRunnerHqMemoryComponents(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
-  return buildRunnerHqMemoryScoreComponents(input, action, {
-    rndTopFreshness: (input) =>
-      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
-    staleKnownRndRepeatRunPenalty,
-    rndFreshRepeatRunBoost,
-    hqHandMemory: (input) =>
-      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
-    definitionType: definitionTypeForMetrics,
-    staleKnownHqRepeatRunPenalty,
-  });
+  return buildRunnerHqMemoryScoreComponents(input, action, RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES);
 }
 
 function semanticRuntimeRunnerArchivesComponents(
