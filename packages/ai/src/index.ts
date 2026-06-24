@@ -243,11 +243,11 @@ import {
 } from "./runtime/runner-viral15-jack-out-context";
 import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
-  safeNonNegativeInteger as buildSafeNonNegativeInteger,
-  visibleCardsByInstanceId as buildVisibleCardsByInstanceId,
-  visibleCounterValue as buildVisibleCounterValue,
-  visibleInstallCost as buildVisibleInstallCost,
-  visibleMemoryCost as buildVisibleMemoryCost,
+  safeNonNegativeInteger,
+  visibleCardsByInstanceId as visibleCardsByInstanceIdForAi,
+  visibleCounterValue as visibleCounterValueForAi,
+  visibleInstallCost as visibleInstallCostForAi,
+  visibleMemoryCost as visibleMemoryCostForAi,
 } from "./runtime/visible-card-heuristics";
 import {
   visibleBreakerRoleCounts as buildVisibleBreakerRoleCounts,
@@ -7325,28 +7325,6 @@ function corpAdvancementCounterChoiceScore(
       rezzedIce * 12
     );
   }, 0);
-}
-
-function visibleCounterValueForAi(card: VisibleCard | undefined): number {
-  return buildVisibleCounterValue(card);
-}
-
-function visibleInstallCostForAi(card: VisibleCard | undefined): number {
-  return buildVisibleInstallCost(card);
-}
-
-function visibleMemoryCostForAi(card: VisibleCard | undefined): number {
-  return buildVisibleMemoryCost(card);
-}
-
-function safeNonNegativeInteger(value: number | undefined): number {
-  return buildSafeNonNegativeInteger(value);
-}
-
-function visibleCardsByInstanceIdForAi(
-  view: PlayerView,
-): Map<string, VisibleCard> {
-  return buildVisibleCardsByInstanceId(view);
 }
 
 function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
