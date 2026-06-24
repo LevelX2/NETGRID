@@ -1,6 +1,6 @@
 # Web-UI-Stabilisierung und Strukturvervollständigung
 
-Status: Paket 0 angelegt, Umsetzung läuft im Worktree `C:\Projekte\NETGRID_WEB_UI_STABILIZATION_STRUCTURE` auf Branch `codex/web-ui-stabilization-structure`.
+Status: Umsetzung abgeschlossen, finale Integration läuft im Worktree `C:\Projekte\NETGRID_WEB_UI_STABILIZATION_STRUCTURE` auf Branch `codex/web-ui-stabilization-structure`.
 
 Quelle: Nutzerauftrag vom 2026-06-24 mit direkter Ausführung über `$paketprozess-worktree-goal`.
 
@@ -263,4 +263,14 @@ Restaufgabe: CSS-Domänensplit als eigenes Paket mit vorherigem Reihenfolge-Inve
 
 ## Abschlusskriterien
 
-Das Goal wird erst abgeschlossen, wenn alle finalen Gates grün sind, ein Abschlussbericht vorliegt, der Projektlog aktualisiert wurde, der Arbeitsbranch sauber in den lokalen `main` integriert ist und der separate Worktree entfernt wurde.
+Abschlussstand vor Integration:
+
+- CounterType-Vertrag fachlich synchronisiert.
+- DamageImpactOverlay-Test auf aktuellen Feature-Ort umgestellt.
+- Web-Typecheck, Web-Tests und Web-Build zuletzt grün.
+- Utilities, Match-Transport und Catalog-Workspace strukturell geschnitten.
+- AI-Debug- und CSS-Schnitt bewusst als eigene Folgepakete dokumentiert.
+- Abschlussbericht: `docs/reviews/ui/web-ui-stabilization-and-structure-final-report-2026-06-24.md`.
+- Projektlog aktualisiert: `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`.
+
+Das Goal wird erst abgeschlossen, wenn die finalen Gates nach Dokumentation erneut grün sind, der Arbeitsbranch sauber in den lokalen `main` integriert ist und der separate Worktree entfernt wurde.
