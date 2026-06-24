@@ -249,49 +249,7 @@ import {
 import {
   createRunnerBadPublicityRelevanceContext,
 } from "./runtime/runner-bad-publicity-relevance-context";
-import {
-  runnerLoanLiabilityAssessment as buildRunnerLoanLiabilityAssessment,
-  type RunnerLoanLiabilityAssessment,
-} from "./runtime/runner-loan-liability-assessment";
-import {
-  runnerLoanRunFundingContext as buildRunnerLoanRunFundingContext,
-  type RunnerLoanRunFundingContext,
-} from "./runtime/runner-loan-run-funding-context";
-import {
-  runnerLoanRuntimeContext as buildRunnerLoanRuntimeContext,
-} from "./runtime/runner-loan-runtime-context";
-import {
-  runnerInstalledLoanActionSpend as buildRunnerInstalledLoanActionSpend,
-  runnerLoanProjectedSpendAfterLoan as buildRunnerLoanProjectedSpendAfterLoan,
-  type RunnerLoanProjectedSpend,
-} from "./runtime/runner-loan-projected-spend";
-import {
-  runnerLoanSpendCandidateKind as buildRunnerLoanSpendCandidateKind,
-  runnerLoanSpendKindRank as buildRunnerLoanSpendKindRank,
-} from "./runtime/runner-loan-spend-candidate";
-import {
-  runnerDefinitionIsHighRiskLoan as buildRunnerDefinitionIsHighRiskLoan,
-  runnerInstalledLoanCards as buildRunnerInstalledLoanCards,
-  runnerLoanDefinitionIdForAction as buildRunnerLoanDefinitionIdForAction,
-  runnerLoanSemanticEvidence as buildRunnerLoanSemanticEvidence,
-  runnerLoanValueHint as buildRunnerLoanValueHint,
-} from "./runtime/runner-loan-source";
-import {
-  runnerLoanAllowedReason as buildRunnerLoanAllowedReason,
-  runnerLoanBlockedReason as buildRunnerLoanBlockedReason,
-  runnerLoanDebtRepaymentRisk as buildRunnerLoanDebtRepaymentRisk,
-  runnerLoanLiabilityScoreValue as buildRunnerLoanLiabilityScoreValue,
-  runnerLoanLiabilitySeverity as buildRunnerLoanLiabilitySeverity,
-  runnerLoanUseCase as buildRunnerLoanUseCase,
-} from "./runtime/runner-loan-liability-policy";
-import {
-  runnerLoanGamePhase,
-  runnerLoanResourceTrashRisk,
-} from "./runtime/runner-loan-state-context";
-import {
-  runnerLoanCriticalBreakerFundingNeed as buildRunnerLoanCriticalBreakerFundingNeed,
-  runnerLoanEmergencyFundingNeed as buildRunnerLoanEmergencyFundingNeed,
-} from "./runtime/runner-loan-funding-need";
+import { createRunnerLoanContext } from "./runtime/runner-loan-context";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
@@ -3737,6 +3695,27 @@ const {
   shouldAvoidRun: (assessment) =>
     blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
 });
+const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
+const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
+  highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
+  hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
+  sourceDefinitionIdForAction,
+  projectedCreditGainForAction: runnerProjectedCreditGainForAction,
+  actionCreditCost,
+  actionClickCost,
+  deckCapabilitiesForInput,
+  strategicIntentForInput: runnerStrategicIntentForInput,
+  handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
+  economyPosture: buildRunnerEconomyPosture,
+  runTargets: evaluateRunnerRunTargets,
+  visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
+  rolesForCardId,
+  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+  isRunnerEconomyRole,
+  isRunnerPressureRole,
+  rolesForAction,
+  hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+});
 const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
@@ -5653,7 +5632,6 @@ function semanticRuntimeRunnerScore(
   );
 }
 
-const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 
@@ -5730,164 +5708,6 @@ function semanticRuntimeRunnerScoreComponents(
       },
     },
   );
-}
-
-function runnerLoanLiabilityAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerLoanLiabilityAssessment | undefined {
-  return buildRunnerLoanLiabilityAssessment(input, action, {
-    loanDefinitionIdForAction: runnerLoanDefinitionIdForAction,
-    installedLoanCards: runnerInstalledLoanCards,
-    valueHint: (definitionId, key, fallback) =>
-      buildRunnerLoanValueHint(
-        definitionId ? AI_HINTS.get(definitionId) : undefined,
-        key,
-        fallback,
-      ),
-    projectedCreditGainForAction: runnerProjectedCreditGainForAction,
-    actionCreditCost,
-    runtimeContext: runnerLoanRuntimeContext,
-    projectedSpendAfterLoan: runnerLoanProjectedSpendAfterLoan,
-    installedLoanActionSpend: runnerInstalledLoanActionSpend,
-    gamePhase: runnerLoanGamePhase,
-    resourceTrashRisk: runnerLoanResourceTrashRisk,
-    criticalBreakerFundingNeed: runnerLoanCriticalBreakerFundingNeed,
-    emergencyFundingNeed: runnerLoanEmergencyFundingNeed,
-    useCase: (params) =>
-      buildRunnerLoanUseCase(params, {
-        projectedCreditGainForAction: runnerProjectedCreditGainForAction,
-        actionCreditCost,
-      }),
-    debtRepaymentRisk: buildRunnerLoanDebtRepaymentRisk,
-    liabilitySeverity: buildRunnerLoanLiabilitySeverity,
-    scoreValue: (params) =>
-      buildRunnerLoanLiabilityScoreValue(params, {
-        projectedCreditGainForAction: runnerProjectedCreditGainForAction,
-        actionCreditCost,
-      }),
-    allowedReason: buildRunnerLoanAllowedReason,
-    blockedReason: buildRunnerLoanBlockedReason,
-    semanticEvidence: runnerLoanSemanticEvidence,
-  });
-}
-
-function runnerLoanDefinitionIdForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string | undefined {
-  return buildRunnerLoanDefinitionIdForAction(input, action, {
-    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
-    hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
-    sourceDefinitionIdForAction,
-  });
-}
-
-function runnerDefinitionIsHighRiskLoan(
-  definitionId: string | undefined,
-): boolean {
-  return buildRunnerDefinitionIsHighRiskLoan(definitionId, {
-    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
-    hintForDefinitionId: (id) => AI_HINTS.get(id),
-  });
-}
-
-function runnerInstalledLoanCards(input: AiDecisionInput): VisibleCard[] {
-  return buildRunnerInstalledLoanCards(input, {
-    highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
-    hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
-  });
-}
-
-function runnerLoanSemanticEvidence(
-  definitionId: string | undefined,
-): string[] | undefined {
-  return buildRunnerLoanSemanticEvidence(definitionId, {
-    hintForDefinitionId: (id) => AI_HINTS.get(id),
-  });
-}
-
-function runnerLoanRuntimeContext(
-  input: AiDecisionInput,
-  creditsAfterLoan: number,
-): {
-  desiredCreditReserve: number;
-  contestReserve: number;
-  runFunding: RunnerLoanRunFundingContext;
-  evidence: string[];
-} {
-  return buildRunnerLoanRuntimeContext(input, creditsAfterLoan, {
-    deckCapabilitiesForInput,
-    strategicIntentForInput: runnerStrategicIntentForInput,
-    handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
-    economyPosture: buildRunnerEconomyPosture,
-    runTargets: evaluateRunnerRunTargets,
-    runFundingContext: buildRunnerLoanRunFundingContext,
-  });
-}
-
-function runnerLoanProjectedSpendAfterLoan(
-  input: AiDecisionInput,
-  loanAction: LegalAction,
-  creditsAfterLoan: number,
-): RunnerLoanProjectedSpend {
-  return buildRunnerLoanProjectedSpendAfterLoan(
-    input,
-    loanAction,
-    creditsAfterLoan,
-    {
-      actionClickCost,
-      actionCreditCost,
-      projectedCreditGainForAction: runnerProjectedCreditGainForAction,
-      definitionIsHighRiskLoan: runnerDefinitionIsHighRiskLoan,
-      visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-      rolesForCardId,
-      spendCandidateKind: (input, card, roles) =>
-        buildRunnerLoanSpendCandidateKind(input, card, roles, {
-          cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-          isRunnerEconomyRole,
-          isRunnerPressureRole,
-        }),
-      spendKindRank: buildRunnerLoanSpendKindRank,
-    },
-  );
-}
-
-function runnerInstalledLoanActionSpend(
-  action: LegalAction,
-): RunnerLoanProjectedSpend {
-  return buildRunnerInstalledLoanActionSpend(action, {
-    actionCreditCost,
-    projectedCreditGainForAction: runnerProjectedCreditGainForAction,
-  });
-}
-
-function runnerLoanCriticalBreakerFundingNeed(
-  input: AiDecisionInput,
-  creditsAfterLoan: number,
-  remoteThreatVisible: boolean,
-): { active: boolean; evidence: string[] } {
-  return buildRunnerLoanCriticalBreakerFundingNeed(
-    input,
-    creditsAfterLoan,
-    remoteThreatVisible,
-    {
-      rolesForCardId,
-      cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-      visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-    },
-  );
-}
-
-function runnerLoanEmergencyFundingNeed(
-  input: AiDecisionInput,
-  desiredCreditReserve: number,
-): boolean {
-  return buildRunnerLoanEmergencyFundingNeed(input, desiredCreditReserve, {
-    rolesForAction,
-    isRunnerEconomyRole,
-    hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
-  });
 }
 
 function actionClickCost(action: LegalAction): number {
