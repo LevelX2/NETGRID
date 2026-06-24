@@ -103,7 +103,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("runner.stack_search_to_grip") ||
-      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install"))
   );
@@ -141,7 +141,7 @@ function stackSearchResolutionForChoice(
       choice.source.startsWith("runner.stack_search_to_grip") ||
       choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1911.hidden_stack_program_install") ||
-      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
         choice.source.includes(":stack:"))
@@ -149,14 +149,14 @@ function stackSearchResolutionForChoice(
         : "hidden",
     destination:
       choice.source.startsWith("v1911.hidden_stack_program_install") ||
-      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? "install_program"
         : "grip",
     shuffleAfter: true,
     ...(choice.source.startsWith("v1911.hidden_stack_program_install") ||
-    choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+    choice.source.startsWith("v1911.temporary_program_install_stack_install") ||
     choice.source.startsWith("p3_38.search_stack_install") ||
     choice.source.startsWith("p3_38.stack_or_trash_program_install")
       ? { publicRevealKind: "reveal" }
@@ -175,7 +175,7 @@ function cardSearchPresentationForChoice(
       sourceZone: "stack",
       selectableFilter: stackSearchSelectableFilter(choice),
       showNonMatchingCards: true,
-      ...(choice.source.includes("sneak_preview") ||
+      ...(isTemporaryProgramInstallChoiceSource(choice.source) ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install")
         ? { temporaryReturnAtEndOfTurn: true }
         : {}),
@@ -183,12 +183,12 @@ function cardSearchPresentationForChoice(
   }
   if (
     choice.source.startsWith("p3_37.search_trash_to_grip") ||
-    choice.source.startsWith("v1911.sneak_preview_heap_install") ||
+    choice.source.startsWith("v1911.temporary_program_install_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
       choice.source.includes(":heap:"))
   ) {
     const temporaryInstall =
-      choice.source.includes("sneak_preview") ||
+      isTemporaryProgramInstallChoiceSource(choice.source) ||
       choice.source.startsWith("p3_38.stack_or_trash_program_install");
     return {
       sourceZone: "heap",
@@ -214,6 +214,10 @@ function stackSearchSelectableFilter(
   return "program";
 }
 
+function isTemporaryProgramInstallChoiceSource(source: string): boolean {
+  return source.startsWith("v1911.temporary_program_install_");
+}
+
 export function visibleChoiceCardForOption(
   state: GameState,
   choice: ChoiceRequest,
@@ -230,8 +234,8 @@ export function visibleChoiceCardForOption(
   const isStackChoice = isRunnerStackSearchChoice(choice);
   const isRunnerArrangeChoice = isRunnerStackArrangeChoice(choice);
   const isCorpArrangeChoice = isCorpRdArrangeChoice(choice);
-  const isSneakHeapChoice =
-    choice.source.startsWith("v1911.sneak_preview_heap_install") ||
+  const isTemporaryHeapInstallChoice =
+    choice.source.startsWith("v1911.temporary_program_install_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
       choice.source.includes(":heap:"));
   const isScoredAgendaFreeRezChoice = choice.source.startsWith(
@@ -244,7 +248,7 @@ export function visibleChoiceCardForOption(
     !isStackChoice &&
     !isRunnerArrangeChoice &&
     !isCorpArrangeChoice &&
-    !isSneakHeapChoice &&
+    !isTemporaryHeapInstallChoice &&
     !isScoredAgendaFreeRezChoice &&
     !isP333PrivateLookChoice
   )
@@ -276,7 +280,8 @@ export function visibleChoiceCardForOption(
     return undefined;
   if (isCorpArrangeChoice && !state.corp.rd.includes(cardId)) return undefined;
   if (
-    (cardSearchPresentation?.sourceZone === "heap" || isSneakHeapChoice) &&
+    (cardSearchPresentation?.sourceZone === "heap" ||
+      isTemporaryHeapInstallChoice) &&
     !state.runner.heap.includes(cardId)
   )
     return undefined;

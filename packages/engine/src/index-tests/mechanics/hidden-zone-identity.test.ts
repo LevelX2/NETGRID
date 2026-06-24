@@ -1477,7 +1477,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 1,
-      tooManyDoorsEndRun: false,
+      secretSpendEndRun: false,
       corpCreditsAfter: corpCreditsBeforeReveal - 1,
       runnerCreditsAfter: runnerCreditsBeforeReveal - 1,
     });
