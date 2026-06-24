@@ -410,17 +410,14 @@ import {
   runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
 } from "./runtime/runner-run-history";
 import {
-  semanticRuntimeDoctrineActionGate as buildSemanticRuntimeDoctrineActionGate,
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
   semanticRuntimeDoctrineSuppressedComponent as buildSemanticRuntimeDoctrineSuppressedComponent,
-  semanticRuntimeRunnerDoctrineActionGate as buildSemanticRuntimeRunnerDoctrineActionGate,
-  semanticRuntimeRunnerDoctrineRunWeight as buildSemanticRuntimeRunnerDoctrineRunWeight,
-  semanticRuntimeRunnerLowValueRecoveryContext as buildSemanticRuntimeRunnerLowValueRecoveryContext,
-  semanticRuntimeRunnerRemoteContestDoctrineGuard as buildSemanticRuntimeRunnerRemoteContestDoctrineGuard,
-  type SemanticRuntimeDoctrineActionGateContext,
   type SemanticRuntimeDoctrineConsumer,
 } from "./runtime/semantic-runtime-doctrine-score";
+import {
+  createSemanticRuntimeRunnerDoctrineContext,
+} from "./runtime/semantic-runtime-runner-doctrine-context";
 import {
   createSemanticRuntimeCorpDoctrineContext,
 } from "./runtime/semantic-runtime-corp-doctrine-context";
@@ -6415,31 +6412,23 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
   );
 }
 
-function semanticRuntimeRunnerDoctrineRunWeight(
-  input: AiDecisionInput,
-  action: LegalAction,
-  serverId: string | undefined,
-): AiDecisionScoreComponent | undefined {
-  return buildSemanticRuntimeRunnerDoctrineRunWeight(
-    input,
-    action,
-    serverId,
-    SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeRunnerRemoteContestDoctrineGuard(
-  input: AiDecisionInput,
-  action: LegalAction,
-  serverId: string | undefined,
-): { allowed: boolean; evidence: string[] } {
-  return buildSemanticRuntimeRunnerRemoteContestDoctrineGuard(
-    input,
-    action,
-    serverId,
-    SEMANTIC_RUNTIME_RUNNER_REMOTE_CONTEST_DOCTRINE_GUARD_DEPENDENCIES,
-  );
-}
+const {
+  semanticRuntimeDoctrineActionGate,
+  semanticRuntimeRunnerDoctrineActionGate,
+  semanticRuntimeRunnerDoctrineRunWeight,
+  semanticRuntimeRunnerRemoteContestDoctrineGuard,
+} = createSemanticRuntimeRunnerDoctrineContext({
+  actionCreditCost,
+  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
+  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
+  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
+  recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
+  recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
+  isRemoteServerTarget,
+  rawWeight: semanticRuntimeDoctrineRawWeight,
+  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
+  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
+});
 
 const {
   semanticRuntimeCorpDoctrineWeight,
@@ -6450,42 +6439,6 @@ const {
   suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
   planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
 });
-
-const SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES = {
-  recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
-  recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
-};
-
-const SEMANTIC_RUNTIME_DOCTRINE_ACTION_GATE_DEPENDENCIES = {
-  actionCreditCost,
-  runnerDoctrineActionGate: semanticRuntimeRunnerDoctrineActionGate,
-  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-};
-
-const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES = {
-  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
-  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-  runnerLowValueRecoveryContext: (input: AiDecisionInput) =>
-    buildSemanticRuntimeRunnerLowValueRecoveryContext(
-      input,
-      SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES,
-    ),
-  runnerRemoteContestDoctrineGuard: semanticRuntimeRunnerRemoteContestDoctrineGuard,
-};
-
-const SEMANTIC_RUNTIME_RUNNER_DOCTRINE_RUN_WEIGHT_DEPENDENCIES = {
-  isRemoteServerTarget,
-  rawWeight: semanticRuntimeDoctrineRawWeight,
-  actionGate: semanticRuntimeDoctrineActionGate,
-  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
-  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-};
-
-const SEMANTIC_RUNTIME_RUNNER_REMOTE_CONTEST_DOCTRINE_GUARD_DEPENDENCIES = {
-  isRemoteServerTarget,
-  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
-  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-};
 
 const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES = {
   publicHistory: mergedAiPublicHistory,
@@ -6522,40 +6475,6 @@ function semanticRuntimeDoctrineRawWeight(
   planKey: string,
 ): number {
   return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
-}
-
-function semanticRuntimeDoctrineActionGate(
-  input: AiDecisionInput,
-  action: LegalAction,
-  planKey: string,
-  consumer: SemanticRuntimeDoctrineConsumer,
-  context: SemanticRuntimeDoctrineActionGateContext = {},
-): { allowed: boolean; evidence: string[] } {
-  return buildSemanticRuntimeDoctrineActionGate(
-    input,
-    action,
-    planKey,
-    consumer,
-    SEMANTIC_RUNTIME_DOCTRINE_ACTION_GATE_DEPENDENCIES,
-    context,
-  );
-}
-
-function semanticRuntimeRunnerDoctrineActionGate(
-  input: AiDecisionInput,
-  action: LegalAction,
-  planKey: string,
-  consumer: SemanticRuntimeDoctrineConsumer,
-  serverId: string | undefined,
-): { allowed: boolean; evidence: string[] } {
-  return buildSemanticRuntimeRunnerDoctrineActionGate(
-    input,
-    action,
-    planKey,
-    consumer,
-    serverId,
-    SEMANTIC_RUNTIME_RUNNER_DOCTRINE_ACTION_GATE_DEPENDENCIES,
-  );
 }
 
 function semanticRuntimeDoctrineSuppressedComponent(
