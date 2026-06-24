@@ -389,9 +389,8 @@ import {
   runnerAccessTrashScoreComponents as buildRunnerAccessTrashScoreComponents,
 } from "./runtime/runner-access-trash-score";
 import {
-  runnerHqMemoryScoreComponents as buildRunnerHqMemoryScoreComponents,
-  runnerRndMemoryScoreComponents as buildRunnerRndMemoryScoreComponents,
-} from "./runtime/runner-central-memory-score";
+  createRunnerCentralMemoryContext,
+} from "./runtime/runner-central-memory-context";
 import {
   runnerArchivesScoreComponents as buildRunnerArchivesScoreComponents,
 } from "./runtime/runner-archives-score";
@@ -6311,7 +6310,10 @@ function semanticRuntimeRunnerAccessTrashComponents(
   });
 }
 
-const RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES = {
+const {
+  semanticRuntimeRunnerRndMemoryComponents,
+  semanticRuntimeRunnerHqMemoryComponents,
+} = createRunnerCentralMemoryContext({
   rndTopFreshness: (input: AiDecisionInput) =>
     reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
   staleKnownRndRepeatRunPenalty,
@@ -6320,21 +6322,7 @@ const RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES = {
     reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
   definitionType: definitionTypeForMetrics,
   staleKnownHqRepeatRunPenalty,
-};
-
-function semanticRuntimeRunnerRndMemoryComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent[] {
-  return buildRunnerRndMemoryScoreComponents(input, action, RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES);
-}
-
-function semanticRuntimeRunnerHqMemoryComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent[] {
-  return buildRunnerHqMemoryScoreComponents(input, action, RUNNER_CENTRAL_MEMORY_SCORE_DEPENDENCIES);
-}
+});
 
 function semanticRuntimeRunnerArchivesComponents(
   input: AiDecisionInput,

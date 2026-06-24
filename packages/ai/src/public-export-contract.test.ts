@@ -193,6 +193,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-run-target-guidance-score",
       "./runtime/runner-access-trash-score",
       "./runtime/runner-central-memory-score",
+      "./runtime/runner-central-memory-context",
       "./runtime/runner-archives-score",
       "./runtime/runner-known-ice-path-score",
       "./runtime/runner-remote-score",
