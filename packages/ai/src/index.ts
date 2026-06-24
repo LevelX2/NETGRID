@@ -419,8 +419,6 @@ import {
   runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
 } from "./runtime/runner-run-history";
 import {
-  semanticRuntimeCorpDoctrineWeight as buildSemanticRuntimeCorpDoctrineWeight,
-  semanticRuntimeCorpScoreNowDoctrineWeight as buildSemanticRuntimeCorpScoreNowDoctrineWeight,
   semanticRuntimeDoctrineActionGate as buildSemanticRuntimeDoctrineActionGate,
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
@@ -432,6 +430,9 @@ import {
   type SemanticRuntimeDoctrineActionGateContext,
   type SemanticRuntimeDoctrineConsumer,
 } from "./runtime/semantic-runtime-doctrine-score";
+import {
+  createSemanticRuntimeCorpDoctrineContext,
+} from "./runtime/semantic-runtime-corp-doctrine-context";
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
@@ -6465,39 +6466,15 @@ function semanticRuntimeRunnerRemoteContestDoctrineGuard(
   );
 }
 
-function semanticRuntimeCorpDoctrineWeight(
-  input: AiDecisionInput,
-  action: LegalAction,
-  planKey: string,
-  consumer: SemanticRuntimeDoctrineConsumer,
-): AiDecisionScoreComponent | undefined {
-  return buildSemanticRuntimeCorpDoctrineWeight(
-    input,
-    action,
-    planKey,
-    consumer,
-    SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeCorpScoreNowDoctrineWeight(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildSemanticRuntimeCorpScoreNowDoctrineWeight(
-    input,
-    action,
-    "corp_score_now",
-    SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES,
-  );
-}
-
-const SEMANTIC_RUNTIME_CORP_DOCTRINE_WEIGHT_DEPENDENCIES = {
+const {
+  semanticRuntimeCorpDoctrineWeight,
+  semanticRuntimeCorpScoreNowDoctrineWeight,
+} = createSemanticRuntimeCorpDoctrineContext({
   rawWeight: semanticRuntimeDoctrineRawWeight,
   actionGate: semanticRuntimeDoctrineActionGate,
   suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
   planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-};
+});
 
 const SEMANTIC_RUNTIME_RUNNER_LOW_VALUE_RECOVERY_CONTEXT_DEPENDENCIES = {
   recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
