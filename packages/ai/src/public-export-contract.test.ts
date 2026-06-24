@@ -197,6 +197,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-mu-pressure-action-evidence",
       "./runtime/runner-mu-pressure-memory-support",
       "./runtime/runner-mu-pressure-policy",
+      "./runtime/runner-mu-pressure-context",
       "./runtime/runner-program-install-trash-policy",
       "./runtime/runner-run-target-guidance-score",
       "./runtime/runner-access-trash-score",

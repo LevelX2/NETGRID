@@ -260,24 +260,7 @@ import {
   visibleBreakerRoles as buildVisibleBreakerRoles,
 } from "./runtime/runner-visible-breaker-coverage";
 import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
-import {
-  runnerMuPressureFundingScoreComponent as buildRunnerMuPressureFundingScoreComponent,
-  runnerMuPressureInstallScoreComponent as buildRunnerMuPressureInstallScoreComponent,
-} from "./runtime/runner-mu-pressure-score";
-import {
-  runnerMuPressureAssessment as buildRunnerMuPressureAssessment,
-} from "./runtime/runner-mu-pressure-assessment";
-import {
-  runnerMuPressureActionEvidence as buildRunnerMuPressureActionEvidence,
-} from "./runtime/runner-mu-pressure-action-evidence";
-import {
-  isRunnerMemorySupportAction as buildIsRunnerMemorySupportAction,
-  isRunnerMemorySupportCard as buildIsRunnerMemorySupportCard,
-  isRunnerProgramInstallActionForMuPressure as buildIsRunnerProgramInstallActionForMuPressure,
-  isUsefulRunnerProgramInHandForMuPressure as buildIsUsefulRunnerProgramInHandForMuPressure,
-  runnerMemorySupportSearchAction as buildRunnerMemorySupportSearchAction,
-  runnerMissingCreditsForCheapestMemorySupport as buildRunnerMissingCreditsForCheapestMemorySupport,
-} from "./runtime/runner-mu-pressure-memory-support";
+import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
 import {
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
   programSacrificeCandidate as buildProgramSacrificeCandidate,
@@ -287,14 +270,6 @@ import {
   type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runtime/runner-program-install-trash-policy";
-import {
-  runnerMuPressureEvidence as buildRunnerMuPressureEvidence,
-  runnerMuPressureReason as buildRunnerMuPressureReason,
-  runnerMuPressureSeverity as buildRunnerMuPressureSeverity,
-  runnerMuPressureSeverityBonus as buildRunnerMuPressureSeverityBonus,
-  runnerMuPressureSeverityFundingBonus as buildRunnerMuPressureSeverityFundingBonus,
-  type RunnerMuPressureAssessment,
-} from "./runtime/runner-mu-pressure-policy";
 import {
   runnerRunTargetGuidanceScoreComponent as buildRunnerRunTargetGuidanceScoreComponent,
 } from "./runtime/runner-run-target-guidance-score";
@@ -3754,6 +3729,25 @@ const {
   },
   runnerBankCommitmentRunOverride,
   isRunnerRigInstallAction,
+});
+const {
+  runnerMuPressureInstallScoreComponent,
+  runnerMuPressureFundingScoreComponent,
+  runnerMuPressureInstallPriorityBonus,
+  runnerMuPressureFundingPriorityBonus,
+  runnerMuPressureActionEvidence,
+} = createRunnerMuPressureContext({
+  safeNonNegativeInteger,
+  findVisibleCard,
+  visibleMemoryCost: visibleMemoryCostForAi,
+  visibleInstallCost: visibleInstallCostForAi,
+  programInstallTrashAssessmentForAction:
+    runnerProgramInstallTrashAssessmentForAction,
+  actionCreditCost,
+  rolesForCardId,
+  rolesForAction,
+  isRunnerPressureRole,
+  isRunnerEconomyRole,
 });
 const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
@@ -7568,201 +7562,6 @@ function selectedChoicesForDecision(
   return selected
     ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
-}
-
-function runnerMuPressureAssessment(
-  input: AiDecisionInput,
-): RunnerMuPressureAssessment {
-  return buildRunnerMuPressureAssessment(input, {
-    safeNonNegativeInteger,
-    isProgramInstallAction: isRunnerProgramInstallActionForMuPressure,
-    visibleMemoryCostForAction: (runtimeInput, action) =>
-      visibleMemoryCostForAi(findVisibleCard(runtimeInput, action.source)),
-    programInstallTrashAssessmentForAction:
-      runnerProgramInstallTrashAssessmentForAction,
-    isUsefulProgramInHand: isUsefulRunnerProgramInHandForMuPressure,
-    isMemorySupportAction: isRunnerMemorySupportAction,
-    actionCreditCost,
-    isMemorySupportCard: isRunnerMemorySupportCardForAi,
-    missingCreditsForCheapestMemorySupport:
-      runnerMissingCreditsForCheapestMemorySupport,
-    memorySupportSearchAction: runnerMemorySupportSearchAction,
-    severity: buildRunnerMuPressureSeverity,
-    evidence: buildRunnerMuPressureEvidence,
-  });
-}
-
-function runnerMuPressureInstallScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerMuPressureInstallScoreComponent(input, action, {
-    installPriorityBonus: runnerMuPressureInstallPriorityBonus,
-    fundingPriorityBonus: runnerMuPressureFundingPriorityBonus,
-    reason: runnerMuPressureReason,
-  });
-}
-
-function runnerMuPressureFundingScoreComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  return buildRunnerMuPressureFundingScoreComponent(input, action, {
-    installPriorityBonus: runnerMuPressureInstallPriorityBonus,
-    fundingPriorityBonus: runnerMuPressureFundingPriorityBonus,
-    reason: runnerMuPressureReason,
-  });
-}
-
-function runnerMuPressureInstallPriorityBonus(
-  input: AiDecisionInput,
-  action: LegalAction,
-): {
-  value: number;
-  evidence: string[];
-  assessment: RunnerMuPressureAssessment;
-} {
-  const assessment = runnerMuPressureAssessment(input);
-  if (
-    assessment.severity === "none" ||
-    !isRunnerMemorySupportAction(input, action)
-  ) {
-    return { value: 0, evidence: [], assessment };
-  }
-  const severityBonus = buildRunnerMuPressureSeverityBonus(
-    assessment.severity,
-  );
-  const value = Math.min(
-    1500,
-    severityBonus +
-      Math.min(260, assessment.usefulProgramsInHand * 90) +
-      (assessment.requiresProgramTrash ? 240 : 0) +
-      (assessment.affordableMemorySupportActions > 0 ? 120 : 0),
-  );
-  return {
-    value,
-    evidence: [
-      `runner_mu_pressure_bonus:${value}`,
-      "runner_memory_support_action:true",
-      ...runnerMuPressureActionEvidence(input, action, assessment),
-    ],
-    assessment,
-  };
-}
-
-function runnerMuPressureFundingPriorityBonus(
-  input: AiDecisionInput,
-  action: LegalAction,
-): {
-  value: number;
-  evidence: string[];
-  assessment: RunnerMuPressureAssessment;
-} {
-  const assessment = runnerMuPressureAssessment(input);
-  if (
-    action.side !== "runner" ||
-    action.type !== "gain_credit" ||
-    assessment.severity === "none" ||
-    assessment.missingCreditsForCheapestMemorySupport === undefined
-  ) {
-    return { value: 0, evidence: [], assessment };
-  }
-  const severityBonus = buildRunnerMuPressureSeverityFundingBonus(
-    assessment.severity,
-  );
-  const value = Math.min(
-    1100,
-    severityBonus + Math.min(180, assessment.usefulProgramsInHand * 60),
-  );
-  return {
-    value,
-    evidence: [
-      `runner_mu_pressure_funding_bonus:${value}`,
-      "runner_memory_support_funding_action:true",
-      ...runnerMuPressureActionEvidence(input, action, assessment),
-    ],
-    assessment,
-  };
-}
-
-function runnerMuPressureActionEvidence(
-  input: AiDecisionInput,
-  action: LegalAction,
-  providedAssessment?: RunnerMuPressureAssessment,
-): string[] {
-  return buildRunnerMuPressureActionEvidence(input, action, providedAssessment, {
-    assessment: runnerMuPressureAssessment,
-    isMemorySupportAction: isRunnerMemorySupportAction,
-    isProgramInstallAction: isRunnerProgramInstallActionForMuPressure,
-  });
-}
-
-function runnerMuPressureReason(
-  assessment: RunnerMuPressureAssessment,
-): string {
-  return buildRunnerMuPressureReason(assessment);
-}
-
-function isRunnerProgramInstallActionForMuPressure(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildIsRunnerProgramInstallActionForMuPressure(
-    action,
-    findVisibleCard(input, action.source),
-    visibleMemoryCostForAi,
-  );
-}
-
-function isRunnerMemorySupportAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildIsRunnerMemorySupportAction(
-    action,
-    findVisibleCard(input, action.source),
-    isRunnerMemorySupportCardForAi,
-  );
-}
-
-function isRunnerMemorySupportCardForAi(
-  card: VisibleCard | undefined,
-): boolean {
-  return buildIsRunnerMemorySupportCard(
-    card,
-    card ? rolesForCardId(card.definitionId) : [],
-    safeNonNegativeInteger,
-  );
-}
-
-function isUsefulRunnerProgramInHandForMuPressure(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): boolean {
-  return buildIsUsefulRunnerProgramInHandForMuPressure(input, card, {
-    visibleMemoryCost: visibleMemoryCostForAi,
-    rolesForCardId,
-    isRunnerPressureRole,
-    isRunnerEconomyRole,
-  });
-}
-
-function runnerMissingCreditsForCheapestMemorySupport(
-  input: AiDecisionInput,
-  memorySupportCards: readonly VisibleCard[],
-): number | undefined {
-  return buildRunnerMissingCreditsForCheapestMemorySupport(
-    input.playerView.own.credits,
-    memorySupportCards,
-    visibleInstallCostForAi,
-  );
-}
-
-function runnerMemorySupportSearchAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return buildRunnerMemorySupportSearchAction(action, rolesForAction(input, action));
 }
 
 function selectedRunnerProgramInstallTrashOptionIds(
