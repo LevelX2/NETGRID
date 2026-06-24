@@ -222,6 +222,9 @@ import {
   runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
 } from "./runtime/runner-viral15-jack-out-score";
 import {
+  runnerBlinkRecoveryScoreComponent as buildRunnerBlinkRecoveryScoreComponent,
+} from "./runtime/runner-blink-recovery-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -6632,52 +6635,11 @@ function runnerBlinkRecoveryScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const targetServerId =
-    action.type === "start_run" ? semanticRuntimeServerId(action) : undefined;
-  const assessment = runnerBlinkRecoveryAssessment(input, targetServerId);
-  if (!assessment?.active) return undefined;
-
-  if (action.type === "draw_card") {
-    return {
-      key: "runner_blink_damage_buffer_recovery",
-      label: "Blink-Schadenspuffer",
-      value: 1700,
-      reason: sortedUnique([
-        ...assessment.evidence,
-        "blink_recovery_action:draw_card",
-      ]).join("|"),
-    };
-  }
-
-  if (action.type === "install_card") {
-    const roles = rolesForAction(input, action);
-    if (roles.some((role) => role.startsWith("breaker_"))) {
-      return {
-        key: "runner_blink_stable_coverage_recovery",
-        label: "Stabile Breaker-Abdeckung",
-        value: 850,
-        reason: sortedUnique([
-          ...assessment.evidence,
-          "blink_recovery_action:stable_breaker_install",
-        ]).join("|"),
-      };
-    }
-  }
-
-  if (action.type === "gain_credit") {
-    return {
-      key: "runner_blink_setup_recovery",
-      label: "Blink-Setup-Erholung",
-      value: 360,
-      reason: sortedUnique([
-        ...assessment.evidence,
-        "blink_recovery_action:gain_credit",
-      ]).join("|"),
-    };
-  }
-
-  return undefined;
+  return buildRunnerBlinkRecoveryScoreComponent(input, action, {
+    targetServerId: semanticRuntimeServerId,
+    assessment: runnerBlinkRecoveryAssessment,
+    rolesForAction,
+  });
 }
 
 function runnerLowValueRecoveryRepeatScoreComponent(
