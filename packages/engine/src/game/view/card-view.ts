@@ -23,18 +23,10 @@ import {
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { CASCADE_ID, SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
-
-const COCKROACH_ID = "onr_v1_013_cockroach";
-const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
-  COCKROACH_ID,
-  CASCADE_ID,
-  SKIVVISS_ID,
-]);
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -212,7 +204,7 @@ function visibleCountersForKnownCard(
 ): Partial<Record<CounterType, number>> | undefined {
   if (!instance.counters) return undefined;
   const counters = cloneCounters(instance.counters);
-  if (CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)) delete counters.virus;
+  if (corpProjectedVirusCounterKind(definition)) delete counters.virus;
   return counters;
 }
 
@@ -430,20 +422,14 @@ function specialCounterDisplays(
       counterType: "trauma",
       usageHint: "status_marker",
     }),
-    ...(CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)
+    ...(corpProjectedVirusCounterKind(definition)
       ? []
       : singleCounterDisplay(counters.virus, {
-          id: definition.id === COCKROACH_ID ? "cockroach" : "virus",
+          id: "virus",
           displayKind: "virus",
-          label:
-            definition.id === COCKROACH_ID
-              ? "Cockroach-Counter"
-              : "Virus-Counter",
-          ariaLabelName:
-            definition.id === COCKROACH_ID
-              ? "Cockroach-Counter"
-              : "Virus-Counter",
-          counterType: definition.id === COCKROACH_ID ? "cockroach" : "virus",
+          label: "Virus-Counter",
+          ariaLabelName: "Virus-Counter",
+          counterType: "virus",
           usageHint: "status_marker",
         })),
     ...singleCounterDisplay(counters.trace_tag_counter, {
@@ -523,61 +509,97 @@ function specialCounterDisplays(
 }
 
 function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = skivvissCounterTotal(state);
-  if (amount <= 0) return undefined;
-  return [
-    {
-      id: "skivviss",
-      amount,
-      displayKind: "virus",
-      label: "Skivviss-Counter",
-      ariaLabel: `${amount} Skivviss-Counter auf der Korp`,
-      counterType: "virus",
-      usageHint: "status_marker",
-    },
-  ];
+  return corpProjectedVirusCounterDisplay(state, "draw_extra_cards_per_counter");
 }
 
 function cockroachCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = cockroachCounterTotal(state);
-  if (amount <= 0) return undefined;
-  return [
-    {
-      id: "cockroach",
-      amount,
-      displayKind: "virus",
-      label: "Cockroach-Counter",
-      ariaLabel: `${amount} Cockroach-Counter auf der Korp`,
-      counterType: "cockroach",
-      usageHint: "status_marker",
-    },
-  ];
+  return corpProjectedVirusCounterDisplay(
+    state,
+    "randomize_corp_hq_discards_at_threshold",
+  );
 }
 
 function cascadeCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  const amount = cascadeCounterTotal(state);
+  return corpProjectedVirusCounterDisplay(
+    state,
+    "trash_faceup_rd_cards_per_two_counters",
+  );
+}
+
+function corpProjectedVirusCounterDisplay(
+  state: GameState,
+  effectKind:
+    | "draw_extra_cards_per_counter"
+    | "randomize_corp_hq_discards_at_threshold"
+    | "trash_faceup_rd_cards_per_two_counters",
+): VisibleCard["counterDisplays"] {
+  const kind = corpProjectedVirusCounterKindForEffect(state, effectKind);
+  if (!kind) return undefined;
+  const amount = corpProjectedVirusCounterTotal(state, kind);
   if (amount <= 0) return undefined;
+  const label = projectedVirusCounterLabel(kind);
   return [
     {
-      id: "runner_virus_corp_cascade",
+      id: projectedVirusCounterDisplayId(kind),
       amount,
       displayKind: "virus",
-      label: "Cascade-Counter",
-      ariaLabel: `${amount} Cascade-Counter auf der Korp`,
-      counterType: "cascade",
+      label,
+      ariaLabel: `${amount} ${label} auf der Korp`,
+      counterType: kind as CounterType,
       usageHint: "status_marker",
     },
   ];
 }
 
-function cascadeCounterTotal(state: GameState): number {
+function corpProjectedVirusCounterKindForEffect(
+  state: GameState,
+  effectKind:
+    | "draw_extra_cards_per_counter"
+    | "randomize_corp_hq_discards_at_threshold"
+    | "trash_faceup_rd_cards_per_two_counters",
+): string | undefined {
+  for (const cardId of Object.keys(state.cardInstances)) {
+    const definition = definitionFor(state, cardId);
+    const implementation = cardImplementationForDefinitionId(definition.id);
+    const virusCounter = implementation?.virusCounter;
+    if (!virusCounter) continue;
+    if (
+      virusCounter.startOfCorpTurn?.kind === effectKind ||
+      virusCounter.continuousEffect?.kind === effectKind
+    )
+      return virusCounter.counterKind;
+  }
+  return undefined;
+}
+
+function corpProjectedVirusCounterKind(definition: CardDefinition): string | undefined {
+  const virusCounter = cardImplementationForDefinitionId(definition.id)?.virusCounter;
+  if (
+    virusCounter?.startOfCorpTurn?.kind === "draw_extra_cards_per_counter" ||
+    virusCounter?.startOfCorpTurn?.kind ===
+      "trash_faceup_rd_cards_per_two_counters" ||
+    virusCounter?.continuousEffect?.kind ===
+      "randomize_corp_hq_discards_at_threshold"
+  )
+    return virusCounter.counterKind;
+  return undefined;
+}
+
+function corpProjectedVirusCounterTotal(state: GameState, kind: string): number {
   const corpCounterAmount = Math.max(
     0,
-    Math.floor(Number(state.purgeableRunnerVirusCounters?.corp?.cascade ?? 0)),
+    Math.floor(
+      Number(
+        state.purgeableRunnerVirusCounters?.corp?.[
+          kind as PurgeableRunnerVirusCounterType
+        ] ?? 0,
+      ),
+    ),
   );
   const legacyCardCounterAmount = Object.keys(state.cardInstances).reduce(
     (sum, cardId) => {
-      if (definitionFor(state, cardId).id !== CASCADE_ID) return sum;
+      if (corpProjectedVirusCounterKind(definitionFor(state, cardId)) !== kind)
+        return sum;
       return sum + cardCounter(state, cardId, "virus");
     },
     0,
@@ -585,18 +607,16 @@ function cascadeCounterTotal(state: GameState): number {
   return corpCounterAmount + legacyCardCounterAmount;
 }
 
-function skivvissCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
+function projectedVirusCounterLabel(kind: string): string {
+  return `${kind
+    .split("_")
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ")}-Counter`;
 }
 
-function cockroachCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== COCKROACH_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
+function projectedVirusCounterDisplayId(kind: string): string {
+  return kind === "cascade" ? `runner_virus_corp_${kind}` : kind;
 }
 
 function badPublicityCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
