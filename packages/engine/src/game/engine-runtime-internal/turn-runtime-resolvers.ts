@@ -736,7 +736,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     PROTEUS_ARMAGEDDON_ID,
     PROTEUS_SCALDAN_ID,
     PROTEUS_TAXMAN_ID,
-    PROTEUS_VIRAL_PIPELINE_ID,
+    PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID,
     RUNNER_EVENT_RESOLVERS,
     TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS,
     abilityMetadata,
@@ -2496,7 +2496,7 @@ function applyPurgeableRunnerVirusCorpStartEffects(
     source: "start_of_turn_effect",
   });
   effects?.push({
-    effectId: "corp.start.proteus.viral_pipeline.pipe",
+    effectId: "corp.start.pipe_counter",
     kind: "counter_change",
     visibility: "public",
     side: "corp",
@@ -2504,8 +2504,6 @@ function applyPurgeableRunnerVirusCorpStartEffects(
     reason: "start_of_turn",
     counterType: "pipe",
     remainingCounters: pipeCounters,
-    sourceDefinitionId: PROTEUS_VIRAL_PIPELINE_ID,
-    sourceTitle: publicCardTitle(PROTEUS_VIRAL_PIPELINE_ID),
   });
 }
 

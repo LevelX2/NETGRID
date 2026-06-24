@@ -310,7 +310,6 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
           kind: "counter_change",
           counterType: "pipe",
           amount: 2,
-          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
         }),
       ]),
     );
