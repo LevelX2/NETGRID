@@ -181,6 +181,12 @@ import {
   semanticRuntimeCorpRemoteRezFloorAssessment as buildSemanticRuntimeCorpRemoteRezFloorAssessment,
   type SemanticRuntimeCorpRezFloorDependencies,
 } from "./runtime/semantic-runtime-corp-rez-floor";
+import {
+  semanticRuntimeCorpAdvanceRemoteScore as buildSemanticRuntimeCorpAdvanceRemoteScore,
+  semanticRuntimeCorpInstallRemoteScore as buildSemanticRuntimeCorpInstallRemoteScore,
+  semanticRuntimeCorpShouldBuildProtectedScoreRemote as buildSemanticRuntimeCorpShouldBuildProtectedScoreRemote,
+  type SemanticRuntimeCorpRemoteScoreDependencies,
+} from "./runtime/semantic-runtime-corp-remote-score";
 import { buildSemanticRuntimeScoreBreakdown } from "./runtime/semantic-runtime-score-breakdown";
 import {
   semanticRuntimeServerId,
@@ -3814,6 +3820,20 @@ const SEMANTIC_RUNTIME_CORP_REZ_FLOOR_DEPENDENCIES: SemanticRuntimeCorpRezFloorD
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
+};
+const SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES: SemanticRuntimeCorpRemoteScoreDependencies<
+  NonNullable<ReturnType<typeof semanticRuntimeCorpServer>>
+> = {
+  actionServerId: semanticRuntimeCorpActionServerId,
+  server: semanticRuntimeCorpServer,
+  hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
+  isRemoteServerTarget,
+  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
+  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+  actionCreditCost,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 };
 const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES: SemanticRuntimeScopeDependencies = {
   isRemoteServerTarget,
@@ -7659,85 +7679,22 @@ function semanticRuntimeCorpInstallRemoteScore(
   action: LegalAction,
   roles: string[],
 ): number {
-  const serverId = semanticRuntimeCorpActionServerId(input, action);
-  const server = semanticRuntimeCorpServer(input, serverId);
-  const placement = action.payload?.placement;
-  const installsIce = placement === "ice";
-  const hasStabilizingAlternative =
-    semanticRuntimeCorpHasStabilizingAlternative(input, action);
-
-  if (installsIce && (serverId === "hq" || serverId === "rd")) {
-    return (server?.ice.length ?? 0) === 0 ? 1200 : 850;
-  }
-  if (installsIce && serverId === "archives") return 350;
-  if (!isRemoteServerTarget(serverId)) return 0;
-
-  const emptyRemoteCount = semanticRuntimeCorpEmptyRemoteCount(input);
-  const protectedRemote = semanticRuntimeCorpRemoteIsProtected(server);
-  const hasRoot = (server?.root.length ?? 0) > 0;
-  const targetIsScoreLine = semanticRuntimeCorpActionIsScoreLine(
+  return buildSemanticRuntimeCorpInstallRemoteScore(
     input,
     action,
     roles,
+    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
   );
-
-  if (installsIce) {
-    if (semanticRuntimeCorpRemoteHasScoreLine(server)) {
-      return protectedRemote ? 650 : 950;
-    }
-    if (
-      !hasRoot &&
-      semanticRuntimeCorpShouldBuildProtectedScoreRemote(input, action)
-    ) {
-      return serverId === "new_remote" ? 1050 : 900;
-    }
-    let score = serverId === "new_remote" ? -1600 : -900;
-    if (!hasRoot) score -= Math.min(1200, emptyRemoteCount * 350);
-    if (hasStabilizingAlternative) score -= 500;
-    return score;
-  }
-
-  if (targetIsScoreLine) {
-    if (protectedRemote) return 950;
-    return hasStabilizingAlternative ? -2700 : -1700;
-  }
-
-  if (serverId === "new_remote" && emptyRemoteCount > 0) {
-    return hasStabilizingAlternative ? -900 : -350;
-  }
-  return protectedRemote ? 250 : -150;
 }
 
 function semanticRuntimeCorpShouldBuildProtectedScoreRemote(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (input.side !== "corp") return false;
-  if (action.type !== "install_card" || action.payload?.placement !== "ice")
-    return false;
-  const serverId = semanticRuntimeCorpActionServerId(input, action);
-  if (!isRemoteServerTarget(serverId)) return false;
-  if (input.playerView.own.credits < actionCreditCost(action) + 2) return false;
-  return (
-    semanticRuntimeCorpHasAgendaInHq(input) &&
-    !semanticRuntimeCorpHasProtectedRemoteCapacity(input)
-  );
-}
-
-function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {
-  return input.playerView.own.gripOrHq.some(
-    (card) => card.known && card.type === "agenda",
-  );
-}
-
-function semanticRuntimeCorpHasProtectedRemoteCapacity(
-  input: AiDecisionInput,
-): boolean {
-  return input.playerView.servers.some(
-    (server) =>
-      isRemoteServerTarget(server.id) &&
-      semanticRuntimeCorpRemoteIsProtected(server) &&
-      server.root.length === 0,
+  return buildSemanticRuntimeCorpShouldBuildProtectedScoreRemote(
+    input,
+    action,
+    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
   );
 }
 
@@ -7745,14 +7702,11 @@ function semanticRuntimeCorpAdvanceRemoteScore(
   input: AiDecisionInput,
   action: LegalAction,
 ): number {
-  const serverId = semanticRuntimeCorpActionServerId(input, action);
-  if (!isRemoteServerTarget(serverId)) return 0;
-  const server = semanticRuntimeCorpServer(input, serverId);
-  if (semanticRuntimeCorpAdvanceCompletesScore(input, action)) return 1100;
-  if (semanticRuntimeCorpRemoteIsProtected(server)) return 900;
-  return semanticRuntimeCorpHasStabilizingAlternative(input, action)
-    ? -2700
-    : -1700;
+  return buildSemanticRuntimeCorpAdvanceRemoteScore(
+    input,
+    action,
+    SEMANTIC_RUNTIME_CORP_REMOTE_SCORE_DEPENDENCIES,
+  );
 }
 
 function semanticRuntimeCorpRemoteRezFloorAssessment(

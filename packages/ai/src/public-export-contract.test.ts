@@ -116,6 +116,7 @@ describe("AI public export contract", () => {
       "./runtime/semantic-runtime-evidence",
       "./runtime/semantic-runtime-corp-risk",
       "./runtime/semantic-runtime-corp-rez-floor",
+      "./runtime/semantic-runtime-corp-remote-score",
       "./runtime/semantic-runtime-scope",
       "./runtime/semantic-runtime-choice-builder",
       "./runtime/semantic-runtime-action-exclusion",
