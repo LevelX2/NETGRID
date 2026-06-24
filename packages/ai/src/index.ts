@@ -300,7 +300,6 @@ import {
   runnerBlinkRecoveryScoreComponent as buildRunnerBlinkRecoveryScoreComponent,
 } from "./runtime/runner-blink-recovery-score";
 import {
-  runnerLateNoFundingCreditSafeProgressTargets as buildRunnerLateNoFundingCreditSafeProgressTargets,
   runnerLateNoFundingCreditRepeatScoreComponent as buildRunnerLateNoFundingCreditRepeatScoreComponent,
   runnerLowValueRecoveryRepeatScoreComponent as buildRunnerLowValueRecoveryRepeatScoreComponent,
 } from "./runtime/runner-recovery-repeat-score";
@@ -405,9 +404,8 @@ import {
   runnerRepeatedRunTargetScoreComponents as buildRunnerRepeatedRunTargetScoreComponents,
 } from "./runtime/runner-repeated-run-target-score";
 import {
-  runnerRecentBasicCreditActions as buildRunnerRecentBasicCreditActions,
-  runnerRecentStartRunsOnServer as buildRunnerRecentStartRunsOnServer,
-} from "./runtime/runner-run-history";
+  createRunnerRecentHistoryContext,
+} from "./runtime/runner-recent-history-context";
 import {
   semanticRuntimeDoctrineClamp,
   semanticRuntimeDoctrinePlanWeightComponent as buildSemanticRuntimeDoctrinePlanWeightComponent,
@@ -6090,24 +6088,6 @@ function runnerLateNoFundingCreditRepeatScoreComponent(
   });
 }
 
-function runnerLateNoFundingCreditSafeProgressTargets(
-  input: AiDecisionInput,
-): RunnerPressureReadyTargetForMetrics[] {
-  return buildRunnerLateNoFundingCreditSafeProgressTargets(
-    input,
-    RUNNER_LATE_NO_FUNDING_CREDIT_SAFE_PROGRESS_TARGETS_DEPENDENCIES,
-  );
-}
-
-function semanticRuntimeRecentRunnerBasicCreditActions(
-  input: AiDecisionInput,
-): number {
-  return buildRunnerRecentBasicCreditActions(
-    input,
-    RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES,
-  );
-}
-
 function runnerJunkyardBbsRecoveryScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
@@ -6389,16 +6369,18 @@ function semanticRuntimeRepeatedRunTargetComponents(
   });
 }
 
-function semanticRuntimeRecentRunnerStartRunsOnServer(
-  input: AiDecisionInput,
-  serverId: string,
-): number {
-  return buildRunnerRecentStartRunsOnServer(
-    input,
-    serverId,
-    RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES,
-  );
-}
+const {
+  runnerLateNoFundingCreditSafeProgressTargets,
+  semanticRuntimeRecentRunnerBasicCreditActions,
+  semanticRuntimeRecentRunnerStartRunsOnServer,
+} = createRunnerRecentHistoryContext({
+  publicHistory: mergedAiPublicHistory,
+  eventVersion: aiEventVersion,
+  serverIdFromEvent: aiServerIdFromEvent,
+  closeout: bestTrueCentralCloseoutProfileForMetrics,
+  pressureReadyTargets: (input: AiDecisionInput) =>
+    assessRunnerPressureReadyForMetrics(input).readyTargets,
+});
 
 const {
   semanticRuntimeDoctrineActionGate,
@@ -6427,19 +6409,6 @@ const {
   suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
   planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
 });
-
-const RUNNER_RECENT_START_RUNS_ON_SERVER_DEPENDENCIES = {
-  publicHistory: mergedAiPublicHistory,
-  eventVersion: aiEventVersion,
-  serverIdFromEvent: aiServerIdFromEvent,
-};
-
-const RUNNER_LATE_NO_FUNDING_CREDIT_SAFE_PROGRESS_TARGETS_DEPENDENCIES = {
-  closeout: bestTrueCentralCloseoutProfileForMetrics,
-  pressureReadyTargets: (input: AiDecisionInput) =>
-    assessRunnerPressureReadyForMetrics(input).readyTargets,
-  recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-};
 
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,

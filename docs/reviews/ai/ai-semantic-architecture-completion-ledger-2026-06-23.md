@@ -1382,6 +1382,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertneunundzwanzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-recent-history-context.ts` kapselt die Runner-Recent-History-Composition für Recent-Start-Runs, Recent-Basic-Credits und Late-No-Funding-SafeProgressTargets.
+  - `packages/ai/src/index.ts` erzeugt den internen Recent-History-Context vor der Runner-Doctrine-Composition und entfernt die lokalen Recent-History-/Late-No-Funding-Dependency-Objekte samt Wrappern.
+  - `packages/ai/src/public-export-contract.test.ts` sperrt den neuen internen Runtime-Modulpfad gegen versehentliche Public-Facade-Exporte.
+  - `packages/ai/src/index.ts` sank weiter von 30.663 auf 30.632 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
