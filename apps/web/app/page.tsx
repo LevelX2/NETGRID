@@ -86,7 +86,7 @@ import {
   automaticEndTurnAction,
   baseActionSlotCapacity,
   installedCorpExposeReviewCardId,
-  fieldCardChoiceOptionForCard,
+  fieldCardChoiceOptionsForCard,
   groupRunnerRigCards,
   orderedCardContextActions,
   parseCuePositionPreference,
@@ -1259,8 +1259,8 @@ export default function Page() {
     if (!activeDiscardChoice) return null;
     return activeDiscardChoice.options.find((option) => option.value === card.instanceId) ?? null;
   };
-  const fieldChoiceOptionForCard = (card: VisibleCard): VisibleChoiceOption | null => {
-    return activeFieldCardChoice && activeView ? fieldCardChoiceOptionForCard(activeFieldCardChoice, activeView, card) : null;
+  const fieldChoiceOptionsForCard = (card: VisibleCard): VisibleChoiceOption[] => {
+    return activeFieldCardChoice && activeView ? fieldCardChoiceOptionsForCard(activeFieldCardChoice, activeView, card) : [];
   };
   const toggleDiscardOption = (optionId: string) => {
     if (!activeDiscardChoice) return;
@@ -1275,20 +1275,28 @@ export default function Page() {
       return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
     });
   };
-  const toggleFieldCardChoiceOption = (optionId: string) => {
-    if (!activeFieldCardChoice) return;
+  const toggleFieldCardChoiceCardOptions = (optionIds: string[]) => {
+    if (!activeFieldCardChoice || optionIds.length === 0) return;
     const minSelections = Math.max(0, Math.floor(activeFieldCardChoice.minSelections));
     const maxSelections = Math.max(minSelections, Math.floor(activeFieldCardChoice.maxSelections));
     setFieldCardChoiceSelection((current) => {
       const currentSelected = current?.choiceId === activeFieldCardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeFieldCardChoiceOptionIds.has(id)) : [];
-      const nextSelected = currentSelected.includes(optionId)
-        ? currentSelected.filter((id) => id !== optionId)
-        : currentSelected.length >= maxSelections
-          ? maxSelections === 1
-            ? [optionId]
-            : currentSelected
-          : [...currentSelected, optionId];
-      return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+      const selectedForCard = optionIds.filter((id) => currentSelected.includes(id));
+      const allCardOptionsSelected = selectedForCard.length === optionIds.length;
+      if (allCardOptionsSelected) {
+        return {
+          choiceId: activeFieldCardChoice.choiceId,
+          selectedOptionIds: currentSelected.filter((id) => !optionIds.includes(id))
+        };
+      }
+      const nextOptionId = optionIds.find((id) => !currentSelected.includes(id));
+      if (!nextOptionId || currentSelected.length >= maxSelections) {
+        if (nextOptionId && maxSelections === 1) {
+          return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [nextOptionId] };
+        }
+        return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: currentSelected };
+      }
+      return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [...currentSelected, nextOptionId] };
     });
   };
   const clearFieldCardChoiceSelection = () => {
@@ -1296,7 +1304,8 @@ export default function Page() {
     setFieldCardChoiceSelection({ choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] });
   };
   const fieldChoiceCardProps = (card: VisibleCard): FieldChoiceCardProps => {
-    const option = fieldChoiceOptionForCard(card);
+    const options = fieldChoiceOptionsForCard(card);
+    const option = options[0] ?? null;
     if (!option) return {};
     if (isSingleInstalledCorpExposeChoice(activeFieldCardChoice)) {
       const disabled =
@@ -1324,17 +1333,20 @@ export default function Page() {
         onSelect: submitExposeTarget,
       };
     }
-    const selected = selectedFieldCardChoiceOptionIdSet.has(option.id);
+    const optionIds = options.map((candidate) => candidate.id);
+    const selectedCount = optionIds.filter((optionId) => selectedFieldCardChoiceOptionIdSet.has(optionId)).length;
+    const selected = selectedCount > 0;
+    const multiOptionCard = optionIds.length > 1;
     return {
       choiceSelected: selected,
       choiceShortcut: {
         selected,
         disabled: Boolean(payload?.winner) || connection !== "online",
-        onToggle: () => toggleFieldCardChoiceOption(option.id),
-        label: "Für Auswahl markieren",
-        selectedLabel: "Aus Auswahl entfernen"
+        onToggle: () => toggleFieldCardChoiceCardOptions(optionIds),
+        label: multiOptionCard ? `Für Auswahl markieren (${selectedCount}/${optionIds.length})` : "Für Auswahl markieren",
+        selectedLabel: multiOptionCard ? `${selectedCount}/${optionIds.length} ausgewählt` : "Aus Auswahl entfernen"
       },
-      onSelect: () => toggleFieldCardChoiceOption(option.id)
+      onSelect: () => toggleFieldCardChoiceCardOptions(optionIds)
     };
   };
   const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;

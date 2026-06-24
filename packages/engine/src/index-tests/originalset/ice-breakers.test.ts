@@ -1368,6 +1368,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
+  it("models Pile Driver as Noisy but not as a Stealth credit source", () => {
+    const pileDriver = DEMO_CARDS_BY_ID["onr_v1_047_pile-driver"];
+
+    expect(pileDriver?.subtypes).toContain("noisy");
+    expect(pileDriver?.subtypes).not.toContain("stealth");
+    expect(pileDriver?.recurringCredits).toBeUndefined();
+    expect(pileDriver?.mechanics).toContain("subtype_noisy");
+    expect(pileDriver?.mechanics).not.toContain("subtype_stealth");
+    expect(pileDriver?.mechanics).not.toContain("recurring_credit");
+  });
+
   it("uses Pile Driver as a source-bound multi-wall breaker with exact Stealth loss", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1515,7 +1526,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       state,
       "onr_v1_047_pile-driver",
     );
-    setCardCounterForTest(state, pileDriverId, "recurring_credit", 1);
     const iceId = putCorpIceOnServer(state, "rd", "onr_v1_237_data-wall");
 
     state = apply(
@@ -1552,8 +1562,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       cardDefinitionId: "onr_v1_047_pile-driver",
       breakSubroutineCount: 1,
       multiBreakSubroutines: true,
-      postBreakStealthLoss: 1,
     });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("postBreakStealthLoss");
   });
 
   it("applies Wrecking Ball as a Proteus wall breaker with public Stealth loss", () => {

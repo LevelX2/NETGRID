@@ -35,6 +35,7 @@ import {
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
+  fieldCardChoiceOptionsForCard,
   installedCorpExposeReviewCardId,
   isInstalledCorpExposeReviewChoice,
   isSingleInstalledCorpExposeChoice,
@@ -952,6 +953,25 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, bbs)?.id).toBe("card_bbs");
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, runnerProgram)).toBeNull();
     expect(fieldCardChoiceOptionForCard(runnerRigChoice, board, runnerProgram)?.id).toBe("card_runner_program");
+    const multiCreditRunnerRigChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...runnerRigChoice,
+      choiceId: "pile_driver_stealth_loss",
+      source: "runner.noisy_breaker_stealth_loss:pile_driver:1",
+      prompt: "Wähle 3 Credits von Stealth-Karten.",
+      options: [
+        { id: "stealth_runner_program_1", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" },
+        { id: "stealth_runner_program_2", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" },
+        { id: "stealth_runner_program_3", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" }
+      ],
+      minSelections: 3,
+      maxSelections: 3
+    };
+    expect(fieldCardChoiceOptionsForCard(multiCreditRunnerRigChoice, board, runnerProgram).map((option) => option.id)).toEqual([
+      "stealth_runner_program_1",
+      "stealth_runner_program_2",
+      "stealth_runner_program_3"
+    ]);
+    expect(fieldCardChoiceOptionForCard(multiCreditRunnerRigChoice, board, runnerProgram)?.id).toBe("stealth_runner_program_1");
     expect(fieldCardChoiceOptionForCard(singleExposeChoice, board, ice)?.id).toBe("card_corp_ice_1");
     expect(fieldCardChoiceOptionForCard(hiddenSlotSingleExposeChoice, hiddenSlotBoard, hiddenSlot)?.id).toBe("card_hidden_ice_slot");
     expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({

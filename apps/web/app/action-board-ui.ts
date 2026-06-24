@@ -1240,13 +1240,21 @@ export function shouldUseFieldCardChoice(
   );
 }
 
+export function fieldCardChoiceOptionsForCard(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+  view: PlayerView,
+  card: Pick<VisibleCard, "instanceId">,
+): NonNullable<PlayerView["pendingChoice"]>["options"] {
+  if (!choice || !shouldUseFieldCardChoice(choice, view)) return [];
+  return choice.options.filter((option) => option.selectable !== false && fieldCardChoiceOptionTargetsCard(option, card));
+}
+
 export function fieldCardChoiceOptionForCard(
   choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
   view: PlayerView,
   card: Pick<VisibleCard, "instanceId">,
 ): NonNullable<PlayerView["pendingChoice"]>["options"][number] | null {
-  if (!choice || !shouldUseFieldCardChoice(choice, view)) return null;
-  return choice.options.find((option) => option.selectable !== false && fieldCardChoiceOptionTargetsCard(option, card)) ?? null;
+  return fieldCardChoiceOptionsForCard(choice, view, card)[0] ?? null;
 }
 
 function fieldCardChoiceOptionTargetsCard(
