@@ -191,6 +191,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-visible-breaker-coverage",
       "./runtime/semantic-runtime-doctrine-score",
       "./runtime/semantic-runtime-corp-score",
+      "./runtime/semantic-runtime-corp-score-context",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",

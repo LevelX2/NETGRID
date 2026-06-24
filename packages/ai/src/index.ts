@@ -435,8 +435,8 @@ import {
   type SemanticRuntimeDoctrineConsumer,
 } from "./runtime/semantic-runtime-doctrine-score";
 import {
-  semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
-} from "./runtime/semantic-runtime-corp-score";
+  createSemanticRuntimeCorpScoreContext,
+} from "./runtime/semantic-runtime-corp-score-context";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -6621,22 +6621,11 @@ function semanticRuntimeDoctrineSuppressedComponent(
   });
 }
 
-function semanticRuntimeCorpScore(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-): number {
-  return semanticRuntimeScoreFromComponents(
-    semanticRuntimeCorpScoreComponents(input, action, scopeId),
-  );
-}
-
-function semanticRuntimeCorpScoreComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  scopeId: string,
-): AiDecisionScoreComponent[] {
-  return buildSemanticRuntimeCorpScoreComponents(input, action, scopeId, {
+const {
+  semanticRuntimeCorpScore,
+  semanticRuntimeCorpScoreComponents,
+} = createSemanticRuntimeCorpScoreContext(
+  {
     actionCreditCost,
     rolesForAction,
     corpScoreNowDoctrineWeight: semanticRuntimeCorpScoreNowDoctrineWeight,
@@ -6652,8 +6641,9 @@ function semanticRuntimeCorpScoreComponents(
     corpHasRemoteRezFloorFundingNeed:
       semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
     corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-  });
-}
+  },
+  semanticRuntimeScoreFromComponents,
+);
 
 function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
   input: AiDecisionInput,

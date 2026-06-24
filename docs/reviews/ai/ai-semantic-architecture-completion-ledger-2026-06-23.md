@@ -1232,6 +1232,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` hundertvierzehnter Struktur-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score-context.ts` kapselt die Korp-Score-Composition aus Score-Komponenten-Provider und `semanticRuntimeScoreFromComponents`.
+  - `packages/ai/src/index.ts` erzeugt nur noch den internen Corp-Score-Context und entfernt die lokalen Score-/ScoreComponents-Wrapper um `semantic-runtime-corp-score.ts`.
+  - `packages/ai/src/public-export-contract.test.ts` sperrt den neuen internen Runtime-Modulpfad gegen versehentliche Public-Facade-Exporte.
+  - `packages/ai/src/index.ts` sank weiter von 30.931 auf 30.921 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
