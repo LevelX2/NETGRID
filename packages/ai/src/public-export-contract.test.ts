@@ -144,6 +144,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-junkyard-bbs-recovery-score",
       "./runtime/runner-persistent-install-fit-score",
       "./runtime/runner-mu-pressure-score",
+      "./runtime/runner-run-target-guidance-score",
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",

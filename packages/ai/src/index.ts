@@ -241,6 +241,9 @@ import {
   runnerMuPressureInstallScoreComponent as buildRunnerMuPressureInstallScoreComponent,
 } from "./runtime/runner-mu-pressure-score";
 import {
+  runnerRunTargetGuidanceScoreComponent as buildRunnerRunTargetGuidanceScoreComponent,
+} from "./runtime/runner-run-target-guidance-score";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -6598,31 +6601,11 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const evaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
-    input,
-    action,
-  );
-  if (!evaluation) return undefined;
-  const value = runnerRunTargetSemanticGuidanceValue(evaluation);
-  if (value < 0 && semanticRuntimeRunnerVisibleHighPayoffRunOverride(input, action)) {
-    return undefined;
-  }
-  if (value === 0) return undefined;
-  return {
-    key: "runner_run_target_semantic_guidance",
-    label: "RunTarget-Empfehlung",
-    value,
-    reason: [
-      `target:${evaluation.targetServerId}`,
-      `access:${evaluation.accessServerId}`,
-      `recommendation:${evaluation.recommendation}`,
-      `payoff:${evaluation.accessPayoff}`,
-      `known_access:${evaluation.knownAccessState}`,
-      `path:${evaluation.pathPassability}`,
-      `credits_after:${evaluation.creditsAfterRun}`,
-      ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
-    ].join("|"),
-  };
+  return buildRunnerRunTargetGuidanceScoreComponent(input, action, {
+    evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
+    guidanceValue: runnerRunTargetSemanticGuidanceValue,
+    visibleHighPayoffRunOverride: semanticRuntimeRunnerVisibleHighPayoffRunOverride,
+  });
 }
 
 function semanticRuntimeRunnerVisibleHighPayoffRunOverride(
