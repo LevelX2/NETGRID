@@ -253,6 +253,7 @@ describe("AI public export contract", () => {
       "./runtime/reactive-action",
       "./runtime/remote-trash-cost",
       "./runtime/remote-trash-target",
+      "./simulation/card-metric-lookup",
       "./simulation/progression-action-sequence",
       "./simulation/simulation-metric-aggregation",
       "./reports/shadow-league-report-formatters",

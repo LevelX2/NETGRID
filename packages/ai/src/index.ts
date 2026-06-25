@@ -405,6 +405,12 @@ import {
   progressionEntriesWithRunTargets,
 } from "./simulation/progression-action-sequence";
 import {
+  agendaPointsForMetrics,
+  definitionTypeForMetrics,
+  remoteRootTrashCostForMetrics,
+  trashCostForDefinitionForMetrics,
+} from "./simulation/card-metric-lookup";
+import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
@@ -25140,34 +25146,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function definitionTypeForMetrics(definitionId: string): string | undefined {
-  return (
-    DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type
-  );
-}
-
-function agendaPointsForMetrics(definitionId: string): number {
-  return (
-    RUNTIME_CARDS[definitionId]?.numeric.agendaPoints ??
-    DEMO_CARDS_BY_ID[definitionId]?.agendaPoints ??
-    0
-  );
-}
-
-function trashCostForDefinitionForMetrics(
-  definitionId: string,
-): number | undefined {
-  return (
-    RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    DEMO_CARDS_BY_ID[definitionId]?.trashCost
-  );
-}
-
-function remoteRootTrashCostForMetrics(card: VisibleCard): number | undefined {
-  if (!card.definitionId) return undefined;
-  return trashCostForDefinitionForMetrics(card.definitionId);
 }
 
 function visibleBreakCostForKnownIceDefinition(
