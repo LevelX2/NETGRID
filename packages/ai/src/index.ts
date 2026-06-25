@@ -393,6 +393,7 @@ import {
   DOCTRINE_QUALITY_METRIC_NAMES,
   averageNumber,
   diffDoctrineMetrics,
+  medianNumber,
   sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
 import {
@@ -22574,14 +22575,6 @@ function summarizeAdvancedRemoteThreatMetrics(
     turnsFromRemoteThreatCreatedToContest: averageNumber(contestDeltas),
     turnsFromRemoteThreatCreatedToScoreOrSteal: averageNumber(resolveDeltas),
   };
-}
-
-function medianNumber(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sorted = values.slice().sort((left, right) => left - right);
-  const middle = Math.floor(sorted.length / 2);
-  if (sorted.length % 2 === 1) return round(sorted[middle] ?? 0);
-  return round(((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2);
 }
 
 function averageTurnsFromFinalAdvanceToScoreOrSteal(
