@@ -684,6 +684,7 @@ import {
   countPassiveActionWithScoreLineAvailable,
   countUnsafeScoreChosen,
 } from "./simulation/score-window-counts";
+import { isHoldoutSeed } from "./simulation/holdout-seed";
 import { simulationSafeSelectedActionId } from "./simulation/selected-action-id";
 import {
   controllerModeForSide,
@@ -5219,7 +5220,10 @@ export function simulateAiGame(
         [],
         deckSupportErrors,
         false,
-        isHoldoutSeed(config.seed ?? "ai-vs-ai-smoke"),
+        isHoldoutSeed(
+          config.seed ?? "ai-vs-ai-smoke",
+          SOAK_SEEDS.holdoutSeeds,
+        ),
       ),
     };
   }
@@ -5529,7 +5533,12 @@ export function simulateAiGame(
     actionSequence,
     errors,
     cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
-    metrics: metricsFor(actionSequence, errors, replay.ok, isHoldoutSeed(seed)),
+    metrics: metricsFor(
+      actionSequence,
+      errors,
+      replay.ok,
+      isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
+    ),
   };
 }
 
@@ -23097,8 +23106,4 @@ function qualityTagsForAction(
     findVisibleCard,
     rolesForAction,
   });
-}
-
-function isHoldoutSeed(seed: string): boolean {
-  return SOAK_SEEDS.holdoutSeeds.includes(seed);
 }
