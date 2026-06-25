@@ -203,6 +203,7 @@ import {
   shellTradersImmediateRemoveAvailable,
   shellTradersPrepareBaselinePenalty,
 } from "./runtime/shell-traders-context";
+import { publicRoleEvidence } from "./runtime/role-evidence";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -11951,10 +11952,6 @@ function scoreCorpOperation(
   if (roles.includes("draw_operation"))
     score += features.handCount < 4 ? 120 : 50;
   return score;
-}
-
-function publicRoleEvidence(roles: string[]): string[] {
-  return roles.slice(0, 2).map((role) => `role:${role}`);
 }
 
 const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
