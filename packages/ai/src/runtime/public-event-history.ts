@@ -1,4 +1,4 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import type { CentralServerId } from "./server-target";
 
 export function findLastHistoryIndex<T>(
@@ -9,6 +9,18 @@ export function findLastHistoryIndex<T>(
     if (predicate(values[index]!)) return index;
   }
   return -1;
+}
+
+export function mergedPublicHistory(
+  input: AiDecisionInput,
+): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort(
+    (left, right) => eventVersion(left) - eventVersion(right),
+  );
 }
 
 export function isArchivesAccessEvent(event: PublicGameEvent): boolean {

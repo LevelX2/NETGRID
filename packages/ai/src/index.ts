@@ -44,7 +44,6 @@ import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
   reconstructBeliefState,
   type CorpOpponentModel,
-  type RndTopFreshnessMemory,
   type RunnerOpponentModel,
 } from "./belief-state";
 import {
@@ -204,6 +203,7 @@ import {
   shellTradersImmediateRemoveAvailable,
   shellTradersPrepareBaselinePenalty,
 } from "./runtime/shell-traders-context";
+import { shellTradersDirectInstallUrgency } from "./runtime/shell-traders-urgency";
 import { publicRoleEvidence } from "./runtime/role-evidence";
 import {
   corpInstalledEconomyCreditAmount,
@@ -212,6 +212,25 @@ import {
   corpSourceAdvancementCounterCreditPayoutAssessment,
   isSourceAdvancementCounterCreditPayoutAction,
 } from "./runtime/corp-source-advancement-counter-credit-payout";
+import {
+  rndFreshRepeatRunBoost,
+  staleKnownRndRepeatRunPenalty,
+} from "./runtime/runner-rnd-repeat-run-score";
+import { isLowValueKnownAccessCard } from "./runtime/runner-low-value-known-access-card";
+import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
+import { staleKnownArchivesRepeatRunPenalty } from "./runtime/runner-archives-repeat-run-score";
+import { recentRemoteJackOutRepeatRunPenalty } from "./runtime/runner-remote-repeat-run-score";
+import {
+  runnerRunReasonCode,
+  runTargetEvidence,
+  scoreRunTarget,
+} from "./runtime/runner-run-target-score";
+import { isBlockedByKnownRezzedIce } from "./runtime/runner-known-rezzed-ice-block";
+import {
+  scoreRunnerEvent,
+  scoreRunnerInstall,
+} from "./runtime/runner-card-action-score";
+import { profileWeights } from "./runtime/profile-weights";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -376,11 +395,10 @@ import {
 import { roundNumber as round } from "./runtime/number-rounding";
 import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
-  eventMayChangeArchives as aiEventMayChangeArchives,
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
-  isArchivesAccessEvent as isAiArchivesAccessEvent,
+  mergedPublicHistory as mergedAiPublicHistory,
   serverIdFromEvent as aiServerIdFromEvent,
 } from "./runtime/public-event-history";
 import {
@@ -8111,7 +8129,7 @@ function scoreRunnerAction(
   action: LegalAction,
 ): RankedChoice {
   const roles = rolesForAction(input, action);
-  const profile = profileWeights(input);
+  const profile = profileWeights(input, AI_PROFILES);
   let score = 0;
   let reasonCode = "runner.fallback.low_value";
   let explanation =
@@ -8444,10 +8462,28 @@ function scoreRunnerAction(
           typeof action.payload?.shellCounterAmount === "number"
             ? action.payload.shellCounterAmount
             : 0;
-        const targetRoles = shellTradersTargetRoles(input, action);
+        const targetCardId =
+          typeof action.payload?.targetCardId === "string"
+            ? action.payload.targetCardId
+            : "";
+        const targetDefinitionId =
+          typeof action.payload?.targetCardDefinitionId === "string"
+            ? action.payload.targetCardDefinitionId
+            : findVisibleCard(input, targetCardId)?.definitionId;
+        const targetRoles = rolesForCardId(targetDefinitionId);
         const directInstall = shellTradersDirectInstallAction(input, action);
+        const installedRigRoles = new Set(
+          (input.playerView.own.rig ?? []).flatMap((card) =>
+            rolesForCardId(card.definitionId),
+          ),
+        );
         const directInstallUrgency = directInstall
-          ? shellTradersDirectInstallUrgency(input, targetRoles, directInstall)
+          ? shellTradersDirectInstallUrgency(
+              input,
+              targetRoles,
+              directInstall,
+              installedRigRoles,
+            )
           : 0;
         const directInstallPenalty = directInstall
           ? shellTradersDirectInstallPreparePenalty(
@@ -8623,7 +8659,7 @@ function scoreCorpAction(
   action: LegalAction,
 ): RankedChoice {
   const roles = rolesForAction(input, action);
-  const profile = profileWeights(input);
+  const profile = profileWeights(input, AI_PROFILES);
   let score = 0;
   let reasonCode = "corp.fallback.low_value";
   let explanation =
@@ -10847,407 +10883,8 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
   return rolesForCardId(visible?.definitionId);
 }
 
-function shellTradersTargetRoles(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  const targetCardId =
-    typeof action.payload?.targetCardId === "string"
-      ? action.payload.targetCardId
-      : "";
-  const targetDefinitionId =
-    typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : findVisibleCard(input, targetCardId)?.definitionId;
-  return rolesForCardId(targetDefinitionId);
-}
-
-function shellTradersDirectInstallUrgency(
-  input: AiDecisionInput,
-  roles: string[],
-  directInstall: LegalAction,
-): number {
-  const remainingCredits =
-    input.playerView.own.credits - actionCreditCost(directInstall);
-  let urgency = 0;
-  if (
-    roles.some(
-      (role) =>
-        role.startsWith("breaker_") &&
-        !input.playerView.own.rig?.some((card) =>
-          rolesForCardId(card.definitionId).includes(role),
-        ),
-    )
-  )
-    urgency += 145;
-  const memoryRemaining =
-    (input.playerView.own.memoryLimit ?? 0) -
-    (input.playerView.own.memoryUsed ?? 0);
-  if (roles.includes("memory") || roles.includes("memory_support"))
-    urgency += memoryRemaining <= 1 ? 110 : 25;
-  if (roles.includes("setup") || roles.includes("build_rig"))
-    urgency += (input.playerView.own.rig ?? []).length === 0 ? 45 : 15;
-  if (roles.includes("economy") || roles.includes("tempo"))
-    urgency += input.playerView.own.credits < 4 ? 55 : 15;
-  if (remainingCredits >= 2) urgency += 45;
-  else if (remainingCredits < 1) urgency -= 35;
-  return Math.max(0, urgency);
-}
-
 function rolesForCardId(cardId: string | undefined): string[] {
   return cardRolesForId(cardId, AI_HINTS);
-}
-
-function profileWeights(input: AiDecisionInput): Record<string, number> {
-  const profile =
-    AI_PROFILES.find((candidate) => candidate.profileId === input.profileId) ??
-    AI_PROFILES.find(
-      (candidate) =>
-        candidate.side === input.side &&
-        candidate.difficulty === input.difficulty,
-    );
-  return profile?.weights ?? {};
-}
-
-function scoreRunnerInstall(
-  roles: string[],
-  features: AiFeatures,
-  profile: Record<string, number>,
-): number {
-  let score = 430 + (profile.setup ?? 1) * 40;
-  if (
-    roles.some(
-      (role) => role.startsWith("breaker_") && !features.rigRoles.has(role),
-    )
-  )
-    score += 190;
-  if (roles.includes("memory") && features.memoryRemaining <= 1) score += 160;
-  if (features.credits < 2) score -= 90;
-  return score;
-}
-
-function scoreRunnerEvent(
-  roles: string[],
-  features: AiFeatures,
-  profile: Record<string, number>,
-): number {
-  let score = 420;
-  if (roles.includes("economy"))
-    score += features.credits < 5 ? 170 * (profile.economy ?? 1) : 70;
-  if (roles.includes("draw")) score += features.handCount < 4 ? 150 : 60;
-  if (roles.includes("run_pressure"))
-    score += features.credits >= 3 ? 150 * (profile.run ?? 1) : 30;
-  return score;
-}
-
-function scoreRunTarget(
-  action: LegalAction,
-  features: AiFeatures,
-  profile: Record<string, number>,
-  difficulty: AiDifficulty,
-  staleCentralRepeatPenalty = 0,
-): number {
-  const serverId = String(action.payload?.serverId ?? "");
-  const server = features.serverFeaturesById.get(serverId);
-  let score = difficulty === "easy" ? 330 : 560 + (profile.run ?? 1) * 55;
-  if (serverId.startsWith("remote_")) {
-    score += 60;
-    if ((server?.rootCount ?? 0) === 0) score -= 380;
-    else score += Math.min(server?.rootCount ?? 0, 3) * 45;
-  }
-  if (serverId === "rd") score += 45;
-  if (server?.iceCount) score -= Math.min(server.iceCount, 3) * 25;
-  if (features.blockedRunServers.has(serverId)) score -= 2000;
-  if (features.credits < 3) score -= 140;
-  if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
-  score -= staleCentralRepeatPenalty;
-  return score;
-}
-
-function staleKnownRndRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "rd"
-  )
-    return 0;
-  const freshness =
-    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
-  // Public-event belief marks this only after Runner already accessed R&D and no visible draw, shuffle, reorder, swap, steal, or trash changed the top card.
-  if (freshness?.freshness !== "stale_known_same_top") return 0;
-  if (rndKnownTopIsAgendaForAi(freshness)) return 0;
-  return rndKnownTopIsLowValueForAi(freshness) ||
-    !freshness.knownTopDefinitionId
-    ? 420
-    : 0;
-}
-
-function rndFreshRepeatRunBoost(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "rd"
-  )
-    return 0;
-  const freshness =
-    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
-  if (rndKnownTopIsAgendaForAi(freshness)) return 520;
-  return freshness?.freshness === "fresh_after_top_removed" ? 170 : 0;
-}
-
-function rndKnownTopIsAgendaForAi(
-  freshness: RndTopFreshnessMemory | undefined,
-): boolean {
-  const definitionId = freshness?.knownTopDefinitionId;
-  if (!definitionId) return false;
-  return (
-    freshness.knownTopIsAgenda === true ||
-    RUNTIME_CARDS[definitionId]?.type === "agenda" ||
-    DEMO_CARDS_BY_ID[definitionId]?.type === "agenda"
-  );
-}
-
-function rndKnownTopIsLowValueForAi(
-  freshness: RndTopFreshnessMemory | undefined,
-): boolean {
-  const definitionId = freshness?.knownTopDefinitionId;
-  if (!definitionId) return false;
-  const type =
-    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
-  if (type === "agenda" || type === "asset" || type === "upgrade") return false;
-  return freshness.knownTopIsLowValue === true || type !== undefined;
-}
-
-function staleKnownHqRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "hq"
-  )
-    return 0;
-  if (
-    input.legalActions.some(
-      (candidate) =>
-        candidate.type === "trash_accessed_card" ||
-        candidate.type === "steal_agenda",
-    )
-  )
-    return 0;
-  const hqHandMemory =
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
-  if (
-    !hqHandMemory?.allCardsKnown ||
-    hqHandMemory.knownDefinitions.length === 0
-  )
-    return 0;
-  return hqHandMemory.knownDefinitions.every((definitionId) =>
-    isLowValueKnownAccessCard(definitionId, input.playerView.own.credits),
-  )
-    ? 430
-    : 0;
-}
-
-function staleKnownArchivesRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "archives"
-  )
-    return 0;
-  if (
-    input.legalActions.some(
-      (candidate) =>
-        candidate.type === "trash_accessed_card" ||
-        candidate.type === "steal_agenda",
-    )
-  )
-    return 0;
-  const archives = input.playerView.servers.find(
-    (server) => server.id === "archives",
-  );
-  const visibleArchivesCards = archives?.root ?? [];
-  if (
-    visibleArchivesCards.length === 0 ||
-    visibleArchivesCards.some((card) => !card.known || !card.definitionId)
-  )
-    return 0;
-  const history = mergedAiPublicHistory(input);
-  const lastArchivesAccessIndex = findLastAiHistoryIndex(history, (event) =>
-    isAiArchivesAccessEvent(event),
-  );
-  if (lastArchivesAccessIndex < 0) return 0;
-  if (
-    history
-      .slice(lastArchivesAccessIndex + 1)
-      .some((event) => aiEventMayChangeArchives(event))
-  )
-    return 0;
-  return 520;
-}
-
-function recentRemoteJackOutRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (input.side !== "runner" || action.type !== "start_run") return 0;
-  const serverId = String(action.payload?.serverId ?? "");
-  if (!serverId.startsWith("remote_")) return 0;
-  const history = mergedAiPublicHistory(input);
-  const lastSameRemoteRunIndex = findLastAiHistoryIndex(
-    history,
-    (event) =>
-      aiServerIdFromEvent(event) === serverId &&
-      (event.publicPayload.actionType === "start_run" ||
-        event.type === "run_started"),
-  );
-  if (lastSameRemoteRunIndex < 0) return 0;
-  const lastRunEvent = history[lastSameRemoteRunIndex];
-  if (!lastRunEvent) return 0;
-  if (input.playerView.stateVersion - aiEventVersion(lastRunEvent) > 8)
-    return 0;
-  return recentAiSameRemoteJackOutWithoutAccess(
-    history,
-    lastSameRemoteRunIndex,
-    serverId,
-  )
-    ? 520
-    : 0;
-}
-
-function recentAiSameRemoteJackOutWithoutAccess(
-  history: PublicGameEvent[],
-  startIndex: number,
-  serverId: string,
-): boolean {
-  const afterStart = history.slice(startIndex + 1);
-  const jackOutIndex = afterStart.findIndex((event) => {
-    const actionType =
-      typeof event.publicPayload.actionType === "string"
-        ? event.publicPayload.actionType
-        : event.type;
-    if (actionType !== "jack_out") return false;
-    const eventServerId = aiServerIdFromEvent(event);
-    return eventServerId === undefined || eventServerId === serverId;
-  });
-  if (jackOutIndex < 0) return false;
-  if (
-    afterStart
-      .slice(0, jackOutIndex)
-      .some(
-        (event) =>
-          aiServerIdFromEvent(event) === serverId &&
-          event.publicPayload.actionType === "access_card",
-      )
-  )
-    return false;
-  return !afterStart
-    .slice(jackOutIndex + 1)
-    .some((event) => aiEventMayRefreshRemoteRun(event, serverId));
-}
-
-function aiEventMayRefreshRemoteRun(
-  event: PublicGameEvent,
-  serverId: string,
-): boolean {
-  const actionType =
-    typeof event.publicPayload.actionType === "string"
-      ? event.publicPayload.actionType
-      : event.type;
-  if (actionType === "access_card" && aiServerIdFromEvent(event) === serverId)
-    return true;
-  return (
-    actionType === "gain_credit" ||
-    actionType === "draw_card" ||
-    actionType === "install_card" ||
-    actionType === "play_event" ||
-    actionType === "trigger_ability" ||
-    actionType === "rez_ice"
-  );
-}
-
-function isLowValueKnownAccessCard(
-  definitionId: string,
-  runnerCredits: number,
-): boolean {
-  const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
-  const type = runtimeDefinition?.type ?? demoDefinition?.type;
-  if (!type) return false;
-  if (type === "agenda") return false;
-  const trashCost =
-    runtimeDefinition?.numeric.trashCost ?? demoDefinition?.trashCost ?? 0;
-  if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost)
-    return false;
-  return true;
-}
-
-function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) => aiEventVersion(left) - aiEventVersion(right),
-  );
-}
-
-function runnerRunReasonCode(
-  action: LegalAction,
-  features: AiFeatures,
-): string {
-  const serverId = String(action.payload?.serverId ?? "");
-  const server = features.serverFeaturesById.get(serverId);
-  if (features.blockedRunServers.has(serverId))
-    return "runner.run.blocked_by_rezzed_ice";
-  if (serverId.startsWith("remote_") && (server?.rootCount ?? 0) === 0)
-    return "runner.run.empty_remote_low_value";
-  return "runner.run.visible_pressure";
-}
-
-function runTargetEvidence(
-  action: LegalAction,
-  features: AiFeatures,
-): string[] {
-  const serverId = String(action.payload?.serverId ?? "");
-  const server = features.serverFeaturesById.get(serverId);
-  if (!server) return [];
-  return [
-    `ice_count:${server.iceCount}`,
-    `root_count:${server.rootCount}`,
-    `known_root_count:${server.knownRootCount}`,
-    `rezzed_root_count:${server.rezzedRootCount}`,
-  ];
-}
-
-function isBlockedByKnownRezzedIce(
-  ice:
-    | {
-        definitionId?: string;
-        rezzed?: boolean;
-        known: boolean;
-        subtypes?: string[];
-      }
-    | undefined,
-  rigDefinitionIds: Set<string>,
-): boolean {
-  if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
-  const iceDefinitionId = ice.definitionId;
-  if (!iceHasEndTheRun(iceDefinitionId)) return false;
-  return ![...rigDefinitionIds].some((breakerDefinitionId) =>
-    canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId),
-  );
 }
 
 function pumpViabilityAssessment(

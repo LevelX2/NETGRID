@@ -3040,6 +3040,106 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertzweiter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-rnd-repeat-run-score.ts` kapselt die R&D-Repeat-Run-Bewertung für stale bekannte Top-Karten und frische Top-Karten nach Access-Änderungen.
+  - `packages/ai/src/index.ts` importiert `staleKnownRndRepeatRunPenalty` und `rndFreshRepeatRunBoost` und entfernt die lokalen R&D-Freshness-Classifier.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.832 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertdritter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-low-value-known-access-card.ts` kapselt die Bewertung bekannter Low-Value-Access-Karten anhand von Definitionstyp und Runner-Credits.
+  - `packages/ai/src/index.ts` importiert `isLowValueKnownAccessCard` und entfernt den lokalen Kartentyp-/Trashkosten-Classifier.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.817 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertvierter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` kapselt die HQ-Repeat-Run-Strafe bei vollständig bekanntem, niedrigwertigem HQ.
+  - `packages/ai/src/index.ts` importiert `staleKnownHqRepeatRunPenalty` und entfernt den lokalen HQ-Hand-Memory-Scoreblock.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.786 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertfünfter Struktur-Schnitt:
+  - `packages/ai/src/runtime/public-event-history.ts` stellt `mergedPublicHistory` als wiederverwendbaren Public-Event-Merge bereit.
+  - `packages/ai/src/runtime/runner-archives-repeat-run-score.ts` kapselt die Archives-Repeat-Run-Strafe bei unverändert bekannten Archives-Inhalten.
+  - `packages/ai/src/index.ts` importiert `staleKnownArchivesRepeatRunPenalty` und entfernt den lokalen Archives-Scoreblock sowie die lokale Public-History-Merge-Funktion.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.735 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertsechster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-remote-repeat-run-score.ts` kapselt die Remote-Repeat-Run-Strafe nach jüngstem Jack-out ohne Access und ohne sichtbare Remote-Auffrischung.
+  - `packages/ai/src/index.ts` importiert `recentRemoteJackOutRepeatRunPenalty` und entfernt den lokalen Remote-Jackout-History-Block.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.656 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertsiebter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-run-target-score.ts` kapselt Runner-Run-Target-Score, Reason-Code und Evidence-Erzeugung.
+  - `packages/ai/src/index.ts` importiert `scoreRunTarget`, `runnerRunReasonCode` und `runTargetEvidence` und entfernt die lokalen Run-Target-Scorehelper.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.609 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertachter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-known-rezzed-ice-block.ts` kapselt die Prüfung, ob sichtbares rezzed ICE den Runner anhand installierter Breaker blockiert.
+  - `packages/ai/src/index.ts` importiert `isBlockedByKnownRezzedIce` und entfernt den lokalen ICE-Blocker-Classifier.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.591 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertneunter Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-card-action-score.ts` kapselt die Runner-Basisscores für Install- und Event-Aktionen.
+  - `packages/ai/src/index.ts` importiert `scoreRunnerInstall` und `scoreRunnerEvent` und entfernt die lokalen Runner-Karten-Scorehelper.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.564 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertzehnter Struktur-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-urgency.ts` kapselt die Direct-Install-Urgency für Shell-Traders-Vorbereitungen.
+  - `packages/ai/src/index.ts` übergibt die sichtbaren installierten Rig-Rollen und entfernt den lokalen Shell-Traders-Urgency-Block.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.543 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertelfter Struktur-Schnitt:
+  - `packages/ai/src/runtime/profile-weights.ts` kapselt die Profilgewicht-Auswahl gegen einen übergebenen Profildatensatz.
+  - `packages/ai/src/index.ts` importiert `profileWeights` und übergibt weiterhin den bestehenden `AI_PROFILES`-Datensatz.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.533 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` dreihundertzwölfter Struktur-Schnitt:
+  - `packages/ai/src/index.ts` ersetzt den einmalig genutzten `shellTradersTargetRoles`-Wrapper durch lokale Target-Definition-Ermittlung am Shell-Traders-Call-Site.
+  - `packages/ai/src/index.ts` entfernt den lokalen `shellTradersTargetRoles`-Helper ohne neue Modulgrenze.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 24.526 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
