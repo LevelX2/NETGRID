@@ -12,6 +12,39 @@ type SimulationControllerConfig = {
   readonly corpControllerMode?: SimulationControllerMode;
 };
 
+type SimulationDeckConfigInput<
+  RunnerDeckId extends string = string,
+  CorpDeckId extends string = string,
+> = {
+  readonly runnerDeckId?: RunnerDeckId;
+  readonly corpDeckId?: CorpDeckId;
+  readonly runnerDeck?: DeckDefinition;
+  readonly corpDeck?: DeckDefinition;
+  readonly runnerDeckMetadata?: DeckPublicMetadata;
+  readonly corpDeckMetadata?: DeckPublicMetadata;
+};
+
+type SimulationDefaultDeckIds<
+  RunnerDeckId extends string,
+  CorpDeckId extends string,
+> = {
+  readonly runnerDeckId: RunnerDeckId;
+  readonly corpDeckId: CorpDeckId;
+};
+
+export type SimulationDeckConfigSelection<
+  RunnerDeckId extends string = string,
+  CorpDeckId extends string = string,
+> = Pick<
+  SimulationDeckConfigInput<RunnerDeckId, CorpDeckId>,
+  | "runnerDeckId"
+  | "corpDeckId"
+  | "runnerDeck"
+  | "corpDeck"
+  | "runnerDeckMetadata"
+  | "corpDeckMetadata"
+>;
+
 export function controllerModeForSide(
   side: Side,
   config: SimulationControllerConfig,
@@ -71,4 +104,29 @@ export function profileIdForMode(
         ? "runner-ai-v1.4.2-normal"
         : "corp-ai-v1.4.2-normal";
   }
+}
+
+export function simulationDeckConfig<
+  RunnerDeckId extends string,
+  CorpDeckId extends string,
+>(
+  config: SimulationDeckConfigInput<RunnerDeckId, CorpDeckId>,
+  defaultDeckIds: SimulationDefaultDeckIds<RunnerDeckId, CorpDeckId>,
+): SimulationDeckConfigSelection<RunnerDeckId, CorpDeckId> {
+  return {
+    ...(config.runnerDeck
+      ? { runnerDeck: config.runnerDeck }
+      : {
+          runnerDeckId: config.runnerDeckId ?? defaultDeckIds.runnerDeckId,
+        }),
+    ...(config.corpDeck
+      ? { corpDeck: config.corpDeck }
+      : { corpDeckId: config.corpDeckId ?? defaultDeckIds.corpDeckId }),
+    ...(config.runnerDeckMetadata
+      ? { runnerDeckMetadata: config.runnerDeckMetadata }
+      : {}),
+    ...(config.corpDeckMetadata
+      ? { corpDeckMetadata: config.corpDeckMetadata }
+      : {}),
+  };
 }

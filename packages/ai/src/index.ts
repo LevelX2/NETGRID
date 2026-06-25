@@ -679,6 +679,7 @@ import {
   controllerModeForSide,
   deckSnapshotForSimulation,
   profileIdForMode,
+  simulationDeckConfig,
 } from "./simulation/simulation-config-helpers";
 import {
   evaluateTacticalPlans,
@@ -6703,36 +6704,6 @@ function evaluateV143RndRepeatAccessFreshnessFixture(
   };
 }
 
-function simulationDeckConfig(
-  config: Partial<AiSimulationConfig>,
-): Pick<
-  AiSimulationConfig,
-  | "runnerDeckId"
-  | "corpDeckId"
-  | "runnerDeck"
-  | "corpDeck"
-  | "runnerDeckMetadata"
-  | "corpDeckMetadata"
-> {
-  return {
-    ...(config.runnerDeck
-      ? { runnerDeck: config.runnerDeck }
-      : {
-          runnerDeckId:
-            config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
-        }),
-    ...(config.corpDeck
-      ? { corpDeck: config.corpDeck }
-      : { corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId }),
-    ...(config.runnerDeckMetadata
-      ? { runnerDeckMetadata: config.runnerDeckMetadata }
-      : {}),
-    ...(config.corpDeckMetadata
-      ? { corpDeckMetadata: config.corpDeckMetadata }
-      : {}),
-  };
-}
-
 function runV143Profile(
   profile: SimulationBenchmarkProfile,
   seeds: string[],
@@ -6743,7 +6714,10 @@ function runV143Profile(
   const summaries = seeds.map((seed) =>
     simulateAiGame({
       seed,
-      ...simulationDeckConfig(config),
+      ...simulationDeckConfig(config, {
+        runnerDeckId: SOAK_SEEDS_143.league.runnerDeckId,
+        corpDeckId: SOAK_SEEDS_143.league.corpDeckId,
+      }),
       agendaPointsToWin:
         config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
       maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
