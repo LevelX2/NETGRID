@@ -161,6 +161,7 @@ import {
   currentRunHasFutureVisibleIce,
   currentRunRemainingIce,
   encounterHasImmediateUnbrokenThreat,
+  runnerReachedAccessMovement,
 } from "./runtime/current-encounter";
 import {
   breakerIdForEncounterAction,
@@ -11042,15 +11043,6 @@ function scoreRunTarget(
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   score -= staleCentralRepeatPenalty;
   return score;
-}
-
-function runnerReachedAccessMovement(input: AiDecisionInput): boolean {
-  const run = input.playerView.run;
-  return (
-    input.playerView.timingPoint === "run.jack_out_window" &&
-    run?.phase === "movement" &&
-    run.position?.kind === "server"
-  );
 }
 
 function staleKnownRndRepeatRunPenalty(

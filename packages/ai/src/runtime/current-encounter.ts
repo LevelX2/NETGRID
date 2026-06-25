@@ -51,3 +51,12 @@ export function currentRunHasFutureVisibleIce(input: AiDecisionInput): boolean {
     (ice) => ice.known && ice.rezzed === true,
   );
 }
+
+export function runnerReachedAccessMovement(input: AiDecisionInput): boolean {
+  const run = input.playerView.run;
+  return (
+    input.playerView.timingPoint === "run.jack_out_window" &&
+    run?.phase === "movement" &&
+    run.position?.kind === "server"
+  );
+}
