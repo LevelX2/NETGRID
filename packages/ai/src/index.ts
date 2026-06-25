@@ -459,6 +459,7 @@ import {
 } from "./simulation/remote-trash-role";
 import { buildRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
 import {
+  runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
   runnerCreditReserveTargetForInput as runnerCreditReserveTargetForInputWithRoles,
 } from "./simulation/runner-credit-reserve";
 import { metricsForSimulationActionSequence } from "./simulation/quality-metrics";
@@ -24752,37 +24753,10 @@ function runnerPostRunReserveTargetForRemoteInput(
   input: AiDecisionInput,
   serverId: string,
 ): number {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return 3;
-  let target = remoteServerHasScoreThreat(input, serverId) ? 1 : 2;
-  const visibleStealTax = server.root.some(
-    (card) =>
-      card.known &&
-      rolesForCardId(card.definitionId).some(
-        (role) =>
-          role.includes("agenda_steal_tax") ||
-          role.includes("remote_upgrade_tax") ||
-          role.includes("access_tax") ||
-          role.includes("remote_agenda_protection") ||
-          role.includes("scoring_protection") ||
-          role.includes("protect_remote"),
-      ),
-  );
-  if (visibleStealTax) target = Math.max(target, 6);
-  const relevantTrashCosts = server.root
-    .filter((card) => card.known)
-    .filter((card) => {
-      const role = remoteTrashRoleForVisibleCard(card);
-      return role !== "low_value" && role !== "unknown";
-    })
-    .map((card) => remoteTrashCostForVisibleCard(card))
-    .filter((cost): cost is number => typeof cost === "number");
-  if (relevantTrashCosts.length > 0) {
-    target = Math.max(target, Math.min(...relevantTrashCosts) + 1);
-  }
-  return Math.min(10, Math.max(1, Math.ceil(target)));
+  return runnerPostRunReserveTargetForRemoteInputWithDeps(input, serverId, {
+    remoteServerHasScoreThreat,
+    rolesForCardId,
+  });
 }
 
 function runnerCentralRunHasClearPressureJustificationForInput(
