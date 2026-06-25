@@ -143,6 +143,26 @@ export function actionsUntil<T>(
   return undefined;
 }
 
+export function nextEntriesForSide<T extends { side?: string }>(
+  sequence: T[],
+  index: number,
+  side: string,
+  ownActionWindow: number,
+): T[] {
+  const entries: T[] = [];
+  for (
+    let candidateIndex = index + 1;
+    candidateIndex < sequence.length;
+    candidateIndex += 1
+  ) {
+    const candidate = sequence[candidateIndex]!;
+    if (candidate.side !== side) continue;
+    entries.push(candidate);
+    if (entries.length >= ownActionWindow) break;
+  }
+  return entries;
+}
+
 export function isCorpProtectionScoreConversionAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {

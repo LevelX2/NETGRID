@@ -463,6 +463,7 @@ import {
   isRunnerSetupAction,
   isStrategicPlanDecision,
   nextEntries,
+  nextEntriesForSide,
   ownStrategicWindow,
   planKindForConversion,
   previousOwnStrategicWindow,
@@ -16862,7 +16863,7 @@ function attributeStarvedEconomySkip(
   metrics.runnerStarvedEconomySkipWindows += 1;
   metrics.runnerSetupAttributionByKindStarvedEconomy += 1;
   incrementChosenFamily(metrics, "runnerStarvedEconomySkip", entry);
-  const next = nextRunnerEntries(sequence, index, 5);
+  const next = nextEntriesForSide(sequence, index, "runner", 5);
   if (
     entry.runStartedAgainstKnownUnaffordablePath === true ||
     next.some((candidate) => candidate.runStartedAgainstKnownUnaffordablePath)
@@ -16970,7 +16971,7 @@ function attributeSearchRecoverySkip(
     metrics.runnerSearchRecoveryAttributionRecoveryTaken += 1;
   incrementCoverageTypes(metrics, entry);
   incrementChosenFamily(metrics, "runnerSearchRecoverySkip", entry);
-  const next = nextRunnerEntries(sequence, index, 5);
+  const next = nextEntriesForSide(sequence, index, "runner", 5);
   const installFollowup = next.some(
     (candidate) => candidate.actionType === "install_card",
   );
@@ -17127,7 +17128,7 @@ function attributeMemorySkip(
   metrics.runnerMemoryFixGateSkipped += 1;
   metrics.runnerMemoryAttributionSkipped += 1;
   incrementChosenFamily(metrics, "runnerMemorySkip", entry);
-  const next = nextRunnerEntries(sequence, index, 5);
+  const next = nextEntriesForSide(sequence, index, "runner", 5);
   const memoryInstalled = next.some(
     (candidate) => candidate.runnerMemoryHardwareTaken === true,
   );
@@ -17258,7 +17259,7 @@ function attributeHandSizeSkip(
   index: number,
 ): void {
   const entry = sequence[index]!;
-  const next = nextRunnerEntries(sequence, index, 5);
+  const next = nextEntriesForSide(sequence, index, "runner", 5);
   metrics.runnerHandSizeFixGateWindows += 1;
   metrics.runnerSetupAttributionByKindHandSize += 1;
   metrics.runnerHandSizeFixGateLegalSupport += 1;
@@ -17401,25 +17402,6 @@ function incrementCoverageTypes(
     metrics.runnerSearchRecoveryFixGateMissingSpecial += 1;
     metrics.runnerSearchRecoveryAttributionMissingSpecial += 1;
   }
-}
-
-function nextRunnerEntries(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownActionWindow: number,
-): PlanConversionActionEntry[] {
-  const entries: PlanConversionActionEntry[] = [];
-  for (
-    let candidateIndex = index + 1;
-    candidateIndex < sequence.length;
-    candidateIndex += 1
-  ) {
-    const candidate = sequence[candidateIndex]!;
-    if (candidate.side !== "runner") continue;
-    entries.push(candidate);
-    if (entries.length >= ownActionWindow) break;
-  }
-  return entries;
 }
 
 type BreakerOntologyCoverageMetricKey =
