@@ -171,6 +171,10 @@ import {
   semanticRuntimeTypePriority,
 } from "./runtime/semantic-runtime-score-components";
 import {
+  semanticRuntimeStrategicActionFitEvidence,
+  semanticRuntimeStrategicActionFitScoreComponents,
+} from "./runtime/strategic-action-fit";
+import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
   tacticalPlanMappedChoice,
@@ -4096,6 +4100,12 @@ function scoreSemanticRuntimeAction(
             `semantic_exclusion_reason:${exclusion.reason}`,
           ]
         : []),
+      ...semanticRuntimeStrategicActionFitEvidence(
+        input,
+        action,
+        scopeId,
+        actionSemanticCandidate,
+      ),
       ...semanticRuntimeEvidence(input, action, scopeId),
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
@@ -4552,6 +4562,12 @@ function semanticRuntimeScoreBreakdown(
         ]
       : []),
     ...contextComponents,
+    ...semanticRuntimeStrategicActionFitScoreComponents(
+      input,
+      action,
+      scopeId,
+      actionSemanticCandidate,
+    ),
     ...(privateBonus !== 0
       ? [
           buildSemanticDecisionDebugScoreComponent({

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { tacticalPlanMappedChoice } from "./semantic-choice-ranking";
+import {
+  tacticalPlanMappedChoice,
+  tacticalPlanMappingOverrideEvidence,
+} from "./semantic-choice-ranking";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 import type { PlanStepMappingResult } from "../tactical-plans";
 
@@ -64,9 +67,68 @@ describe("tacticalPlanMappedChoice", () => {
     );
     expect(result.scoreGap).toBe(7800);
   });
+
+  it("lets strategic action fit lower the tactical plan override score gap", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(run, 7425, ["semantic_strategic_action_fit:true"]),
+        choice(gain, 7025),
+      ],
+      coverageMapping([gain]),
+      choice(run, 7425, ["semantic_strategic_action_fit:true"]),
+    );
+
+    expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("gain");
+    expect(result.overrideReason).toBe("strategic_score_gap");
+    expect(result.overrideThreshold).toBe(360);
+    expect(tacticalPlanMappingOverrideEvidence(result)).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_override_allowed:true",
+        "tactical_plan_override_reason:strategic_score_gap",
+        "tactical_plan_mapping_score_gap_threshold:360",
+      ]),
+    );
+  });
+
+  it("protects a strategic mapped action from a nonstrategic medium score gap", () => {
+    const mappedRun = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(run, 7785),
+        choice(mappedRun, 7025, ["semantic_strategic_action_fit:true"]),
+      ],
+      remoteContestMapping([mappedRun]),
+      choice(run, 7785),
+    );
+
+    expect(result.choice?.action.actionId).toBe("run-remote");
+    expect(result.overrideChoice).toBeUndefined();
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBe("strategic_mapping_protected");
+    expect(result.overrideThreshold).toBe(900);
+    expect(result.choice?.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_mapping_override_blocked:true",
+        "tactical_plan_override_blocked_reason:strategic_mapping_protected",
+        "tactical_plan_mapping_score_gap_threshold:900",
+      ]),
+    );
+  });
 });
 
-function choice(action: LegalAction, score: number): SemanticRuntimeChoice {
+function choice(
+  action: LegalAction,
+  score: number,
+  evidence: string[] = [],
+): SemanticRuntimeChoice {
   return {
     action,
     scopeId:
@@ -76,19 +138,32 @@ function choice(action: LegalAction, score: number): SemanticRuntimeChoice {
     score,
     reasonCode: `runner.semantic.${action.type}`,
     explanation: action.label,
-    evidence: [],
+    evidence,
   };
 }
 
 function coverageMapping(
   legalActions: LegalAction[],
 ): PlanStepMappingResult {
+  return planMapping("runner.obtain_breaker_coverage", legalActions);
+}
+
+function remoteContestMapping(
+  legalActions: LegalAction[],
+): PlanStepMappingResult {
+  return planMapping("runner.contest_remote", legalActions);
+}
+
+function planMapping(
+  type: "runner.obtain_breaker_coverage" | "runner.contest_remote",
+  legalActions: LegalAction[],
+): PlanStepMappingResult {
   return {
     status: "matched",
     plan: {
-      planId: "runner.obtain_breaker_coverage:remote_1",
+      planId: `${type}:remote_1`,
       side: "runner",
-      type: "runner.obtain_breaker_coverage",
+      type,
       status: "active",
       priority: 100,
       horizonTurns: 1,

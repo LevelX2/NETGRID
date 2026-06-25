@@ -383,6 +383,59 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("adds bounded StrategicIntent action fit to semantic runtime scoring", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    const rdRun = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [rdRun, draw]) as AiDecisionInput & {
+      ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
+    };
+    input.playerView.own.credits = 6;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.ownStrategicIntentState = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      targetVector: {
+        kind: "central",
+        targetId: "rd",
+        evidence: ["test:strategic_action_fit"],
+      },
+      availableCredits: input.playerView.own.credits,
+      strategyProfile: runtimeRunnerStrategyProfile(),
+    });
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_family:runner_central_pressure",
+      ]),
+    );
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "semantic_strategic_action_fit",
+          reason: expect.stringContaining(
+            "strategic_action_fit_family:runner_central_pressure",
+          ),
+        }),
+      ]),
+    );
+  });
+
   it("persists StrategicIntent memory by default and respects preview mode", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {

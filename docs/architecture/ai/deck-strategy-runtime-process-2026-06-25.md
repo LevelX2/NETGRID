@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-07 next`
+Status: `active: DSR-08 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -84,9 +84,9 @@ preflight
 4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: `8a0e9e55`.
 5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: `30506fea`.
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: `16a70206`.
-7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: pending.
-8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `next`.
-9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren.
+7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: `fc8e7908`.
+8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: pending.
+9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `next`.
 10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten.
 11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen.
 12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration.
@@ -286,6 +286,20 @@ Done-Gate:
 
 - Tests für erlaubte und verweigerte Plan-Overrides bestehen.
 - Debug erklärt Overrule oder Nicht-Overrule.
+
+Umsetzung:
+
+- `runtime/strategic-action-fit.ts` ergänzt eine bounded `semantic_strategic_action_fit`-Komponente aus `ownStrategicIntentState` für Runner- und Corp-Actions.
+- Die Komponente bleibt AI-intern, side-safe, erzeugt keine Actions und wird bei hard-blocked StrategicIntent nicht vergeben.
+- `tacticalPlanMappedChoice` senkt die Score-Gap-Schwelle für strategisch passende Override-Kandidaten und schützt strategisch passende Plan-Mappings stärker vor nichtstrategischen mittleren Gaps.
+- Erlaubte und blockierte Plan-Mapping-Overrides erhalten explizite Evidence mit Grund, Score-Gap und Schwelle.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-choice-ranking.test.ts src/semantic-ai-runtime-cutover.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `feat(ai): bound strategic action overrides`
 
