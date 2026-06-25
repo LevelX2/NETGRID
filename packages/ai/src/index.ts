@@ -140,6 +140,7 @@ import {
   type ProgressionCardTargetType,
 } from "./runtime/progression-card-target";
 import {
+  remoteTrashActionTotalCost,
   remoteTrashCostBucket,
   type RemoteTrashCostBucket,
 } from "./runtime/remote-trash-cost";
@@ -26569,7 +26570,7 @@ function runnerRemoteTrashAccessContext(
     (candidate) => candidate.type === "trash_accessed_card",
   ).length;
   const trashCost = trashAction
-    ? remoteTrashActionTotalCostForMetrics(trashAction)
+    ? remoteTrashActionTotalCost(trashAction)
     : (remoteTrashCostForVisibleCard(accessed) ?? 0);
   const trashable =
     targetType !== "unknown" &&
@@ -27004,13 +27005,6 @@ function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
   return "unknown";
 }
 
-function remoteTrashActionTotalCostForMetrics(action: LegalAction): number {
-  const payloadCost = action.payload?.accessTrashTotalCost;
-  return typeof payloadCost === "number" && Number.isFinite(payloadCost)
-    ? payloadCost
-    : actionCreditCost(action);
-}
-
 function remoteTrashDedicatedCreditsForMetrics(
   input: AiDecisionInput,
   action: LegalAction,
@@ -27058,7 +27052,7 @@ function remoteTrashDedicatedCreditsForMetrics(
       );
     }, 0) ?? 0;
   return Math.min(
-    remoteTrashActionTotalCostForMetrics(action),
+    remoteTrashActionTotalCost(action),
     Math.max(payloadCredits, rigCredits),
   );
 }
