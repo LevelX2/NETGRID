@@ -1,4 +1,4 @@
-import type { VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
@@ -111,4 +111,38 @@ export function remoteTrashRoleForVisibleCard(
   if (roles.some((role) => role.includes("low_value"))) return "low_value";
   if (card.type === "asset" || card.type === "upgrade") return "unknown";
   return "unknown";
+}
+
+export function remoteTrashRoleForAccessedVisibleCard(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): RemoteTrashRole {
+  const role = remoteTrashRoleForVisibleCard(card);
+  if (role !== "unknown") return role;
+  if (accessedCardContributesToVisibleRunTaxForMetrics(input, card))
+    return "run_tax";
+  return role;
+}
+
+function accessedCardContributesToVisibleRunTaxForMetrics(
+  input: AiDecisionInput,
+  accessed: VisibleCard,
+): boolean {
+  const definitionId = accessed.definitionId;
+  if (!definitionId) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === input.playerView.run?.attackedServerId,
+  );
+  return (
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.subroutines.some(
+        (subroutine) => subroutine.sourceDefinitionId === definitionId,
+      ),
+    ) === true ||
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.breakSubroutineCostSourceDefinitionIds?.includes(
+        definitionId,
+      ),
+    ) === true
+  );
 }

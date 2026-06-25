@@ -423,6 +423,7 @@ import {
 } from "./simulation/central-run-history";
 import { remoteServerHasScoreThreat } from "./simulation/remote-server-threat";
 import {
+  remoteTrashRoleForAccessedVisibleCard,
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
@@ -26897,17 +26898,6 @@ function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
   );
 }
 
-function remoteTrashRoleForAccessedVisibleCard(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): RemoteTrashRole {
-  const role = remoteTrashRoleForVisibleCard(card);
-  if (role !== "unknown") return role;
-  if (accessedCardContributesToVisibleRunTaxForMetrics(input, card))
-    return "run_tax";
-  return role;
-}
-
 function remoteTrashDedicatedCreditsForMetrics(
   input: AiDecisionInput,
   action: LegalAction,
@@ -26980,29 +26970,6 @@ function remoteTrashAccessProtectsAcuteThreatForMetrics(
       input.playerView.agendaPointsToWin - 1
     );
   });
-}
-
-function accessedCardContributesToVisibleRunTaxForMetrics(
-  input: AiDecisionInput,
-  accessed: VisibleCard,
-): boolean {
-  const definitionId = accessed.definitionId;
-  if (!definitionId) return false;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === input.playerView.run?.attackedServerId,
-  );
-  return (
-    server?.ice.some((ice) =>
-      ice.effectiveRunQuote?.subroutines.some(
-        (subroutine) => subroutine.sourceDefinitionId === definitionId,
-      ),
-    ) === true ||
-    server?.ice.some((ice) =>
-      ice.effectiveRunQuote?.breakSubroutineCostSourceDefinitionIds?.includes(
-        definitionId,
-      ),
-    ) === true
-  );
 }
 
 function isRunnerEconomyAction(
