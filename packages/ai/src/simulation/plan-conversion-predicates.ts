@@ -200,6 +200,17 @@ export function isCorpRemoteProtectionActionEntry(
   );
 }
 
+export function scorePathFollowsCorpProtection<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  const entry = sequence[index];
+  if (!entry || entry.side !== "corp") return false;
+  if (!isCorpProtectionScoreConversionAction(entry)) return false;
+  return previousOwnStrategicWindow(sequence, index, 3).some(
+    isCorpRemoteProtectionActionEntry,
+  );
+}
+
 export function isRunnerRigProgressAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {

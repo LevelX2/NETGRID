@@ -472,7 +472,6 @@ import {
   ownStrategicWindow,
   planKindForConversion,
   planIntentConvertedWithin,
-  previousOwnStrategicWindow,
   remoteBuildConvertsToAdvanceOrScore,
   remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
@@ -482,6 +481,7 @@ import {
   runnerRemoteContestConvertsToStealTrashOrAbort,
   runnerRigConvertsToRun,
   serverTargetsMatch,
+  scorePathFollowsCorpProtection,
   rigActionConvertsToRun,
   setupActionConvertsToRun,
   strategicPlanConvertsWithinOwnDecisions,
@@ -21156,18 +21156,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
   };
-}
-
-function scorePathFollowsCorpProtection(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index];
-  if (!entry || entry.side !== "corp") return false;
-  if (!isCorpProtectionScoreConversionAction(entry)) return false;
-  return previousOwnStrategicWindow(sequence, index, 3).some(
-    isCorpRemoteProtectionActionEntry,
-  );
 }
 
 function corpRemoteCreatedConverts(
