@@ -211,6 +211,35 @@ export function scorePathFollowsCorpProtection<
   );
 }
 
+export function corpCompressionActionLeadsToScoreLine<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number, ownDecisions: number): boolean {
+  const entry = sequence[index];
+  if (!entry || entry.side !== "corp") return false;
+  if (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "advance_card" ||
+    (entry.actionType === "install_card" && entry.targetCardType === "agenda")
+  )
+    return true;
+  return ownStrategicWindow(sequence, index, ownDecisions).some(
+    isCorpProtectionScoreConversionAction,
+  );
+}
+
+export function runnerStealsBeforeNextCorpScore<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side === "corp" && entry.actionType === "score_agenda")
+      return false;
+    if (entry.side === "runner" && entry.actionType === "steal_agenda")
+      return true;
+  }
+  return false;
+}
+
 export function isRunnerRigProgressAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {
