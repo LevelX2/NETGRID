@@ -573,6 +573,7 @@ import {
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
 import { buildRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
+import { chooseRandomLegalDecision } from "./simulation/random-legal-decision";
 import {
   runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
   runnerCreditReserveTargetForInput as runnerCreditReserveTargetForInputWithRoles,
@@ -6815,7 +6816,9 @@ function chooseDecisionForSimulation(
   const mode = controllerModeForSide(side, config);
   switch (mode) {
     case "random_legal_bot":
-      return chooseRandomLegalDecision(input, simulationRng);
+      return chooseRandomLegalDecision(input, simulationRng, {
+        selectedChoicesForDecision,
+      });
     case "basic_runner_ai":
       return side === "runner"
         ? chooseRunnerBaselineAction(input)
@@ -6837,40 +6840,6 @@ function chooseDecisionForSimulation(
     case "current_candidate":
       return chooseAiAction(input, config.aiDecisionRuntimeOptions);
   }
-}
-
-function chooseRandomLegalDecision(
-  input: AiDecisionInput,
-  simulationRng: SimulationRng,
-): AiDecision {
-  const legalActions = input.legalActions.slice().sort(compareAction);
-  const fallback = legalActions[0];
-  if (!fallback) {
-    return {
-      actionId: "",
-      reasonCode: "simulation.random.no_legal_action",
-      explanation: "Keine legale Aktion verfuegbar.",
-      consideredActionIds: [],
-      fallbackUsed: true,
-      timeoutUsed: false,
-      confidence: 0,
-    };
-  }
-  const index = simulationRng.nextInt(legalActions.length);
-  const selected = legalActions[index] ?? fallback;
-  const selectedChoices = selectedChoicesForDecision(input, selected);
-  return {
-    actionId: selected.actionId,
-    ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: "simulation.random_legal_bot",
-    explanation:
-      "Deterministisch pseudozufaellige legale Aktion fuer Benchmark.",
-    consideredActionIds: legalActions.map((action) => action.actionId),
-    fallbackUsed: false,
-    timeoutUsed: false,
-    confidence: 0.35,
-    evidence: [`mode:random_legal_bot`, `rng_counter:${simulationRng.counter}`],
-  };
 }
 
 function validateSimulationDeckSupport(config: AiSimulationConfig): string[] {
