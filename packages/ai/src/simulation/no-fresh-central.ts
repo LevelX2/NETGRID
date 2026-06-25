@@ -17,6 +17,12 @@ export type BestTrueCentralCloseoutProfile = TrueCentralCloseoutProfile & {
   target?: CentralServerTarget;
 };
 
+export type RunnerNoFreshCentralContext = {
+  targets: CentralServerTarget[];
+  betterAlternatives: string[];
+  allowedReasons: string[];
+};
+
 export type NoFreshCentralSubstitutionType =
   | "economy"
   | "rig_unlock"
@@ -50,6 +56,24 @@ type TrueCentralCloseoutDependencies = {
     action: LegalAction,
   ) => string | undefined;
 };
+
+type RunnerNoFreshCentralContextDependencies =
+  TrueCentralCloseoutDependencies & {
+    centralRunStreakWithoutValueForMetrics: (
+      input: AiDecisionInput,
+      target: CentralServerTarget,
+    ) => number;
+    isRunnerEconomyAction: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) => boolean;
+    rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+    runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
+    runnerRemoteThreatProfile: (
+      input: AiDecisionInput,
+      serverId: string,
+    ) => { contestable: boolean };
+  };
 
 export function bestTrueCentralCloseoutProfile(
   input: AiDecisionInput,
@@ -139,6 +163,161 @@ export function trueCentralCloseoutProfile(
   return {
     opportunity: hasSpecificPressure,
     reasons,
+  };
+}
+
+export function runnerNoFreshCentralContext(
+  input: AiDecisionInput,
+  dependencies: RunnerNoFreshCentralContextDependencies,
+): RunnerNoFreshCentralContext {
+  const targets = (["rd", "hq", "archives"] as const).filter((target) => {
+    const hasRun = input.legalActions.some(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === target,
+    );
+    if (!hasRun) return false;
+    const closeout = trueCentralCloseoutProfile(
+      input,
+      target,
+      dependencies,
+    ).opportunity;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === target,
+    );
+    const matchingInterface = (input.playerView.own.rig ?? []).some((card) =>
+      centralPressureTargetsForCard(card.definitionId).includes(target),
+    );
+    const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
+      dependencies
+        .rolesForCardId(card.definitionId)
+        .some((role) => role.includes("multiaccess")),
+    );
+    return (
+      dependencies.centralRunStreakWithoutValueForMetrics(input, target) > 0 &&
+      !matchingInterface &&
+      !anyMultiaccess &&
+      !closeout &&
+      !centralRunEventGoodForTarget(
+        input,
+        target,
+        dependencies.sourceDefinitionIdForAction,
+      ) &&
+      server !== undefined
+    );
+  });
+  if (targets.length === 0)
+    return { targets: [], betterAlternatives: [], allowedReasons: [] };
+
+  const better = new Set<string>();
+  const reserveTarget = dependencies.runnerCreditReserveTargetForInput(input);
+  if (
+    input.playerView.own.credits <= reserveTarget &&
+    input.legalActions.some((action) =>
+      dependencies.isRunnerEconomyAction(input, action),
+    )
+  )
+    better.add("economy");
+  if (
+    input.legalActions.some(
+      (action) =>
+        action.type === "start_run" &&
+        typeof action.payload?.serverId === "string" &&
+        isRemoteServerTarget(action.payload.serverId) &&
+        dependencies.runnerRemoteThreatProfile(input, action.payload.serverId)
+          .contestable,
+    )
+  )
+    better.add("remote_contest");
+  if (
+    input.legalActions.some(
+      (action) =>
+        action.type === "install_card" &&
+        dependencies
+          .rolesForAction(input, action)
+          .some((role) => role.startsWith("breaker_")),
+    )
+  )
+    better.add("rig_unlock");
+  if (
+    input.legalActions.some((action) => {
+      if (action.type !== "install_card") return false;
+      const definitionId = dependencies.sourceDefinitionIdForAction(
+        input,
+        action,
+      );
+      return isCentralPressureCardForMetrics(definitionId, true);
+    })
+  )
+    better.add("pressure_install");
+  if (
+    input.legalActions.some((action) => {
+      if (
+        action.type === "draw_card" &&
+        input.playerView.own.gripOrHq.length <= 2
+      )
+        return true;
+      if (action.type !== "play_event" && action.type !== "resolve_choice")
+        return false;
+      return dependencies.rolesForAction(input, action).some(
+        (role) =>
+          role === "draw" ||
+          role === "setup" ||
+          role.includes("search") ||
+          role.includes("tutor"),
+      );
+    })
+  )
+    better.add("setup_search");
+
+  const allowed = new Set<string>();
+  for (const target of targets) {
+    const profile = trueCentralCloseoutProfile(input, target, dependencies);
+    if (profile.opportunity) allowed.add("closeout");
+    const installed = input.playerView.own.rig ?? [];
+    if (
+      installed.some((card) =>
+        centralPressureTargetsForCard(card.definitionId).includes(target),
+      )
+    )
+      allowed.add("interface");
+    if (
+      installed.some((card) =>
+        dependencies
+          .rolesForCardId(card.definitionId)
+          .some((role) => role.includes("multiaccess")),
+      )
+    )
+      allowed.add("multiaccess");
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === target,
+    );
+    const assessment = dependencies.assessKnownRezzedIcePath(
+      server?.ice ?? [],
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server?.root ?? [],
+    );
+    if (
+      !assessment.blocked &&
+      ((assessment.visibleBreakCost ?? 0) <= 0 ||
+        (server?.ice.length ?? 0) === 0)
+    )
+      allowed.add("central_open");
+  }
+  const remoteContestable = input.legalActions.some(
+    (action) =>
+      action.type === "start_run" &&
+      typeof action.payload?.serverId === "string" &&
+      isRemoteServerTarget(action.payload.serverId) &&
+      dependencies.runnerRemoteThreatProfile(input, action.payload.serverId)
+        .contestable,
+  );
+  if (!remoteContestable) allowed.add("remote_uncontestable");
+  if (better.size === 0) allowed.add("no_better_action");
+  return {
+    targets,
+    betterAlternatives: [...better].sort(),
+    allowedReasons: [...allowed].sort(),
   };
 }
 
