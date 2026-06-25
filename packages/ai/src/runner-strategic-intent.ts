@@ -91,6 +91,42 @@ export function buildRunnerStrategicIntentProfile(
       evidence: ["projection_input_side:not_runner"],
     };
   }
+  if (!hasProductiveStrategyAnchor(strategyProfile)) {
+    const riskProfile = ["runner.low_confidence_strategy_projection" as const];
+    const rejectedIntents = sortedIntentValues<RunnerRejectedIntent>([
+      ...(!scoreHasSpecificAnchor(strategyProfile, "runner.rnd_pressure")
+        ? ["runner.dedicated_rnd_multiaccess" as const]
+        : []),
+      ...(!scoreHasSpecificAnchor(strategyProfile, "runner.hq_pressure")
+        ? ["runner.dedicated_hq_multiaccess" as const]
+        : []),
+      "runner.hq_depletion",
+      "runner.bad_publicity_pressure",
+    ]);
+    return {
+      schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
+      side: "runner",
+      source: sourceFor(params),
+      primaryWinIntent: "runner.unknown",
+      setupEngine: [],
+      pressureVectors: [],
+      riskProfile,
+      rejectedIntents,
+      confidence: "low",
+      evidence: [
+        "productive_strategy_anchor:false",
+        ...strategicIntentEvidence({
+          strategyProfile,
+          deckCapabilities,
+          setupEngine: [],
+          pressureVectors: [],
+          riskProfile,
+          rejectedIntents,
+          executionStyle: undefined,
+        }),
+      ],
+    };
+  }
 
   const setupEngine = sortedIntentValues<RunnerSetupEngine>([
     ...(hasBreakerSearchSetup(strategyProfile, deckCapabilities)
@@ -334,6 +370,18 @@ function scoreHasSpecificAnchor(
 ): boolean {
   const score = strategyScore(strategyProfile, strategyId);
   return Boolean(score && score.anchorScore > 0 && score.anchorEvidence.length > 0);
+}
+
+function hasProductiveStrategyAnchor(
+  strategyProfile: AiDeckStrategyProfile | undefined,
+): boolean {
+  if (!strategyProfile) return false;
+  return Object.values(strategyProfile.strategyScores).some(
+    (score) =>
+      score.runtimeStatus === "productive" &&
+      score.anchorScore > 0 &&
+      score.anchorEvidence.length > 0,
+  );
 }
 
 function strategyScore(

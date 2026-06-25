@@ -46,6 +46,25 @@ Vor dem ersten Check fehlten im neuen Worktree `node_modules`; `corepack pnpm in
 - `corepack pnpm --filter @netgrid/ai test`: grün, 146 Testdateien und 1628 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H02-Ergebnis
+
+Status: `done`
+
+Die Capability-Grenze ist gehärtet: Capabilities beschreiben Werkzeuge, Coverage, Support und Pflichten, erzeugen aber ohne produktiven Strategy-Anker keine Runtime-Strategie mehr.
+
+Umgesetzt:
+
+- Runner-Intent gibt bei fehlendem produktivem Anker `runner.unknown`, leere `setupEngine`/`pressureVectors`, Low-Confidence und `productive_strategy_anchor:false` zurück.
+- Corp-Intent gibt bei fehlendem produktivem Anker `corp.unknown`, leere Score-/Defense-/Economy-/Punish-Pläne, Low-Confidence und `corp.no_productive_anchor` zurück.
+- Capability-only Tests sichern ab, dass Search-, Economy-, Remote-, Score- oder Defense-Support allein keine produktive Strategie erzeugt.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `runner-strategic-intent`, `corp-strategic-intent`, `strategic-intent-state`, `deck-doctrine-strategy`, `strategic-vertical-slices`, `runner-golden-deck-debug`: grün.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 146 Testdateien und 1631 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.

@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H01_done`
+Status: `DSR-H02_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -78,8 +78,8 @@ preflight
 
 1. `DSR-H00` Post-Integration-Audit und reproduzierbare Baseline. Status: `done`.
 2. `DSR-H01` Produktiven Strategie-Vertrag und report-only Diagnostic strikt trennen. Status: `done`.
-3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `active`.
-4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `pending`.
+3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `done`.
+4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `active`.
 5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `pending`.
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `pending`.
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `pending`.
@@ -118,6 +118,10 @@ Commit: `feat(ai): separate strategy runtime and diagnostics`
 Ziel: Capabilities bleiben Werkzeuge und Pflichten, erfinden aber ohne echte Anker keine Strategie.
 
 Kernartefakte: DeckStrategyProfile, Runner-/Corp-Intent, ankerlose und Golden-Deck-Tests.
+
+Ergebnis: Runner- und Corp-StrategicIntent-Projektionen erzeugen ohne produktiven Strategy-Anker keine Setup-, Pressure-, Score-, Defense-, Economy- oder Punish-Pläne mehr. Capabilities bleiben als Evidence sichtbar, dürfen aber ankerlose oder support-only Profile nicht in produktive Strategie verwandeln. Runner- und Corp-Tests sichern capability-only Fälle explizit ab.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `runner-strategic-intent`, `corp-strategic-intent`, `strategic-intent-state`, `deck-doctrine-strategy`, `strategic-vertical-slices`, `runner-golden-deck-debug` grün; vollständiger `@netgrid/ai`-Testlauf grün mit 146 Testdateien und 1631 Tests; Diff-Check grün.
 
 Commit: `feat(ai): harden strategy anchors and capability boundary`
 
