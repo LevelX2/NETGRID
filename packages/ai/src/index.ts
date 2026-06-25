@@ -161,6 +161,8 @@ import {
 } from "./runtime/encounter-subroutine";
 import {
   currentEncounteredIceCard,
+  currentRunHasFutureVisibleIce,
+  currentRunRemainingIce,
   encounterHasImmediateUnbrokenThreat,
 } from "./runtime/current-encounter";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
@@ -12220,21 +12222,6 @@ function projectFutureIceForUnbrokenEffects(
         : {}),
     },
   };
-}
-
-function currentRunHasFutureVisibleIce(input: AiDecisionInput): boolean {
-  return currentRunRemainingIce(input).some(
-    (ice) => ice.known && ice.rezzed === true,
-  );
-}
-
-function currentRunRemainingIce(input: AiDecisionInput): VisibleCard[] {
-  const run = input.playerView.run;
-  if (!run || run.position?.kind !== "ice") return [];
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === run.position?.serverId,
-  );
-  return server?.ice.slice(0, Math.max(0, run.position.iceIndex)) ?? [];
 }
 
 function breakerIdForEncounterAction(action: LegalAction): string | undefined {
