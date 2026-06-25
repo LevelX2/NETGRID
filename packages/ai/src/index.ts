@@ -581,6 +581,7 @@ import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-
 import type { RunnerSetupMissingCoverageType } from "./simulation/runner-setup-coverage-types";
 import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
 import type { AiSimulationConfig } from "./simulation/ai-simulation-config";
+import type { AiSimulationSummary } from "./simulation/ai-simulation-summary";
 import type {
   AiBenchmarkDeckSlotResult,
   AiMatchProgressionBenchmarkResult,
@@ -1152,6 +1153,9 @@ export type {
   AiSimulationConfig,
 } from "./simulation/ai-simulation-config";
 export type {
+  AiSimulationSummary,
+} from "./simulation/ai-simulation-summary";
+export type {
   SimulationControllerMode,
   SimulationBenchmarkProfileId,
   SimulationBenchmarkProfile,
@@ -1343,23 +1347,6 @@ const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     ...LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS,
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
-
-export type AiSimulationSummary = {
-  seed: string;
-  winner: Exclude<GameState["winner"], null> | "action_limit_reached";
-  gameEndReason?: GameState["gameEndReason"];
-  actions: number;
-  turns: number;
-  finalAgendaPoints: { runner: number; corp: number };
-  finalStateHash: string;
-  eventLogLength: number;
-  replayOk: boolean;
-  replayErrors: string[];
-  actionSequence: AiSimulationActionSequenceEntry[];
-  errors: string[];
-  cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
-  metrics: AiQualityMetrics;
-};
 
 export function chooseAiAction(
   input: AiDecisionInput,
