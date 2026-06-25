@@ -425,6 +425,10 @@ import {
   isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
 import {
+  centralRunEventGoodForTarget as centralRunEventGoodForTargetWithSource,
+  noFreshCentralSubstitutionTypeForAction as noFreshCentralSubstitutionTypeForActionWithDeps,
+} from "./simulation/no-fresh-central";
+import {
   centralRunStreakWithoutValueForMetrics,
   centralRepeatHasFreshValueForMetrics,
   isRepeatedLowValueCentralRunForMetrics,
@@ -24434,12 +24438,11 @@ function centralRunEventGoodForTarget(
   input: AiDecisionInput,
   target: "hq" | "rd" | "archives",
 ): boolean {
-  return input.legalActions.some((action) => {
-    if (action.side !== "runner" || action.type !== "play_event") return false;
-    return centralPressureTargetsForCard(
-      sourceDefinitionIdForSimulationAction(input, action),
-    ).includes(target);
-  });
+  return centralRunEventGoodForTargetWithSource(
+    input,
+    target,
+    sourceDefinitionIdForSimulationAction,
+  );
 }
 
 function noFreshCentralSubstitutionTypeForAction(
@@ -24453,34 +24456,11 @@ function noFreshCentralSubstitutionTypeForAction(
   | "setup_search"
   | "end_turn"
   | undefined {
-  if (isRunnerEconomyAction(input, action)) return "economy";
-  if (
-    action.type === "start_run" &&
-    typeof action.payload?.serverId === "string" &&
-    isRemoteServerTarget(action.payload.serverId)
-  )
-    return "remote_contest";
-  if (action.type === "install_card") {
-    const definitionId = sourceDefinitionIdForSimulationAction(input, action);
-    if (isCentralPressureCardForMetrics(definitionId, true))
-      return "pressure_install";
-    if (
-      rolesForAction(input, action).some((role) => role.startsWith("breaker_"))
-    )
-      return "rig_unlock";
-  }
-  if (
-    action.type === "draw_card" ||
-    (action.type === "play_event" &&
-      rolesForAction(input, action).some(
-        (role) =>
-          role === "draw" || role === "setup" || role.includes("search"),
-      )) ||
-    action.type === "resolve_choice"
-  )
-    return "setup_search";
-  if (action.type === "end_turn") return "end_turn";
-  return undefined;
+  return noFreshCentralSubstitutionTypeForActionWithDeps(input, action, {
+    isRunnerEconomyAction,
+    rolesForAction,
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  });
 }
 
 function runnerReserveDiagnosticsForSimulationAction(
