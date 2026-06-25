@@ -20,12 +20,10 @@ import {
   type EditableDeck,
 } from "@netgrid/decks";
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
-import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import localRealisticBenchmarkDeckSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import localRealisticBenchmarkDecksData from "../../../data/ai/ai-local-realistic-benchmark-decks-2026-05-23.json";
 import realSceneBenchmarkDeckSnapshotsData from "../../../data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json";
 import realSceneBenchmarkDecksData from "../../../data/ai/ai-real-scene-benchmark-decks-2026-05-24.json";
-import soakSeeds143Data from "../../../data/ai/ai-soak-seeds-1.4.3.json";
 import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import {
@@ -761,6 +759,7 @@ import {
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
+import { SOAK_SEEDS, SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
 import {
   controllerModeForSide,
   deckSnapshotForSimulation,
@@ -1168,28 +1167,6 @@ export type {
 } from "./simulation/simulation-types";
 
 const AI_PROFILES = aiProfilesData.profiles as AiProfileWeightsData[];
-const SOAK_SEEDS = soakSeedsData as {
-  tuningSeeds: string[];
-  holdoutSeeds: string[];
-  matrix: {
-    runnerDeckId: "demo_runner_008";
-    corpDeckId: "demo_corp_008";
-    agendaPointsToWin: number;
-    difficulties: AiDifficulty[];
-    maxActions: number;
-  };
-};
-const SOAK_SEEDS_143 = soakSeeds143Data as {
-  version: "1.4.3";
-  tuningSeeds: string[];
-  holdoutSeeds: string[];
-  league: {
-    runnerDeckId: "demo_runner_008";
-    corpDeckId: "demo_corp_008";
-    agendaPointsToWin: number;
-    maxActions: number;
-  };
-};
 const AI_HINTS = createAiHintsByCard();
 
 const DECK_SNAPSHOTS_08 = (
