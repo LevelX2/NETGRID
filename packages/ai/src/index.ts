@@ -170,7 +170,10 @@ import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./runtime/shell-traders-choice-option";
-import { selectedDefaultCardChoiceOptionIds } from "./runtime/select-card-choice-option";
+import {
+  selectedDefaultCardChoiceOptionIds,
+  selectedFirstChoiceOptionId,
+} from "./runtime/select-card-choice-option";
 import { selectedSetupMulliganChoiceOptionId } from "./runtime/setup-mulligan-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
@@ -7398,9 +7401,9 @@ function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind !== "bid_amount") {
-    const firstOption = selectableOptions[0];
-    return firstOption
-      ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] }
+    const selectedOptionId = selectedFirstChoiceOptionId(selectableOptions);
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
 
