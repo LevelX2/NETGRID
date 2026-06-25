@@ -148,6 +148,7 @@ import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
+import { latestTraceContext } from "./runtime/trace-context";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -8106,44 +8107,6 @@ function scoreSearchChoiceOption(
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
   score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
   return score;
-}
-
-function latestTraceContext(input: AiDecisionInput): {
-  traceStrength?: number;
-  runnerLink?: number;
-  corpBid?: number;
-  runnerBid?: number;
-  runnerStrength?: number;
-  postBidTraceLinkBonus?: number;
-} {
-  for (const event of input.eventTail.slice().reverse()) {
-    const traceStrength = event.publicPayload.traceStrength;
-    const runnerLink = event.publicPayload.runnerLink;
-    const corpBid = event.publicPayload.corpBid;
-    const runnerBid = event.publicPayload.runnerBid;
-    const runnerStrength = event.publicPayload.runnerStrength;
-    const postBidTraceLinkBonus = event.publicPayload.postBidTraceLinkBonus;
-    if (
-      typeof traceStrength === "number" ||
-      typeof runnerLink === "number" ||
-      typeof corpBid === "number" ||
-      typeof runnerBid === "number" ||
-      typeof runnerStrength === "number" ||
-      typeof postBidTraceLinkBonus === "number"
-    ) {
-      return {
-        ...(typeof traceStrength === "number" ? { traceStrength } : {}),
-        ...(typeof runnerLink === "number" ? { runnerLink } : {}),
-        ...(typeof corpBid === "number" ? { corpBid } : {}),
-        ...(typeof runnerBid === "number" ? { runnerBid } : {}),
-        ...(typeof runnerStrength === "number" ? { runnerStrength } : {}),
-        ...(typeof postBidTraceLinkBonus === "number"
-          ? { postBidTraceLinkBonus }
-          : {}),
-      };
-    }
-  }
-  return {};
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
