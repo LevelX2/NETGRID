@@ -3,6 +3,7 @@ import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import {
@@ -90,4 +91,13 @@ export function rezCostForDefinitionId(
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
   );
+}
+
+export function sourceDefinitionIdForSimulationAction(
+  action: LegalAction,
+  findVisibleCard: (instanceId: string) => VisibleCard | undefined,
+): string | undefined {
+  if (action.source === "basic_action" || action.source === "game_rule")
+    return undefined;
+  return findVisibleCard(action.source)?.definitionId;
 }

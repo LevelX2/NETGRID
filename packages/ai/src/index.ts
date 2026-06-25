@@ -140,6 +140,7 @@ import {
   cardTargetTypeForInstance,
   remoteHasNearFinalAgenda,
   rezCostForDefinitionId,
+  sourceDefinitionIdForSimulationAction as sourceDefinitionIdForSimulationSource,
 } from "./runtime/simulation-card-target";
 import {
   remoteTrashCostBucket,
@@ -449,6 +450,10 @@ import {
   remoteProtectionScoreForSimulation,
   runnerContestRiskForSimulation,
 } from "./simulation/remote-protection-score";
+import {
+  isRunnerDuplicateInstallForSimulation,
+  isRunnerLowValueDuplicateInstallForSimulation,
+} from "./simulation/runner-install-classification";
 import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
@@ -25584,12 +25589,10 @@ function isRunnerDuplicateInstall(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
-  if (!definitionId || action.type !== "install_card") return false;
-  return (
-    input.playerView.own.rig?.some(
-      (card) => card.known && card.definitionId === definitionId,
-    ) === true
+  return isRunnerDuplicateInstallForSimulation(
+    input,
+    action,
+    sourceDefinitionIdForSimulationAction,
   );
 }
 
@@ -25597,32 +25600,19 @@ function isRunnerLowValueDuplicateInstall(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
-  if (!definitionId) return false;
-  const roles = rolesForCardId(definitionId);
-  if (definitionId === "onr_v1_165_junkyard-bbs") return true;
-  if (roles.some((role) => role === "memory" || role === "memory_support"))
-    return false;
-  if (roles.some((role) => isRunnerPressureRole(role))) return false;
-  if (roles.some((role) => isRunnerNonAdditiveUtilityRole(role))) return true;
-  if (roles.some((role) => role.startsWith("breaker_"))) return true;
-  return roles.some(
-    (role) =>
-      role === "resource" ||
-      role === "setup" ||
-      role === "draw" ||
-      role === "tag_risk" ||
-      isRunnerEconomyRole(role),
-  );
+  return isRunnerLowValueDuplicateInstallForSimulation(input, action, {
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+    rolesForCardId,
+  });
 }
 
 function sourceDefinitionIdForSimulationAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): string | undefined {
-  if (action.source === "basic_action" || action.source === "game_rule")
-    return undefined;
-  return findVisibleCard(input, action.source)?.definitionId;
+  return sourceDefinitionIdForSimulationSource(action, (id) =>
+    findVisibleCard(input, id),
+  );
 }
 
 function finalAdvanceAssessmentForSimulationAction(
