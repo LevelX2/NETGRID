@@ -121,8 +121,11 @@ import {
 import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
-  type ServerFeatures,
 } from "./runtime/ai-feature-server";
+import {
+  extractAiFeatures as extractAiFeaturesRuntime,
+  type AiFeatures,
+} from "./runtime/ai-features";
 import {
   runnerCardMechanicsForAi,
   visibleCardDefinition,
@@ -1007,25 +1010,6 @@ type AiProfileData = {
   side: Side;
   difficulty: AiDifficulty;
   weights: Record<string, number>;
-};
-
-type AiFeatures = {
-  side: Side;
-  credits: number;
-  clicks: number;
-  tags: number;
-  citySurveillanceSourceCount: number;
-  opponentCredits: number;
-  opponentTags: number;
-  memoryRemaining: number;
-  handCount: number;
-  rigRoles: Set<string>;
-  rigDefinitionIds: Set<string>;
-  handRoles: Set<string>;
-  eventCounts: Record<string, number>;
-  knownServerPressure: number;
-  blockedRunServers: Set<string>;
-  serverFeaturesById: Map<string, ServerFeatures>;
 };
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
@@ -8295,75 +8279,14 @@ function politicalOverthrowEconomyAvailable(
 }
 
 function extractAiFeatures(input: AiDecisionInput): AiFeatures {
-  const ownCards = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.heapOrArchives,
-    ...input.playerView.own.scoreArea,
-    ...(input.playerView.own.rig ?? []),
-  ];
-  const rigRoles = new Set(
-    (input.playerView.own.rig ?? []).flatMap((card) =>
-      rolesForCardId(card.definitionId),
-    ),
-  );
-  const rigDefinitionIds = new Set(
-    (input.playerView.own.rig ?? [])
-      .map((card) => card.definitionId)
-      .filter((id): id is string => Boolean(id)),
-  );
-  const handRoles = new Set(
-    input.playerView.own.gripOrHq.flatMap((card) =>
-      rolesForCardId(card.definitionId),
-    ),
-  );
-  const eventCounts = buildObservedFacts(input).eventCounts;
-  const serverFeaturesById = buildServerFeatures(input);
-  const knownServerPressure = input.playerView.servers.reduce(
-    (sum, server) =>
-      sum +
-      server.ice.filter((card) => card.known || card.rezzed).length +
-      server.root.filter((card) => card.known).length,
-    0,
-  );
-  const blockedRunServers = new Set(
-    input.playerView.servers
-      .filter(
-        (server) =>
-          assessKnownRezzedIcePath(
-            server.ice,
-            input.playerView.own.rig ?? [],
-            input.playerView.own.credits,
-            server.root,
-          ).canReachAccess === false ||
-          isBlockedByKnownRezzedIce(server.ice.at(-1), rigDefinitionIds),
-      )
-      .map((server) => server.id),
-  );
-  return {
-    side: input.side,
-    credits: input.playerView.own.credits,
-    clicks: input.playerView.own.clicks,
-    tags: input.playerView.own.tags,
-    citySurveillanceSourceCount: visibleCitySurveillanceSourceCount(input),
-    opponentCredits: input.playerView.opponent.credits,
-    opponentTags: input.playerView.opponent.tags,
-    memoryRemaining:
-      (input.playerView.own.memoryLimit ?? 0) -
-      (input.playerView.own.memoryUsed ?? 0),
-    handCount: input.playerView.own.gripOrHq.length,
-    rigRoles,
-    rigDefinitionIds,
-    handRoles: new Set([
-      ...handRoles,
-      ...ownCards
-        .flatMap((card) => rolesForCardId(card.definitionId))
-        .filter((role) => role === "tag_punishment"),
-    ]),
-    eventCounts,
-    knownServerPressure,
-    blockedRunServers,
-    serverFeaturesById,
-  };
+  return extractAiFeaturesRuntime(input, {
+    rolesForCardId,
+    buildObservedFacts,
+    buildServerFeatures,
+    assessKnownRezzedIcePath,
+    isBlockedByKnownRezzedIce,
+    visibleCitySurveillanceSourceCount,
+  });
 }
 
 const SCORCHED_EARTH_LIKE_PUNISH_IDS = new Set(["onr_v1_302_scorched-earth"]);
