@@ -743,9 +743,9 @@ import {
 } from "./legacy/legacy-baseline";
 import { decisionFromLegacyChoices } from "./legacy/decision-from-choices";
 import {
-  retainActionAlternativesForFindingWindows as retainActionAlternativesForFindingWindowsRuntime,
+  retainActionAlternativesForFindingWindows,
   selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime,
-  stripSelfplayActionAlternatives as stripSelfplayActionAlternativesRuntime,
+  stripSelfplayActionAlternatives,
 } from "./simulation/selfplay-trace-facts";
 import {
   applyFixtureAction,
@@ -2665,17 +2665,6 @@ const {
   semanticRuntimeScoreFromComponents,
 );
 
-function selfplayTraceFactsForDecision(decision: AiDecision): {
-  planKind?: string;
-  debugFacts?: string[];
-  actionAlternatives?: AiDecisionActionAlternative[];
-} {
-  return selfplayTraceFactsForSimulationDecisionRuntime(decision, true, {
-    sanitizeAiDecisionDebug,
-    safeSelfplayFacts,
-  });
-}
-
 function selfplayTraceFactsForSimulationDecision(
   decision: AiDecision,
   config: AiSimulationConfig,
@@ -2691,29 +2680,6 @@ function selfplayTraceFactsForSimulationDecision(
       sanitizeAiDecisionDebug,
       safeSelfplayFacts,
     },
-  );
-}
-
-function stripSelfplayActionAlternatives(
-  summaries: AiSimulationSummary[],
-): void {
-  stripSelfplayActionAlternativesRuntime(summaries);
-}
-
-function retainActionAlternativesForFindingWindows(
-  summaries: AiSimulationSummary[],
-  findings: { summaryIndex: number; actionIndex: number }[],
-  maxAlternativesPerFinding: number,
-  opportunitySnapshotRequests: Array<{
-    seed: string;
-    actionIndices: number[];
-  }> = [],
-): void {
-  retainActionAlternativesForFindingWindowsRuntime(
-    summaries,
-    findings,
-    maxAlternativesPerFinding,
-    opportunitySnapshotRequests,
   );
 }
 
