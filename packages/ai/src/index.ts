@@ -124,9 +124,6 @@ import {
   type ServerFeatures,
 } from "./runtime/ai-feature-server";
 import {
-  selectedCorpAdvancementCounterChoiceOptionId,
-} from "./runtime/corp-advancement-counter-choice";
-import {
   runnerCardMechanicsForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
@@ -166,16 +163,9 @@ import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
-import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
-import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
-import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
-import { selectedShellTradersStartTurnChoiceOptionId } from "./runtime/shell-traders-choice-option";
 import {
-  selectedDefaultCardChoiceOptionIds,
-  selectedFirstChoiceOptionId,
-} from "./runtime/select-card-choice-option";
-import { selectedSetupMulliganChoiceOptionId } from "./runtime/setup-mulligan-choice-option";
-import { latestTraceContext } from "./runtime/trace-context";
+  selectedChoicesForDecision as selectedChoicesForDecisionRuntime,
+} from "./runtime/selected-choices-for-decision";
 import {
   breakSubroutineIndexesForAction,
   parseSubroutineIndexes,
@@ -440,9 +430,6 @@ import {
 } from "./runtime/public-event-history";
 import { selectableChoiceOptions } from "./runtime/choice-option";
 import {
-  selectedDiscardChoiceOptionIds,
-} from "./runtime/discard-choice-selection";
-import {
   discardCurrentPlanKind,
   discardEvidenceForInput,
 } from "./runtime/discard-plan";
@@ -451,7 +438,6 @@ import {
 } from "./runtime/discard-keep-score";
 import {
   isSearchChoice,
-  selectedSearchChoiceOptionIds,
 } from "./runtime/search-choice-option";
 import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
@@ -7292,129 +7278,15 @@ function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecision["selectedChoices"] | undefined {
-  const choice = input.playerView.pendingChoice;
-  if (action.type !== "resolve_choice" || !choice) return undefined;
-  const selectableOptions = selectableChoiceOptions(choice.options);
-  if (choice.source === "setup.mulligan") {
-    const opening =
-      input.side === "corp"
-        ? evaluateCorpOpeningHand(input)
-        : evaluateRunnerOpeningHand(input);
-    const selectedOptionId = selectedSetupMulliganChoiceOptionId(
-      choice,
-      opening.decision,
-    );
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
-  }
-  if (choice.kind === "select_cards" && choice.source === "discard_phase") {
-    const selected = selectedDiscardChoiceOptionIds(
-      input,
-      choice,
-      selectableOptions,
-      discardKeepScore,
-    );
-    return { choiceId: choice.choiceId, selectedOptionIds: selected };
-  }
-  if (
-    choice.kind === "select_cards" &&
-    choice.source.startsWith("v1912.shell_traders_start_turn")
-  ) {
-    const selectedOptionId = selectedShellTradersStartTurnChoiceOptionId(choice);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
-  }
-  if (
-    choice.kind === "select_cards" &&
-    choice.source.startsWith("runner_program_trash_before_install")
-  ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedRunnerProgramInstallTrashOptionIds(
-        input,
-        choice,
-        selectableOptions,
-      ),
-    };
-  }
-  if (
-    choice.kind === "select_cards" &&
-    (choice.source.startsWith("p3_56.pass_ice_program_trash") ||
-      choice.source.startsWith("card_implementation.active_ice_program_trash"))
-  ) {
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedRunnerForcedProgramTrashOptionIds(
-        input,
-        selectableOptions,
-      ),
-    };
-  }
-  if (
-    input.side === "corp" &&
-    (choice.source.startsWith("p3_34.distribute_advancement") ||
-      choice.source.startsWith("v1919.systematic_layoffs_advancement"))
-  ) {
-    const selected = selectedCorpAdvancementCounterChoiceOptionId(
-      input,
-      selectableOptions,
-    );
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selected ? [selected] : [],
-    };
-  }
-  if (choice.kind === "select_cards") {
-    const searchSelected = selectedSearchChoiceOptionIds(
-      choice,
-      selectableOptions,
-      {
-        features: extractAiFeatures(input),
-        rolesForCardId,
-      },
-    );
-    if (searchSelected)
-      return { choiceId: choice.choiceId, selectedOptionIds: searchSelected };
-    return {
-      choiceId: choice.choiceId,
-      selectedOptionIds: selectedDefaultCardChoiceOptionIds(
-        choice,
-        selectableOptions,
-      ),
-    };
-  }
-  if (choice.source.startsWith("v1921.playful_ai")) {
-    const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
-  }
-  if (choice.source.startsWith("trace_post_bid_link")) {
-    const selectedOptionId = selectedPostBidLinkChoiceOptionId(
-      choice,
-      latestTraceContext(input),
-    );
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
-  }
-  if (choice.kind !== "bid_amount") {
-    const selectedOptionId = selectedFirstChoiceOptionId(selectableOptions);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
-  }
-
-  const selectedOptionId = selectedBidChoiceOptionId(
-    input,
-    choice,
-    latestTraceContext(input),
-  );
-  return selectedOptionId !== undefined
-    ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-    : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  return selectedChoicesForDecisionRuntime(input, action, {
+    evaluateCorpOpeningHand,
+    evaluateRunnerOpeningHand,
+    discardKeepScore,
+    selectedRunnerProgramInstallTrashOptionIds,
+    selectedRunnerForcedProgramTrashOptionIds,
+    extractAiFeatures,
+    rolesForCardId,
+  });
 }
 
 function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
