@@ -568,6 +568,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
+import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
@@ -2923,8 +2924,14 @@ const BENCHMARK_DECK_FORMAT_PROFILE: DeckFormatProfile =
 
 const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   LOCAL_REALISTIC_BENCHMARK_DECKS.slots.map((slot) => {
-    const runner = localBenchmarkDeckManifestEntry(slot.runnerLocalDeckId);
-    const corp = localBenchmarkDeckManifestEntry(slot.corpLocalDeckId);
+    const runner = benchmarkDeckManifestEntry(
+      LOCAL_REALISTIC_BENCHMARK_DECKS.decks,
+      slot.runnerLocalDeckId,
+    );
+    const corp = benchmarkDeckManifestEntry(
+      LOCAL_REALISTIC_BENCHMARK_DECKS.decks,
+      slot.corpLocalDeckId,
+    );
     return {
       slotId: slot.slotId,
       label: slot.label,
@@ -2954,8 +2961,14 @@ const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
 
 const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   REAL_SCENE_BENCHMARK_DECKS.slots.map((slot) => {
-    const runner = realSceneBenchmarkDeckManifestEntry(slot.runnerLocalDeckId);
-    const corp = realSceneBenchmarkDeckManifestEntry(slot.corpLocalDeckId);
+    const runner = benchmarkDeckManifestEntry(
+      REAL_SCENE_BENCHMARK_DECKS.decks,
+      slot.runnerLocalDeckId,
+    );
+    const corp = benchmarkDeckManifestEntry(
+      REAL_SCENE_BENCHMARK_DECKS.decks,
+      slot.corpLocalDeckId,
+    );
     return {
       slotId: slot.slotId,
       label: slot.label,
@@ -5880,22 +5893,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards,
     nonDeckLegalCards,
   };
-}
-
-function localBenchmarkDeckManifestEntry(
-  localDeckId: string,
-): LocalRealisticBenchmarkDeckManifest["decks"][number] | undefined {
-  return LOCAL_REALISTIC_BENCHMARK_DECKS.decks.find(
-    (deck) => deck.localDeckId === localDeckId,
-  );
-}
-
-function realSceneBenchmarkDeckManifestEntry(
-  localDeckId: string,
-): RealSceneBenchmarkDeckManifest["decks"][number] | undefined {
-  return REAL_SCENE_BENCHMARK_DECKS.decks.find(
-    (deck) => deck.localDeckId === localDeckId,
-  );
 }
 
 function missingBenchmarkDeckFormatProfile(): never {
