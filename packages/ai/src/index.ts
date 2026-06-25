@@ -205,6 +205,9 @@ import {
   shellTradersPrepareBaselinePenalty,
 } from "./runtime/shell-traders-context";
 import { publicRoleEvidence } from "./runtime/role-evidence";
+import {
+  corpInstalledEconomyCreditAmount,
+} from "./runtime/corp-installed-economy-credit";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10669,15 +10672,6 @@ function corpInstalledEconomyActionProfile(
       `installed_corp_economy_stored_credits:${storedCredits}`,
     ],
   };
-}
-
-function corpInstalledEconomyCreditAmount(action: LegalAction): number {
-  const payloadAmount = Number(action.payload?.cardImplementationCreditAmount ?? 0);
-  if (Number.isFinite(payloadAmount) && payloadAmount > 0) return payloadAmount;
-  const match = action.label.match(/(\d+)\s+Credits?\s+nehmen/i);
-  if (!match) return 0;
-  const labelAmount = Number(match[1]);
-  return Number.isFinite(labelAmount) ? labelAmount : 0;
 }
 
 function corpTagPunishPayoffFundingProfile(
