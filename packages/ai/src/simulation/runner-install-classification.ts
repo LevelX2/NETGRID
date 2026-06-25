@@ -17,6 +17,38 @@ type RunnerActionRoleDependencies = {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
 };
 
+type RunnerDrawKindDependencies = RunnerActionRoleDependencies & {
+  isSearchChoice: (
+    choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  ) => boolean;
+};
+
+export function runnerDrawKindForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerDrawKindDependencies,
+): { draw: boolean; click: boolean; cardEffect: boolean } {
+  if (action.type === "draw_card")
+    return { draw: true, click: true, cardEffect: false };
+  const roles = dependencies.rolesForAction(input, action);
+  const cardEffect =
+    (action.type === "play_event" ||
+      action.type === "trigger_ability" ||
+      action.type === "activated_card_ability") &&
+    roles.some(
+      (role) => role === "draw" || role === "setup" || role.includes("search"),
+    );
+  const searchChoice =
+    action.type === "resolve_choice" &&
+    input.playerView.pendingChoice !== undefined &&
+    dependencies.isSearchChoice(input.playerView.pendingChoice);
+  return {
+    draw: cardEffect || searchChoice,
+    click: false,
+    cardEffect: cardEffect || searchChoice,
+  };
+}
+
 export function isRunnerEconomyActionForSimulation(
   input: AiDecisionInput,
   action: LegalAction,
@@ -167,4 +199,33 @@ export function isRunnerLowValueDuplicateInstallForSimulation(
       role === "tag_risk" ||
       isRunnerEconomyRole(role),
   );
+}
+
+export function runnerDiscardChoiceRolesForSimulation(
+  input: AiDecisionInput,
+  decision: { selectedChoices?: unknown },
+  discardRolesForCardId: (cardId: string | undefined) => string[],
+): string[] {
+  if (
+    input.playerView.pendingChoice?.source !== "discard_phase" ||
+    input.playerView.pendingChoice.kind !== "select_cards" ||
+    decision.selectedChoices === undefined
+  )
+    return [];
+  const selected = decision.selectedChoices as
+    | { choiceId?: unknown; selectedOptionIds?: unknown }
+    | undefined;
+  if (
+    selected?.choiceId !== input.playerView.pendingChoice.choiceId ||
+    !Array.isArray(selected.selectedOptionIds)
+  )
+    return [];
+  const selectedIds = new Set(
+    selected.selectedOptionIds.filter(
+      (optionId): optionId is string => typeof optionId === "string",
+    ),
+  );
+  return input.playerView.pendingChoice.options
+    .filter((option) => selectedIds.has(option.id))
+    .flatMap((option) => discardRolesForCardId(option.card?.definitionId));
 }

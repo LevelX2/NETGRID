@@ -459,6 +459,8 @@ import {
   isRunnerLowValueDuplicateInstallForSimulation,
   isRunnerPressureActionForSimulation,
   isRunnerRigInstallActionForSimulation,
+  runnerDiscardChoiceRolesForSimulation,
+  runnerDrawKindForSimulationAction as runnerDrawKindForSimulationActionWithDeps,
 } from "./simulation/runner-install-classification";
 import {
   runnerHasRecentRunOnServer,
@@ -25445,25 +25447,10 @@ function runnerDrawKindForSimulationAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): { draw: boolean; click: boolean; cardEffect: boolean } {
-  if (action.type === "draw_card")
-    return { draw: true, click: true, cardEffect: false };
-  const roles = rolesForAction(input, action);
-  const cardEffect =
-    (action.type === "play_event" ||
-      action.type === "trigger_ability" ||
-      action.type === "activated_card_ability") &&
-    roles.some(
-      (role) => role === "draw" || role === "setup" || role.includes("search"),
-    );
-  const searchChoice =
-    action.type === "resolve_choice" &&
-    input.playerView.pendingChoice !== undefined &&
-    isSearchChoice(input.playerView.pendingChoice);
-  return {
-    draw: cardEffect || searchChoice,
-    click: false,
-    cardEffect: cardEffect || searchChoice,
-  };
+  return runnerDrawKindForSimulationActionWithDeps(input, action, {
+    rolesForAction,
+    isSearchChoice,
+  });
 }
 
 function hasRunnerPlayableEconomyAction(
@@ -25524,28 +25511,11 @@ function runnerDiscardChoiceRoles(
   input: AiDecisionInput,
   decision: AiDecision,
 ): string[] {
-  if (
-    input.playerView.pendingChoice?.source !== "discard_phase" ||
-    input.playerView.pendingChoice.kind !== "select_cards" ||
-    decision.selectedChoices === undefined
-  )
-    return [];
-  const selected = decision.selectedChoices as
-    | { choiceId?: unknown; selectedOptionIds?: unknown }
-    | undefined;
-  if (
-    selected?.choiceId !== input.playerView.pendingChoice.choiceId ||
-    !Array.isArray(selected.selectedOptionIds)
-  )
-    return [];
-  const selectedIds = new Set(
-    selected.selectedOptionIds.filter(
-      (optionId): optionId is string => typeof optionId === "string",
-    ),
+  return runnerDiscardChoiceRolesForSimulation(
+    input,
+    decision,
+    discardRolesForCardId,
   );
-  return input.playerView.pendingChoice.options
-    .filter((option) => selectedIds.has(option.id))
-    .flatMap((option) => discardRolesForCardId(option.card?.definitionId));
 }
 
 function isRunnerDuplicateInstall(
