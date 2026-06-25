@@ -496,6 +496,10 @@ import type {
   V143SoakResult,
 } from "./simulation/v143-tuning-gate";
 import type {
+  V143ExploitFixture,
+  V143ExploitRegressionResult,
+} from "./simulation/v143-fixture-types";
+import type {
   AiBenchmarkDeckReference,
   AiBenchmarkDeckSlotDefinition,
   AiBenchmarkDeckSlotStatus,
@@ -770,6 +774,10 @@ export type {
   V143SoakResult,
   V143TuningGateResult,
 } from "./simulation/v143-tuning-gate";
+export type {
+  V143ExploitFixture,
+  V143ExploitRegressionResult,
+} from "./simulation/v143-fixture-types";
 export type {
   AiBenchmarkDeckReference,
   AiBenchmarkDeckSlotDefinition,
@@ -2626,21 +2634,6 @@ export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
   baselineProfile?: SimulationBenchmarkProfileId;
   candidateProfile?: SimulationBenchmarkProfileId;
   comparisonProfiles?: SimulationBenchmarkProfileId[];
-};
-
-export type V143ExploitFixture = {
-  fixtureId: string;
-  title: string;
-  category: string;
-  expectedBadBehavior: string;
-  expectedGoodBehavior: string;
-  hiddenInfoSafe: boolean;
-};
-
-export type V143ExploitRegressionResult = {
-  fixtureId: string;
-  passed: boolean;
-  message: string;
 };
 
 const AI_PROFILES = aiProfilesData.profiles as AiProfileData[];
