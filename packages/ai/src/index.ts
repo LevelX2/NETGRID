@@ -19,7 +19,6 @@ import {
   type DeckFormatProfile,
   type EditableDeck,
 } from "@netgrid/decks";
-import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import localRealisticBenchmarkDeckSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import localRealisticBenchmarkDecksData from "../../../data/ai/ai-local-realistic-benchmark-decks-2026-05-23.json";
 import realSceneBenchmarkDeckSnapshotsData from "../../../data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json";
@@ -254,8 +253,8 @@ import {
   scoreCorpRootInstall,
 } from "./runtime/corp-card-action-score";
 import {
+  AI_PROFILES,
   profileWeights,
-  type AiProfileWeightsData,
 } from "./runtime/profile-weights";
 import type {
   CorpPunishKind,
@@ -1166,7 +1165,6 @@ export type {
   SimulationWorld,
 } from "./simulation/simulation-types";
 
-const AI_PROFILES = aiProfilesData.profiles as AiProfileWeightsData[];
 const AI_HINTS = createAiHintsByCard();
 
 const DECK_SNAPSHOTS_08 = (

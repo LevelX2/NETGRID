@@ -3,6 +3,7 @@ import {
   type AiDifficulty,
   type Side,
 } from "@netgrid/shared";
+import aiProfilesData from "../../../../data/ai/ai-profiles-0.9.json";
 
 export type AiProfileWeightsData = {
   profileId: string;
@@ -10,6 +11,8 @@ export type AiProfileWeightsData = {
   difficulty: AiDifficulty;
   weights: Record<string, number>;
 };
+
+export const AI_PROFILES = aiProfilesData.profiles as AiProfileWeightsData[];
 
 export function profileWeights(
   input: AiDecisionInput,
