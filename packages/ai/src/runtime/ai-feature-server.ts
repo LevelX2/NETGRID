@@ -1,0 +1,44 @@
+import { type AiDecisionInput } from "@netgrid/shared";
+
+export type ServerFeatures = {
+  iceCount: number;
+  rootCount: number;
+  knownRootCount: number;
+  unrezzedRootCount: number;
+  rezzedRootCount: number;
+};
+
+export function buildServerFeatures(
+  input: AiDecisionInput,
+): Map<string, ServerFeatures> {
+  return new Map(
+    input.playerView.servers.map((server) => [
+      server.id,
+      {
+        iceCount: server.ice.length,
+        rootCount: server.root.length,
+        knownRootCount: server.root.filter((card) => card.known).length,
+        unrezzedRootCount: server.root.filter((card) => card.rezzed !== true)
+          .length,
+        rezzedRootCount: server.root.filter((card) => card.rezzed === true)
+          .length,
+      },
+    ]),
+  );
+}
+
+export function visibleCitySurveillanceSourceCount(
+  input: AiDecisionInput,
+): number {
+  return input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.root.filter(
+        (card) =>
+          card.known &&
+          card.rezzed === true &&
+          card.definitionId === "onr_v1_313_city-surveillance",
+      ).length,
+    0,
+  );
+}

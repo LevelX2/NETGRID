@@ -119,6 +119,11 @@ import {
   type AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
 import {
+  buildServerFeatures,
+  visibleCitySurveillanceSourceCount,
+  type ServerFeatures,
+} from "./runtime/ai-feature-server";
+import {
   buildObservedFacts as buildObservedFactsRuntime,
   type AiObservedFacts as RuntimeAiObservedFacts,
 } from "./runtime/observed-facts";
@@ -1006,14 +1011,6 @@ type AiFeatures = {
   knownServerPressure: number;
   blockedRunServers: Set<string>;
   serverFeaturesById: Map<string, ServerFeatures>;
-};
-
-type ServerFeatures = {
-  iceCount: number;
-  rootCount: number;
-  knownRootCount: number;
-  unrezzedRootCount: number;
-  rezzedRootCount: number;
 };
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
@@ -9152,39 +9149,6 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     blockedRunServers,
     serverFeaturesById,
   };
-}
-
-function buildServerFeatures(
-  input: AiDecisionInput,
-): Map<string, ServerFeatures> {
-  return new Map(
-    input.playerView.servers.map((server) => [
-      server.id,
-      {
-        iceCount: server.ice.length,
-        rootCount: server.root.length,
-        knownRootCount: server.root.filter((card) => card.known).length,
-        unrezzedRootCount: server.root.filter((card) => card.rezzed !== true)
-          .length,
-        rezzedRootCount: server.root.filter((card) => card.rezzed === true)
-          .length,
-      },
-    ]),
-  );
-}
-
-function visibleCitySurveillanceSourceCount(input: AiDecisionInput): number {
-  return input.playerView.servers.reduce(
-    (count, server) =>
-      count +
-      server.root.filter(
-        (card) =>
-          card.known &&
-          card.rezzed === true &&
-          card.definitionId === "onr_v1_313_city-surveillance",
-      ).length,
-    0,
-  );
 }
 
 const SCORCHED_EARTH_LIKE_PUNISH_IDS = new Set(["onr_v1_302_scorched-earth"]);
