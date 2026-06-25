@@ -446,6 +446,7 @@ import {
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
 import { buildRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
+import { metricsForSimulationActionSequence } from "./simulation/quality-metrics";
 import {
   hasRunnerInstallableBreakerActionForSimulation,
   hasRunnerPlayableEconomyActionForSimulation,
@@ -25549,38 +25550,13 @@ function metricsFor(
   replayOk: boolean,
   holdout: boolean,
 ): AiQualityMetrics {
-  const actions = actionSequence.length || 1;
-  const reasonCodeCoverage = sortedUnique(
-    actionSequence.map((entry) =>
-      entry.reasonCode.split(".").slice(0, 2).join("."),
-    ),
-  );
-  const doctrine = summarizeDoctrineQualityMetrics(actionSequence);
-  return {
-    illegalActions: errors.length,
-    fallbackRate: round(
-      actionSequence.filter((entry) => entry.fallbackUsed).length / actions,
-    ),
-    timeoutRate: round(
-      actionSequence.filter((entry) => entry.timeoutUsed).length / actions,
-    ),
-    reasonCodeCoverage,
-    actionTypeCoverage: sortedUnique(
-      actionSequence.map((entry) => entry.actionType),
-    ),
-    roleCoverage: sortedUnique(
-      actionSequence.flatMap((entry) =>
-        entry.evidence
-          .filter((item) => item.startsWith("role:"))
-          .map((item) => item.slice("role:".length)),
-      ),
-    ),
-    progressScore: round(
-      actionSequence.length + (replayOk ? 10 : 0) - errors.length * 10,
-    ),
+  return metricsForSimulationActionSequence(
+    actionSequence,
+    errors,
+    replayOk,
     holdout,
-    doctrine,
-  };
+    summarizeDoctrineQualityMetrics,
+  );
 }
 
 function qualityTagsForAction(
