@@ -124,6 +124,10 @@ import {
   type ServerFeatures,
 } from "./runtime/ai-feature-server";
 import {
+  runnerCardMechanicsForAi,
+  visibleCardDefinition,
+} from "./runtime/card-definition-lookup";
+import {
   buildObservedFacts as buildObservedFactsRuntime,
   type AiObservedFacts as RuntimeAiObservedFacts,
 } from "./runtime/observed-facts";
@@ -4911,18 +4915,6 @@ function encounterRemotePayoffAfterBreakAssessment(
   };
 }
 
-function runnerCardMechanicsForAi(definitionId: string): string[] {
-  const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
-  return [
-    ...("mechanics" in (runtimeDefinition ?? {})
-      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
-          ?.mechanics ?? [])
-      : []),
-    ...(demoDefinition?.mechanics ?? []),
-  ];
-}
-
 const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
 const FULL_BODY_CONVERSION_CARD_ID = "onr_v1_127_full-body-conversion";
 const DERMATECH_BODYPLATING_CARD_ID = "onr_v1_125_dermatech-bodyplating";
@@ -4935,10 +4927,6 @@ const {
   isRemoteServerTarget,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
 });
-
-function visibleCardDefinition(card: VisibleCard) {
-  return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
-}
 
 const {
   semanticRuntimeRunnerRndMemoryComponents,

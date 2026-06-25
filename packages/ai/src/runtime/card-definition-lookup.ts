@@ -1,0 +1,18 @@
+import { DEMO_CARDS_BY_ID, type VisibleCard } from "@netgrid/shared";
+import { RUNTIME_CARDS } from "../ai-hints";
+
+export function runnerCardMechanicsForAi(definitionId: string): string[] {
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  return [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? [])
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+}
+
+export function visibleCardDefinition(card: VisibleCard) {
+  return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+}
