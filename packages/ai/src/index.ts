@@ -24,7 +24,6 @@ import localRealisticBenchmarkDecksData from "../../../data/ai/ai-local-realisti
 import realSceneBenchmarkDeckSnapshotsData from "../../../data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json";
 import realSceneBenchmarkDecksData from "../../../data/ai/ai-real-scene-benchmark-decks-2026-05-24.json";
 import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-1.3.0.json";
-import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import {
   assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
@@ -522,11 +521,11 @@ import type {
   AiBenchmarkLocalEditableDeckResult,
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
-  DeckSnapshotRecord,
   FrozenLocalBenchmarkDeckSnapshot,
   LocalRealisticBenchmarkDeckManifest,
   RealSceneBenchmarkDeckManifest,
 } from "./simulation/benchmark-deck-types";
+import { DECK_SNAPSHOTS_08 } from "./simulation/benchmark-deck-snapshot-data";
 import {
   createSimulationRng,
   type SimulationRng,
@@ -1166,10 +1165,6 @@ export type {
 } from "./simulation/simulation-types";
 
 const AI_HINTS = createAiHintsByCard();
-
-const DECK_SNAPSHOTS_08 = (
-  deckSnapshots08Data as { snapshots: DeckSnapshotRecord[] }
-).snapshots;
 
 const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = (
   localRealisticBenchmarkDeckSnapshotsData as {
