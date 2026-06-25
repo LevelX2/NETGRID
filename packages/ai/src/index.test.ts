@@ -197,6 +197,12 @@ describe("MVP 0.3 AI controller contract", () => {
         hiddenInfoPolicy: "player_view_only",
       },
     });
+    expect(corpInput.ownStrategicIntentState?.targetVector.evidence).toContain(
+      "target_source:runtime_context",
+    );
+    expect(corpInput.ownStrategicIntentState?.reserve.evidence).toContain(
+      "reserve_source:runtime_context",
+    );
     expect(corpInput.ownDeckStrategyProfile).toMatchObject({
       side: "corp",
       source: {
@@ -238,6 +244,12 @@ describe("MVP 0.3 AI controller contract", () => {
       },
     });
     expect(runnerInput.ownStrategicIntentState?.side).toBe("runner");
+    expect(runnerInput.ownStrategicIntentState?.targetVector.evidence).toContain(
+      "target_source:runtime_context",
+    );
+    expect(runnerInput.ownStrategicIntentState?.reserve.evidence).toContain(
+      "reserve_source:runtime_context",
+    );
     expect(runnerInput.ownRunnerStrategicIntent?.side).toBe("runner");
     expect(runnerInput.ownCorpStrategicIntent).toBeUndefined();
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);

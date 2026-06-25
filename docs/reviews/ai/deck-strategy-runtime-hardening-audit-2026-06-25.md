@@ -65,6 +65,26 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai test`: grün, 146 Testdateien und 1631 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H03-Ergebnis
+
+Status: `done`
+
+Der Default-Input-Pfad leitet strategische Rollen, Zielvektor und Reservebedarf jetzt aus echter Runtime-Sicht ab.
+
+Umgesetzt:
+
+- Neues Modul `runtime/strategic-runtime-context.ts` baut `roleStatuses`, `targetVector` und `reserveRequirement` aus `PlayerView`, `LegalActions`, produktivem StrategyProfile und Deck-Capabilities.
+- Runner-Kontext erkennt Coverage-Rollen, konkrete legale Zentral-/Remote-Run-Ziele und Reservebedarf aus relevanten Action-Kosten plus Strategiefamilie.
+- Corp-Kontext erkennt Score-, Defense-, Economy- und Punish-Fenster aus sichtbarem Board, legalen Actions und Capabilities.
+- `buildAiDecisionInput` übergibt diesen Kontext an `buildStrategicIntentState`.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `runtime/strategic-runtime-context`, `index`, `strategic-intent-state`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices`: grün, 609 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 147 Testdateien und 1633 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.

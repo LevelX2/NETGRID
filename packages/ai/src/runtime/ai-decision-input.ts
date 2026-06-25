@@ -36,6 +36,7 @@ import {
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
 
 export type AiDecisionSideSelection =
   | {
@@ -125,6 +126,13 @@ export function buildAiDecisionInput(
     input,
     options.ownDeckSnapshot.deckSnapshotId,
   )?.state;
+  const strategicRuntimeContext = buildStrategicRuntimeContext({
+    side,
+    playerView,
+    legalActions,
+    strategyProfile: ownDeckStrategyProfile,
+    deckCapabilities: ownDeckCapabilities,
+  });
   const ownStrategicIntentState = buildStrategicIntentState({
     side,
     stateVersion: playerView.stateVersion,
@@ -134,6 +142,9 @@ export function buildAiDecisionInput(
       ? { previousState: previousStrategicIntentState }
       : {}),
     availableCredits: playerView.own.credits,
+    roleStatuses: strategicRuntimeContext.roleStatuses,
+    targetVector: strategicRuntimeContext.targetVector,
+    reserveRequirement: strategicRuntimeContext.reserveRequirement,
   });
   const ownRunnerStrategicIntent =
     side === "runner"

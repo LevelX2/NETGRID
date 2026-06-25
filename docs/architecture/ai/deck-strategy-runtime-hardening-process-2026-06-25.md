@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H02_done`
+Status: `DSR-H03_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -79,8 +79,8 @@ preflight
 1. `DSR-H00` Post-Integration-Audit und reproduzierbare Baseline. Status: `done`.
 2. `DSR-H01` Produktiven Strategie-Vertrag und report-only Diagnostic strikt trennen. Status: `done`.
 3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `done`.
-4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `active`.
-5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `pending`.
+4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `done`.
+5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `active`.
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `pending`.
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `pending`.
 8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `pending`.
@@ -130,6 +130,10 @@ Commit: `feat(ai): harden strategy anchors and capability boundary`
 Ziel: Der Default-Input-Pfad baut Rollenstatus, konkrete Targets und Reservebedarf aus Deck, PlayerView, Capabilities und LegalActions.
 
 Kernartefakte: `strategic-intent-state`, `runtime/ai-decision-input`, Runner-/Corp-Intent-Tests.
+
+Ergebnis: `buildAiDecisionInput` baut vor `buildStrategicIntentState` einen side-safe `StrategicRuntimeContext` aus `PlayerView`, `LegalActions`, produktivem StrategyProfile und Deck-Capabilities. Der Kontext liefert Rollenstatus, Zielvektor und Reservebedarf mit `runtime_context`-Evidence. Tests decken Runner-Zentraldruck und Corp-Scoreline ab; der Default-Input-Test prüft, dass Target/Reserve aus dem Kontext stammen.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `runtime/strategic-runtime-context`, `index`, `strategic-intent-state`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices` grün mit 609 Tests; vollständiger `@netgrid/ai`-Testlauf grün mit 147 Testdateien und 1633 Tests; Diff-Check grün.
 
 Commit: `feat(ai): derive strategic role and target context`
 
