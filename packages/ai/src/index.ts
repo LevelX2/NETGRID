@@ -451,6 +451,8 @@ import {
   summarizeRunnerEndgameCloseoutWindow,
 } from "./simulation/runner-endgame-closeout";
 import {
+  isCorpProtectionScoreConversionAction,
+  isCorpRemoteProtectionActionEntry,
   isStrategicPlanDecision,
   ownStrategicWindow,
   previousOwnStrategicWindow,
@@ -21143,18 +21145,6 @@ function scorePathFollowsCorpProtection(
   );
 }
 
-function isCorpProtectionScoreConversionAction(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.side === "corp" &&
-    (entry.actionType === "score_agenda" ||
-      entry.actionType === "advance_card" ||
-      (entry.actionType === "install_card" &&
-        entry.targetCardType === "agenda"))
-  );
-}
-
 function corpRemoteCreatedConverts(
   sequence: PlanConversionActionEntry[],
   index: number,
@@ -21236,25 +21226,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function isCorpRemoteProtectionActionEntry(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.side === "corp" &&
-    (hasEvidenceFlag(
-      entry,
-      "corp_unsafe_remote_converted_to_protection:true",
-    ) ||
-      hasEvidenceFlag(
-        entry,
-        "corp_protection_chosen_before_unsafe_agenda_install:true",
-      ) ||
-      (entry.actionType === "install_card" &&
-        entry.installPlacement === "ice" &&
-        Boolean(entry.targetServerId?.startsWith("remote_"))))
-  );
 }
 
 function strategicPlanConvertsWithinOwnDecisions(

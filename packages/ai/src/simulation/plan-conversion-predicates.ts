@@ -1,9 +1,13 @@
 export type PlanConversionDecisionEntry = {
   side?: string;
   actionType?: string;
+  targetCardType?: string;
+  installPlacement?: string;
+  targetServerId?: string;
   advancementCountersAdded?: number;
   runnerRelevantRemoteTrashTaken?: boolean;
   runnerHandUseActionTaken?: boolean;
+  evidence?: readonly string[];
 };
 
 const NON_STRATEGIC_ACTION_TYPES = [
@@ -92,4 +96,42 @@ export function previousOwnStrategicWindow<
     if (window.length >= ownDecisions) break;
   }
   return window;
+}
+
+export function isCorpProtectionScoreConversionAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    (entry.actionType === "score_agenda" ||
+      entry.actionType === "advance_card" ||
+      (entry.actionType === "install_card" &&
+        entry.targetCardType === "agenda"))
+  );
+}
+
+export function isCorpRemoteProtectionActionEntry(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    (hasPlanConversionEvidenceFlag(
+      entry,
+      "corp_unsafe_remote_converted_to_protection:true",
+    ) ||
+      hasPlanConversionEvidenceFlag(
+        entry,
+        "corp_protection_chosen_before_unsafe_agenda_install:true",
+      ) ||
+      (entry.actionType === "install_card" &&
+        entry.installPlacement === "ice" &&
+        Boolean(entry.targetServerId?.startsWith("remote_"))))
+  );
+}
+
+function hasPlanConversionEvidenceFlag(
+  entry: PlanConversionDecisionEntry,
+  flag: string,
+): boolean {
+  return (entry.evidence ?? []).includes(flag);
 }
