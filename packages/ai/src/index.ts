@@ -411,6 +411,10 @@ import {
   remoteRootTrashCostForMetrics,
   trashCostForDefinitionForMetrics,
 } from "./simulation/card-metric-lookup";
+import {
+  centralPressureTargetsForCard,
+  isCentralPressureCardForMetrics,
+} from "./simulation/central-pressure-card";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -25134,51 +25138,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function isCentralPressureCardForMetrics(
-  definitionId: string | undefined,
-  installedOnly: boolean,
-): boolean {
-  if (!definitionId) return false;
-  const roles = rolesForCardId(definitionId);
-  if (!roles.some(isRunnerPressureRole)) return false;
-  if (!installedOnly) return true;
-  const type =
-    DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
-  return type === "hardware" || type === "program" || type === "resource";
-}
-
-function centralPressureTargetsForCard(
-  definitionId: string | undefined,
-): Array<"hq" | "rd" | "archives"> {
-  if (!definitionId) return [];
-  const roles = rolesForCardId(definitionId);
-  const targets: Array<"hq" | "rd" | "archives"> = [];
-  if (
-    definitionId === "onr_v1_139_r-and-d-interface" ||
-    roles.includes("pressure_rnd") ||
-    roles.includes("rnd_pressure")
-  )
-    targets.push("rd");
-  if (
-    definitionId === "onr_v1_129_hq-interface" ||
-    roles.includes("pressure_hq") ||
-    roles.includes("hq_pressure")
-  )
-    targets.push("hq");
-  if (roles.includes("archives_pressure")) targets.push("archives");
-  if (
-    targets.length === 0 &&
-    roles.some((role) => role.includes("multiaccess")) &&
-    [
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_105_priority-wreck",
-    ].includes(definitionId)
-  )
-    targets.push("rd", "hq");
-  return sortedUnique(targets) as Array<"hq" | "rd" | "archives">;
 }
 
 function centralPressureTargetIsGoodForMetrics(

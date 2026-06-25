@@ -255,6 +255,7 @@ describe("AI public export contract", () => {
       "./runtime/remote-trash-cost",
       "./runtime/remote-trash-target",
       "./simulation/card-metric-lookup",
+      "./simulation/central-pressure-card",
       "./simulation/progression-action-sequence",
       "./simulation/simulation-metric-aggregation",
       "./simulation/visible-break-cost-metric",
