@@ -61,6 +61,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "placement",
   "encounterContinue",
   "unbrokenSubroutineCount",
+  "delayedInstallAbility",
   "encounterWillEndRun",
   "shellTradersAbility",
   "abilityFamily",

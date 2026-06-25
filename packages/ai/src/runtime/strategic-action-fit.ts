@@ -162,7 +162,8 @@ function corpStrategicActionFitValue(
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":
-      return corpStrategicPunishAction(action, scopeId, actionSemanticCandidate)
+      return strategicIntentActionTargetMatches(state, action) ||
+        corpStrategicPunishAction(action, scopeId, actionSemanticCandidate)
         ? 180
         : 0;
     default:

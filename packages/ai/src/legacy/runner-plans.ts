@@ -54,7 +54,6 @@ import {
   visibleRisksForPlan,
   type RunnerPlanKind,
 } from "./runner-plan-metadata";
-
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
   "onr_v1_309_bbs-whispering-campaign";
 

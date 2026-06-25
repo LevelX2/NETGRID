@@ -350,7 +350,8 @@ export function summarizeSelfplayActionLimitClusters(
     SELFPLAY_ACTION_LIMIT_CLUSTER_IDS.map((cluster) => [cluster, 0]),
   ) as Record<AiSelfplayActionLimitClusterId, number>;
   for (const summary of summaries) {
-    if (summary.winner !== "action_limit_reached") continue;
+    if (summary.winner !== "action_limit_reached" || summary.errors.length > 0)
+      continue;
     counts[classifySelfplayActionLimitCluster(summary)] += 1;
   }
   return counts;
@@ -363,7 +364,8 @@ export function summarizeSelfplayActionLimitSubclusters(
     SELFPLAY_ACTION_LIMIT_SUBCLUSTER_IDS.map((subcluster) => [subcluster, 0]),
   ) as Record<AiSelfplayActionLimitSubclusterId, number>;
   for (const summary of summaries) {
-    if (summary.winner !== "action_limit_reached") continue;
+    if (summary.winner !== "action_limit_reached" || summary.errors.length > 0)
+      continue;
     counts[classifySelfplayActionLimitSubcluster(summary)] += 1;
   }
   return counts;
@@ -816,7 +818,8 @@ function collectSelfplayFindingsForSummary(
   }
   if (
     enabled.has("action_limit_reached") &&
-    summary.winner === "action_limit_reached"
+    summary.winner === "action_limit_reached" &&
+    summary.errors.length === 0
   ) {
     findings.push(
       selfplaySummaryFinding(

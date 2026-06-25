@@ -20,6 +20,14 @@ export function averageNumber(values: readonly number[]): number {
   return round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
+export function medianNumber(values: readonly number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = values.slice().sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) return round(sorted[middle] ?? 0);
+  return round(((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2);
+}
+
 export function sumDoctrineMetrics(
   metrics: readonly AiDoctrineQualityMetrics[],
 ): AiDoctrineQualityMetrics {

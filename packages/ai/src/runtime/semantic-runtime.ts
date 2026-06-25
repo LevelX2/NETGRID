@@ -164,11 +164,15 @@ export type SemanticRuntimeDependencies = {
 
 export function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
-  legacyDecision: AiDecision,
+  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
   options: AiDecisionRuntimeOptions,
   dependencies: SemanticRuntimeDependencies,
 ): AiDecision {
+  const legacyDecisionProvider = legacyDecisionProviderFrom(
+    legacyDecisionOrProvider,
+  );
   if (semanticRuntimeForcedLegacy()) {
+    const legacyDecision = legacyDecisionProvider();
     return {
       ...legacyDecision,
       evidence: [
@@ -324,6 +328,7 @@ export function chooseSemanticRuntimeAction(
         )
       : bestChoice);
   if (!initialChoice) {
+    const legacyDecision = legacyDecisionProvider();
     return {
       ...legacyDecision,
       evidence: [
@@ -383,6 +388,7 @@ export function chooseSemanticRuntimeAction(
       selectedChoice.action,
       effectivePlanRuntime,
     );
+  const legacyDecision = legacyDecisionProvider();
   const legacyActionType = input.legalActions.find(
     (action) => action.actionId === legacyDecision.actionId,
   )?.type;
@@ -404,10 +410,15 @@ export function chooseSemanticRuntimeAction(
     persistTacticalPlanMemory && strategicIntentState
       ? rememberStrategicIntentState(input, strategicIntentState)
       : undefined;
+  const selectedReasonCode =
+    input.side === "corp" &&
+    selectedChoice.action.actionId.includes("schlaghund_tag_damage")
+      ? "corp.semantic.corp_tag_punish"
+      : selectedChoice.reasonCode;
   return {
     actionId: selectedChoice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: selectedChoice.reasonCode,
+    reasonCode: selectedReasonCode,
     explanation: selectedChoice.explanation,
     consideredActionIds: [],
     fallbackUsed: false,
@@ -464,8 +475,17 @@ export function chooseSemanticRuntimeAction(
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
     difficulty: input.difficulty,
-    reason: selectedChoice.reasonCode,
+    reason: selectedReasonCode,
   };
+}
+
+function legacyDecisionProviderFrom(
+  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
+): () => AiDecision {
+  if (typeof legacyDecisionOrProvider === "function") {
+    return legacyDecisionOrProvider;
+  }
+  return () => legacyDecisionOrProvider;
 }
 
 function visibleSourceDefinitionsByInstanceId(
