@@ -319,7 +319,6 @@ import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
   eventMayChangeArchives as aiEventMayChangeArchives,
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
-  eventRefreshesCentralTarget as aiEventRefreshesCentralTarget,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
   isArchivesAccessEvent as isAiArchivesAccessEvent,
@@ -417,6 +416,10 @@ import {
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
+import {
+  centralRunStreakWithoutValueForMetrics,
+  recentCentralRunSameTargetWithoutRefresh,
+} from "./simulation/central-run-history";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -25455,76 +25458,6 @@ function noFreshCentralSubstitutionTypeForAction(
     return "setup_search";
   if (action.type === "end_turn") return "end_turn";
   return undefined;
-}
-
-function recentCentralRunSameTargetWithoutRefresh(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): boolean {
-  const history = [...input.playerView.publicEvents, ...input.eventTail].sort(
-    (left, right) =>
-      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
-  );
-  let lastSameRun = -1;
-  for (let index = history.length - 1; index >= 0; index -= 1) {
-    const event = history[index]!;
-    if (
-      aiServerIdFromEvent(event) === target &&
-      (event.publicPayload.actionType === "start_run" ||
-        event.type === "run_started")
-    ) {
-      lastSameRun = index;
-      break;
-    }
-  }
-  if (lastSameRun < 0) return false;
-  const last = history[lastSameRun];
-  if (
-    !last ||
-    input.playerView.stateVersion - (last.stateVersionAfter ?? 0) > 8
-  )
-    return false;
-  const after = history.slice(lastSameRun + 1);
-  return !after.some((event) => aiEventRefreshesCentralTarget(event, target));
-}
-
-function centralRunStreakWithoutValueForMetrics(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): number {
-  const history = [...input.playerView.publicEvents, ...input.eventTail].sort(
-    (left, right) =>
-      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
-  );
-  let streak = 0;
-  for (let index = history.length - 1; index >= 0; index -= 1) {
-    const event = history[index]!;
-    const actionType =
-      typeof event.publicPayload.actionType === "string"
-        ? event.publicPayload.actionType
-        : event.type;
-    if (
-      actionType === "steal_agenda" ||
-      actionType === "trash_accessed_card" ||
-      actionType === "score_agenda"
-    )
-      break;
-    if (aiServerIdFromEvent(event) === target && actionType === "start_run") {
-      streak += 1;
-      continue;
-    }
-    if (
-      (target === "hq" &&
-        (actionType === "draw_card" || actionType === "mandatory_draw")) ||
-      (target === "rd" &&
-        (actionType === "draw_card" ||
-          actionType === "mandatory_draw" ||
-          actionType === "shuffle_stack")) ||
-      actionType === "install_card"
-    )
-      break;
-  }
-  return streak;
 }
 
 function runnerReserveDiagnosticsForSimulationAction(
