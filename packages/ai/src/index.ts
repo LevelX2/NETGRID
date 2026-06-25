@@ -174,6 +174,10 @@ import {
   sourceDefinitionIdForAction,
 } from "./runtime/visible-card-lookup";
 import { titleForCardId } from "./runtime/card-title";
+import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
+import {
+  corpVisibleRunnerHardwarePayoffEvidence,
+} from "./runtime/runner-hardware-payoff-evidence";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10838,35 +10842,12 @@ function corpVisibleRunnerRigTrashTarget(
   );
 }
 
-function corpVisibleCardStoredCredits(card: VisibleCard): number {
-  return Object.entries(card.counters ?? {}).reduce((total, [key, value]) => {
-    const normalizedKey = key.toLowerCase();
-    if (!normalizedKey.includes("credit") && normalizedKey !== "bit")
-      return total;
-    return total + (typeof value === "number" ? value : 0);
-  }, 0);
-}
-
 function corpVisibleRunnerHardwareTrashTarget(
   input: AiDecisionInput,
 ): VisibleCard | undefined {
   return (input.playerView.opponent.rig ?? []).find(
     (card) => card.known && card.type === "hardware",
   );
-}
-
-function corpVisibleRunnerHardwarePayoffEvidence(card: VisibleCard): string[] {
-  const normalizedText = `${card.title ?? ""} ${card.rulesText ?? ""}`
-    .toLowerCase()
-    .replace(/&/g, "and");
-  return [
-    `target_definition:${card.definitionId ?? "unknown"}`,
-    ...(normalizedText.includes("additional card") ||
-    normalizedText.includes("access 1 additional") ||
-    normalizedText.includes("multiaccess")
-      ? ["runner_hardware_payoff:multiaccess"]
-      : []),
-  ];
 }
 
 function corpPunishKindFromOntologyPayoff(
