@@ -144,6 +144,10 @@ import {
   type RemoteTrashCostBucket,
 } from "./runtime/remote-trash-cost";
 import {
+  remoteTrashTargetTypeForVisibleCard,
+  type RemoteTrashTargetType,
+} from "./runtime/remote-trash-target";
+import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
@@ -3525,7 +3529,6 @@ export type AiSimulationSummary = {
   metrics: AiQualityMetrics;
 };
 
-type RemoteTrashTargetType = "asset_node" | "upgrade" | "ice" | "unknown";
 type RemoteTrashRole =
   | "economy"
   | "scoring_protection"
@@ -27273,15 +27276,6 @@ function remoteServerHasScoreThreat(
       (card.advancementCounters ?? 0) > 0 ||
       (card.known && card.type === "agenda"),
   );
-}
-
-function remoteTrashTargetTypeForVisibleCard(
-  card: VisibleCard,
-): RemoteTrashTargetType {
-  if (card.type === "asset") return "asset_node";
-  if (card.type === "upgrade") return "upgrade";
-  if (card.type === "ice") return "ice";
-  return "unknown";
 }
 
 function remoteTrashRoleForAccessedVisibleCard(

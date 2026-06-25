@@ -251,6 +251,7 @@ describe("AI public export contract", () => {
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
       "./runtime/remote-trash-cost",
+      "./runtime/remote-trash-target",
       "./simulation/simulation-metric-aggregation",
       "./reports/shadow-league-report-formatters",
       "./reports/selfplay-promotion-activity-formatters",
