@@ -59,3 +59,37 @@ export function isStrategicPlanDecision(
   }
   return CORP_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "");
 }
+
+export function ownStrategicWindow<T extends PlanConversionDecisionEntry>(
+  sequence: T[],
+  index: number,
+  ownDecisions: number,
+): T[] {
+  const side = sequence[index]?.side;
+  if (!side) return [];
+  const window: T[] = [];
+  for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side !== side) continue;
+    if (!isStrategicPlanDecision(entry)) continue;
+    window.push(entry);
+    if (window.length >= ownDecisions) break;
+  }
+  return window;
+}
+
+export function previousOwnStrategicWindow<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number, ownDecisions: number): T[] {
+  const side = sequence[index]?.side;
+  if (!side) return [];
+  const window: T[] = [];
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side !== side) continue;
+    if (!isStrategicPlanDecision(entry)) continue;
+    window.push(entry);
+    if (window.length >= ownDecisions) break;
+  }
+  return window;
+}

@@ -450,7 +450,11 @@ import {
   isRunnerEndgameStallSymptom,
   summarizeRunnerEndgameCloseoutWindow,
 } from "./simulation/runner-endgame-closeout";
-import { isStrategicPlanDecision } from "./simulation/plan-conversion-predicates";
+import {
+  isStrategicPlanDecision,
+  ownStrategicWindow,
+  previousOwnStrategicWindow,
+} from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -21125,42 +21129,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
   };
-}
-
-function ownStrategicWindow(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownDecisions: number,
-): PlanConversionActionEntry[] {
-  const side = sequence[index]?.side;
-  if (!side) return [];
-  const window: PlanConversionActionEntry[] = [];
-  for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
-    const entry = sequence[cursor]!;
-    if (entry.side !== side) continue;
-    if (!isStrategicPlanDecision(entry)) continue;
-    window.push(entry);
-    if (window.length >= ownDecisions) break;
-  }
-  return window;
-}
-
-function previousOwnStrategicWindow(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownDecisions: number,
-): PlanConversionActionEntry[] {
-  const side = sequence[index]?.side;
-  if (!side) return [];
-  const window: PlanConversionActionEntry[] = [];
-  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
-    const entry = sequence[cursor]!;
-    if (entry.side !== side) continue;
-    if (!isStrategicPlanDecision(entry)) continue;
-    window.push(entry);
-    if (window.length >= ownDecisions) break;
-  }
-  return window;
 }
 
 function scorePathFollowsCorpProtection(
