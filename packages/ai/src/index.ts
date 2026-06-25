@@ -439,6 +439,10 @@ import {
   stableDiscardChoiceOptionIds,
 } from "./runtime/discard-choice-option";
 import {
+  discardDoctrineFitBonus,
+  discardPlanFitBonus,
+} from "./runtime/discard-fit-bonus";
+import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
 } from "./runtime/search-choice-option";
@@ -7634,7 +7638,12 @@ function discardKeepScore(
   if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
     baseValue -= 60;
 
-  const planFit = discardPlanFitBonus(input, roles, type);
+  const planFit = discardPlanFitBonus(
+    input,
+    roles,
+    type,
+    discardCurrentPlanKind(input),
+  );
   const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
   return {
     total: baseValue + planFit + doctrineFit,
@@ -7647,174 +7656,6 @@ function discardKeepScore(
       ...(doctrineFit > 0 ? ["discard_score:doctrinefit"] : []),
     ]),
   };
-}
-
-function discardPlanFitBonus(
-  input: AiDecisionInput,
-  roles: string[],
-  type: string | undefined,
-): number {
-  const plan = discardCurrentPlanKind(input);
-  const doctrineWeight = plan
-    ? Math.max(
-        0,
-        Math.min(
-          15,
-          Math.round((input.ownDeckDoctrine?.planWeights[plan] ?? 0) / 2),
-        ),
-      )
-    : 0;
-  let bonus = doctrineWeight;
-
-  if (input.side === "runner") {
-    if (
-      plan === "build_rig" &&
-      discardRolesMatch(roles, [
-        "breaker_",
-        "memory",
-        "setup",
-        "build_rig",
-        "runner_program",
-      ])
-    )
-      bonus += 42;
-    if (
-      plan === "recover_economy" &&
-      discardRolesMatch(roles, ["economy", "tempo"])
-    )
-      bonus += 42;
-    if (
-      (plan === "pressure_hq" ||
-        plan === "pressure_rnd" ||
-        plan === "contest_remote") &&
-      discardRolesMatch(roles, [
-        "run_pressure",
-        plan,
-        "multiaccess",
-        "breaker_",
-        "economy",
-      ])
-    )
-      bonus += 36;
-    if (
-      plan === "draw_for_answers" &&
-      discardRolesMatch(roles, ["draw", "setup", "breaker_"])
-    )
-      bonus += 30;
-  } else {
-    if (
-      (plan === "score_now" ||
-        plan === "score_next_turn" ||
-        plan === "build_scoring_remote") &&
-      (type === "agenda" ||
-        discardRolesMatch(roles, [
-          "score",
-          "remote",
-          "advance",
-          "economy",
-          "ice",
-        ]))
-    )
-      bonus += 42;
-    if (
-      (plan === "protect_hq" || plan === "protect_rnd") &&
-      discardRolesMatch(roles, [
-        "ice",
-        "etr_ice",
-        "taxing_ice",
-        "corp_rez_ice",
-        "corp_install_ice",
-      ])
-    )
-      bonus += 38;
-    if (plan === "recover_economy" && discardRolesMatch(roles, ["economy"]))
-      bonus += 42;
-    if (
-      plan === "bait_runner" &&
-      discardRolesMatch(roles, ["asset", "upgrade", "remote_support"])
-    )
-      bonus += 24;
-  }
-
-  return Math.max(0, Math.min(55, bonus));
-}
-
-function discardDoctrineFitBonus(
-  input: AiDecisionInput,
-  roles: string[],
-  type: string | undefined,
-  cost: number,
-): number {
-  const tags = input.ownDeckDoctrine?.archetypeTags ?? [];
-  let bonus = 0;
-  if (input.side === "runner") {
-    if (
-      tags.includes("rig_builder") &&
-      discardRolesMatch(roles, [
-        "breaker_",
-        "memory",
-        "setup",
-        "build_rig",
-        "runner_program",
-      ])
-    )
-      bonus += 30;
-    if (
-      tags.includes("hq_pressure") &&
-      discardRolesMatch(roles, [
-        "pressure_hq",
-        "run_pressure",
-        "multiaccess",
-        "breaker_",
-        "economy",
-      ])
-    )
-      bonus += 26;
-    if (
-      tags.includes("rnd_pressure") &&
-      discardRolesMatch(roles, [
-        "pressure_rnd",
-        "run_pressure",
-        "multiaccess",
-        "breaker_",
-        "economy",
-      ])
-    )
-      bonus += 26;
-    if (
-      tags.includes("economy_dense") &&
-      discardRolesMatch(roles, ["economy", "tempo"])
-    )
-      bonus += 24;
-  } else {
-    if (
-      tags.includes("glacier") &&
-      (type === "ice" ||
-        discardRolesMatch(roles, [
-          "ice",
-          "etr_ice",
-          "taxing_ice",
-          "remote",
-          "economy",
-        ]))
-    )
-      bonus += 30;
-    if (
-      tags.includes("rush") &&
-      (type === "agenda" ||
-        cost <= 3 ||
-        discardRolesMatch(roles, ["score", "ice", "tempo", "advance"]))
-    )
-      bonus += 24;
-    if (
-      tags.includes("asset_remote") &&
-      (type === "asset" ||
-        type === "upgrade" ||
-        discardRolesMatch(roles, ["asset", "upgrade", "remote", "economy"]))
-    )
-      bonus += 26;
-  }
-  return Math.max(0, Math.min(35, bonus));
 }
 
 function discardCurrentPlanKind(input: AiDecisionInput): string | undefined {
