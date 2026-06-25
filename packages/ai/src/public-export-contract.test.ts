@@ -261,6 +261,7 @@ describe("AI public export contract", () => {
       "./simulation/remote-server-threat",
       "./simulation/remote-trash-access-context",
       "./simulation/remote-trash-role",
+      "./simulation/runner-run-target-context",
       "./simulation/simulation-metric-aggregation",
       "./simulation/visible-break-cost-metric",
       "./reports/shadow-league-report-formatters",
