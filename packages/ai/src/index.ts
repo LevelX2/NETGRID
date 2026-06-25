@@ -410,6 +410,7 @@ import {
   agendaPointsForMetrics,
   definitionTypeForMetrics,
   remoteRootTrashCostForMetrics,
+  remoteTrashCostForVisibleCard,
   trashCostForDefinitionForMetrics,
 } from "./simulation/card-metric-lookup";
 import {
@@ -27099,15 +27100,6 @@ function accessedCardContributesToVisibleRunTaxForMetrics(
         definitionId,
       ),
     ) === true
-  );
-}
-
-function remoteTrashCostForVisibleCard(card: VisibleCard): number | undefined {
-  if (!card.known || !card.definitionId) return undefined;
-  return (
-    card.trashCost ??
-    RUNTIME_CARDS[card.definitionId]?.numeric.trashCost ??
-    DEMO_CARDS_BY_ID[card.definitionId]?.trashCost
   );
 }
 

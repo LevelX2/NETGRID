@@ -33,3 +33,10 @@ export function remoteRootTrashCostForMetrics(
   if (!card.definitionId) return undefined;
   return trashCostForDefinitionForMetrics(card.definitionId);
 }
+
+export function remoteTrashCostForVisibleCard(
+  card: VisibleCard,
+): number | undefined {
+  if (!card.known || !card.definitionId) return undefined;
+  return card.trashCost ?? trashCostForDefinitionForMetrics(card.definitionId);
+}
