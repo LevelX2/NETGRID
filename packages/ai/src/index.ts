@@ -215,6 +215,7 @@ import {
   rndFreshRepeatRunBoost,
   staleKnownRndRepeatRunPenalty,
 } from "./runtime/runner-rnd-repeat-run-score";
+import { isLowValueKnownAccessCard } from "./runtime/runner-low-value-known-access-card";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -11118,22 +11119,6 @@ function aiEventMayRefreshRemoteRun(
     actionType === "trigger_ability" ||
     actionType === "rez_ice"
   );
-}
-
-function isLowValueKnownAccessCard(
-  definitionId: string,
-  runnerCredits: number,
-): boolean {
-  const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
-  const type = runtimeDefinition?.type ?? demoDefinition?.type;
-  if (!type) return false;
-  if (type === "agenda") return false;
-  const trashCost =
-    runtimeDefinition?.numeric.trashCost ?? demoDefinition?.trashCost ?? 0;
-  if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost)
-    return false;
-  return true;
 }
 
 function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
