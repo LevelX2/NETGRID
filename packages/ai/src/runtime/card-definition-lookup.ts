@@ -13,6 +13,12 @@ export function runnerCardMechanicsForAi(definitionId: string): string[] {
   ];
 }
 
+export function cardDefinitionTypeForAi(
+  definitionId: string | undefined,
+): string | undefined {
+  return definitionId ? DEMO_CARDS_BY_ID[definitionId]?.type : undefined;
+}
+
 export function visibleCardDefinition(card: VisibleCard) {
   return card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
 }

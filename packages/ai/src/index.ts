@@ -127,6 +127,7 @@ import {
   type AiFeatures,
 } from "./runtime/ai-features";
 import {
+  cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
@@ -6874,12 +6875,6 @@ function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
   return isVisibleIcebreakerProgramRuntime(card, visibleBreakerRolesForAi);
 }
 
-function definitionTypeForDiscardPlan(
-  cardId: string | undefined,
-): string | undefined {
-  return cardId ? DEMO_CARDS_BY_ID[cardId]?.type : undefined;
-}
-
 function discardKeepScore(
   input: AiDecisionInput,
   card: NonNullable<
@@ -6888,7 +6883,7 @@ function discardKeepScore(
 ) {
   return discardKeepScoreRuntime(input, card, {
     rolesForCardId,
-    definitionTypeForCardId: definitionTypeForDiscardPlan,
+    definitionTypeForCardId: cardDefinitionTypeForAi,
     visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
     runnerCardAddressesVisibleBreakerNeed,
     runnerBadPublicityOrTraceTechCard,
@@ -6992,7 +6987,7 @@ function scoreRunnerAction(
               input,
               discardCurrentPlanKind(input, {
                 rolesForCardId,
-                definitionTypeForCardId: definitionTypeForDiscardPlan,
+                definitionTypeForCardId: cardDefinitionTypeForAi,
               }),
             ),
           );
@@ -7500,7 +7495,7 @@ function scoreCorpAction(
               input,
               discardCurrentPlanKind(input, {
                 rolesForCardId,
-                definitionTypeForCardId: definitionTypeForDiscardPlan,
+                definitionTypeForCardId: cardDefinitionTypeForAi,
               }),
             ),
           );
