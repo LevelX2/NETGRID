@@ -23,7 +23,9 @@ export type PlanConversionDecisionEntry = {
   runnerLowValueDuplicateInstallAction?: boolean;
   runnerCentralRunWithMultiaccess?: boolean;
   runnerCentralRunWithInterfaceInstalled?: boolean;
+  runnerCentralRunEventWithGoodTarget?: boolean;
   runnerRepeatedCentralRunWithFreshValue?: boolean;
+  runnerCentralCloseoutRunTaken?: boolean;
   evidence?: readonly string[];
 };
 
@@ -289,6 +291,49 @@ export function corpRemoteCreatedConvertsTo<
           ))
       );
     });
+}
+
+export function planConversionEntryHasMeaningfulBoardProgress<
+  T extends PlanConversionDecisionEntry,
+>(
+  entry: T,
+  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
+): boolean {
+  if (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "steal_agenda"
+  )
+    return true;
+  if (
+    entry.side === "runner" &&
+    (entry.runnerRelevantRemoteTrashTaken === true ||
+      (entry.actionType === "trash_accessed_card" &&
+        isRemoteServerTarget(entry.targetServerId)))
+  )
+    return true;
+  if (isRunnerRigProgressAction(entry)) return true;
+  if (isRunnerEconomyProgressAction(entry)) return true;
+  if (isCorpRemoteAdvancementProgress(entry)) return true;
+  if (
+    entry.side === "corp" &&
+    isRemoteServerTarget(entry.targetServerId) &&
+    (entry.protectBeforeAdvance === true ||
+      entry.protectedFinalAdvance === true ||
+      (entry.actionType === "install_card" && entry.installPlacement === "ice"))
+  )
+    return true;
+  if (entry.side === "corp" && entry.actionType === "rez_ice")
+    return isRemoteServerTarget(entry.targetServerId);
+  if (isRunnerCentralPressureAction(entry)) {
+    return (
+      entry.runnerCentralRunWithMultiaccess === true ||
+      entry.runnerCentralRunWithInterfaceInstalled === true ||
+      entry.runnerCentralRunEventWithGoodTarget === true ||
+      entry.runnerRepeatedCentralRunWithFreshValue === true ||
+      entry.runnerCentralCloseoutRunTaken === true
+    );
+  }
+  return false;
 }
 
 export function isRunnerRigProgressAction(
