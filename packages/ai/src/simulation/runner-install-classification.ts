@@ -67,6 +67,67 @@ export function isRunnerPressureActionForSimulation(
   );
 }
 
+export function hasRunnerPlayableEconomyActionForSimulation(
+  input: AiDecisionInput,
+  excludeActionId: string | undefined,
+  isRunnerEconomyAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean,
+): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.actionId !== excludeActionId &&
+      action.side === "runner" &&
+      isRunnerEconomyAction(input, action) &&
+      action.source !== "basic_action" &&
+      action.source !== "game_rule",
+  );
+}
+
+export function hasRunnerInstallableBreakerActionForSimulation(
+  input: AiDecisionInput,
+  excludeActionId: string | undefined,
+  dependencies: RunnerActionRoleDependencies,
+): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.actionId !== excludeActionId &&
+      action.side === "runner" &&
+      action.type === "install_card" &&
+      dependencies
+        .rolesForAction(input, action)
+        .some((role) => role.startsWith("breaker_")),
+  );
+}
+
+export function hasRunnerRunnablePressureActionForSimulation(
+  input: AiDecisionInput,
+  excludeActionId: string | undefined,
+  isRunnerPressureAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === excludeActionId || action.side !== "runner")
+      return false;
+    if (isRunnerPressureAction(input, action)) return true;
+    if (action.type !== "start_run") return false;
+    const serverId =
+      typeof action.payload?.serverId === "string"
+        ? action.payload.serverId
+        : "";
+    if (!serverId) return false;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (serverId.startsWith("remote_") && (server?.root.length ?? 0) === 0)
+      return false;
+    return input.playerView.own.credits >= 3 || (server?.ice.length ?? 0) === 0;
+  });
+}
+
 export function isRunnerDuplicateInstallForSimulation(
   input: AiDecisionInput,
   action: LegalAction,

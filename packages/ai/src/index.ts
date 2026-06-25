@@ -451,6 +451,9 @@ import {
   runnerContestRiskForSimulation,
 } from "./simulation/remote-protection-score";
 import {
+  hasRunnerInstallableBreakerActionForSimulation,
+  hasRunnerPlayableEconomyActionForSimulation,
+  hasRunnerRunnablePressureActionForSimulation,
   isRunnerDuplicateInstallForSimulation,
   isRunnerEconomyActionForSimulation,
   isRunnerLowValueDuplicateInstallForSimulation,
@@ -25467,13 +25470,10 @@ function hasRunnerPlayableEconomyAction(
   input: AiDecisionInput,
   excludeActionId?: string,
 ): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.actionId !== excludeActionId &&
-      action.side === "runner" &&
-      isRunnerEconomyAction(input, action) &&
-      action.source !== "basic_action" &&
-      action.source !== "game_rule",
+  return hasRunnerPlayableEconomyActionForSimulation(
+    input,
+    excludeActionId,
+    isRunnerEconomyAction,
   );
 }
 
@@ -25481,36 +25481,20 @@ function hasRunnerInstallableBreakerAction(
   input: AiDecisionInput,
   excludeActionId?: string,
 ): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.actionId !== excludeActionId &&
-      action.side === "runner" &&
-      action.type === "install_card" &&
-      rolesForAction(input, action).some((role) => role.startsWith("breaker_")),
-  );
+  return hasRunnerInstallableBreakerActionForSimulation(input, excludeActionId, {
+    rolesForAction,
+  });
 }
 
 function hasRunnerRunnablePressureAction(
   input: AiDecisionInput,
   excludeActionId?: string,
 ): boolean {
-  return input.legalActions.some((action) => {
-    if (action.actionId === excludeActionId || action.side !== "runner")
-      return false;
-    if (isRunnerPressureAction(input, action)) return true;
-    if (action.type !== "start_run") return false;
-    const serverId =
-      typeof action.payload?.serverId === "string"
-        ? action.payload.serverId
-        : "";
-    if (!serverId) return false;
-    const server = input.playerView.servers.find(
-      (candidate) => candidate.id === serverId,
-    );
-    if (serverId.startsWith("remote_") && (server?.root.length ?? 0) === 0)
-      return false;
-    return input.playerView.own.credits >= 3 || (server?.ice.length ?? 0) === 0;
-  });
+  return hasRunnerRunnablePressureActionForSimulation(
+    input,
+    excludeActionId,
+    isRunnerPressureAction,
+  );
 }
 
 function isRunnerEconomyAction(
