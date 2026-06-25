@@ -224,6 +224,7 @@ import {
   runTargetEvidence,
   scoreRunTarget,
 } from "./runtime/runner-run-target-score";
+import { isBlockedByKnownRezzedIce } from "./runtime/runner-known-rezzed-ice-block";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10949,25 +10950,6 @@ function scoreRunnerEvent(
   if (roles.includes("run_pressure"))
     score += features.credits >= 3 ? 150 * (profile.run ?? 1) : 30;
   return score;
-}
-
-function isBlockedByKnownRezzedIce(
-  ice:
-    | {
-        definitionId?: string;
-        rezzed?: boolean;
-        known: boolean;
-        subtypes?: string[];
-      }
-    | undefined,
-  rigDefinitionIds: Set<string>,
-): boolean {
-  if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
-  const iceDefinitionId = ice.definitionId;
-  if (!iceHasEndTheRun(iceDefinitionId)) return false;
-  return ![...rigDefinitionIds].some((breakerDefinitionId) =>
-    canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId),
-  );
 }
 
 function pumpViabilityAssessment(
