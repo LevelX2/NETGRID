@@ -151,7 +151,7 @@ import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
-import { isRemoteServerTarget } from "./runtime/server-target";
+import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -25209,14 +25209,6 @@ function eventMayChangeHqPressureForMetrics(event: PublicGameEvent): boolean {
     actionType === "discard_card" ||
     actionType === "resolve_choice"
   );
-}
-
-function centralServerId(
-  serverId: string | undefined,
-): "hq" | "rd" | "archives" | undefined {
-  return serverId === "hq" || serverId === "rd" || serverId === "archives"
-    ? serverId
-    : undefined;
 }
 
 function isCentralPressureCardForMetrics(
