@@ -271,6 +271,11 @@ import type {
   CorpTagPunishUnknownSkipPlausibility,
   CorpVisibleTagPayoffCategory,
 } from "./runtime/corp-tag-punish-types";
+import type {
+  CorpCentralRezReserveAssessment,
+  CorpRemoteContestabilityAssessment,
+  CorpTaggedRunnerPayoffActionProfile,
+} from "./runtime/corp-scoring-assessment-types";
 import type { RankedChoice } from "./runtime/ranked-choice";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
@@ -8399,12 +8404,6 @@ function corpTagPunishOntologyAssessmentForAction(
   );
 }
 
-type CorpRemoteContestabilityAssessment = {
-  serverId: string;
-  contestable: boolean;
-  evidence: string[];
-};
-
 function semanticRuntimeCorpRemoteScoreContestabilityAssessment(
   input: AiDecisionInput,
   action: LegalAction,
@@ -8477,15 +8476,6 @@ function semanticRuntimeCorpRemoteContestabilityAssessment(
   };
 }
 
-type CorpCentralRezReserveAssessment = {
-  serverId: "hq";
-  sourceDefinitionId: string;
-  rezFloor: number;
-  creditsAfterAction: number;
-  blockedByFloor: boolean;
-  evidence: string[];
-};
-
 function semanticRuntimeCorpCentralRezReserveAssessment(
   input: AiDecisionInput,
   action: LegalAction,
@@ -8556,20 +8546,6 @@ function semanticRuntimeCorpHasCentralRezFloorFundingNeed(
     return assessment?.blockedByFloor === true;
   });
 }
-
-type CorpTaggedRunnerPayoffActionProfile = {
-  kind:
-    | "damage"
-    | "economic"
-    | "resource_trash"
-    | "hardware_trash"
-    | "tag_source"
-    | "installed_economy"
-    | "funding"
-    | "unknown";
-  value: number;
-  evidence: string[];
-};
 
 function corpTaggedRunnerPayoffPressure(
   input: AiDecisionInput,
