@@ -129,7 +129,6 @@ import {
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
 import { compareAction } from "./runtime/action-order";
-import { isProtectionDefinitionId } from "./runtime/protection-definition";
 import { advancementCountersAddedForSimulationAction } from "./runtime/simulation-action-event";
 import {
   sortedUniqueProgressionCardTargetTypes,
@@ -138,8 +137,6 @@ import {
 import {
   advancedAgendaStealSourceForAction,
   cardTargetTypeForInstance,
-  remoteHasNearFinalAgenda,
-  rezCostForDefinitionId,
   sourceDefinitionIdForSimulationAction as sourceDefinitionIdForSimulationSource,
 } from "./runtime/simulation-card-target";
 import {
@@ -294,7 +291,6 @@ import {
 import {
   actionClickCost,
   actionCreditCost,
-  nonNegativeActionCreditCost as simulationActionCreditCost,
 } from "./runtime/action-cost";
 import {
   addStringsToCounter as addCardsToCounter,
@@ -442,14 +438,14 @@ import {
   runnerTrashBlockedByCredits,
 } from "./simulation/remote-server-threat";
 import {
+  finalAdvanceAssessmentForSimulationAction,
+  isProtectBeforeAdvanceSimulationAction,
+} from "./simulation/final-advance-assessment";
+import {
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
 import { buildRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
-import {
-  remoteProtectionScoreForSimulation,
-  runnerContestRiskForSimulation,
-} from "./simulation/remote-protection-score";
 import {
   hasRunnerInstallableBreakerActionForSimulation,
   hasRunnerPlayableEconomyActionForSimulation,
@@ -545,7 +541,6 @@ import {
   type AiDecisionInput,
   type AiDecisionScoreComponent,
   type AiDifficulty,
-  type CardInstanceId,
   type DeckDefinition,
   type DeckPublicMetadata,
   type GameState,
@@ -25546,102 +25541,6 @@ function sourceDefinitionIdForSimulationAction(
   return sourceDefinitionIdForSimulationSource(action, (id) =>
     findVisibleCard(input, id),
   );
-}
-
-function finalAdvanceAssessmentForSimulationAction(
-  stateBeforeAction: GameState,
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-  targetCardIds: CardInstanceId[],
-  advancementCountersAdded: number,
-): {
-  finalAdvance: boolean;
-  unsafeFinalAdvance?: boolean;
-  protectedFinalAdvance?: boolean;
-  remoteProtectionScore?: number;
-  runnerContestRisk?: "low" | "medium" | "high" | "unknown";
-  advancesRemainingAfterAction?: number;
-} {
-  if (action.side !== "corp" || advancementCountersAdded <= 0)
-    return { finalAdvance: false };
-  const cardId = targetCardIds.find(
-    (candidate) =>
-      cardTargetTypeForInstance(stateBeforeAction, candidate) === "agenda",
-  );
-  if (!cardId || !targetServerId?.startsWith("remote_"))
-    return { finalAdvance: false };
-  const instance = stateBeforeAction.cardInstances[cardId];
-  if (!instance) return { finalAdvance: false };
-  const definitionId = instance.definitionId;
-  const requirement =
-    DEMO_CARDS_BY_ID[definitionId]?.advancementRequirement ??
-    RUNTIME_CARDS[definitionId]?.numeric.advancementRequirement ??
-    0;
-  const countersAfter = instance.advancementCounters + advancementCountersAdded;
-  const advancesRemainingAfterAction = Math.max(0, requirement - countersAfter);
-  if (advancesRemainingAfterAction > 1) return { finalAdvance: false };
-  const remoteProtectionScore = remoteProtectionScoreForSimulation(
-    stateBeforeAction,
-    input,
-    targetServerId,
-    simulationActionCreditCost(action),
-  );
-  const runnerContestRisk = runnerContestRiskForSimulation(
-    stateBeforeAction,
-    input,
-    targetServerId,
-  );
-  const sameTurnScoreLikely = advancesRemainingAfterAction === 0;
-  const unsafeFinalAdvance =
-    !sameTurnScoreLikely &&
-    (runnerContestRisk === "high" || remoteProtectionScore < 60);
-  return {
-    finalAdvance: true,
-    unsafeFinalAdvance,
-    protectedFinalAdvance: !unsafeFinalAdvance,
-    remoteProtectionScore,
-    runnerContestRisk,
-    advancesRemainingAfterAction,
-  };
-}
-
-function isProtectBeforeAdvanceSimulationAction(
-  stateBeforeAction: GameState,
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-): boolean {
-  if (action.side !== "corp" || !targetServerId?.startsWith("remote_"))
-    return false;
-  if (!remoteHasNearFinalAgenda(stateBeforeAction, targetServerId))
-    return false;
-  if (action.type === "install_card" && action.payload?.placement === "ice")
-    return true;
-  if (
-    action.type === "install_card" &&
-    action.payload?.placement !== "ice" &&
-    isProtectionDefinitionId(
-      stateBeforeAction.cardInstances[action.source]?.definitionId,
-    )
-  )
-    return true;
-  if (action.type === "gain_credit") {
-    const protectionBefore = remoteProtectionScoreForSimulation(
-      stateBeforeAction,
-      input,
-      targetServerId,
-      0,
-    );
-    const protectionAfter = remoteProtectionScoreForSimulation(
-      stateBeforeAction,
-      input,
-      targetServerId,
-      -1,
-    );
-    return protectionBefore < 60 && protectionAfter > protectionBefore;
-  }
-  return false;
 }
 
 function metricsFor(
