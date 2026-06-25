@@ -169,6 +169,7 @@ import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
+import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -12064,13 +12065,6 @@ function encounterRunRemainderEffectAssessment(
     remainingVisibleIceCount,
     evidence,
   };
-}
-
-function runnerHasInstalledPrograms(input: AiDecisionInput): boolean {
-  const rig = input.playerView.own.rig;
-  if (!rig) return false;
-  if (!Array.isArray(rig)) return false;
-  return rig.some((card) => card.type === "program");
 }
 
 function estimatedEncounterBreakCost(
