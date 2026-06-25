@@ -319,6 +319,7 @@ import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
   eventMayChangeArchives as aiEventMayChangeArchives,
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
+  eventRefreshesCentralTarget as aiEventRefreshesCentralTarget,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
   isArchivesAccessEvent as isAiArchivesAccessEvent,
@@ -25484,34 +25485,7 @@ function recentCentralRunSameTargetWithoutRefresh(
   )
     return false;
   const after = history.slice(lastSameRun + 1);
-  return !after.some((event) => centralRefreshEventForTarget(event, target));
-}
-
-function centralRefreshEventForTarget(
-  event: PublicGameEvent,
-  target: "hq" | "rd" | "archives",
-): boolean {
-  const actionType =
-    typeof event.publicPayload.actionType === "string"
-      ? event.publicPayload.actionType
-      : event.type;
-  if (actionType === "steal_agenda" || actionType === "trash_accessed_card")
-    return true;
-  if (target === "hq")
-    return (
-      actionType === "draw_card" ||
-      actionType === "mandatory_draw" ||
-      actionType === "install_card" ||
-      actionType === "play_operation"
-    );
-  if (target === "rd")
-    return (
-      actionType === "draw_card" ||
-      actionType === "mandatory_draw" ||
-      actionType === "shuffle_stack" ||
-      actionType === "reorder_cards"
-    );
-  return actionType === "trash_card";
+  return !after.some((event) => aiEventRefreshesCentralTarget(event, target));
 }
 
 function centralRunStreakWithoutValueForMetrics(

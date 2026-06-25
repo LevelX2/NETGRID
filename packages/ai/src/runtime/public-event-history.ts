@@ -1,4 +1,5 @@
 import type { PublicGameEvent } from "@netgrid/shared";
+import type { CentralServerId } from "./server-target";
 
 export function findLastHistoryIndex<T>(
   values: readonly T[],
@@ -46,6 +47,33 @@ export function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
     actionType === "discard_card" ||
     actionType === "resolve_choice"
   );
+}
+
+export function eventRefreshesCentralTarget(
+  event: PublicGameEvent,
+  target: CentralServerId,
+): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  if (actionType === "steal_agenda" || actionType === "trash_accessed_card")
+    return true;
+  if (target === "hq")
+    return (
+      actionType === "draw_card" ||
+      actionType === "mandatory_draw" ||
+      actionType === "install_card" ||
+      actionType === "play_operation"
+    );
+  if (target === "rd")
+    return (
+      actionType === "draw_card" ||
+      actionType === "mandatory_draw" ||
+      actionType === "shuffle_stack" ||
+      actionType === "reorder_cards"
+    );
+  return actionType === "trash_card";
 }
 
 export function serverIdFromEvent(
