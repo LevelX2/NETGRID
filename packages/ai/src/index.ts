@@ -263,6 +263,14 @@ import {
   profileWeights,
   type AiProfileWeightsData,
 } from "./runtime/profile-weights";
+import type {
+  CorpPunishKind,
+  CorpTagPunishSkipReason,
+  CorpTagPunishUnknownChosenFamily,
+  CorpTagPunishUnknownSkipAttribution,
+  CorpTagPunishUnknownSkipPlausibility,
+  CorpVisibleTagPayoffCategory,
+} from "./runtime/corp-tag-punish-types";
 import type { RankedChoice } from "./runtime/ranked-choice";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
@@ -3535,32 +3543,6 @@ export type AiSimulationSummary = {
   cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
   metrics: AiQualityMetrics;
 };
-
-type CorpPunishKind =
-  | "scorched_earth_like"
-  | "urban_renewal_like"
-  | "punitive_counterstrike_like"
-  | "closed_accounts_like"
-  | "power_grid_overload_like"
-  | "datapool_like"
-  | "resource_trash_like"
-  | "scored_agenda_damage_like"
-  | "scored_agenda_trace_tag_like"
-  | "unknown";
-
-type CorpTagPunishSkipReason =
-  | "economy"
-  | "protection"
-  | "score"
-  | "advance"
-  | "remote_safety"
-  | "remote_protection"
-  | "central_protection"
-  | "draw"
-  | "install"
-  | "end_turn"
-  | "unknown_higher_priority"
-  | "unknown";
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -7526,48 +7508,6 @@ const RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS = new Set([
 const RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS = new Set([
   "onr_v1_022_emergency-self-construct",
 ]);
-
-type CorpVisibleTagPayoffCategory =
-  | "damage"
-  | "economic"
-  | "trash"
-  | "run_lock"
-  | "ambush"
-  | "unknown";
-
-type CorpTagPunishUnknownChosenFamily =
-  | "score"
-  | "advance"
-  | "install_agenda"
-  | "install_ice"
-  | "install_asset_or_upgrade"
-  | "rez"
-  | "operation"
-  | "ability"
-  | "trace_tag_source"
-  | "draw"
-  | "basic_credit"
-  | "end_turn"
-  | "unknown";
-
-type CorpTagPunishUnknownSkipPlausibility =
-  | "plausible"
-  | "suspicious"
-  | "unclassified";
-
-type CorpTagPunishUnknownSkipAttribution =
-  | "unknown_skip_plausible_score_window"
-  | "unknown_skip_plausible_advance_to_score"
-  | "unknown_skip_plausible_remote_safety"
-  | "unknown_skip_plausible_hq_or_rnd_safety"
-  | "unknown_skip_plausible_payoff_unaffordable"
-  | "unknown_skip_plausible_payoff_low_impact"
-  | "unknown_skip_plausible_survival_countercontext"
-  | "unknown_skip_suspicious_economy_or_setup"
-  | "unknown_skip_suspicious_low_value_install"
-  | "unknown_skip_suspicious_basic_credit"
-  | "unknown_skip_suspicious_end_turn"
-  | "unknown_skip_unclassified_missing_evidence";
 
 function tagPunishWindowDiagnosticsForSimulationAction(
   input: AiDecisionInput,
