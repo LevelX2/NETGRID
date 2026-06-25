@@ -185,6 +185,9 @@ import {
 import {
   traceTagExpectedSuccessEstimate,
 } from "./runtime/trace-tag-success-estimate";
+import {
+  tagPunishPayoffPriorityBonus,
+} from "./runtime/tag-punish-payoff-priority";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10882,25 +10885,6 @@ function corpOntologyPayoffAvailableForTagSource(
       classifyTagPunishPayoffFromOntology(card.definitionId),
     ),
   );
-}
-
-function tagPunishPayoffPriorityBonus(
-  assessment: NonNullable<
-    ReturnType<typeof corpTagPunishOntologyAssessmentForAction>
-  >,
-): number {
-  switch (assessment.payoffKind) {
-    case "damage":
-    case "scored_agenda_damage_like":
-      return 55;
-    case "economic":
-      return 35;
-    case "resource_trash":
-    case "hardware_trash":
-      return 25;
-    default:
-      return 10;
-  }
 }
 
 function corpTagPunishSkipReason(
