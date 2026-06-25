@@ -135,7 +135,7 @@ import {
   visibleRootIsKnownAgenda as visibleRootIsKnownAgendaRuntime,
 } from "./runtime/visible-root-agenda";
 import {
-  isVisibleIcebreakerProgram as isVisibleIcebreakerProgramRuntime,
+  createVisibleIcebreakerProgramPredicate,
 } from "./runtime/visible-icebreaker-program";
 import {
   buildObservedFacts as buildObservedFactsRuntime,
@@ -3899,6 +3899,8 @@ const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
 const {
   runnerStrategicIntentForInput,
 } = createRunnerStrategicIntentContext();
+const isVisibleIcebreakerProgram =
+  createVisibleIcebreakerProgramPredicate(visibleBreakerRolesForAi);
 const {
   runnerRunOnlyActionAdjustedSemanticChoice,
 } = createRunnerRunOnlyActionContext({
@@ -6869,10 +6871,6 @@ function selectedChoicesForDecision(
     extractAiFeatures,
     rolesForCardId,
   });
-}
-
-function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
-  return isVisibleIcebreakerProgramRuntime(card, visibleBreakerRolesForAi);
 }
 
 function discardKeepScore(

@@ -10,3 +10,9 @@ export function isVisibleIcebreakerProgram(
     visibleBreakerRoles(card).length > 0
   );
 }
+
+export function createVisibleIcebreakerProgramPredicate(
+  visibleBreakerRoles: (card: VisibleCard) => readonly string[],
+): (card: VisibleCard) => boolean {
+  return (card) => isVisibleIcebreakerProgram(card, visibleBreakerRoles);
+}
