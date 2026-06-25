@@ -170,7 +170,10 @@ import {
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
-import { findVisibleCard } from "./runtime/visible-card-lookup";
+import {
+  findVisibleCard,
+  semanticRuntimeVisibleSourceCard,
+} from "./runtime/visible-card-lookup";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -11207,50 +11210,6 @@ function shellTradersPrepareBaselinePenalty(
   if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2)
     penalty += 70;
   return penalty;
-}
-
-function semanticRuntimeVisibleSourceCard(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  if (action.source !== "basic_action" && action.source !== "game_rule") {
-    const byInstance = findVisibleCard(input, action.source);
-    if (byInstance) return byInstance;
-  }
-  const payload = action.payload ?? {};
-  const definitionId =
-    typeof payload.cardDefinitionId === "string"
-      ? payload.cardDefinitionId
-      : typeof payload.sourceDefinitionId === "string"
-        ? payload.sourceDefinitionId
-        : typeof payload.sourceCardDefinitionId === "string"
-          ? payload.sourceCardDefinitionId
-          : action.source.startsWith("onr_") ||
-              action.source.startsWith("simple_")
-            ? action.source
-            : undefined;
-  const allVisibleCards = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.heapOrArchives,
-    ...input.playerView.own.scoreArea,
-    ...(input.playerView.own.rig ?? []),
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
-  ];
-  if (definitionId) {
-    const byDefinition = allVisibleCards.find(
-      (card) => card.known && card.definitionId === definitionId,
-    );
-    if (byDefinition) return byDefinition;
-  }
-  return allVisibleCards.find(
-    (card) =>
-      card.known &&
-      card.title !== undefined &&
-      action.label.toLowerCase().includes(card.title.toLowerCase()),
-  );
 }
 
 function findVisibleCorpServerCard(
