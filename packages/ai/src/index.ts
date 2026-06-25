@@ -430,14 +430,12 @@ import {
   serverIdFromEvent as aiServerIdFromEvent,
 } from "./runtime/public-event-history";
 import {
-  boundedSelectionCount,
   playfulAiGainValue,
   selectableChoiceOptions,
 } from "./runtime/choice-option";
 import {
-  discardOptionInstanceId,
-  stableDiscardChoiceOptionIds,
-} from "./runtime/discard-choice-option";
+  selectedDiscardChoiceOptionIds,
+} from "./runtime/discard-choice-selection";
 import {
   discardDoctrineFitBonus,
   discardPlanFitBonus,
@@ -7321,6 +7319,7 @@ function selectedChoicesForDecision(
       input,
       choice,
       selectableOptions,
+      discardKeepScore,
     );
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
@@ -7506,51 +7505,6 @@ function definitionTypeForDiscardPlan(
   cardId: string | undefined,
 ): string | undefined {
   return cardId ? DEMO_CARDS_BY_ID[cardId]?.type : undefined;
-}
-
-function selectedDiscardChoiceOptionIds(
-  input: AiDecisionInput,
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): string[] {
-  const count = boundedSelectionCount(
-    choice.minSelections,
-    choice.maxSelections,
-    selectableOptions.length,
-  );
-  if (count <= 0) return [];
-  const handByInstanceId = new Map(
-    input.playerView.own.gripOrHq
-      .filter((card) => card.known)
-      .map((card) => [card.instanceId, card]),
-  );
-  const scored = selectableOptions.map((option) => {
-    const instanceId = discardOptionInstanceId(option);
-    const card = instanceId ? handByInstanceId.get(instanceId) : undefined;
-    if (!card || !card.definitionId) return undefined;
-    return { option, score: discardKeepScore(input, card) };
-  });
-  if (scored.some((entry) => !entry))
-    return stableDiscardChoiceOptionIds(selectableOptions, count);
-  return scored
-    .filter(
-      (
-        entry,
-      ): entry is {
-        option: (typeof selectableOptions)[number];
-        score: DiscardCandidateScore;
-      } => Boolean(entry),
-    )
-    .sort(
-      (left, right) =>
-        left.score.total - right.score.total ||
-        left.option.label.localeCompare(right.option.label, "de") ||
-        left.option.id.localeCompare(right.option.id),
-    )
-    .slice(0, count)
-    .map((entry) => entry.option.id);
 }
 
 function discardKeepScore(
