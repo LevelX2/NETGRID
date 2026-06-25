@@ -467,6 +467,7 @@ import {
   nextEntriesForSide,
   ownStrategicWindow,
   planKindForConversion,
+  planIntentConvertedWithin,
   previousOwnStrategicWindow,
   remoteBuildConvertsToAdvanceOrScore,
   remoteContestConvertsToStealOrTrash,
@@ -15310,7 +15311,13 @@ function summarizePlanConversionMetrics(
         ) {
           samePlanRepeatedWithoutProgress += 1;
         }
-        const converted = planIntentConvertedWithin(sequence, index, planKind);
+        const converted = planIntentConvertedWithin(
+          sequence,
+          index,
+          planKind,
+          isMeaningfulBoardProgress,
+          isCorpRemoteAdvancementProgress,
+        );
         if (converted) planIntentConverted += 1;
         else if (
           !hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress)
@@ -21362,39 +21369,6 @@ function corpProtectionConvertsToScoreSafety(
         later.protectBeforeAdvance === true ||
         planKindForConversion(later)?.includes("remote_build") === true),
   );
-}
-
-function planIntentConvertedWithin(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  planKind: string,
-): boolean {
-  if (planKind.includes("setup") || planKind.includes("draw"))
-    return setupActionConvertsToRun(sequence, index, isMeaningfulBoardProgress);
-  if (planKind.includes("economy"))
-    return economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress);
-  if (planKind.includes("rig") || planKind.includes("breaker"))
-    return (
-      rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress) ||
-      isMeaningfulBoardProgress(sequence[index]!)
-    );
-  if (planKind.includes("remote_build") || planKind.includes("protect"))
-    return remoteBuildConvertsToAdvanceOrScore(
-      sequence,
-      index,
-      isCorpRemoteAdvancementProgress,
-    );
-  if (planKind.includes("advance"))
-    return advanceConvertsToScore(
-      sequence,
-      index,
-      isCorpRemoteAdvancementProgress,
-    );
-  if (planKind.includes("remote_contest"))
-    return remoteContestConvertsToStealOrTrash(sequence, index);
-  if (planKind.includes("central") || planKind.includes("pressure"))
-    return centralPressureConvertsToSteal(sequence, index);
-  return hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress);
 }
 
 function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {

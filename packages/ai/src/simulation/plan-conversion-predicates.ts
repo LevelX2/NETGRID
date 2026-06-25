@@ -436,6 +436,48 @@ export function centralPressureConvertsToSteal<
   );
 }
 
+export function planIntentConvertedWithin<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  planKind: string,
+  isMeaningfulProgress: (entry: T) => boolean,
+  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
+): boolean {
+  if (planKind.includes("setup") || planKind.includes("draw"))
+    return setupActionConvertsToRun(sequence, index, isMeaningfulProgress);
+  if (planKind.includes("economy"))
+    return economyActionConvertsToRun(sequence, index, isMeaningfulProgress);
+  if (planKind.includes("rig") || planKind.includes("breaker"))
+    return (
+      rigActionConvertsToRun(sequence, index, isMeaningfulProgress) ||
+      isMeaningfulProgress(sequence[index]!)
+    );
+  if (planKind.includes("remote_build") || planKind.includes("protect"))
+    return remoteBuildConvertsToAdvanceOrScore(
+      sequence,
+      index,
+      isCorpRemoteAdvancementProgress,
+    );
+  if (planKind.includes("advance"))
+    return advanceConvertsToScore(
+      sequence,
+      index,
+      isCorpRemoteAdvancementProgress,
+    );
+  if (planKind.includes("remote_contest"))
+    return remoteContestConvertsToStealOrTrash(sequence, index);
+  if (planKind.includes("central") || planKind.includes("pressure"))
+    return centralPressureConvertsToSteal(sequence, index);
+  return hasMeaningfulProgressWithin(
+    sequence,
+    index,
+    3,
+    isMeaningfulProgress,
+  );
+}
+
 function isCorpRemoteAdvancementProgressForPlan(
   entry: PlanConversionDecisionEntry,
 ): boolean {
