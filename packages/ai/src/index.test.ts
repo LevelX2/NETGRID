@@ -34,6 +34,7 @@ import {
   buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
+  type AiDecisionInputWithDeckCapabilities,
   assessCorpScoreTerminalWindow,
   assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
@@ -175,6 +176,38 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(runnerInput.playerView).toEqual(getPlayerView(state, "runner"));
     expect(JSON.stringify(corpInput)).not.toContain("cardInstances");
     expect(JSON.stringify(corpInput)).not.toContain("sessionToken");
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("projects side-safe deck strategy runtime fields for both sides when snapshots are present", () => {
+    const state = createGameAfterSetup({ seed: "ai-strategic-runtime-input" });
+    const corpInput = buildAiDecisionInput(state, "corp", {
+      ownDeckSnapshot: snapshotById("demo_corp_008_snapshot_v0_8"),
+    }) as AiDecisionInputWithDeckCapabilities;
+    const runnerInput = buildAiDecisionInput(state, "runner", {
+      ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
+    }) as AiDecisionInputWithDeckCapabilities;
+
+    expect(corpInput.ownStrategicIntentState).toMatchObject({
+      side: "corp",
+      source: {
+        plannerEffect: "goal_and_plan_input",
+        actionGeneration: "none",
+        hiddenInfoPolicy: "player_view_only",
+      },
+    });
+    expect(corpInput.ownCorpStrategicIntent).toMatchObject({
+      side: "corp",
+      source: {
+        strategicIntentState: "strategic_intent_state_v1",
+        plannerEffect: "runtime_projection",
+      },
+    });
+    expect(corpInput.ownRunnerStrategicIntent).toBeUndefined();
+    expect(runnerInput.ownStrategicIntentState?.side).toBe("runner");
+    expect(runnerInput.ownRunnerStrategicIntent?.side).toBe("runner");
+    expect(runnerInput.ownCorpStrategicIntent).toBeUndefined();
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
   });

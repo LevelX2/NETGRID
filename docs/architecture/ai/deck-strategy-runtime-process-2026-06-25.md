@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-03 next`
+Status: `active: DSR-04 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -80,8 +80,8 @@ preflight
 
 1. `DSR-00` Ist-Zustand und Consumer verifizieren. Status: `done`, Commit: `77ebf459`.
 2. `DSR-01` Einheitlichen strategischen Laufzeitvertrag festlegen. Status: `done`, Commit: `79decae4`.
-3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: pending.
-4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen.
+3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: `c5a1b920`.
+4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: pending.
 5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen.
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen.
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen.
@@ -158,6 +158,20 @@ Done-Gate:
 
 - Mindestens zwei konkurrierende Strategien pro Seite und neutrale Decks sind getestet.
 - Bestehende Runner-Setup-, Economy-, Coverage- und Run-Logik bleibt erhalten.
+
+Umsetzung:
+
+- `StrategicIntentState` wird beim AI-Input-Aufbau aus DeckStrategyProfile, DeckCapabilities und PlayerView-Credits für beide Seiten erzeugt.
+- Runner-Projektion bleibt erhalten und nutzt das einmal aufgebaute StrategyProfile weiter.
+- Corp-Projektion bildet Scoreline, Defense, Economy, Punish, Risiken und Rejected Intents side-sicher aus StrategyProfile, Capabilities und StrategicIntentState ab.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/corp-strategic-intent.test.ts src/strategic-intent-state.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "projects side-safe deck strategy runtime fields" --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `feat(ai): project strategic intent for both sides`
 

@@ -17,9 +17,17 @@ import {
 } from "../deck-doctrine";
 import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
 import {
+  buildCorpStrategicIntentProfile,
+  type CorpStrategicIntentProfile,
+} from "../corp-strategic-intent";
+import {
   buildRunnerStrategicIntentProfile,
   type RunnerStrategicIntentProfile,
 } from "../runner-strategic-intent";
+import {
+  buildStrategicIntentState,
+  type StrategicIntentState,
+} from "../strategic-intent-state";
 import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
 
@@ -42,6 +50,8 @@ export type AiDecisionSideSelection =
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownStrategicIntentState?: StrategicIntentState;
+  ownCorpStrategicIntent?: CorpStrategicIntentProfile;
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
   ownRunnerTacticalGoals?: RunnerTacticalGoal[];
 };
@@ -97,16 +107,34 @@ export function buildAiDecisionInput(
     legalActions,
     deckSnapshot: options.ownDeckSnapshot,
   });
+  const ownDeckStrategyProfile = buildDeckStrategyProfile(options.ownDeckSnapshot);
+  const ownStrategicIntentState = buildStrategicIntentState({
+    side,
+    stateVersion: playerView.stateVersion,
+    strategyProfile: ownDeckStrategyProfile,
+    deckCapabilities: ownDeckCapabilities,
+    availableCredits: playerView.own.credits,
+  });
   const ownRunnerStrategicIntent =
     side === "runner"
       ? buildRunnerStrategicIntentProfile({
-          strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
+          strategyProfile: ownDeckStrategyProfile,
           deckCapabilities: ownDeckCapabilities,
+        })
+      : undefined;
+  const ownCorpStrategicIntent =
+    side === "corp"
+      ? buildCorpStrategicIntentProfile({
+          strategyProfile: ownDeckStrategyProfile,
+          deckCapabilities: ownDeckCapabilities,
+          strategicIntentState: ownStrategicIntentState,
         })
       : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
+    ownStrategicIntentState,
+    ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),
     ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),
   };
   return enriched;

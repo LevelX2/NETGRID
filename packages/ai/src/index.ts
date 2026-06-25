@@ -345,7 +345,10 @@ export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
-export type { AiDecisionSideSelection } from "./runtime/ai-decision-input";
+export type {
+  AiDecisionInputWithDeckCapabilities,
+  AiDecisionSideSelection,
+} from "./runtime/ai-decision-input";
 
 export {
   chooseCorpPlanAction,
@@ -448,6 +451,21 @@ export {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   buildRunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
+export {
+  CORP_STRATEGIC_INTENT_SCHEMA_VERSION,
+  buildCorpStrategicIntentProfile,
+} from "./corp-strategic-intent";
+export {
+  STRATEGIC_INTENT_STATE_SCHEMA_VERSION,
+  buildStrategicIntentState,
+} from "./strategic-intent-state";
+export type {
+  CorpStrategicIntentProfile,
+  CorpStrategicIntentConfidence,
+  CorpStrategicIntentRisk,
+  CorpRejectedIntent,
+} from "./corp-strategic-intent";
+export type { StrategicIntentState } from "./strategic-intent-state";
 export type {
   AiDeckDoctrineDeckSnapshot,
   CorpOpeningHandEvaluation,
