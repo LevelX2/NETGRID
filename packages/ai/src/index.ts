@@ -122,6 +122,7 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
+import { rolesForAction as rolesForActionRuntime } from "./runtime/action-role-lookup";
 import {
   extractAiFeatures as extractAiFeaturesRuntime,
   type AiFeatures,
@@ -9965,10 +9966,10 @@ export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
 }
 
 function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
-  if (action.source === "basic_action" || action.source === "game_rule")
-    return [];
-  const visible = findVisibleCard(input, action.source);
-  return rolesForCardId(visible?.definitionId);
+  return rolesForActionRuntime(input, action, {
+    findVisibleCard,
+    rolesForCardId,
+  });
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
