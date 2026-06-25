@@ -115,3 +115,16 @@ export function runnerTrashBlockedByCredits(
     !input.legalActions.some((action) => action.type === "trash_accessed_card")
   );
 }
+
+export function runnerStealBlockedByCredits(
+  input: AiDecisionInput,
+  reserveTarget: number,
+): boolean {
+  const run = input.playerView.run;
+  const accessed = run?.accessedCard;
+  if (!run || !accessed?.known || accessed.type !== "agenda") return false;
+  return (
+    !input.legalActions.some((action) => action.type === "steal_agenda") &&
+    input.playerView.own.credits < reserveTarget
+  );
+}

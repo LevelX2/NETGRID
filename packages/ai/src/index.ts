@@ -428,6 +428,7 @@ import {
   runnerContestBlockedByCredits,
   runnerHasVisibleRemoteScoreThreat,
   runnerRemoteHasKnownRelevantTrashTarget,
+  runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
 } from "./simulation/remote-server-threat";
 import {
@@ -26414,19 +26415,6 @@ function runnerHasRecentRunOnServer(
         event.publicPayload.actionType === "start_run" &&
         aiServerIdFromEvent(event) === serverId,
     );
-}
-
-function runnerStealBlockedByCredits(
-  input: AiDecisionInput,
-  reserveTarget: number,
-): boolean {
-  const run = input.playerView.run;
-  const accessed = run?.accessedCard;
-  if (!run || !accessed?.known || accessed.type !== "agenda") return false;
-  return (
-    !input.legalActions.some((action) => action.type === "steal_agenda") &&
-    input.playerView.own.credits < reserveTarget
-  );
 }
 
 function runnerRemoteTrashAccessContext(
