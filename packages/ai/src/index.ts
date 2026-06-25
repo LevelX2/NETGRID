@@ -7554,7 +7554,7 @@ function discardKeepScore(
       evidence: ["discard_score:base"],
     };
   }
-  const roles = discardRolesForCardId(card.definitionId);
+  const roles = rolesForCardId(card.definitionId);
   const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
   const cost = visibleCardPlayOrInstallCostForAi(card);
   const runnerPlanRelevantBreaker =
@@ -7593,7 +7593,7 @@ function discardKeepScore(
         (role) =>
           role.startsWith("breaker_") &&
           (input.playerView.own.rig ?? []).some((rigCard) =>
-            discardRolesForCardId(rigCard.definitionId).includes(role),
+            rolesForCardId(rigCard.definitionId).includes(role),
           ),
       );
       baseValue += installedSameBreakerRole ? 95 : 210;
@@ -7822,14 +7822,14 @@ function discardCurrentPlanKind(input: AiDecisionInput): string | undefined {
   if (input.side === "runner") {
     if (input.playerView.own.credits < 4) return "recover_economy";
     const hasInstalledBreaker = (input.playerView.own.rig ?? []).some((card) =>
-      discardRolesForCardId(card.definitionId).some((role) =>
+      rolesForCardId(card.definitionId).some((role) =>
         role.startsWith("breaker_"),
       ),
     );
     if (
       !hasInstalledBreaker &&
       hand.some((card) =>
-        discardRolesForCardId(card.definitionId).some(
+        rolesForCardId(card.definitionId).some(
           (role) =>
             role.startsWith("breaker_") ||
             role === "memory" ||
@@ -7847,7 +7847,7 @@ function discardCurrentPlanKind(input: AiDecisionInput): string | undefined {
             : undefined)) === "agenda",
     );
     const hasRemoteSupport = hand.some((card) => {
-      const roles = discardRolesForCardId(card.definitionId);
+      const roles = rolesForCardId(card.definitionId);
       const type =
         card.type ??
         (card.definitionId
@@ -7890,10 +7890,6 @@ function discardEvidenceForInput(input: AiDecisionInput): string[] {
       evidence.push(`discard_keep:doctrine_${tag}`);
   }
   return sortedUnique(evidence);
-}
-
-function discardRolesForCardId(cardId: string | undefined): string[] {
-  return cardRolesForId(cardId, AI_HINTS);
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
@@ -24152,7 +24148,7 @@ function runnerDiscardChoiceRoles(
   return runnerDiscardChoiceRolesForSimulation(
     input,
     decision,
-    discardRolesForCardId,
+    rolesForCardId,
   );
 }
 
