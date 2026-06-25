@@ -35,6 +35,8 @@ export type RunnerEndgameCloseoutEntry = {
   targetServerId?: string;
   hqKnownAgendaCount?: number;
   knownRemoteAgendas?: number;
+  knownRemoteTrashableCards?: number;
+  knownUnrezzedIceFromExpose?: number;
   runCreditsMissingForKnownPath?: number;
   hqRunBoostedBecauseKnownAgenda?: boolean;
   hqRunBoostedByRndToHqAgenda?: boolean;
@@ -59,6 +61,8 @@ export type RunnerEndgameCloseoutEntry = {
   runStartedWithInsufficientStealOrTrashReserve?: boolean;
   runnerRemoteRunAgainstAdvancedRemote?: boolean;
   runnerRelevantRemoteTrashTaken?: boolean;
+  runnerRemoteRunOpportunityAgainstAdvancedRemote?: boolean;
+  remoteTrashBoostedByKnownRemoteTrashable?: boolean;
 };
 
 export function summarizeRunnerEndgameCloseoutWindow(
@@ -244,5 +248,77 @@ function runnerCloseoutAttemptedByEntry(
     entry.runnerCentralCloseoutRunTaken === true ||
     entry.runnerRemoteRunAgainstAdvancedRemote === true ||
     entry.runnerRelevantRemoteTrashTaken === true
+  );
+}
+
+export function isRunnerEndgameMeaningfulRunOpportunity(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  if (entry.side !== "runner") return false;
+  return (
+    entry.runnerRemoteRunOpportunityAgainstAdvancedRemote === true ||
+    entry.runnerTrueCentralCloseoutOpportunity === true ||
+    (entry.hqKnownAgendaCount ?? 0) > 0 ||
+    (entry.knownRemoteAgendas ?? 0) > 0 ||
+    (entry.knownRemoteTrashableCards ?? 0) > 0 ||
+    entry.runnerCentralRunWithMultiaccess === true ||
+    entry.runnerCentralRunWithInterfaceInstalled === true ||
+    entry.runnerCentralRunEventWithGoodTarget === true
+  );
+}
+
+export function isRunnerEndgameMeaningfulRunTaken(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  if (entry.side !== "runner") return false;
+  if (entry.actionType === "steal_agenda") return true;
+  if (
+    entry.actionType === "trash_accessed_card" ||
+    entry.runnerRelevantRemoteTrashTaken === true
+  )
+    return true;
+  if (entry.actionType !== "start_run") return false;
+  return (
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralCloseoutRunTaken === true ||
+    entry.runnerCentralRunWithMultiaccess === true ||
+    entry.runnerCentralRunWithInterfaceInstalled === true ||
+    entry.runnerCentralRunEventWithGoodTarget === true ||
+    entry.hqRunBoostedBecauseKnownAgenda === true ||
+    entry.hqRunBoostedByRndToHqAgenda === true ||
+    entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+    entry.remoteTrashBoostedByKnownRemoteTrashable === true
+  );
+}
+
+export function isEndgameKnownInfoOpportunity(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    ((entry.hqKnownAgendaCount ?? 0) > 0 ||
+      (entry.knownRemoteAgendas ?? 0) > 0 ||
+      (entry.knownRemoteTrashableCards ?? 0) > 0 ||
+      (entry.knownUnrezzedIceFromExpose ?? 0) > 0 ||
+      entry.hqRunBoostedBecauseKnownAgenda === true ||
+      entry.hqRunBoostedByRndToHqAgenda === true ||
+      entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+      entry.remoteTrashBoostedByKnownRemoteTrashable === true)
+  );
+}
+
+export function isEndgameKnownInfoTaken(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    (entry.actionType === "steal_agenda" ||
+      entry.actionType === "trash_accessed_card" ||
+      (entry.actionType === "start_run" &&
+        (entry.hqRunBoostedBecauseKnownAgenda === true ||
+          entry.hqRunBoostedByRndToHqAgenda === true ||
+          entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+          entry.remoteTrashBoostedByKnownRemoteTrashable === true ||
+          (entry.knownUnrezzedIceFromExpose ?? 0) > 0)))
   );
 }

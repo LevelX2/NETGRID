@@ -434,7 +434,13 @@ import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
-import { summarizeRunnerEndgameCloseoutWindow } from "./simulation/runner-endgame-closeout";
+import {
+  isEndgameKnownInfoOpportunity,
+  isEndgameKnownInfoTaken,
+  isRunnerEndgameMeaningfulRunOpportunity,
+  isRunnerEndgameMeaningfulRunTaken,
+  summarizeRunnerEndgameCloseoutWindow,
+} from "./simulation/runner-endgame-closeout";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -15622,46 +15628,6 @@ function summarizeActionLimitEndgameMetrics(
   };
 }
 
-function isRunnerEndgameMeaningfulRunOpportunity(
-  entry: PlanConversionActionEntry,
-): boolean {
-  if (entry.side !== "runner") return false;
-  return (
-    entry.runnerRemoteRunOpportunityAgainstAdvancedRemote === true ||
-    entry.runnerTrueCentralCloseoutOpportunity === true ||
-    (entry.hqKnownAgendaCount ?? 0) > 0 ||
-    (entry.knownRemoteAgendas ?? 0) > 0 ||
-    (entry.knownRemoteTrashableCards ?? 0) > 0 ||
-    entry.runnerCentralRunWithMultiaccess === true ||
-    entry.runnerCentralRunWithInterfaceInstalled === true ||
-    entry.runnerCentralRunEventWithGoodTarget === true
-  );
-}
-
-function isRunnerEndgameMeaningfulRunTaken(
-  entry: PlanConversionActionEntry,
-): boolean {
-  if (entry.side !== "runner") return false;
-  if (entry.actionType === "steal_agenda") return true;
-  if (
-    entry.actionType === "trash_accessed_card" ||
-    entry.runnerRelevantRemoteTrashTaken === true
-  )
-    return true;
-  if (entry.actionType !== "start_run") return false;
-  return (
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralCloseoutRunTaken === true ||
-    entry.runnerCentralRunWithMultiaccess === true ||
-    entry.runnerCentralRunWithInterfaceInstalled === true ||
-    entry.runnerCentralRunEventWithGoodTarget === true ||
-    entry.hqRunBoostedBecauseKnownAgenda === true ||
-    entry.hqRunBoostedByRndToHqAgenda === true ||
-    entry.remoteRunBoostedByKnownRemoteAgenda === true ||
-    entry.remoteTrashBoostedByKnownRemoteTrashable === true
-  );
-}
-
 function isCorpEndgameScorePathOpportunity(
   entry: PlanConversionActionEntry,
 ): boolean {
@@ -15685,36 +15651,6 @@ function isCorpEndgameScorePathTaken(
     isCorpRemoteAdvancementProgress(entry) ||
     entry.protectedFinalAdvance === true ||
     entry.protectBeforeAdvance === true
-  );
-}
-
-function isEndgameKnownInfoOpportunity(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.side === "runner" &&
-    ((entry.hqKnownAgendaCount ?? 0) > 0 ||
-      (entry.knownRemoteAgendas ?? 0) > 0 ||
-      (entry.knownRemoteTrashableCards ?? 0) > 0 ||
-      (entry.knownUnrezzedIceFromExpose ?? 0) > 0 ||
-      entry.hqRunBoostedBecauseKnownAgenda === true ||
-      entry.hqRunBoostedByRndToHqAgenda === true ||
-      entry.remoteRunBoostedByKnownRemoteAgenda === true ||
-      entry.remoteTrashBoostedByKnownRemoteTrashable === true)
-  );
-}
-
-function isEndgameKnownInfoTaken(entry: PlanConversionActionEntry): boolean {
-  return (
-    entry.side === "runner" &&
-    (entry.actionType === "steal_agenda" ||
-      entry.actionType === "trash_accessed_card" ||
-      (entry.actionType === "start_run" &&
-        (entry.hqRunBoostedBecauseKnownAgenda === true ||
-          entry.hqRunBoostedByRndToHqAgenda === true ||
-          entry.remoteRunBoostedByKnownRemoteAgenda === true ||
-          entry.remoteTrashBoostedByKnownRemoteTrashable === true ||
-          (entry.knownUnrezzedIceFromExpose ?? 0) > 0)))
   );
 }
 
