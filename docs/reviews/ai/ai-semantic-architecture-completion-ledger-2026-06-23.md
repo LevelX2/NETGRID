@@ -2151,6 +2151,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` zweihundertachter Struktur-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` kapselt die sichtbare Remote-Trash-Rollenklassifikation inklusive internem `RemoteTrashRole`-Typ.
+  - `packages/ai/src/index.ts` nutzt den internen Remote-Trash-Role-Helfer und entfernt die lokale sichtbare Rollenklassifikation.
+  - `packages/ai/src/public-export-contract.test.ts` sperrt den neuen internen Simulation-Modulpfad gegen versehentliche Public-Facade-Exporte.
+  - `packages/ai/src/index.ts` sank weiter von 27.798 auf 27.700 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
