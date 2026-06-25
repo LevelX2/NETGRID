@@ -437,11 +437,13 @@ import {
 import {
   isEndgameKnownInfoOpportunity,
   isEndgameKnownInfoTaken,
+  isEndgameLowValueRepeatAction,
   isCorpEndgameScorePathOpportunity,
   isCorpEndgameScorePathTaken,
   isEndgameScoreOrStealPressureAction,
   isRunnerEndgameMeaningfulRunOpportunity,
   isRunnerEndgameMeaningfulRunTaken,
+  isRunnerEndgameStallSymptom,
   summarizeRunnerEndgameCloseoutWindow,
 } from "./simulation/runner-endgame-closeout";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
@@ -15655,41 +15657,6 @@ function isEndgameProtectionAction(entry: PlanConversionActionEntry): boolean {
         entry.installPlacement === "ice") ||
       entry.actionType === "rez_ice" ||
       planKind?.includes("protect") === true)
-  );
-}
-
-function isEndgameLowValueRepeatAction(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.runnerRepeatedLowValueCentralRun === true ||
-    entry.runnerNoFreshCentralRunTaken === true ||
-    entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
-    hasEvidenceFlag(entry, "runner_access_no_value_repeated:true") ||
-    hasEvidenceFlag(
-      entry,
-      "runner_central_success_followed_by_repeat_no_value:true",
-    ) ||
-    hasEvidenceFlag(
-      entry,
-      "runner_jack_out_repeated_same_server_without_new_info:true",
-    )
-  );
-}
-
-function isRunnerEndgameStallSymptom(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.runnerContestBlockedByCredits === true ||
-    entry.runnerRemoteContestBlockedByCredits === true ||
-    entry.runnerRemoteContestBlockedByPostRunReserve === true ||
-    entry.runnerRemoteContestBlockedByBreakerCoverage === true ||
-    entry.runnerRemoteContestBlockedByKnownIceCost === true ||
-    entry.runStartedAgainstKnownUnaffordablePath === true ||
-    entry.runnerSkippedAdvancedRemoteContest === true ||
-    entry.runnerCentralRunBurnedRemoteContestReserve === true ||
-    isEndgameLowValueRepeatAction(entry)
   );
 }
 

@@ -1,3 +1,4 @@
+import { hasEvidenceFlag } from "../runtime/evidence-value";
 import { isRemoteServerTarget } from "../runtime/server-target";
 
 export type RunnerEndgameCloseoutWindowSummary = {
@@ -66,11 +67,16 @@ export type RunnerEndgameCloseoutEntry = {
   runnerRelevantRemoteTrashTaken?: boolean;
   runnerRemoteRunOpportunityAgainstAdvancedRemote?: boolean;
   remoteTrashBoostedByKnownRemoteTrashable?: boolean;
+  runnerRepeatedLowValueCentralRun?: boolean;
+  runnerNoFreshCentralRunTaken?: boolean;
+  runnerRepeatedCentralRunWithoutFreshValue?: boolean;
+  runnerSkippedAdvancedRemoteContest?: boolean;
   scoreActionsAvailable?: number;
   finalAdvance?: boolean;
   protectedFinalAdvance?: boolean;
   protectBeforeAdvance?: boolean;
   advancementCountersAdded?: number;
+  evidence?: readonly string[];
 };
 
 export function summarizeRunnerEndgameCloseoutWindow(
@@ -370,6 +376,41 @@ export function isEndgameScoreOrStealPressureAction(
   );
 }
 
+export function isEndgameLowValueRepeatAction(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.runnerRepeatedLowValueCentralRun === true ||
+    entry.runnerNoFreshCentralRunTaken === true ||
+    entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
+    hasEndgameEvidenceFlag(entry, "runner_access_no_value_repeated:true") ||
+    hasEndgameEvidenceFlag(
+      entry,
+      "runner_central_success_followed_by_repeat_no_value:true",
+    ) ||
+    hasEndgameEvidenceFlag(
+      entry,
+      "runner_jack_out_repeated_same_server_without_new_info:true",
+    )
+  );
+}
+
+export function isRunnerEndgameStallSymptom(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.runnerContestBlockedByCredits === true ||
+    entry.runnerRemoteContestBlockedByCredits === true ||
+    entry.runnerRemoteContestBlockedByPostRunReserve === true ||
+    entry.runnerRemoteContestBlockedByBreakerCoverage === true ||
+    entry.runnerRemoteContestBlockedByKnownIceCost === true ||
+    entry.runStartedAgainstKnownUnaffordablePath === true ||
+    entry.runnerSkippedAdvancedRemoteContest === true ||
+    entry.runnerCentralRunBurnedRemoteContestReserve === true ||
+    isEndgameLowValueRepeatAction(entry)
+  );
+}
+
 function isCorpRemoteAdvancementProgressForEndgame(
   entry: RunnerEndgameCloseoutEntry,
 ): boolean {
@@ -387,4 +428,11 @@ function isCorpRemoteBuildActionForEndgame(
     isRemoteServerTarget(entry.targetServerId) &&
     (entry.actionType === "install_card" || entry.actionType === "rez_ice")
   );
+}
+
+function hasEndgameEvidenceFlag(
+  entry: RunnerEndgameCloseoutEntry,
+  flag: string,
+): boolean {
+  return hasEvidenceFlag({ evidence: entry.evidence ?? [] }, flag);
 }
