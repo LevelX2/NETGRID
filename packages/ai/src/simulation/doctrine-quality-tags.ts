@@ -1,4 +1,10 @@
-import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecision,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
+} from "@netgrid/shared";
 import type {
   AiDoctrineQualityCaseAnalysis,
   AiDoctrineQualityCaseExample,
@@ -7,7 +13,7 @@ import type {
   AiSimulationSummary,
 } from "../index";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
-import { countValue as countTag } from "../runtime/collection";
+import { countValue as countTag, sortedUnique } from "../runtime/collection";
 import { DOCTRINE_QUALITY_METRIC_NAMES } from "./simulation-metric-aggregation";
 
 type CentralRunActionSequenceEntry = {
@@ -16,6 +22,121 @@ type CentralRunActionSequenceEntry = {
   targetServerId?: string;
   reasonCode: string;
 };
+
+type DoctrineQualityTagFeatures = {
+  serverFeaturesById: Map<string, { iceCount?: number; rootCount?: number }>;
+  rigRoles: Set<string>;
+};
+
+type DoctrineQualityTagDependencies = {
+  extractFeatures: (input: AiDecisionInput) => DoctrineQualityTagFeatures;
+  findVisibleCard: (
+    input: AiDecisionInput,
+    instanceId: string,
+  ) => VisibleCard | undefined;
+  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+};
+
+export function qualityTagsForActionWithDependencies(
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  dependencies: DoctrineQualityTagDependencies,
+): string[] {
+  const tags: string[] = [];
+  const features = dependencies.extractFeatures(input);
+  const sourceCard =
+    action.source === "basic_action" || action.source === "game_rule"
+      ? undefined
+      : dependencies.findVisibleCard(input, action.source);
+  const sourceDefinition = sourceCard?.definitionId
+    ? DEMO_CARDS_BY_ID[sourceCard.definitionId]
+    : undefined;
+  const targetServerId =
+    typeof action.payload?.serverId === "string"
+      ? action.payload.serverId
+      : undefined;
+  const targetServer = targetServerId
+    ? features.serverFeaturesById.get(targetServerId)
+    : undefined;
+  const agendaInHand = input.playerView.own.gripOrHq.filter(
+    (card) =>
+      card.definitionId &&
+      DEMO_CARDS_BY_ID[card.definitionId]?.type === "agenda",
+  ).length;
+  const legalScoreAvailable =
+    input.side === "corp" &&
+    input.legalActions.some((candidate) => candidate.type === "score_agenda");
+  const legalTrashAvailable =
+    input.side === "runner" &&
+    input.legalActions.some(
+      (candidate) => candidate.type === "trash_accessed_card",
+    );
+  const lowCredits = input.playerView.own.credits <= 1;
+  const economyAction =
+    action.type === "gain_credit" ||
+    ((action.type === "play_event" || action.type === "play_operation") &&
+      dependencies
+        .rolesForAction(input, action)
+        .some((role) => role.includes("economy") || role === "tempo"));
+  const economyStallExempt = isEconomyStallExemptAction(
+    input,
+    action,
+    decision,
+  );
+  const visibleRemoteContest =
+    targetServerId?.startsWith("remote_") === true &&
+    (targetServer?.rootCount ?? 0) > 0;
+
+  if (
+    input.side === "corp" &&
+    action.type === "install_card" &&
+    action.payload?.placement !== "ice" &&
+    sourceDefinition?.type === "agenda"
+  ) {
+    if (
+      targetServerId === "new_remote" ||
+      ((targetServer?.iceCount ?? 0) === 0 &&
+        (targetServer?.rootCount ?? 0) === 0)
+    )
+      tags.push("naked_agenda_install");
+  }
+  if (
+    input.side === "corp" &&
+    agendaInHand >= 3 &&
+    !isAgendaFloodExposureExemptAction(action, decision, sourceDefinition)
+  )
+    tags.push("agenda_flood_exposure");
+  if (legalScoreAvailable && action.type !== "score_agenda")
+    tags.push("score_window_missed");
+  if (
+    input.side === "corp" &&
+    action.type === "install_card" &&
+    targetServerId?.startsWith("remote_") &&
+    ((action.payload?.placement === "ice" &&
+      (targetServer?.iceCount ?? 0) >= 2) ||
+      (action.payload?.placement !== "ice" &&
+        (targetServer?.rootCount ?? 0) >= 2))
+  ) {
+    tags.push("remote_overbuild");
+  }
+  if (lowCredits && !economyAction && !economyStallExempt)
+    tags.push("economy_stall");
+  if (
+    input.side === "runner" &&
+    features.rigRoles.size === 0 &&
+    action.type === "start_run" &&
+    !visibleRemoteContest &&
+    input.playerView.opponent.agendaPoints <
+      input.playerView.agendaPointsToWin - 2
+  )
+    tags.push("rig_stall");
+  if (legalTrashAvailable && action.type !== "trash_accessed_card")
+    tags.push("asset_trash_neglect");
+  if (decision.timeoutUsed) tags.push("timeout");
+  if (decision.fallbackUsed) tags.push("fallback");
+  return sortedUnique(tags);
+}
 
 export function isEconomyStallExemptAction(
   input: AiDecisionInput,
