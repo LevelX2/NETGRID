@@ -420,6 +420,7 @@ import {
   centralRunStreakWithoutValueForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
+import { remoteServerHasScoreThreat } from "./simulation/remote-server-threat";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -26898,21 +26899,6 @@ function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
       action.side === "runner" &&
       action.type === "trash_accessed_card" &&
       isRemoteServerTarget(input.playerView.run?.attackedServerId),
-  );
-}
-
-function remoteServerHasScoreThreat(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  return server.root.some(
-    (card) =>
-      (card.advancementCounters ?? 0) > 0 ||
-      (card.known && card.type === "agenda"),
   );
 }
 

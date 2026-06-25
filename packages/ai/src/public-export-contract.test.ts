@@ -258,6 +258,7 @@ describe("AI public export contract", () => {
       "./simulation/central-pressure-card",
       "./simulation/central-run-history",
       "./simulation/progression-action-sequence",
+      "./simulation/remote-server-threat",
       "./simulation/simulation-metric-aggregation",
       "./simulation/visible-break-cost-metric",
       "./reports/shadow-league-report-formatters",
