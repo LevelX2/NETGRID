@@ -203,6 +203,7 @@ import {
   shellTradersImmediateRemoveAvailable,
   shellTradersPrepareBaselinePenalty,
 } from "./runtime/shell-traders-context";
+import { shellTradersDirectInstallUrgency } from "./runtime/shell-traders-urgency";
 import { publicRoleEvidence } from "./runtime/role-evidence";
 import {
   corpInstalledEconomyCreditAmount,
@@ -8462,8 +8463,18 @@ function scoreRunnerAction(
             : 0;
         const targetRoles = shellTradersTargetRoles(input, action);
         const directInstall = shellTradersDirectInstallAction(input, action);
+        const installedRigRoles = new Set(
+          (input.playerView.own.rig ?? []).flatMap((card) =>
+            rolesForCardId(card.definitionId),
+          ),
+        );
         const directInstallUrgency = directInstall
-          ? shellTradersDirectInstallUrgency(input, targetRoles, directInstall)
+          ? shellTradersDirectInstallUrgency(
+              input,
+              targetRoles,
+              directInstall,
+              installedRigRoles,
+            )
           : 0;
         const directInstallPenalty = directInstall
           ? shellTradersDirectInstallPreparePenalty(
@@ -10876,38 +10887,6 @@ function shellTradersTargetRoles(
       ? action.payload.targetCardDefinitionId
       : findVisibleCard(input, targetCardId)?.definitionId;
   return rolesForCardId(targetDefinitionId);
-}
-
-function shellTradersDirectInstallUrgency(
-  input: AiDecisionInput,
-  roles: string[],
-  directInstall: LegalAction,
-): number {
-  const remainingCredits =
-    input.playerView.own.credits - actionCreditCost(directInstall);
-  let urgency = 0;
-  if (
-    roles.some(
-      (role) =>
-        role.startsWith("breaker_") &&
-        !input.playerView.own.rig?.some((card) =>
-          rolesForCardId(card.definitionId).includes(role),
-        ),
-    )
-  )
-    urgency += 145;
-  const memoryRemaining =
-    (input.playerView.own.memoryLimit ?? 0) -
-    (input.playerView.own.memoryUsed ?? 0);
-  if (roles.includes("memory") || roles.includes("memory_support"))
-    urgency += memoryRemaining <= 1 ? 110 : 25;
-  if (roles.includes("setup") || roles.includes("build_rig"))
-    urgency += (input.playerView.own.rig ?? []).length === 0 ? 45 : 15;
-  if (roles.includes("economy") || roles.includes("tempo"))
-    urgency += input.playerView.own.credits < 4 ? 55 : 15;
-  if (remainingCredits >= 2) urgency += 45;
-  else if (remainingCredits < 1) urgency -= 35;
-  return Math.max(0, urgency);
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
