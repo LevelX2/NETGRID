@@ -263,6 +263,7 @@ import {
   profileWeights,
   type AiProfileWeightsData,
 } from "./runtime/profile-weights";
+import type { RankedChoice } from "./runtime/ranked-choice";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -1102,15 +1103,6 @@ export type {
   AiDeckOntologyTagPunishSummary,
   AiDeckOntologyValidationSummary,
 } from "./hint-ontology-doctrine";
-
-type RankedChoice = {
-  action: LegalAction | undefined;
-  reasonCode: string;
-  explanation: string;
-  score: number;
-  evidence: string[];
-  confidence?: number;
-};
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
 
