@@ -143,6 +143,7 @@ import {
   remoteTrashCostBucket,
   type RemoteTrashCostBucket,
 } from "./runtime/remote-trash-cost";
+import { serverIdForCorpInstalledCard } from "./runtime/installed-card-location";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -27692,21 +27693,6 @@ function sourceDefinitionIdForSimulationAction(
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
   return findVisibleCard(input, action.source)?.definitionId;
-}
-
-function serverIdForCorpInstalledCard(
-  state: GameState,
-  cardId: string,
-): string | undefined {
-  const installedCardId = cardId as CardInstanceId;
-  for (const server of state.corp.servers) {
-    if (
-      server.ice.includes(installedCardId) ||
-      server.root.includes(installedCardId)
-    )
-      return server.id;
-  }
-  return undefined;
 }
 
 function cardTargetTypeForInstance(

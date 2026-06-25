@@ -141,6 +141,7 @@ describe("AI public export contract", () => {
       "./runtime/collection",
       "./runtime/counter",
       "./runtime/evidence-value",
+      "./runtime/installed-card-location",
       "./runtime/number-rounding",
       "./runtime/public-event-history",
       "./runtime/progression-card-target",
