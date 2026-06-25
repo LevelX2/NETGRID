@@ -454,6 +454,7 @@ import {
   isCorpProtectionScoreConversionAction,
   isCorpRemoteBuildAction,
   isCorpRemoteProtectionActionEntry,
+  hasMeaningfulProgressWithin,
   isRunnerCentralPressureAction,
   isRunnerEconomyProgressAction,
   isRunnerRemoteContestRun,
@@ -15285,11 +15286,11 @@ function summarizePlanConversionMetrics(
         noProgressChain += 1;
       }
 
-      if (hasMeaningfulProgressWithin(sequence, index, 1))
+      if (hasMeaningfulProgressWithin(sequence, index, 1, isMeaningfulBoardProgress))
         actionLedToProgressWithin1 += 1;
-      if (hasMeaningfulProgressWithin(sequence, index, 2))
+      if (hasMeaningfulProgressWithin(sequence, index, 2, isMeaningfulBoardProgress))
         actionLedToProgressWithin2 += 1;
-      if (hasMeaningfulProgressWithin(sequence, index, 3))
+      if (hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress))
         actionLedToProgressWithin3 += 1;
 
       const planKind = planKindForConversion(entry);
@@ -15303,7 +15304,9 @@ function summarizePlanConversionMetrics(
         }
         const converted = planIntentConvertedWithin(sequence, index, planKind);
         if (converted) planIntentConverted += 1;
-        else if (!hasMeaningfulProgressWithin(sequence, index, 3))
+        else if (
+          !hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress)
+        )
           planIntentAbandoned += 1;
         lastPlanBySide[entry.side] = { planKind, progressSince: false };
       }
@@ -16015,9 +16018,7 @@ function summarizeOutcomeFollowupMetrics(
       if (hasEvidenceFlag(entry, "outcome_followup_applied:true")) {
         outcomeFollowupApplied += 1;
         const progressedWithin3 = hasMeaningfulProgressWithin(
-          summary.actionSequence,
-          index,
-          3,
+          summary.actionSequence, index, 3, isMeaningfulBoardProgress
         );
         if (progressedWithin3) {
           outcomeFollowupLedToProgressWithin3 += 1;
@@ -16876,7 +16877,7 @@ function attributeStarvedEconomySkip(
     )
   )
     metrics.runnerStarvedEconomySkipThenFailedRun += 1;
-  if (!hasMeaningfulProgressWithin(sequence, index, 5))
+  if (!hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress))
     metrics.runnerStarvedEconomySkipThenNoProgress += 1;
   const economyNextDecision = next[0]?.runnerEconomyTaken === true;
   if (economyNextDecision)
@@ -16889,7 +16890,7 @@ function attributeStarvedEconomySkip(
   );
   if (reserveRecovered)
     metrics.runnerStarvedEconomySkipThenReserveRecovered += 1;
-  if (hasMeaningfulProgressWithin(sequence, index, 5))
+  if (hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress))
     metrics.runnerStarvedEconomySkipThenProgress += 1;
   if (summary.winner === "action_limit_reached")
     metrics.runnerStarvedEconomySkipThenActionLimit += 1;
@@ -16936,7 +16937,8 @@ function attributeStarvedEconomySkip(
     suspiciousDraw ||
     suspiciousEndTurn ||
     suspiciousUnknown ||
-    (!blocked && !hasMeaningfulProgressWithin(sequence, index, 5));
+    (!blocked &&
+      !hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress));
   metrics.runnerEconomyFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerEconomyFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerEconomyFixGateAttributionSuspicious += 1;
@@ -16977,7 +16979,9 @@ function attributeSearchRecoverySkip(
   const knownUnaffordableRun = next.some(
     (candidate) => candidate.runStartedAgainstKnownUnaffordablePath === true,
   );
-  const noProgress = !hasMeaningfulProgressWithin(sequence, index, 5);
+  const noProgress = !hasMeaningfulProgressWithin(
+    sequence, index, 5, isMeaningfulBoardProgress
+  );
   const actionLimit = summary.winner === "action_limit_reached" && noProgress;
   if (installFollowup) metrics.runnerSearchRecoverySkipThenInstallFollowup += 1;
   if (coverageResolved)
@@ -17136,7 +17140,9 @@ function attributeMemorySkip(
         candidate.runnerPathBlockedByMissingCoverage === true ||
         candidate.runnerSetupFixGateEligibleSearchRecoverySkip === true,
     );
-  const noProgress = !hasMeaningfulProgressWithin(sequence, index, 5);
+  const noProgress = !hasMeaningfulProgressWithin(
+    sequence, index, 5, isMeaningfulBoardProgress
+  );
   const actionLimit = summary.winner === "action_limit_reached" && noProgress;
   if (memoryInstalled) metrics.runnerMemorySkipThenMemoryInstalled += 1;
   if (programBlocked) metrics.runnerMemorySkipThenProgramInstallBlocked += 1;
@@ -17413,16 +17419,6 @@ function nextRunnerEntries(
     if (entries.length >= ownActionWindow) break;
   }
   return entries;
-}
-
-function hasMeaningfulProgressWithin(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  windowActions: number,
-): boolean {
-  return sequence
-    .slice(index, index + windowActions + 1)
-    .some(isMeaningfulBoardProgress);
 }
 
 function actionsUntil(
@@ -21404,7 +21400,7 @@ function planIntentConvertedWithin(
     return remoteContestConvertsToStealOrTrash(sequence, index);
   if (planKind.includes("central") || planKind.includes("pressure"))
     return centralPressureConvertsToSteal(sequence, index);
-  return hasMeaningfulProgressWithin(sequence, index, 3);
+  return hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress);
 }
 
 function setupActionConvertsToRun(

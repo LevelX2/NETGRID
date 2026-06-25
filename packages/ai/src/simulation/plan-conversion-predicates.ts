@@ -117,6 +117,17 @@ export function nextEntries<T>(
   return sequence.slice(index + 1, index + windowActions + 1);
 }
 
+export function hasMeaningfulProgressWithin<T>(
+  sequence: T[],
+  index: number,
+  windowActions: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  return sequence
+    .slice(index, index + windowActions + 1)
+    .some(isMeaningfulProgress);
+}
+
 export function isCorpProtectionScoreConversionAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {
