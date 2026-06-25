@@ -744,9 +744,9 @@ import {
 import { decisionFromLegacyChoices } from "./legacy/decision-from-choices";
 import {
   retainActionAlternativesForFindingWindows,
-  selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime,
   stripSelfplayActionAlternatives,
 } from "./simulation/selfplay-trace-facts";
+import { selfplayTraceFactsForSimulationDecision } from "./simulation/selfplay-trace-facts-adapter";
 import {
   applyFixtureAction,
   applyFixtureChoiceFirstOption,
@@ -774,8 +774,6 @@ import {
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   type AiDecision,
-  type AiDecisionActionAlternative,
-  type AiDecisionDebug,
   type AiDecisionInput,
   type AiDecisionScoreComponent,
   type AiDifficulty,
@@ -788,7 +786,6 @@ import {
   type Side,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
-  sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
 export {
   beliefDebugSummary,
@@ -2664,24 +2661,6 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
-
-function selfplayTraceFactsForSimulationDecision(
-  decision: AiDecision,
-  config: AiSimulationConfig,
-): {
-  planKind?: string;
-  debugFacts?: string[];
-  actionAlternatives?: AiDecisionActionAlternative[];
-} {
-  return selfplayTraceFactsForSimulationDecisionRuntime(
-    decision,
-    config.includeActionAlternativesForFindings,
-    {
-      sanitizeAiDecisionDebug,
-      safeSelfplayFacts,
-    },
-  );
-}
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
