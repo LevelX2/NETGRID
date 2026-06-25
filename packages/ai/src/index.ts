@@ -460,6 +460,7 @@ import {
   isRunnerRigProgressAction,
   isRunnerSetupAction,
   isStrategicPlanDecision,
+  nextEntries,
   ownStrategicWindow,
   planKindForConversion,
   previousOwnStrategicWindow,
@@ -17437,14 +17438,6 @@ function actionsUntil(
     if (predicate(sequence[candidateIndex]!)) return candidateIndex - index;
   }
   return undefined;
-}
-
-function nextEntries(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  windowActions = 3,
-): PlanConversionActionEntry[] {
-  return sequence.slice(index + 1, index + windowActions + 1);
 }
 
 type BreakerOntologyCoverageMetricKey =

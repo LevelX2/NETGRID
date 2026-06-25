@@ -109,6 +109,14 @@ export function previousOwnStrategicWindow<
   return window;
 }
 
+export function nextEntries<T>(
+  sequence: T[],
+  index: number,
+  windowActions = 3,
+): T[] {
+  return sequence.slice(index + 1, index + windowActions + 1);
+}
+
 export function isCorpProtectionScoreConversionAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {
