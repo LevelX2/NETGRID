@@ -491,6 +491,10 @@ import type {
   SimulationControllerMode,
   SimulationWorld,
 } from "./simulation/simulation-types";
+import type {
+  V143SimulationRunResult,
+  V143SoakResult,
+} from "./simulation/v143-tuning-gate";
 import {
   createSimulationRng,
   type SimulationRng,
@@ -732,6 +736,11 @@ export {
   summarizeDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
 export { evaluateV143TuningGate } from "./simulation/v143-tuning-gate";
+export type {
+  V143SimulationRunResult,
+  V143SoakResult,
+  V143TuningGateResult,
+} from "./simulation/v143-tuning-gate";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
@@ -2723,40 +2732,6 @@ export type {
   SimulationBenchmarkProfile,
   SimulationWorld,
 } from "./simulation/simulation-types";
-
-export type V143SimulationRunResult = {
-  simulationId: string;
-  benchmarkProfile: SimulationBenchmarkProfileId;
-  games: number;
-  illegalActions: number;
-  timeouts: number;
-  fallbackRate: number;
-  winRates: Record<string, number>;
-  agendaPoints: Record<string, number>;
-  averageActions: number;
-  replayFailures: number;
-  notableExploitRefs: string[];
-  summaries: AiSimulationSummary[];
-};
-
-export type V143TuningGateResult = {
-  accepted: boolean;
-  holdoutDelta: {
-    winRate: number;
-    fallbackRate: number;
-    timeoutRate: number;
-    illegalActions: number;
-    replayFailures: number;
-  };
-  reason: string;
-};
-
-export type V143SoakResult = {
-  version: "1.4.3";
-  profiles: V143SimulationRunResult[];
-  holdoutSeeds: string[];
-  tuningSeeds: string[];
-};
 
 export type V143LeagueConfig = Partial<AiSimulationConfig> & {
   includeHoldout?: boolean;

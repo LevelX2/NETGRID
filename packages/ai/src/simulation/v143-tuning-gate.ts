@@ -1,8 +1,42 @@
 import type {
-  V143SimulationRunResult,
-  V143TuningGateResult,
+  AiSimulationSummary,
 } from "../index";
 import { roundNumber as round } from "../runtime/number-rounding";
+import type { SimulationBenchmarkProfileId } from "./simulation-types";
+
+export type V143SimulationRunResult = {
+  simulationId: string;
+  benchmarkProfile: SimulationBenchmarkProfileId;
+  games: number;
+  illegalActions: number;
+  timeouts: number;
+  fallbackRate: number;
+  winRates: Record<string, number>;
+  agendaPoints: Record<string, number>;
+  averageActions: number;
+  replayFailures: number;
+  notableExploitRefs: string[];
+  summaries: AiSimulationSummary[];
+};
+
+export type V143TuningGateResult = {
+  accepted: boolean;
+  holdoutDelta: {
+    winRate: number;
+    fallbackRate: number;
+    timeoutRate: number;
+    illegalActions: number;
+    replayFailures: number;
+  };
+  reason: string;
+};
+
+export type V143SoakResult = {
+  version: "1.4.3";
+  profiles: V143SimulationRunResult[];
+  holdoutSeeds: string[];
+  tuningSeeds: string[];
+};
 
 export function evaluateV143TuningGate(
   candidate: V143SimulationRunResult,
