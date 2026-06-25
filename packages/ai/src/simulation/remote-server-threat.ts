@@ -186,3 +186,12 @@ export function runnerAdvancedRemoteContestContext(
       : {}),
   };
 }
+
+export function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "trash_accessed_card" &&
+      isRemoteServerTarget(input.playerView.run?.attackedServerId),
+  );
+}

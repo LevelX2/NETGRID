@@ -416,6 +416,7 @@ import {
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
 import {
+  hasRunnerRemoteTrashAction,
   remoteServerHasScoreThreat,
   runnerAdvancedRemoteContestContext,
   runnerContestBlockedByCredits,
@@ -26468,15 +26469,6 @@ function hasRunnerRunnablePressureAction(
       return false;
     return input.playerView.own.credits >= 3 || (server?.ice.length ?? 0) === 0;
   });
-}
-
-function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "trash_accessed_card" &&
-      isRemoteServerTarget(input.playerView.run?.attackedServerId),
-  );
 }
 
 function isRunnerEconomyAction(
