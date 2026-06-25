@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-08 next`
+Status: `active: DSR-09 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -85,9 +85,9 @@ preflight
 5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: `30506fea`.
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: `16a70206`.
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: `fc8e7908`.
-8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: pending.
-9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `next`.
-10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten.
+8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: `f9381d5f`.
+9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `done`, Commit: pending.
+10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `next`.
 11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen.
 12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration.
 
@@ -322,6 +322,19 @@ Done-Gate je Slice:
 - Planfortschritt über mindestens zwei Entscheidungen oder Züge geprüft.
 - Gegenbeispiel mit Boardstate-Override vorhanden.
 - Keine Regression in bestehenden Replay-Fixes.
+
+Umsetzung:
+
+- `strategic-vertical-slices.test.ts` ergänzt repräsentative End-to-End-Slices für Runner-Central-Pressure, Corp-Punish, Corp-Scoring, ICE-Tax/Glacier und Runner-Remote-Contest.
+- Die Slices prüfen Strategieerkennung, strategische Action-Auswahl, TacticalPlan-Memory-Fortschritt und Boardstate-Overrides gegen akut bessere Alternativen.
+- Counterexamples decken unter anderem fehlende Punish-Fenster, contestable Advance-Lines, unfinanzierbare ICE-Defense und Runner-Hand-Safety ab.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/strategic-vertical-slices.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `test(ai): calibrate strategic vertical slices`
 
