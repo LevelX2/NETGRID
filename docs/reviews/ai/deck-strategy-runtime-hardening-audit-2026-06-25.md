@@ -182,6 +182,24 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-decision-frame.test.ts src/decision/neutral-goal-synthesis.test.ts src/decision/semantic-shadow-decision.test.ts --maxWorkers=1 --testTimeout=30000`: grün, 24 Tests.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H09-Ergebnis
+
+Status: `done`
+
+Gesamtvalidierung und lokaler Main-Abgleich im Arbeitsbranch sind abgeschlossen.
+
+Umgesetzt:
+
+- Lokaler `main` wurde konfliktfrei in `codex/deck-strategy-runtime-hardening` gemergt.
+- `docs/reviews/ai/deck-strategy-runtime-hardening-final-report-2026-06-25.md` fasst den gehärteten Runtime-Vertrag, die Safety-Grenzen und die Abschlusschecks zusammen.
+- Die Wissensbasis verweist auf den finalen Hardening-Stand.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1643 Tests.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.

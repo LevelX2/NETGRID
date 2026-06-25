@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H08_done`
+Status: `DSR-H09_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -85,7 +85,7 @@ preflight
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `done`.
 8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `done`.
 9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `done`.
-10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `active`.
+10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `done`.
 
 ## Paketdetails
 
@@ -202,6 +202,8 @@ Commit: `docs(ai): finalize deck strategy hardening`
 Ziel: Vollständige Verifikation, Source-Review, `main`-Integration, erneute `main`-Prüfung und Worktree-Entfernung.
 
 Checks: `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/ai test`, `git diff --check -- packages/ai docs KI-Wissen-NETGRID`; zusätzliche Package-Checks nur bei tatsächlich geändertem Scope.
+
+Ergebnis: Lokaler `main` wurde konfliktfrei in den Arbeitsbranch integriert. Der finale Hardening-Report liegt unter `docs/reviews/ai/deck-strategy-runtime-hardening-final-report-2026-06-25.md`. Branch-Verifikation: `@netgrid/ai` Typecheck grün, vollständiger `@netgrid/ai`-Testlauf grün mit 148 Testdateien und 1643 Tests, Diff-Check grün. Danach folgt die lokale Integration des Arbeitsbranches nach `main` und die erneute Main-Prüfung.
 
 Commit: `chore(ai): validate deck strategy hardening`
 
