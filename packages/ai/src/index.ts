@@ -21,7 +21,6 @@ import {
 } from "@netgrid/decks";
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
-import benchmarkProfiles143Data from "../../../data/ai/ai-benchmark-profiles-1.4.3.json";
 import localRealisticBenchmarkDeckSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import localRealisticBenchmarkDecksData from "../../../data/ai/ai-local-realistic-benchmark-decks-2026-05-23.json";
 import realSceneBenchmarkDeckSnapshotsData from "../../../data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json";
@@ -29,7 +28,6 @@ import realSceneBenchmarkDecksData from "../../../data/ai/ai-real-scene-benchmar
 import soakSeeds143Data from "../../../data/ai/ai-soak-seeds-1.4.3.json";
 import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
-import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import {
   assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
@@ -758,6 +756,12 @@ import {
 import { isHoldoutSeed } from "./simulation/holdout-seed";
 import { simulationSafeSelectedActionId } from "./simulation/selected-action-id";
 import {
+  BENCHMARK_PROFILES_143,
+  EXPLOIT_FIXTURES_143,
+  listV143BenchmarkProfiles,
+  listV143ExploitFixtures,
+} from "./simulation/v143-data";
+import {
   controllerModeForSide,
   deckSnapshotForSimulation,
   profileIdForMode,
@@ -799,6 +803,10 @@ export {
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./simulation/benchmark-reports";
+export {
+  listV143BenchmarkProfiles,
+  listV143ExploitFixtures,
+} from "./simulation/v143-data";
 export {
   analyzeDoctrineQualityCases,
   summarizeDoctrineQualityMetrics,
@@ -1171,10 +1179,6 @@ const SOAK_SEEDS = soakSeedsData as {
     maxActions: number;
   };
 };
-const BENCHMARK_PROFILES_143 = benchmarkProfiles143Data as {
-  version: "1.4.3";
-  profiles: SimulationBenchmarkProfile[];
-};
 const SOAK_SEEDS_143 = soakSeeds143Data as {
   version: "1.4.3";
   tuningSeeds: string[];
@@ -1185,10 +1189,6 @@ const SOAK_SEEDS_143 = soakSeeds143Data as {
     agendaPointsToWin: number;
     maxActions: number;
   };
-};
-const EXPLOIT_FIXTURES_143 = exploitFixtures143Data as {
-  version: "1.4.3";
-  fixtures: V143ExploitFixture[];
 };
 const AI_HINTS = createAiHintsByCard();
 
@@ -3061,14 +3061,6 @@ export function simulateAiSoak(
       holdoutSeeds: SOAK_SEEDS.holdoutSeeds,
     },
   };
-}
-
-export function listV143BenchmarkProfiles(): SimulationBenchmarkProfile[] {
-  return BENCHMARK_PROFILES_143.profiles.map((profile) => ({ ...profile }));
-}
-
-export function listV143ExploitFixtures(): V143ExploitFixture[] {
-  return EXPLOIT_FIXTURES_143.fixtures.map((fixture) => ({ ...fixture }));
 }
 
 export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
