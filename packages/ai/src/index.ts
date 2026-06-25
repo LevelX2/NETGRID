@@ -512,6 +512,10 @@ import type {
   AiBenchmarkLocalEditableDeckResult,
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
+  DeckSnapshotRecord,
+  FrozenLocalBenchmarkDeckSnapshot,
+  LocalRealisticBenchmarkDeckManifest,
+  RealSceneBenchmarkDeckManifest,
 } from "./simulation/benchmark-deck-types";
 import {
   createSimulationRng,
@@ -2651,37 +2655,9 @@ const EXPLOIT_FIXTURES_143 = exploitFixtures143Data as {
 };
 const AI_HINTS = createAiHintsByCard();
 
-type DeckSnapshotRecord = {
-  deckSnapshotId: string;
-  sourceDeckId: string;
-  name: string;
-  side: Side;
-  identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
-  publicMetadata?: DeckPublicMetadata;
-};
-
 const DECK_SNAPSHOTS_08 = (
   deckSnapshots08Data as { snapshots: DeckSnapshotRecord[] }
 ).snapshots;
-
-type FrozenLocalBenchmarkDeckSnapshot = {
-  deckSnapshotId: string;
-  sourceDeckId: string;
-  sourceFileName: string;
-  deckVersion: string;
-  name: string;
-  side: Side;
-  identityCardId: string;
-  cardPoolSnapshotId: string;
-  cardPoolVersion?: string;
-  formatProfileId: string;
-  formatProfileVersion?: string;
-  deckHash: string;
-  classification: AiLocalBenchmarkDeckClassification;
-  role: string;
-  cards: Array<{ cardId: string; quantity: number }>;
-};
 
 const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = (
   localRealisticBenchmarkDeckSnapshotsData as {
@@ -2693,66 +2669,6 @@ const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = (
     snapshots: FrozenLocalBenchmarkDeckSnapshot[];
   }
 ).snapshots;
-
-type LocalRealisticBenchmarkDeckManifest = {
-  schemaVersion: "ai-local-realistic-benchmark-decks-v1";
-  storage: {
-    kind: "appdata_netgrid_decks";
-    relativeDirectory: string;
-    overrideEnv: string;
-    format: "netgrid-editable-deck-v1";
-    cardReference: "cardId";
-  };
-  frozenSnapshotsFile: string;
-  decks: Array<{
-    localDeckId: string;
-    snapshotId: string;
-    expectedName: string;
-    side: Side;
-    fileName: string;
-    classification: AiLocalBenchmarkDeckClassification;
-    role: string;
-  }>;
-  slots: Array<{
-    slotId: string;
-    label: string;
-    slotType: "local_realistic_holdout";
-    status: AiBenchmarkDeckSlotStatus;
-    runnerLocalDeckId: string;
-    corpLocalDeckId: string;
-    tuningUse: "holdout_only";
-  }>;
-};
-
-type RealSceneBenchmarkDeckManifest = {
-  schemaVersion: "ai-real-scene-benchmark-decks-v1";
-  storage: {
-    kind: "repo_frozen_snapshots";
-    format: "netgrid-editable-deck-v1";
-    cardReference: "cardId";
-    runtimeLiveDeckDependency: boolean;
-  };
-  frozenSnapshotsFile: string;
-  decks: Array<{
-    localDeckId: string;
-    snapshotId: string;
-    expectedName: string;
-    side: Side;
-    sourceFileName: string;
-    classification: AiLocalBenchmarkDeckClassification;
-    role: string;
-  }>;
-  slots: Array<{
-    slotId: string;
-    label: string;
-    slotType: "real_scene_holdout";
-    status: AiBenchmarkDeckSlotStatus;
-    runnerLocalDeckId: string;
-    corpLocalDeckId: string;
-    tuningUse: "holdout_only";
-    selectionReason?: string;
-  }>;
-};
 
 const LOCAL_REALISTIC_BENCHMARK_DECKS =
   localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest;

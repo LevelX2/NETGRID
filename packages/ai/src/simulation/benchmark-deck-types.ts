@@ -1,4 +1,8 @@
-import type { DeckDefinition, DeckPublicMetadata } from "@netgrid/shared";
+import type {
+  DeckDefinition,
+  DeckPublicMetadata,
+  Side,
+} from "@netgrid/shared";
 
 export type AiBenchmarkDeckSlotType =
   | "smoke"
@@ -80,3 +84,91 @@ export type AiBenchmarkLocalEditableDeckResult =
       unsupportedCards: string[];
       nonDeckLegalCards: string[];
     };
+
+export type DeckSnapshotRecord = {
+  deckSnapshotId: string;
+  sourceDeckId: string;
+  name: string;
+  side: Side;
+  identityCardId: string;
+  cards: Array<{ cardId: string; quantity: number }>;
+  publicMetadata?: DeckPublicMetadata;
+};
+
+export type FrozenLocalBenchmarkDeckSnapshot = {
+  deckSnapshotId: string;
+  sourceDeckId: string;
+  sourceFileName: string;
+  deckVersion: string;
+  name: string;
+  side: Side;
+  identityCardId: string;
+  cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
+  formatProfileId: string;
+  formatProfileVersion?: string;
+  deckHash: string;
+  classification: AiLocalBenchmarkDeckClassification;
+  role: string;
+  cards: Array<{ cardId: string; quantity: number }>;
+};
+
+export type LocalRealisticBenchmarkDeckManifest = {
+  schemaVersion: "ai-local-realistic-benchmark-decks-v1";
+  storage: {
+    kind: "appdata_netgrid_decks";
+    relativeDirectory: string;
+    overrideEnv: string;
+    format: "netgrid-editable-deck-v1";
+    cardReference: "cardId";
+  };
+  frozenSnapshotsFile: string;
+  decks: Array<{
+    localDeckId: string;
+    snapshotId: string;
+    expectedName: string;
+    side: Side;
+    fileName: string;
+    classification: AiLocalBenchmarkDeckClassification;
+    role: string;
+  }>;
+  slots: Array<{
+    slotId: string;
+    label: string;
+    slotType: "local_realistic_holdout";
+    status: AiBenchmarkDeckSlotStatus;
+    runnerLocalDeckId: string;
+    corpLocalDeckId: string;
+    tuningUse: "holdout_only";
+  }>;
+};
+
+export type RealSceneBenchmarkDeckManifest = {
+  schemaVersion: "ai-real-scene-benchmark-decks-v1";
+  storage: {
+    kind: "repo_frozen_snapshots";
+    format: "netgrid-editable-deck-v1";
+    cardReference: "cardId";
+    runtimeLiveDeckDependency: boolean;
+  };
+  frozenSnapshotsFile: string;
+  decks: Array<{
+    localDeckId: string;
+    snapshotId: string;
+    expectedName: string;
+    side: Side;
+    sourceFileName: string;
+    classification: AiLocalBenchmarkDeckClassification;
+    role: string;
+  }>;
+  slots: Array<{
+    slotId: string;
+    label: string;
+    slotType: "real_scene_holdout";
+    status: AiBenchmarkDeckSlotStatus;
+    runnerLocalDeckId: string;
+    corpLocalDeckId: string;
+    tuningUse: "holdout_only";
+    selectionReason?: string;
+  }>;
+};
