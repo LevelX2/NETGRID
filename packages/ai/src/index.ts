@@ -446,8 +446,10 @@ import {
   runnerContestBlockedByCredits,
   runnerHasVisibleRemoteScoreThreat,
   runnerRemoteHasKnownRelevantTrashTarget,
+  runnerRemoteThreatProfile as runnerRemoteThreatProfileWithReserve,
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
+  type RunnerRemoteThreatProfile,
 } from "./simulation/remote-server-threat";
 import {
   finalAdvanceAssessmentForSimulationAction,
@@ -24571,18 +24573,6 @@ function runnerReserveDiagnosticsForSimulationAction(
   };
 }
 
-type RunnerRemoteThreatProfile = {
-  serverId: string;
-  advanced: boolean;
-  relevantTrash: boolean;
-  blockedByBreakerCoverage: boolean;
-  blockedByKnownIceCost: boolean;
-  blockedByPostRunReserve: boolean;
-  creditsAfterPath: number;
-  postRunReserveTarget: number;
-  contestable: boolean;
-};
-
 function runnerRemoteThreatTargetingDiagnosticsForAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -24705,48 +24695,11 @@ function runnerRemoteThreatProfile(
   input: AiDecisionInput,
   serverId: string,
 ): RunnerRemoteThreatProfile {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  const assessment = assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server?.root ?? [],
-  );
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
-  const postRunReserveTarget = runnerPostRunReserveTargetForRemoteInput(
+  return runnerRemoteThreatProfileWithReserve(
     input,
     serverId,
+    runnerPostRunReserveTargetForRemoteInput,
   );
-  const advanced = remoteServerHasScoreThreat(input, serverId);
-  const relevantTrash = runnerRemoteHasKnownRelevantTrashTarget(
-    input,
-    serverId,
-  );
-  const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
-  const blockedByBreakerCoverage =
-    assessment.blocked === true && !blockedByKnownIceCost;
-  const blockedByPostRunReserve =
-    !blockedByBreakerCoverage &&
-    !blockedByKnownIceCost &&
-    creditsAfterPath < postRunReserveTarget;
-  return {
-    serverId,
-    advanced,
-    relevantTrash,
-    blockedByBreakerCoverage,
-    blockedByKnownIceCost,
-    blockedByPostRunReserve,
-    creditsAfterPath,
-    postRunReserveTarget,
-    contestable:
-      advanced &&
-      !blockedByBreakerCoverage &&
-      !blockedByKnownIceCost &&
-      !blockedByPostRunReserve,
-  };
 }
 
 function runnerPostRunReserveTargetForRemoteInput(

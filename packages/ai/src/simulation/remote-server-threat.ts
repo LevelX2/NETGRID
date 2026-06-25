@@ -8,6 +8,18 @@ import { isRemoteServerTarget } from "../runtime/server-target";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { actionCreditCost } from "../runtime/action-cost";
 
+export type RunnerRemoteThreatProfile = {
+  serverId: string;
+  advanced: boolean;
+  relevantTrash: boolean;
+  blockedByBreakerCoverage: boolean;
+  blockedByKnownIceCost: boolean;
+  blockedByPostRunReserve: boolean;
+  creditsAfterPath: number;
+  postRunReserveTarget: number;
+  contestable: boolean;
+};
+
 export function remoteServerHasScoreThreat(
   input: AiDecisionInput,
   serverId: string,
@@ -67,6 +79,58 @@ export function runnerRemoteHasKnownRelevantTrashTarget(
     const role = remoteTrashRoleForVisibleCard(card);
     return role !== "low_value" && role !== "unknown";
   });
+}
+
+export function runnerRemoteThreatProfile(
+  input: AiDecisionInput,
+  serverId: string,
+  runnerPostRunReserveTargetForRemoteInput: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => number,
+): RunnerRemoteThreatProfile {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const assessment = assessKnownRezzedIcePath(
+    server?.ice ?? [],
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server?.root ?? [],
+  );
+  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
+  const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
+  const postRunReserveTarget = runnerPostRunReserveTargetForRemoteInput(
+    input,
+    serverId,
+  );
+  const advanced = remoteServerHasScoreThreat(input, serverId);
+  const relevantTrash = runnerRemoteHasKnownRelevantTrashTarget(
+    input,
+    serverId,
+  );
+  const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
+  const blockedByBreakerCoverage =
+    assessment.blocked === true && !blockedByKnownIceCost;
+  const blockedByPostRunReserve =
+    !blockedByBreakerCoverage &&
+    !blockedByKnownIceCost &&
+    creditsAfterPath < postRunReserveTarget;
+  return {
+    serverId,
+    advanced,
+    relevantTrash,
+    blockedByBreakerCoverage,
+    blockedByKnownIceCost,
+    blockedByPostRunReserve,
+    creditsAfterPath,
+    postRunReserveTarget,
+    contestable:
+      advanced &&
+      !blockedByBreakerCoverage &&
+      !blockedByKnownIceCost &&
+      !blockedByPostRunReserve,
+  };
 }
 
 export function runnerContestBlockedByCredits(
