@@ -170,6 +170,7 @@ import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./runtime/shell-traders-choice-option";
+import { selectedDefaultCardChoiceOptionIds } from "./runtime/select-card-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -7371,14 +7372,13 @@ function selectedChoicesForDecision(
     );
     if (searchSelected)
       return { choiceId: choice.choiceId, selectedOptionIds: searchSelected };
-    const count = Math.max(
-      choice.minSelections,
-      Math.min(choice.maxSelections, choice.maxSelections),
-    );
-    const selected = selectableOptions
-      .slice(0, count)
-      .map((option) => option.id);
-    return { choiceId: choice.choiceId, selectedOptionIds: selected };
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedDefaultCardChoiceOptionIds(
+        choice,
+        selectableOptions,
+      ),
+    };
   }
   if (choice.source.startsWith("v1921.playful_ai")) {
     const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
