@@ -7556,7 +7556,7 @@ function discardKeepScore(
   }
   const roles = discardRolesForCardId(card.definitionId);
   const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
-  const cost = discardVisibleCardCost(card);
+  const cost = visibleCardPlayOrInstallCostForAi(card);
   const runnerPlanRelevantBreaker =
     input.side === "runner" &&
     runnerCardAddressesVisibleBreakerNeed(input, card);
@@ -7894,24 +7894,6 @@ function discardEvidenceForInput(input: AiDecisionInput): string[] {
 
 function discardRolesForCardId(cardId: string | undefined): string[] {
   return cardRolesForId(cardId, AI_HINTS);
-}
-
-function discardVisibleCardCost(
-  card: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"][number]["card"],
-): number {
-  if (!card) return 0;
-  const direct = card.installCost ?? card.cost ?? card.rezCost;
-  if (typeof direct === "number" && Number.isFinite(direct))
-    return Math.max(0, direct);
-  const definition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
-    : undefined;
-  return Math.max(
-    0,
-    definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0,
-  );
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
