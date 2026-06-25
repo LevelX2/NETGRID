@@ -572,6 +572,7 @@ import { missingBenchmarkDeckFormatProfile } from "./simulation/benchmark-deck-f
 import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
 import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
 import { resolveLocalDeckEditorDecksDir } from "./simulation/local-deck-editor-dir";
+import { classifyLocalEditableBenchmarkDeck } from "./simulation/local-editable-benchmark-classification";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
@@ -5899,21 +5900,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards,
     nonDeckLegalCards,
   };
-}
-
-function classifyLocalEditableBenchmarkDeck(input: {
-  deck: EditableDeck;
-  missingCards: string[];
-  unsupportedCards: string[];
-  nonDeckLegalCards: string[];
-  validationErrors: string[];
-}): AiLocalBenchmarkDeckClassification {
-  if (!input.deck.cards || input.deck.cards.length === 0) return "incomplete";
-  if (input.missingCards.length > 0) return "blocked_by_missing_cards";
-  if (input.unsupportedCards.length > 0 || input.nonDeckLegalCards.length > 0)
-    return "blocked_by_unsupported_cards";
-  if (input.validationErrors.length > 0) return "unclear";
-  return "runnable_ai_benchmark";
 }
 
 export function createBeliefSimulationWorld(
