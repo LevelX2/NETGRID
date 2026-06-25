@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H00_done`
+Status: `DSR-H01_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -77,8 +77,8 @@ preflight
 ## Paketfolge
 
 1. `DSR-H00` Post-Integration-Audit und reproduzierbare Baseline. Status: `done`.
-2. `DSR-H01` Produktiven Strategie-Vertrag und report-only Diagnostic strikt trennen. Status: `active`.
-3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `pending`.
+2. `DSR-H01` Produktiven Strategie-Vertrag und report-only Diagnostic strikt trennen. Status: `done`.
+3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `active`.
 4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `pending`.
 5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `pending`.
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `pending`.
@@ -106,6 +106,10 @@ Commit: `docs(ai): audit deck strategy hardening baseline`
 Ziel: Keine report-only/no-effect Struktur darf Runtime-Auswahl beeinflussen; produktive Goals müssen auf eine produktiv deklarierte Quelle zurückführbar sein.
 
 Kernartefakte: Strategy-/Diagnostic-Vertrag, Goal-Synthese-Tests, Debug-/Trace-Kommentare.
+
+Ergebnis: Produktiver Input enthält nun `ownDeckStrategyProfile` als explizite `ai_internal_strategy_profile`-Quelle. `DeckDoctrineV2Diagnostic` bleibt report-only im Input, wird aber nicht mehr in produktive Runtime-Frames, neutrale Goal-Synthese, TacticalGoal-Merge oder StrategicIntent-Memory eingespeist. Report-only Doctrine-Ziele werden im produktiven Merge defensiv verworfen, auch wenn ein Aufrufer sie explizit übergibt.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `neutral-goal-synthesis`, `tactical-goal-merge`, `semantic-shadow-decision`, `semantic-ai-runtime-cutover`, `strategic-intent-memory`, `index` grün mit 621 Tests; vollständiger `@netgrid/ai`-Testlauf grün mit 146 Testdateien und 1629 Tests; Diff-Check grün.
 
 Commit: `feat(ai): separate strategy runtime and diagnostics`
 

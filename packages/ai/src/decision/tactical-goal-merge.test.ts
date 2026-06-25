@@ -14,7 +14,7 @@ import {
 import { buildMergedTacticalGoals } from "./tactical-goal-merge";
 
 describe("tactical goal merge", () => {
-  it("keeps Runner tactical, StrategicIntent, Neutral and Doctrine goals together", () => {
+  it("keeps productive Runner tactical, StrategicIntent and Neutral goals together", () => {
     const input = inputFor("runner", [
       legalAction("gain-1", "gain_credit", "runner"),
       legalAction("draw-1", "draw_card", "runner"),
@@ -25,21 +25,26 @@ describe("tactical goal merge", () => {
       actionCandidates: candidatesFor(input),
       tacticalGoals: [
         goal("runner.build_economy_base", "economy", 940, "economy_posture"),
+        {
+          ...goal("runner.doctrine.report_only", "pressure", 999, "deck"),
+          evidence: ["doctrine_v2:runner.rnd_pressure"],
+        },
       ],
       strategicIntentState,
-      doctrineDiagnostic: runnerDoctrine(),
+      doctrineDiagnostic: reportOnlyDoctrineDiagnostic(),
     });
 
     const goals = buildMergedTacticalGoals({ frame });
+    const goalIds = goals.map((candidate) => candidate.goalId);
 
-    expect(goals.map((candidate) => candidate.goalId)).toEqual(
+    expect(goalIds).toEqual(
       expect.arrayContaining([
         "runner.build_economy_base",
         "runner.strategic.central_pressure",
         "runner.neutral.economy",
-        "runner.doctrine.rnd_pressure_access",
       ]),
     );
+    expect(goalIds.some((goalId) => goalId.includes(".doctrine."))).toBe(false);
     expect(goals[0]).toMatchObject({
       goalId: "runner.build_economy_base",
       priority: 940,
@@ -190,7 +195,7 @@ function corpIntent(): CorpStrategicIntentProfile {
   };
 }
 
-function runnerDoctrine(): DeckDoctrineV2Diagnostic {
+function reportOnlyDoctrineDiagnostic(): DeckDoctrineV2Diagnostic {
   return {
     schemaVersion: "deck-doctrine-v2-diagnostic-v1",
     scope: "diagnostic_only",

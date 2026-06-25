@@ -49,3 +49,24 @@ Vor dem ersten Check fehlten im neuen Worktree `node_modules`; `corepack pnpm in
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.
+
+## DSR-H01-Ergebnis
+
+Status: `done`
+
+Die produktive Strategy Runtime nutzt `AiDeckStrategyProfile` und `StrategicIntentState` als produktiven Vertrag. `DeckDoctrineV2Diagnostic` bleibt für Audit, Report und optionalen Trace-Bereich verfügbar, ist aber aus produktiven Goal-, Plan-, Runtime- und Memory-Consumern entfernt.
+
+Umgesetzt:
+
+- `buildAiDecisionInput` gibt `ownDeckStrategyProfile` als produktive Strategiequelle aus.
+- `chooseSemanticRuntimeAction` baut produktive `SemanticDecisionFrame`s ohne `doctrineDiagnostic`.
+- `synthesizeNeutralTacticalGoals` mischt keine Doctrine-v2-Diagnostic-Ziele mehr ein.
+- `buildMergedTacticalGoals` verwirft report-only Doctrine-Ziele defensiv auch bei expliziter Übergabe.
+- `StrategicIntentMemory` nutzt keine Diagnostic-Deck-ID mehr als produktiven Memory-Key.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `neutral-goal-synthesis`, `tactical-goal-merge`, `semantic-shadow-decision`, `semantic-ai-runtime-cutover`, `strategic-intent-memory`, `index`: grün, 621 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 146 Testdateien und 1629 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.

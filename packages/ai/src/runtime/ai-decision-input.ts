@@ -18,6 +18,7 @@ import {
 import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
+  type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
 } from "../deck-doctrine-strategy";
 import {
@@ -55,6 +56,9 @@ export type AiDecisionSideSelection =
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownDeckStrategyProfile?: AiDeckStrategyProfile;
+  // Report-only diagnostic: keep it available for audits and debug reports, but
+  // productive runtime consumers must use ownDeckStrategyProfile/StrategicIntentState.
   ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
   ownStrategicIntentState?: StrategicIntentState;
   ownCorpStrategicIntent?: CorpStrategicIntentProfile;
@@ -149,6 +153,7 @@ export function buildAiDecisionInput(
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
+    ownDeckStrategyProfile,
     ownDeckDoctrineV2Diagnostic,
     ownStrategicIntentState,
     ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),

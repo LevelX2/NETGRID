@@ -76,7 +76,7 @@ describe("neutral goal synthesis", () => {
     )).toBe(true);
   });
 
-  it("adds diagnostic doctrine goals when a frame carries DeckDoctrine v2", () => {
+  it("does not turn report-only DeckDoctrine diagnostics into neutral goals", () => {
     const frame = frameFor(
       "runner",
       [
@@ -86,9 +86,12 @@ describe("neutral goal synthesis", () => {
       { doctrineDiagnostic: runnerRndDoctrine() },
     );
 
-    expect(synthesizeNeutralTacticalGoals(frame).map((goal) => goal.goalId)).toEqual(
-      expect.arrayContaining(["runner.doctrine.rnd_pressure_access"]),
+    const goalIds = synthesizeNeutralTacticalGoals(frame).map(
+      (goal) => goal.goalId,
     );
+
+    expect(goalIds).toEqual(expect.arrayContaining(["runner.neutral.economy"]));
+    expect(goalIds.some((goalId) => goalId.includes(".doctrine."))).toBe(false);
   });
 });
 

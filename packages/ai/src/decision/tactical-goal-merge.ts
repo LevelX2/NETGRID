@@ -17,7 +17,6 @@ export type TacticalGoalMergeSource =
   | "runner_tactical_goal"
   | "corp_tactical_goal"
   | "neutral"
-  | "deck_doctrine_v2"
   | "strategic_intent_state"
   | "corp_strategic_intent";
 
@@ -35,7 +34,9 @@ export function buildMergedTacticalGoals(
   params: BuildMergedTacticalGoalsParams,
 ): TacticalGoalLike[] {
   const frame = params.frame;
-  const explicitGoals = params.tacticalGoals ?? frame.tacticalGoals;
+  const explicitGoals = (params.tacticalGoals ?? frame.tacticalGoals).filter(
+    (goal) => !isReportOnlyDoctrineGoal(goal),
+  );
   const inputs: GoalInput[] = [
     ...explicitGoals.map((goal) => ({
       goal,
@@ -52,14 +53,14 @@ export function buildMergedTacticalGoals(
     ...synthesizeNeutralTacticalGoals({
       ...frame,
       tacticalGoals: [],
-    }).map((goal) => ({
-      goal,
-      source: goal.goalId.includes(".doctrine.")
-        ? "deck_doctrine_v2" as const
-        : frame.side === "corp"
+    })
+      .filter((goal) => !isReportOnlyDoctrineGoal(goal))
+      .map((goal) => ({
+        goal,
+        source: frame.side === "corp"
           ? "corp_tactical_goal" as const
           : "neutral" as const,
-    })),
+      })),
   ];
   return dedupeGoals(inputs).sort(compareGoals);
 }
@@ -310,18 +311,24 @@ function goalSourceFromExisting(
   goal: TacticalGoalLike,
 ): TacticalGoalMergeSource {
   if (goal.source === "neutral") return "neutral";
-  if (goal.source === "deck") return "deck_doctrine_v2";
   if (goal.source === "boardstate" && frame.side === "corp") {
     return "corp_tactical_goal";
   }
   if (goal.source && frame.side === "runner") return "runner_tactical_goal";
   if (goal.source && frame.side === "corp") return "corp_tactical_goal";
-  if (goal.goalId.includes(".doctrine.")) return "deck_doctrine_v2";
   if (goal.goalId.includes(".neutral.")) return "neutral";
   if (frame.side === "corp" || goal.goalId.startsWith("corp.")) {
     return "corp_tactical_goal";
   }
   return "runner_tactical_goal";
+}
+
+function isReportOnlyDoctrineGoal(goal: TacticalGoalLike): boolean {
+  return (
+    goal.source === "deck" ||
+    goal.goalId.includes(".doctrine.") ||
+    (goal.evidence ?? []).some((entry) => entry.startsWith("doctrine_v2:"))
+  );
 }
 
 function dedupeGoals(inputs: readonly GoalInput[]): TacticalGoalLike[] {

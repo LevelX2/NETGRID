@@ -281,7 +281,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("passes merged tactical goals into the default TacticalPlan context", () => {
+  it("passes productive merged tactical goals into the default TacticalPlan context", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const observedGoals: string[] = [];
     const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -372,8 +372,10 @@ describe("Semantic AI runtime cutover", () => {
         "runner.build_economy_base",
         "runner.strategic.central_pressure",
         "runner.neutral.economy",
-        "runner.doctrine.rnd_pressure_coverage",
       ]),
+    );
+    expect(observedGoals.some((goalId) => goalId.includes(".doctrine."))).toBe(
+      false,
     );
   });
 

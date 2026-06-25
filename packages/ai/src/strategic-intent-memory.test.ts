@@ -98,6 +98,29 @@ describe("StrategicIntent memory", () => {
 
     expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
   });
+
+  it("does not use report-only Doctrine diagnostics as a productive memory key", () => {
+    const input = aiInput("runner", "match-diagnostic-only", "deck-runner-a");
+    delete (input as any).ownDeckStrategyProfile;
+    (input as any).ownDeckDoctrineV2Diagnostic = {
+      deckSnapshotId: "diagnostic-only-deck",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+    };
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 5,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+
+    const snapshot = rememberStrategicIntentState(input, state);
+
+    expect(snapshot?.deckSnapshotId).toBe("no_deck_snapshot");
+    expect(
+      getStrategicIntentMemorySnapshot(input, "diagnostic-only-deck"),
+    ).toBeUndefined();
+  });
 });
 
 function strategyProfile(
@@ -167,8 +190,8 @@ function aiInput(
     decisionId: `${decisionScope}:10:${side}`,
     actionNumber: 10,
     profileId,
-    ownDeckDoctrineV2Diagnostic: {
-      deckSnapshotId,
+    ownDeckStrategyProfile: {
+      deckId: deckSnapshotId,
     },
   } as unknown as AiDecisionInput;
 }
