@@ -69,6 +69,33 @@ export function centralRunStreakWithoutValueForMetrics(
   return streak;
 }
 
+export function isRepeatedLowValueCentralRunForMetrics(
+  input: AiDecisionInput,
+  target: CentralServerId,
+): boolean {
+  return centralRunStreakWithoutValueForMetrics(input, target) > 0;
+}
+
+export function centralRepeatHasFreshValueForMetrics(
+  input: AiDecisionInput,
+  target: CentralServerId,
+  context: {
+    matchingInterface: boolean;
+    anyMultiaccessInstalled: boolean;
+    eventGoodTarget: boolean;
+    trueCloseout: boolean;
+  },
+): boolean {
+  if (
+    context.matchingInterface ||
+    context.anyMultiaccessInstalled ||
+    context.eventGoodTarget ||
+    context.trueCloseout
+  )
+    return true;
+  return !recentCentralRunSameTargetWithoutRefresh(input, target);
+}
+
 function centralRunHistory(input: AiDecisionInput) {
   return [...input.playerView.publicEvents, ...input.eventTail].sort(
     (left, right) =>

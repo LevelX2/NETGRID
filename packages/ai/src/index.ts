@@ -426,6 +426,8 @@ import {
 } from "./simulation/central-pressure-card";
 import {
   centralRunStreakWithoutValueForMetrics,
+  centralRepeatHasFreshValueForMetrics,
+  isRepeatedLowValueCentralRunForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
 import {
@@ -24279,33 +24281,6 @@ function trueCentralCloseoutProfileForMetrics(
     opportunity: hasSpecificPressure,
     reasons,
   };
-}
-
-function isRepeatedLowValueCentralRunForMetrics(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): boolean {
-  return centralRunStreakWithoutValueForMetrics(input, target) > 0;
-}
-
-function centralRepeatHasFreshValueForMetrics(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-  context: {
-    matchingInterface: boolean;
-    anyMultiaccessInstalled: boolean;
-    eventGoodTarget: boolean;
-    trueCloseout: boolean;
-  },
-): boolean {
-  if (
-    context.matchingInterface ||
-    context.anyMultiaccessInstalled ||
-    context.eventGoodTarget ||
-    context.trueCloseout
-  )
-    return true;
-  return !recentCentralRunSameTargetWithoutRefresh(input, target);
 }
 
 function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
