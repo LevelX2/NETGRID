@@ -571,6 +571,7 @@ import type {
   RemoteRoleKindMetricKey,
   RemoteRoleServerScopeMetricKey,
 } from "./simulation/ontology-metric-key-types";
+import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -18014,61 +18015,6 @@ function isTerminalDamageOrEconomicPunish(kind: CorpPunishKind | undefined) {
     kind === "resource_trash_like"
   );
 }
-
-type CorpIcePortfolioMetricKey =
-  | "corpHqIceCount"
-  | "corpRndIceCount"
-  | "corpArchivesIceCount"
-  | "corpRemoteIceCount"
-  | "corpHqUnrezzedIceCount"
-  | "corpRndUnrezzedIceCount"
-  | "corpCentralIceCount"
-  | "corpCentralUnrezzedIceCount"
-  | "corpCentralIceInstalled"
-  | "corpHqIceInstalled"
-  | "corpRndIceInstalled"
-  | "corpArchivesIceInstalled"
-  | "corpRemoteIceInstalled"
-  | "corpHqOverIced"
-  | "corpRndOverIced"
-  | "corpCentralOverIced"
-  | "corpCentralOverIcedWithoutPressure"
-  | "corpCentralOverIcedWithLowRezReserve"
-  | "corpHqFifthIceInstalled"
-  | "corpCentralIceDiminishingReturnInstall"
-  | "corpCentralIceInstallSuppressedByDiminishingReturns"
-  | "corpCentralIceInstallPenalizedByDiminishingReturns"
-  | "corpRezReserveCredits"
-  | "corpRezReserveDeficit"
-  | "corpInstalledIceWithoutRezReserve"
-  | "corpInstalledCentralIceWithoutRezReserve"
-  | "corpInstalledRemoteIceWithoutRezReserve"
-  | "corpCanRezAtLeastOneCentralIce"
-  | "corpCanRezAtLeastOneRemoteIce"
-  | "corpCannotRezAnyNewlyInstalledIce"
-  | "corpCreditsBelowCheapestRelevantRez"
-  | "corpCreditsBelowEstimatedCentralRezNeed"
-  | "corpHqProtectionJustifiedByAgendaFlood"
-  | "corpHqProtectionJustifiedByRunnerPressure"
-  | "corpRndProtectionJustifiedByRunnerPressure"
-  | "corpCentralOverIceBlockedByRunnerPressure"
-  | "corpCentralOverIceBlockedByAgendaFlood"
-  | "corpCentralOverIceBlockedByNoRemotePlan"
-  | "corpRemoteScoringUnderbuiltWhileCentralsOverIced"
-  | "corpReadyRemoteExists"
-  | "corpAgendaInHqWithReadyRemote"
-  | "corpAgendaInHqWithoutReadyRemote"
-  | "corpExtraCentralIceChosenOverReadyRemoteBuild"
-  | "corpExtraCentralIceChosenOverEconomy"
-  | "corpExtraCentralIceChosenOverRezReserve"
-  | "corpExtraCentralIceChosenOverAgendaInstall"
-  | "corpExtraCentralIceChosenOverAdvanceOrScore"
-  | "corpIcePortfolioFixGateEligible"
-  | "corpIcePortfolioFixGateSuspiciousCentralOverIce"
-  | "corpIcePortfolioFixGateBlockedByAgendaFlood"
-  | "corpIcePortfolioFixGateBlockedByRunnerCentralPressure"
-  | "corpIcePortfolioFixGateBlockedByNoRemotePlan"
-  | "corpIcePortfolioFixGateBlockedByEmergencyProtection";
 
 function summarizeCorpIcePortfolioMetrics(
   summaries: AiSimulationSummary[],
