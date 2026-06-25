@@ -71,6 +71,7 @@ export type RunnerEndgameCloseoutEntry = {
   runnerNoFreshCentralRunTaken?: boolean;
   runnerRepeatedCentralRunWithoutFreshValue?: boolean;
   runnerSkippedAdvancedRemoteContest?: boolean;
+  installPlacement?: string;
   scoreActionsAvailable?: number;
   finalAdvance?: boolean;
   protectedFinalAdvance?: boolean;
@@ -376,6 +377,21 @@ export function isEndgameScoreOrStealPressureAction(
   );
 }
 
+export function isEndgameProtectionAction(
+  entry: RunnerEndgameCloseoutEntry,
+  planKind?: string,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    (entry.protectBeforeAdvance === true ||
+      entry.protectedFinalAdvance === true ||
+      (entry.actionType === "install_card" &&
+        entry.installPlacement === "ice") ||
+      entry.actionType === "rez_ice" ||
+      planKind?.includes("protect") === true)
+  );
+}
+
 export function isEndgameLowValueRepeatAction(
   entry: RunnerEndgameCloseoutEntry,
 ): boolean {
@@ -408,6 +424,32 @@ export function isRunnerEndgameStallSymptom(
     entry.runnerSkippedAdvancedRemoteContest === true ||
     entry.runnerCentralRunBurnedRemoteContestReserve === true ||
     isEndgameLowValueRepeatAction(entry)
+  );
+}
+
+export function isCorpEndgameStallSymptom(
+  entry: RunnerEndgameCloseoutEntry,
+  options: {
+    planKind: string | undefined;
+    meaningfulBoardProgress: boolean;
+  },
+): boolean {
+  const planKind = options.planKind;
+  return (
+    hasEndgameEvidenceFlag(entry, "corp_remote_build_followup_noop:true") ||
+    hasEndgameEvidenceFlag(
+      entry,
+      "corp_score_window_overridden_by_followup:true",
+    ) ||
+    hasEndgameEvidenceFlag(
+      entry,
+      "outcome_followup_delayed_score_window:true",
+    ) ||
+    (entry.side === "corp" &&
+      !options.meaningfulBoardProgress &&
+      (planKind?.includes("remote_build") === true ||
+        planKind?.includes("protect") === true ||
+        planKind?.includes("economy") === true))
   );
 }
 

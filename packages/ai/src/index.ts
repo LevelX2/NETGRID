@@ -438,6 +438,8 @@ import {
   isEndgameKnownInfoOpportunity,
   isEndgameKnownInfoTaken,
   isEndgameLowValueRepeatAction,
+  isEndgameProtectionAction,
+  isCorpEndgameStallSymptom,
   isCorpEndgameScorePathOpportunity,
   isCorpEndgameScorePathTaken,
   isEndgameScoreOrStealPressureAction,
@@ -15499,7 +15501,9 @@ function summarizeActionLimitEndgameMetrics(
     const setupOrEconomyActions = strategicWindow.filter(
       isEndgameSetupOrEconomyAction,
     );
-    const protectionActions = strategicWindow.filter(isEndgameProtectionAction);
+    const protectionActions = strategicWindow.filter((entry) =>
+      isEndgameProtectionAction(entry, planKindForConversion(entry)),
+    );
     const lowValueRepeatActions =
       strategicWindow.filter(isEndgameLowValueRepeatAction).length +
       countSameStrategicPlanRepeatsWithoutProgress(strategicWindow);
@@ -15551,7 +15555,12 @@ function summarizeActionLimitEndgameMetrics(
       Math.max(0, runnerCloseoutOpportunities - runnerCloseoutAttempts);
     const corpSymptoms =
       corpNoProgress.length +
-      strategicWindow.filter(isCorpEndgameStallSymptom).length +
+      strategicWindow.filter((entry) =>
+        isCorpEndgameStallSymptom(entry, {
+          planKind: planKindForConversion(entry),
+          meaningfulBoardProgress: isMeaningfulBoardProgress(entry),
+        }),
+      ).length +
       Math.max(
         0,
         corpScorePathOpportunities.length - corpScorePathTaken.length,
@@ -15644,33 +15653,6 @@ function isEndgameSetupOrEconomyAction(
     entry.actionType === "draw_card" ||
     planKind?.includes("economy") === true ||
     planKind?.includes("setup") === true
-  );
-}
-
-function isEndgameProtectionAction(entry: PlanConversionActionEntry): boolean {
-  const planKind = planKindForConversion(entry);
-  return (
-    entry.side === "corp" &&
-    (entry.protectBeforeAdvance === true ||
-      entry.protectedFinalAdvance === true ||
-      (entry.actionType === "install_card" &&
-        entry.installPlacement === "ice") ||
-      entry.actionType === "rez_ice" ||
-      planKind?.includes("protect") === true)
-  );
-}
-
-function isCorpEndgameStallSymptom(entry: PlanConversionActionEntry): boolean {
-  const planKind = planKindForConversion(entry);
-  return (
-    hasEvidenceFlag(entry, "corp_remote_build_followup_noop:true") ||
-    hasEvidenceFlag(entry, "corp_score_window_overridden_by_followup:true") ||
-    hasEvidenceFlag(entry, "outcome_followup_delayed_score_window:true") ||
-    (entry.side === "corp" &&
-      !isMeaningfulBoardProgress(entry) &&
-      (planKind?.includes("remote_build") === true ||
-        planKind?.includes("protect") === true ||
-        planKind?.includes("economy") === true))
   );
 }
 
