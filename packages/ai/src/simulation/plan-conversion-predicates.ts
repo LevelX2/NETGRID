@@ -515,6 +515,26 @@ export function runnerRigConvertsToRun<T extends PlanConversionDecisionEntry>(
   );
 }
 
+export function runnerProbeConvertsToUsefulInfoOrPivot<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  const target = entry.targetServerId;
+  const window = ownStrategicWindow(sequence, index, 3);
+  return window.some(
+    (later) =>
+      isMeaningfulProgress(later) ||
+      later.targetServerId !== target ||
+      ["recover_economy", "rig", "remote_contest"].some((needle) =>
+        planKindForConversion(later)?.includes(needle),
+      ),
+  );
+}
+
 export function strategicPlanConvertsWithinOwnDecisions<
   T extends PlanConversionDecisionEntry,
 >(

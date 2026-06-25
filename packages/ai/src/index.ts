@@ -473,6 +473,7 @@ import {
   remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
   runnerEconomyConvertsToRunOrRig,
+  runnerProbeConvertsToUsefulInfoOrPivot,
   runnerRigConvertsToRun,
   serverTargetsMatch,
   rigActionConvertsToRun,
@@ -15845,7 +15846,13 @@ function summarizeStrategicPlanConversionMetrics(
           runnerRigConvertedToRun += 1;
       }
       if (entry.side === "runner" && planKind.includes("safe_probe")) {
-        if (runnerProbeConvertsToUsefulInfoOrPivot(strategicEntries, index))
+        if (
+          runnerProbeConvertsToUsefulInfoOrPivot(
+            strategicEntries,
+            index,
+            isMeaningfulBoardProgress,
+          )
+        )
           runnerProbeConvertedToUsefulInfoOrPivot += 1;
       }
       if (entry.side === "runner" && planKind.includes("pressure")) {
@@ -21234,23 +21241,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function runnerProbeConvertsToUsefulInfoOrPivot(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  const target = entry.targetServerId;
-  const window = ownStrategicWindow(sequence, index, 3);
-  return window.some(
-    (later) =>
-      isMeaningfulBoardProgress(later) ||
-      later.targetServerId !== target ||
-      ["recover_economy", "rig", "remote_contest"].some((needle) =>
-        planKindForConversion(later)?.includes(needle),
-      ),
-  );
 }
 
 function runnerCentralPressureConvertsToStealOrFreshValue(
