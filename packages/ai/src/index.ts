@@ -452,7 +452,10 @@ import {
 } from "./simulation/remote-protection-score";
 import {
   isRunnerDuplicateInstallForSimulation,
+  isRunnerEconomyActionForSimulation,
   isRunnerLowValueDuplicateInstallForSimulation,
+  isRunnerPressureActionForSimulation,
+  isRunnerRigInstallActionForSimulation,
 } from "./simulation/runner-install-classification";
 import {
   runnerHasRecentRunOnServer,
@@ -25514,47 +25517,23 @@ function isRunnerEconomyAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.side !== "runner") return false;
-  if (action.type === "gain_credit") return true;
-  if (
-    action.type !== "play_event" &&
-    action.type !== "install_card" &&
-    action.type !== "trigger_ability" &&
-    action.type !== "activated_card_ability"
-  )
-    return false;
-  return rolesForAction(input, action).some((role) =>
-    isRunnerEconomyRole(role),
-  );
+  return isRunnerEconomyActionForSimulation(input, action, { rolesForAction });
 }
 
 function isRunnerRigInstallAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.type !== "install_card") return false;
-  const roles = rolesForAction(input, action);
-  return roles.some(
-    (role) =>
-      role.startsWith("breaker_") ||
-      role === "memory" ||
-      role === "memory_support" ||
-      role === "setup" ||
-      role === "build_rig" ||
-      isRunnerPressureRole(role),
-  );
+  return isRunnerRigInstallActionForSimulation(input, action, {
+    rolesForAction,
+  });
 }
 
 function isRunnerPressureAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (action.side !== "runner") return false;
-  const roles = rolesForAction(input, action);
-  return (
-    action.type === "start_run" ||
-    roles.some((role) => isRunnerPressureRole(role))
-  );
+  return isRunnerPressureActionForSimulation(input, action, { rolesForAction });
 }
 
 function runnerDiscardChoiceRoles(
