@@ -192,6 +192,10 @@ import {
   corpPunishKindFromOntologyPayoff,
   corpVisibleTagPayoffCategoryFromOntology,
 } from "./runtime/tag-punish-payoff-mapping";
+import {
+  shellTradersAbility,
+  shellTradersTargetValue,
+} from "./runtime/shell-traders-action";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10930,19 +10934,6 @@ function shellTradersTargetRoles(
   return rolesForCardId(targetDefinitionId);
 }
 
-function shellTradersTargetValue(
-  roles: string[],
-  shellCounters: number,
-): number {
-  let value = 0;
-  if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
-  if (roles.includes("memory") || roles.includes("memory_support")) value += 55;
-  if (roles.includes("setup") || roles.includes("build_rig")) value += 45;
-  if (roles.includes("economy") || roles.includes("tempo")) value += 20;
-  value += Math.min(60, Math.max(0, shellCounters) * 10);
-  return value;
-}
-
 function shellTradersDirectInstallAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -11028,16 +11019,6 @@ function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
       typeof action.payload?.remainingCountersBefore === "number" &&
       action.payload.remainingCountersBefore <= 1,
   );
-}
-
-function shellTradersAbility(action: LegalAction): string | undefined {
-  const payload = action.payload;
-  if (!payload) return undefined;
-  return typeof payload.delayedInstallAbility === "string"
-    ? payload.delayedInstallAbility
-    : typeof payload.shellTradersAbility === "string"
-      ? payload.shellTradersAbility
-      : undefined;
 }
 
 function shellTradersPrepareBaselinePenalty(
