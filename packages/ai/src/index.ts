@@ -132,6 +132,7 @@ import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-
 import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
 import { compareAction } from "./runtime/action-order";
+import { isProtectionDefinitionId } from "./runtime/protection-definition";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -27962,16 +27963,6 @@ function runnerContestRiskForSimulation(
   if (runnerCredits >= 6 && breakers > 0) return "high";
   if (rezzedIce > 0 || runnerCredits <= 3 || breakers === 0) return "low";
   return "medium";
-}
-
-function isProtectionDefinitionId(definitionId: string | undefined): boolean {
-  if (!definitionId) return false;
-  const normalized = definitionId.toLocaleLowerCase("en-US");
-  return (
-    normalized.includes("red-herrings") ||
-    normalized.includes("tesseract") ||
-    normalized.includes("namatoki")
-  );
 }
 
 function rezCostForDefinitionId(definitionId: string | undefined): number {
