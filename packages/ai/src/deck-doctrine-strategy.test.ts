@@ -83,6 +83,13 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(
       profile.strategyScores["runner.economy_first"]?.supportScore,
     ).toBeGreaterThan(0);
+    expect(profile.strategyScores["runner.economy_first"]?.runtimeStatus).toBe(
+      "supporting",
+    );
+    expect(
+      profile.strategyScores["runner.economy_first"]?.runtimeBlockers,
+    ).toContain("supporting_only:runner.economy_first");
+    expect(profile.primaryStrategies).toEqual([]);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
     expect(
       profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence,
@@ -98,6 +105,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(profile.strategyScores["runner.rig_first"]?.supportGaps).toContain(
       "missing_wall_coverage",
     );
+    expect(profile.strategyScores["runner.rig_first"]?.runtimeStatus).toBe(
+      "blocked",
+    );
+    expect(
+      profile.strategyScores["runner.rig_first"]?.runtimeBlockers,
+    ).toContain("hard_support_gap:missing_wall_coverage");
   });
 
   it("does not treat Dropp as Runner access coverage or a strategy anchor", () => {
@@ -137,6 +150,12 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBeGreaterThan(70);
     expect(profile.corpProfile?.punishProfile.tagSources).toBeGreaterThan(0);
     expect(profile.corpProfile?.punishProfile.tagPayoff).toBeGreaterThan(0);
+    expect(
+      profile.strategyScores["corp.tag_trace_punish"]?.runtimeStatus,
+    ).toBe("productive");
+    expect(
+      profile.strategyScores["corp.tag_trace_punish"]?.runtimeBlockers,
+    ).toEqual([]);
   });
 
   it("detects Corp remote-scoring evidence from remote protection and safe lineSupport anchors", () => {
@@ -227,6 +246,27 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(JSON.stringify(profile)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|deckHash|legalActions/i,
     );
+  });
+
+  it("annotates every strategy score with runtime readiness", () => {
+    const profile = buildDeckStrategyProfile(
+      snapshotById("onr_origin_runner_ai_snapshot_v1"),
+    );
+
+    expect(Object.values(profile.strategyScores).length).toBeGreaterThan(0);
+    expect(
+      Object.values(profile.strategyScores).every(
+        (score) =>
+          score.runtimeStatus !== undefined &&
+          Array.isArray(score.runtimeBlockers),
+      ),
+    ).toBe(true);
+    expect(
+      profile.primaryStrategies.every(
+        (strategyId) =>
+          profile.strategyScores[strategyId]?.runtimeStatus === "productive",
+      ),
+    ).toBe(true);
   });
 
   it("builds a report-only DeckDoctrine v2 diagnostic with role status", () => {

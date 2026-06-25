@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-02 next`
+Status: `active: DSR-03 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -79,8 +79,8 @@ preflight
 ## Paketfolge
 
 1. `DSR-00` Ist-Zustand und Consumer verifizieren. Status: `done`, Commit: `77ebf459`.
-2. `DSR-01` Einheitlichen strategischen Laufzeitvertrag festlegen. Status: `done`, Commit: pending.
-3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten.
+2. `DSR-01` Einheitlichen strategischen Laufzeitvertrag festlegen. Status: `done`, Commit: `79decae4`.
+3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: pending.
 4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen.
 5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen.
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen.
