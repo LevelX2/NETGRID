@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   agendaPointsForMetrics,
   remoteTrashCostForVisibleCard,
@@ -6,6 +6,7 @@ import {
 import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { actionCreditCost } from "../runtime/action-cost";
 
 export function remoteServerHasScoreThreat(
   input: AiDecisionInput,
@@ -127,4 +128,61 @@ export function runnerStealBlockedByCredits(
     !input.legalActions.some((action) => action.type === "steal_agenda") &&
     input.playerView.own.credits < reserveTarget
   );
+}
+
+export function runnerAdvancedRemoteContestContext(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+): {
+  opportunity: boolean;
+  taken: boolean;
+  skipped: boolean;
+  centralWhileThreat: boolean;
+  reserveAfterRun?: number;
+} {
+  if (input.side !== "runner") {
+    return {
+      opportunity: false,
+      taken: false,
+      skipped: false,
+      centralWhileThreat: false,
+    };
+  }
+  const advancedRemoteTargets = new Set(
+    input.legalActions
+      .filter(
+        (candidate) =>
+          candidate.type === "start_run" &&
+          typeof candidate.payload?.serverId === "string" &&
+          isRemoteServerTarget(candidate.payload.serverId) &&
+          remoteServerHasScoreThreat(input, candidate.payload.serverId),
+      )
+      .map((candidate) => String(candidate.payload?.serverId)),
+  );
+  const opportunity = advancedRemoteTargets.size > 0;
+  const taken =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    advancedRemoteTargets.has(targetServerId);
+  const centralWhileThreat =
+    opportunity &&
+    action.type === "start_run" &&
+    (targetServerId === "hq" ||
+      targetServerId === "rd" ||
+      targetServerId === "archives");
+  return {
+    opportunity,
+    taken,
+    skipped: opportunity && !taken,
+    centralWhileThreat,
+    ...(action.type === "start_run" &&
+    targetServerId !== undefined &&
+    isRemoteServerTarget(targetServerId)
+      ? {
+          reserveAfterRun:
+            input.playerView.own.credits - actionCreditCost(action),
+        }
+      : {}),
+  };
 }
