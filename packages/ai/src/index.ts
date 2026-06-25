@@ -577,6 +577,7 @@ import type {
   RunnerPressureReadyForMetrics,
   RunnerPressureReadyTargetForMetrics,
 } from "./simulation/runner-pressure-metric-types";
+import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -20724,23 +20725,6 @@ function runnerHandUseDiagnosticsForSimulationAction(
     ...(handUseActionTaken ? { runnerHandUseActionTaken: true } : {}),
   };
 }
-
-type RunnerEconomySetupActionClass = {
-  economy: boolean;
-  burstEconomy: boolean;
-  actionEconomy: boolean;
-  finitePoolEconomy: boolean;
-  loanDebtEconomy: boolean;
-  recurringEconomy: boolean;
-  resourceEconomy: boolean;
-  hardwareEconomy: boolean;
-  memoryHardware: boolean;
-  handSizeSupport: boolean;
-  search: boolean;
-  recovery: boolean;
-  downsideEconomy: boolean;
-  delayedPenaltyEconomy: boolean;
-};
 
 type RunnerSetupMissingCoverageType =
   | "wall"
