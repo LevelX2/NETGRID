@@ -398,6 +398,8 @@ import {
 } from "./simulation/simulation-metric-aggregation";
 import {
   averageTurnsFromFinalAdvanceToScoreOrSteal,
+  countCorpMultiIceInstallOrderFutureEffectDead,
+  countCorpMultiIceInstallOrderOptimized,
   progressionEntriesWithRunTargets,
 } from "./simulation/progression-action-sequence";
 import {
@@ -22552,59 +22554,6 @@ function summarizeAdvancedRemoteThreatMetrics(
     turnsFromRemoteThreatCreatedToContest: averageNumber(contestDeltas),
     turnsFromRemoteThreatCreatedToScoreOrSteal: averageNumber(resolveDeltas),
   };
-}
-
-function countCorpMultiIceInstallOrderFutureEffectDead(
-  sequence: AiSimulationSummary["actionSequence"],
-): number {
-  return sequence.filter((entry, index) => {
-    if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsDeadEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
-    )
-      return false;
-    return sequence
-      .slice(index + 1)
-      .some(
-        (later) =>
-          later.side === "corp" &&
-          later.turnNumber === entry.turnNumber &&
-          later.actionType === "install_card" &&
-          later.installPlacement === "ice" &&
-          later.targetServerId === entry.targetServerId,
-      );
-  }).length;
-}
-
-function countCorpMultiIceInstallOrderOptimized(
-  sequence: AiSimulationSummary["actionSequence"],
-): number {
-  return sequence.filter((entry, index) => {
-    if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsLiveEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
-    )
-      return false;
-    return sequence
-      .slice(0, index)
-      .some(
-        (previous) =>
-          previous.side === "corp" &&
-          previous.turnNumber === entry.turnNumber &&
-          previous.actionType === "install_card" &&
-          previous.installPlacement === "ice" &&
-          previous.targetServerId === entry.targetServerId &&
-          previous.corpFutureRunIceInstalled !== true,
-      );
-  }).length;
 }
 
 function isCorpRemoteAdvancementProgress(
