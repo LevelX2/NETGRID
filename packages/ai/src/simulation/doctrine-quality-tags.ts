@@ -231,6 +231,15 @@ export function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
   };
 }
 
+export function summarizeDoctrineQualityMetrics(
+  actionSequence: AiSimulationSummary["actionSequence"],
+): AiDoctrineQualityMetrics {
+  return doctrineMetricsFor([
+    ...actionSequence.flatMap((entry) => entry.qualityTags),
+    ...repeatedLowValueCentralRunTags(actionSequence),
+  ]);
+}
+
 export function emptyDoctrineCaseExamples(): Record<
   AiDoctrineQualityMetricName,
   AiDoctrineQualityCaseExample[]

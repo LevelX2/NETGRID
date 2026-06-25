@@ -506,13 +506,12 @@ import {
   collectRepeatedLowValueCentralRunExamples,
   doctrineCaseExample,
   doctrineMetricForQualityTag,
-  doctrineMetricsFor,
   emptyDoctrineCaseExamples,
   isAgendaFloodExposureExemptAction,
   isEconomyStallExemptAction,
   isRedactionSafeCaseAnalysis,
   qualityTagsForActionWithDependencies,
-  repeatedLowValueCentralRunTags,
+  summarizeDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
 import {
   averageTurnsFromFinalAdvanceToScoreOrSteal,
@@ -732,6 +731,7 @@ export {
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./simulation/benchmark-reports";
+export { summarizeDoctrineQualityMetrics } from "./simulation/doctrine-quality-tags";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
@@ -5598,15 +5598,6 @@ export function simulateAiSoak(
       holdoutSeeds: SOAK_SEEDS.holdoutSeeds,
     },
   };
-}
-
-export function summarizeDoctrineQualityMetrics(
-  actionSequence: AiSimulationSummary["actionSequence"],
-): AiDoctrineQualityMetrics {
-  return doctrineMetricsFor([
-    ...actionSequence.flatMap((entry) => entry.qualityTags),
-    ...repeatedLowValueCentralRunTags(actionSequence),
-  ]);
 }
 
 export function listV143BenchmarkProfiles(): SimulationBenchmarkProfile[] {
