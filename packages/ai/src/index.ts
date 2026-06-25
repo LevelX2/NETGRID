@@ -437,13 +437,12 @@ import {
   selectedDiscardChoiceOptionIds,
 } from "./runtime/discard-choice-selection";
 import {
-  discardDoctrineFitBonus,
-  discardPlanFitBonus,
-} from "./runtime/discard-fit-bonus";
-import {
   discardCurrentPlanKind,
   discardEvidenceForInput,
 } from "./runtime/discard-plan";
+import {
+  discardKeepScore as discardKeepScoreRuntime,
+} from "./runtime/discard-keep-score";
 import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
@@ -3042,14 +3041,6 @@ const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     ...LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS,
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
-
-type DiscardCandidateScore = {
-  total: number;
-  baseValue: number;
-  planFit: number;
-  doctrineFit: number;
-  evidence: string[];
-};
 
 export type AiSimulationConfig = {
   seed?: string;
@@ -7512,113 +7503,16 @@ function discardKeepScore(
   card: NonNullable<
     AiDecisionInput["playerView"]["pendingChoice"]
   >["options"][number]["card"],
-): DiscardCandidateScore {
-  if (!card?.definitionId) {
-    return {
-      total: 0,
-      baseValue: 0,
-      planFit: 0,
-      doctrineFit: 0,
-      evidence: ["discard_score:base"],
-    };
-  }
-  const roles = rolesForCardId(card.definitionId);
-  const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
-  const cost = visibleCardPlayOrInstallCostForAi(card);
-  const runnerPlanRelevantBreaker =
-    input.side === "runner" &&
-    runnerCardAddressesVisibleBreakerNeed(input, card);
-  const runnerBadPublicityTraceTech =
-    input.side === "runner" && runnerBadPublicityOrTraceTechCard(card, roles);
-  const runnerFundingEconomyCard =
-    input.side === "runner" &&
-    cost > input.playerView.own.credits &&
-    (roles.some((role) => isRunnerEconomyRole(role)) ||
-      runnerCardLooksLikeCreditPayout(card));
-  const duplicateCount = input.playerView.own.gripOrHq.filter(
-    (candidate) => candidate.definitionId === card.definitionId,
-  ).length;
-  let baseValue = 100;
-
-  if (input.side === "corp") {
-    if (type === "agenda") baseValue += 330;
-    if (
-      type === "ice" ||
-      card.definitionId.includes("_ice") ||
-      roles.some((role) => role.endsWith("_ice") || role === "etr_ice")
-    )
-      baseValue += 320;
-    const economyRole =
-      roles.some((role) => role.includes("economy")) ||
-      card.definitionId.includes("economy");
-    if (type === "operation") baseValue += economyRole ? 120 : 40;
-    if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
-    if (roles.some((role) => role.includes("score") || role.includes("remote")))
-      baseValue += 70;
-  } else {
-    if (roles.some((role) => role.startsWith("breaker_"))) {
-      const installedSameBreakerRole = roles.some(
-        (role) =>
-          role.startsWith("breaker_") &&
-          (input.playerView.own.rig ?? []).some((rigCard) =>
-            rolesForCardId(rigCard.definitionId).includes(role),
-          ),
-      );
-      baseValue += installedSameBreakerRole ? 95 : 210;
-    }
-    if (roles.some((role) => role.includes("economy") || role === "tempo"))
-      baseValue += input.playerView.own.credits < 4 ? 170 : 65;
-    if (
-      roles.includes("memory") ||
-      roles.includes("setup") ||
-      roles.includes("build_rig")
-    )
-      baseValue += 80;
-    if (roles.includes("draw")) baseValue += 55;
-    if (roles.includes("run_pressure"))
-      baseValue += input.playerView.own.credits < 4 ? 20 : 90;
-    if (runnerPlanRelevantBreaker) baseValue += 360;
-    if (runnerBadPublicityTraceTech) baseValue += 240;
-    if (runnerFundingEconomyCard) baseValue += 190;
-  }
-
-  if (
-    input.legalActions.some(
-      (action) =>
-        action.source === card.instanceId && action.type !== "resolve_choice",
-    )
-  )
-    baseValue += 90;
-  if (duplicateCount > 1 && type !== "agenda")
-    baseValue -= 75 * (duplicateCount - 1);
-  if (
-    cost > input.playerView.own.credits + 3 &&
-    type !== "agenda" &&
-    !runnerPlanRelevantBreaker &&
-    !runnerBadPublicityTraceTech &&
-    !runnerFundingEconomyCard
-  )
-    baseValue -= 70;
-  if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
-    baseValue -= 60;
-
-  const currentPlan = discardCurrentPlanKind(input, {
+) {
+  return discardKeepScoreRuntime(input, card, {
     rolesForCardId,
     definitionTypeForCardId: definitionTypeForDiscardPlan,
+    visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
+    runnerCardAddressesVisibleBreakerNeed,
+    runnerBadPublicityOrTraceTechCard,
+    isRunnerEconomyRole,
+    runnerCardLooksLikeCreditPayout,
   });
-  const planFit = discardPlanFitBonus(input, roles, type, currentPlan);
-  const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
-  return {
-    total: baseValue + planFit + doctrineFit,
-    baseValue,
-    planFit,
-    doctrineFit,
-    evidence: sortedUnique([
-      "discard_score:base",
-      ...(planFit > 0 ? ["discard_score:planfit"] : []),
-      ...(doctrineFit > 0 ? ["discard_score:doctrinefit"] : []),
-    ]),
-  };
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
