@@ -377,6 +377,25 @@ export function isEndgameScoreOrStealPressureAction(
   );
 }
 
+export function isEndgameSetupOrEconomyAction(
+  entry: RunnerEndgameCloseoutEntry,
+  options: {
+    planKind: string | undefined;
+    runnerSetupAction: boolean;
+    runnerEconomyProgressAction: boolean;
+  },
+): boolean {
+  const planKind = options.planKind;
+  return (
+    options.runnerSetupAction ||
+    options.runnerEconomyProgressAction ||
+    entry.actionType === "gain_credit" ||
+    entry.actionType === "draw_card" ||
+    planKind?.includes("economy") === true ||
+    planKind?.includes("setup") === true
+  );
+}
+
 export function isEndgameProtectionAction(
   entry: RunnerEndgameCloseoutEntry,
   planKind?: string,

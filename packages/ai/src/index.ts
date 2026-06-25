@@ -439,6 +439,7 @@ import {
   isEndgameKnownInfoTaken,
   isEndgameLowValueRepeatAction,
   isEndgameProtectionAction,
+  isEndgameSetupOrEconomyAction,
   isCorpEndgameStallSymptom,
   isCorpEndgameScorePathOpportunity,
   isCorpEndgameScorePathTaken,
@@ -15498,8 +15499,12 @@ function summarizeActionLimitEndgameMetrics(
     const pressureActions = strategicWindow.filter(
       isEndgameScoreOrStealPressureAction,
     );
-    const setupOrEconomyActions = strategicWindow.filter(
-      isEndgameSetupOrEconomyAction,
+    const setupOrEconomyActions = strategicWindow.filter((entry) =>
+      isEndgameSetupOrEconomyAction(entry, {
+        planKind: planKindForConversion(entry),
+        runnerSetupAction: isRunnerSetupAction(entry),
+        runnerEconomyProgressAction: isRunnerEconomyProgressAction(entry),
+      }),
     );
     const protectionActions = strategicWindow.filter((entry) =>
       isEndgameProtectionAction(entry, planKindForConversion(entry)),
@@ -15640,20 +15645,6 @@ function summarizeActionLimitEndgameMetrics(
     actionLimitLikelyStrategyIssue,
     actionLimitLikelyMetricArtifact,
   };
-}
-
-function isEndgameSetupOrEconomyAction(
-  entry: PlanConversionActionEntry,
-): boolean {
-  const planKind = planKindForConversion(entry);
-  return (
-    isRunnerSetupAction(entry) ||
-    isRunnerEconomyProgressAction(entry) ||
-    entry.actionType === "gain_credit" ||
-    entry.actionType === "draw_card" ||
-    planKind?.includes("economy") === true ||
-    planKind?.includes("setup") === true
-  );
 }
 
 function countSameStrategicPlanRepeatsWithoutProgress(
