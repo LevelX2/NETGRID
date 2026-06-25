@@ -178,6 +178,24 @@ import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
 import {
   corpVisibleRunnerHardwarePayoffEvidence,
 } from "./runtime/runner-hardware-payoff-evidence";
+import {
+  corpVisibleRunnerHardwareTrashTarget,
+  corpVisibleRunnerRigTrashTarget,
+} from "./runtime/runner-rig-trash-target";
+import {
+  traceTagExpectedSuccessEstimate,
+} from "./runtime/trace-tag-success-estimate";
+import {
+  tagPunishPayoffPriorityBonus,
+} from "./runtime/tag-punish-payoff-priority";
+import {
+  corpPunishKindFromOntologyPayoff,
+  corpVisibleTagPayoffCategoryFromOntology,
+} from "./runtime/tag-punish-payoff-mapping";
+import {
+  shellTradersAbility,
+  shellTradersTargetValue,
+} from "./runtime/shell-traders-action";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -9595,23 +9613,6 @@ function corpVisibleTagPayoffCategoryForAction(
   return "unknown";
 }
 
-function corpVisibleTagPayoffCategoryFromOntology(
-  payoffKind: StructuredTagPunishPayoffKind,
-): CorpVisibleTagPayoffCategory {
-  switch (payoffKind) {
-    case "damage":
-    case "scored_agenda_damage_like":
-      return "damage";
-    case "economic":
-      return "economic";
-    case "resource_trash":
-    case "hardware_trash":
-      return "trash";
-    default:
-      return "unknown";
-  }
-}
-
 function applyCorpVisibleTagPunishTakenWindowDiagnostics(
   diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
   input: AiDecisionInput,
@@ -10827,50 +10828,6 @@ function corpVisibleRunnerResourceTrashEvidence(
   return { valueBonus: 0, evidence: [] };
 }
 
-function corpVisibleRunnerRigTrashTarget(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  const targetIds = [
-    action.payload?.cardId,
-    action.payload?.targetCardId,
-  ].filter(
-    (value): value is string => typeof value === "string" && value.length > 0,
-  );
-  return (input.playerView.opponent.rig ?? []).find(
-    (card) => card.known && targetIds.includes(card.instanceId),
-  );
-}
-
-function corpVisibleRunnerHardwareTrashTarget(
-  input: AiDecisionInput,
-): VisibleCard | undefined {
-  return (input.playerView.opponent.rig ?? []).find(
-    (card) => card.known && card.type === "hardware",
-  );
-}
-
-function corpPunishKindFromOntologyPayoff(
-  payoffKind: StructuredTagPunishPayoffKind,
-): CorpPunishKind {
-  switch (payoffKind) {
-    case "damage":
-      return "scorched_earth_like";
-    case "economic":
-      return "closed_accounts_like";
-    case "resource_trash":
-      return "resource_trash_like";
-    case "hardware_trash":
-      return "power_grid_overload_like";
-    case "scored_agenda_damage_like":
-      return "scored_agenda_damage_like";
-    case "scored_agenda_trace_tag_like":
-      return "scored_agenda_trace_tag_like";
-    default:
-      return "unknown";
-  }
-}
-
 function corpOntologyPayoffAvailableForTagSource(
   input: AiDecisionInput,
   sourceAction: LegalAction,
@@ -10898,34 +10855,6 @@ function corpOntologyPayoffAvailableForTagSource(
       classifyTagPunishPayoffFromOntology(card.definitionId),
     ),
   );
-}
-
-function tagPunishPayoffPriorityBonus(
-  assessment: NonNullable<
-    ReturnType<typeof corpTagPunishOntologyAssessmentForAction>
-  >,
-): number {
-  switch (assessment.payoffKind) {
-    case "damage":
-    case "scored_agenda_damage_like":
-      return 55;
-    case "economic":
-      return 35;
-    case "resource_trash":
-    case "hardware_trash":
-      return 25;
-    default:
-      return 10;
-  }
-}
-
-function traceTagExpectedSuccessEstimate(input: AiDecisionInput): number {
-  if (input.side !== "corp") return 0;
-  if (input.playerView.own.credits >= input.playerView.opponent.credits + 2)
-    return 1;
-  if (input.playerView.own.credits >= input.playerView.opponent.credits)
-    return 0.5;
-  return 0.25;
 }
 
 function corpTagPunishSkipReason(
@@ -11003,19 +10932,6 @@ function shellTradersTargetRoles(
       ? action.payload.targetCardDefinitionId
       : findVisibleCard(input, targetCardId)?.definitionId;
   return rolesForCardId(targetDefinitionId);
-}
-
-function shellTradersTargetValue(
-  roles: string[],
-  shellCounters: number,
-): number {
-  let value = 0;
-  if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
-  if (roles.includes("memory") || roles.includes("memory_support")) value += 55;
-  if (roles.includes("setup") || roles.includes("build_rig")) value += 45;
-  if (roles.includes("economy") || roles.includes("tempo")) value += 20;
-  value += Math.min(60, Math.max(0, shellCounters) * 10);
-  return value;
 }
 
 function shellTradersDirectInstallAction(
@@ -11103,16 +11019,6 @@ function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
       typeof action.payload?.remainingCountersBefore === "number" &&
       action.payload.remainingCountersBefore <= 1,
   );
-}
-
-function shellTradersAbility(action: LegalAction): string | undefined {
-  const payload = action.payload;
-  if (!payload) return undefined;
-  return typeof payload.delayedInstallAbility === "string"
-    ? payload.delayedInstallAbility
-    : typeof payload.shellTradersAbility === "string"
-      ? payload.shellTradersAbility
-      : undefined;
 }
 
 function shellTradersPrepareBaselinePenalty(

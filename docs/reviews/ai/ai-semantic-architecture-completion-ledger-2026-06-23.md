@@ -2941,6 +2941,51 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
+- `AI-COMPLETE-03` zweihunderteinundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/trace-tag-success-estimate.ts` kapselt die Trace-Tag-Erfolgsschätzung aus Corp-/Runner-Credit-Differenz.
+  - `packages/ai/src/index.ts` importiert `traceTagExpectedSuccessEstimate` und entfernt den lokalen Trace-Tag-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.648 auf 24.643 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
+- `AI-COMPLETE-03` zweihundertzweiundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-rig-trash-target.ts` kapselt sichtbare Runner-Rig- und Hardware-Trash-Zielermittlung.
+  - `packages/ai/src/index.ts` importiert `corpVisibleRunnerRigTrashTarget` und `corpVisibleRunnerHardwareTrashTarget` und entfernt die lokalen Target-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.643 auf 24.626 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
+- `AI-COMPLETE-03` zweihundertdreiundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/tag-punish-payoff-priority.ts` kapselt den Tag-Punish-Payoff-Prioritaetsbonus mit schmalem `payoffKind`-Eingabetyp.
+  - `packages/ai/src/index.ts` importiert `tagPunishPayoffPriorityBonus` und entfernt den lokalen ReturnType-gekoppelten Bonus-Helfer.
+  - `packages/ai/src/index.ts` sank nach dem Main-Abgleich weiter von 24.626 auf 24.566 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` zweihundertvierundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/tag-punish-payoff-mapping.ts` kapselt Ontology-Payoff-Mappings auf sichtbare Payoff-Kategorien und Corp-Punish-Kinds.
+  - `packages/ai/src/index.ts` importiert `corpVisibleTagPayoffCategoryFromOntology` und `corpPunishKindFromOntologyPayoff` und entfernt die lokalen Mapping-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.566 auf 24.534 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` zweihundertfünfundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-action.ts` kapselt Shell-Traders-Ability-Ermittlung und vorbereiteten Zielwert.
+  - `packages/ai/src/index.ts` importiert `shellTradersAbility` und `shellTradersTargetValue` und entfernt die lokalen Utility-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.534 auf 24.517 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
