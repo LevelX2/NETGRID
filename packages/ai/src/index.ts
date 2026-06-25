@@ -317,6 +317,7 @@ import {
 import { roundNumber as round } from "./runtime/number-rounding";
 import {
   eventMayChangeArchives as aiEventMayChangeArchives,
+  eventMayChangeHqPressure as aiEventMayChangeHqPressure,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
   isArchivesAccessEvent as isAiArchivesAccessEvent,
@@ -24907,7 +24908,7 @@ function runnerHqMemoryDiagnosticsForMetrics(
     ...(centralRun &&
     centralTarget === "hq" &&
     isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
-    !input.eventTail.some(eventMayChangeHqPressureForMetrics)
+    !input.eventTail.some(aiEventMayChangeHqPressure)
       ? { hqRunRepeatedWithoutNewHqInfo: true }
       : {}),
   };
@@ -25194,21 +25195,6 @@ function visibleBreakCostForKnownIceDefinition(
     input.playerView.own.credits,
   );
   return assessment.visibleBreakCost ?? 0;
-}
-
-function eventMayChangeHqPressureForMetrics(event: PublicGameEvent): boolean {
-  const actionType =
-    typeof event.publicPayload.actionType === "string"
-      ? event.publicPayload.actionType
-      : event.type;
-  return (
-    actionType === "draw_card" ||
-    actionType === "mandatory_draw" ||
-    actionType === "install_card" ||
-    actionType === "play_operation" ||
-    actionType === "discard_card" ||
-    actionType === "resolve_choice"
-  );
 }
 
 function isCentralPressureCardForMetrics(

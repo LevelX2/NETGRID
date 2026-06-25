@@ -33,6 +33,21 @@ export function eventMayChangeArchives(event: PublicGameEvent): boolean {
   );
 }
 
+export function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return (
+    actionType === "draw_card" ||
+    actionType === "mandatory_draw" ||
+    actionType === "install_card" ||
+    actionType === "play_operation" ||
+    actionType === "discard_card" ||
+    actionType === "resolve_choice"
+  );
+}
+
 export function serverIdFromEvent(
   event: PublicGameEvent,
 ): string | undefined {
