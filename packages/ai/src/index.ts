@@ -568,6 +568,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
+import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
@@ -6840,28 +6841,6 @@ function chooseDecisionForSimulation(
     case "current_candidate":
       return chooseAiAction(input, config.aiDecisionRuntimeOptions);
   }
-}
-
-function validateSimulationDeckSupport(config: AiSimulationConfig): string[] {
-  const errors: string[] = [];
-  for (const deck of [config.runnerDeck, config.corpDeck]) {
-    if (!deck) continue;
-    for (const entry of deck.cards) {
-      const definition = DEMO_CARDS_BY_ID[entry.id];
-      if (!definition) {
-        errors.push(
-          `Simulation blockiert: Karte ${entry.id} ist nicht im Runtime-Katalog.`,
-        );
-        continue;
-      }
-      if (definition.implementationStatus !== "playable_mvp") {
-        errors.push(
-          `Simulation blockiert: Karte ${entry.id} ist nicht als playable_mvp freigegeben.`,
-        );
-      }
-    }
-  }
-  return sortedUnique(errors);
 }
 
 // Legacy baseline decision assembly for fallback and reference decisions.
