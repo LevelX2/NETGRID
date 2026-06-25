@@ -73,7 +73,7 @@ export type AccessFlowHost = {
   };
   run: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       run: ActiveRun,
       legalAction?: LegalAction,
     ) => boolean;
@@ -292,12 +292,12 @@ function applyPrearrangedDropAgendaAccess(
   legalAction: LegalAction,
 ): void {
   const flags = host.state.runnerTurnFlags;
-  if (!flags?.prearrangedDropPending || definition.type !== "agenda") return;
-  flags.prearrangedDropPending = false;
+  if (!flags?.nextAgendaAccessCreditGainPending || definition.type !== "agenda") return;
+  flags.nextAgendaAccessCreditGainPending = false;
   host.state.runner.credits += 6;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    prearrangedDropResolved: true,
+    nextAgendaAccessCreditGainResolved: true,
     gainedCredits: Number(legalAction.payload?.gainedCredits ?? 0) + 6,
     runnerCreditsAfter: host.state.runner.credits,
   };
@@ -310,23 +310,23 @@ function applyPromisesPromisesAgendaAccess(
   legalAction: LegalAction,
 ): void {
   const flags = host.state.runnerTurnFlags;
-  if (!flags?.promisesPromisesNextAgendaAccess || definition.type !== "agenda")
+  if (!flags?.nextAgendaAccessAgendaPointPending || definition.type !== "agenda")
     return;
-  flags.promisesPromisesNextAgendaAccess = false;
+  flags.nextAgendaAccessAgendaPointPending = false;
   host.state.run = {
     ...mustRun(host),
-    promisesPromisesAgendaPointBonus: {
+    nextAgendaAccessAgendaPointBonus: {
       sourceDefinitionId:
-        flags.promisesPromisesSourceDefinitionId ??
+        flags.nextAgendaAccessAgendaPointSourceDefinitionId ??
         ("card_implementation" as CardDefinition["id"]),
-      sourceTitle: flags.promisesPromisesSourceTitle ?? "Promises, Promises",
+      sourceTitle: flags.nextAgendaAccessAgendaPointSourceTitle ?? "Promises, Promises",
       amount: 1,
       cardId,
     },
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    promisesPromisesConsumed: true,
+    nextAgendaAccessAgendaPointConsumed: true,
     agendaPointBonusPending: 1,
   };
 }
@@ -402,7 +402,7 @@ export function completeCurrentBreachAccess(
       },
     };
     host.state.run = completedRun;
-    if (host.run.startExpertScheduleAnalyzerPostAccessChoice(completedRun, legalAction))
+    if (host.run.startPostAccessInstalledProgramChoice(completedRun, legalAction))
       return {
         handled: true,
         accessFinished: true,
@@ -508,12 +508,12 @@ function stealAgenda(
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1919RunnerEventAbility: "arasaka_owns_you_future_agenda_forfeit",
+        v1919RunnerEventAbility: "future_agenda_point_forfeit",
         futureAgendaPointForfeitPaid: paidDebt,
         futureAgendaPointForfeitPending: host.state.runnerAgendaPointsToForfeit,
         specialZone: "removed_from_game",
         specialZoneVisibility: "public",
-        specialZoneReason: "v1919_arasaka_owns_you_future_agenda_forfeit",
+        specialZoneReason: "v1919_future_agenda_point_forfeit",
       };
     }
     if (host.state.run?.breach) {
@@ -563,7 +563,7 @@ function applyPendingAgendaPointBonusToStolenAgenda(
   cardId: CardInstanceId,
   legalAction?: LegalAction,
 ): void {
-  const bonus = host.state.run?.promisesPromisesAgendaPointBonus;
+  const bonus = host.state.run?.nextAgendaAccessAgendaPointBonus;
   if (!bonus || bonus.cardId !== cardId) return;
   const instance = host.cards.cardInstanceFor(cardId);
   const existing = Math.max(0, Math.floor(instance.counters?.agenda ?? 0));
@@ -577,7 +577,7 @@ function applyPendingAgendaPointBonusToStolenAgenda(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      promisesPromisesBonusAgendaPoints: bonus.amount,
+      nextAgendaAccessAgendaPointBonusAmount: bonus.amount,
       sourceDefinitionId: bonus.sourceDefinitionId,
       sourceTitle: bonus.sourceTitle,
     };
@@ -727,7 +727,7 @@ function trashAccessedCard(
     cardId as CardInstanceId,
   );
   if (legalAction && overrideCost === undefined) {
-    const scatterShotSpent =
+    const upgradeTrashRecurringCreditsSpent =
       definition.type === "upgrade" ? trashPayment.recurringSpent : 0;
     const poltergeistSpent =
       definition.type === "asset" ? trashPayment.recurringSpent : 0;
@@ -743,11 +743,11 @@ function trashAccessedCard(
             accessTrashCostSourceTitles: effectiveCost.sourceTitles.join(","),
           }
         : {}),
-      ...(scatterShotSpent > 0
+      ...(upgradeTrashRecurringCreditsSpent > 0
         ? {
             v1922RunnerProgramAbility:
-              "scatter_shot_upgrade_trash_recurring_credit",
-            scatterShotRecurringCreditsSpent: scatterShotSpent,
+              "upgrade_trash_recurring_credit",
+            upgradeTrashRecurringCreditsSpent: upgradeTrashRecurringCreditsSpent,
             runnerCreditsSpent: trashPayment.runnerCreditsSpent,
           }
         : {}),

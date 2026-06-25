@@ -154,7 +154,7 @@ export type RunEndCleanupHost = {
     isTokyoUnsuccessfulRunSource: (cardId: CardInstanceId) => boolean;
   };
   followups: {
-    applyBodyweightDataCrecheSuccessfulRun: (
+    applySuccessfulRunExtraRunFollowup: (
       legalAction?: LegalAction,
     ) => SuccessfulRunFollowupExecutionResult;
     cleanupDelayedSuccessfulRunTemporaryIce: (
@@ -297,13 +297,13 @@ export function handleRunEndCleanup(
   const run = host.state.run;
   if (run) clearEncounterTemporaryTraceCredits(run, legalAction);
   const dupre = run ? applyDupreRunEndCounters(host, run) : { handled: false };
-  const olivia = run
-    ? derezOliviaSalazarTemporaryIce(host, run, legalAction)
+  const temporaryDiscountedDerez = run
+    ? derezTemporaryDiscountedRunIce(host, run, legalAction)
     : { handled: false };
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
   if (run && successful)
-    host.followups.applyBodyweightDataCrecheSuccessfulRun(legalAction);
+    host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
   if (run && successful) {
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;
@@ -322,10 +322,10 @@ export function handleRunEndCleanup(
   const sequenceRun = run
     ? applyMultiServerSuccessSequenceRunResult(host, run, successful, legalAction)
     : { handled: false };
-  const allNighterBonusRunOnFinish =
-    run?.grantAllNighterBonusRunOnFinish === true;
+  const bonusRunOnFinish =
+    run?.grantBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
-  const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
+  const corpBonus = unsuccessfulRunCorpCreditBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
   if (run) host.followups.resolveTestSpinRunEnd(run, legalAction);
   host.credits.gainRunner(bonus);
@@ -339,7 +339,7 @@ export function handleRunEndCleanup(
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      tokyoChibaInfightingBonus: true,
+      unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId,
       serverId: run.attackedServerId,
       corpCreditsGained: corpBonus.amount,
@@ -350,7 +350,7 @@ export function handleRunEndCleanup(
       ...(legalAction.resolvedEffects ?? []),
       {
         effectId: `${run.runId}.${
-          corpBonus.sourceCardId ?? "tokyo-chiba-infighting"
+          corpBonus.sourceCardId ?? "unsuccessful-run-corp-credit-bonus"
         }.unsuccessful_run.gain_credits`,
         kind: "gain_credits",
         visibility: "public",
@@ -358,15 +358,15 @@ export function handleRunEndCleanup(
         amount: corpBonus.amount,
         reason: "unsuccessful_run",
         sourceDefinitionId,
-        sourceTitle: sourceDefinition?.title ?? "Tokyo-Chiba Infighting",
+        sourceTitle: sourceDefinition?.title ?? "Unsuccessful run credit bonus",
         serverId: run.attackedServerId,
         ...(serverLabel ? { serverLabel } : {}),
       },
     ];
   }
   let postRunBridge: PostRunBridgeResult = { handled: false };
-  if (allNighterBonusRunOnFinish && !host.state.winner) {
-    host.runner.ensureTurnFlags().allNighterBonusRunPending = true;
+  if (bonusRunOnFinish && !host.state.winner) {
+    host.runner.ensureTurnFlags().bonusRunPending = true;
     postRunBridge = { handled: true, followupRunChoiceStarted: true };
   }
   const temporary = applyRunnerRunTemporaryCreditCleanupAndDamage(
@@ -408,7 +408,9 @@ export function handleRunEndCleanup(
     ...(postRunBridge.followupRunChoiceStarted !== undefined
       ? { followupRunChoiceStarted: postRunBridge.followupRunChoiceStarted }
       : {}),
-    ...(olivia.derezCardIds ? { derezCardIds: olivia.derezCardIds } : {}),
+    ...(temporaryDiscountedDerez.derezCardIds
+      ? { derezCardIds: temporaryDiscountedDerez.derezCardIds }
+      : {}),
     ...(dupre.placedCounters !== undefined
       ? { placedCounters: dupre.placedCounters }
       : {}),
@@ -453,7 +455,7 @@ function applyBadPublicityRunAftermath(
   const aftermath = run.badPublicityRunAftermath;
   if (!aftermath) return;
   let badPublicityAdded = 0;
-  if (aftermath.kind === "live_news_feed") {
+  if (aftermath.kind === "successful_run_draw_event") {
     if (!successful) return;
     const tagAmount = 2;
     host.state.runner.tags += tagAmount;
@@ -655,14 +657,14 @@ export function recordDupreBreakUsage(
   run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
 }
 
-export function resolvePattelsVirusCounterChoice(
+export function resolveBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v181.pattels_virus"))
-    throw new Error("Es ist keine Pattel's-Virus-Choice offen.");
+  if (!choice || !choice.source.startsWith("broken_ice.virus_counter"))
+    throw new Error("Es ist keine Broken-ICE-Virus-Counter-Choice offen.");
   const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find((candidate) => candidate.id === selectedId);
   const targetIceId = typeof option?.value === "string" ? option.value : "";
@@ -671,7 +673,7 @@ export function resolvePattelsVirusCounterChoice(
     !choice.source.includes(targetIceId) ||
     !host.state.cardInstances[targetIceId]
   ) {
-    throw new Error("Die Pattel's-Virus-Auswahl ist ungültig.");
+    throw new Error("Die Broken-ICE-Virus-Counter-Auswahl ist ungueltig.");
   }
   const amount = Math.max(
     1,
@@ -684,8 +686,8 @@ export function resolvePattelsVirusCounterChoice(
   );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v181RunnerProgramAbility: "pattels_virus_counter",
-    pattelsVirusCounterAdded: added,
+    v181RunnerProgramAbility: "broken_ice_virus_counter",
+    brokenIceVirusCounterAdded: added,
     targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
     remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
     choiceVisibility: "public",
@@ -780,12 +782,12 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
   };
 }
 
-function derezOliviaSalazarTemporaryIce(
+function derezTemporaryDiscountedRunIce(
   host: RunEndCleanupHost,
   run: ActiveRun,
   legalAction?: LegalAction,
 ): RunDurationCleanupResult {
-  const iceIds = [...new Set(run.oliviaSalazarTemporaryRezzedIceIds ?? [])].sort();
+  const iceIds = [...new Set(run.temporaryDiscountedRezzedIceIds ?? [])].sort();
   const derezCardIds: CardInstanceId[] = [];
   for (const iceId of iceIds) {
     const instance = host.state.cardInstances[iceId];
@@ -806,7 +808,7 @@ function derezOliviaSalazarTemporaryIce(
   if (derezCardIds.length > 0 && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      oliviaSalazarRunEndDerez: true,
+      temporaryDiscountedRunEndDerez: true,
       derezzedCount: derezCardIds.length,
     };
   }
@@ -880,14 +882,14 @@ function applyV181SuccessfulRunCounterTriggers(
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          v181RunnerProgramAbility: "pattels_virus_counter",
-          pattelsVirusCounterAdded: added,
+          v181RunnerProgramAbility: "broken_ice_virus_counter",
+          brokenIceVirusCounterAdded: added,
           targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
           remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
         };
       }
     } else if (targetIceIds.length > 1) {
-      startPattelsVirusCounterChoice(
+      startBrokenIceVirusCounterChoice(
         host,
         targetIceIds,
         legalAction,
@@ -1075,13 +1077,13 @@ function applyV181SuccessfulRunCounterTriggers(
     if (implementation.counterKind === "fait") {
       const current = Math.max(
         0,
-        Math.floor(host.state.faitAccompliCountersByServer?.[serverId] ?? 0),
+        Math.floor(host.state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
       );
       const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
         ? 0
         : trigger.amount;
-      host.state.faitAccompliCountersByServer = {
-        ...(host.state.faitAccompliCountersByServer ?? {}),
+      host.state.serverAgendaCostCountersByServer = {
+        ...(host.state.serverAgendaCostCountersByServer ?? {}),
         [serverId]: current + added,
       };
       if (legalAction) {
@@ -1161,7 +1163,7 @@ function successfulRunMatchesVirusTrigger(
   return false;
 }
 
-function startPattelsVirusCounterChoice(
+function startBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
@@ -1182,10 +1184,10 @@ function startPattelsVirusCounterChoice(
     });
   if (options.length === 0) return;
   host.state.pendingChoice = {
-    choiceId: `v181_pattels_virus_${host.state.stateVersion + 1}`,
+    choiceId: `broken_ice_virus_counter_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v181.pattels_virus:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
-    prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
+    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
+    prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
     kind: "select_cards",
     options,
     minSelections: 1,
@@ -1196,16 +1198,16 @@ function startPattelsVirusCounterChoice(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v181RunnerProgramAbility: "pattels_virus_counter_choice",
-      pattelsVirusCandidateCount: options.length,
-      pattelsVirusCounterAmount: amount,
-      pattelsVirusChoiceOpened: true,
+      v181RunnerProgramAbility: "broken_ice_virus_counter_choice",
+      brokenIceVirusCounterCandidateCount: options.length,
+      brokenIceVirusCounterAmount: amount,
+      brokenIceVirusCounterChoiceOpened: true,
       choiceVisibility: "public",
     };
   }
 }
 
-function tokyoChibaUnsuccessfulRunBonus(
+function unsuccessfulRunCorpCreditBonus(
   host: RunEndCleanupHost,
   run: GameState["run"],
   successful: boolean,

@@ -1,12 +1,12 @@
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
 import {
-  isEmployeeEmpowermentStartDrawChoiceSource,
-  resolveEmployeeEmpowermentStartDrawChoice,
-} from "./employee-empowerment-sequence";
+  isScoredAgendaStartDrawChoiceSource,
+  resolveScoredAgendaStartDrawChoice,
+} from "./scored-agenda-start-draw-choice-sequence";
 import {
   isScoredIceMarkModifierChoiceSource,
   resolveScoredRezzedIceMarkModifierChoice,
-} from "./ice-transmutation-sequence";
+} from "./scored-rezzed-ice-mark-modifier-sequence";
 import {
   isScoredSubtypeRevealChoiceSource,
   resolveScoredSubtypeRevealChoice,
@@ -26,14 +26,14 @@ export const SCORED_AGENDA_FLOW_CHOICE_RESOLVERS: readonly ScoredAgendaFlowChoic
       resolve: resolveScoredSubtypeRevealChoice,
     },
     {
-      id: "ice_transmutation_flow_choice",
+      id: "scored_rezzed_ice_mark_modifier_flow_choice",
       matches: isScoredIceMarkModifierChoiceSource,
       resolve: resolveScoredRezzedIceMarkModifierChoice,
     },
     {
-      id: "employee_empowerment_start_draw_flow_choice",
-      matches: isEmployeeEmpowermentStartDrawChoiceSource,
-      resolve: resolveEmployeeEmpowermentStartDrawChoice,
+      id: "scored_agenda_start_draw_flow_choice",
+      matches: isScoredAgendaStartDrawChoiceSource,
+      resolve: resolveScoredAgendaStartDrawChoice,
     },
   ];
 

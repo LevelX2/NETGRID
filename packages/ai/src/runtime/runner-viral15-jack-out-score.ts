@@ -18,7 +18,9 @@ export function runnerViral15JackOutScoreComponent(
   if (
     input.side !== "runner" ||
     action.type !== "jack_out" ||
-    action.payload?.v1922CorpIceAbility !== "viral_15_jack_out_tax"
+    (action.payload?.v1922CorpIceAbility !== "viral_15_jack_out_tax" &&
+      action.payload?.v1922CorpIceAbility !==
+        "jack_out_tax_after_passed_rezzed_ice")
   ) {
     return undefined;
   }

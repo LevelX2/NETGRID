@@ -28,8 +28,8 @@ export type MainActionHostCompositionHost = {
     serverChoiceDisplayLabel: RunnerMainActionGenerationHost["servers"]["serverChoiceDisplayLabel"];
     runnerMemoryLimit: RunnerMainActionGenerationHost["memory"]["runnerMemoryLimit"];
     exposedCorpCardInServer: RunnerMainActionGenerationHost["hiddenZone"]["exposedCorpCardInServer"];
-    topHostedProgramOnMicrotech: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnMicrotech"];
-    microtechHostedProgramIds: RunnerMainActionGenerationHost["hiddenZone"]["microtechHostedProgramIds"];
+    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
+    hostedProgramIdsOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["hostedProgramIdsOnHardware"];
     topRunnerHeapCardId: RunnerMainActionGenerationHost["hiddenZone"]["topRunnerHeapCardId"];
     constants: CorpMainActionGenerationHost["constants"] &
       RunnerMainActionGenerationHost["constants"];
@@ -110,23 +110,19 @@ export function createMainActionHostComposition(
       },
       corp: {
         corpActionDebtPending: corp.corpActionDebtPending,
-        acmeSavingsAndLoanObligationCount:
-          corp.acmeSavingsAndLoanObligationCount,
+        activeObligationCount:
+          corp.activeObligationCount,
         canPlayCorpOperation: corp.canPlayCorpOperation,
         cardImplementationOperationLegalActions:
           corp.cardImplementationOperationLegalActions,
         corpUtilityImplementationForDefinition:
           corp.corpUtilityImplementationForDefinition,
-        powerGridOverloadLegalActions: corp.powerGridOverloadLegalActions,
-        systematicLayoffsLegalActions: corp.systematicLayoffsLegalActions,
+        hardwareTrashByCounterLegalActions: corp.hardwareTrashByCounterLegalActions,
+        advancementPlacementLegalActions: corp.advancementPlacementLegalActions,
         corpAgendaPointTotal: corp.corpAgendaPointTotal,
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
         uniqueDirectLongtailKindForDefinition:
           corp.uniqueDirectLongtailKindForDefinition,
-        corpInstalledEconomyActionProfileForDefinition:
-          corp.corpInstalledEconomyActionProfileForDefinition,
-        corpInstalledEconomyActionPayload:
-          corp.corpInstalledEconomyActionPayload,
         ...(corp.filterActionsForRestrictedExtraActions
           ? {
               filterActionsForRestrictedExtraActions:
@@ -157,7 +153,7 @@ export function createMainActionHostComposition(
         rezCostForCard: rez.rezCostForCard,
         rezCostReductionSourceDefinitionIdsFor:
           rez.rezCostReductionSourceDefinitionIdsFor,
-        isAcmeSavingsAndLoanDefinition: rez.isAcmeSavingsAndLoanDefinition,
+        isObligationDebtDefinition: rez.isObligationDebtDefinition,
       },
       abilities: {
         corpTraceDamageAbilityHost:
@@ -206,10 +202,10 @@ export function createMainActionHostComposition(
           actions.buildRunnerValuPakInstallAction,
         buildRunnerValuPakSequenceEndAction:
           actions.buildRunnerValuPakSequenceEndAction,
-        buildRunnerShellTradersSetAsideAction:
-          actions.buildRunnerShellTradersSetAsideAction,
-        buildRunnerShellTradersRemoveCounterAction:
-          actions.buildRunnerShellTradersRemoveCounterAction,
+        buildRunnerDelayedInstallSetAsideAction:
+          actions.buildRunnerDelayedInstallSetAsideAction,
+        buildRunnerDelayedInstallRemoveCounterAction:
+          actions.buildRunnerDelayedInstallRemoveCounterAction,
       },
       cards: {
         definitionFor: cards.definitionFor,
@@ -254,8 +250,8 @@ export function createMainActionHostComposition(
       install: {
         shouldOfferRunnerProgramTrashBeforeInstall:
           install.shouldOfferRunnerProgramTrashBeforeInstall,
-        canOverlayProgramOnZetatechSoftwareInstaller:
-          install.canOverlayProgramOnZetatechSoftwareInstaller,
+        canOverlayProgramOnInstalledProgramHost:
+          install.canOverlayProgramOnInstalledProgramHost,
         canHostProgramOnDaemon: install.canHostProgramOnDaemon,
         cardImplementationAgendaPointInstallCost:
           install.cardImplementationAgendaPointInstallCost,
@@ -274,8 +270,8 @@ export function createMainActionHostComposition(
       },
       hiddenZone: {
         exposedCorpCardInServer: callbacks.exposedCorpCardInServer,
-        topHostedProgramOnMicrotech: callbacks.topHostedProgramOnMicrotech,
-        microtechHostedProgramIds: callbacks.microtechHostedProgramIds,
+        topHostedProgramOnHardware: callbacks.topHostedProgramOnHardware,
+        hostedProgramIdsOnHardware: callbacks.hostedProgramIdsOnHardware,
         topRunnerHeapCardId: callbacks.topRunnerHeapCardId,
       },
       specialZones: {
@@ -284,10 +280,10 @@ export function createMainActionHostComposition(
         runnerInstallableProgramIdsForValuPak:
           specialZones.runnerInstallableProgramIdsForValuPak,
         specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        shellTradersPrepareTargetIds: specialZones.shellTradersPrepareTargetIds,
-        shellTradersInstallCost: specialZones.shellTradersInstallCost,
-        shellTradersPreparedTargetIds:
-          specialZones.shellTradersPreparedTargetIds,
+        delayedInstallPrepareTargetIds: specialZones.delayedInstallPrepareTargetIds,
+        delayedInstallCounterCost: specialZones.delayedInstallCounterCost,
+        delayedInstallPreparedTargetIds:
+          specialZones.delayedInstallPreparedTargetIds,
       },
       cardImplementation: {
         runtimeDeps: cardImplementation.runtimeDeps,

@@ -11,12 +11,12 @@ import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   buildCorpFortPassWindowActions,
-  buildSingaporeCityGridRunActions,
+  buildHqIceSwapRunActions,
   buildStartRunIceRepositionActions,
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "./fort-pass-window";
 
@@ -162,7 +162,7 @@ function definitionsFor(state: GameState): Record<string, CardDefinition> {
     ),
     "onr_v1_369_singapore-city-grid": definition(
       "onr_v1_369_singapore-city-grid",
-      { title: "Singapore City Grid" },
+      { title: "HQ Ice Swap" },
     ),
     "onr_v1_364_omni-kismet-ph-d": definition(
       "onr_v1_364_omni-kismet-ph-d",
@@ -285,7 +285,7 @@ describe("fort pass window", () => {
     expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:server:rd"]);
   });
 
-  it("starts and resolves Singapore City Grid as a hidden-info-safe HQ ICE swap", () => {
+  it("starts and resolves HQ Ice Swap as a hidden-info-safe HQ ICE swap", () => {
     const state = makeState();
     state.cardInstances.source_root = {
       ...state.cardInstances.source_root!,
@@ -295,7 +295,7 @@ describe("fort pass window", () => {
     const server = host.servers.mustServer("rd");
     const run = state.run!;
 
-    const actions = buildSingaporeCityGridRunActions(host, run, server);
+    const actions = buildHqIceSwapRunActions(host, run, server);
 
     expect(actions.map((candidate) => candidate.payload)).toEqual([
       expect.objectContaining({
@@ -303,9 +303,9 @@ describe("fort pass window", () => {
         targetIceId: "ice_inner",
         serverId: "rd",
         iceIndex: 0,
-        v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
+        v1918UpgradeAbility: "hq_ice_swap",
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1918_singapore_city_grid_choice",
+        hiddenZoneAction: "hq_ice_swap_choice",
       }),
       expect.objectContaining({
         targetIceId: "ice_outer",
@@ -313,10 +313,10 @@ describe("fort pass window", () => {
       }),
     ]);
 
-    startSingaporeCityGridSwapChoice(host, actions[0]!);
+    startHqIceSwapChoice(host, actions[0]!);
 
     expect(state.pendingChoice).toMatchObject({
-      source: "v1918.singapore_city_grid:source_root:rd:ice_inner:0:run_1",
+      source: "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:run_1",
       kind: "select_cards",
       visibility: "hidden_info_barrier",
       options: [
@@ -329,7 +329,7 @@ describe("fort pass window", () => {
     expect(JSON.stringify(actions[0]!.payload)).not.toMatch(/"cardInstances"/);
 
     const resolveAction = action(state);
-    const result = resolveSingaporeCityGridSwapChoice(
+    const result = resolveHqIceSwapChoice(
       host,
       resolveAction,
       choiceAction("card_hq_ice"),
@@ -355,7 +355,7 @@ describe("fort pass window", () => {
     });
     expect(resolveAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      hiddenZoneAction: "hq_ice_swap_swap",
       sourceDefinitionId: "onr_v1_369_singapore-city-grid",
       swappedIceCount: 1,
       oncePerRunConsumed: true,

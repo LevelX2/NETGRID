@@ -6,13 +6,13 @@ describe("sanitizeCardImplementationSurfacePayload", () => {
     expect(
       sanitizeCardImplementationSurfacePayload({
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1922_security_purge_rd_top3",
+        hiddenZoneAction: "agenda_purge_rd_top3",
         revealedCount: 3,
         publicRevealDefinitionIds: "ice_wall,agenda_contract",
       }),
     ).toEqual({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_security_purge_rd_top3",
+      hiddenZoneAction: "agenda_purge_rd_top3",
       revealedCount: 3,
       publicRevealDefinitionIds: "ice_wall,agenda_contract",
     });

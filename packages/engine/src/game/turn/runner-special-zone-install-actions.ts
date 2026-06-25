@@ -12,7 +12,7 @@ export type RunnerValuPakInstallActionInput = {
   definition: CardDefinition;
 };
 
-export type RunnerShellTradersSetAsideActionInput = {
+export type RunnerDelayedInstallSetAsideActionInput = {
   sourceCardId: CardInstanceId;
   sourceTitle: string;
   sourceDefinitionId: CardDefinitionId;
@@ -21,7 +21,7 @@ export type RunnerShellTradersSetAsideActionInput = {
   shellCounterAmount: number;
 };
 
-export type RunnerShellTradersRemoveCounterActionInput = {
+export type RunnerDelayedInstallRemoveCounterActionInput = {
   sourceCardId: CardInstanceId;
   sourceTitle: string;
   sourceDefinitionId: CardDefinitionId;
@@ -64,9 +64,9 @@ export function buildRunnerValuPakSequenceEndAction(
   );
 }
 
-export function buildRunnerShellTradersSetAsideAction(
+export function buildRunnerDelayedInstallSetAsideAction(
   state: GameState,
-  input: RunnerShellTradersSetAsideActionInput,
+  input: RunnerDelayedInstallSetAsideActionInput,
 ): LegalAction {
   return buildLegalAction(
     state,
@@ -92,7 +92,7 @@ export function buildRunnerShellTradersSetAsideAction(
     {
       targetRequirements: [
         {
-          id: "shellTradersTarget",
+          id: "delayedInstallTarget",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.grip"],
@@ -103,9 +103,9 @@ export function buildRunnerShellTradersSetAsideAction(
   );
 }
 
-export function buildRunnerShellTradersRemoveCounterAction(
+export function buildRunnerDelayedInstallRemoveCounterAction(
   state: GameState,
-  input: RunnerShellTradersRemoveCounterActionInput,
+  input: RunnerDelayedInstallRemoveCounterActionInput,
 ): LegalAction {
   return buildLegalAction(
     state,
@@ -129,7 +129,7 @@ export function buildRunnerShellTradersRemoveCounterAction(
     {
       targetRequirements: [
         {
-          id: "shellTradersPreparedCard",
+          id: "delayedInstallPreparedCard",
           kind: "card",
           side: "runner",
           zoneScope: ["special.set_aside"],
@@ -140,7 +140,7 @@ export function buildRunnerShellTradersRemoveCounterAction(
   );
 }
 
-export function buildRunnerSelfModifyingCodeInstallAction(
+export function buildRunnerHiddenStackProgramInstallAction(
   state: GameState,
   sourceCardId: CardInstanceId,
 ): LegalAction {
@@ -153,15 +153,15 @@ export function buildRunnerSelfModifyingCodeInstallAction(
     [],
     {
       cardId: sourceCardId,
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      v1911HiddenZoneAbility: "hidden_stack_program_install",
       hiddenZoneBarrier: true,
     },
     {
       abilityRef: {
         sourceCardInstanceId: sourceCardId,
-        abilityId: "self_modifying_code_install_program",
+        abilityId: "hidden_stack_program_install",
       },
-      effectRef: "effect.self_modifying_code_install_program",
+      effectRef: "effect.hidden_stack_program_install",
     },
   );
 }

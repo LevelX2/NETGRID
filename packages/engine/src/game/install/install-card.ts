@@ -15,10 +15,10 @@ import {
   SKIVVISS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
 } from "../../mechanics/damage-prevention";
-import { ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID } from "../../mechanics/longtail-card-effects";
+import { PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE } from "../../mechanics/longtail-card-effects";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import {
@@ -97,7 +97,7 @@ export type InstallCardHost = {
     hiddenRunnerResourceSlotId: (cardId: CardInstanceId) => CardInstanceId;
   };
   corp: {
-    expireCorporateRetreatInstallCreditAbilities: () => void;
+    expireScoredAgendaInstallRezCreditAbilities: () => void;
     consumeEdgerunnerTempsInstallAction: (legalAction: LegalAction) => void;
     isRegionUpgrade: (definition: CardDefinition) => boolean;
     isFortTraceBitPoolSource: (cardId: CardInstanceId) => boolean;
@@ -108,7 +108,7 @@ export type InstallCardHost = {
       hostCardId: CardInstanceId,
       definition: CardDefinition,
     ) => boolean;
-    canOverlayProgramOnZetatechSoftwareInstaller: (
+    canOverlayProgramOnInstalledProgramHost: (
       hostCardId: CardInstanceId,
       definition: CardDefinition,
     ) => boolean;
@@ -222,7 +222,7 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
   }
   host.payment.spendClick(legalAction.side);
   if (legalAction.side === "corp")
-    host.corp.expireCorporateRetreatInstallCreditAbilities();
+    host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (legalAction.side === "runner") {
     installRunnerCard(host, legalAction, cardId, definition);
     return;
@@ -241,8 +241,8 @@ function installRunnerCard(
     typeof legalAction.payload?.hostOnCardId === "string"
       ? (String(legalAction.payload.hostOnCardId) as CardInstanceId)
       : undefined;
-  const zetatechOverlayInstall =
-    legalAction.payload?.v1922ZetatechOverlayInstall === true;
+  const programOverlayInstall =
+    legalAction.payload?.programOverlayInstallRequested === true;
   const selectedServerId =
     typeof legalAction.payload?.selectedServerId === "string"
       ? String(legalAction.payload.selectedServerId)
@@ -273,8 +273,8 @@ function installRunnerCard(
     definition.type === "program" &&
     hostOnCardId &&
     !(
-      zetatechOverlayInstall
-        ? host.hosting.canOverlayProgramOnZetatechSoftwareInstaller(
+      programOverlayInstall
+        ? host.hosting.canOverlayProgramOnInstalledProgramHost(
             hostOnCardId,
             definition,
           )
@@ -326,8 +326,8 @@ function installRunnerCard(
         host.servers.serverChoiceDisplayLabel(restrictiveTargetServerId),
     };
   }
-  const zetatechRecurringBefore =
-    zetatechOverlayInstall && hostOnCardId
+  const hostedRecurringCreditsBefore =
+    programOverlayInstall && hostOnCardId
       ? host.hosting.hostedPaymentCredits(hostOnCardId)
       : 0;
   const concealedHiddenRunnerResource =
@@ -403,17 +403,17 @@ function installRunnerCard(
       ? { selectedSubtype }
       : {}),
   };
-  if (zetatechOverlayInstall) {
+  if (programOverlayInstall) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "zetatech_overlay_install",
-      zetatechOverlayInstall: true,
-      hostDefinitionId: ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
-      zetatechRecurringCreditsSpent:
-        zetatechOverlayInstall && hostOnCardId
+      v1922RunnerProgramAbility: "program_overlay_install",
+      programOverlayInstall: true,
+      hostDefinitionId: PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
+      hostedRecurringCreditsSpent:
+        programOverlayInstall && hostOnCardId
           ? Math.max(
               0,
-              zetatechRecurringBefore -
+              hostedRecurringCreditsBefore -
                 host.hosting.hostedPaymentCredits(hostOnCardId),
             )
           : 0,
@@ -488,7 +488,7 @@ function installRunnerHardware(
       definition.recurringCredits ?? 0,
     );
   if (
-    definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID &&
+    definition.id === ABLATIVE_COUNTER_HARDWARE_SOURCE &&
     host.cards.damagePreventionSourcesForDefinition(definition).length === 0
   ) {
     host.counters.setCardCounter(

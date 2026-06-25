@@ -3,11 +3,7 @@
  * Keine State-Mutation, keine LegalAction-Erzeugung, keine Action-Ausführung.
  * Revalidation bleibt an Quote gekoppelt; kein Import aus index.ts.
  */
-export type {
-  CostModifierQuote,
-  CostPurpose,
-  CostQuote,
-} from "./cost-quote";
+export type { CostModifierQuote, CostPurpose, CostQuote } from "./cost-quote";
 export type {
   CorpTracePaymentBreakdown,
   CorpTracePaymentDependencies,
@@ -16,6 +12,7 @@ export type {
   CorpTracePaymentSourceKind,
   RunnerTracePaymentBreakdown,
   RunnerTracePaymentDependencies,
+  RunnerTraceLinkCreditSelection,
   RunnerTracePaymentPurpose,
   RunnerTracePaymentQuote,
   RunnerTracePaymentReceipt,
@@ -28,7 +25,7 @@ export {
 export {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
-  oliviaSalazarRezSourcesForRunIce,
+  discountedRezSourceIdsForRunIce,
   quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,

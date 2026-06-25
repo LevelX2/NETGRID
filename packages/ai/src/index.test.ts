@@ -94,7 +94,6 @@ import {
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
 } from "./index";
-import { delayedInstallAbilityForAction } from "./actions/delayed-install-action";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -707,7 +706,7 @@ describe("MVP 0.3 AI controller contract", () => {
       iceDefinitionId: "onr_v1_232_crystal-wall",
       effectiveStrength: 3,
       subroutines: [
-        { id: "onr_v1_232_crystal_wall_etr", type: "end_the_run" },
+        { id: "catalog_onr_v1_232_crystal_wall_etr", type: "end_the_run" },
         {
           id: "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
           type: "end_the_run_unless_runner_pays",
@@ -811,7 +810,7 @@ describe("MVP 0.3 AI controller contract", () => {
         effectiveStrength: 5,
         subroutines: [
           {
-            id: "onr_v1_274_tutor_future_end_the_run",
+            id: "catalog_onr_v1_274_tutor_future_end_the_run",
             type: "set_run_future_end_the_run_subroutine",
             unbrokenRunEffect: { addsFutureEndTheRunSubroutines: 1 },
           },
@@ -2514,7 +2513,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip",
+        action.payload?.delayedInstallAbility === "set_aside_from_grip",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2552,7 +2551,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardId === fracterId,
     );
     setShellCountersForTest(state, fracterId, 1);
@@ -2563,7 +2562,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const remove = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "remove_shell_counter",
+        action.payload?.delayedInstallAbility === "remove_shell_counter",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2601,7 +2600,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardId === firstTargetId,
     );
     state = apply(
@@ -2609,7 +2608,7 @@ describe("MVP 0.3 AI controller contract", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardId === secondTargetId,
     );
     setShellCountersForTest(state, firstTargetId, 1);
@@ -2624,12 +2623,12 @@ describe("MVP 0.3 AI controller contract", () => {
     const remove = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "remove_shell_counter",
+        action.payload?.delayedInstallAbility === "remove_shell_counter",
     );
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip",
+        action.payload?.delayedInstallAbility === "set_aside_from_grip",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -2670,7 +2669,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
-        delayedInstallAbilityForAction(action) === "set_aside_from_grip" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
         action.payload?.targetCardDefinitionId === "simple_fracter",
     );
     const directInstall = input.legalActions.find(
@@ -3325,6 +3324,572 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Killer");
   });
 
+  it("prioritizes trashing Diplomatic Immunity over low-credit economy in a tagged meat-damage plan", () => {
+    if (
+      !createRuntimeCardsById()[DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST] ||
+      !createRuntimeCardsById()["onr_v1_302_scorched-earth"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-trash-diplomatic-immunity",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: {
+        ...V095_RUNNER_DECK,
+        id: "demo_runner_095_diplomatic_immunity",
+        cards: [
+          ...V095_RUNNER_DECK.cards,
+          { id: DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST, quantity: 1 },
+        ],
+      },
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_scorched_earth",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveRunnerResourceToRig(state, DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST);
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 2;
+    state.runner.tags = 1;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const diplomaticTrash = input.legalActions.find(
+      (action) =>
+        action.type === "trash_resource" &&
+        action.payload?.cardId ===
+          input.playerView.opponent.rig?.find(
+            (card) =>
+              card.definitionId === DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST,
+          )?.instanceId,
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(diplomaticTrash).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!diplomaticTrash || !gain)
+      throw new Error("Missing Diplomatic Immunity trash fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [gain, diplomaticTrash],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(diplomaticTrash.actionId);
+    expect(debugText).toContain("corp_tagged_damage_prevention_resource_trash");
+    expect(debugText).toContain("runner_resource_diplomatic_immunity:true");
+    expect(debugText).toContain("cancel_blocked:true");
+    expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("prioritizes Schlaghund tagged meat damage over economy and generic ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST] ||
+      !runtimeCards[FULL_BODY_CONVERSION_CARD_ID_FOR_TEST] ||
+      !runtimeCards[DERMATECH_BODYPLATING_CARD_ID_FOR_TEST] ||
+      !runtimeCards["onr_v1_243_fetch-4-0-1"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-schlaghund-tagged-meat-payoff",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_schlaghund",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: SCHLAGHUND_CARD_ID_FOR_TEST, quantity: 2 },
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    putCorpRootInServer(state, "remote_1", SCHLAGHUND_CARD_ID_FOR_TEST, 0, {
+      faceup: true,
+      rezzed: true,
+    });
+    moveCorpCardToHq(state, "onr_v1_243_fetch-4-0-1");
+    addRunnerHardwareToRigForTest(state, FULL_BODY_CONVERSION_CARD_ID_FOR_TEST);
+    addRunnerHardwareToRigForTest(
+      state,
+      DERMATECH_BODYPLATING_CARD_ID_FOR_TEST,
+    );
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 1;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const schlaghund = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          SCHLAGHUND_CARD_ID_FOR_TEST,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const fetchInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_243_fetch-4-0-1",
+    );
+    expect(schlaghund).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(fetchInstall).toBeDefined();
+    if (!schlaghund || !gain || !fetchInstall)
+      throw new Error("Missing Schlaghund tagged meat damage fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [fetchInstall, gain, schlaghund],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(schlaghund.actionId);
+    expect(decision.reasonCode).toBe("corp.semantic.corp_tag_punish");
+    expect(debugText).toContain("corp_tagged_meat_damage_payoff_pressure");
+    expect(debugText).toContain("corp_tagged_meat_damage_payoff:true");
+    expect(debugText).toContain("source_definition:onr_v1_339_schlaghund");
+    expect(debugText).toContain("runner_tags:7");
+    expect(debugText).toContain("runner_full_body_conversion_visible:true");
+    expect(debugText).toContain("runner_dermatech_bodyplating_visible:true");
+    expect(debugText).toContain("prevention_pressure:true");
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("prioritizes endgame tag-punish resource trash over economy and slow ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_182_submarine-uplink"] ||
+      !runtimeCards["onr_v1_243_fetch-4-0-1"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-punish-endgame-resource-trash",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: {
+        ...V095_RUNNER_DECK,
+        id: "demo_runner_095_submarine_uplink",
+        cards: [
+          ...V095_RUNNER_DECK.cards,
+          { id: "onr_v1_182_submarine-uplink", quantity: 1 },
+        ],
+      },
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_tag_punish_setup",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const resourceId = moveRunnerResourceToRig(
+      state,
+      "onr_v1_182_submarine-uplink",
+    );
+    scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+    moveCorpCardToHq(state, "onr_v1_243_fetch-4-0-1");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 4;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const resourceTrash = input.legalActions.find(
+      (action) =>
+        action.type === "trash_resource" &&
+        action.payload?.cardId === resourceId,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const fetchInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_243_fetch-4-0-1",
+    );
+    expect(resourceTrash).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(fetchInstall).toBeDefined();
+    if (!resourceTrash || !gain || !fetchInstall)
+      throw new Error("Missing tag-punish resource trash fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [fetchInstall, gain, resourceTrash],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === fetchInstall.actionId,
+    );
+
+    expect(decision.actionId).toBe(resourceTrash.actionId);
+    expect(debugText).toContain("corp_tag_punish_endgame_resource_trash");
+    expect(debugText).toContain("runner_resource_trace_defense_visible:true");
+    expect(debugText).toContain("tag_punish_endgame_active:true");
+    expect(
+      installAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_tag_punish_endgame_slow_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("funds visible tag-punish payoffs instead of continuing slow ICE setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_302_scorched-earth"] ||
+      !runtimeCards["simple_barrier_ice"]
+    ) {
+      return;
+    }
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-punish-payoff-funding",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_scorched_funding",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 2;
+    state.runner.tags = 7;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const iceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    expect(gain).toBeDefined();
+    expect(iceInstall).toBeDefined();
+    if (!gain || !iceInstall)
+      throw new Error("Missing tag-punish funding fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [iceInstall, gain],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === iceInstall.actionId,
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(debugText).toContain("corp_tag_punish_payoff_funding");
+    expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
+    expect(
+      installAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_tag_punish_endgame_slow_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("uses immediate trace tag source before more economy or unprotected tag-asset setup", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_284_chance-observation"] ||
+      !runtimeCards["onr_v1_307_urban-renewal"] ||
+      !runtimeCards["onr_v1_313_city-surveillance"] ||
+      !runtimeCards["onr_v1_309_bbs-whispering-campaign"]
+    ) {
+      return;
+    }
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-chance-before-setup",
+      { installedBbs: true, cityInHq: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const cityInstall =
+      input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinitionFromInput(input, action) ===
+            "onr_v1_313_city-surveillance" &&
+          action.payload?.serverId === "new_remote",
+      ) ??
+      input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinitionFromInput(input, action) ===
+            "onr_v1_313_city-surveillance",
+      );
+
+    expect(chanceObservation).toBeDefined();
+    expect(bbsTake).toBeDefined();
+    expect(cityInstall).toBeDefined();
+    if (!chanceObservation || !bbsTake || !cityInstall)
+      throw new Error("Missing Chance/BBS/City replay fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [cityInstall, bbsTake, chanceObservation],
+    });
+    const cityAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === cityInstall.actionId,
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(chanceObservation.actionId);
+    expect(debugText).toContain("corp_tag_source_visible_payoff_pressure");
+    expect(debugText).toContain("corp_visible_tag_punish_payoff_kind:damage");
+    expect(
+      cityAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_unprotected_tag_asset_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("does not add visible-payoff tag-source pressure without a visible payoff", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (!runtimeCards["onr_v1_284_chance-observation"]) return;
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-chance-no-payoff",
+      { cityInHq: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(chanceObservation).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!chanceObservation || !basicCredit)
+      throw new Error("Missing Chance no-payoff fixture actions");
+
+    const payoffIds = new Set([
+      "onr_v1_285_closed-accounts",
+      "onr_v1_301_punitive-counterstrike",
+      "onr_v1_302_scorched-earth",
+      "onr_v1_307_urban-renewal",
+    ]);
+    const stripPayoffs = (cards: VisibleCard[]) =>
+      cards.filter((card) => !payoffIds.has(card.definitionId ?? ""));
+    const noPayoffInput: AiDecisionInput = {
+      ...input,
+      legalActions: [basicCredit, chanceObservation],
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          gripOrHq: stripPayoffs(input.playerView.own.gripOrHq),
+          scoreArea: stripPayoffs(input.playerView.own.scoreArea),
+        },
+        servers: input.playerView.servers.map((server) => ({
+          ...server,
+          ice: stripPayoffs(server.ice),
+          root: stripPayoffs(server.root),
+        })),
+      },
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(noPayoffInput);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(debugText).not.toContain("corp_tag_source_visible_payoff_pressure");
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("keeps unprotected persistent tag-asset rez below immediate tag source", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (
+      !runtimeCards["onr_v1_284_chance-observation"] ||
+      !runtimeCards["onr_v1_307_urban-renewal"] ||
+      !runtimeCards["onr_v1_313_city-surveillance"]
+    ) {
+      return;
+    }
+    const input = corpReplayTagPunishWindowInput(
+      "ai-corp-replay-city-rez-risk",
+      { cityInstalled: true },
+    );
+    const chanceObservation = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_284_chance-observation",
+    );
+    const cityRez = input.legalActions.find(
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_313_city-surveillance",
+    );
+
+    expect(chanceObservation).toBeDefined();
+    expect(cityRez).toBeDefined();
+    if (!chanceObservation || !cityRez)
+      throw new Error("Missing Chance/City rez replay fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [cityRez, chanceObservation],
+    });
+    const cityAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === cityRez.actionId,
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(chanceObservation.actionId);
+    expect(
+      cityAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_unprotected_tag_asset_setup_penalty",
+      ),
+    ).toBe(true);
+    expect(debugText).toContain(
+      "immediate_operation_tag_source_available:true",
+    );
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("does not promote Schlaghund tagged meat damage when Runner has no tags", () => {
+    const runtimeCards = createRuntimeCardsById();
+    if (!runtimeCards[SCHLAGHUND_CARD_ID_FOR_TEST]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-schlaghund-untagged",
+      baseline: CURRENT_RULES_BASELINE,
+      runnerDeck: V095_RUNNER_DECK,
+      corpDeck: {
+        ...V095_CORP_DECK,
+        id: "demo_corp_095_schlaghund_untagged",
+        cards: [
+          ...V095_CORP_DECK.cards,
+          { id: SCHLAGHUND_CARD_ID_FOR_TEST, quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    putCorpRootInServer(state, "remote_1", SCHLAGHUND_CARD_ID_FOR_TEST, 0, {
+      faceup: true,
+      rezzed: true,
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 1;
+    state.runner.tags = 0;
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const schlaghund = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          SCHLAGHUND_CARD_ID_FOR_TEST,
+    );
+    const gain = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing basic gain-credit action");
+    if (!schlaghund) return;
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [gain, schlaghund],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(debugText).not.toContain("corp_tagged_meat_damage_payoff_pressure");
+  });
+
   it("chooses V0.96 Trace bids from side-safe PlayerView choices", () => {
     let state = traceCorpBidState("ai-v096-trace");
     const corpInput = buildAiDecisionInput(state, "corp", {
@@ -3478,6 +4043,104 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 
+  it("passes post-bid Trace Link choices when the Runner already avoided the trace", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-already-avoided",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 5,
+      runnerLink: 1,
+      runnerBid: 4,
+      runnerStrength: 5,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("chooses the cheapest post-bid Trace Link source that changes the outcome", () => {
+    const { state, input, springboardId } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-minimal-needed",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 1,
+      runnerLink: 0,
+      runnerBid: 0,
+      runnerStrength: 0,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: [`trace_link_${springboardId}`],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("does not spend Submarine Uplink post-bid link when the trace is already avoided", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-submarine-already-avoided",
+    );
+    const submarineInput = withPostBidChoiceOptions(input, [
+      { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
+      {
+        id: "trace_link_runner_onr_v1_182_submarine-uplink_1",
+        label: "Submarine Uplink: +1 Link",
+        publicLabel: "Trace Link",
+        value: "runner_onr_v1_182_submarine-uplink_1",
+      },
+    ]);
+    const contextualInput = withSyntheticPostBidTraceContext(submarineInput, {
+      traceStrength: 5,
+      runnerLink: 1,
+      runnerBid: 4,
+      runnerStrength: 5,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
+  it("passes a reopened post-bid Trace Link choice after a prior link boost already fixed the outcome", () => {
+    const { state, input } = postBidTraceLinkChoiceFixture(
+      "ai-post-bid-trace-link-reopened-after-fixed",
+    );
+    const contextualInput = withSyntheticPostBidTraceContext(input, {
+      traceStrength: 5,
+      runnerLink: 2,
+      runnerBid: 3,
+      runnerStrength: 5,
+      postBidTraceLinkBonus: 1,
+    });
+
+    const decision = chooseRunnerAction(contextualInput);
+
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: ["pass"],
+    });
+    expect(assertAiInputIsSideSafe(contextualInput)).toBe(true);
+    expect(JSON.stringify(contextualInput)).not.toContain("cardInstances");
+  });
+
   it("keeps V0.97 breach queues hidden and chooses access from LegalActions", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -3621,7 +4284,7 @@ describe("MVP 0.3 AI controller contract", () => {
     );
 
     expect(corpInput.playerView.pendingChoice?.source).toContain(
-      "p3_56.too_many_doors_secret_spend",
+      "card_implementation.secret_spend_compare",
     );
     expect(corpInput.playerView.pendingChoice?.kind).toBe("bid_amount");
     expect(corpInput.legalActions.map((action) => action.type)).toEqual([
@@ -5304,6 +5967,82 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("scores installed Corp economy payouts in semantic runtime", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-semantic-installed-bbs-economy",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing semantic BBS economy fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, bbsTake],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(bbsTake.actionId);
+    expect(debugText).toContain("corp_card_action_economy_gain");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("does not give opaque Corp abilities the installed-economy bonus", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-semantic-opaque-bbs-ability",
+    );
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing opaque BBS fixture actions");
+
+    const opaqueAbility: LegalAction = {
+      ...bbsTake,
+      actionId: "test.opaque-corp-card-ability",
+      label: "BBS Whispering Campaign: Konfiguration prüfen",
+      costs: [{ clicks: 1, credits: 3 }],
+      payload: {},
+      resolvedEffects: [],
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, opaqueAbility],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(debugText).not.toContain("corp_card_action_economy_gain");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
@@ -7486,7 +8225,8 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
         sourceDefinitionFromInput(input, action) === "simple_fracter",
     );
     const runHq = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const gain = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -7523,10 +8263,16 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       (state) => {
         state.runner.credits = 6;
         ensureRemoteServer(state, "remote_1");
-        const agendaId = putCorpRootInServer(state, "remote_1", "simple_agenda", 0, {
-          faceup: true,
-          rezzed: true,
-        });
+        const agendaId = putCorpRootInServer(
+          state,
+          "remote_1",
+          "simple_agenda",
+          0,
+          {
+            faceup: true,
+            rezzed: true,
+          },
+        );
         state.cardInstances[agendaId] = {
           ...state.cardInstances[agendaId]!,
           faceup: true,
@@ -11647,6 +12393,40 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("keeps affordable remote contest ahead of creditbase gain in holdout-shaped fixtures", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-remote-contest-creditbase-holdout",
+      (state) => {
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(remoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !gainCredit)
+      throw new Error("Missing remote contest creditbase fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, remoteRun],
+    });
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("recovers economy before low-reserve central pressure through visible ICE", () => {
     const input = runnerActionPhaseInput(
       "ai-v141-low-reserve-rd-ice",
@@ -13420,8 +14200,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(drawCard?.payload).toMatchObject({
-      citySurveillanceDrawDecision: "tag",
-      citySurveillanceProjectedTagsAdded: 1,
+      drawTaxDecision: "tag",
+      drawTaxProjectedTagsAdded: 1,
     });
     expect(gainCredit).toBeDefined();
     if (!drawCard || !gainCredit)
@@ -16347,10 +17127,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     const rdRun = repeatInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const hqRun = repeatInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const gainCredit = repeatInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -16369,12 +17151,15 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const remoteRunTarget = evaluateRunnerRunTargets({
       input: scopedRepeatInput,
     }).find((evaluation) => evaluation.targetServerId === "remote_1");
-    const repeatCandidate = generateRunnerPlanCandidates(scopedRepeatInput).find(
+    const repeatCandidate = generateRunnerPlanCandidates(
+      scopedRepeatInput,
+    ).find(
       (candidate) =>
         candidate.kind === "contest_remote" &&
         candidate.steps.some((step) => step.targetServerId === "remote_1"),
     );
-    if (!repeatCandidate) throw new Error("Missing repeated Holovid remote run");
+    if (!repeatCandidate)
+      throw new Error("Missing repeated Holovid remote run");
     const repeatScore = evaluateRunnerPlan(scopedRepeatInput, repeatCandidate);
     const repeatDecision = chooseRunnerAction(scopedRepeatInput, {
       persistTacticalPlanMemory: false,
@@ -22728,7 +23513,8 @@ describe("V1.4.2 belief state and opponent model", () => {
     const jackOut = input.legalActions.find(
       (action) =>
         action.type === "jack_out" &&
-        action.payload?.v1922CorpIceAbility === "viral_15_jack_out_tax",
+        action.payload?.v1922CorpIceAbility ===
+          "jack_out_tax_after_passed_rezzed_ice",
     );
     const continueRun = input.legalActions.find(
       (action) => action.type === "continue_run",
@@ -27041,6 +27827,12 @@ const V094_CORP_DECK: DeckDefinition = {
   ],
 };
 
+const DIPLOMATIC_IMMUNITY_CARD_ID_FOR_TEST = "onr_v1_160_diplomatic-immunity";
+const SCHLAGHUND_CARD_ID_FOR_TEST = "onr_v1_339_schlaghund";
+const FULL_BODY_CONVERSION_CARD_ID_FOR_TEST = "onr_v1_127_full-body-conversion";
+const DERMATECH_BODYPLATING_CARD_ID_FOR_TEST =
+  "onr_v1_125_dermatech-bodyplating";
+
 const V111_CORP_DECK: DeckDefinition = {
   ...V094_CORP_DECK,
   id: "demo_corp_111",
@@ -27294,6 +28086,125 @@ function traceCorpBidState(seed: string): GameState {
   return apply(state, "runner", (action) => action.type === "continue_run");
 }
 
+function postBidTraceLinkChoiceFixture(seed: string): {
+  state: GameState;
+  input: AiDecisionInput;
+  signpostId: CardInstanceId;
+  springboardId: CardInstanceId;
+} {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `${seed}_runner`,
+        name: "AI Post-Bid Trace Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_063_signpost", quantity: 1 },
+          { id: "onr_v1_181_the-springboard", quantity: 1 },
+          { id: "simple_economy_event", quantity: 10 },
+        ],
+      },
+      corpDeck: {
+        id: `${seed}_corp`,
+        name: "AI Post-Bid Trace Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+          { id: "simple_agenda", quantity: 6 },
+          { id: "simple_economy_operation", quantity: 6 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 5;
+  state.corp.credits = 5;
+  const signpostId = moveRunnerProgramToRig(state, "onr_v1_063_signpost");
+  const springboardId = moveRunnerResourceToRig(
+    state,
+    "onr_v1_181_the-springboard",
+  );
+  const iceId = putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
+
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  state = apply(
+    state,
+    "corp",
+    (action) => action.type === "rez_ice" && action.source === iceId,
+  );
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  state = applyChoice(state, "corp", ["bid_0"]);
+  state = applyChoice(state, "runner", ["bid_0"]);
+
+  return {
+    state,
+    input: buildAiDecisionInput(state, "runner", { difficulty: "hard" }),
+    signpostId,
+    springboardId,
+  };
+}
+
+function withSyntheticPostBidTraceContext(
+  input: AiDecisionInput,
+  context: {
+    traceStrength: number;
+    runnerLink: number;
+    runnerBid: number;
+    runnerStrength: number;
+    postBidTraceLinkBonus?: number;
+  },
+): AiDecisionInput {
+  const event: PublicGameEvent = {
+    eventId: `synthetic_post_bid_trace_${input.eventTail.length}`,
+    type: "resolve_choice",
+    stateVersionBefore: 9000,
+    stateVersionAfter: 9001,
+    stateHashAfter: "fnv1a:synthetic",
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      traceStep: "runner_bid",
+      traceStrength: context.traceStrength,
+      runnerLink: context.runnerLink,
+      runnerBid: context.runnerBid,
+      runnerStrength: context.runnerStrength,
+      ...(context.postBidTraceLinkBonus !== undefined
+        ? { postBidTraceLinkBonus: context.postBidTraceLinkBonus }
+        : {}),
+    },
+  };
+  return { ...input, eventTail: [...input.eventTail, event] };
+}
+
+function withPostBidChoiceOptions(
+  input: AiDecisionInput,
+  options: NonNullable<
+    AiDecisionInput["playerView"]["pendingChoice"]
+  >["options"],
+): AiDecisionInput {
+  if (!input.playerView.pendingChoice)
+    throw new Error("Expected pending post-bid choice");
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      pendingChoice: {
+        ...input.playerView.pendingChoice,
+        options,
+      },
+    },
+  };
+}
+
 function corpActionPhaseInput(
   seed: string,
   mutate: (state: GameState) => void,
@@ -27495,6 +28406,66 @@ function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function corpReplayTagPunishWindowInput(
+  seed: string,
+  options: {
+    installedBbs?: boolean;
+    cityInHq?: boolean;
+    cityInstalled?: boolean;
+  } = {},
+) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: V095_RUNNER_DECK,
+    corpDeck: {
+      ...V095_CORP_DECK,
+      id: `corp_replay_tag_punish_${seed}`,
+      cards: [
+        ...V095_CORP_DECK.cards,
+        { id: "onr_v1_284_chance-observation", quantity: 1 },
+        { id: "onr_v1_307_urban-renewal", quantity: 1 },
+        { id: "onr_v1_313_city-surveillance", quantity: 1 },
+        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  moveCorpCardToHq(state, "onr_v1_284_chance-observation");
+  moveCorpCardToHq(state, "onr_v1_307_urban-renewal");
+  if (options.cityInHq) {
+    moveCorpCardToHq(state, "onr_v1_313_city-surveillance");
+  }
+  if (options.cityInstalled) {
+    putCorpRootInServer(state, "remote_2", "onr_v1_313_city-surveillance", 0, {
+      faceup: false,
+      rezzed: false,
+    });
+  }
+  if (options.installedBbs) {
+    putInstalledCorpBbsInRemote(state, "remote_1", 16);
+  }
+  state.runnerTurnFlags = {
+    ...(state.runnerTurnFlags ?? {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false,
+    }),
+    runAttemptsLastTurn: 1,
+  };
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.credits = 10;
+  state.corp.clicks = 3;
+  state.runner.credits = 8;
+  state.runner.tags = 0;
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v0.9-hard",
   });
 }
 

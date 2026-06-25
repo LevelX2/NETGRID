@@ -85,7 +85,9 @@ describe("runner run target guidance", () => {
       recommendation: "run_if_free" as RunnerRunTargetRecommendation,
     };
 
-    expect(runnerRunTargetMultiRunPayoffClass(undefined)).toBe("missing_target");
+    expect(runnerRunTargetMultiRunPayoffClass(undefined)).toBe(
+      "missing_target",
+    );
     expect(
       runnerRunTargetMultiRunPayoffClass({
         ...base,
@@ -144,6 +146,12 @@ describe("runner run target guidance", () => {
         targetServerId: "hq",
       }),
     ).toBe(20);
+    expect(
+      runnerPressureProbeTargetAllowed({
+        ...base,
+        recommendation: "gain_credits_first",
+      }),
+    ).toBe(false);
     expect(
       runnerPressureProbeTargetAllowed({
         ...base,

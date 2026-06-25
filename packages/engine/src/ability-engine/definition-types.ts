@@ -74,7 +74,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "trojan_horse_tag";
+      kind: "encounter_tag";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -88,7 +88,7 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "power_grid_overload";
+      kind: "installed_hardware_trash_by_counter";
       excludesSubtype: "cybernetics";
       visibility: Extract<EventVisibilityClass, "public">;
     }
@@ -260,11 +260,11 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "submarine_uplink_trace_link_force_jack_out";
+      kind: "trace_link_force_jack_out";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "i_spy_successful_run_fort_counter_expose";
+      kind: "successful_run_fort_counter_expose";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -303,7 +303,7 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "microtech_trode_set_ap_subroutine_modifier";
+      kind: "access_point_subroutine_modifier";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -352,7 +352,7 @@ export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
       kind: "add_runner_counter";
-      counterType: Extract<CounterType, "crying" | "doppelganger_antibody">;
+      counterType: Extract<CounterType, "crying" | "link_reduction_counter">;
       amount: number;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -654,7 +654,7 @@ export type CardRunEncounterInterventionImplementation =
 
 export type CardRunnerEventLongtailImplementation =
   | {
-      kind: "playful_ai_dice_loop";
+      kind: "random_dice_loop";
       dieFaces: 6;
       choiceOn: readonly [1, 2, 3];
       visibility: Extract<EventVisibilityClass, "public">;
@@ -682,7 +682,7 @@ export type CardRunnerEventLongtailImplementation =
 
 export type CardVirusCounterKindImplementation =
   | "boardwalk"
-  | "butcher_boy"
+  | "successful_hq_run_pair_credit"
   | "cockroach"
   | "cascade"
   | "crumble"
@@ -812,7 +812,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "corporate_retreat_disable_on_rez_or_install";
+      kind: "scored_agenda_credit_until_install_or_rez";
       counterType: Extract<CounterType, "mark">;
       gainAmount: number;
       visibility: Extract<EventVisibilityClass, "public">;
@@ -851,6 +851,11 @@ export type CardScoredAgendaImplementation =
     }
   | {
       kind: "corp_start_turn_random_restricted_optional_action";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_start_turn_optional_draw";
+      drawCount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -1058,17 +1063,17 @@ export type CardAbilityCostImplementation =
 
 export type CardUniqueDirectLongtailImplementation =
   | {
-      kind: "karl_successful_run_credit";
+      kind: "successful_run_credit_resource";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "smiths_pawnshop_start_turn_trash_for_credits";
+      kind: "start_turn_trash_for_credits";
       gainCredits: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "databroker_agenda_point_credits";
+      kind: "agenda_point_for_credits_resource";
       agendaPointCost: 1;
       gainCredits: 10;
       trashSource: true;
@@ -1086,12 +1091,12 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "nevinyrral_action_and_lose_on_rezzed_leave";
+      kind: "rezzed_leave_action_gain_asset";
       actionGain: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "i_got_a_rock_tagged_meat_damage";
+      kind: "tagged_meat_damage";
       requiredRunnerTags: 2;
       agendaPointCost: 3;
       damageType: Extract<DamageType, "meat">;
@@ -1099,7 +1104,7 @@ export type CardUniqueDirectLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "schlaghund_tag_die_meat_damage";
+      kind: "tag_threshold_meat_damage_asset";
       damageType: Extract<DamageType, "meat">;
       damageAmount: 10;
       trashSourceOnSuccess: true;
@@ -1108,7 +1113,7 @@ export type CardUniqueDirectLongtailImplementation =
 
 export type CardRemainingReplacementLongtailImplementation =
   | {
-      kind: "crash_everett_draw_extra_choose_trash_or_top";
+      kind: "hidden_draw_keep_or_top_replacement";
       extraDraw: 1;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -1120,7 +1125,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "acme_savings_and_loan_debt";
+      kind: "obligation_debt";
       agendaPointRezCost: 1;
       gainCreditsOnRez: 12;
       endTurnCreditDebt: 1;
@@ -1129,7 +1134,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "investment_firm_credit_diversion";
+      kind: "basic_credit_diversion_to_recurring_credits";
       counterType: Extract<CounterType, "recurring_credit">;
       hostedCreditsPerDivertedCredit: 2;
       startTurnTakeCredits: 1;
@@ -1137,19 +1142,19 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "city_surveillance_draw_tag";
+      kind: "runner_draw_tax_tag";
       avoidTagCost: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "hacker_tracker_trace_bits";
+      kind: "trace_bit_counter_pool_asset";
       counterType: Extract<CounterType, "bit">;
       addAfterTrace: 1;
       traceStrengthAndLimitPerBit: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "crybaby_crying_counter";
+      kind: "link_reduction_counter_upgrade";
       counterType: Extract<CounterType, "crying">;
       linkReductionPerCounter: 2;
       removeCost: 2;
@@ -1265,7 +1270,7 @@ export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
 
 export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
   kind: "add_counter_to_all_installed_runner_icebreakers";
-  counterType: Extract<CounterType, "militech" | "pattel_antibody">;
+  counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
@@ -1623,7 +1628,7 @@ export type CardTraceSuccessEffectImplementation =
   | {
       kind: "add_counter";
       recipient: "runner";
-      counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
+      counterType: Extract<CounterType, "trace_tag_counter" | "cerberus" | "mastiff">;
       amount: number;
       visibility: EventVisibilityClass;
     }
@@ -1714,7 +1719,7 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
+  badPublicityRunAftermath?: "successful_run_draw_event" | "bad_publicity_run_replacement";
   visibility: EventVisibilityClass;
 };
 
@@ -2072,7 +2077,7 @@ export type CardIcebreakerUseSideEffectImplementation = {
 };
 
 export type CardIcebreakerBreakSpecialImplementation =
-  | { kind: "ai_boon_run_start_random_strength" }
+  | { kind: "run_start_random_strength_bonus" }
   | { kind: "blink_random_break_or_net_damage" }
   | { kind: "bartmoss_post_encounter_self_trash_check" }
   | { kind: "snowball_run_strength_per_successful_break" }
@@ -2153,7 +2158,7 @@ export type CardDamagePreventionSourceImplementation = {
 export type CardFlatlineReplacementSourceImplementation =
   | {
       kind: "flatline_replacement_from_grip";
-      replacement: "arasaka_owns_you";
+      replacement: "flatline_tag_replacement";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -2166,7 +2171,7 @@ export type CardFlatlineReplacementSourceImplementation =
     }
   | {
       kind: "flatline_replacement_installed";
-      replacement: "emergency_self_construct";
+      replacement: "installed_flatline_prevention";
       cost: { kind: "trash_source" };
       visibility: Extract<EventVisibilityClass, "public">;
     };
@@ -2349,7 +2354,7 @@ export type CardIceEncounterImplementation =
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<
     CounterType,
-    "data_raven" | "cerberus" | "mastiff" | "crying" | "doppelganger_antibody"
+    "trace_tag_counter" | "cerberus" | "mastiff" | "crying" | "link_reduction_counter"
   >;
   removeCost: number;
   startOfRunnerTurn?:

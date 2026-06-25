@@ -9,7 +9,7 @@ export const smithsPawnshopImplementation: CardImplementationDefinition = {
     controller: "runner",
   },
   uniqueDirectLongtail: {
-    kind: "smiths_pawnshop_start_turn_trash_for_credits",
+    kind: "start_turn_trash_for_credits",
     gainCredits: 2,
     visibility: "public",
   },

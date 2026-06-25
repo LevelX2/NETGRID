@@ -9,10 +9,11 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   buildCorpTraceDamageAbilityActionsForCard,
-  corpTraceDamageAbilityProfileForDefinitionId,
+  corpTraceDamageAbilityProfileForDefinition,
   handleCorpTraceDamageActivatedAbility,
   type CorpTraceDamageAbilityHost,
 } from "./trace-damage-abilities";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 
 function definition(
   id: string,
@@ -36,6 +37,64 @@ function instance(
     rezzed: true,
     zone,
   } as unknown as CardInstance;
+}
+
+function traceTagImplementation(
+  definitionId: CardDefinitionId,
+  traceBase: number,
+): CardImplementationDefinition {
+  return {
+    cardDefinitionId: definitionId,
+    abilities: [
+      {
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          {
+            kind: "trace",
+            baseTraceStrength: traceBase,
+            onSuccess: [
+              {
+                kind: "add_tags",
+                recipient: "runner",
+                amount: 1,
+                visibility: "public",
+              },
+            ],
+            visibility: "public",
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function taggedMeatDamageImplementation(
+  definitionId: CardDefinitionId,
+  amount: number,
+): CardImplementationDefinition {
+  return {
+    cardDefinitionId: definitionId,
+    abilities: [
+      {
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        condition: { kind: "runner_is_tagged" },
+        effects: [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "meat",
+            amount,
+            preventable: true,
+            visibility: "public",
+          },
+        ],
+      },
+    ],
+  };
 }
 
 type HostInput = {
@@ -70,6 +129,26 @@ function makeHost(input: HostInput = {}) {
   const scoreArea =
     input.scoreArea ??
     (["netwatch", "private", "on_call", "kali"] as CardInstanceId[]);
+  const implementations: Record<string, CardImplementationDefinition> = {
+    [definitions.netwatch!.id]: traceTagImplementation(definitions.netwatch!.id, 2),
+    [definitions.private!.id]: traceTagImplementation(definitions.private!.id, 5),
+    [definitions.on_call!.id]: taggedMeatDamageImplementation(
+      definitions.on_call!.id,
+      1,
+    ),
+    [definitions.kali!.id]: taggedMeatDamageImplementation(
+      definitions.kali!.id,
+      2,
+    ),
+    [definitions.blood_cat!.id]: traceTagImplementation(
+      definitions.blood_cat!.id,
+      5,
+    ),
+    [definitions.solo_squad!.id]: taggedMeatDamageImplementation(
+      definitions.solo_squad!.id,
+      1,
+    ),
+  };
   const defaultInstances: Record<string, CardInstance> = {
     netwatch: instance(
       "netwatch" as CardInstanceId,
@@ -112,12 +191,15 @@ function makeHost(input: HostInput = {}) {
     ...(input.legalAction ? { legalAction: input.legalAction } : {}),
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,
+      implementationForDefinition: (cardDefinition) =>
+        implementations[cardDefinition.id],
     },
     callbacks: {
       pushActivatedCardImplementationActions: (actions, cardId, cardDefinition) => {
         calls.pushed.push(cardId);
-        const profile = corpTraceDamageAbilityProfileForDefinitionId(
-          cardDefinition.id,
+        const profile = corpTraceDamageAbilityProfileForDefinition(
+          cardDefinition,
+          implementations[cardDefinition.id],
         );
         actions.push({
           actionId: `activated_card_ability:corp:${cardId}`,

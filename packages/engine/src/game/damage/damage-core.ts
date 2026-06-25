@@ -26,13 +26,10 @@ import {
 import { maxHandSize } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+  FLATLINE_REPLACEMENT_EVENT_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
-  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import type {
@@ -52,6 +49,9 @@ export type DamageSummary = {
   coreDamageAfter?: number;
   runnerMaxHandSizeAfter?: number;
 };
+
+const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX =
+  "damage_prevention_bypass_pay_";
 
 export type DamageCoreHost = {
   cards: {
@@ -611,9 +611,9 @@ export function resolveDamageOperation(
   const payload = (legalAction.payload ??= {});
   if (typeof event.payload.baseDamageAmount === "number")
     payload.baseDamageAmount = event.payload.baseDamageAmount;
-  if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-    payload.bioweaponsEngineeringModifier =
-      event.payload.bioweaponsEngineeringModifier;
+  if (typeof event.payload.damageAmountModifier === "number")
+    payload.damageAmountModifier =
+      event.payload.damageAmountModifier;
 }
 
 export function createDamageImminentEvent(
@@ -625,11 +625,11 @@ export function createDamageImminentEvent(
     source: string;
   },
 ): ImminentEvent {
-  const bioweaponsModifier =
-    request.damageType === "meat" && corpHasScoredBioweaponsEngineering(state)
+  const damageAmountModifier =
+    request.damageType === "meat" && corpHasScoredMeatDamageBonusAgenda(state)
       ? 1
       : 0;
-  const amount = request.amount + bioweaponsModifier;
+  const amount = request.amount + damageAmountModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
     eventType: "damage",
@@ -640,10 +640,10 @@ export function createDamageImminentEvent(
       damageId: request.damageId,
       damageType: request.damageType,
       amount,
-      ...(bioweaponsModifier > 0
+      ...(damageAmountModifier > 0
         ? {
             baseDamageAmount: request.amount,
-            bioweaponsEngineeringModifier: bioweaponsModifier,
+            damageAmountModifier: damageAmountModifier,
           }
         : {}),
       source: request.source,
@@ -701,7 +701,7 @@ function cybertechThinkTankBoostCandidates(
   return candidates;
 }
 
-function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
+function corpHasScoredMeatDamageBonusAgenda(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
       scoredAgendaKindForDefinition(definitionFor(state, cardId)) ===
@@ -939,73 +939,6 @@ function collectRuntimeDamagePreventionCandidates(
           cardImplementationPreventionSources,
         ),
       );
-      continue;
-    }
-    if (
-      definition.id === DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-      damageType === "meat"
-    ) {
-      candidates.push({
-        candidateId: `v1920_diplomatic_immunity_prevent_${sanitizeId(cardId)}_${amount}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: corpAgendaPointTotal(state) >= 1 ? "corp" : "runner",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 140,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: amount,
-      });
-      continue;
-    }
-    if (definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID) {
-      const remainingCounters = cardCounter(state, cardId, "power");
-      if (remainingCounters <= 0) continue;
-      candidates.push({
-        candidateId: `v1913_armored_fridge_prevent_${sanitizeId(cardId)}_${remainingCounters}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: "runner",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 120,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: 1,
-      });
-      continue;
-    }
-    if (
-      definition.id === FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
-      damageType === "meat"
-    ) {
-      candidates.push({
-        candidateId: `v1922_full_body_conversion_prevent_${sanitizeId(cardId)}_${amount}`,
-        eventId: event.eventId,
-        kind: "prevent",
-        controller: "corp",
-        sourceRef: {
-          kind: "card",
-          instanceId: cardId,
-          definitionId: definition.id,
-          label: definition.title,
-        },
-        priority: 119,
-        visibility: "hidden_info_barrier",
-        optional: true,
-        preventAmount: amount,
-        bypassCostPerDamage: 1,
-        bypassPaymentSide: "corp",
-      });
       continue;
     }
     const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
@@ -1418,25 +1351,25 @@ function collectReplacementCandidates(
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
   ) {
-    const arasakaId = state.runner.grip.find(
+    const gripFlatlineReplacementId = state.runner.grip.find(
       (cardId) => {
         const definition = definitionFor(state, cardId);
         return flatlineReplacementSourcesForDefinition(definition).some(
           (source) =>
             source.kind === "flatline_replacement_from_grip" &&
-            source.replacement === "arasaka_owns_you" &&
+            source.replacement === "flatline_tag_replacement" &&
             source.visibility === "public",
         );
       },
     );
-    if (arasakaId) {
-      const definition = definitionFor(state, arasakaId);
+    if (gripFlatlineReplacementId) {
+      const definition = definitionFor(state, gripFlatlineReplacementId);
       candidates.push({
-        candidateId: `v1919_arasaka_owns_you_${arasakaId}`,
+        candidateId: `flatline_tag_replacement_from_grip_${gripFlatlineReplacementId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
-          instanceId: arasakaId,
+          instanceId: gripFlatlineReplacementId,
           definitionId: definition.id,
           label: definition.title,
         },
@@ -1447,25 +1380,25 @@ function collectReplacementCandidates(
         optional: true,
       });
     }
-    const emergencySelfConstructId = state.runner.rig.programs.find(
+    const installedFlatlinePreventionId = state.runner.rig.programs.find(
       (cardId) => {
         const definition = definitionFor(state, cardId);
         return flatlineReplacementSourcesForDefinition(definition).some(
           (source) =>
             source.kind === "flatline_replacement_installed" &&
-            source.replacement === "emergency_self_construct" &&
+            source.replacement === "installed_flatline_prevention" &&
             source.visibility === "public",
         );
       },
     );
-    if (emergencySelfConstructId) {
-      const definition = definitionFor(state, emergencySelfConstructId);
+    if (installedFlatlinePreventionId) {
+      const definition = definitionFor(state, installedFlatlinePreventionId);
       candidates.push({
-        candidateId: `v1920_emergency_self_construct_${emergencySelfConstructId}`,
+        candidateId: `installed_flatline_prevention_${installedFlatlinePreventionId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
-          instanceId: emergencySelfConstructId,
+          instanceId: installedFlatlinePreventionId,
           definitionId: definition.id,
           label: definition.title,
         },
@@ -1537,10 +1470,10 @@ function replacementChoice(
         id: candidate.candidateId,
         label:
           candidate.sourceRef.definitionId ===
-          ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
+          FLATLINE_REPLACEMENT_EVENT_SOURCE
             ? "Arasaka Owns You spielen"
             : candidate.sourceRef.definitionId ===
-                EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID
+                SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
               ? "Emergency Self-Construct ausloesen"
               : isIdentityDonorReplacementCandidateForChoice(candidate)
                 ? "Identity Donor spielen"
@@ -1576,34 +1509,38 @@ function eventModificationChoice(
     "Event-Modification-Kandidat fehlt.",
   );
   const amount = numberPayload(event, "amount");
-  const diplomaticImmunityCancel =
-    candidate.sourceRef.definitionId ===
-      DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-    candidate.controller === "corp";
-  if (
-    candidate.sourceRef.definitionId ===
-      FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
-    candidate.bypassPaymentSide === "corp" &&
-    candidate.bypassCostPerDamage === 1
-  ) {
-    const maxBypass = Math.min(amount, state.corp.credits);
+  const corpDamagePreventionCancel = isCorpDamagePreventionCancelCandidate(
+    state,
+    candidate,
+  );
+  if (isCorpDamagePreventionBypassCandidate(state, candidate)) {
+    const bypassCandidates = corpDamagePreventionBypassCandidatesForStage(
+      state,
+      window,
+    );
+    const costPerDamage = totalBypassCostPerDamage(bypassCandidates);
+    const maxBypass = Math.min(
+      amount,
+      costPerDamage > 0 ? Math.floor(state.corp.credits / costPerDamage) : 0,
+    );
     const options: ChoiceRequest["options"] = [];
-    for (let paid = 0; paid <= maxBypass; paid += 1) {
+    for (let damageAllowed = 0; damageAllowed <= maxBypass; damageAllowed += 1) {
+      const creditCost = damageAllowed * costPerDamage;
       options.push({
-        id: `full_body_conversion_pay_${paid}`,
+        id: `${DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX}${damageAllowed}`,
         label:
-          paid === 0
+          damageAllowed === 0
             ? "0 Credits zahlen: 0 Meat Damage durchlassen"
-            : `${paid} Credits zahlen: ${paid} Meat Damage durchlassen`,
+            : `${creditCost} Credits zahlen: ${damageAllowed} Meat Damage durchlassen`,
         publicLabel: "Event Modification",
-        value: paid,
+        value: damageAllowed,
       });
     }
     return {
       choiceId: `v120_choice_${window.windowId}`,
       side: window.side,
       source: `v120.event_modification.${window.kind}`,
-      prompt: "Full Body Conversion",
+      prompt: "Damage Prevention",
       kind: "select_option",
       options,
       minSelections: 1,
@@ -1612,10 +1549,11 @@ function eventModificationChoice(
       visibility: candidate.visibility,
     };
   }
-  const options = [
+  const stageCandidates = eventModificationStageCandidates(window);
+  const options: ChoiceRequest["options"] = [
     {
       id: "pass",
-      label: diplomaticImmunityCancel
+      label: corpDamagePreventionCancel
         ? "1 Agenda-Punkt zahlen und Prevention canceln"
         : event.eventType === "add_tag"
           ? "Tag nicht vermeiden"
@@ -1626,22 +1564,22 @@ function eventModificationChoice(
               : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
-    {
-      id: candidate.candidateId,
+    ...stageCandidates.map((stageCandidate) => ({
+      id: stageCandidate.candidateId,
       label:
-        diplomaticImmunityCancel
-          ? "Diplomatic Immunity wirken lassen"
+        corpDamagePreventionCancel
+          ? "Prevention wirken lassen"
           : event.eventType === "add_tag"
-            ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
+            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
             : event.eventType === "runner_installed_trash"
-              ? `${candidate.sourceRef.label}: ${candidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
-            : window.kind === "increase"
-              ? `${candidate.sourceRef.label}: Schaden um ${candidate.increaseAmount ?? 1} erhöhen`
-              : candidate.sourceRef.kind === "card"
-                ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
-                : `${candidate.preventAmount ?? amount} Schaden verhindern`,
+              ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+              : window.kind === "increase"
+                ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
+                : stageCandidate.sourceRef.kind === "card"
+                  ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
+                  : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification",
-    },
+    })),
   ];
   return {
     choiceId: `v120_choice_${window.windowId}`,
@@ -1680,7 +1618,28 @@ export function resolveEventModificationChoice(
     redactedKind: "event_modification",
   };
   if (selected === "pass") {
+    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
+      state,
+      window,
+      event,
+    );
     if (event.eventType === "add_tag") {
+      if (
+        continueEventModificationWindow(
+          state,
+          event,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...basePayload,
+            eventModificationDecision: "pass",
+            eventModificationOutcome: "next_window_opened",
+            originalAmount: numberPayload(event, "amount"),
+          },
+        )
+      )
+        return;
       resolveAddTagImminentEvent(state, event, legalAction);
       legalAction.payload = {
         ...basePayload,
@@ -1693,6 +1652,22 @@ export function resolveEventModificationChoice(
       return;
     }
     if (event.eventType === "runner_installed_trash") {
+      if (
+        continueEventModificationWindow(
+          state,
+          event,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...basePayload,
+            eventModificationDecision: "pass",
+            eventModificationOutcome: "next_window_opened",
+            originalAmount: numberPayload(event, "amount"),
+          },
+        )
+      )
+        return;
       const summary = resolveRunnerInstalledTrashImminentEvent(
         state,
         event,
@@ -1709,26 +1684,36 @@ export function resolveEventModificationChoice(
       clearEventModificationState(state);
       return;
     }
-    const diplomaticImmunityCancel =
-      window.candidates[0]?.sourceRef.definitionId ===
-        DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
-      window.side === "corp";
+    const cancelCandidate = window.candidates[0];
+    const corpDamagePreventionCancel =
+      !!cancelCandidate &&
+      window.side === "corp" &&
+      isCorpDamagePreventionCancelCandidate(state, cancelCandidate);
+    let agendaPointCost = 0;
     let agendaPointCostPaid = 0;
     let forfeitedAgendaDefinitionIds = "";
-    if (diplomaticImmunityCancel) {
-      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(state, 1);
+    if (corpDamagePreventionCancel) {
+      agendaPointCost =
+        damagePreventionSourceForEventCandidate(
+          state,
+          cancelCandidate,
+        )?.corpMayCancelUntilEndOfTurn?.agendaPointCost ?? 1;
+      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(
+        state,
+        agendaPointCost,
+      );
       agendaPointCostPaid = forfeitedAgendaIds.reduce(
         (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
         0,
       );
-      if (agendaPointCostPaid < 1)
-        throw new Error("Diplomatic Immunity kann nicht gecancelt werden.");
+      if (agendaPointCostPaid < agendaPointCost)
+        throw new Error("Damage Prevention kann nicht gecancelt werden.");
       forfeitedAgendaDefinitionIds = forfeitedAgendaIds
         .map((cardId) => definitionFor(state, cardId).id)
         .join(",");
       for (const agendaId of forfeitedAgendaIds)
         forfeitCorpAgendaForPointCost(state, agendaId);
-      const sourceInstanceId = window.candidates[0]?.sourceRef.instanceId;
+      const sourceInstanceId = cancelCandidate.sourceRef.instanceId;
       if (sourceInstanceId) {
         state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [
           ...new Set([
@@ -1738,20 +1723,49 @@ export function resolveEventModificationChoice(
         ];
       }
     }
+    if (
+      continueEventModificationWindow(
+        state,
+        event,
+        window,
+        remainingCandidates,
+        legalAction,
+        {
+          ...basePayload,
+          eventModificationDecision: corpDamagePreventionCancel
+            ? "cancel"
+            : "pass",
+          eventModificationOutcome: "next_window_opened",
+          originalAmount: numberPayload(event, "amount"),
+          ...(corpDamagePreventionCancel
+            ? {
+                sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
+                agendaPointCost,
+                agendaPointCostPaid,
+                forfeitedAgendaDefinitionIds,
+                specialZone: "removed_from_game",
+                specialZoneVisibility: "public",
+                specialZoneReason: "damage_prevention_cancel",
+              }
+            : {}),
+        },
+      )
+    )
+      return;
     legalAction.payload = {
       ...basePayload,
-      eventModificationDecision: diplomaticImmunityCancel ? "cancel" : "pass",
+      eventModificationDecision: corpDamagePreventionCancel ? "cancel" : "pass",
       eventModificationOutcome: "original_resolved",
       originalAmount: numberPayload(event, "amount"),
-      ...(diplomaticImmunityCancel
+      ...(corpDamagePreventionCancel
         ? {
-            sourceDefinitionId: DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
-            agendaPointCost: 1,
+            sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
+            agendaPointCost,
             agendaPointCostPaid,
             forfeitedAgendaDefinitionIds,
             specialZone: "removed_from_game",
             specialZoneVisibility: "public",
-            specialZoneReason: "diplomatic_immunity_cancel",
+            specialZoneReason: "damage_prevention_cancel",
           }
         : {}),
     };
@@ -1761,35 +1775,42 @@ export function resolveEventModificationChoice(
     setDamagePayload(legalAction, summary);
     return;
   }
-  if (selected.startsWith("full_body_conversion_pay_")) {
+  if (selected.startsWith(DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX)) {
     const candidate = window.candidates[0];
     if (
       !candidate ||
-      candidate.sourceRef.definitionId !==
-        FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID ||
-      candidate.bypassPaymentSide !== "corp" ||
-      candidate.bypassCostPerDamage !== 1 ||
+      !isCorpDamagePreventionBypassCandidate(state, candidate) ||
       window.side !== "corp" ||
       event.eventType !== "damage" ||
       event.affectedSide !== "runner" ||
       damageTypePayload(event) !== "meat"
     ) {
-      throw new Error("Full Body Conversion passt nicht zum Fenster.");
+      throw new Error("Damage-Prevention-Bypass passt nicht zum Fenster.");
     }
-    const bypassPaid = Number(selected.replace("full_body_conversion_pay_", ""));
+    const bypassDamageAllowed = Number(
+      selected.replace(DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX, ""),
+    );
+    const bypassCandidates = corpDamagePreventionBypassCandidatesForStage(
+      state,
+      window,
+    );
+    const bypassCostPerDamage = totalBypassCostPerDamage(bypassCandidates);
+    const bypassPaid = bypassDamageAllowed * bypassCostPerDamage;
     const originalAmount = numberPayload(event, "amount");
     if (
-      !Number.isInteger(bypassPaid) ||
-      bypassPaid < 0 ||
-      bypassPaid > originalAmount ||
+      !Number.isInteger(bypassDamageAllowed) ||
+      bypassDamageAllowed < 0 ||
+      bypassDamageAllowed > originalAmount ||
+      bypassCostPerDamage <= 0 ||
       bypassPaid > state.corp.credits
     ) {
-      throw new Error("Full Body Conversion-Bypass ist nicht bezahlbar.");
+      throw new Error("Damage-Prevention-Bypass ist nicht bezahlbar.");
     }
-    revalidateDamagePreventionCandidateSource(state, candidate);
+    for (const bypassCandidate of bypassCandidates)
+      revalidateDamagePreventionCandidateSource(state, bypassCandidate);
     spendCredits(state, "corp", bypassPaid);
-    const preventedAmount = Math.max(0, originalAmount - bypassPaid);
-    const finalAmount = bypassPaid;
+    const preventedAmount = Math.max(0, originalAmount - bypassDamageAllowed);
+    const finalAmount = bypassDamageAllowed;
     const finalEvent = {
       ...event,
       payload: { ...event.payload, amount: finalAmount },
@@ -1808,10 +1829,24 @@ export function resolveEventModificationChoice(
       preventedAmount,
       finalAmount,
       sourceKind: candidate.sourceRef.kind,
-      sourceDefinitionId: FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
-      fullBodyConversionCorpBypassPaid: bypassPaid,
-      fullBodyConversionBypassCostPerDamage: 1,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      damagePreventionBypassPaid: bypassPaid,
+      damagePreventionBypassCostPerDamage: bypassCostPerDamage,
     };
+    if (
+      finalAmount > 0 &&
+      continueEventModificationWindow(
+        state,
+        finalEvent,
+        window,
+        remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+        legalAction,
+        legalAction.payload,
+      )
+    )
+      return;
     clearEventModificationState(state);
     if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
     const summary = resolveDamageImminentEvent(state, finalEvent);
@@ -1823,6 +1858,12 @@ export function resolveEventModificationChoice(
   );
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
+  if (
+    !eventModificationStageCandidates(window).some(
+      (item) => item.candidateId === candidate.candidateId,
+    )
+  )
+    throw new Error("Dieser Event-Modification-Kandidat ist noch nicht legal.");
   if (
     candidate.eventId !== event.eventId ||
     !(
@@ -1994,10 +2035,169 @@ export function resolveEventModificationChoice(
       : {}),
     ...preventionCostPayload,
   };
+  if (
+    finalAmount > 0 &&
+    continueEventModificationWindow(
+      state,
+      finalEvent,
+      window,
+      remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+      legalAction,
+      legalAction.payload,
+    )
+  )
+    return;
   clearEventModificationState(state);
   if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, finalEvent);
   setDamagePayload(legalAction, summary);
+}
+
+function isCorpDamagePreventionCancelCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): boolean {
+  return (
+    candidate.controller === "corp" &&
+    damagePreventionSourceForEventCandidate(state, candidate)
+      ?.corpMayCancelUntilEndOfTurn !== undefined
+  );
+}
+
+function eventModificationStageCandidates(
+  window: EventModificationWindow,
+): EventModificationCandidate[] {
+  const first = window.candidates[0];
+  if (!first) return [];
+  return window.candidates.filter(
+    (candidate) =>
+      candidate.kind === first.kind &&
+      candidate.controller === first.controller &&
+      candidate.priority === first.priority &&
+      candidate.preventAmount === first.preventAmount,
+  );
+}
+
+function corpDamagePreventionBypassCandidatesForStage(
+  state: GameState,
+  window: EventModificationWindow,
+): EventModificationCandidate[] {
+  return eventModificationStageCandidates(window).filter((candidate) =>
+    isCorpDamagePreventionBypassCandidate(state, candidate),
+  );
+}
+
+function remainingEventModificationCandidatesAfterStage(
+  state: GameState,
+  window: EventModificationWindow,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  const stageIds = new Set(
+    eventModificationStageCandidates(window).map(
+      (candidate) => candidate.candidateId,
+    ),
+  );
+  return clampEventModificationCandidatesToEventAmount(
+    window.candidates.filter((candidate) => !stageIds.has(candidate.candidateId)),
+    numberPayload(event, "amount"),
+  );
+}
+
+function clampEventModificationCandidatesToEventAmount(
+  candidates: EventModificationCandidate[],
+  amount: number,
+): EventModificationCandidate[] {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    ...(typeof candidate.preventAmount === "number"
+      ? { preventAmount: Math.min(candidate.preventAmount, amount) }
+      : {}),
+  }));
+}
+
+function continueEventModificationWindow(
+  state: GameState,
+  event: ImminentEvent,
+  previousWindow: EventModificationWindow,
+  candidates: EventModificationCandidate[],
+  legalAction: LegalAction,
+  payload: LegalAction["payload"],
+): boolean {
+  const sorted = candidates
+    .filter((candidate) => candidate.eventId === event.eventId)
+    .filter(
+      (candidate) =>
+        candidate.preventAmount === undefined || candidate.preventAmount > 0,
+    )
+    .sort(compareEventModificationCandidate);
+  if (sorted.length === 0) return false;
+  if (hasEventModificationConflict(sorted))
+    throw new Error("Event-Modification-Konflikt blockiert.");
+  const candidate = sorted[0];
+  if (!candidate) return false;
+  const windowId =
+    `${previousWindow.windowId}_next_${candidate.priority}_${candidate.controller}`;
+  const window: EventModificationWindow = {
+    windowId,
+    eventId: event.eventId,
+    eventType: event.eventType,
+    kind: candidate.kind,
+    side: candidate.controller,
+    candidates: sorted,
+    createdAtStateVersion: state.stateVersion + 1,
+    optional: candidate.optional,
+  };
+  state.imminentEvent = { ...event, modificationWindowId: windowId };
+  state.eventModificationWindow = window;
+  state.pendingChoice = eventModificationChoice(
+    state,
+    window,
+    state.imminentEvent,
+    state.stateVersion + 1,
+  );
+  legalAction.payload = {
+    ...(payload ?? {}),
+    nextEventModificationWindowOpened: true,
+    nextEventModificationWindowId: window.windowId,
+    nextEventModificationKind: window.kind,
+  };
+  return true;
+}
+
+function totalBypassCostPerDamage(
+  candidates: EventModificationCandidate[],
+): number {
+  return candidates.reduce(
+    (sum, candidate) => sum + Math.max(0, candidate.bypassCostPerDamage ?? 0),
+    0,
+  );
+}
+
+function isCorpDamagePreventionBypassCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): boolean {
+  const source = damagePreventionSourceForEventCandidate(
+    state,
+    candidate,
+  );
+  return (
+    source?.corpMayPayToBypass !== undefined &&
+    candidate.bypassPaymentSide === "corp" &&
+    candidate.bypassCostPerDamage === source.corpMayPayToBypass.costPerDamage
+  );
+}
+
+function damagePreventionSourceForEventCandidate(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): CardDamagePreventionSourceImplementation | undefined {
+  const sourceCardId = candidate.sourceRef.instanceId;
+  if (!sourceCardId || !state.cardInstances[sourceCardId]) return undefined;
+  return cardImplementationDamagePreventionSourceForCandidate(
+    definitionFor(state, sourceCardId),
+    candidate,
+  );
 }
 
 export function resolveReplacementChoice(
@@ -2043,14 +2243,14 @@ export function resolveReplacementChoice(
     );
   if (
     candidate.sourceRef.definitionId ===
-    ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
+    FLATLINE_REPLACEMENT_EVENT_SOURCE
   ) {
-    resolveArasakaOwnsYouReplacement(state, legalAction, event, candidate);
+    resolveGripFlatlineTagReplacement(state, legalAction, event, candidate);
     clearReplacementState(state);
     return;
   }
-  if (candidate.sourceRef.definitionId === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID) {
-    resolveEmergencySelfConstructReplacement(
+  if (candidate.sourceRef.definitionId === SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE) {
+    resolveInstalledFlatlinePreventionReplacement(
       state,
       legalAction,
       event,
@@ -2171,7 +2371,7 @@ function resolveIdentityDonorReplacement(
   ];
 }
 
-function resolveArasakaOwnsYouReplacement(
+function resolveGripFlatlineTagReplacement(
   state: GameState,
   legalAction: LegalAction,
   event: ImminentEvent,
@@ -2214,10 +2414,10 @@ function resolveArasakaOwnsYouReplacement(
     replacementEventType: "prevent_damage",
     originalAmount,
     preventedAmount: originalAmount,
-    v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
-    sourceDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-    cardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-    trashedCardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+    flatlineReplacementAbility: "flatline_tag_replacement_from_grip",
+    sourceDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
+    cardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
+    trashedCardDefinitionId: FLATLINE_REPLACEMENT_EVENT_SOURCE,
     coreDamageRemoved,
     drawnCards,
     gainedCredits: 10,
@@ -2230,7 +2430,7 @@ function resolveArasakaOwnsYouReplacement(
   };
 }
 
-function resolveEmergencySelfConstructReplacement(
+function resolveInstalledFlatlinePreventionReplacement(
   state: GameState,
   legalAction: LegalAction,
   event: ImminentEvent,
@@ -2238,9 +2438,9 @@ function resolveEmergencySelfConstructReplacement(
 ): void {
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.rig.programs.includes(cardId))
-    throw new Error("Emergency Self-Construct ist nicht installiert.");
-  if (definitionFor(state, cardId).id !== EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID)
-    throw new Error("Die Emergency-Self-Construct-Quelle passt nicht.");
+    throw new Error("Die installierte Flatline-Prevention ist nicht installiert.");
+  if (definitionFor(state, cardId).id !== SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE)
+    throw new Error("Die installierte Flatline-Prevention-Quelle passt nicht.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
   const coreDamageRemoved = state.runner.coreDamage;
@@ -2269,10 +2469,10 @@ function resolveEmergencySelfConstructReplacement(
     replacementEventType: "prevent_damage",
     originalAmount,
     preventedAmount: originalAmount,
-    v1920RunnerProgramAbility: "emergency_self_construct_flatline_replacement",
-    sourceDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-    cardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-    trashedCardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    flatlineReplacementAbility: "installed_flatline_prevention",
+    sourceDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+    cardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+    trashedCardDefinitionId: SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
     coreDamageRemoved,
     gripCardsLost,
     runnerActionsPerTurnOverride: state.runnerActionsPerTurnOverride,
@@ -2653,22 +2853,7 @@ function applyRuntimeDamagePreventionCost(
       ...(sourceTrashed ? { trashedCardDefinitionId: definition.id } : {}),
     };
   }
-  if (candidate.sourceRef.definitionId !== ABLATIVE_COUNTER_HARDWARE_CARD_ID)
-    return {};
-  if (!state.runner.rig.hardware.includes(sourceCardId))
-    throw new Error("Armored Fridge ist nicht mehr installiert.");
-  if (cardCounter(state, sourceCardId, "power") <= 0)
-    throw new Error("Armored Fridge hat keine Ablative Counter mehr.");
-  spendCardCounter(state, sourceCardId, "power", 1);
-  const remainingCounters = cardCounter(state, sourceCardId, "power");
-  const sourceTrashed = remainingCounters <= 0;
-  if (sourceTrashed) trashRunnerInstalledCardToHeap(state, sourceCardId);
-  return {
-    counterType: "power",
-    removedCounterAmount: 1,
-    remainingCounters,
-    sourceTrashed,
-  };
+  return {};
 }
 
 function applyRuntimeTagPreventionCost(

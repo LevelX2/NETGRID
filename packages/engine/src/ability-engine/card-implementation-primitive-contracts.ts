@@ -54,7 +54,7 @@ export function primitiveContractRecords(
         requiresTarget: true,
         targetKind: scoredAgenda.target,
         hiddenInfoClass: scoredAgenda.visibility,
-        resolverModule: "scored-agenda/ice-transmutation-sequence",
+        resolverModule: "scored-agenda/mark-modifier-sequence",
       });
     }
     if (
@@ -72,7 +72,7 @@ export function primitiveContractRecords(
         requiresTarget: true,
         targetKind: scoredAgenda.targetServer,
         hiddenInfoClass: scoredAgenda.visibility,
-        resolverModule: "scored-agenda/data-fort-reclamation-sequence",
+        resolverModule: "scored-agenda/install-rez-sequence",
       });
     }
   }

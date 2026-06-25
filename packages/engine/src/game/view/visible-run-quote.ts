@@ -121,6 +121,12 @@ function visibleEffectiveSubroutine(
     id: subroutine.id,
     type: subroutine.type,
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
+    ...(subroutine.baseTraceStrength !== undefined
+      ? { baseTraceStrength: subroutine.baseTraceStrength }
+      : {}),
+    ...(subroutine.traceSuccessEffect
+      ? { traceSuccessEffect: subroutine.traceSuccessEffect }
+      : {}),
     ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
     ...(dynamic
       ? {
@@ -158,7 +164,7 @@ function visibleUnbrokenRunEffectForSubroutine(
       return { preventsJackOut: true };
     case "set_next_encounter_unless_fully_break_damage":
     case "set_run_pass_rezzed_ice_program_trash":
-    case "set_run_viral_15":
+    case "set_run_active_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
     case "trash_installed_program_unless_runner_pays":

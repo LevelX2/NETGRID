@@ -94,16 +94,16 @@ function host(input: {
       installedIceIds: () => input.installed ?? ["installed" as CardInstanceId],
       rezzedBlackIceIds: () =>
         input.rezzedBlack ?? ["black" as CardInstanceId],
-      startCoreCommandJettisonIceChoice: () => {
+      startPayRezCostToTrashRezzedIceChoice: () => {
         input.calls?.push("core_command");
       },
-      startSecurityCodeWormChipTrashIceChoice: () => {
+      startTrashUnrezzedIceChoice: () => {
         input.calls?.push("security_code");
       },
-      startForgedActivationOrdersTargetChoice: () => {
+      startCorpChoiceRezOrTrashIceChoice: () => {
         input.calls?.push("forged_orders");
       },
-      startAnonymousTipDerezBlackIceChoice: () => {
+      startDerezRezzedBlackIceChoice: () => {
         input.calls?.push("anonymous_tip");
       },
     },

@@ -148,7 +148,7 @@ function makeHost(overrides: {
     callbacks: {
       successfulRunProgramActions: () => [],
       runnerDuringRunCardImplementationLegalActions: () => [],
-      mysteryBoxRunActions: () => [],
+      hiddenStackInstallRunActions: () => [],
     },
   };
 }

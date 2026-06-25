@@ -539,7 +539,7 @@ export function formatChronicleEvent(
           (effect) =>
             (effect.visibility === "hidden_info_barrier" ||
               stringValue(effect.reason) === "access_effect" ||
-              effect.counterType === "pattel_antibody") &&
+              isPattelAccessCounterType(effect.counterType)) &&
             (stringValue(effect.sourceDefinitionId) ||
               stringValue(effect.sourceTitle)),
         );
@@ -549,7 +549,7 @@ export function formatChronicleEvent(
           stringValue(ambushEffect?.sourceDefinitionId);
         const ambushPaidCost =
           numberValue(payload.ambushPaidCost) ??
-          (ambushEffect?.counterType === "pattel_antibody" &&
+          (isPattelAccessCounterType(ambushEffect?.counterType) &&
           payload.ambushPaymentDeclined !== true
             ? 3
             : undefined);
@@ -1501,6 +1501,23 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (hiddenZoneAction === "p3_33_private_look") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
+        category = "hidden";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt und ${privateLookActionText(payload)}`,
+        );
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, ...privateLookChips(payload));
+        break;
+      }
       if (
         hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
         hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
@@ -1566,6 +1583,21 @@ export function formatChronicleEvent(
         description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
+      if (hiddenZoneAction === "p3_33_private_look") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
+        const lookText = privateLookActionText(payload);
+        category = "hidden";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${source} genutzt und ${lookText}`);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, ...privateLookChips(payload));
         break;
       }
       if (
@@ -2384,11 +2416,19 @@ export function formatChronicleEvent(
         break;
       }
       {
-        const vacuumLinkDieRoll = numberValue(payload.vacuumLinkDieRoll);
+        const vacuumLinkDieRoll =
+          numberValue(payload.vacuumLinkDieRoll) ??
+          numberValue(payload.rezzedIceRewindDieRoll);
         if (vacuumLinkDieRoll !== undefined) {
-          const rewindApplied = payload.vacuumLinkRewindApplied === true;
-          const rewindBack = numberValue(payload.vacuumLinkRewindRezzedIceBack);
-          const targetIceIndex = numberValue(payload.vacuumLinkTargetIceIndex);
+          const rewindApplied =
+            payload.vacuumLinkRewindApplied === true ||
+            payload.rezzedIceRewindApplied === true;
+          const rewindBack =
+            numberValue(payload.vacuumLinkRewindRezzedIceBack) ??
+            numberValue(payload.rezzedIceRewindRezzedIceBack);
+          const targetIceIndex =
+            numberValue(payload.vacuumLinkTargetIceIndex) ??
+            numberValue(payload.rezzedIceRewindTargetIceIndex);
           const targetIcePosition =
             targetIceIndex !== undefined ? targetIceIndex + 1 : undefined;
           category = "run";
@@ -3074,6 +3114,11 @@ export function shouldSuppressChronicleEventItem(
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType === "decline_rez") return true;
+  if (
+    actionType === "resolve_choice" &&
+    stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
+  )
+    return true;
   if (actionType !== "continue_run" || payload.encounterContinue !== true)
     return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some(
@@ -3865,7 +3910,7 @@ function pattelAccessCounterChronicleText(
 ): { title: string; description?: string; targetChips?: string[] } | null {
   if (
     effect.kind !== "counter_change" ||
-    effect.counterType !== "pattel_antibody"
+    !isPattelAccessCounterType(effect.counterType)
   )
     return null;
   const payload = event.publicPayload ?? {};
@@ -3880,7 +3925,7 @@ function pattelAccessCounterChronicleText(
     sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
     sourceTitle === "Pattel Antibody" ||
     stringValue(payload.hiddenZoneAction) ===
-      "proteus_pattel_antibody_access_counters";
+      "proteus_breaker_strength_penalty_access_counters";
   if (!isPattelAccessCounter) return null;
   const targetTitles = titlesForDefinitionIds(
     stringValue(payload.targetCardDefinitionIds),
@@ -3914,6 +3959,13 @@ function pattelAccessCounterChronicleText(
       ...targetTitles,
     ],
   };
+}
+
+function isPattelAccessCounterType(counterType: unknown): boolean {
+  return (
+    counterType === "breaker_strength_penalty" ||
+    counterType === "pattel_antibody"
+  );
 }
 
 function endTurnCreditPayoutChronicleItem(
@@ -4729,6 +4781,28 @@ function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
 }
 
+function privateLookActionText(payload: Record<string, unknown>): string {
+  const zone = stringValue(payload.privateLookZone);
+  const count = numberValue(payload.privateLookCount) ?? 1;
+  if (zone === "rd")
+    return count === 1
+      ? "die oberste R&D-Karte angesehen"
+      : `die obersten ${count} R&D-Karten angesehen`;
+  if (zone === "hq")
+    return count === 1
+      ? "eine HQ-Karte angesehen"
+      : `${count} HQ-Karten angesehen`;
+  return `${cardCountText(count)} angesehen`;
+}
+
+function privateLookChips(payload: Record<string, unknown>): string[] {
+  const zone = stringValue(payload.privateLookZone);
+  const count = numberValue(payload.privateLookCount) ?? 1;
+  const zoneChip =
+    zone === "rd" ? "R&D" : zone === "hq" ? "HQ" : "Private Look";
+  return [zoneChip, `${count} angesehen`];
+}
+
 function tagCountText(amount: number): string {
   return `${amount} Tag${amount === 1 ? "" : "s"}`;
 }
@@ -5130,12 +5204,17 @@ function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
 }
 
 function counterLabel(counterType: unknown): string {
-  if (counterType === "data_raven") return "Data-Raven-Counter";
+  if (counterType === "trace_tag_counter" || counterType === "data_raven")
+    return "Data-Raven-Counter";
   if (counterType === "cerberus") return "Cerberus-Counter";
   if (counterType === "mastiff") return "Mastiff-Counter";
   if (counterType === "crying") return "Crying-Counter";
-  if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
-  if (counterType === "pattel_antibody") return "Pattel-Counter";
+  if (
+    counterType === "link_reduction_counter" ||
+    counterType === "doppelganger_antibody"
+  )
+    return "Doppelganger-Counter";
+  if (isPattelAccessCounterType(counterType)) return "Pattel-Counter";
   if (counterType === "cockroach") return "Cockroach-Counter";
   if (counterType === "cascade") return "Cascade-Counter";
   if (counterType === "highlighter") return "Highlighter-Counter";

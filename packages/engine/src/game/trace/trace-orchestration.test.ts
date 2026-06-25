@@ -148,6 +148,103 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("lets the Runner choose trace-link credit allocation before paying a trace bid", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const linkAId = "link_a" as CardInstanceId;
+    const linkBId = "link_b" as CardInstanceId;
+    const linkADefinition = definition("link_a_definition", "hardware");
+    const linkBDefinition = definition("link_b_definition", "resource");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [linkAId]: instance(linkAId, linkADefinition.id, "runner"),
+        [linkBId]: instance(linkBId, linkBDefinition.id, "runner"),
+      },
+      runnerHardware: [linkAId],
+      runnerResources: [linkBId],
+    });
+    state.runner.credits = 5;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceStrength: 8,
+      runnerLink: 0,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 12);
+    const hostedCredits = new Map<CardInstanceId, number>([
+      [linkAId, 5],
+      [linkBId, 2],
+    ]);
+    const action = actionFor("runner", "resolve_choice");
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [linkADefinition.id]: linkADefinition,
+        [linkBDefinition.id]: linkBDefinition,
+      },
+      testCalls(),
+      {
+        runnerTraceLinkCreditSourceIds: [linkAId, linkBId],
+        hostedCredits,
+      },
+    );
+
+    resolveTraceChoice(host, action, playerChoice("bid_8"));
+
+    expect(state.trace?.runnerBidPaymentSelection).toMatchObject({
+      bid: 8,
+      sourceIndex: 0,
+      allocations: [],
+    });
+    expect(state.pendingChoice).toMatchObject({
+      source: `trace_runner_bid_payment:trace_1:${linkAId}`,
+      prompt:
+        "link_a_definition fuer Runner Link-Bid nutzen (bisher 0/8 Gesamtbid)",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "1 Link-Bit (1/8 Gesamtbid)",
+      "2 Link-Bits (2/8 Gesamtbid)",
+      "3 Link-Bits (3/8 Gesamtbid)",
+      "4 Link-Bits (4/8 Gesamtbid)",
+      "5 Link-Bits (5/8 Gesamtbid)",
+    ]);
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_3"),
+    );
+
+    expect(state.trace?.runnerBidPaymentSelection).toMatchObject({
+      bid: 8,
+      sourceIndex: 1,
+      allocations: [{ sourceCardInstanceId: linkAId, amount: 3 }],
+    });
+    expect(state.pendingChoice).toMatchObject({
+      source: `trace_runner_bid_payment:trace_1:${linkBId}`,
+      prompt:
+        "link_b_definition fuer Runner Link-Bid nutzen (bisher 3/8 Gesamtbid)",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Link-Bits (3/8 Gesamtbid)",
+      "1 Link-Bit (4/8 Gesamtbid)",
+      "2 Link-Bits (5/8 Gesamtbid)",
+    ]);
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_1"),
+    );
+
+    expect(hostedCredits.get(linkAId)).toBe(2);
+    expect(hostedCredits.get(linkBId)).toBe(1);
+    expect(state.runner.credits).toBe(1);
+    expect(state.trace).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("opens a trace success cancel window from a real successful trace result", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
@@ -349,7 +446,7 @@ describe("trace orchestration", () => {
     });
   });
 
-  it("handles Paris City Grid trace trigger ability through trace orchestration", () => {
+  it("does not handle legacy Paris City Grid trace trigger payloads", () => {
     const sourceId = "paris_1" as CardInstanceId;
     const sourceDefinition = definition("paris_city_grid", "upgrade");
     const state = minimalState({
@@ -376,24 +473,9 @@ describe("trace orchestration", () => {
       action,
     );
 
-    expect(result).toEqual({ handled: true });
-    expect(state.trace).toMatchObject({
-      sourceCardInstanceId: sourceId,
-      sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
-      status: "corp_bid",
-    });
-    expect(state.pendingChoice).toMatchObject({
-      side: "corp",
-      source: `trace:${state.trace?.traceId}`,
-      kind: "bid_amount",
-    });
-    expect(action.payload).toMatchObject({
-      traceStarted: true,
-      sourceCardId: sourceId,
-      sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
-    });
+    expect(result).toEqual({ handled: false });
+    expect(state.trace).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
   });
 
   it("does not import from index.ts", () => {
@@ -447,6 +529,7 @@ function instance(
 
 function minimalState(input: {
   cardInstances: Record<CardInstanceId, CardInstance>;
+  runnerHardware?: CardInstanceId[];
   runnerPrograms?: CardInstanceId[];
   runnerResources?: CardInstanceId[];
 }): GameState {
@@ -468,8 +551,8 @@ function minimalState(input: {
       memoryUsed: 0,
       memoryLimit: 4,
       rig: {
+        hardware: [...(input.runnerHardware ?? [])],
         programs: [...(input.runnerPrograms ?? [])],
-        hardware: [],
         resources: [...(input.runnerResources ?? [])],
       },
     },
@@ -589,6 +672,8 @@ function testHost(
     successCancelSourceId?: CardInstanceId;
     parisTraceDefinitionId?: CardDefinitionId;
     rezzedCorpRootCardIds?: CardInstanceId[];
+    runnerTraceLinkCreditSourceIds?: CardInstanceId[];
+    hostedCredits?: Map<CardInstanceId, number>;
   } = {},
 ): TraceOrchestrationHost {
   const definitionFor = (cardId: CardInstanceId) => {
@@ -617,9 +702,19 @@ function testHost(
     cardCounter: () => 0,
   };
   const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
-    runnerTraceLinkCreditSources: () => [],
-    hostedPaymentCredits: () => 0,
-    spendHostedPaymentCredits: () => undefined,
+    runnerTraceLinkCreditSources: () =>
+      (options.runnerTraceLinkCreditSourceIds ?? []).map((cardId) => ({
+        sourceCardInstanceId: cardId,
+        sourceDefinitionId: state.cardInstances[cardId]!.definitionId,
+      })),
+    hostedPaymentCredits: (_targetState, cardId) =>
+      options.hostedCredits?.get(cardId) ?? 0,
+    spendHostedPaymentCredits: (_targetState, cardId, amount) => {
+      options.hostedCredits?.set(
+        cardId,
+        (options.hostedCredits.get(cardId) ?? 0) - amount,
+      );
+    },
     runnerCreditsAvailable: (targetState) => targetState.runner.credits,
     spendRunnerCredits: (targetState, amount) => {
       targetState.runner.credits -= amount;
@@ -684,14 +779,15 @@ function testHost(
         ];
       },
       hasCardImplementationForDefinition: () => false,
-      isSubmarineUplinkSource: (cardId) =>
+      isTraceLinkForceJackOutSource: (cardId) =>
         cardId === options.postBidLinkSourceId,
     },
     payment: {
       corpTracePaymentDeps,
       runnerTracePaymentDeps,
-      runnerTraceLinkCreditSourceIds: () => [],
-      hostedPaymentCredits: () => 0,
+      runnerTraceLinkCreditSourceIds: () =>
+        options.runnerTraceLinkCreditSourceIds ?? [],
+      hostedPaymentCredits: (cardId) => options.hostedCredits?.get(cardId) ?? 0,
       spendRunnerCredits: (amount) => {
         state.runner.credits -= amount;
       },
@@ -711,14 +807,14 @@ function testHost(
     },
     counters: {
       cardCounter: () => 0,
-      hackerTrackerCounterTotal: () => 0,
+      corpTraceCounterPoolTotal: () => 0,
       recurringTraceCreditPoolTotal: () => 0,
     },
     fort: {
       fortTraceBitPoolSource: () => undefined,
     },
     run: {
-      markSubmarineUplinkJackOutAfterEncounter: (cardId) => {
+      markTraceLinkForceJackOutAfterEncounter: (cardId) => {
         calls.submarineMarkers.push(cardId);
       },
       applyPrintedTraceSuccessFollowups: (input) => {
@@ -733,13 +829,8 @@ function testHost(
     },
     callbacks: {
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
-      addHackerTrackerTraceCounters: () => 0,
+      addCorpTraceCounterPoolCounters: () => 0,
       resolveTraceTrashRunnerResourceSuccess: () => ({}),
-    },
-    constants: {
-      PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID:
-        options.parisTraceDefinitionId ??
-        ("paris_city_grid" as CardDefinitionId),
     },
   };
 }

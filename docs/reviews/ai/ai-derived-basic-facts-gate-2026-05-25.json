@@ -12217,7 +12217,7 @@
             "scope": "runner",
             "resource": "cards",
             "amount": 1,
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top"
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement"
           },
           {
             "confidence": "high",
@@ -12226,7 +12226,7 @@
             "scope": "runner",
             "resource": "cards",
             "amount": 1,
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top"
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement"
           }
         ],
         "conditions": [],
@@ -21053,8 +21053,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "protect_hq",
-          "recover_economy"
+          "protect_hq"
         ],
         "effects": [
           {
@@ -21182,8 +21181,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "protect_hq",
-          "recover_economy"
+          "protect_hq"
         ],
         "effects": [
           {
@@ -21509,7 +21507,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {
@@ -23079,7 +23077,7 @@
         ],
         "planRoles": [
           "bait_runner",
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {
@@ -25164,7 +25162,7 @@
             "scope": "corp",
             "resource": "credits",
             "amount": 1,
-            "source": "implementation.remainingReplacementLongtail.hacker_tracker_trace_bits"
+            "source": "implementation.remainingReplacementLongtail.trace_bit_counter_pool_asset"
           }
         ],
         "conditions": [],

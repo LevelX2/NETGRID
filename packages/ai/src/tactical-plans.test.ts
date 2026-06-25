@@ -1963,6 +1963,54 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("blocks corp score windows in protected but runner-contestable remotes", () => {
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-agenda",
+        "corp",
+        "advance_card",
+        { serverId: "remote_1" },
+        { source: "agenda-1" },
+      ),
+      legalAction("gain", "corp", "gain_credit"),
+    ]);
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+          rezzed: true,
+        }),
+      ], [
+        visibleCard("agenda-1", "corp", "agenda", {
+          advancementCounters: 0,
+          advancementRequirement: 3,
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const scorePlan = plans.find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["score_window_contestable"]),
+    );
+    expect(JSON.stringify(scorePlan)).toContain(
+      "remote_contestable_by_runner:true",
+    );
+  });
+
   it("isolates tactical plan memory by decision context", () => {
     resetTacticalPlanMemory();
     const draw = legalAction("draw", "runner", "draw_card");

@@ -9,11 +9,11 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   encounterSpecialWindowHost,
-  markSubmarineUplinkJackOutAfterEncounter,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
   resolveFullyBrokenPassedIceTrash,
-  resolveTooManyDoorsSecretSpendChoice,
-  resolveVacuumLinkRewindSubroutine,
+  resolveSecretSpendCompareChoice,
+  resolveRezzedIceRewindSubroutine,
   fullyBrokenPassedIceTrashPostPassActions,
 } from "./encounter-special-windows";
 
@@ -123,7 +123,7 @@ function makeState(): GameState {
 }
 
 describe("encounter special windows boundary", () => {
-  it("runs Too Many Doors secret bid privately, then reveals and ends the run when Corp spent less", () => {
+  it("runs Secret Spend Compare secret bid privately, then reveals and ends the run when Corp spent less", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
     const subroutine = {
@@ -142,7 +142,7 @@ describe("encounter special windows boundary", () => {
     });
 
     const start = resolveEncounterSpecialWindowSubroutine(host, {
-      definition: { id: "onr_v1_272_too-many-doors", title: "Too Many Doors" } as never,
+      definition: { id: "onr_v1_272_too-many-doors", title: "Secret Spend Compare" } as never,
       subroutine,
       subroutineIndex: 2,
       legalAction,
@@ -151,7 +151,7 @@ describe("encounter special windows boundary", () => {
     expect(start).toMatchObject({ handled: true, suspended: true });
     expect(state.pendingChoice).toMatchObject({
       choiceId:
-        "p3_56.too_many_doors_secret_spend:run_1:ice_current:2.corp.10",
+        "card_implementation.secret_spend_compare:run_1:ice_current:2.corp.10",
       side: "corp",
       kind: "bid_amount",
       visibility: "hidden_info_barrier",
@@ -162,7 +162,7 @@ describe("encounter special windows boundary", () => {
       sourceDefinitionId: "onr_v1_272_too-many-doors",
     });
 
-    const corpStep = resolveTooManyDoorsSecretSpendChoice(
+    const corpStep = resolveSecretSpendCompareChoice(
       host,
       legalAction,
       playerChoice("bid_1"),
@@ -173,12 +173,12 @@ describe("encounter special windows boundary", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "p3_56.too_many_doors_secret_spend:run_1:ice_current:2",
+      source: "card_implementation.secret_spend_compare:run_1:ice_current:2",
       visibility: "hidden_info_barrier",
     });
     expect(legalAction.payload).not.toHaveProperty("secretSpendCorp");
 
-    const reveal = resolveTooManyDoorsSecretSpendChoice(
+    const reveal = resolveSecretSpendCompareChoice(
       host,
       legalAction,
       playerChoice("bid_2"),
@@ -199,7 +199,7 @@ describe("encounter special windows boundary", () => {
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 2,
-      tooManyDoorsEndRun: true,
+      secretSpendEndRun: true,
       corpCreditsAfter: 4,
       runnerCreditsAfter: 4,
     });
@@ -221,7 +221,7 @@ describe("encounter special windows boundary", () => {
       },
     });
 
-    const result = resolveVacuumLinkRewindSubroutine(host, legalAction);
+    const result = resolveRezzedIceRewindSubroutine(host, legalAction);
 
     expect(result).toMatchObject({
       handled: true,
@@ -231,7 +231,7 @@ describe("encounter special windows boundary", () => {
       repositionIndex: 2,
     });
     expect(purposes).toEqual([
-      "onr_v1_272_too-many-doors.rewind.run_1.ice_current",
+      "rewind_run_to_rezzed_ice_by_die.run_1.ice_current",
     ]);
     expect(state.run).toMatchObject({
       phase: "movement",
@@ -241,18 +241,18 @@ describe("encounter special windows boundary", () => {
       resolvedSubroutineIndexes: [],
     });
     expect(legalAction.payload).toMatchObject({
-      vacuumLinkDieRoll: 2,
-      vacuumLinkRewindApplied: true,
-      vacuumLinkRewindRezzedIceBack: 2,
-      vacuumLinkTargetIceId: "ice_outer",
-      vacuumLinkTargetIceIndex: 2,
+      rezzedIceRewindDieRoll: 2,
+      rezzedIceRewindApplied: true,
+      rezzedIceRewindRezzedIceBack: 2,
+      rezzedIceRewindTargetIceId: "ice_outer",
+      rezzedIceRewindTargetIceIndex: 2,
     });
   });
 
   it("leaves Vacuum Link in place on die 4 without reposition side effects", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
-    const result = resolveVacuumLinkRewindSubroutine(
+    const result = resolveRezzedIceRewindSubroutine(
       encounterSpecialWindowHost(state, { rollDie: () => 4 }),
       legalAction,
     );
@@ -268,8 +268,8 @@ describe("encounter special windows boundary", () => {
       iceIndex: 0,
     });
     expect(legalAction.payload).toMatchObject({
-      vacuumLinkDieRoll: 4,
-      vacuumLinkRewindApplied: false,
+      rezzedIceRewindDieRoll: 4,
+      rezzedIceRewindApplied: false,
     });
   });
 
@@ -350,7 +350,7 @@ describe("encounter special windows boundary", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
 
-    const result = markSubmarineUplinkJackOutAfterEncounter(
+    const result = markTraceLinkForceJackOutAfterEncounter(
       encounterSpecialWindowHost(state),
       "submarine_1" as CardInstanceId,
       legalAction,
@@ -369,7 +369,7 @@ describe("encounter special windows boundary", () => {
     });
 
     const otherAction = { payload: {} } as LegalAction;
-    const other = markSubmarineUplinkJackOutAfterEncounter(
+    const other = markTraceLinkForceJackOutAfterEncounter(
       encounterSpecialWindowHost(state),
       "startup_1" as CardInstanceId,
       otherAction,

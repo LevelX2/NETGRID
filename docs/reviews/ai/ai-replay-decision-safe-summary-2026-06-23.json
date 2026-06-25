@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "ai-replay-decision-safe-summary-v1",
+  "status": "summary_only",
+  "sourceRun": "2026-06-23 local SQLite analysis",
+  "privacyBoundary": {
+    "fullDecisionCaseExportVersioned": false,
+    "fullClusterExportVersioned": false,
+    "fullStateEmbedded": false,
+    "rawTraceJsonEmbedded": false,
+    "localRuntimePathEmbedded": false,
+    "productiveUseAllowed": false
+  },
+  "decisionCaseAggregate": {
+    "cases": 1494,
+    "discoveryCases": 1211,
+    "holdoutCases": 283,
+    "bySide": {
+      "corp": 30,
+      "runner": 1464
+    },
+    "byMode": {
+      "human_corp_vs_runner_ai": 1464,
+      "human_runner_vs_corp_ai": 30
+    },
+    "byStatus": {
+      "active": 438,
+      "finished": 1032,
+      "forfeited": 24
+    },
+    "topSelectedActionTypes": {
+      "start_run": 255,
+      "gain_credit": 210,
+      "continue_run": 201,
+      "access_card": 189,
+      "end_turn": 166,
+      "install_card": 71,
+      "resolve_choice": 66,
+      "decline_trash": 63,
+      "draw_card": 61,
+      "activated_card_ability": 42
+    },
+    "topPlanKinds": {
+      "access_trash_steal": 285,
+      "simple_run_choice": 210,
+      "runner.build_credit_base": 181,
+      "end_turn": 165,
+      "runner.obtain_breaker_coverage": 149,
+      "runner.opportunistic_central_run": 92,
+      "runner.contest_remote": 71,
+      "choice_resolution": 66,
+      "runner.develop_hand_card": 55,
+      "encounter_survival": 44
+    }
+  },
+  "candidateClusterAggregate": {
+    "sourceCases": 1494,
+    "discoveryCases": 1211,
+    "holdoutCasesIgnored": 283,
+    "candidates": 59,
+    "blockedShadowOnly": 88,
+    "blockedTraceQuality": 17,
+    "clusters": 15,
+    "selectedClusterForRepro": "replay-cluster-12029aa33f19"
+  },
+  "versionedReplacementPolicy": [
+    "Versionierte Review-Artefakte enthalten nur Aggregate, Cluster-IDs, Digests oder wenige redigierte Beispiele.",
+    "Vollstaendige DecisionCase- und Cluster-Exports muessen unter data/local/ oder einem expliziten nichtversionierten Ausgabepfad erzeugt werden.",
+    "Holdout-Daten duerfen nicht zur Fixableitung genutzt werden."
+  ]
+}

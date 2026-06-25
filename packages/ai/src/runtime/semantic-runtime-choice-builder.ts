@@ -100,11 +100,20 @@ function scoreSemanticRuntimeAction(
     actionSemanticCandidate,
   );
   const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
+  const reasonCode =
+    input.side === "corp" &&
+    scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_tagged_meat_damage_payoff_pressure" ||
+        component.reason?.includes("corp_tagged_meat_damage_payoff:true"),
+    )
+      ? "corp.semantic.corp_tag_punish"
+      : `${input.side}.semantic.${scopeId}`;
   return {
     action,
     scopeId,
     ...(exclusion ? { exclusion } : {}),
-    reasonCode: `${input.side}.semantic.${scopeId}`,
+    reasonCode,
     explanation: dependencies.explanation(input.side, scopeId),
     score,
     evidence: [

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -185,16 +184,16 @@ import {
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
-  microtechHostedProgramIds,
-  topHostedProgramOnMicrotech,
+  hostedProgramIdsOnHardware,
+  topHostedProgramOnHardware,
   type RunFortTriggerExecutionHost,
 } from "../abilities/run-fort-trigger-execution";
 import {
-  applyShellTradersStartOfTurn,
+  applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
-  shellTradersInstallCost,
-  shellTradersPreparedTargetIds,
-  shellTradersPrepareTargetIds,
+  delayedInstallCounterCost,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
@@ -245,20 +244,20 @@ import {
 } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
-  buildRunnerShellTradersRemoveCounterAction,
-  buildRunnerShellTradersSetAsideAction,
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "../turn/runner-special-zone-install-actions";
 import {
   lookTopStackShowToCorpThenInstallMatchingTargets,
   searchStackInstallTargets,
-  sneakPreviewInstallableProgramIds,
-  sneakPreviewSourceOptions,
+  temporaryProgramInstallableProgramIds,
+  temporaryProgramInstallSourceOptions,
   startAujourdOuiTop5Activation,
   startRunnerStackSearchChoiceActivation,
-  startSelfModifyingCodeStackActivation,
-  startSneakPreviewSourceActivation,
+  startHiddenStackProgramInstallActivation,
+  startTemporaryProgramInstallSourceActivation,
 } from "../hidden-zone/search-choice-activations";
 import {
   handleHiddenZoneSearchChoice,
@@ -282,29 +281,29 @@ import {
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
-  startSmithsPawnshopChoice,
+  startInstalledCardTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "../hidden-zone/nonsearch-choice-handlers";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
-  startCorporateNegotiatingCenterChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "../hidden-zone/corp-zone-choice-handlers";
 import {
   handleCorpInstallRezSequenceChoice,
-  resolveSecurityPurgeAgendaPurge,
-  startDataFortReclamationChoice,
-  startPriorityRequisitionChoice,
+  resolveAgendaPurgeInstallTargets,
+  startHqToNewRemoteInstallRezChoice,
+  startScoredAgendaFreeRezChoice,
   type CorpInstallRezSequenceHandlerHost,
 } from "../corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
 import {
@@ -343,14 +342,14 @@ import {
   type BreachStateHost,
 } from "../access/breach-state";
 import {
-  resolveMicrotechAiInterfacePreAccessChoice,
-  resolvePriorityWreckSpendChoice,
+  resolvePreAccessTopRdReorderChoice,
+  resolveSuccessfulRunCreditLossSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "../run/run-access-transition";
 import { type StartRunOptions } from "../run/run-core-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,
@@ -359,7 +358,7 @@ import {
   handleRunEndCleanup,
   recordDupreBreakUsage,
   resetBreakerStrength,
-  resolvePattelsVirusCounterChoice,
+  resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
@@ -381,16 +380,16 @@ import {
 } from "../run/run-duration-payment";
 import {
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
-  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  resolveActiveIceProgramTrashChoice as resolveActiveIceProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "../run/encounter-resolution";
 import {
-  applyRioDeJaneiroCityGridPassedIceTrigger,
-  isSubmarineUplinkSource,
-  markSubmarineUplinkJackOutAfterEncounter,
+  applyPassedIceRunEndTrigger,
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
-  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
   type EncounterSpecialWindowHost,
 } from "../run/encounter-special-windows";
 import {
@@ -446,14 +445,14 @@ import {
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
   resolveCorpRootRezEffect,
-  resolveSpeedTrapRezInterruptChoice,
+  resolveRezInterruptJackOutChoice,
   type RunRezWindowHost,
 } from "../run/run-rez-window";
 import {
   resolveFortPassAdvancementWindow,
-  resolveSingaporeCityGridSwapChoice,
+  resolveHqIceSwapChoice,
   resolveStartRunIceRepositionWindow,
-  startSingaporeCityGridSwapChoice,
+  startHqIceSwapChoice,
   type FortPassWindowHost,
 } from "../run/fort-pass-window";
 import {
@@ -541,87 +540,79 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
-  ACTION_ASSET_CARD_IDS,
-  COUNTER_ASSET_CARD_IDS,
-  COUNTER_OPERATION_CARD_IDS,
-  OVERADVANCE_AGENDA_CARD_IDS,
+  COUNTER_OPERATION_SOURCES,
+  OVERADVANCE_AGENDA_SOURCES,
   scoredAgendaCounterCreditPayload,
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_CARD_IDS,
-  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+  SCORED_REVEAL_AGENDA_SOURCES,
+  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import {
-  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-  ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
-  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-  FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
-  GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
-  INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
-  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
-  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
-  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
-  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
-  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+  FLATLINE_REPLACEMENT_EVENT_SOURCE,
+  OVERADVANCE_DIRECTOR_AGENDA_SOURCE,
+  ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
+  ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
+  COUNTER_GAIN_PROGRAM_SOURCE,
+  COUNTER_CREDIT_OPERATION_SOURCE,
+  OVERADVANCE_ACQUISITION_AGENDA_SOURCE,
+  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
+  AGENDA_ADVANCE_OPERATION_SOURCE,
+  ECONOMY_RECOVERY_OPERATION_SOURCE,
+  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
+  TEAM_COUNTER_OPERATION_SOURCE,
+  ACCESS_CORE_DAMAGE_ASSET_SOURCE,
+  ACCESS_NET_DAMAGE_ASSET_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
-  COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-  DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  INSTALLED_CARD_LIMIT_ASSET_SOURCE,
+  VIRUS_COUNTER_ASSET_SOURCE,
+  ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
+  ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
 } from "../../mechanics/asset-node-effects";
 import {
-  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
-  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "../../mechanics/damage-prevention";
 import {
-  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
-  CORP_HQ_AGENDA_REVEAL_CARD_ID,
-  CORP_HQ_SHUFFLE_DRAW_CARD_ID,
-  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
-  COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
-  AUJOURD_OUI_RESOURCE_CARD_ID,
-  HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
-  HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
-  RUNNER_GRIP_TRASH_EVENT_CARD_ID,
-  RUNNER_STACK_TOP5_EVENT_CARD_ID,
-  SERVER_EXPOSE_PROGRAM_CARD_IDS,
-  SERVER_ICE_SWAP_UPGRADE_CARD_ID,
-  SHORT_CIRCUIT_RESOURCE_CARD_ID,
-  STACK_SEARCH_PROGRAM_CARD_IDS,
-  STACK_TOP_REORDER_RESOURCE_CARD_ID,
-  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+  ARCHIVES_TO_HQ_OPERATION_SOURCE,
+  HQ_AGENDA_REVEAL_ASSET_SOURCE,
+  RD_TOP5_REORDER_OPERATION_SOURCE,
+  COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE,
+  DAILY_CREDIT_RESOURCE_SOURCE,
+  GRIP_TRASH_EVENT_SOURCE,
+  STACK_TOP5_EVENT_SOURCE,
+  SERVER_EXPOSE_PROGRAM_SOURCES,
+  SERVER_ICE_SWAP_UPGRADE_SOURCE,
+  PAID_STACK_SEARCH_RESOURCE_SOURCE,
+  STACK_SEARCH_PROGRAM_SOURCES,
+  STACK_TOP_REORDER_RESOURCE_SOURCE,
 } from "../../mechanics/hidden-zone";
-import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
+import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
-  ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
-  CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
-  EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
-  FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
-  JAPANESE_WATER_TORTURE_BREAKER_ID,
-  MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-  MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
-  OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
-  RABBIT_HQ_INTERFACE_PROGRAM_ID,
-  SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
-  SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
-  VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
-  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+  BLACK_ICE_DEREZ_EVENT_SOURCE,
+  HQ_ICE_JETTISON_EVENT_SOURCE,
+  RUNNER_CARD_INSTALL_OPERATION_SOURCE,
+  FORCE_REZ_EVENT_SOURCE,
+  BREAKER_DISABLE_PROGRAM_SOURCE,
+  HOST_RETURN_HARDWARE_SOURCE,
+  INSTALLED_CARD_TRASH_EVENT_SOURCE,
+  TAG_RETURN_EVENT_SOURCE,
+  HQ_INTERFACE_PROGRAM_SOURCE,
+  HQ_CARD_TRASH_EVENT_SOURCE,
+  HQ_ACCESS_RETAIN_EVENT_SOURCE,
+  PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
+  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
   corpInstalledEconomyActionProfileForPayload,
-  CORP_RECURRING_ASSET_CARD_IDS,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
 import {
@@ -663,25 +654,23 @@ import {
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
-  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
-  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-  RUNNER_RANDOM_PROGRAM_CARD_IDS,
+  BOARDWALK_RANDOM_PROGRAM_SOURCE,
+  RANDOM_RESOURCE_SOURCE,
+  RUNNER_RANDOM_PROGRAM_SOURCES,
 } from "../../mechanics/random-effects";
 import {
-  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
-  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
-  TRACE_AWARE_RUN_EVENT_CARD_ID,
+  RUN_ACCESS_PRESSURE_EVENT_SOURCE,
+  RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
+  TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
 import {
-  CRYBABY_ACCESS_COST_UPGRADE_ID,
-  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
-  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+  ACCESS_COST_UPGRADE_SOURCE,
+  ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
+  ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
 import {
-  RUN_TAX_UPGRADE_CARD_IDS,
-  TAG_CONDITION_UPGRADE_CARD_IDS,
+  RUN_TAX_UPGRADE_SOURCES,
 } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
@@ -705,6 +694,8 @@ import type {
   CardDamagePreventionSourceImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
+  CardFortCapacityModifierImplementation,
+  CardInstallCapabilityImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
@@ -724,10 +715,12 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
   const {
     cardInstallCapabilitiesForDefinition,
     cardHasSubtype,
-    expireCorporateRetreatInstallCreditAbilities,
+    expireScoredAgendaInstallRezCreditAbilities,
     fortCapacityModifiersForCard,
     mustInstallInsideSubsidiaryDataFort,
     rezCardHost,
+    runMovementHostForState,
+    runRezWindowHostForState,
   } = deps;
 
   function canInstallCorpRootCardInServer(
@@ -737,13 +730,17 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
   ): boolean {
     const installCapabilities = cardInstallCapabilitiesForDefinition(definition.id);
     if (
-      installCapabilities.some((capability) => capability.kind === "install_only_in_hq") &&
+      installCapabilities.some(
+        (capability: CardInstallCapabilityImplementation) =>
+          capability.kind === "install_only_in_hq",
+      ) &&
       server.id !== "hq"
     )
       return false;
     if (
       installCapabilities.some(
-        (capability) => capability.kind === "install_only_in_hq_or_rd",
+        (capability: CardInstallCapabilityImplementation) =>
+          capability.kind === "install_only_in_hq_or_rd",
       ) &&
       server.id !== "hq" &&
       server.id !== "rd"
@@ -784,11 +781,17 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
           sum +
           fortCapacityModifiersForCard(state, cardId)
             .filter(
-              (modifier) =>
+              (modifier: CardFortCapacityModifierImplementation) =>
                 modifier.kind === "additional_agenda_or_node_slot_inside_fort" &&
                 modifier.activeWhile === "installed",
             )
-            .reduce((innerSum, modifier) => innerSum + modifier.amount, 0)
+            .reduce(
+              (
+                innerSum: number,
+                modifier: CardFortCapacityModifierImplementation,
+              ) => innerSum + modifier.amount,
+              0,
+            )
         );
       }, 0)
     );
@@ -811,8 +814,8 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
       rez: {
         executeRezCard: (cardId, rootRez, legalAction) =>
           executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
-        expireCorporateRetreatInstallCreditAbilities: () =>
-          expireCorporateRetreatInstallCreditAbilities(state),
+        expireScoredAgendaInstallRezCreditAbilities: () =>
+          expireScoredAgendaInstallRezCreditAbilities(state),
       },
       run: {
         passCorpRunRootRezWindow: (legalAction) =>

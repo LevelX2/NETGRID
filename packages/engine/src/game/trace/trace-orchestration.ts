@@ -25,9 +25,12 @@ import {
   payPostBidLinkPaymentQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
+  quoteRunnerTraceBidPayment,
   runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
+  type RunnerTraceLinkCreditSelection,
   type RunnerTracePaymentDependencies,
+  type RunnerTracePaymentQuote,
 } from "../payment";
 import type { TraceSuccessFollowupResult } from "../run/encounter-printed-effects";
 import {
@@ -74,7 +77,7 @@ export type TraceOrchestrationHost = {
         | "trace_success_cancel_window"
       >,
     ) => Array<{ ability: ActivatedCardAbilityImplementation; index: number }>;
-    isSubmarineUplinkSource: (cardId: CardInstanceId) => boolean;
+    isTraceLinkForceJackOutSource: (cardId: CardInstanceId) => boolean;
   };
   payment: {
     corpTracePaymentDeps: CorpTracePaymentDependencies;
@@ -96,7 +99,7 @@ export type TraceOrchestrationHost = {
   };
   counters: {
     cardCounter: (cardId: CardInstanceId, counterType: string) => number;
-    hackerTrackerCounterTotal: () => number;
+    corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
   };
   fort: {
@@ -108,7 +111,7 @@ export type TraceOrchestrationHost = {
       | undefined;
   };
   run: {
-    markSubmarineUplinkJackOutAfterEncounter: (
+    markTraceLinkForceJackOutAfterEncounter: (
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
@@ -126,16 +129,13 @@ export type TraceOrchestrationHost = {
   };
   callbacks: {
     sanitizeId: (value: string) => string;
-    addHackerTrackerTraceCounters: () => number;
+    addCorpTraceCounterPoolCounters: () => number;
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
       targetCardId: CardInstanceId | undefined,
     ) => Record<string, unknown>;
-  };
-  constants: {
-    PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: CardDefinitionId;
   };
 };
 
@@ -160,7 +160,7 @@ export function startTraceFromOperation(
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpBidMax =
     state.corp.credits +
-    host.counters.hackerTrackerCounterTotal() +
+    host.counters.corpTraceCounterPoolTotal() +
     host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -200,11 +200,11 @@ export function startTraceFromOperation(
     ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
-          parisCityGridPoolAvailable: host.counters.cardCounter(
+          fortTraceBitPoolAvailable: host.counters.cardCounter(
             fortTraceBitPoolSource.cardId,
             "bit",
           ),
-          parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
+          fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
   };
@@ -244,30 +244,7 @@ export function handleTraceOrchestrationAction(
   host: TraceOrchestrationHost,
   legalAction: LegalAction,
 ): { handled: boolean } {
-  if (legalAction.payload?.v1918UpgradeAbility !== "trace_2_tag")
-    return { handled: false };
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
-  const sourceCardId = String(
-    legalAction.payload?.cardId ?? "",
-  ) as CardInstanceId;
-  if (!host.corp.rezzedCorpRootCardIds().includes(sourceCardId))
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
-    );
-  const definition = host.cards.definitionFor(sourceCardId);
-  if (
-    definition.id !== host.constants.PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID ||
-    host.cards.hasCardImplementationForDefinition(definition.id)
-  )
-    throw new Error(
-      "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
-    );
-  const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-  if (!Number.isInteger(traceStrength) || traceStrength !== 2)
-    throw new Error("Paris City Grid startet in diesem WIP genau Trace 2.");
-  startTraceFromOperation(host, definition.id, traceStrength, legalAction);
-  return { handled: true };
+  return { handled: false };
 }
 
 export function traceBidChoice(
@@ -276,6 +253,7 @@ export function traceBidChoice(
   traceId: string,
   prompt: string,
   maxBid: number,
+  optionUnit = "Credits",
 ): ChoiceRequest {
   const boundedMax = Math.max(0, Math.floor(maxBid));
   return {
@@ -286,8 +264,8 @@ export function traceBidChoice(
     kind: "bid_amount",
     options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
       id: `bid_${amount}`,
-      label: `${amount} Credits`,
-      publicLabel: `${amount} Credits`,
+      label: `${amount} ${optionUnit}`,
+      publicLabel: `${amount} ${optionUnit}`,
       value: amount,
     })),
     minSelections: 1,
@@ -367,12 +345,16 @@ function resolveTraceCorpBid(
     ...baseLinkTrace,
     status: "runner_bid",
   };
+  const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits + runnerTraceLinkCredits(host),
+    runnerTraceLinkCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    state.runner.credits + runnerTraceLinkCreditCapacity,
+    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
   );
   state.activeSide = "runner";
   legalAction.payload = {
@@ -438,12 +420,18 @@ function openTraceRunnerBidChoice(
     ...trace,
     status: "runner_bid",
   };
+  const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
+  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength;
+  const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    `Runner Link-Bid wählen (Trace ${trace.traceStrength ?? trace.baseTraceStrength}, Link ${trace.runnerLink ?? calculateRunnerLink(host)})`,
-    state.runner.credits + runnerTraceLinkCredits(host),
+    runnerTraceLinkCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+    state.runner.credits + runnerTraceLinkCreditCapacity,
+    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
   );
   state.activeSide = "runner";
 }
@@ -489,7 +477,7 @@ function resolveTraceBaseLinkChoice(
   host.payment.recordRunActionSpendingCapSpend(candidate.creditCost);
   host.payment.spendRunnerCredits(candidate.creditCost);
   if (state.run)
-    host.run.markSubmarineUplinkJackOutAfterEncounter(
+    host.run.markTraceLinkForceJackOutAfterEncounter(
       candidate.sourceCardInstanceId,
       legalAction,
     );
@@ -537,12 +525,32 @@ function resolveTraceRunnerBid(
 ): void {
   const { state } = host;
   const trace = requireTracePhase(state, "runner_bid");
+  if (isRunnerBidPaymentChoice(state.pendingChoice)) {
+    resolveTraceRunnerBidPaymentChoice(host, legalAction, playerAction);
+    return;
+  }
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
+  if (startRunnerBidPaymentChoice(host, trace, bid, legalAction)) return;
   const tracePaymentQuote = assertRunnerTraceBidPaymentValid(
     host.payment.runnerTracePaymentDeps,
     state,
     bid,
   );
+  finishTraceRunnerBid(host, legalAction, trace, bid, tracePaymentQuote);
+}
+
+function finishTraceRunnerBid(
+  host: TraceOrchestrationHost,
+  legalAction: LegalAction,
+  trace: CurrentTrace,
+  bid: number,
+  tracePaymentQuote: RunnerTracePaymentQuote,
+): void {
+  const { state } = host;
+  const {
+    runnerBidPaymentSelection: _runnerBidPaymentSelection,
+    ...traceWithoutPaymentSelection
+  } = trace;
   const tracePaymentReceipt = payRunnerTraceBidQuote(
     host.payment.runnerTracePaymentDeps,
     state,
@@ -552,7 +560,7 @@ function resolveTraceRunnerBid(
     runnerTracePaymentPublicPayload(tracePaymentReceipt);
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   const postBidTraceBase = {
-    ...trace,
+    ...traceWithoutPaymentSelection,
     status: "post_bid_link" as const,
     runnerLink,
     runnerBid: bid,
@@ -623,6 +631,101 @@ function resolveTraceRunnerBid(
   });
 }
 
+function startRunnerBidPaymentChoice(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+  bid: number,
+  legalAction: LegalAction,
+): boolean {
+  if (bid <= 0) return false;
+  const sourceCardInstanceIds = runnerTraceLinkPaymentSourceIds(host);
+  if (sourceCardInstanceIds.length <= 1) return false;
+  host.state.trace = {
+    ...trace,
+    runnerBidPaymentSelection: {
+      bid,
+      sourceCardInstanceIds,
+      sourceIndex: 0,
+      allocations: [],
+    },
+  };
+  openRunnerBidPaymentChoice(host);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "runner_bid",
+    sourceDefinitionId: trace.sourceDefinitionId,
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: trace.corpBid ?? 0,
+    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+    runnerLink: trace.runnerLink ?? calculateRunnerLink(host),
+    runnerBid: bid,
+    traceLinkPaymentChoiceOpened: true,
+  };
+  return true;
+}
+
+function resolveTraceRunnerBidPaymentChoice(
+  host: TraceOrchestrationHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const { state } = host;
+  const trace = requireTracePhase(state, "runner_bid");
+  const selection = trace.runnerBidPaymentSelection;
+  if (!selection)
+    throw new Error("Es ist keine Runner-Trace-Zahlungswahl offen.");
+  const sourceCardInstanceId =
+    selection.sourceCardInstanceIds[selection.sourceIndex];
+  if (!sourceCardInstanceId)
+    throw new Error("Die Runner-Trace-Zahlungsquelle fehlt.");
+  const amount = selectedBidAmount(state.pendingChoice, playerAction);
+  const allocation = {
+    sourceCardInstanceId,
+    amount,
+  };
+  const nextSelection = {
+    ...selection,
+    sourceIndex: selection.sourceIndex + 1,
+    allocations: [...selection.allocations, allocation],
+  };
+  const nextTrace = {
+    ...trace,
+    runnerBidPaymentSelection: nextSelection,
+  };
+  const sourceDefinitionId =
+    state.cardInstances[sourceCardInstanceId]?.definitionId;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "runner_bid_payment",
+    sourceDefinitionId: trace.sourceDefinitionId,
+    runnerBid: selection.bid,
+    ...(sourceDefinitionId
+      ? { traceLinkPaymentSourceDefinitionId: sourceDefinitionId }
+      : {}),
+    traceLinkPaymentAmount: amount,
+  };
+  if (nextSelection.sourceIndex < nextSelection.sourceCardInstanceIds.length) {
+    state.trace = nextTrace;
+    openRunnerBidPaymentChoice(host);
+    return;
+  }
+  const {
+    runnerBidPaymentSelection: _finishedRunnerBidPaymentSelection,
+    ...finishedTrace
+  } = nextTrace;
+  state.trace = finishedTrace;
+  delete state.pendingChoice;
+  const quote = quoteRunnerTraceBidPayment(
+    host.payment.runnerTracePaymentDeps,
+    state,
+    selection.bid,
+    nextSelection.allocations,
+  );
+  finishTraceRunnerBid(host, legalAction, trace, selection.bid, quote);
+}
+
 function postBidTraceLinkCandidates(
   host: TraceOrchestrationHost,
   trace: CurrentTrace,
@@ -639,7 +742,8 @@ function postBidTraceLinkCandidates(
     )) {
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
-      if (host.cards.isSubmarineUplinkSource(cardId) && !state.run) continue;
+      if (host.cards.isTraceLinkForceJackOutSource(cardId) && !state.run)
+        continue;
       const traceCost = costForTraceAbility(ability);
       const creditCost = traceCost.creditCost;
       if (state.runner.credits + runnerTraceLinkCredits(host) < creditCost)
@@ -740,7 +844,7 @@ function resolveTracePostBidLinkChoice(
       ? tapTraceSource(host, candidate.cardId)
       : {};
     if (state.run)
-      host.run.markSubmarineUplinkJackOutAfterEncounter(
+      host.run.markTraceLinkForceJackOutAfterEncounter(
         candidate.cardId,
         legalAction,
       );
@@ -847,7 +951,7 @@ function completeTraceWithoutRun(
   );
   if (successful) state.runner.tags += tagsAdded;
   const hackerTrackerCountersAdded =
-    host.callbacks.addHackerTrackerTraceCounters();
+    host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewardsForOperation(state, trace);
@@ -1091,6 +1195,75 @@ function runnerTraceLinkCredits(host: TraceOrchestrationHost): number {
       (sum, cardId) => sum + host.payment.hostedPaymentCredits(cardId),
       0,
     );
+}
+
+function runnerTraceLinkPaymentSourceIds(
+  host: TraceOrchestrationHost,
+): CardInstanceId[] {
+  return host.payment
+    .runnerTraceLinkCreditSourceIds()
+    .filter((cardId) => host.payment.hostedPaymentCredits(cardId) > 0);
+}
+
+function isRunnerBidPaymentChoice(choice: ChoiceRequest | undefined): boolean {
+  return choice?.source.startsWith("trace_runner_bid_payment:") === true;
+}
+
+function openRunnerBidPaymentChoice(host: TraceOrchestrationHost): void {
+  const { state } = host;
+  const trace = requireTracePhase(state, "runner_bid");
+  const selection = trace.runnerBidPaymentSelection;
+  if (!selection)
+    throw new Error("Es ist keine Runner-Trace-Zahlungswahl offen.");
+  const sourceCardInstanceId =
+    selection.sourceCardInstanceIds[selection.sourceIndex];
+  if (!sourceCardInstanceId)
+    throw new Error("Die Runner-Trace-Zahlungsquelle fehlt.");
+  const sourceDefinition = host.cards.definitionFor(sourceCardInstanceId);
+  const available = Math.max(
+    0,
+    Math.floor(host.payment.hostedPaymentCredits(sourceCardInstanceId)),
+  );
+  const selectedSoFar = selection.allocations.reduce(
+    (sum, allocation) => sum + allocation.amount,
+    0,
+  );
+  const remainingBid = Math.max(0, selection.bid - selectedSoFar);
+  const futureSourceIds = selection.sourceCardInstanceIds.slice(
+    selection.sourceIndex + 1,
+  );
+  const futureLinkCredits = futureSourceIds.reduce(
+    (sum, cardId) =>
+      sum + Math.max(0, Math.floor(host.payment.hostedPaymentCredits(cardId))),
+    0,
+  );
+  const runnerCredits = Math.max(0, Math.floor(state.runner.credits));
+  const maxAmount = Math.min(available, remainingBid);
+  const options = Array.from({ length: maxAmount + 1 }, (_, amount) => amount)
+    .filter(
+      (amount) => remainingBid - amount <= runnerCredits + futureLinkCredits,
+    )
+    .map((amount) => ({
+      id: `bid_${amount}`,
+      label: `${amount} Link-Bit${amount === 1 ? "" : "s"} (${selectedSoFar + amount}/${selection.bid} Gesamtbid)`,
+      publicLabel: `${amount} Link-Bit${amount === 1 ? "" : "s"} (${selectedSoFar + amount}/${selection.bid} Gesamtbid)`,
+      value: amount,
+    }));
+  if (options.length === 0)
+    throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
+  state.pendingChoice = {
+    choiceId: `${trace.traceId}.runner.bid_payment.${sourceCardInstanceId}.${state.stateVersion + 1}`,
+    side: "runner",
+    source: `trace_runner_bid_payment:${trace.traceId}:${sourceCardInstanceId}`,
+    prompt: `${sourceDefinition.title} fuer Runner Link-Bid nutzen (bisher ${selectedSoFar}/${selection.bid} Gesamtbid)`,
+    kind: "bid_amount",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "runner";
 }
 
 function selectedBidAmount(

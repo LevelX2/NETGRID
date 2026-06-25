@@ -11009,6 +11009,7 @@ select,
   height: 100%;
   border-radius: 6px;
   object-fit: cover;
+  pointer-events: none;
 }
 
 .card.withImage.hardware,
@@ -11996,6 +11997,22 @@ select,
 
 .rigGroupCardsFull {
   --rig-group-card-width: var(--cards-min-width, 118px);
+}
+
+.rigProgramEmptyPlaceholder {
+  box-sizing: border-box;
+  flex: 0 0 clamp(24px, calc(var(--rig-group-card-width, 118px) * 0.22), 38px);
+  width: clamp(24px, calc(var(--rig-group-card-width, 118px) * 0.22), 38px);
+  min-height: calc(var(--rig-group-card-width, 118px) * 1.28);
+  border: 1px dashed color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  opacity: 0.78;
+}
+
+.rigProgramEmptyPlaceholder.compact {
+  flex-basis: clamp(18px, calc(var(--rig-group-card-width, 88px) * 0.22), 30px);
+  width: clamp(18px, calc(var(--rig-group-card-width, 88px) * 0.22), 30px);
 }
 
 .miniCards {

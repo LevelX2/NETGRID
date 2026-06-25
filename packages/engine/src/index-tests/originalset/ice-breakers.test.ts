@@ -1368,6 +1368,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
+  it("models Pile Driver as Noisy but not as a Stealth credit source", () => {
+    const pileDriver = DEMO_CARDS_BY_ID["onr_v1_047_pile-driver"];
+
+    expect(pileDriver?.subtypes).toContain("noisy");
+    expect(pileDriver?.subtypes).not.toContain("stealth");
+    expect(pileDriver?.recurringCredits).toBeUndefined();
+    expect(pileDriver?.mechanics).toContain("subtype_noisy");
+    expect(pileDriver?.mechanics).not.toContain("subtype_stealth");
+    expect(pileDriver?.mechanics).not.toContain("recurring_credit");
+  });
+
   it("uses Pile Driver as a source-bound multi-wall breaker with exact Stealth loss", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1469,7 +1480,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_047_pile-driver",
       breakSubroutineCount: 4,
-      pileDriverMultiBreak: true,
+      multiBreakSubroutines: true,
       postBreakStealthLoss: 3,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1478,6 +1489,81 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("lets Pile Driver break a wall when fewer than 3 Stealth bits are available", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-pile-driver-stealth-penalty-not-cost",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_pile_driver_penalty_runner",
+          name: "Spotcheck Pile Driver Penalty Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_047_pile-driver", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_pile_driver_penalty_corp",
+          name: "Spotcheck Pile Driver Penalty Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+    const pileDriverId = installRunnerProgramForTest(
+      state,
+      "onr_v1_047_pile-driver",
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_237_data-wall");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === pileDriverId &&
+        action.payload?.subroutineIndexes === "0",
+    );
+    expect(breakAction.costs).toEqual([{ credits: 3 }]);
+    expect(breakAction.payload).toMatchObject({
+      breakSubroutineCount: 1,
+      multiBreakSubroutines: true,
+      targetIceDefinitionId: "onr_v1_237_data-wall",
+    });
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(cardCounterAmount(state, pileDriverId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_047_pile-driver",
+      breakSubroutineCount: 1,
+      multiBreakSubroutines: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("postBreakStealthLoss");
   });
 
   it("applies Wrecking Ball as a Proteus wall breaker with public Stealth loss", () => {
@@ -1790,12 +1876,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       source: "v120.event_modification.prevent",
-      prompt: "Full Body Conversion",
+      prompt: "Damage Prevention",
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "full_body_conversion_pay_0",
-      "full_body_conversion_pay_1",
-      "full_body_conversion_pay_2",
+      "damage_prevention_bypass_pay_0",
+      "damage_prevention_bypass_pay_1",
+      "damage_prevention_bypass_pay_2",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
       "0 Credits zahlen: 0 Meat Damage durchlassen",
@@ -1809,12 +1895,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: ["full_body_conversion_pay_1"],
+        selectedOptionIds: ["damage_prevention_bypass_pay_1"],
       },
       idempotencyKey: "spotcheck-full-body-wrong-side",
     });
     expect(wrongSide.ok).toBe(false);
-    state = applyChoice(state, "corp", "full_body_conversion_pay_1");
+    state = applyChoice(state, "corp", "damage_prevention_bypass_pay_1");
     expect(state.corp.credits).toBe(1);
     expect(state.runner.grip.length).toBe(gripBefore - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1825,8 +1911,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       originalAmount: 2,
       preventedAmount: 1,
       finalAmount: 1,
-      fullBodyConversionCorpBypassPaid: 1,
-      fullBodyConversionBypassCostPerDamage: 1,
+      damagePreventionBypassPaid: 1,
+      damagePreventionBypassCostPerDamage: 1,
       damageType: "meat",
       damageAmount: 1,
     });
@@ -1881,12 +1967,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           "onr_v1_301_punitive-counterstrike",
     );
     expect(preventAll.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "full_body_conversion_pay_0",
+      "damage_prevention_bypass_pay_0",
     ]);
     expect(preventAll.pendingChoice?.options.map((option) => option.label)).toEqual([
       "0 Credits zahlen: 0 Meat Damage durchlassen",
     ]);
-    preventAll = applyChoice(preventAll, "corp", "full_body_conversion_pay_0");
+    preventAll = applyChoice(
+      preventAll,
+      "corp",
+      "damage_prevention_bypass_pay_0",
+    );
     expect(preventAll.runner.grip.length).toBe(preventAllGrip);
     expect(preventAll.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "prevented",
@@ -1894,6 +1984,244 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       finalAmount: 0,
       damageAmount: 0,
     });
+  });
+
+  it("requires the Corp to pay each Full Body Conversion to let meat damage through", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-full-body-conversion-stacked",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_full_body_runner_stacked",
+          name: "Spotcheck Full Body Runner Stacked",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_127_full-body-conversion", quantity: 2 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_full_body_corp_stacked",
+          name: "Spotcheck Full Body Corp Stacked",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.runner.tags = 1;
+    state.corp.credits = 3;
+    const firstFullBodyConversionId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_127_full-body-conversion",
+    );
+    const secondFullBodyConversionId = Object.entries(state.cardInstances).find(
+      ([id, card]) =>
+        id !== firstFullBodyConversionId &&
+        card.definitionId === "onr_v1_127_full-body-conversion",
+    )?.[0] as CardInstanceId | undefined;
+    expect(secondFullBodyConversionId).toBeDefined();
+    removeEverywhere(state, String(secondFullBodyConversionId));
+    state.runner.rig.hardware.push(String(secondFullBodyConversionId));
+    state.cardInstances[String(secondFullBodyConversionId)] = {
+      ...state.cardInstances[String(secondFullBodyConversionId)]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "v120.event_modification.prevent",
+      prompt: "Damage Prevention",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      candidateCount: 2,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "damage_prevention_bypass_pay_0",
+      "damage_prevention_bypass_pay_1",
+    ]);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Credits zahlen: 0 Meat Damage durchlassen",
+      "2 Credits zahlen: 1 Meat Damage durchlassen",
+    ]);
+
+    state = applyChoice(state, "corp", "damage_prevention_bypass_pay_1");
+
+    expect(state.corp.credits).toBe(1);
+    expect(state.runner.grip.length).toBe(gripBefore - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "partially_prevented",
+      sourceDefinitionId: "onr_v1_127_full-body-conversion",
+      originalAmount: 2,
+      preventedAmount: 1,
+      finalAmount: 1,
+      damagePreventionBypassPaid: 2,
+      damagePreventionBypassCostPerDamage: 2,
+      damageType: "meat",
+      damageAmount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("continues to later meat-prevention sources after an earlier source is passed", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-stacked-meat-prevention-chain",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_stacked_meat_prevention_runner",
+          name: "Spotcheck Stacked Meat Prevention Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_125_dermatech-bodyplating", quantity: 1 },
+            { id: "onr_v1_127_full-body-conversion", quantity: 2 },
+            { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+            { id: "onr_v1_160_diplomatic-immunity", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_stacked_meat_prevention_corp",
+          name: "Spotcheck Stacked Meat Prevention Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.runner.tags = 1;
+    state.corp.credits = 3;
+    installRunnerHardwareForTest(state, "onr_v1_125_dermatech-bodyplating");
+    const firstFullBodyConversionId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_127_full-body-conversion",
+    );
+    const secondFullBodyConversionId = Object.entries(state.cardInstances).find(
+      ([id, card]) =>
+        id !== firstFullBodyConversionId &&
+        card.definitionId === "onr_v1_127_full-body-conversion",
+    )?.[0] as CardInstanceId | undefined;
+    expect(secondFullBodyConversionId).toBeDefined();
+    removeEverywhere(state, String(secondFullBodyConversionId));
+    state.runner.rig.hardware.push(String(secondFullBodyConversionId));
+    state.cardInstances[String(secondFullBodyConversionId)] = {
+      ...state.cardInstances[String(secondFullBodyConversionId)]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    installRunnerHardwareForTest(state, "onr_v1_143_techtronica-utility-suit");
+    installRunnerResourceForTest(state, "onr_v1_160_diplomatic-immunity");
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "v120.event_modification.prevent",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "Nicht verhindern",
+      "Dermatech Bodyplating: 1 Schaden verhindern",
+    ]);
+
+    state = applyChoice(state, "runner", "pass");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "v120.event_modification.prevent",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "0 Credits zahlen: 0 Meat Damage durchlassen",
+      "2 Credits zahlen: 1 Meat Damage durchlassen",
+    ]);
+
+    state = applyChoice(state, "corp", "damage_prevention_bypass_pay_1");
+
+    expect(state.corp.credits).toBe(1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "v120.event_modification.prevent",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "Nicht verhindern",
+      "Techtronica Utility Suit: 1 Schaden verhindern",
+    ]);
+
+    state = applyChoice(state, "runner", "pass");
+
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "Nicht verhindern",
+      "Diplomatic Immunity: 1 Schaden verhindern",
+    ]);
+
+    const diplomaticOption = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    expect(diplomaticOption).toBeDefined();
+    state = applyChoice(state, "runner", String(diplomaticOption));
+
+    expect(state.runner.grip.length).toBe(gripBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "prevented",
+      sourceDefinitionId: "onr_v1_160_diplomatic-immunity",
+      originalAmount: 1,
+      preventedAmount: 1,
+      finalAmount: 0,
+      damageAmount: 0,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("gates Lifesaver Nanosurgeons draw on damage during the last three Runner actions", () => {

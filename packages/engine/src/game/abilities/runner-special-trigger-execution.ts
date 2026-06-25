@@ -75,7 +75,7 @@ export type RunnerSpecialTriggerExecutionHost = {
     runnerMemoryLimit: (state: GameState) => number;
   };
   hiddenZone: {
-    startSelfModifyingCodeStackActivation: (
+    startHiddenStackProgramInstallActivation: (
       sourceCardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
@@ -102,21 +102,21 @@ export function handleRunnerSpecialTriggerExecution(
 
   if (
     legalAction.payload?.v1911HiddenZoneAbility ===
-    "self_modifying_code_install_program"
+    "hidden_stack_program_install"
   ) {
-    resolveSelfModifyingCodeAbility(host, legalAction);
+    resolveHiddenStackProgramInstallAbility(host, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.resourceAbility === "junkyard_bbs_return_top_heap") {
-    resolveJunkyardBbsAbility(host, legalAction);
+  if (legalAction.payload?.resourceAbility === "return_top_heap_card") {
+    resolveTopHeapCardReturnAbility(host, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.delayedInstallAbility === "set_aside_from_grip") {
-    resolveShellTradersSetAside(host, legalAction);
+    resolveDelayedInstallSetAside(host, legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.delayedInstallAbility === "remove_shell_counter") {
-    resolveShellTradersRemoveCounter(host, legalAction);
+    resolveDelayedInstallRemoveCounter(host, legalAction);
     return handled(legalAction);
   }
 
@@ -129,22 +129,22 @@ export function topRunnerHeapCardId(
   return state.runner.heap.at(-1);
 }
 
-export function shellTradersInstallCost(definition: CardDefinition): number {
+export function delayedInstallCounterCost(definition: CardDefinition): number {
   const value = Number(definition.installCost ?? 0);
   if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0)
     throw new Error("Shell-Traders-Installationskosten sind ungueltig.");
   return value;
 }
 
-export function shellTradersPrepareTargetIds(
+export function delayedInstallPrepareTargetIds(
   host: RunnerSpecialTriggerExecutionHost,
 ): CardInstanceId[] {
   return host.state.runner.grip
-    .filter((cardId) => shellTradersCanPrepareTarget(host, cardId))
+    .filter((cardId) => delayedInstallCanPrepareTarget(host, cardId))
     .sort();
 }
 
-export function shellTradersPreparedTargetIds(
+export function delayedInstallPreparedTargetIds(
   host: RunnerSpecialTriggerExecutionHost,
 ): CardInstanceId[] {
   return (host.state.specialZones?.setAside ?? [])
@@ -168,13 +168,13 @@ export function shellTradersPreparedTargetIds(
       // counters may still be removed while the delayed install target drifts.
       return (
         shellCounters > 1 ||
-        shellTradersCanInstallPreparedCardForFree(host, cardId, definition)
+        delayedInstallCanInstallPreparedCardForFree(host, cardId, definition)
       );
     })
     .sort();
 }
 
-export function applyShellTradersStartOfTurn(
+export function applyDelayedInstallStartOfTurn(
   host: RunnerSpecialTriggerExecutionHost,
   effects?: ResolvedGameEffect[],
 ): void {
@@ -195,7 +195,7 @@ export function applyShellTradersStartOfTurn(
     runnerActionsTakenThisTurn: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false,
+    bonusRunPending: false,
   } as NonNullable<GameState["runnerTurnFlags"]>);
   const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
@@ -205,7 +205,7 @@ export function applyShellTradersStartOfTurn(
     )
       continue;
     if (resolvedSourceIds.includes(sourceCardId)) continue;
-    const targetCardId = shellTradersPreparedTargetIds(host)[0];
+    const targetCardId = delayedInstallPreparedTargetIds(host)[0];
     if (!targetCardId) continue;
     resolvedSourceIds.push(sourceCardId);
     const targetDefinition = host.cards.definitionFor(state, targetCardId);
@@ -230,7 +230,7 @@ export function applyShellTradersStartOfTurn(
   }
 }
 
-function resolveJunkyardBbsAbility(
+function resolveTopHeapCardReturnAbility(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -287,7 +287,7 @@ function resolveJunkyardBbsAbility(
   };
 }
 
-function resolveShellTradersSetAside(
+function resolveDelayedInstallSetAside(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -310,7 +310,7 @@ function resolveShellTradersSetAside(
   )
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
-  if (!shellTradersCanPrepareTarget(host, targetCardId))
+  if (!delayedInstallCanPrepareTarget(host, targetCardId))
     throw new Error("The Shell Traders hat kein gueltiges Ziel.");
   const targetDefinition = host.cards.definitionFor(state, targetCardId);
   if (
@@ -318,7 +318,7 @@ function resolveShellTradersSetAside(
     legalAction.payload.targetCardDefinitionId !== targetDefinition.id
   )
     throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");
-  const shellCounterAmount = shellTradersInstallCost(targetDefinition);
+  const shellCounterAmount = delayedInstallCounterCost(targetDefinition);
   const payloadCounterAmount = Number(
     legalAction.payload?.shellCounterAmount ?? shellCounterAmount,
   );
@@ -360,7 +360,7 @@ function resolveShellTradersSetAside(
   };
 }
 
-function resolveShellTradersRemoveCounter(
+function resolveDelayedInstallRemoveCounter(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -383,7 +383,7 @@ function resolveShellTradersRemoveCounter(
   )
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
-  if (!shellTradersPreparedTargetIds(host).includes(targetCardId))
+  if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))
     throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
   const targetDefinition = host.cards.definitionFor(state, targetCardId);
   if (
@@ -412,7 +412,7 @@ function removeShellCounterAndMaybeInstall(
 ): { remainingCounters: number; installed: boolean } {
   // Re-check the prepared target at resolution time because both paid and
   // start-of-turn removal can turn the last counter into an immediate install.
-  if (!shellTradersPreparedTargetIds(host).includes(targetCardId))
+  if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))
     throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
   host.counters.spendCardCounter(host.state, targetCardId, "shell", 1);
   const remainingCounters = host.counters.cardCounter(
@@ -422,11 +422,11 @@ function removeShellCounterAndMaybeInstall(
   );
   if (remainingCounters > 0)
     return { remainingCounters, installed: false };
-  installShellTradersPreparedCardForFree(host, targetCardId);
+  installDelayedPreparedCardForFree(host, targetCardId);
   return { remainingCounters, installed: true };
 }
 
-function installShellTradersPreparedCardForFree(
+function installDelayedPreparedCardForFree(
   host: RunnerSpecialTriggerExecutionHost,
   cardId: CardInstanceId,
 ): void {
@@ -448,7 +448,7 @@ function installShellTradersPreparedCardForFree(
     throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
   if (
     definition.type === "program" &&
-    !shellTradersCanInstallPreparedCardForFree(host, cardId, definition)
+    !delayedInstallCanInstallPreparedCardForFree(host, cardId, definition)
   )
     throw new Error("Nicht genug Memory fuer The Shell Traders.");
 
@@ -488,7 +488,7 @@ function installShellTradersPreparedCardForFree(
     host.counters.addCardCounter(state, cardId, "virus", 1);
 }
 
-function shellTradersCanInstallPreparedCardForFree(
+function delayedInstallCanInstallPreparedCardForFree(
   host: RunnerSpecialTriggerExecutionHost,
   cardId: CardInstanceId,
   definition = host.cards.definitionFor(host.state, cardId),
@@ -516,7 +516,7 @@ function shellTradersCanInstallPreparedCardForFree(
   );
 }
 
-function resolveSelfModifyingCodeAbility(
+function resolveHiddenStackProgramInstallAbility(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
 ): void {
@@ -541,7 +541,7 @@ function resolveSelfModifyingCodeAbility(
     throw new Error("Keine suchbare Programmkarte im Stack.");
 
   host.zones.trashRunnerInstalledCardToHeap(state, sourceCardId);
-  host.hiddenZone.startSelfModifyingCodeStackActivation(
+  host.hiddenZone.startHiddenStackProgramInstallActivation(
     sourceCardId,
     legalAction,
   );
@@ -549,13 +549,13 @@ function resolveSelfModifyingCodeAbility(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     sourceDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
-    hiddenZoneAction: "self_modifying_code_install_program",
+    hiddenZoneAction: "hidden_stack_program_install",
     trashOnUse: true,
     trashedCardDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
   };
 }
 
-function shellTradersCanPrepareTarget(
+function delayedInstallCanPrepareTarget(
   host: RunnerSpecialTriggerExecutionHost,
   cardId: CardInstanceId,
 ): boolean {

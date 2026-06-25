@@ -2,7 +2,7 @@ import type { GameState, LegalAction } from "@netgrid/shared";
 import { buildLegalAction } from "./action-builders";
 
 export type RunnerDrawActionContext = {
-  citySurveillanceSourceCount: number;
+  drawTaxSourceCount: number;
   projectedDrawCount: number;
 };
 
@@ -10,8 +10,8 @@ export function buildRunnerDrawCardActions(
   state: GameState,
   context: RunnerDrawActionContext,
 ): LegalAction[] {
-  const { citySurveillanceSourceCount, projectedDrawCount } = context;
-  if (citySurveillanceSourceCount <= 0) {
+  const { drawTaxSourceCount, projectedDrawCount } = context;
+  if (drawTaxSourceCount <= 0) {
     return [
       buildLegalAction(
         state,
@@ -25,25 +25,24 @@ export function buildRunnerDrawCardActions(
   }
 
   const actions: LegalAction[] = [];
-  const projectedCitySurveillanceCost =
-    citySurveillanceSourceCount * projectedDrawCount;
-  if (state.runner.credits >= projectedCitySurveillanceCost) {
+  const projectedDrawTaxCost = drawTaxSourceCount * projectedDrawCount;
+  if (state.runner.credits >= projectedDrawTaxCost) {
     actions.push(
       buildLegalAction(
         state,
         "runner",
         "draw_card",
-        projectedCitySurveillanceCost === 1
+        projectedDrawTaxCost === 1
           ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
-          : `Karte ziehen (City Surveillance: ${projectedCitySurveillanceCost} Credits zahlen)`,
+          : `Karte ziehen (City Surveillance: ${projectedDrawTaxCost} Credits zahlen)`,
         "basic_action",
-        [{ clicks: 1, credits: projectedCitySurveillanceCost }],
+        [{ clicks: 1, credits: projectedDrawTaxCost }],
         {
-          citySurveillanceSourceCount,
-          citySurveillanceProjectedDrawCount: projectedDrawCount,
-          citySurveillanceDrawDecision: "pay",
-          citySurveillanceProjectedCreditsPaid: projectedCitySurveillanceCost,
-          citySurveillanceProjectedTagsAdded: 0,
+          drawTaxSourceCount: drawTaxSourceCount,
+          drawTaxProjectedDrawCount: projectedDrawCount,
+          drawTaxDecision: "pay",
+          drawTaxProjectedCreditsPaid: projectedDrawTaxCost,
+          drawTaxProjectedTagsAdded: 0,
         },
       ),
     );
@@ -54,18 +53,18 @@ export function buildRunnerDrawCardActions(
       state,
       "runner",
       "draw_card",
-      citySurveillanceSourceCount === 1
+      drawTaxSourceCount === 1
         ? "Karte ziehen (City Surveillance: 1 Tag nehmen)"
-        : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Tags nehmen)`,
+        : `Karte ziehen (City Surveillance: ${drawTaxSourceCount} Tags nehmen)`,
       "basic_action",
       [{ clicks: 1 }],
       {
-        citySurveillanceSourceCount,
-        citySurveillanceProjectedDrawCount: projectedDrawCount,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded:
-          citySurveillanceSourceCount * projectedDrawCount,
+        drawTaxSourceCount: drawTaxSourceCount,
+        drawTaxProjectedDrawCount: projectedDrawCount,
+        drawTaxDecision: "tag",
+        drawTaxProjectedCreditsPaid: 0,
+        drawTaxProjectedTagsAdded:
+          drawTaxSourceCount * projectedDrawCount,
       },
     ),
   );

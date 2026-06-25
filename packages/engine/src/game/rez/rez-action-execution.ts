@@ -7,7 +7,7 @@ export type RezActionExecutionHost = {
       rootRez: boolean,
       legalAction: LegalAction,
     ) => void;
-    expireCorporateRetreatInstallCreditAbilities: () => void;
+    expireScoredAgendaInstallRezCreditAbilities: () => void;
   };
   run: {
     passCorpRunRootRezWindow: (legalAction: LegalAction) => void;
@@ -44,7 +44,7 @@ function executeRezIceAction(
     legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true,
     legalAction,
   );
-  host.rez.expireCorporateRetreatInstallCreditAbilities();
+  host.rez.expireScoredAgendaInstallRezCreditAbilities();
 }
 
 function executeDeclineRezAction(

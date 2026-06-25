@@ -3,15 +3,15 @@ import {
   isHqToNewRemoteInstallRezRezChoiceSource,
   resolveHqToNewRemoteInstallRezChoice,
   resolveHqToNewRemoteInstallRezRezChoice,
-} from "./data-fort-reclamation-sequence";
+} from "./hq-to-new-remote-install-rez-sequence";
 import {
-  isPriorityRequisitionChoiceSource,
-  resolvePriorityRequisitionChoice,
-} from "./priority-requisition-sequence";
+  isScoredAgendaFreeRezChoiceSource,
+  resolveScoredAgendaFreeRezChoice,
+} from "./scored-agenda-free-rez-sequence";
 import {
-  isSecurityPurgeInstallTargetChoiceSource,
-  resolveSecurityPurgeInstallTargetChoice,
-} from "./security-purge-sequence";
+  isAgendaPurgeInstallTargetChoiceSource,
+  resolveAgendaPurgeInstallTargetChoice,
+} from "./agenda-purge-install-target-sequence";
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
@@ -28,24 +28,24 @@ export type ScoredAgendaChoiceResolver = {
 export const SCORED_AGENDA_CHOICE_RESOLVERS: readonly ScoredAgendaChoiceResolver[] =
   [
     {
-      id: "priority_requisition_choice",
-      matches: isPriorityRequisitionChoiceSource,
-      resolve: resolvePriorityRequisitionChoice,
+      id: "scored_agenda_free_rez_choice",
+      matches: isScoredAgendaFreeRezChoiceSource,
+      resolve: resolveScoredAgendaFreeRezChoice,
     },
     {
-      id: "data_fort_reclamation_rez_choice",
+      id: "hq_to_new_remote_rez_choice",
       matches: isHqToNewRemoteInstallRezRezChoiceSource,
       resolve: resolveHqToNewRemoteInstallRezRezChoice,
     },
     {
-      id: "data_fort_reclamation_install_choice",
+      id: "hq_to_new_remote_install_rez_install_choice",
       matches: isHqToNewRemoteInstallRezChoiceSource,
       resolve: resolveHqToNewRemoteInstallRezChoice,
     },
     {
-      id: "security_purge_target_choice",
-      matches: isSecurityPurgeInstallTargetChoiceSource,
-      resolve: resolveSecurityPurgeInstallTargetChoice,
+      id: "agenda_purge_target_choice",
+      matches: isAgendaPurgeInstallTargetChoiceSource,
+      resolve: resolveAgendaPurgeInstallTargetChoice,
     },
   ];
 

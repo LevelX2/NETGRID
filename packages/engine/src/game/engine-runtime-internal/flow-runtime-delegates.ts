@@ -1,363 +1,381 @@
-import { runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegate } from "./runtime-delegate-store";
 
 export function canInstallCorpRootCardInServer(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.canInstallCorpRootCardInServer as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "canInstallCorpRootCardInServer",
   )(...args);
 }
 
 export function corpRootAgendaOrNodeCapacityInServer(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .corpRootAgendaOrNodeCapacityInServer as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "corpRootAgendaOrNodeCapacityInServer",
   )(...args);
 }
 
 export function corpRegionUpgradeIdsInServer(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.corpRegionUpgradeIdsInServer as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "corpRegionUpgradeIdsInServer",
   )(...args);
 }
 
 export function startRun(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.startRun as any)(...args);
+  return runtimeDelegate("flowRuntimeHosts", "startRun")(...args);
 }
 
 export function runnerTraceCounterEffectDefinitions(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.runnerTraceCounterEffectDefinitions as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerTraceCounterEffectDefinitions",
   )(...args);
 }
 
 export function runnerCounterDisplayName(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runnerCounterDisplayName as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerCounterDisplayName",
+  )(...args);
 }
 
 export function traceCounterEffectDefinitionFor(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.traceCounterEffectDefinitionFor as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "traceCounterEffectDefinitionFor",
   )(...args);
 }
 
 export function runnerUtilityLongtailKindForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .runnerUtilityLongtailKindForDefinition as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerUtilityLongtailKindForDefinition",
   )(...args);
 }
 
 export function runnerUtilityLongtailKindForCard(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.runnerUtilityLongtailKindForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerUtilityLongtailKindForCard",
   )(...args);
 }
 
 export function runnerUtilityLongtailImplementationForCard(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .runnerUtilityLongtailImplementationForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerUtilityLongtailImplementationForCard",
   )(...args);
 }
 
 export function uniqueDirectLongtailImplementationForDefinition(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .uniqueDirectLongtailImplementationForDefinition as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "uniqueDirectLongtailImplementationForDefinition",
   )(...args);
 }
 
 export function uniqueDirectLongtailKindForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .uniqueDirectLongtailKindForDefinition as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "uniqueDirectLongtailKindForDefinition",
   )(...args);
 }
 
 export function uniqueDirectLongtailImplementationForCard(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .uniqueDirectLongtailImplementationForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "uniqueDirectLongtailImplementationForCard",
   )(...args);
 }
 
 export function uniqueDirectLongtailKindForCard(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.uniqueDirectLongtailKindForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "uniqueDirectLongtailKindForCard",
   )(...args);
 }
 
 export function remainingReplacementLongtailImplementationForDefinition(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .remainingReplacementLongtailImplementationForDefinition as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "remainingReplacementLongtailImplementationForDefinition",
   )(...args);
 }
 
 export function remainingReplacementLongtailKindForDefinition(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .remainingReplacementLongtailKindForDefinition as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "remainingReplacementLongtailKindForDefinition",
   )(...args);
 }
 
 export function remainingReplacementLongtailImplementationForCard(
   ...args: any[]
 ): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .remainingReplacementLongtailImplementationForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "remainingReplacementLongtailImplementationForCard",
   )(...args);
 }
 
 export function remainingReplacementLongtailKindForCard(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .remainingReplacementLongtailKindForCard as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "remainingReplacementLongtailKindForCard",
   )(...args);
 }
 
-export function isAcmeSavingsAndLoanDefinition(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.isAcmeSavingsAndLoanDefinition as any
+export function isObligationDebtDefinition(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "isObligationDebtDefinition",
   )(...args);
 }
 
-export function isCitySurveillanceCard(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.isCitySurveillanceCard as any)(
-    ...args,
-  );
+export function isDrawTaxSourceDefinition(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "isDrawTaxSourceDefinition")(...args);
 }
 
-export function isInvestmentFirmCard(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.isInvestmentFirmCard as any)(
-    ...args,
-  );
+export function isCorpInstalledEconomyCreditSource(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "isCorpInstalledEconomyCreditSource")(...args);
 }
 
-export function isHackerTrackerCentralCard(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.isHackerTrackerCentralCard as any)(
-    ...args,
-  );
+export function isCorpTraceCounterPoolSource(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "isCorpTraceCounterPoolSource",
+  )(...args);
 }
 
 export function applyRunnerTraceCounterRunStartEffects(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .applyRunnerTraceCounterRunStartEffects as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "applyRunnerTraceCounterRunStartEffects",
   )(...args);
 }
 
-export function applyAiBoonRunStart(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.applyAiBoonRunStart as any)(
-    ...args,
-  );
+export function applyRunStartRandomStrengthBonus(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "applyRunStartRandomStrengthBonus")(...args);
 }
 
 export function continueRun(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.continueRun as any)(...args);
+  return runtimeDelegate("flowRuntimeHosts", "continueRun")(...args);
 }
 
 export function addCurrentRunAccessCount(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.addCurrentRunAccessCount as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "addCurrentRunAccessCount",
+  )(...args);
 }
 
 export function passCurrentEncounteredIce(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.passCurrentEncounteredIce as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "passCurrentEncounteredIce",
+  )(...args);
 }
 
 export function resolveBlinkBreakSubroutineAction(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.resolveBlinkBreakSubroutineAction as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "resolveBlinkBreakSubroutineAction",
   )(...args);
 }
 
 export function recordBartmossEncounterUsage(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.recordBartmossEncounterUsage as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "recordBartmossEncounterUsage",
   )(...args);
 }
 
 export function recordSnowballBreakUsage(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.recordSnowballBreakUsage as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "recordSnowballBreakUsage",
+  )(...args);
 }
 
 export function icebreakerHasSpecial(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.icebreakerHasSpecial as any)(
-    ...args,
-  );
+  return runtimeDelegate("flowRuntimeHosts", "icebreakerHasSpecial")(...args);
 }
 
-export function hackerTrackerCardIds(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.hackerTrackerCardIds as any)(
-    ...args,
-  );
+export function corpTraceCounterPoolSourceIds(...args: any[]): any {
+  return runtimeDelegate("flowRuntimeHosts", "corpTraceCounterPoolSourceIds")(...args);
 }
 
-export function hackerTrackerCounterType(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.hackerTrackerCounterType as any)(
-    ...args,
-  );
+export function corpTraceCounterPoolCounterType(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "corpTraceCounterPoolCounterType",
+  )(...args);
 }
 
-export function hackerTrackerCounterTotal(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.hackerTrackerCounterTotal as any)(
-    ...args,
-  );
+export function corpTraceCounterPoolTotal(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "corpTraceCounterPoolTotal",
+  )(...args);
 }
 
-export function spendHackerTrackerCounters(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.spendHackerTrackerCounters as any)(
-    ...args,
-  );
+export function spendCorpTraceCounterPoolCounters(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "spendCorpTraceCounterPoolCounters",
+  )(...args);
 }
 
-export function addHackerTrackerTraceCounters(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.addHackerTrackerTraceCounters as any
+export function addCorpTraceCounterPoolCounters(...args: any[]): any {
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "addCorpTraceCounterPoolCounters",
   )(...args);
 }
 
 export function rabbitTraceLimitReductionForIceTrace(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .rabbitTraceLimitReductionForIceTrace as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "rabbitTraceLimitReductionForIceTrace",
   )(...args);
 }
 
 export function archivesAccessRequiresDecisionOrEffect(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .archivesAccessRequiresDecisionOrEffect as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "archivesAccessRequiresDecisionOrEffect",
   )(...args);
 }
 
 export function runnerAccessActionHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runnerAccessActionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate("flowRuntimeHosts", "runnerAccessActionHost")(...args);
 }
 
 export function runnerEncounterActionHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.runnerEncounterActionHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerEncounterActionHostForState",
   )(...args);
 }
 
 export function runMovementHostForState(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runMovementHostForState as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runMovementHostForState",
+  )(...args);
 }
 
 export function runRezWindowHostForState(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runRezWindowHostForState as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runRezWindowHostForState",
+  )(...args);
 }
 
 export function fortPassWindowHostForState(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.fortPassWindowHostForState as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "fortPassWindowHostForState",
+  )(...args);
 }
 
 export function fortRunSideFamiliesHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.fortRunSideFamiliesHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "fortRunSideFamiliesHostForState",
   )(...args);
 }
 
 export function encounterEntryHostForState(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.encounterEntryHostForState as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "encounterEntryHostForState",
+  )(...args);
 }
 
 export function successfulRunInterventionHost(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.successfulRunInterventionHost as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "successfulRunInterventionHost",
   )(...args);
 }
 
 export function encounterResolutionHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.encounterResolutionHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "encounterResolutionHostForState",
   )(...args);
 }
 
 export function encounterSpecialWindowHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.encounterSpecialWindowHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "encounterSpecialWindowHostForState",
   )(...args);
 }
 
 export function encounterPrintedEffectHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.encounterPrintedEffectHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "encounterPrintedEffectHostForState",
   )(...args);
 }
 
 export function encounterPrintedNonTraceHostForState(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts
-      .encounterPrintedNonTraceHostForState as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "encounterPrintedNonTraceHostForState",
   )(...args);
 }
 
 export function runEndCleanupHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runEndCleanupHost as any)(...args);
+  return runtimeDelegate("flowRuntimeHosts", "runEndCleanupHost")(...args);
 }
 
 export function runnerBreakerActionExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegates.flowRuntimeHosts.runnerBreakerActionExecutionHost as any
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runnerBreakerActionExecutionHost",
   )(...args);
 }
 
 export function startRunActionExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.startRunActionExecutionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "startRunActionExecutionHost",
+  )(...args);
 }
 
 export function rezActionExecutionHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.rezActionExecutionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate("flowRuntimeHosts", "rezActionExecutionHost")(...args);
 }
 
 export function breachStateHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.breachStateHost as any)(...args);
+  return runtimeDelegate("flowRuntimeHosts", "breachStateHost")(...args);
 }
 
 export function accessFlowHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.accessFlowHost as any)(...args);
+  return runtimeDelegate("flowRuntimeHosts", "accessFlowHost")(...args);
 }
 
 export function runAccessTransitionHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.runAccessTransitionHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "runAccessTransitionHost",
+  )(...args);
 }
 
 export function accessEffectHandlerHost(...args: any[]): any {
-  return (runtimeDelegates.flowRuntimeHosts.accessEffectHandlerHost as any)(
-    ...args,
-  );
+  return runtimeDelegate(
+    "flowRuntimeHosts",
+    "accessEffectHandlerHost",
+  )(...args);
 }

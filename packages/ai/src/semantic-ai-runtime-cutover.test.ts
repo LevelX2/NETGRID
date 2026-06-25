@@ -163,6 +163,52 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toContain("semantic_runtime_scope:basic_economy_draw");
   });
 
+  it("keeps the replay cluster shape on the visible run path", () => {
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [draw, run]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("held-1", "runner", "event"),
+      visibleCard("held-2", "runner", "program"),
+      visibleCard("held-3", "runner", "resource"),
+      visibleCard("held-4", "runner", "hardware"),
+    ];
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_runtime_default:true",
+        "action_type:start_run",
+      ]),
+    );
+    const runAlternative = decision.decisionDebug?.rankedAlternatives?.find(
+      (entry) => entry.selectedActionType === "start_run",
+    );
+    const drawAlternative = decision.decisionDebug?.rankedAlternatives?.find(
+      (entry) => entry.selectedActionType === "draw_card",
+    );
+    expect(runAlternative?.score ?? 0).toBeGreaterThan(
+      drawAlternative?.score ?? 0,
+    );
+  });
+
   it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
     const rdRun = legalAction(
       "run-rd",
@@ -727,6 +773,117 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("defers a protected but contestable remote agenda install", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-contestable-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in protected remote",
+        { credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_remote_risk:unsafe_score_action_available",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(debugText).toContain("corp_remote_score_line:contestable_by_runner");
+    expect(debugText).toContain("remote_contestable_by_runner:true");
+  });
+
+  it("does not advance a protected but contestable remote score line", () => {
+    const remoteAgenda = visibleCard("contestable-remote-agenda", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-contestable-agenda",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(debugText).toContain("remote_contestable_by_runner:true");
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining(["blocked_plan_count:1"]),
+        }),
+      ]),
+    );
+  });
+
   it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
     const remoteAgenda = visibleCard("remote-agenda-below-rez-floor", "corp", "agenda", {
       advancementCounters: 1,
@@ -827,6 +984,182 @@ describe("Semantic AI runtime cutover", () => {
         "low_rez_reserve:false",
       ]),
     );
+  });
+
+  it("funds HQ rez reserve before installing unrezzable HQ ICE over agenda exposure", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      advancementRequirement: 3,
+    });
+    const expensiveIce = visibleCard("expensive-hq-ice", "corp", "ice", {
+      rezCost: 4,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-hq-ice-below-rez-floor",
+        "corp",
+        "install_card",
+        "Install ICE protecting HQ",
+        { credits: 0 },
+        {
+          source: expensiveIce.instanceId,
+          payload: { placement: "ice", serverId: "hq" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [agenda, expensiveIce];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "central_rez_floor_funding_need:true",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(debugText).toContain("corp_central_rez_floor_penalty");
+    expect(debugText).toContain("corp_hq_agenda_exposure:true");
+    expect(debugText).toContain("central_rez_reserve_below_floor:true");
+  });
+
+  it("uses Closed Accounts before BBS economy in an open tag-payoff window", () => {
+    const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
+      definitionId: "onr_v1_285_closed-accounts",
+      title: "Closed Accounts",
+    });
+    const bbs = visibleCard("bbs-root", "corp", "asset", {
+      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      title: "BBS Whispering Campaign",
+      counters: { bit: 4 },
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "closed-accounts",
+        "corp",
+        "play_operation",
+        "Closed Accounts spielen",
+        { credits: 1 },
+        { source: closedAccounts.instanceId },
+      ),
+      legalAction(
+        "bbs-take",
+        "corp",
+        "activated_card_ability",
+        "BBS Whispering Campaign: 2 Credits nehmen",
+        { credits: 0 },
+        {
+          source: bbs.instanceId,
+          payload: { cardImplementationCreditAmount: 2 },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.gripOrHq = [closedAccounts];
+    input.playerView.opponent.tags = 1;
+    input.playerView.opponent.credits = 1;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [bbs]),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const bbsAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === "bbs-take",
+    );
+
+    expect(decision.actionId).toBe("closed-accounts");
+    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
+    expect(debugText).toContain("tagged_payoff_kind:economic");
+    expect(debugText).toContain("corp_tagged_payoff_followup_plan:active");
+    expect(
+      bbsAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "corp_tagged_payoff_window_passive_penalty",
+      ),
+    ).toBe(true);
+  });
+
+  it("uses hardware trash payoff over basic credit while the Runner is tagged", () => {
+    const powerGrid = visibleCard("power-grid", "corp", "operation", {
+      definitionId: "onr_v1_299_power-grid-overload",
+      title: "Power Grid Overload",
+    });
+    const rdInterface = visibleCard("rd-interface", "runner", "hardware", {
+      definitionId: "onr_v1_139_r-and-d-interface",
+      title: "R&D Interface",
+      rulesText: "Access 1 additional card whenever you access R&D.",
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "power-grid",
+        "corp",
+        "play_operation",
+        "Power Grid Overload: 1 Hardware trashen",
+        { credits: 1 },
+        { source: powerGrid.instanceId },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.gripOrHq = [powerGrid];
+    input.playerView.opponent.tags = 1;
+    input.playerView.opponent.rig = [rdInterface];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("power-grid");
+    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
+    expect(debugText).toContain("tagged_payoff_kind:hardware_trash");
+    expect(debugText).toContain("runner_hardware_payoff:multiaccess");
+  });
+
+  it("trashes a visible Runner credit-bank resource before basic credit while tagged", () => {
+    const broker = visibleCard("broker", "runner", "resource", {
+      definitionId: "onr_v1_154_broker",
+      title: "Broker",
+      counters: { bit: 6 },
+      rulesText: "Take all the bits from Broker.",
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "trash-broker",
+        "corp",
+        "trash_resource",
+        "Broker trashen",
+        { credits: 2 },
+        { payload: { targetCardId: broker.instanceId } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.opponent.tags = 1;
+    input.playerView.opponent.rig = [broker];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("trash-broker");
+    expect(debugText).toContain("corp_tagged_runner_payoff_pressure");
+    expect(debugText).toContain("tagged_payoff_kind:resource_trash");
+    expect(debugText).toContain("runner_resource_credit_bank_visible:true");
   });
 
   it("uses a breaker coverage plan step before a blocked remote contest", () => {

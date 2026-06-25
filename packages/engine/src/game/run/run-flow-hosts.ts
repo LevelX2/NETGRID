@@ -46,7 +46,7 @@ import {
   type RunContinuationExecutionHost,
 } from "./run-continuation-execution";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
@@ -103,7 +103,6 @@ import {
   isTokyoUnsuccessfulRunSource,
   fortTraceBitPoolSource,
   runnerCanUseBreakerOnCurrentFort,
-  runnerStealthRecurringCredits,
   tokyoUnsuccessfulRunAmountForCard,
   type FortRunSideFamiliesHost,
 } from "./fort-run-side-families";
@@ -192,7 +191,7 @@ export type RunFlowHost = {
       reason: "ability" | "successful_run" | "post_access",
       legalAction?: LegalAction,
     ) => boolean;
-    startExpertScheduleAnalyzerPostAccessChoice: (
+    startPostAccessInstalledProgramChoice: (
       state: GameState,
       run: NonNullable<GameState["run"]>,
       legalAction?: LegalAction,
@@ -219,7 +218,7 @@ export type RunFlowHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
-    applyAiBoonRunStart: (state: GameState, legalAction?: LegalAction) => void;
+    applyRunStartRandomStrengthBonus: (state: GameState, legalAction?: LegalAction) => void;
     openStartOfRunFortUtilityWindow: (
       state: GameState,
       legalAction?: LegalAction,
@@ -227,8 +226,8 @@ export type RunFlowHost = {
   };
   trace: {
     calculateRunnerLink: (state: GameState) => number;
-    addHackerTrackerTraceCounters: (state: GameState) => number;
-    hackerTrackerCounterTotal: (state: GameState) => number;
+    addCorpTraceCounterPoolCounters: (state: GameState) => number;
+    corpTraceCounterPoolTotal: (state: GameState) => number;
     recurringTraceCreditPoolTotal: (state: GameState) => number;
     rabbitTraceLimitReductionForIceTrace: (state: GameState) => number;
     resolveTraceHardwareWreckerSuccess: (
@@ -394,10 +393,10 @@ export type RunFlowHost = {
       legalAction: LegalAction,
       sourceDefinitionId: CardDefinitionId,
     ) => void;
-    acmeSavingsAndLoanObligationCount: (state: GameState) => number;
-    addAcmeSavingsAndLoanObligation: (state: GameState, amount: number) => void;
+    activeObligationCount: (state: GameState) => number;
+    addActiveObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
-    hasInstalledMicrotechTrodeSet: (state: GameState) => boolean;
+    hasInstalledRunnerApDamageReducerHardware: (state: GameState) => boolean;
     traceCounterEffectDefinitionFor: Parameters<typeof isSupportedEncounterTraceSuccessEffect>[1];
     installedRunnerVirusSourceIds: (
       state: GameState,
@@ -505,7 +504,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.run.executeCardImplementationRunnerRunStartEffects,
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
-        applyAiBoonRunStart: host.run.applyAiBoonRunStart,
+        applyRunStartRandomStrengthBonus: host.run.applyRunStartRandomStrengthBonus,
         openStartOfRunFortUtilityWindow:
           host.run.openStartOfRunFortUtilityWindow,
       },
@@ -612,8 +611,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       breaker: {
         dupreStrengthCounterBonus: (breakerId) =>
           host.ice.dupreStrengthCounterBonus(state, breakerId),
-        runnerStealthRecurringCredits: () =>
-          runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)),
       },
       payment: {
         availableRunnerRunCredits: (breakerId) =>
@@ -724,10 +721,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
         canReplaceFortCardsFromHq: (serverId) =>
           host.cards.canReplaceFortCardsFromHq(state, serverId),
-        acmeSavingsAndLoanObligationCount: () =>
-          host.callbacks.acmeSavingsAndLoanObligationCount(state),
-        addAcmeSavingsAndLoanObligation: (amount) =>
-          host.callbacks.addAcmeSavingsAndLoanObligation(state, amount),
+        activeObligationCount: () =>
+          host.callbacks.activeObligationCount(state),
+        addActiveObligation: (amount) =>
+          host.callbacks.addActiveObligation(state, amount),
       },
     };
   }
@@ -967,8 +964,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
     return encounterPrintedEffectHost(state, {
       addCardCounter: (cardId, counterType, amount) =>
         host.counters.addCardCounter(state, cardId, counterType, amount),
-      addHackerTrackerTraceCounters: () =>
-        host.trace.addHackerTrackerTraceCounters(state),
+      addCorpTraceCounterPoolCounters: () =>
+        host.trace.addCorpTraceCounterPoolCounters(state),
       calculateRunnerLink: () => host.trace.calculateRunnerLink(state),
       cardCounter: (cardId, counterType) =>
         host.counters.cardCounter(state, cardId, counterType),
@@ -977,9 +974,9 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       ensureRunnerTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
-      hasInstalledMicrotechTrodeSet: () =>
-        host.callbacks.hasInstalledMicrotechTrodeSet(state),
-      hackerTrackerCounterTotal: () => host.trace.hackerTrackerCounterTotal(state),
+      hasInstalledRunnerApDamageReducerHardware: () =>
+        host.callbacks.hasInstalledRunnerApDamageReducerHardware(state),
+      corpTraceCounterPoolTotal: () => host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () => host.trace.recurringTraceCreditPoolTotal(state),
       openEventModificationWindow: (event, action) =>
         host.damage.openEventModificationWindow(state, event, action),
@@ -1191,8 +1188,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       followups: {
-        applyBodyweightDataCrecheSuccessfulRun: (legalAction) =>
-          applyBodyweightDataCrecheSuccessfulRun(
+        applySuccessfulRunExtraRunFollowup: (legalAction) =>
+          applySuccessfulRunExtraRunFollowup(
             successfulRunInterventionHost(state),
             legalAction,
           ),
@@ -1264,8 +1261,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             host.access.accessFlowHost(state),
             legalAction,
           ),
-        findMicrotechAiInterfacePreAccessSource: (run) => {
-          if (run.microtechAiInterfacePreAccessResolved) return undefined;
+        findPreAccessTopRdReorderSource: (run) => {
+          if (run.preAccessTopRdReorderResolved) return undefined;
           const accessServerId = run.accessServerOverride ?? run.attackedServerId;
           if (accessServerId !== "rd") return undefined;
           return host.cards.runnerInstalledCardIds(state)
@@ -1277,7 +1274,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
               ).includes("pre_access_rd_cut"),
             );
         },
-        isMicrotechAiInterfacePreAccessSource: (cardId) =>
+        isPreAccessTopRdReorderSource: (cardId) =>
           host.cards.runnerInstalledCardIds(state).includes(cardId) &&
           host.cards.cardImplementationAccessHookKindsForDefinition(
             host.cards.definitionFor(state, cardId).id,

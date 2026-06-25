@@ -85,7 +85,7 @@ describe("main-action-hosts", () => {
     const composition = createMainActionHostComposition(
       hostFor(state, {
         specialZoneHarnessActions: () => [delegated],
-        topHostedProgramOnMicrotech: () => "program_1",
+        topHostedProgramOnHardware: () => "program_1",
       }),
     );
 
@@ -97,7 +97,7 @@ describe("main-action-hosts", () => {
     expect(
       composition
         .runnerMainActionGenerationHost(state)
-        .hiddenZone.topHostedProgramOnMicrotech(state, "hardware_1"),
+        .hiddenZone.topHostedProgramOnHardware(state, "hardware_1"),
     ).toBe("program_1");
   });
 
@@ -167,7 +167,7 @@ function hostFor(
   state: GameState,
   overrides: Partial<{
     specialZoneHarnessActions: CorpMainActionGenerationHost["specialZones"]["specialZoneHarnessActions"];
-    topHostedProgramOnMicrotech: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnMicrotech"];
+    topHostedProgramOnHardware: RunnerMainActionGenerationHost["hiddenZone"]["topHostedProgramOnHardware"];
   }> = {},
 ): MainActionHostCompositionHost {
   const unexpected = (name: string) => () => {
@@ -243,10 +243,10 @@ function hostFor(
       ),
       buildRunnerValuPakInstallAction: unexpected("valu-pak install"),
       buildRunnerValuPakSequenceEndAction: unexpected("valu-pak end"),
-      buildRunnerShellTradersSetAsideAction: unexpected(
+      buildRunnerDelayedInstallSetAsideAction: unexpected(
         "shell traders set aside",
       ),
-      buildRunnerShellTradersRemoveCounterAction: unexpected(
+      buildRunnerDelayedInstallRemoveCounterAction: unexpected(
         "shell traders remove counter",
       ),
     },
@@ -286,19 +286,15 @@ function hostFor(
     },
     corp: {
       corpActionDebtPending: () => 0,
-      acmeSavingsAndLoanObligationCount: () => 0,
+      activeObligationCount: () => 0,
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
-      powerGridOverloadLegalActions: () => [],
-      systematicLayoffsLegalActions: () => [],
+      hardwareTrashByCounterLegalActions: () => [],
+      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
-      corpInstalledEconomyActionProfileForDefinition: () => undefined,
-      corpInstalledEconomyActionPayload: unexpected(
-        "corpInstalledEconomyActionPayload",
-      ),
     },
     runner: {
       isConcealedRunnerResource: () => false,
@@ -308,7 +304,7 @@ function hostFor(
       availableRunnerProgramInstallCredits: () => state.runner.credits,
       availableRunnerRunStartCredits: () => state.runner.credits,
       runnerDrawActionContext: () => ({
-        citySurveillanceSourceCount: 0,
+        drawTaxSourceCount: 0,
         projectedDrawCount: 1,
       }),
       runnerUtilityLongtailKindForCard: () => undefined,
@@ -345,7 +341,7 @@ function hostFor(
         "isInstalledCorpCardAdvanceable",
       ),
       shouldOfferRunnerProgramTrashBeforeInstall: () => false,
-      canOverlayProgramOnZetatechSoftwareInstaller: () => false,
+      canOverlayProgramOnInstalledProgramHost: () => false,
       canHostProgramOnDaemon: () => false,
       cardImplementationAgendaPointInstallCost: () => 0,
       pickRunnerAgendaForAgendaPointCost: () => undefined,
@@ -357,7 +353,7 @@ function hostFor(
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),
-      isAcmeSavingsAndLoanDefinition: () => false,
+      isObligationDebtDefinition: () => false,
     },
     cardImplementation: {
       corpTraceDamageAbilityHost: () => ({}),
@@ -381,9 +377,9 @@ function hostFor(
       edgerunnerTempsInstallActionsRemaining: () => 0,
       valuPakProgramInstallActionsRemaining: () => 0,
       runnerInstallableProgramIdsForValuPak: () => [],
-      shellTradersPrepareTargetIds: () => [],
-      shellTradersInstallCost: () => 0,
-      shellTradersPreparedTargetIds: () => [],
+      delayedInstallPrepareTargetIds: () => [],
+      delayedInstallCounterCost: () => 0,
+      delayedInstallPreparedTargetIds: () => [],
     },
     callbacks: {
       mustServer: unexpected("mustServer"),
@@ -392,37 +388,28 @@ function hostFor(
         serverId,
       runnerMemoryLimit: () => state.runner.memoryLimit,
       exposedCorpCardInServer: () => undefined,
-      topHostedProgramOnMicrotech:
-        overrides.topHostedProgramOnMicrotech ?? (() => undefined),
-      microtechHostedProgramIds: () => [],
+      topHostedProgramOnHardware:
+        overrides.topHostedProgramOnHardware ?? (() => undefined),
+      hostedProgramIdsOnHardware: () => [],
       topRunnerHeapCardId: () => undefined,
       constants: {
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: new Set(),
-        HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: new Set(),
-        CORP_HQ_SHUFFLE_DRAW_CARD_ID: "corp_hq_shuffle_draw",
-        COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
-        DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
-        COUNTER_UPGRADE_CARD_IDS: new Set(),
-        TAG_CONDITION_UPGRADE_CARD_IDS: new Set(),
-        COUNTER_ASSET_CARD_IDS: new Set(),
-        INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
-          "information_laundering",
-        ACTION_ASSET_CARD_IDS: new Set(),
-        SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID: "systematic_layoffs",
+        INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
+        VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
+        COUNTER_UPGRADE_SOURCES: new Set(),
+        ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
         RUNNER_EVENT_RESOLVERS: {},
-        STACK_SEARCH_PROGRAM_CARD_IDS: new Set(),
+        STACK_SEARCH_PROGRAM_SOURCES: new Set(),
         SELF_MODIFYING_CODE_ID: "self_modifying_code",
-        SHORT_CIRCUIT_RESOURCE_CARD_ID: "short_circuit",
-        AUJOURD_OUI_RESOURCE_CARD_ID: "aujourd_oui",
-        SERVER_EXPOSE_PROGRAM_CARD_IDS: new Set(),
-        STACK_TOP_REVEAL_PROGRAM_CARD_IDS: new Set(),
-        COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID: "counter_stack_reveal",
-        FAIT_ACCOMPLI_COUNTER_PROGRAM_ID: "fait_accompli",
-        BOARDWALK_RANDOM_PROGRAM_CARD_ID: "boardwalk",
-        MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID: "microtech",
-        QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID: "quest_for_cattekin",
-        STACK_TOP_REORDER_RESOURCE_CARD_ID: "stack_top_reorder",
+        PAID_STACK_SEARCH_RESOURCE_SOURCE: "short_circuit",
+        DAILY_CREDIT_RESOURCE_SOURCE: "aujourd_oui",
+        SERVER_EXPOSE_PROGRAM_SOURCES: new Set(),
+        COUNTER_STACK_TOP_REVEAL_PROGRAM_SOURCE: "counter_stack_reveal",
+        COUNTER_GAIN_PROGRAM_SOURCE: "fait_accompli",
+        BOARDWALK_RANDOM_PROGRAM_SOURCE: "boardwalk",
+        HOST_RETURN_HARDWARE_SOURCE: "microtech",
+        RANDOM_RESOURCE_SOURCE: "quest_for_cattekin",
+        STACK_TOP_REORDER_RESOURCE_SOURCE: "stack_top_reorder",
         JUNKYARD_BBS_ID: "junkyard_bbs",
         SHELL_TRADERS_ID: "shell_traders",
         DANSHIS_SECOND_ID: "danshis_second_id",

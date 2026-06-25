@@ -58,7 +58,7 @@ type HostInput = {
 
 function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
-    ai_cfo: definition("ai_cfo", "agenda", "AI CFO"),
+    ai_cfo: definition("ai_cfo", "agenda", "HQ/Archives-Shuffle-Draw"),
     retreat: definition("retreat", "agenda", "Corporate Retreat"),
     reveal: definition("reveal", "agenda", "Reveal Agenda"),
     stored: definition("stored", "agenda", "Stored Credits"),
@@ -163,7 +163,7 @@ function makeHost(input: HostInput = {}) {
       revealCorpRdTop: () => {
         calls.reveal += 1;
       },
-      resolveAiChiefFinancialOfficer: (sourceCardId) => {
+      resolveHqArchivesShuffleDraw: (sourceCardId) => {
         calls.aiCfo.push(sourceCardId);
       },
     },
@@ -195,7 +195,7 @@ describe("scored agenda activated abilities", () => {
           visibility: "hidden_info_barrier",
         },
         retreat: {
-          kind: "corporate_retreat_disable_on_rez_or_install",
+          kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
           visibility: "public",
@@ -205,18 +205,24 @@ describe("scored agenda activated abilities", () => {
 
     const actions = buildScoredAgendaAbilityActions(host);
 
-    expect(calls.pushed).toEqual(["boon"]);
+    expect(calls.pushed).toEqual([
+      "ai_cfo",
+      "boon",
+      "retreat",
+      "reveal",
+      "stored",
+    ]);
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "ai_chief_financial_officer",
+      "hq_archives_shuffle_draw",
     );
     expect(
       actions.find(
         (action) =>
-          action.payload?.agendaAbility === "ai_chief_financial_officer",
+          action.payload?.agendaAbility === "hq_archives_shuffle_draw",
       )?.label,
     ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "v1922_corporate_retreat",
+      "scored_agenda_credit_until_install_or_rez",
     );
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "v1919_scored_agenda_reveal_rd_top",
@@ -232,14 +238,14 @@ describe("scored agenda activated abilities", () => {
   it("handles Corporate Retreat credit execution", () => {
     const action = legalAction("gain_credit", {
       cardId: "retreat",
-      agendaAbility: "v1922_corporate_retreat",
+      agendaAbility: "scored_agenda_credit_until_install_or_rez",
       gainCreditsAmount: 2,
     });
     const { host } = makeHost({
       legalAction: action,
       implementations: {
         retreat: {
-          kind: "corporate_retreat_disable_on_rez_or_install",
+          kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
           visibility: "public",
@@ -257,10 +263,10 @@ describe("scored agenda activated abilities", () => {
     });
   });
 
-  it("delegates AI CFO execution to the corp-zone handler", () => {
+  it("delegates HQ/Archives-Shuffle-Draw execution to the corp-zone handler", () => {
     const action = legalAction("gain_credit", {
       cardId: "ai_cfo",
-      agendaAbility: "ai_chief_financial_officer",
+      agendaAbility: "hq_archives_shuffle_draw",
       drawCardsAmount: 5,
     });
     const { host, calls } = makeHost({
@@ -306,7 +312,10 @@ describe("scored agenda activated abilities", () => {
       side: "corp",
       type: "activated_card_ability",
       abilityRef: { sourceCardInstanceId: "boon", abilityId: "boon" },
-      payload: { cardId: "boon" },
+      payload: {
+        cardId: "boon",
+        cardImplementationAbility: "activated",
+      },
     } as unknown as LegalAction;
     const { host, calls } = makeHost({ legalAction: action });
 
@@ -351,11 +360,10 @@ describe("scored agenda activated abilities", () => {
           "Netwatch Operations Office",
         ),
       },
-      activatedSourceId: "netwatch" as CardInstanceId,
     });
 
     expect(buildScoredAgendaAbilityActions(host)).toEqual([]);
-    expect(calls.pushed).toEqual([]);
+    expect(calls.pushed).toEqual(["netwatch"]);
   });
 
   it("ignores unrelated agendaAbility payloads", () => {

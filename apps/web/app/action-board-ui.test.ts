@@ -35,6 +35,7 @@ import {
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
+  fieldCardChoiceOptionsForCard,
   installedCorpExposeReviewCardId,
   isInstalledCorpExposeReviewChoice,
   isSingleInstalledCorpExposeChoice,
@@ -450,6 +451,14 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(groups.map((group) => group.label)).toEqual(["Programme", "Hardware", "Ressourcen"]);
     expect(groups.flatMap((group) => group.cards.map((entry) => entry.instanceId))).toEqual(["program_1", "hardware_1", "resource_1"]);
+  });
+
+  it("can keep the Runner program group visible for an empty MU display", () => {
+    const defaultGroups = groupRunnerRigCards([]);
+    const visibleProgramGroups = groupRunnerRigCards([], { includeEmptyProgramGroup: true });
+
+    expect(defaultGroups).toEqual([]);
+    expect(visibleProgramGroups).toEqual([{ key: "program", label: "Programme", cards: [] }]);
   });
 
   it("summarizes public Runner MU for the Corp rig view", () => {
@@ -944,6 +953,25 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, bbs)?.id).toBe("card_bbs");
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, runnerProgram)).toBeNull();
     expect(fieldCardChoiceOptionForCard(runnerRigChoice, board, runnerProgram)?.id).toBe("card_runner_program");
+    const multiCreditRunnerRigChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...runnerRigChoice,
+      choiceId: "pile_driver_stealth_loss",
+      source: "runner.noisy_breaker_stealth_loss:pile_driver:1",
+      prompt: "Wähle 3 Credits von Stealth-Karten.",
+      options: [
+        { id: "stealth_runner_program_1", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" },
+        { id: "stealth_runner_program_2", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" },
+        { id: "stealth_runner_program_3", label: "Raven Microcyb Owl: 1 Stealth-Credit verlieren", value: "runner_program_1" }
+      ],
+      minSelections: 3,
+      maxSelections: 3
+    };
+    expect(fieldCardChoiceOptionsForCard(multiCreditRunnerRigChoice, board, runnerProgram).map((option) => option.id)).toEqual([
+      "stealth_runner_program_1",
+      "stealth_runner_program_2",
+      "stealth_runner_program_3"
+    ]);
+    expect(fieldCardChoiceOptionForCard(multiCreditRunnerRigChoice, board, runnerProgram)?.id).toBe("stealth_runner_program_1");
     expect(fieldCardChoiceOptionForCard(singleExposeChoice, board, ice)?.id).toBe("card_corp_ice_1");
     expect(fieldCardChoiceOptionForCard(hiddenSlotSingleExposeChoice, hiddenSlotBoard, hiddenSlot)?.id).toBe("card_hidden_ice_slot");
     expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
@@ -1313,12 +1341,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(
       counterDisplayBadgeView(
         {
-          id: "data_raven",
+          id: "trace_tag_counter",
           amount: 2,
           displayKind: "trace",
           label: "Data-Raven-Counter",
           ariaLabel: "2 Data-Raven-Counter",
-          counterType: "data_raven",
+          counterType: "trace_tag_counter",
           usageHint: "status_marker"
         },
         "data-raven-counter-badge"
@@ -1443,12 +1471,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe("Vienna 22: 2 Vienna geben dem Runner 2 zusätzliche HQ-Karten beim Zugriff auf HQ. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
     expect(
       counterDisplayTooltipText({
-        id: "pattel_antibody",
+        id: "breaker_strength_penalty",
         amount: 1,
         displayKind: "generic_counter",
         label: "Pattel-Counter",
         ariaLabel: "1 Pattel-Counter",
-        counterType: "pattel_antibody",
+        counterType: "breaker_strength_penalty",
         usageHint: "status_marker"
       })
     ).toBe("Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.");

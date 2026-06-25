@@ -14781,7 +14781,7 @@
             "kind": "draw",
             "resource": "cards",
             "scope": "runner",
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
             "timing": "persistent"
           },
           {
@@ -14790,7 +14790,7 @@
             "kind": "survival_payoff",
             "resource": "cards",
             "scope": "runner",
-            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+            "source": "implementation.remainingReplacementLongtail.hidden_draw_keep_or_top_replacement",
             "timing": "persistent"
           }
         ]
@@ -21904,7 +21904,7 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": ["bait_runner", "protect_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -22019,7 +22019,7 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": ["bait_runner", "protect_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -22314,7 +22314,7 @@
         "side": "corp",
         "cardType": "operation",
         "roles": ["operation", "tag_punishment_operation", "tag_punishment"],
-        "planRoles": ["bait_runner", "recover_economy"],
+        "planRoles": ["bait_runner", "punish_tagged_runner"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -23736,7 +23736,7 @@
         "side": "corp",
         "cardType": "operation",
         "roles": ["operation", "tag_enabler", "tag_operation"],
-        "planRoles": ["bait_runner", "recover_economy"],
+        "planRoles": ["bait_runner", "punish_tagged_runner"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -25577,7 +25577,7 @@
             "kind": "trace_credit",
             "resource": "credits",
             "scope": "corp",
-            "source": "implementation.remainingReplacementLongtail.hacker_tracker_trace_bits",
+            "source": "implementation.remainingReplacementLongtail.trace_bit_counter_pool_asset",
             "timing": "persistent"
           }
         ],

@@ -154,34 +154,34 @@ function pendingChoiceHost(
       ),
       handleHiddenZoneSearchChoice: unhandled,
       hiddenZoneSearchChoiceHandlerHost: () => ({}),
-      resolveHuntClubBbsExposeChoice: unexpected("resolveHuntClubBbsExposeChoice"),
+      resolveMultiExposeInstalledCorpCardsChoice: unexpected("resolveMultiExposeInstalledCorpCardsChoice"),
       resolveExposeInstalledCorpCardsChoice: unexpected(
         "resolveExposeInstalledCorpCardsChoice",
       ),
-      resolveInvestmentFirmCreditChoice: unexpected(
-        "resolveInvestmentFirmCreditChoice",
+      resolveCorpInstalledEconomyCreditChoice: unexpected(
+        "resolveCorpInstalledEconomyCreditChoice",
       ),
       resolveCrashEverettDrawChoice: unexpected("resolveCrashEverettDrawChoice"),
-      resolvePowerGridOverloadChoice: unexpected("resolvePowerGridOverloadChoice"),
-      resolveSystematicLayoffsAdvancementChoice: unexpected(
-        "resolveSystematicLayoffsAdvancementChoice",
+      resolveHardwareTrashByCounterChoice: unexpected("resolveHardwareTrashByCounterChoice"),
+      resolveAdvancementPlacementChoice: unexpected(
+        "resolveAdvancementPlacementChoice",
       ),
-      resolveAnonymousTipDerezBlackIceChoice: unexpected(
-        "resolveAnonymousTipDerezBlackIceChoice",
+      resolveDerezRezzedBlackIceChoice: unexpected(
+        "resolveDerezRezzedBlackIceChoice",
       ),
-      resolveCoreCommandJettisonIceChoice: unexpected(
-        "resolveCoreCommandJettisonIceChoice",
+      resolvePayRezCostToTrashRezzedIceChoice: unexpected(
+        "resolvePayRezCostToTrashRezzedIceChoice",
       ),
-      resolveForgedActivationOrdersTargetChoice: unexpected(
-        "resolveForgedActivationOrdersTargetChoice",
+      resolveCorpChoiceRezOrTrashIceTargetChoice: unexpected(
+        "resolveCorpChoiceRezOrTrashIceTargetChoice",
       ),
-      resolveForgedActivationOrdersCorpChoice: unexpected(
-        "resolveForgedActivationOrdersCorpChoice",
+      resolveCorpChoiceRezOrTrashIceDecisionChoice: unexpected(
+        "resolveCorpChoiceRezOrTrashIceDecisionChoice",
       ),
-      resolveSecurityCodeWormChipTrashIceChoice: unexpected(
-        "resolveSecurityCodeWormChipTrashIceChoice",
+      resolveTrashUnrezzedIceChoice: unexpected(
+        "resolveTrashUnrezzedIceChoice",
       ),
-      resolveV1921PlayfulAiChoice: unexpected("resolveV1921PlayfulAiChoice"),
+      resolveRandomDiceSplitChoice: unexpected("resolveRandomDiceSplitChoice"),
       resolveRunnerInstalledConnectionTrashBadPublicityChoice: unexpected(
         "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
       ),
@@ -191,13 +191,13 @@ function pendingChoiceHost(
       resolveStackInstallRunCleanupChoice: unexpected(
         "resolveStackInstallRunCleanupChoice",
       ),
-      resolveOpenEndedMileageProgramReturnChoice: unexpected(
-        "resolveOpenEndedMileageProgramReturnChoice",
+      resolvePaidSourceReturnToGripChoice: unexpected(
+        "resolvePaidSourceReturnToGripChoice",
       ),
       resolveRunnerHostingChoice: unexpected("resolveRunnerHostingChoice"),
       resolveIncubatorTransformChoice: unexpected("resolveIncubatorTransformChoice"),
-      resolveCodeViralCachePurgeChoice: unexpected(
-        "resolveCodeViralCachePurgeChoice",
+      resolveVirusCounterPurgePreserveChoice: unexpected(
+        "resolveVirusCounterPurgePreserveChoice",
       ),
       resolveChimeraDaemonTrashChoice: unexpected("resolveChimeraDaemonTrashChoice"),
       resolveRunnerProgramReturnChoice: unexpected(
@@ -222,28 +222,28 @@ function pendingChoiceHost(
       ),
     },
     run: {
-      resolveSingaporeCityGridSwapChoice: unexpected(
-        "resolveSingaporeCityGridSwapChoice",
+      resolveHqIceSwapChoice: unexpected(
+        "resolveHqIceSwapChoice",
       ),
       fortPassWindowHostForState: () => ({}),
-      resolveTooManyDoorsSecretSpendChoiceInRunModule: unexpected(
-        "resolveTooManyDoorsSecretSpendChoiceInRunModule",
+      resolveSecretSpendCompareChoiceInRunModule: unexpected(
+        "resolveSecretSpendCompareChoiceInRunModule",
       ),
       encounterSpecialWindowHostForState: () => ({}),
       resolveHammerStealthLossChoice: unexpected("resolveHammerStealthLossChoice"),
       fortRunSideFamiliesHostForState: () => ({}),
-      resolveViral15ProgramTrashChoiceInRunModule: unexpected(
-        "resolveViral15ProgramTrashChoiceInRunModule",
+      resolveActiveIceProgramTrashChoiceInRunModule: unexpected(
+        "resolveActiveIceProgramTrashChoiceInRunModule",
       ),
       encounterResolutionHostForState: () => ({}),
       resolvePassRezzedIceProgramTrashChoiceInRunModule: unexpected(
         "resolvePassRezzedIceProgramTrashChoiceInRunModule",
       ),
-      resolveSpeedTrapRezInterruptChoice: unexpected(
-        "resolveSpeedTrapRezInterruptChoice",
+      resolveRezInterruptJackOutChoice: unexpected(
+        "resolveRezInterruptJackOutChoice",
       ),
       runRezWindowHostForState: () => ({}),
-      resolvePattelsVirusCounterChoice: unexpected("resolvePattelsVirusCounterChoice"),
+      resolveBrokenIceVirusCounterChoice: unexpected("resolveBrokenIceVirusCounterChoice"),
       runEndCleanupHost: () => ({}),
       resolveAardvarkInterceptionChoice: unexpected(
         "resolveAardvarkInterceptionChoice",
@@ -260,10 +260,10 @@ function pendingChoiceHost(
       ),
     },
     access: {
-      resolvePriorityWreckSpendChoice: unexpected("resolvePriorityWreckSpendChoice"),
+      resolveSuccessfulRunCreditLossSpendChoice: unexpected("resolveSuccessfulRunCreditLossSpendChoice"),
       runAccessTransitionHost: () => ({}),
-      resolveMicrotechAiInterfacePreAccessChoice: unexpected(
-        "resolveMicrotechAiInterfacePreAccessChoice",
+      resolvePreAccessTopRdReorderChoice: unexpected(
+        "resolvePreAccessTopRdReorderChoice",
       ),
     },
     cardImplementation: {

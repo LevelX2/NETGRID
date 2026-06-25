@@ -44,6 +44,15 @@ export function runnerRunTargetGuidanceScoreComponent(
       `known_access:${evaluation.knownAccessState}`,
       `path:${evaluation.pathPassability}`,
       `credits_after:${evaluation.creditsAfterRun}`,
+      ...evaluation.evidence
+        .filter(
+          (entry) =>
+            entry.startsWith("visible_ice_hazard:") ||
+            entry.startsWith("visible_ice_trace_base:") ||
+            entry.startsWith("visible_trace_") ||
+            entry.startsWith("unavoidable_visible_ice_hazard_count:"),
+        )
+        .slice(0, 24),
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };

@@ -1149,7 +1149,7 @@ describe("formatChronicleEvent", () => {
             kind: "counter_change",
             visibility: "hidden_info_barrier",
             side: "runner",
-            counterType: "doppelganger_antibody",
+            counterType: "link_reduction_counter",
             addedCounterAmount: 1,
             remainingCounters: 1,
             sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
@@ -1184,7 +1184,7 @@ describe("formatChronicleEvent", () => {
           kind: "counter_change",
           visibility: "hidden_info_barrier",
           side: "runner",
-          counterType: "doppelganger_antibody",
+          counterType: "link_reduction_counter",
           addedCounterAmount: 1,
           remainingCounters: 1,
           sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
@@ -1468,6 +1468,45 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
   });
 
+  it("describes Technician Lover private look in the use message and suppresses the confirmation event", () => {
+    const activated = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Technician Lover",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "rd",
+      privateLookCount: 1,
+      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceTitle: "Technician Lover",
+      aiReasonCode: "runner_private_look",
+    });
+    const resolved = makeEvent("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "rd",
+      privateLookCount: 1,
+      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceTitle: "Technician Lover",
+      aiReasonCode: "runner_private_look",
+    });
+
+    const activatedItem = formatChronicleEvent(activated, "corp");
+    const resolvedItem = formatChronicleEvent(resolved, "corp");
+
+    expect(activatedItem.title).toBe(
+      "Die Runner-KI hat Technician Lover genutzt und die oberste R&D-Karte angesehen.",
+    );
+    expect(activatedItem.category).toBe("hidden");
+    expect(activatedItem.visibility).toBe("public");
+    expect(activatedItem.chips).toEqual(
+      expect.arrayContaining(["Technician Lover", "R&D", "1 angesehen"]),
+    );
+    expect(resolvedItem.title).toBe(activatedItem.title);
+    expect(resolvedItem.title).not.toContain("Entscheidung beantwortet");
+    expect(shouldSuppressChronicleEventItem(resolved)).toBe(true);
+  });
+
   it("shows Schlaghund tag-check damage without internal state", () => {
     const item = formatChronicleEvent(
       makeEvent("gain_credit", {
@@ -1530,10 +1569,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         serverLabel: "HQ",
-        vacuumLinkDieRoll: 3,
-        vacuumLinkRewindApplied: true,
-        vacuumLinkRewindRezzedIceBack: 3,
-        vacuumLinkTargetIceIndex: 1,
+        rezzedIceRewindDieRoll: 3,
+        rezzedIceRewindApplied: true,
+        rezzedIceRewindRezzedIceBack: 3,
+        rezzedIceRewindTargetIceIndex: 1,
       }),
       "runner",
     );
@@ -1541,8 +1580,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         serverLabel: "HQ",
-        vacuumLinkDieRoll: 5,
-        vacuumLinkRewindApplied: false,
+        rezzedIceRewindDieRoll: 5,
+        rezzedIceRewindApplied: false,
       }),
       "corp",
     );
@@ -5617,7 +5656,7 @@ describe("formatChronicleEvent", () => {
             visibility: "public",
             side: "runner",
             amount: 2,
-            counterType: "pattel_antibody",
+            counterType: "breaker_strength_penalty",
             addedCounterAmount: 2,
             remainingCounters: 2,
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
@@ -5639,7 +5678,7 @@ describe("formatChronicleEvent", () => {
             visibility: "public",
             side: "runner",
             amount: 0,
-            counterType: "pattel_antibody",
+            counterType: "breaker_strength_penalty",
             addedCounterAmount: 0,
             remainingCounters: 0,
             reason: "access_effect",
@@ -5674,7 +5713,7 @@ describe("formatChronicleEvent", () => {
             visibility: "public",
             side: "runner",
             amount: 1,
-            counterType: "pattel_antibody",
+            counterType: "breaker_strength_penalty",
             addedCounterAmount: 1,
             remainingCounters: 1,
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",

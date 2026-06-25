@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const citySurveillanceImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_313_city-surveillance",
   remainingReplacementLongtail: {
-    kind: "city_surveillance_draw_tag",
+    kind: "runner_draw_tax_tag",
     avoidTagCost: 1,
     visibility: "public",
   },

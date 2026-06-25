@@ -9,14 +9,14 @@ import type {
   Side,
 } from "@netgrid/shared";
 
-export type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
+export type DrawTaxDecision = "auto" | "pay" | "tag";
 
 export type TurnBasicRunnerDrawSummary = {
   drawnCount: number;
   drawnCardIds?: CardInstanceId[];
-  citySurveillanceSourceCount: number;
-  citySurveillanceCreditsPaid: number;
-  citySurveillanceTagsAdded: number;
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
   crashEverettSourceCardId?: CardInstanceId;
   crashEverettChoiceOpened?: boolean;
 };
@@ -28,7 +28,7 @@ export type TurnBasicExecutionHost = {
     drawRunnerCards: (
       state: GameState,
       amount: number,
-      citySurveillanceDecision?: CitySurveillanceDrawDecision,
+      drawTaxDecision?: DrawTaxDecision,
     ) => TurnBasicRunnerDrawSummary;
     applyRunnerDrawSummaryPayload: (
       state: GameState,
@@ -56,7 +56,7 @@ export type TurnBasicExecutionHost = {
     ) => void;
   };
   callbacks: {
-    startCodeViralCachePurgeChoice: (
+    startVirusCounterPurgePreserveChoice: (
       state: GameState,
       legalAction: LegalAction,
     ) => boolean;
@@ -90,7 +90,7 @@ export function handleTurnBasicExecution(
           host.draw.drawRunnerCards(
             state,
             1,
-            citySurveillanceDrawDecisionFromPayload(legalAction),
+            drawTaxDecisionFromPayload(legalAction),
           ),
         );
       } else {
@@ -99,9 +99,13 @@ export function handleTurnBasicExecution(
       return handled(legalAction);
     case "remove_tag":
       host.turn.spendClick(state, "runner");
-      if (legalAction.payload?.resourceAbility === "danshis_second_id") {
+      if (
+        legalAction.payload?.resourceAbility === "remove_tags_trash_resource"
+      ) {
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.resources.includes(sourceCardId as CardInstanceId))
+        if (
+          !state.runner.rig.resources.includes(sourceCardId as CardInstanceId)
+        )
           throw new Error("Danshi's Second ID ist nicht installiert.");
         const requested = Number(legalAction.payload?.removeTagAmount ?? 0);
         if (!Number.isInteger(requested) || requested <= 0 || requested > 3)
@@ -126,7 +130,7 @@ export function handleTurnBasicExecution(
       return handled(legalAction);
     case "purge_virus_counters": {
       host.turn.spendClicks(state, "corp", 3);
-      if (host.callbacks.startCodeViralCachePurgeChoice(state, legalAction))
+      if (host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction))
         return handled(legalAction);
       const purged = purgeVirusCounters(state);
       legalAction.payload = {
@@ -145,7 +149,9 @@ export function handleTurnBasicExecution(
         state.timingPoint === "corp_action.main" &&
         state.activeSide === "corp";
       if (!window && !mainActionPurge)
-        throw new Error("Runner-Virus-Purge ist im aktuellen Fenster nicht legal.");
+        throw new Error(
+          "Runner-Virus-Purge ist im aktuellen Fenster nicht legal.",
+        );
       const summary = purgePurgeableRunnerVirusCounters(state);
       const pendingDebt = addCorpActionDebt(state, {
         amount: 3,
@@ -175,8 +181,7 @@ export function handleTurnBasicExecution(
       if (legalAction.side !== "corp")
         throw new Error("Nur die Korp darf Korp-Aktionsschuld abtragen.");
       const beforeDebt = corpActionDebtPending(state);
-      if (beforeDebt <= 0)
-        throw new Error("Es gibt keine Korp-Aktionsschuld.");
+      if (beforeDebt <= 0) throw new Error("Es gibt keine Korp-Aktionsschuld.");
       host.turn.spendClick(state, "corp");
       const paid = consumeCorpActionDebt(state, 1);
       legalAction.payload = {
@@ -196,16 +201,19 @@ export function handleTurnBasicExecution(
   }
 }
 
-export function citySurveillanceDrawDecisionFromPayload(
+export function drawTaxDecisionFromPayload(
   legalAction: LegalAction,
-): CitySurveillanceDrawDecision {
-  const decision = legalAction.payload?.citySurveillanceDrawDecision;
+): DrawTaxDecision {
+  const decision = legalAction.payload?.drawTaxDecision;
   if (decision === "pay" || decision === "tag") return decision;
   return "auto";
 }
 
 export function corpActionDebtPending(state: GameState): number {
-  return Math.max(0, Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0));
+  return Math.max(
+    0,
+    Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0),
+  );
 }
 
 export function addCorpActionDebt(
@@ -345,7 +353,8 @@ export function purgePurgeableRunnerVirusCounters(state: GameState): {
     if (!compact) return;
     for (const counterType of PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES) {
       const amount = compact[counterType];
-      if (amount && amount > 0) summary.push(`${scope}:${counterType}=${amount}`);
+      if (amount && amount > 0)
+        summary.push(`${scope}:${counterType}=${amount}`);
     }
   };
 
@@ -377,8 +386,8 @@ export function purgeVirusCounters(state: GameState): number {
     setCardCounter(state, cardId as CardInstanceId, "virus", 0);
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
-  if (state.faitAccompliCountersByServer)
-    state.faitAccompliCountersByServer = {};
+  if (state.serverAgendaCostCountersByServer)
+    state.serverAgendaCostCountersByServer = {};
   return total;
 }
 
@@ -394,7 +403,9 @@ function totalCounters(state: GameState, counterType: CounterType): number {
     poxTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   let faitTotal = 0;
-  for (const amount of Object.values(state.faitAccompliCountersByServer ?? {})) {
+  for (const amount of Object.values(
+    state.serverAgendaCostCountersByServer ?? {},
+  )) {
     faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   return cardCounterTotal + poxTotal + faitTotal;

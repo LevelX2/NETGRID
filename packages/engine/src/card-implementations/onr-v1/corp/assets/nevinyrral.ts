@@ -23,7 +23,7 @@ export const nevinyrralImplementation: CardImplementationDefinition = {
     ],
   },
   uniqueDirectLongtail: {
-    kind: "nevinyrral_action_and_lose_on_rezzed_leave",
+    kind: "rezzed_leave_action_gain_asset",
     actionGain: 1,
     visibility: "public",
   },

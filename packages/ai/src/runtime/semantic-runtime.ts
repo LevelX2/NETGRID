@@ -372,10 +372,15 @@ export function chooseSemanticRuntimeAction(
           : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
+  const selectedReasonCode =
+    input.side === "corp" &&
+    selectedChoice.action.actionId.includes("schlaghund_tag_damage")
+      ? "corp.semantic.corp_tag_punish"
+      : selectedChoice.reasonCode;
   return {
     actionId: selectedChoice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: selectedChoice.reasonCode,
+    reasonCode: selectedReasonCode,
     explanation: selectedChoice.explanation,
     consideredActionIds: [],
     fallbackUsed: false,
@@ -422,7 +427,7 @@ export function chooseSemanticRuntimeAction(
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
     difficulty: input.difficulty,
-    reason: selectedChoice.reasonCode,
+    reason: selectedReasonCode,
   };
 }
 

@@ -1,4 +1,20 @@
 import type { DamageType } from "@netgrid/shared";
+import {
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
+  CORE_DAMAGE_PREVENTION_HARDWARE_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
+  DUAL_DAMAGE_BUFFER_PROGRAM_SOURCE,
+  MEAT_ARMOR_HARDWARE_SOURCE,
+  MEAT_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  NET_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  NET_MEAT_DAMAGE_PREVENTION_HARDWARE_SOURCE,
+  NET_MEAT_UTILITY_HARDWARE_SOURCE,
+  NET_SURGE_BUFFER_HARDWARE_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  SINGLE_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+  TWO_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+} from "../compatibility/runtime-compatibility";
 
 export type RuntimeDamagePreventionProfile = {
   maxPerTurn: number;
@@ -6,78 +22,74 @@ export type RuntimeDamagePreventionProfile = {
   priority: number;
 };
 
-export const DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID =
-  "onr_v1_160_diplomatic-immunity";
-
-export const ABLATIVE_COUNTER_HARDWARE_CARD_ID = "onr_v1_121_armored-fridge";
+export {
+  ABLATIVE_COUNTER_HARDWARE_SOURCE,
+  CORE_REPLACEMENT_DAMAGE_PREVENTION_SOURCE,
+  RUNNER_DAMAGE_PREVENTION_RESOURCE_SOURCE,
+  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
+};
 
 export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
-
-export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID =
-  "onr_v1_127_full-body-conversion";
-
-export const EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID =
-  "onr_v1_022_emergency-self-construct";
 
 export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
   Record<string, RuntimeDamagePreventionProfile>
 > = {
-  "onr_v1_023_evil-twin": {
+  [DUAL_DAMAGE_BUFFER_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net", "core"],
     priority: 90,
   },
-  "onr_v1_028_force-shield": {
+  [TWO_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net", "core"],
     priority: 100,
   },
-  "onr_v1_038_joan-of-arc": {
+  [SINGLE_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "core"],
     priority: 120,
   },
-  [ABLATIVE_COUNTER_HARDWARE_CARD_ID]: {
+  [ABLATIVE_COUNTER_HARDWARE_SOURCE]: {
     maxPerTurn: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
     damageTypes: ["meat"],
     priority: 120,
   },
-  "onr_v1_125_dermatech-bodyplating": {
+  [MEAT_ARMOR_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["meat"],
     priority: 110,
   },
-  "onr_v1_128_green-knight-surge-buffers": {
+  [NET_SURGE_BUFFER_HARDWARE_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 121,
   },
-  [EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID]: {
+  [SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["meat"],
     priority: 118,
   },
-  "onr_v1_130_lifesaver-nanosurgeons": {
+  [CORE_DAMAGE_PREVENTION_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["core"],
     priority: 121,
   },
-  "onr_v1_135_nasuko-cycle": {
+  [NET_MEAT_DAMAGE_PREVENTION_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],
     priority: 122,
   },
-  "onr_v1_143_techtronica-utility-suit": {
+  [NET_MEAT_UTILITY_HARDWARE_SOURCE]: {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],
     priority: 124,
   },
-  "onr_v1_185_trauma-team": {
+  [MEAT_DAMAGE_PREVENTION_RESOURCE_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["meat"],
     priority: 128,
   },
-  "onr_v1_061_shield": {
+  [NET_DAMAGE_PREVENTION_PROGRAM_SOURCE]: {
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 131,

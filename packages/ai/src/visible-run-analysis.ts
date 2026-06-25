@@ -1,11 +1,14 @@
 import {
   DEMO_CARDS_BY_ID,
   type CardDefinition,
+  type CardDefinitionId,
   type PublicGameEvent,
+  type TraceSuccessEffect,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
+import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
 
@@ -35,9 +38,55 @@ type BreakAssessment = {
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
 };
+type VisibleTraceSupportSideEffect = "forces_jack_out_after_encounter";
+export type VisibleIceRunHazardKind =
+  | "trace_tag"
+  | "trace_tag_counter"
+  | "trace_counter"
+  | "trace_damage"
+  | "trace_trash"
+  | "trace_run_lock";
+export type VisibleIceRunHazardSeverity = "low" | "medium" | "high";
+export type VisibleIceRunHazard = {
+  kind: VisibleIceRunHazardKind;
+  severity: VisibleIceRunHazardSeverity;
+  iceIndex: number;
+  sourceDefinitionId?: string;
+  sourceTitle?: string;
+  subroutineId: string;
+  traceBaseStrength?: number;
+  runnerTraceCapacity: number;
+  baseTraceCovered?: boolean;
+  visibleCorpBidCapacity?: number;
+  visibleCorpMaxTraceCovered?: boolean;
+  traceAvoidanceCost?: number;
+  visibleCorpMaxTraceAvoidanceCost?: number;
+  traceBidCost?: number;
+  baseLinkValue?: number;
+  baseLinkActivationCost?: number;
+  baseLinkSourceDefinitionId?: string;
+  baseLinkSourceTitle?: string;
+  baseLinkSideEffect?: VisibleTraceSupportSideEffect;
+  breakAvoidanceCost?: number;
+  minimumAvoidanceCost?: number;
+  unavoidable: boolean;
+  expectedTags?: number;
+  expectedCounters?: number;
+  expectedDamage?: number;
+  actionTax?: number;
+  penalty: number;
+  evidence: string[];
+};
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   visibleBreakCost?: number;
+  visibleIceRunHazards?: VisibleIceRunHazard[];
+  visibleIceHazardPenalty?: number;
+  visibleIceHazardAvoidanceCost?: number;
+  creditsAfterAvoidingVisibleIceHazards?: number;
+  expectedTagsFromVisibleIce?: number;
+  unavoidableVisibleIceHazardCount?: number;
+  visibleTraceTagHazardUnavoidable?: boolean;
   canReachAccess: boolean;
   knownPathBlockedByUnbreakableIce: boolean;
   knownPathBlockedByMissingCoverage: boolean;
@@ -129,12 +178,14 @@ export function assessKnownRezzedIcePath(
   rigCards: VisibleCard[],
   runnerCredits: number,
   rootCards: RootCardLike[] = [],
+  visibleCorpBidCapacity = 0,
 ): KnownRezzedIcePathAssessment {
   return assessKnownRezzedIcePathInternal(
     iceCards,
     rigCards,
     runnerCredits,
     rootCards,
+    normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
     [],
     { allowBreakingRunPathEffects: true },
   );
@@ -145,12 +196,15 @@ function assessKnownRezzedIcePathInternal(
   rigCards: VisibleCard[],
   runnerCredits: number,
   rootCards: RootCardLike[],
+  visibleCorpBidCapacity: number,
   initialRunPathEffects: RunPathProjectionEffect[],
   options: { allowBreakingRunPathEffects: boolean },
   initialBreakerStrengths?: Map<string, number>,
 ): KnownRezzedIcePathAssessment {
   let visibleBreakCost = 0;
   let remainingCredits = runnerCredits;
+  let creditsAfterAvoidingVisibleIceHazards = runnerCredits;
+  const visibleIceRunHazards: VisibleIceRunHazard[] = [];
   let assessedKnownIceCount = 0;
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
@@ -205,6 +259,7 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += encounterTax;
       remainingCredits -= encounterTax;
+      creditsAfterAvoidingVisibleIceHazards -= encounterTax;
     }
     if (endTheRunCount > 0) {
       const breakAssessment = runPathEffectsPreventFutureBreaking(
@@ -248,6 +303,7 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += breakAssessment.cost;
       remainingCredits -= breakAssessment.cost;
+      creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
       firstKnownIceBreakable = true;
       if (breakAssessment.carriesStrengthAcrossIce) {
         breakerStrengths.set(
@@ -291,6 +347,7 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += handlingCost;
       remainingCredits -= handlingCost;
+      creditsAfterAvoidingVisibleIceHazards -= handlingCost;
       firstKnownIceBreakable = true;
       if (
         breakAssessment &&
@@ -301,6 +358,22 @@ function assessKnownRezzedIcePathInternal(
           breakAssessment.breakerInstanceId,
           breakAssessment.endingStrength,
         );
+      }
+    }
+    const visibleHazards = visibleIceRunHazardsForQuote({
+      quote,
+      ice: effectiveIce,
+      iceIndex,
+      rigCards,
+      availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
+      visibleCorpBidCapacity,
+      breakerStrengths,
+      additionalBreakCostPerSubroutine,
+    });
+    for (const hazard of visibleHazards) {
+      visibleIceRunHazards.push(hazard);
+      if (!hazard.unavoidable && hazard.minimumAvoidanceCost !== undefined) {
+        creditsAfterAvoidingVisibleIceHazards -= hazard.minimumAvoidanceCost;
       }
     }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
@@ -336,6 +409,7 @@ function assessKnownRezzedIcePathInternal(
         if (breakAssessment && breakAssessment.cost <= remainingCredits) {
           visibleBreakCost += breakAssessment.cost;
           remainingCredits -= breakAssessment.cost;
+          creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
           firstKnownIceBreakable = true;
           if (breakAssessment.carriesStrengthAcrossIce) {
             breakerStrengths.set(
@@ -382,6 +456,7 @@ function assessKnownRezzedIcePathInternal(
               rigCards,
               rootCards,
               remainingCredits,
+              visibleCorpBidCapacity,
               breakerStrengths,
               additionalBreakCostPerSubroutine,
             })
@@ -389,6 +464,7 @@ function assessKnownRezzedIcePathInternal(
       if (breakAssessment) {
         visibleBreakCost += breakAssessment.cost;
         remainingCredits -= breakAssessment.cost;
+        creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
         firstKnownIceBreakable = true;
         if (breakAssessment.carriesStrengthAcrossIce) {
           breakerStrengths.set(
@@ -404,6 +480,10 @@ function assessKnownRezzedIcePathInternal(
   return {
     blocked: false,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
+    ...visibleIceRunHazardSummary(
+      visibleIceRunHazards,
+      creditsAfterAvoidingVisibleIceHazards,
+    ),
     canReachAccess: true,
     knownPathBlockedByUnbreakableIce: false,
     knownPathBlockedByMissingCoverage: false,
@@ -427,6 +507,7 @@ function runPathEffectBreakAssessment(params: {
   rigCards: VisibleCard[];
   rootCards: RootCardLike[];
   remainingCredits: number;
+  visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
 }): BreakAssessment | undefined {
@@ -448,6 +529,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
@@ -457,6 +539,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
@@ -473,6 +556,7 @@ function runPathEffectBreakAssessment(params: {
     params.rigCards,
     params.remainingCredits - breakAssessment.cost,
     params.rootCards,
+    params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     breakerStrengthsAfterBreak,
@@ -502,6 +586,609 @@ function pathProjectionEffectsForQuote(
     }
   }
   return effects;
+}
+
+function visibleIceRunHazardSummary(
+  hazards: VisibleIceRunHazard[],
+  creditsAfterAvoidingVisibleIceHazards: number,
+): Partial<KnownRezzedIcePathAssessment> {
+  if (hazards.length === 0) return {};
+  const visibleIceHazardPenalty = hazards.reduce(
+    (sum, hazard) => sum + hazard.penalty,
+    0,
+  );
+  const visibleIceHazardAvoidanceCost = hazards.reduce(
+    (sum, hazard) => sum + Math.max(0, hazard.minimumAvoidanceCost ?? 0),
+    0,
+  );
+  const expectedTagsFromVisibleIce = hazards.reduce(
+    (sum, hazard) => sum + Math.max(0, hazard.expectedTags ?? 0),
+    0,
+  );
+  const unavoidableVisibleIceHazardCount = hazards.filter(
+    (hazard) => hazard.unavoidable,
+  ).length;
+  return {
+    visibleIceRunHazards: hazards,
+    visibleIceHazardPenalty,
+    visibleIceHazardAvoidanceCost,
+    creditsAfterAvoidingVisibleIceHazards,
+    ...(expectedTagsFromVisibleIce > 0 ? { expectedTagsFromVisibleIce } : {}),
+    ...(unavoidableVisibleIceHazardCount > 0
+      ? { unavoidableVisibleIceHazardCount }
+      : {}),
+    ...(hazards.some(
+      (hazard) =>
+        hazard.unavoidable &&
+        (hazard.kind === "trace_tag" || hazard.kind === "trace_tag_counter"),
+    )
+      ? { visibleTraceTagHazardUnavoidable: true }
+      : {}),
+  };
+}
+
+function visibleIceRunHazardsForQuote(params: {
+  quote: VisibleEffectiveIceRunQuote | undefined;
+  ice: IceCardLike;
+  iceIndex: number;
+  rigCards: VisibleCard[];
+  availableCredits: number;
+  visibleCorpBidCapacity: number;
+  breakerStrengths: Map<string, number>;
+  additionalBreakCostPerSubroutine: number;
+}): VisibleIceRunHazard[] {
+  if (!params.quote) return [];
+  const hazards: VisibleIceRunHazard[] = [];
+  let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
+  params.quote.subroutines.forEach((subroutine, subroutineIndex) => {
+    if (subroutine.type !== "initiate_trace") return;
+    const traceSupport = visibleRunnerTraceSupport(
+      params.rigCards,
+      remainingHazardCredits,
+    );
+    const successEffect = traceSuccessEffectForVisibleSubroutine(
+      params.quote!,
+      subroutine,
+      subroutineIndex,
+    );
+    const baseHazard = visibleIceRunHazardForTraceEffect(successEffect);
+    if (!baseHazard) return;
+    const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(
+      params.quote!,
+      subroutine,
+      subroutineIndex,
+    );
+    const traceAvoidance =
+      traceBaseStrength === undefined
+        ? undefined
+        : visibleTraceAvoidanceForBaseStrength(
+            traceBaseStrength,
+            traceSupport,
+          );
+    const visibleCorpBidCapacity = Math.max(
+      0,
+      Math.floor(params.visibleCorpBidCapacity),
+    );
+    const visibleCorpMaxTraceAvoidance =
+      traceBaseStrength === undefined
+        ? undefined
+        : visibleTraceAvoidanceForBaseStrength(
+            traceBaseStrength + visibleCorpBidCapacity,
+            traceSupport,
+          );
+    const traceAvoidanceCandidate =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
+    const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
+      effectiveIceForQuote(params.ice, params.quote),
+      params.rigCards,
+      [subroutine],
+      params.breakerStrengths,
+      params.additionalBreakCostPerSubroutine,
+    );
+    const breakAvoidanceCandidate =
+      breakAssessment && breakAssessment.cost <= remainingHazardCredits
+        ? breakAssessment.cost
+        : undefined;
+    const avoidanceCandidates = [
+      traceAvoidanceCandidate,
+      breakAvoidanceCandidate,
+    ].filter((cost): cost is number => cost !== undefined);
+    const minimumAvoidanceCost =
+      avoidanceCandidates.length > 0
+        ? Math.min(...avoidanceCandidates)
+        : undefined;
+    const usesBreakAvoidance =
+      breakAvoidanceCandidate !== undefined &&
+      minimumAvoidanceCost === breakAvoidanceCandidate &&
+      (traceAvoidanceCandidate === undefined ||
+        breakAvoidanceCandidate < traceAvoidanceCandidate);
+    const unavoidable = minimumAvoidanceCost === undefined;
+    const sourceDefinitionId =
+      subroutine.sourceDefinitionId ?? params.quote!.iceDefinitionId;
+    const sourceTitle =
+      subroutine.sourceTitle ??
+      visibleRunCardDefinition(sourceDefinitionId)?.title ??
+      sourceDefinitionId;
+    const cheapestTraceAvoidance = traceAvoidance?.cheapestSafe;
+    const cheapestCorpMaxTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestSafe;
+    const unsafeTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableUnsafe ??
+      visibleCorpMaxTraceAvoidance?.cheapestUnsafe ??
+      traceAvoidance?.cheapestAffordableUnsafe ??
+      traceAvoidance?.cheapestUnsafe;
+    const guaranteedTraceAvoidance =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe;
+    const baseLinkEvidenceSource =
+      guaranteedTraceAvoidance?.baseLink
+        ? guaranteedTraceAvoidance
+        : cheapestCorpMaxTraceAvoidance?.baseLink
+          ? cheapestCorpMaxTraceAvoidance
+          : cheapestTraceAvoidance?.baseLink
+            ? cheapestTraceAvoidance
+            : unsafeTraceAvoidance?.baseLink
+              ? unsafeTraceAvoidance
+              : undefined;
+    const baseTraceCovered =
+      traceAvoidance?.cheapestAffordableSafe !== undefined;
+    const visibleCorpMaxTraceCovered =
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe !== undefined;
+    const penalty = visibleIceHazardPenalty(
+      baseHazard.kind,
+      baseHazard.severity,
+      unavoidable,
+      minimumAvoidanceCost,
+    );
+    hazards.push({
+      ...baseHazard,
+      iceIndex: params.iceIndex,
+      ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
+      ...(sourceTitle ? { sourceTitle } : {}),
+      subroutineId: subroutine.id,
+      ...(traceBaseStrength !== undefined ? { traceBaseStrength } : {}),
+      runnerTraceCapacity: traceSupport.runnerTraceCapacity,
+      ...(traceBaseStrength !== undefined ? { baseTraceCovered } : {}),
+      visibleCorpBidCapacity,
+      ...(traceBaseStrength !== undefined
+        ? { visibleCorpMaxTraceCovered }
+        : {}),
+      ...(cheapestTraceAvoidance
+        ? {
+            traceAvoidanceCost: cheapestTraceAvoidance.creditCost,
+            traceBidCost: cheapestTraceAvoidance.traceBidCost,
+          }
+        : {}),
+      ...(cheapestCorpMaxTraceAvoidance
+        ? {
+            visibleCorpMaxTraceAvoidanceCost:
+              cheapestCorpMaxTraceAvoidance.creditCost,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.baseLink
+        ? { baseLinkValue: baseLinkEvidenceSource.baseLink }
+        : {}),
+      ...(baseLinkEvidenceSource?.activationCost !== undefined
+        ? {
+            baseLinkActivationCost: baseLinkEvidenceSource.activationCost,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.sourceDefinitionId
+        ? {
+            baseLinkSourceDefinitionId:
+              baseLinkEvidenceSource.sourceDefinitionId,
+          }
+        : {}),
+      ...(baseLinkEvidenceSource?.sourceTitle
+        ? { baseLinkSourceTitle: baseLinkEvidenceSource.sourceTitle }
+        : {}),
+      ...(baseLinkEvidenceSource?.sideEffect
+        ? { baseLinkSideEffect: baseLinkEvidenceSource.sideEffect }
+        : {}),
+      ...(breakAssessment ? { breakAvoidanceCost: breakAssessment.cost } : {}),
+      ...(minimumAvoidanceCost !== undefined ? { minimumAvoidanceCost } : {}),
+      unavoidable,
+      penalty,
+      evidence: [
+        `visible_ice_hazard:${baseHazard.kind}`,
+        `visible_ice_hazard_source:${sourceTitle}`,
+        ...(traceBaseStrength !== undefined
+          ? [`visible_ice_trace_base:${traceBaseStrength}`]
+          : []),
+        `visible_runner_trace_capacity:${traceSupport.runnerTraceCapacity}`,
+        ...(traceBaseStrength !== undefined
+          ? [
+              `visible_trace_base_covered:${baseTraceCovered}`,
+              `visible_corp_bid_capacity:${visibleCorpBidCapacity}`,
+              `visible_corp_max_trace_covered:${visibleCorpMaxTraceCovered}`,
+            ]
+          : []),
+        ...(cheapestTraceAvoidance
+          ? [
+              `visible_trace_avoidance_cost:${cheapestTraceAvoidance.creditCost}`,
+              `visible_trace_bid_cost:${cheapestTraceAvoidance.traceBidCost}`,
+            ]
+          : []),
+        ...(cheapestCorpMaxTraceAvoidance
+          ? [
+              `visible_corp_max_trace_avoidance_cost:${cheapestCorpMaxTraceAvoidance.creditCost}`,
+            ]
+          : []),
+        ...(baseLinkEvidenceSource?.baseLink
+          ? [
+              `visible_trace_base_link:${baseLinkEvidenceSource.baseLink}`,
+              `visible_trace_base_link_cost:${baseLinkEvidenceSource.activationCost}`,
+            ]
+          : []),
+        ...(baseLinkEvidenceSource?.sourceTitle
+          ? [`visible_trace_base_link_source:${baseLinkEvidenceSource.sourceTitle}`]
+          : []),
+        ...(baseLinkEvidenceSource?.sideEffect
+          ? [
+              `visible_trace_base_link_side_effect:${baseLinkEvidenceSource.sideEffect}`,
+            ]
+          : []),
+        ...(breakAssessment
+          ? [`visible_trace_break_cost:${breakAssessment.cost}`]
+          : []),
+        `visible_ice_hazard_unavoidable:${unavoidable}`,
+      ],
+    });
+    if (!unavoidable && minimumAvoidanceCost !== undefined) {
+      remainingHazardCredits -= minimumAvoidanceCost;
+      if (
+        usesBreakAvoidance &&
+        breakAssessment?.carriesStrengthAcrossIce === true
+      ) {
+        params.breakerStrengths.set(
+          breakAssessment.breakerInstanceId,
+          breakAssessment.endingStrength,
+        );
+      }
+    }
+  });
+  return hazards;
+}
+
+function visibleIceRunHazardForTraceEffect(
+  effect: TraceSuccessEffect | undefined,
+): Omit<
+  VisibleIceRunHazard,
+  | "iceIndex"
+  | "sourceDefinitionId"
+  | "sourceTitle"
+  | "subroutineId"
+  | "traceBaseStrength"
+  | "runnerTraceCapacity"
+  | "baseTraceCovered"
+  | "visibleCorpBidCapacity"
+  | "visibleCorpMaxTraceCovered"
+  | "traceAvoidanceCost"
+  | "visibleCorpMaxTraceAvoidanceCost"
+  | "traceBidCost"
+  | "baseLinkValue"
+  | "baseLinkActivationCost"
+  | "baseLinkSourceDefinitionId"
+  | "baseLinkSourceTitle"
+  | "baseLinkSideEffect"
+  | "breakAvoidanceCost"
+  | "minimumAvoidanceCost"
+  | "unavoidable"
+  | "penalty"
+  | "evidence"
+> | undefined {
+  if (!effect || effect.type === "none") return undefined;
+  switch (effect.type) {
+    case "add_tag":
+      return {
+        kind: "trace_tag",
+        severity: "high",
+        expectedTags: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "add_tags_by_trace_margin_over_runner_link":
+      return {
+        kind: "trace_tag",
+        severity: "high",
+        expectedTags: 1,
+      };
+    case "add_tag_and_counter":
+      return {
+        kind: "trace_tag_counter",
+        severity: "high",
+        expectedTags: Math.max(1, Math.floor(effect.tagAmount)),
+        expectedCounters: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "add_counter":
+      return {
+        kind: "trace_counter",
+        severity: "medium",
+        expectedCounters: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "net_damage":
+      return {
+        kind: "trace_damage",
+        severity: effect.amount >= 3 ? "high" : "medium",
+        expectedDamage: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "end_run_and_run_lock":
+      return {
+        kind: "trace_run_lock",
+        severity: "high",
+        actionTax: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "end_run_trash_program_and_run_lock":
+      return {
+        kind: "trace_trash",
+        severity: "high",
+        actionTax: Math.max(1, Math.floor(effect.amount)),
+      };
+    case "end_run_trash_hardware_and_unpreventable_meat_damage":
+      return {
+        kind: "trace_damage",
+        severity: "high",
+        expectedDamage: 2,
+      };
+    case "trash_runner_resource_and_add_tag":
+      return {
+        kind: "trace_trash",
+        severity: "high",
+        expectedTags: 1,
+      };
+  }
+}
+
+function visibleIceHazardPenalty(
+  kind: VisibleIceRunHazardKind,
+  severity: VisibleIceRunHazardSeverity,
+  unavoidable: boolean,
+  minimumAvoidanceCost: number | undefined,
+): number {
+  const base =
+    kind === "trace_tag_counter" || kind === "trace_trash"
+      ? 1750
+      : kind === "trace_tag"
+        ? 1450
+        : kind === "trace_damage" || kind === "trace_run_lock"
+          ? 1350
+          : 760;
+  const severityBonus =
+    severity === "high" ? 350 : severity === "medium" ? 120 : 0;
+  if (unavoidable) return base + severityBonus;
+  return Math.min(650, 180 + Math.max(0, minimumAvoidanceCost ?? 0) * 90);
+}
+
+function normalizeVisibleCorpBidCapacity(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+type VisibleRunnerTraceSupportOption = {
+  baseLink: number;
+  activationCost: number;
+  safeForAccess: boolean;
+  sourceDefinitionId?: string;
+  sourceTitle?: string;
+  sideEffect?: VisibleTraceSupportSideEffect;
+};
+
+type VisibleRunnerTraceSupport = {
+  availableCredits: number;
+  traceCreditPool: number;
+  runnerTraceCapacity: number;
+  baseLinkOptions: VisibleRunnerTraceSupportOption[];
+};
+
+type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
+  creditCost: number;
+  traceBidCost: number;
+  affordable: boolean;
+  runnerTraceCapacity: number;
+};
+
+type VisibleTraceAvoidanceAssessment = {
+  cheapestSafe?: VisibleTraceAvoidanceCandidate;
+  cheapestAffordableSafe?: VisibleTraceAvoidanceCandidate;
+  cheapestUnsafe?: VisibleTraceAvoidanceCandidate;
+  cheapestAffordableUnsafe?: VisibleTraceAvoidanceCandidate;
+};
+
+function visibleRunnerTraceSupport(
+  rigCards: VisibleCard[],
+  availableCredits: number,
+): VisibleRunnerTraceSupport {
+  const normalizedCredits = Math.max(0, Math.floor(availableCredits));
+  let traceCreditPool = 0;
+  const baseLinkOptions: VisibleRunnerTraceSupportOption[] = [
+    { baseLink: 0, activationCost: 0, safeForAccess: true },
+  ];
+  for (const card of rigCards) {
+    if (card.known === false) continue;
+    const definition = visibleRunCardDefinition(card.definitionId);
+    for (const display of card.counterDisplays ?? []) {
+      const uses = display.creditPool?.uses ?? [];
+      if (uses.includes("increase_link")) {
+        traceCreditPool += Math.max(0, Math.floor(display.amount));
+      }
+    }
+    if (
+      definition?.mechanics.includes("link_recurring_credit") &&
+      definition.recurringCredits !== undefined
+    ) {
+      traceCreditPool += Math.max(0, Math.floor(definition.recurringCredits));
+    }
+    if (card.definitionId) {
+      const implementationQuotes =
+        traceBaseLinkCardImplementationQuotesForDefinition(
+          card.definitionId as CardDefinitionId,
+        );
+      for (const quote of implementationQuotes) {
+        const option: VisibleRunnerTraceSupportOption = {
+          baseLink: Math.max(0, Math.floor(quote.baseLinkValue)),
+          activationCost: Math.max(0, Math.floor(quote.creditCost)),
+          safeForAccess: !quote.forcesJackOutAfterEncounter,
+          sourceDefinitionId: quote.sourceDefinitionId,
+          sourceTitle: quote.label,
+        };
+        if (quote.forcesJackOutAfterEncounter) {
+          option.sideEffect = "forces_jack_out_after_encounter";
+        }
+        baseLinkOptions.push(option);
+      }
+      if (implementationQuotes.length > 0) continue;
+    }
+    const staticIdentityBaseLink =
+      card.type === "identity"
+        ? Math.max(0, Math.floor(card.baseLink ?? definition?.baseLink ?? 0))
+        : 0;
+    if (staticIdentityBaseLink > 0) {
+      baseLinkOptions.push({
+        baseLink: staticIdentityBaseLink,
+        activationCost: 0,
+        safeForAccess: true,
+        ...(card.definitionId
+          ? { sourceDefinitionId: card.definitionId }
+          : {}),
+        ...(card.title ? { sourceTitle: card.title } : {}),
+      });
+    }
+  }
+  const runnerTraceCapacity = Math.max(
+    ...baseLinkOptions
+      .filter(
+        (option) =>
+          option.safeForAccess && option.activationCost <= normalizedCredits,
+      )
+      .map(
+        (option) =>
+          option.baseLink +
+          normalizedCredits -
+          option.activationCost +
+          traceCreditPool,
+      ),
+  );
+  return {
+    availableCredits: normalizedCredits,
+    traceCreditPool,
+    runnerTraceCapacity,
+    baseLinkOptions,
+  };
+}
+
+function visibleTraceAvoidanceForBaseStrength(
+  traceBaseStrength: number,
+  support: VisibleRunnerTraceSupport,
+): VisibleTraceAvoidanceAssessment {
+  const baseStrength = Math.max(0, Math.floor(traceBaseStrength));
+  const candidates = support.baseLinkOptions.map((option) => {
+    const traceBidCost = Math.max(0, baseStrength - option.baseLink);
+    const creditBidCost = Math.max(0, traceBidCost - support.traceCreditPool);
+    const creditCost = option.activationCost + creditBidCost;
+    const affordable =
+      option.activationCost <= support.availableCredits &&
+      traceBidCost <=
+        support.availableCredits - option.activationCost +
+          support.traceCreditPool;
+    return {
+      ...option,
+      creditCost,
+      traceBidCost,
+      affordable,
+      runnerTraceCapacity:
+        option.baseLink +
+        Math.max(0, support.availableCredits - option.activationCost) +
+        support.traceCreditPool,
+    };
+  });
+  const assessment: VisibleTraceAvoidanceAssessment = {};
+  const cheapestSafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter((candidate) => candidate.safeForAccess),
+  );
+  const cheapestAffordableSafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter(
+      (candidate) => candidate.safeForAccess && candidate.affordable,
+    ),
+  );
+  const cheapestUnsafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter((candidate) => !candidate.safeForAccess),
+  );
+  const cheapestAffordableUnsafe = cheapestTraceAvoidanceCandidate(
+    candidates.filter(
+      (candidate) => !candidate.safeForAccess && candidate.affordable,
+    ),
+  );
+  if (cheapestSafe) assessment.cheapestSafe = cheapestSafe;
+  if (cheapestAffordableSafe)
+    assessment.cheapestAffordableSafe = cheapestAffordableSafe;
+  if (cheapestUnsafe) assessment.cheapestUnsafe = cheapestUnsafe;
+  if (cheapestAffordableUnsafe)
+    assessment.cheapestAffordableUnsafe = cheapestAffordableUnsafe;
+  return assessment;
+}
+
+function cheapestTraceAvoidanceCandidate(
+  candidates: VisibleTraceAvoidanceCandidate[],
+): VisibleTraceAvoidanceCandidate | undefined {
+  return candidates.sort(
+    (a, b) =>
+      a.creditCost - b.creditCost ||
+      a.activationCost - b.activationCost ||
+      b.baseLink - a.baseLink,
+  )[0];
+}
+
+function traceBaseStrengthForVisibleSubroutine(
+  quote: VisibleEffectiveIceRunQuote,
+  subroutine: VisibleEffectiveSubroutine,
+  subroutineIndex: number,
+): number | undefined {
+  if (typeof subroutine.baseTraceStrength === "number") {
+    return Math.max(0, Math.floor(subroutine.baseTraceStrength));
+  }
+  if (typeof subroutine.amount === "number") {
+    return Math.max(0, Math.floor(subroutine.amount));
+  }
+  const definitionSubroutine = definitionSubroutineForVisibleSubroutine(
+    quote,
+    subroutine,
+    subroutineIndex,
+  );
+  return definitionSubroutine?.baseTraceStrength === undefined
+    ? undefined
+    : Math.max(0, Math.floor(definitionSubroutine.baseTraceStrength));
+}
+
+function traceSuccessEffectForVisibleSubroutine(
+  quote: VisibleEffectiveIceRunQuote,
+  subroutine: VisibleEffectiveSubroutine,
+  subroutineIndex: number,
+): TraceSuccessEffect | undefined {
+  return (
+    subroutine.traceSuccessEffect ??
+    definitionSubroutineForVisibleSubroutine(quote, subroutine, subroutineIndex)
+      ?.traceSuccessEffect
+  );
+}
+
+function definitionSubroutineForVisibleSubroutine(
+  quote: VisibleEffectiveIceRunQuote,
+  subroutine: VisibleEffectiveSubroutine,
+  subroutineIndex: number,
+):
+  | NonNullable<CardDefinition["subroutines"]>[number]
+  | undefined {
+  const definition =
+    visibleRunCardDefinition(subroutine.sourceDefinitionId) ??
+    visibleRunCardDefinition(quote.iceDefinitionId);
+  const definitionSubroutines = definition?.subroutines ?? [];
+  const byId = definitionSubroutines.find(
+    (candidate) => candidate.id === subroutine.id,
+  );
+  if (byId) return byId;
+  const sameType = definitionSubroutines.filter(
+    (candidate) => candidate.type === subroutine.type,
+  );
+  const sameTypeIndex = quote.subroutines
+    .slice(0, subroutineIndex)
+    .filter((candidate) => candidate.type === subroutine.type).length;
+  return sameType[sameTypeIndex] ?? (sameType.length === 1 ? sameType[0] : undefined);
 }
 
 function runPathEffectAlreadyVisibleOnFutureIce(
@@ -589,8 +1276,13 @@ function unbrokenEffectIsUnavoidableTraceRunLock(
 ): boolean | undefined {
   if ((effect.createsRunLockOrActionTax ?? 0) <= 0) return undefined;
   if (sourceSubroutine.type !== "initiate_trace") return undefined;
-  if (typeof sourceSubroutine.amount !== "number") return true;
-  const traceBaseStrength = Math.max(0, Math.floor(sourceSubroutine.amount));
+  const traceBaseStrength =
+    typeof sourceSubroutine.baseTraceStrength === "number"
+      ? Math.max(0, Math.floor(sourceSubroutine.baseTraceStrength))
+      : typeof sourceSubroutine.amount === "number"
+        ? Math.max(0, Math.floor(sourceSubroutine.amount))
+        : undefined;
+  if (traceBaseStrength === undefined) return true;
   const runnerVisibleTraceCapacity = Math.max(0, Math.floor(remainingCredits));
   return traceBaseStrength > runnerVisibleTraceCapacity;
 }
@@ -618,6 +1310,12 @@ function projectIceForRunPathEffects(
         type: subroutine.type,
         ...(subroutine.amount !== undefined
           ? { amount: subroutine.amount }
+          : {}),
+        ...(subroutine.baseTraceStrength !== undefined
+          ? { baseTraceStrength: subroutine.baseTraceStrength }
+          : {}),
+        ...(subroutine.traceSuccessEffect
+          ? { traceSuccessEffect: subroutine.traceSuccessEffect }
           : {}),
         ...(subroutine.breakTags
           ? { breakTags: subroutine.breakTags.slice() }
@@ -828,6 +1526,12 @@ function runQuoteForIce(
           ...(subroutine.amount !== undefined
             ? { amount: subroutine.amount }
             : {}),
+          ...(subroutine.baseTraceStrength !== undefined
+            ? { baseTraceStrength: subroutine.baseTraceStrength }
+            : {}),
+          ...(subroutine.traceSuccessEffect
+            ? { traceSuccessEffect: subroutine.traceSuccessEffect }
+            : {}),
           ...(subroutine.breakTags
             ? { breakTags: subroutine.breakTags.slice() }
             : {}),
@@ -859,8 +1563,14 @@ function visibleSubroutineWithFallbackUnbrokenRunEffect(
 function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
   type: VisibleEffectiveSubroutine["type"];
   amount?: number;
+  traceSuccessEffect?: TraceSuccessEffect;
 }): RunPathProjectionEffect | undefined {
   const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+  const traceEffect =
+    subroutine.type === "initiate_trace"
+      ? fallbackUnbrokenRunEffectForTraceSuccess(subroutine.traceSuccessEffect)
+      : undefined;
+  if (traceEffect) return traceEffect;
   switch (subroutine.type) {
     case "set_run_future_end_the_run_subroutine":
       return { addsFutureEndTheRunSubroutines: 1 };
@@ -879,7 +1589,7 @@ function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
       return { preventsJackOut: true };
     case "set_next_encounter_unless_fully_break_damage":
     case "set_run_pass_rezzed_ice_program_trash":
-    case "set_run_viral_15":
+    case "set_run_active_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
     case "trash_installed_program_unless_runner_pays":
@@ -893,11 +1603,130 @@ function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
   }
 }
 
+function fallbackUnbrokenRunEffectForTraceSuccess(
+  effect: TraceSuccessEffect | undefined,
+): RunPathProjectionEffect | undefined {
+  if (!effect || effect.type === "none") return undefined;
+  switch (effect.type) {
+    case "end_run_and_run_lock":
+      return { createsRunLockOrActionTax: Math.max(1, effect.amount) };
+    case "end_run_trash_program_and_run_lock":
+      return { createsRunLockOrActionTax: Math.max(1, effect.amount) };
+    default:
+      return undefined;
+  }
+}
+
 function effectiveIceForQuote(
   ice: IceCardLike,
   quote: VisibleEffectiveIceRunQuote | undefined,
 ): IceCardLike {
   return quote ? { ...ice, strength: quote.effectiveStrength } : ice;
+}
+
+function minimumCreditsToBreakVisibleSubroutines(
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  rigCards: VisibleCard[],
+  targetSubroutines: readonly VisibleEffectiveSubroutine[],
+  breakerStrengths: Map<string, number>,
+  additionalBreakCostPerSubroutine = 0,
+): BreakAssessment | undefined {
+  const costs = rigCards
+    .map((card) =>
+      creditsToBreakVisibleSubroutinesWithBreaker(
+        card,
+        ice,
+        targetSubroutines,
+        breakerStrengths.get(card.instanceId),
+        additionalBreakCostPerSubroutine,
+      ),
+    )
+    .filter((cost): cost is BreakAssessment => cost !== undefined)
+    .sort(
+      (left, right) =>
+        left.cost - right.cost ||
+        left.breakerInstanceId.localeCompare(right.breakerInstanceId),
+    );
+  return costs[0];
+}
+
+function creditsToBreakVisibleSubroutinesWithBreaker(
+  breakerCard: VisibleCard,
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  targetSubroutines: readonly VisibleEffectiveSubroutine[],
+  currentBreakerStrength = breakerCard.strength ??
+    cardDefinitionStrength(breakerCard.definitionId),
+  additionalBreakCostPerSubroutine = 0,
+): BreakAssessment | undefined {
+  if (
+    targetSubroutines.length <= 0 ||
+    !breakerCard.known ||
+    !breakerCard.definitionId ||
+    !ice.definitionId
+  )
+    return undefined;
+  if (breakerCardBlocksAccessReachability(breakerCard.definitionId)) {
+    return undefined;
+  }
+  const breakerDefinition = visibleRunCardDefinition(breakerCard.definitionId);
+  const iceDefinition = visibleRunCardDefinition(ice.definitionId);
+  if (
+    !breakerDefinition ||
+    !iceDefinition ||
+    !breakerDefinition.subtypes.includes("icebreaker")
+  )
+    return undefined;
+  const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
+  const targetBreakTags = targetSubroutines.map(breakTagsForSubroutine);
+  const breakAbility = breakerDefinition.abilities?.find((ability) => {
+    if (ability.type !== "break_subroutine") return false;
+    if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
+      return false;
+    }
+    const abilityBreakTags = ability.subroutineBreakTags ?? [];
+    if (abilityBreakTags.length === 0) return true;
+    return targetBreakTags.every((tags) =>
+      abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
+    );
+  });
+  if (!breakAbility) return undefined;
+  const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
+  const pumpAbility = breakerDefinition.abilities?.find(
+    (ability) => ability.type === "pump_strength",
+  );
+  let pumpCost = 0;
+  let endingStrength = currentBreakerStrength;
+  if (endingStrength < iceStrength) {
+    if (!pumpAbility || (pumpAbility.amount ?? 0) <= 0) return undefined;
+    const requiredPumps = Math.ceil(
+      (iceStrength - endingStrength) / Math.max(1, pumpAbility.amount ?? 1),
+    );
+    pumpCost = requiredPumps * (pumpAbility.cost.credits ?? 0);
+    endingStrength += requiredPumps * Math.max(1, pumpAbility.amount ?? 1);
+  }
+  const breakCount = Math.max(1, breakAbility.count ?? 1);
+  const breakUses = Math.ceil(targetSubroutines.length / breakCount);
+  return {
+    cost:
+      pumpCost +
+      breakUses * (breakAbility.cost.credits ?? 0) +
+      targetSubroutines.length *
+        Math.max(0, additionalBreakCostPerSubroutine),
+    breakerInstanceId: breakerCard.instanceId,
+    endingStrength,
+    carriesStrengthAcrossIce:
+      breakerCarriesStrengthAcrossIce(breakerDefinition),
+  };
+}
+
+function breakTagsForSubroutine(
+  subroutine: VisibleEffectiveSubroutine,
+): string[] {
+  const tags = new Set((subroutine.breakTags ?? []).map(subtypeKey));
+  if (subroutine.type === "initiate_trace") tags.add("trace");
+  if (subroutine.type === "end_the_run") tags.add("end_the_run");
+  if (subroutine.type === "do_damage") tags.add("damage");
+  return [...tags];
 }
 
 export function minimumCreditsToBreakEndTheRunSubroutines(

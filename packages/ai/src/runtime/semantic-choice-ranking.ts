@@ -64,16 +64,18 @@ export function tacticalPlanMappedChoice(
     overrideChoice &&
     overrideChoice.action.actionId !== mappedChoice.action.actionId
   ) {
+    const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
     if (
       tacticalPlanCoverageMappingBlocksRunOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
+        scoreGap,
       )
     ) {
       return { choice: mappedChoice };
     }
-    const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
     if (
       tacticalPlanHandBufferMappingBlocksProbeRunOverride(
         mapping,
@@ -185,13 +187,25 @@ function tacticalPlanBlocksSemanticChoice(
 
 function tacticalPlanCoverageMappingBlocksRunOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
+  scoreGap: number,
 ): boolean {
+  if (
+    mapping.plan.type === "runner.obtain_breaker_coverage" &&
+    overrideChoice.action.type === "start_run" &&
+    !mappedActionIds.has(overrideChoice.action.actionId) &&
+    mappedChoice.action.type !== "gain_credit" &&
+    mappedChoice.action.type !== "draw_card"
+  ) {
+    return mappedChoice.score > 0;
+  }
   return (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     overrideChoice.action.type === "start_run" &&
-    !mappedActionIds.has(overrideChoice.action.actionId)
+    !mappedActionIds.has(overrideChoice.action.actionId) &&
+    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
   );
 }
 

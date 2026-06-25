@@ -10,10 +10,10 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   handleCorpZoneChoice,
-  resolveAiChiefFinancialOfficer,
+  resolveHqArchivesShuffleDraw,
   resolveReschedulerHqShuffleDraw,
-  startCorporateDownsizingScoreChoice,
-  startCorporateNegotiatingCenterChoice,
+  startScoredAgendaHqShuffleCreditsChoice,
+  startCorpHqAgendaRevealChoice,
   type CorpZoneChoiceHandlerHost,
 } from "./corp-zone-choice-handlers";
 
@@ -102,7 +102,7 @@ function makeHost(input: {
       "Corporate Downsizing",
       2,
     ),
-    ai_cfo_source: definition(aiCfoDefinitionId, "agenda", "AI CFO", 2),
+    ai_cfo_source: definition(aiCfoDefinitionId, "agenda", "HQ/Archives-Shuffle-Draw", 2),
     hq_agenda_1: definition("agenda_alpha", "agenda", "Agenda Alpha", 2),
     hq_agenda_2: definition("agenda_beta", "agenda", "Agenda Beta", 3),
     hq_operation: definition("operation_alpha", "operation", "Operation Alpha"),
@@ -188,10 +188,10 @@ describe("corp zone choice handlers", () => {
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
     });
 
-    startCorporateNegotiatingCenterChoice(host);
+    startCorpHqAgendaRevealChoice(host);
 
     expect(host.state.pendingChoice?.source).toBe(
-      "v1917.corp_negotiating_center:cnc_source:8",
+      "v1917.corp_hq_agenda_reveal:cnc_source:8",
     );
     expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
       "hq_agenda_1",
@@ -205,7 +205,7 @@ describe("corp zone choice handlers", () => {
       hq: ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
       pendingChoice: selectCardsChoice(
-        "v1917.corp_negotiating_center:cnc_source:8",
+        "v1917.corp_hq_agenda_reveal:cnc_source:8",
         ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_agenda_1"]),
@@ -217,7 +217,7 @@ describe("corp zone choice handlers", () => {
     expect(host.state.corp.credits).toBe(5);
     expect(host.state.pendingChoice).toBeUndefined();
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+      hiddenZoneAction: "corp_hq_agenda_reveal",
       revealedCount: 1,
       gainedCredits: 1,
       publicRevealDefinitionIds: "agenda_alpha",
@@ -230,14 +230,14 @@ describe("corp zone choice handlers", () => {
       hq: ["hq_operation"] as CardInstanceId[],
       rezzedRoot: ["cnc_source"] as CardInstanceId[],
       pendingChoice: selectCardsChoice(
-        "v1917.corp_negotiating_center:cnc_source:8",
+        "v1917.corp_hq_agenda_reveal:cnc_source:8",
         ["hq_operation"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_operation"]),
     });
 
     expect(() => handleCorpZoneChoice(host)).toThrow(
-      "Corporate Negotiating Center darf nur HQ-Agenden zeigen.",
+      "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.",
     );
   });
 
@@ -253,12 +253,12 @@ describe("corp zone choice handlers", () => {
       shuffleInputs,
     });
 
-    startCorporateDownsizingScoreChoice(host, {
+    startScoredAgendaHqShuffleCreditsChoice(host, {
       sourceCardId: "downsizing_source" as CardInstanceId,
       creditPerAgendaPoint: 2,
     });
     expect(host.state.pendingChoice?.source).toBe(
-      "p3_50.corporate_downsizing:downsizing_source:2:8",
+      "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:8",
     );
 
     host.playerAction = playerAction(["card_hq_agenda_1", "card_hq_agenda_2"]);
@@ -272,11 +272,11 @@ describe("corp zone choice handlers", () => {
     expect(shuffleInputs).toEqual([
       {
         ids: ["rd_1", "hq_agenda_1", "hq_agenda_2"],
-        purpose: "p3_50.corporate_downsizing.hq_agendas_into_rd.downsizing_source.8",
+        purpose: "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.downsizing_source.8",
       },
     ]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
       shownCardDefinitionIds: "agenda_alpha,agenda_beta",
       shownCount: 2,
       shuffledIntoRndCount: 2,
@@ -294,14 +294,14 @@ describe("corp zone choice handlers", () => {
         downsizing_source: "shuffle_selected_hq_agendas_into_rd_gain_credits",
       },
       pendingChoice: selectCardsChoice(
-        "p3_50.corporate_downsizing:downsizing_source:2:8",
+        "scored_agenda.hq_agenda_shuffle_credits:downsizing_source:2:8",
         ["hq_operation"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_hq_operation"]),
     });
 
     expect(() => handleCorpZoneChoice(host)).toThrow(
-      "Corporate Downsizing darf nur HQ-Agenden zeigen.",
+      "Diese Scored Agenda darf nur HQ-Agenden zeigen.",
     );
   });
 
@@ -335,7 +335,7 @@ describe("corp zone choice handlers", () => {
     expect(JSON.stringify(host.legalAction.payload)).not.toContain("hq_agenda_1");
   });
 
-  it("resolves AI CFO with HQ/Archives counts and draw five", () => {
+  it("resolves HQ/Archives-Shuffle-Draw with HQ/Archives counts and draw five", () => {
     const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
     const drawCalls: number[] = [];
     const host = makeHost({
@@ -350,7 +350,7 @@ describe("corp zone choice handlers", () => {
       drawCalls,
     });
 
-    const result = resolveAiChiefFinancialOfficer(
+    const result = resolveHqArchivesShuffleDraw(
       host,
       "ai_cfo_source" as CardInstanceId,
     );
@@ -360,11 +360,11 @@ describe("corp zone choice handlers", () => {
     expect(drawCalls).toEqual([5]);
     expect(shuffleInputs[0]).toEqual({
       ids: ["rd_1", "hq_agenda_1", "archives_1"],
-      purpose: "v192.shuffle.ai_cfo.hq_archives_into_rd.8",
+      purpose: "scored_agenda.shuffle.hq_archives_into_rd.8",
     });
     expect(host.state.corp.archives).toEqual([]);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+      hiddenZoneAction: "hq_archives_shuffle_into_rd",
       shuffledCardsCount: 2,
       drawnCardsCount: 3,
     });

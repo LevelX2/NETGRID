@@ -1,4 +1,4 @@
-import { isGeneratedCardImageId } from "../../app/card-image-service";
+import { isGeneratedCardImageId } from "./card-image-service";
 
 export function rulesTextLines(text: string): string[] {
   return text

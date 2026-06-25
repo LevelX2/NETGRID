@@ -27,25 +27,25 @@ export type PendingChoiceResolutionHost = {
     resolveP358HiddenReplacementChoice: HostFn<void>;
     handleHiddenZoneSearchChoice: HostFn<{ handled: boolean; deletePendingChoice?: boolean }>;
     hiddenZoneSearchChoiceHandlerHost: HostFn<unknown>;
-    resolveHuntClubBbsExposeChoice: HostFn<void>;
+    resolveMultiExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
-    resolveInvestmentFirmCreditChoice: HostFn<void>;
+    resolveCorpInstalledEconomyCreditChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
-    resolvePowerGridOverloadChoice: HostFn<void>;
-    resolveSystematicLayoffsAdvancementChoice: HostFn<void>;
-    resolveAnonymousTipDerezBlackIceChoice: HostFn<void>;
-    resolveCoreCommandJettisonIceChoice: HostFn<void>;
-    resolveForgedActivationOrdersTargetChoice: HostFn<void>;
-    resolveForgedActivationOrdersCorpChoice: HostFn<void>;
-    resolveSecurityCodeWormChipTrashIceChoice: HostFn<void>;
-    resolveV1921PlayfulAiChoice: HostFn<void>;
+    resolveHardwareTrashByCounterChoice: HostFn<void>;
+    resolveAdvancementPlacementChoice: HostFn<void>;
+    resolveDerezRezzedBlackIceChoice: HostFn<void>;
+    resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
+    resolveCorpChoiceRezOrTrashIceTargetChoice: HostFn<void>;
+    resolveCorpChoiceRezOrTrashIceDecisionChoice: HostFn<void>;
+    resolveTrashUnrezzedIceChoice: HostFn<void>;
+    resolveRandomDiceSplitChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
     resolveGripInstallTemporaryCreditChoice: HostFn<void>;
     resolveStackInstallRunCleanupChoice: HostFn<void>;
-    resolveOpenEndedMileageProgramReturnChoice: HostFn<void>;
+    resolvePaidSourceReturnToGripChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
-    resolveCodeViralCachePurgeChoice: HostFn<void>;
+    resolveVirusCounterPurgePreserveChoice: HostFn<void>;
     resolveChimeraDaemonTrashChoice: HostFn<void>;
     resolveRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
@@ -63,18 +63,18 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
   };
   run: {
-    resolveSingaporeCityGridSwapChoice: HostFn<void>;
+    resolveHqIceSwapChoice: HostFn<void>;
     fortPassWindowHostForState: HostFn<unknown>;
-    resolveTooManyDoorsSecretSpendChoiceInRunModule: HostFn<void>;
+    resolveSecretSpendCompareChoiceInRunModule: HostFn<void>;
     encounterSpecialWindowHostForState: HostFn<unknown>;
     resolveHammerStealthLossChoice: HostFn<void>;
     fortRunSideFamiliesHostForState: HostFn<unknown>;
-    resolveViral15ProgramTrashChoiceInRunModule: HostFn<void>;
+    resolveActiveIceProgramTrashChoiceInRunModule: HostFn<void>;
     encounterResolutionHostForState: HostFn<unknown>;
     resolvePassRezzedIceProgramTrashChoiceInRunModule: HostFn<void>;
-    resolveSpeedTrapRezInterruptChoice: HostFn<void>;
+    resolveRezInterruptJackOutChoice: HostFn<void>;
     runRezWindowHostForState: HostFn<unknown>;
-    resolvePattelsVirusCounterChoice: HostFn<void>;
+    resolveBrokenIceVirusCounterChoice: HostFn<void>;
     runEndCleanupHost: HostFn<unknown>;
     resolveAardvarkInterceptionChoice: HostFn<void>;
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
@@ -83,9 +83,9 @@ export type PendingChoiceResolutionHost = {
     resolveStartOfRunFortUtilityChoice: HostFn<void>;
   };
   access: {
-    resolvePriorityWreckSpendChoice: HostFn<void>;
+    resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
     runAccessTransitionHost: HostFn<unknown>;
-    resolveMicrotechAiInterfacePreAccessChoice: HostFn<void>;
+    resolvePreAccessTopRdReorderChoice: HostFn<void>;
   };
   cardImplementation: {
     resolveCardImplementationAccessPaymentChoice: HostFn<void>;
@@ -129,43 +129,43 @@ export function resolvePendingChoice(
     host.hiddenZone.handleHiddenZoneSearchChoice;
   const hiddenZoneSearchChoiceHandlerHost =
     host.hiddenZone.hiddenZoneSearchChoiceHandlerHost;
-  const resolveHuntClubBbsExposeChoice =
-    host.hiddenZone.resolveHuntClubBbsExposeChoice;
+  const resolveMultiExposeInstalledCorpCardsChoice =
+    host.hiddenZone.resolveMultiExposeInstalledCorpCardsChoice;
   const resolveExposeInstalledCorpCardsChoice =
     host.hiddenZone.resolveExposeInstalledCorpCardsChoice;
-  const resolveInvestmentFirmCreditChoice =
-    host.hiddenZone.resolveInvestmentFirmCreditChoice;
+  const resolveCorpInstalledEconomyCreditChoice =
+    host.hiddenZone.resolveCorpInstalledEconomyCreditChoice;
   const resolveCrashEverettDrawChoice =
     host.hiddenZone.resolveCrashEverettDrawChoice;
-  const resolvePowerGridOverloadChoice =
-    host.hiddenZone.resolvePowerGridOverloadChoice;
-  const resolveSystematicLayoffsAdvancementChoice =
-    host.hiddenZone.resolveSystematicLayoffsAdvancementChoice;
-  const resolveAnonymousTipDerezBlackIceChoice =
-    host.hiddenZone.resolveAnonymousTipDerezBlackIceChoice;
-  const resolveCoreCommandJettisonIceChoice =
-    host.hiddenZone.resolveCoreCommandJettisonIceChoice;
-  const resolveForgedActivationOrdersTargetChoice =
-    host.hiddenZone.resolveForgedActivationOrdersTargetChoice;
-  const resolveForgedActivationOrdersCorpChoice =
-    host.hiddenZone.resolveForgedActivationOrdersCorpChoice;
-  const resolveSecurityCodeWormChipTrashIceChoice =
-    host.hiddenZone.resolveSecurityCodeWormChipTrashIceChoice;
-  const resolveV1921PlayfulAiChoice =
-    host.hiddenZone.resolveV1921PlayfulAiChoice;
+  const resolveHardwareTrashByCounterChoice =
+    host.hiddenZone.resolveHardwareTrashByCounterChoice;
+  const resolveAdvancementPlacementChoice =
+    host.hiddenZone.resolveAdvancementPlacementChoice;
+  const resolveDerezRezzedBlackIceChoice =
+    host.hiddenZone.resolveDerezRezzedBlackIceChoice;
+  const resolvePayRezCostToTrashRezzedIceChoice =
+    host.hiddenZone.resolvePayRezCostToTrashRezzedIceChoice;
+  const resolveCorpChoiceRezOrTrashIceTargetChoice =
+    host.hiddenZone.resolveCorpChoiceRezOrTrashIceTargetChoice;
+  const resolveCorpChoiceRezOrTrashIceDecisionChoice =
+    host.hiddenZone.resolveCorpChoiceRezOrTrashIceDecisionChoice;
+  const resolveTrashUnrezzedIceChoice =
+    host.hiddenZone.resolveTrashUnrezzedIceChoice;
+  const resolveRandomDiceSplitChoice =
+    host.hiddenZone.resolveRandomDiceSplitChoice;
   const resolveRunnerInstalledConnectionTrashBadPublicityChoice =
     host.hiddenZone.resolveRunnerInstalledConnectionTrashBadPublicityChoice;
   const resolveGripInstallTemporaryCreditChoice =
     host.hiddenZone.resolveGripInstallTemporaryCreditChoice;
   const resolveStackInstallRunCleanupChoice =
     host.hiddenZone.resolveStackInstallRunCleanupChoice;
-  const resolveOpenEndedMileageProgramReturnChoice =
-    host.hiddenZone.resolveOpenEndedMileageProgramReturnChoice;
+  const resolvePaidSourceReturnToGripChoice =
+    host.hiddenZone.resolvePaidSourceReturnToGripChoice;
   const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
   const resolveIncubatorTransformChoice =
     host.hiddenZone.resolveIncubatorTransformChoice;
-  const resolveCodeViralCachePurgeChoice =
-    host.hiddenZone.resolveCodeViralCachePurgeChoice;
+  const resolveVirusCounterPurgePreserveChoice =
+    host.hiddenZone.resolveVirusCounterPurgePreserveChoice;
   const resolveChimeraDaemonTrashChoice =
     host.hiddenZone.resolveChimeraDaemonTrashChoice;
   const resolveRunnerProgramReturnChoice =
@@ -186,28 +186,28 @@ export function resolvePendingChoice(
   const scoredAgendaFlowHost = host.corp.scoredAgendaFlowHost;
   const resolveRunnerProgramTrashBeforeInstallChoice =
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
-  const resolveSingaporeCityGridSwapChoice =
-    host.run.resolveSingaporeCityGridSwapChoice;
+  const resolveHqIceSwapChoice =
+    host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
-  const resolveTooManyDoorsSecretSpendChoiceInRunModule =
-    host.run.resolveTooManyDoorsSecretSpendChoiceInRunModule;
+  const resolveSecretSpendCompareChoiceInRunModule =
+    host.run.resolveSecretSpendCompareChoiceInRunModule;
   const encounterSpecialWindowHostForState =
     host.run.encounterSpecialWindowHostForState;
   const resolveHammerStealthLossChoice =
     host.run.resolveHammerStealthLossChoice;
   const fortRunSideFamiliesHostForState =
     host.run.fortRunSideFamiliesHostForState;
-  const resolveViral15ProgramTrashChoiceInRunModule =
-    host.run.resolveViral15ProgramTrashChoiceInRunModule;
+  const resolveActiveIceProgramTrashChoiceInRunModule =
+    host.run.resolveActiveIceProgramTrashChoiceInRunModule;
   const encounterResolutionHostForState =
     host.run.encounterResolutionHostForState;
   const resolvePassRezzedIceProgramTrashChoiceInRunModule =
     host.run.resolvePassRezzedIceProgramTrashChoiceInRunModule;
-  const resolveSpeedTrapRezInterruptChoice =
-    host.run.resolveSpeedTrapRezInterruptChoice;
+  const resolveRezInterruptJackOutChoice =
+    host.run.resolveRezInterruptJackOutChoice;
   const runRezWindowHostForState = host.run.runRezWindowHostForState;
-  const resolvePattelsVirusCounterChoice =
-    host.run.resolvePattelsVirusCounterChoice;
+  const resolveBrokenIceVirusCounterChoice =
+    host.run.resolveBrokenIceVirusCounterChoice;
   const runEndCleanupHost = host.run.runEndCleanupHost;
   const resolveAardvarkInterceptionChoice =
     host.run.resolveAardvarkInterceptionChoice;
@@ -218,11 +218,11 @@ export function resolvePendingChoice(
     host.run.resolvePostMeatDamageHiddenResourceChoice;
   const resolveStartOfRunFortUtilityChoice =
     host.run.resolveStartOfRunFortUtilityChoice;
-  const resolvePriorityWreckSpendChoice =
-    host.access.resolvePriorityWreckSpendChoice;
+  const resolveSuccessfulRunCreditLossSpendChoice =
+    host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
-  const resolveMicrotechAiInterfacePreAccessChoice =
-    host.access.resolveMicrotechAiInterfacePreAccessChoice;
+  const resolvePreAccessTopRdReorderChoice =
+    host.access.resolvePreAccessTopRdReorderChoice;
   const resolveCardImplementationAccessPaymentChoice =
     host.cardImplementation.resolveCardImplementationAccessPaymentChoice;
   const resolveCardImplementationAdvancementDistributionChoice =
@@ -312,8 +312,8 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
-    resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.multi_expose_installed_corp_cards")) {
+    resolveMultiExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {
@@ -345,32 +345,32 @@ export function resolvePendingChoice(
     resolveFortHqReplacementChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
-    resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("corp_installed_economy.credit_choice")) {
+    resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
-    resolvePowerGridOverloadChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.installed_hardware_trash_by_counter")) {
+    resolveHardwareTrashByCounterChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith(
-      "v1919.systematic_layoffs_advancement",
+      "card_implementation.advancement_placement",
     )
   ) {
-    resolveSystematicLayoffsAdvancementChoice(
+    resolveAdvancementPlacementChoice(
       state,
       legalAction,
       playerAction,
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
-    resolveSingaporeCityGridSwapChoice(
+  if (state.pendingChoice.source.startsWith("card_implementation.hq_ice_swap")) {
+    resolveHqIceSwapChoice(
       fortPassWindowHostForState(state),
       legalAction,
       playerAction,
@@ -378,23 +378,23 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")
+    state.pendingChoice.source.startsWith("card_implementation.derez_rezzed_black_ice")
   ) {
-    resolveAnonymousTipDerezBlackIceChoice(state, legalAction, playerAction);
+    resolveDerezRezzedBlackIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.core_command_jettison_ice")
+    state.pendingChoice.source.startsWith("card_implementation.pay_rez_cost_trash_rezzed_ice")
   ) {
-    resolveCoreCommandJettisonIceChoice(state, legalAction, playerAction);
+    resolvePayRezCostToTrashRezzedIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith(
-      "v1922.forged_activation_orders_target",
+      "card_implementation.corp_choice_rez_or_trash_ice_target",
     )
   ) {
-    resolveForgedActivationOrdersTargetChoice(
+    resolveCorpChoiceRezOrTrashIceTargetChoice(
       state,
       legalAction,
       playerAction,
@@ -402,21 +402,21 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.forged_activation_orders_corp")
+    state.pendingChoice.source.startsWith("card_implementation.corp_choice_rez_or_trash_ice_decision")
   ) {
-    resolveForgedActivationOrdersCorpChoice(
+    resolveCorpChoiceRezOrTrashIceDecisionChoice(
       state,
       legalAction,
       playerAction,
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.security_code_worm_chip")) {
-    resolveSecurityCodeWormChipTrashIceChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.trash_unrezzed_ice")) {
+    resolveTrashUnrezzedIceChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
-    resolveV1921PlayfulAiChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("card_implementation.random_dice_split")) {
+    resolveRandomDiceSplitChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -451,9 +451,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
+    state.pendingChoice.source.startsWith("card_implementation.secret_spend_compare")
   ) {
-    resolveTooManyDoorsSecretSpendChoiceInRunModule(
+    resolveSecretSpendCompareChoiceInRunModule(
       encounterSpecialWindowHostForState(state),
       legalAction,
       playerAction,
@@ -461,9 +461,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")
+    state.pendingChoice.source.startsWith("card_implementation.paid_source_return_to_grip")
   ) {
-    resolveOpenEndedMileageProgramReturnChoice(state, legalAction, playerAction);
+    resolvePaidSourceReturnToGripChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -477,9 +477,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
+    state.pendingChoice.source.startsWith("card_implementation.active_ice_program_trash")
   ) {
-    resolveViral15ProgramTrashChoiceInRunModule(
+    resolveActiveIceProgramTrashChoiceInRunModule(
       encounterResolutionHostForState(state),
       legalAction,
       playerAction,
@@ -496,8 +496,8 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
-    resolveSpeedTrapRezInterruptChoice(
+  if (state.pendingChoice.source.startsWith("rez_interrupt.jack_out")) {
+    resolveRezInterruptJackOutChoice(
       runRezWindowHostForState(state),
       legalAction,
       playerAction,
@@ -512,8 +512,8 @@ export function resolvePendingChoice(
     resolveIncubatorTransformChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v181.pattels_virus")) {
-    resolvePattelsVirusCounterChoice(
+  if (state.pendingChoice.source.startsWith("broken_ice.virus_counter")) {
+    resolveBrokenIceVirusCounterChoice(
       runEndCleanupHost(state),
       legalAction,
       playerAction,
@@ -523,7 +523,7 @@ export function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("runner_virus_counter_purge_replacement")
   ) {
-    resolveCodeViralCachePurgeChoice(state, legalAction, playerAction);
+    resolveVirusCounterPurgePreserveChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.aardvark")) {
@@ -554,8 +554,8 @@ export function resolvePendingChoice(
     resolveCardImplementationAccessPaymentChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_33.priority_wreck")) {
-    resolvePriorityWreckSpendChoice(
+  if (state.pendingChoice.source.startsWith("successful_run.credit_loss_spend")) {
+    resolveSuccessfulRunCreditLossSpendChoice(
       runAccessTransitionHost(state),
       legalAction,
       playerAction,
@@ -566,8 +566,8 @@ export function resolvePendingChoice(
     resolveRunnerPrivateLookChoice(state, legalAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_33.microtech_ai_interface")) {
-    resolveMicrotechAiInterfacePreAccessChoice(
+  if (state.pendingChoice.source.startsWith("pre_access.top_rd_reorder")) {
+    resolvePreAccessTopRdReorderChoice(
       runAccessTransitionHost(state),
       legalAction,
       playerAction,

@@ -6,19 +6,18 @@ import type {
   LegalAction,
   ResolvedGameEffect,
 } from "@netgrid/shared";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 
 type CorpTraceDamageAbilityPayload = Record<string, string | number | boolean>;
 
 type CorpTraceDamageAbilityProfile =
   | {
-      sourceDefinitionId: string;
       sourceZone: "scored_agenda" | "installed_corp_root";
       family: "trace_tag";
       traceBase: number;
       traceLimit?: number;
     }
   | {
-      sourceDefinitionId: string;
       sourceZone: "scored_agenda" | "installed_corp_root";
       family: "tagged_meat_damage";
       damageType: Extract<DamageType, "meat">;
@@ -31,6 +30,9 @@ export type CorpTraceDamageAbilityHost = {
   legalAction?: LegalAction;
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
+    implementationForDefinition: (
+      definition: CardDefinition,
+    ) => CardImplementationDefinition | undefined;
   };
   callbacks: {
     pushActivatedCardImplementationActions: (
@@ -69,58 +71,53 @@ export type CorpTraceDamageAbilityExecutionResult = {
   resolvedEffects?: ResolvedGameEffect[];
 };
 
-const CORP_TRACE_DAMAGE_ABILITY_PROFILES: Record<
-  string,
-  CorpTraceDamageAbilityProfile
-> = {
-  "onr_v1_207_netwatch-operations-office": {
-    sourceDefinitionId: "onr_v1_207_netwatch-operations-office",
-    sourceZone: "scored_agenda",
-    family: "trace_tag",
-    traceBase: 2,
-  },
-  "onr_v1_213_private-cybernet-police": {
-    sourceDefinitionId: "onr_v1_213_private-cybernet-police",
-    sourceZone: "scored_agenda",
-    family: "trace_tag",
-    traceBase: 5,
-  },
-  "onr_v1_208_on-call-solo-team": {
-    sourceDefinitionId: "onr_v1_208_on-call-solo-team",
-    sourceZone: "scored_agenda",
-    family: "tagged_meat_damage",
-    damageType: "meat",
-    damageAmount: 1,
-    requiresRunnerTagged: true,
-  },
-  "onr_v1_217_strike-force-kali": {
-    sourceDefinitionId: "onr_v1_217_strike-force-kali",
-    sourceZone: "scored_agenda",
-    family: "tagged_meat_damage",
-    damageType: "meat",
-    damageAmount: 2,
-    requiresRunnerTagged: true,
-  },
-  "onr_v1_310_blood-cat": {
-    sourceDefinitionId: "onr_v1_310_blood-cat",
-    sourceZone: "installed_corp_root",
-    family: "trace_tag",
-    traceBase: 5,
-  },
-  "onr_v1_342_solo-squad": {
-    sourceDefinitionId: "onr_v1_342_solo-squad",
-    sourceZone: "installed_corp_root",
-    family: "tagged_meat_damage",
-    damageType: "meat",
-    damageAmount: 1,
-    requiresRunnerTagged: true,
-  },
-};
-
-export function corpTraceDamageAbilityProfileForDefinitionId(
-  definitionId: string,
+export function corpTraceDamageAbilityProfileForDefinition(
+  definition: CardDefinition,
+  implementation: CardImplementationDefinition | undefined,
 ): CorpTraceDamageAbilityProfile | undefined {
-  return CORP_TRACE_DAMAGE_ABILITY_PROFILES[definitionId];
+  const sourceZone =
+    definition.type === "agenda" ? "scored_agenda" : "installed_corp_root";
+  for (const ability of implementation?.abilities ?? []) {
+    if (ability.kind !== "activated" || ability.timing !== "corp_main")
+      continue;
+    const traceEffect = ability.effects.find(
+      (effect) =>
+        effect.kind === "trace" &&
+        effect.onSuccess.some(
+          (successEffect) =>
+            successEffect.kind === "add_tags" &&
+            successEffect.recipient === "runner",
+        ),
+    );
+    if (traceEffect?.kind === "trace") {
+      return {
+        sourceZone,
+        family: "trace_tag",
+        traceBase: traceEffect.baseTraceStrength,
+      };
+    }
+
+    const damageEffect = ability.effects.find(
+      (effect) =>
+        effect.kind === "damage" &&
+        effect.recipient === "runner" &&
+        effect.damageType === "meat",
+    );
+    if (
+      ability.condition?.kind === "runner_is_tagged" &&
+      damageEffect?.kind === "damage" &&
+      damageEffect.damageType === "meat"
+    ) {
+      return {
+        sourceZone,
+        family: "tagged_meat_damage",
+        damageType: damageEffect.damageType,
+        damageAmount: damageEffect.amount,
+        requiresRunnerTagged: true,
+      };
+    }
+  }
+  return undefined;
 }
 
 export function buildCorpTraceDamageAbilityActionsForCard(
@@ -128,7 +125,10 @@ export function buildCorpTraceDamageAbilityActionsForCard(
   sourceCardId: CardInstanceId,
 ): CorpTraceDamageAbilityLegalActionResult {
   const definition = host.cards.definitionFor(sourceCardId);
-  const profile = corpTraceDamageAbilityProfileForDefinitionId(definition.id);
+  const profile = corpTraceDamageAbilityProfileForDefinition(
+    definition,
+    host.cards.implementationForDefinition(definition),
+  );
   if (!profile) return { handled: false, actions: [] };
   const actions: LegalAction[] = [];
   host.callbacks.pushActivatedCardImplementationActions(
@@ -155,7 +155,10 @@ export function handleCorpTraceDamageActivatedAbility(
   if (!sourceCardId || !host.state.cardInstances[sourceCardId])
     return { handled: false };
   const definition = host.cards.definitionFor(sourceCardId);
-  const profile = corpTraceDamageAbilityProfileForDefinitionId(definition.id);
+  const profile = corpTraceDamageAbilityProfileForDefinition(
+    definition,
+    host.cards.implementationForDefinition(definition),
+  );
   if (!profile || !sourceZoneMatches(host, sourceCardId, profile))
     return { handled: false };
   if (!host.callbacks.resolveActivatedCardImplementationAbility())

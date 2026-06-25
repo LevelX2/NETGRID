@@ -5364,7 +5364,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("v1922.forged_activation_orders_corp")
+      source: expect.stringContaining(
+        "card_implementation.corp_choice_rez_or_trash_ice_decision"
+      )
     });
     expect(getLegalActions(gameState, "runner")).toEqual([]);
     expect(getLegalActions(gameState, "corp").map((action) => action.type)).toEqual(["resolve_choice"]);
@@ -5384,7 +5386,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(before.playerView.activeSide).toBe("runner");
     expect(before.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("v1922.forged_activation_orders_corp")
+      source: expect.stringContaining(
+        "card_implementation.corp_choice_rez_or_trash_ice_decision"
+      )
     });
     expect(before.pendingChoice?.options.map((option) => option.id)).toEqual(["trash_ice"]);
     expect(before.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
@@ -5576,7 +5580,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("p3_38.mystery_box_corp_review")
+      source: expect.stringContaining("p3_38.revealed_stack_program_install_corp_review")
     });
 
     record.gameState = gameState;
@@ -5591,7 +5595,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const beforeReview = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
     expect("error" in beforeReview).toBe(false);
     if ("error" in beforeReview) throw new Error(beforeReview.error.message);
-    expect(beforeReview.pendingChoice?.source).toContain("p3_38.mystery_box_corp_review");
+    expect(beforeReview.pendingChoice?.source).toContain("p3_38.revealed_stack_program_install_corp_review");
     expect(beforeReview.pendingChoice?.options.some((option) => option.value === decoderId)).toBe(true);
     expect(beforeReview.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
 

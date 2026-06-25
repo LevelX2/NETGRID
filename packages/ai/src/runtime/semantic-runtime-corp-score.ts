@@ -20,6 +20,11 @@ type SemanticRuntimeCorpAdvancementPlacementAssessment = {
   evidence: string[];
 };
 
+type SemanticRuntimeCorpContestabilityAssessment = {
+  contestable: boolean;
+  evidence: string[];
+};
+
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
@@ -45,6 +50,14 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeCorpRezFloorAssessment | undefined;
+  corpCentralRezReserveAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeCorpRezFloorAssessment | undefined;
+  corpRemoteScoreContestabilityAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => SemanticRuntimeCorpContestabilityAssessment | undefined;
   corpActionIsScoreLine: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -61,6 +74,15 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   ) => SemanticRuntimeCorpAdvancementPlacementAssessment | undefined;
   corpHasRemoteInstability: (input: AiDecisionInput) => boolean;
   corpHasRemoteRezFloorFundingNeed: (input: AiDecisionInput) => boolean;
+  corpHasCentralRezFloorFundingNeed: (input: AiDecisionInput) => boolean;
+  corpTaggedRunnerPayoffPressure: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecisionScoreComponent | undefined;
+  corpTaggedPayoffWindowPassiveActionPenalty: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecisionScoreComponent | undefined;
   corpPassiveScoreLinePenalty: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -196,6 +218,28 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: rezFloor.evidence.join("|"),
       });
     }
+    const centralRezFloor = dependencies.corpCentralRezReserveAssessment(
+      input,
+      action,
+    );
+    if (centralRezFloor?.blockedByFloor) {
+      components.push({
+        key: "corp_central_rez_floor_penalty",
+        label: "Zentrale Rez-Reserve",
+        value: -2600,
+        reason: centralRezFloor.evidence.join("|"),
+      });
+    }
+  }
+  const contestableScoreLine =
+    dependencies.corpRemoteScoreContestabilityAssessment(input, action);
+  if (contestableScoreLine?.contestable) {
+    components.push({
+      key: "corp_contestable_remote_score_penalty",
+      label: "Contestable Remote-Scoreline",
+      value: -3000,
+      reason: contestableScoreLine.evidence.join("|"),
+    });
   }
   const advancementPlacement =
     dependencies.corpAdvancementCounterPlacementAssessment(input, action);
@@ -234,6 +278,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: "low_rez_reserve",
       });
     }
+    if (dependencies.corpHasCentralRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_central_rez_floor_credit_reserve",
+        label: "Zentrale Rez-Reserve",
+        value: 900,
+        reason: "central_rez_reserve_needed",
+      });
+    }
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
@@ -258,7 +310,23 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: "low_rez_reserve",
       });
     }
+    if (dependencies.corpHasCentralRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_central_rez_floor_draw_fallback",
+        label: "Zentrale Rez-Reserve",
+        value: 450,
+        reason: "central_rez_reserve_needed",
+      });
+    }
   }
+  const taggedRunnerPayoffPressure = dependencies.corpTaggedRunnerPayoffPressure(
+    input,
+    action,
+  );
+  if (taggedRunnerPayoffPressure) components.push(taggedRunnerPayoffPressure);
+  const taggedPayoffPassivePenalty =
+    dependencies.corpTaggedPayoffWindowPassiveActionPenalty(input, action);
+  if (taggedPayoffPassivePenalty) components.push(taggedPayoffPassivePenalty);
   const passiveScoreLinePenalty = dependencies.corpPassiveScoreLinePenalty(
     input,
     action,

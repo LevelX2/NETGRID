@@ -18,8 +18,9 @@ export function initializeRuntimeDelegates(
   runtimeDomainDeps: RuntimeDeps,
 ): void {
   runtimeDelegates.turnCorpRuntime = createTurnCorpRuntime(runtimeDomainDeps);
-  (runtimeDomainDeps as Record<string, unknown>).turnCorpRuntime =
-    runtimeDelegates.turnCorpRuntime;
+  Object.assign(runtimeDomainDeps, {
+    turnCorpRuntime: runtimeDelegates.turnCorpRuntime,
+  });
   runtimeDelegates.stateCorpRuntimeResolvers =
     createStateCorpRuntimeResolvers(runtimeDomainDeps);
   runtimeDelegates.cardRuntimeResolvers =

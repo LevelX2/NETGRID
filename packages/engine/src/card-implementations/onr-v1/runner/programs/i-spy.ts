@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const iSpyImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_032_i-spy",
   runnerUtilityLongtail: {
-    kind: "i_spy_successful_run_fort_counter_expose",
+    kind: "successful_run_fort_counter_expose",
     visibility: "public",
   },
 };

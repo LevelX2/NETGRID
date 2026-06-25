@@ -196,19 +196,15 @@ function testCorpMainHost(
     },
     corp: {
       corpActionDebtPending: overrides.corpActionDebtPending ?? (() => 0),
-      acmeSavingsAndLoanObligationCount: () => 0,
+      activeObligationCount: () => 0,
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
-      powerGridOverloadLegalActions: () => [],
-      systematicLayoffsLegalActions: () => [],
+      hardwareTrashByCounterLegalActions: () => [],
+      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
-      corpInstalledEconomyActionProfileForDefinition: () => undefined,
-      corpInstalledEconomyActionPayload: unexpected(
-        "corpInstalledEconomyActionPayload",
-      ),
     },
     runner: {
       isConcealedRunnerResource: () => false,
@@ -240,7 +236,7 @@ function testCorpMainHost(
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),
-      isAcmeSavingsAndLoanDefinition: () => false,
+      isObligationDebtDefinition: () => false,
     },
     abilities: {
       corpTraceDamageAbilityHost: () => ({}),
@@ -256,18 +252,10 @@ function testCorpMainHost(
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
     constants: {
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: new Set(),
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: new Set(),
-      CORP_HQ_SHUFFLE_DRAW_CARD_ID: "corp_hq_shuffle_draw",
-      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: "cowboy_sysop",
-      DISINFECTANT_VIRUS_COUNTER_ASSET_ID: "disinfectant",
-      COUNTER_UPGRADE_CARD_IDS: new Set(),
-      TAG_CONDITION_UPGRADE_CARD_IDS: new Set(),
-      COUNTER_ASSET_CARD_IDS: new Set(),
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID:
-        "information_laundering",
-      ACTION_ASSET_CARD_IDS: new Set(),
-      SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID: "systematic_layoffs",
+      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
+      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
+      COUNTER_UPGRADE_SOURCES: new Set(),
+      ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
     },
   };
 }

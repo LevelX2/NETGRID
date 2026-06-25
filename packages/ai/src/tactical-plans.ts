@@ -2962,6 +2962,24 @@ function corpScoreWindowBlockers(
       evidence: [`server:${serverId}`, "remote_protection:false"],
     });
   }
+  const remoteContestability =
+    serverId && isRemoteServer(serverId)
+      ? corpRemoteContestabilityAssessment(input.playerView, serverId)
+      : undefined;
+  if (
+    serverId &&
+    remoteContestability?.contestable === true &&
+    !advanceCompletesScore(input.playerView, action)
+  ) {
+    blockers.push({
+      blockerId: `score_window_contestable:${serverId}`,
+      kind: "score_window_contestable",
+      severity: "hard",
+      ...(target ? { target } : {}),
+      removalStepKind: "protect_remote",
+      evidence: [`server:${serverId}`, ...remoteContestability.evidence],
+    });
+  }
   if (
     serverId &&
     remoteIsProtected(input.playerView, serverId) &&
@@ -2988,7 +3006,13 @@ function corpScoreWindowCurrentStep(
   action: LegalAction,
   blockers: readonly PlanBlocker[],
 ): PlanStep {
-  if (blockers.some((blocker) => blocker.kind === "score_window_unprotected")) {
+  if (
+    blockers.some(
+      (blocker) =>
+        blocker.kind === "score_window_unprotected" ||
+        blocker.kind === "score_window_contestable",
+    )
+  ) {
     return createPlanStep({
       stepId: `protect_remote:${action.actionId}`,
       kind: "protect_remote",
@@ -2998,7 +3022,11 @@ function corpScoreWindowCurrentStep(
           capabilityId: `remote_protection:${action.actionId}`,
           kind: "remote_protection",
           side: "corp",
-          evidence: ["score_window_unprotected"],
+          evidence: blockers.some(
+            (blocker) => blocker.kind === "score_window_contestable",
+          )
+            ? ["score_window_contestable"]
+            : ["score_window_unprotected"],
         },
       ],
       rationale: ["score window must be protected before advancing safely"],
@@ -3970,6 +3998,41 @@ function visibleCardForAction(
 function remoteIsProtected(playerView: PlayerView, serverId: string): boolean {
   const server = playerView.servers.find((candidate) => candidate.id === serverId);
   return (server?.ice.length ?? 0) > 0;
+}
+
+function corpRemoteContestabilityAssessment(
+  playerView: PlayerView,
+  serverId: string,
+): { contestable: boolean; evidence: string[] } | undefined {
+  const server = playerView.servers.find((candidate) => candidate.id === serverId);
+  if (!server || server.ice.length === 0) return undefined;
+  const runnerRig = playerView.opponent.rig ?? [];
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    runnerRig,
+    playerView.opponent.credits,
+    server.root,
+  );
+  if (assessment.assessedKnownIceCount <= 0) return undefined;
+  const contestable =
+    assessment.canReachAccess === true && assessment.creditsAfterPath >= 0;
+  return {
+    contestable,
+    evidence: [
+      `remote_contestable_by_runner:${contestable}`,
+      `runner_credits:${playerView.opponent.credits}`,
+      `runner_visible_rig_count:${runnerRig.length}`,
+      `assessed_known_ice_count:${assessment.assessedKnownIceCount}`,
+      `can_reach_access:${assessment.canReachAccess}`,
+      `credits_after_path:${assessment.creditsAfterPath}`,
+      ...(assessment.visibleBreakCost !== undefined
+        ? [`visible_break_cost:${assessment.visibleBreakCost}`]
+        : []),
+      ...(assessment.noAccessReason
+        ? [`no_access_reason:${assessment.noAccessReason}`]
+        : []),
+    ],
+  };
 }
 
 function advanceCompletesScore(

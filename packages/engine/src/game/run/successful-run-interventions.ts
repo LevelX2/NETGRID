@@ -19,10 +19,10 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import { FAIT_ACCOMPLI_COUNTER_PROGRAM_ID } from "../../mechanics/agenda-operation-effects";
+import { COUNTER_GAIN_PROGRAM_SOURCE } from "../../mechanics/agenda-operation-effects";
 import {
-  FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
-  NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
+  SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE,
+  ICE_ORDER_REVERSAL_PROGRAM_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 
@@ -234,7 +234,7 @@ export function buildSuccessfulRunFollowupActions(
     const forceRezFollowup =
       hasSuccessfulRunForceRezFollowup(definition.id) ||
       (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID);
+        definition.id === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE);
     if (forceRezFollowup) {
       const server = host.servers.mustServer(run.attackedServerId);
       const unrezzedCount = server.ice.filter(
@@ -253,8 +253,8 @@ export function buildSuccessfulRunFollowupActions(
           {
             cardId: sourceCardId,
             serverId: server.id,
-            v1922RunnerProgramAbility: "false_echo_force_rez",
-            falseEchoCreditCost: abilityCost,
+            v1922RunnerProgramAbility: "successful_run_force_rez",
+            successfulRunForceRezCreditCost: abilityCost,
             unrezzedIceCount: unrezzedCount,
           },
         ),
@@ -354,7 +354,7 @@ export function buildSuccessfulRunFollowupActions(
         (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
       ) ||
       (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
+        definition.id === ICE_ORDER_REVERSAL_PROGRAM_SOURCE)
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind !== "archives" && server.ice.length > 1) {
@@ -366,7 +366,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+              v1922RunnerProgramAbility: "successful_run_reverse_ice",
               iceCount: server.ice.length,
             },
           ),
@@ -374,7 +374,7 @@ export function buildSuccessfulRunFollowupActions(
       }
     }
     if (
-      definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
+      definition.id === COUNTER_GAIN_PROGRAM_SOURCE &&
       !cardImplementationForDefinitionId(definition.id)?.virusCounter
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
@@ -387,7 +387,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
+              v1919RunnerProgramAbility: "successful_run_remote_counter",
               counterType: "power",
               addCounterAmount: 1,
             },
@@ -397,7 +397,7 @@ export function buildSuccessfulRunFollowupActions(
     }
     if (
       runnerUtilityLongtailKindForDefinition(definition.id) ===
-      "i_spy_successful_run_fort_counter_expose"
+      "successful_run_fort_counter_expose"
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind !== "archives") {
@@ -409,7 +409,7 @@ export function buildSuccessfulRunFollowupActions(
             {
               cardId: sourceCardId,
               serverId: server.id,
-              runnerUtilityAbility: "i_spy_put_spy_counter",
+              runnerUtilityAbility: "successful_run_fort_counter_expose",
               counterType: "spy",
             },
           ),
@@ -424,20 +424,26 @@ export function resolveSuccessfulRunFollowupAbility(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
-  if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez")
-    return resolveFalseEchoForceRez(host, legalAction);
   if (
     legalAction.payload?.v1922RunnerProgramAbility ===
-    "netspace_inverter_reverse_ice"
+    "successful_run_force_rez"
   )
-    return resolveNetspaceInverterReverseIce(host, legalAction);
+    return resolveSuccessfulRunForceRez(host, legalAction);
+  if (
+    legalAction.payload?.v1922RunnerProgramAbility ===
+    "successful_run_reverse_ice"
+  )
+    return resolveSuccessfulRunReverseIce(host, legalAction);
   if (
     legalAction.payload?.v1919RunnerProgramAbility ===
-    "fait_accompli_successful_run_counter"
+    "successful_run_remote_counter"
   )
-    return resolveFaitAccompliSuccessfulRunCounter(host, legalAction);
-  if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter")
-    return resolveISpyPutSpyCounter(host, legalAction);
+    return resolveSuccessfulRunRemoteCounter(host, legalAction);
+  if (
+    legalAction.payload?.runnerUtilityAbility ===
+    "successful_run_fort_counter_expose"
+  )
+    return resolveSuccessfulRunFortCounterExpose(host, legalAction);
   if (
     legalAction.payload?.proteusRunnerVirusFollowup ===
     "doom_counter_instead_of_rd_access"
@@ -833,7 +839,7 @@ export function resolveSuccessfulRunInterventionChoice(
       rezCostPaid: cost,
       serverId: server.id,
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_dr_dreff_temporary_encounter",
+      hiddenZoneAction: "successful_run_temporary_encounter",
     };
     return {
       handled: true,
@@ -879,7 +885,7 @@ export function resolveSuccessfulRunInterventionChoice(
     installCostPaid: cost,
     serverId: server.id,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_54_jenny_jett_install_approach",
+    hiddenZoneAction: "successful_run_install_approach",
   };
   return {
     handled: true,
@@ -967,7 +973,7 @@ export function applyDirectSuccessfulRunTriggers(
       (cardId) =>
         uniqueDirectLongtailKindForDefinition(
           host.cards.definitionFor(cardId).id,
-        ) === "karl_successful_run_credit",
+        ) === "successful_run_credit_resource",
     );
   if (karlSources.length === 0) return { handled: false };
   let gainedCredits = 0;
@@ -976,7 +982,7 @@ export function applyDirectSuccessfulRunTriggers(
     const implementation = uniqueDirectLongtailImplementationForDefinition(
       host.cards.definitionFor(sourceId).id,
     );
-    if (implementation?.kind !== "karl_successful_run_credit") continue;
+    if (implementation?.kind !== "successful_run_credit_resource") continue;
     host.credits.gainRunner(implementation.amount);
     gainedCredits += implementation.amount;
     sourceDefinitionIds.push(host.cards.definitionFor(sourceId).id);
@@ -1005,7 +1011,7 @@ export function applyDirectSuccessfulRunTriggers(
   };
 }
 
-export function applyBodyweightDataCrecheSuccessfulRun(
+export function applySuccessfulRunExtraRunFollowup(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1025,17 +1031,17 @@ export function applyBodyweightDataCrecheSuccessfulRun(
   const sourceDefinitionId = host.cards.definitionFor(sourceId).id;
   const flags = host.runner.ensureTurnFlags();
   if (
-    flags.bodyweightDataCrecheExtraRunUsedThisTurn ||
-    flags.bodyweightDataCrecheExtraRunPending
+    flags.successfulRunExtraRunUsedThisTurn ||
+    flags.successfulRunExtraRunPending
   )
     return { handled: false };
-  flags.bodyweightDataCrecheExtraRunPending = true;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn = true;
-  flags.allNighterBonusRunPending = true;
+  flags.successfulRunExtraRunPending = true;
+  flags.successfulRunExtraRunUsedThisTurn = true;
+  flags.bonusRunPending = true;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      bodyweightDataCrecheExtraRunPending: true,
+      successfulRunExtraRunPending: true,
       sourceDefinitionId,
     };
   }
@@ -1048,7 +1054,7 @@ export function applyBodyweightDataCrecheSuccessfulRun(
   };
 }
 
-function resolveFalseEchoForceRez(
+function resolveSuccessfulRunForceRez(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1075,7 +1081,7 @@ function resolveFalseEchoForceRez(
     !hasSuccessfulRunForceRezFollowup(sourceDefinitionId) &&
     !(
       !cardImplementationForDefinitionId(sourceDefinitionId) &&
-      sourceDefinitionId === FALSE_ECHO_FORCE_REZ_PROGRAM_ID
+      sourceDefinitionId === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE
     )
   )
     throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
@@ -1111,7 +1117,7 @@ function resolveFalseEchoForceRez(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId,
-    falseEchoCreditCost: abilityCost,
+    successfulRunForceRezCreditCost: abilityCost,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     checkedIceCount: checkedIceIds.length,
     rezzedIceCount: rezzedCount,
@@ -1128,7 +1134,7 @@ function resolveFalseEchoForceRez(
   };
 }
 
-function resolveNetspaceInverterReverseIce(
+function resolveSuccessfulRunReverseIce(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1161,7 +1167,7 @@ function resolveNetspaceInverterReverseIce(
     ) ?? false;
   if (
     !reverseFollowup &&
-    sourceDefinition.id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID
+    sourceDefinition.id !== ICE_ORDER_REVERSAL_PROGRAM_SOURCE
   )
     throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
@@ -1188,7 +1194,7 @@ function resolveNetspaceInverterReverseIce(
   };
 }
 
-function resolveFaitAccompliSuccessfulRunCounter(
+function resolveSuccessfulRunRemoteCounter(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1217,40 +1223,40 @@ function resolveFaitAccompliSuccessfulRunCounter(
     throw new Error("Fait Accompli ist nicht installiert.");
   if (
     host.cards.definitionFor(sourceCardId).id !==
-    FAIT_ACCOMPLI_COUNTER_PROGRAM_ID
+    COUNTER_GAIN_PROGRAM_SOURCE
   )
     throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
     throw new Error("Fait Accompli wurde fuer diesen Run bereits genutzt.");
   host.counters.addCardCounter(sourceCardId, "power", 1);
-  host.state.faitAccompliCountersByServer ??= {};
-  host.state.faitAccompliCountersByServer[serverId] =
+  host.state.serverAgendaCostCountersByServer ??= {};
+  host.state.serverAgendaCostCountersByServer[serverId] =
     Math.max(
       0,
-      Math.floor(host.state.faitAccompliCountersByServer[serverId] ?? 0),
+      Math.floor(host.state.serverAgendaCostCountersByServer[serverId] ?? 0),
     ) + 1;
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     addedCounterAmount: 1,
     remainingCounters: host.counters.cardCounter(sourceCardId, "power"),
-    faitAccompliServerCounters:
-      host.state.faitAccompliCountersByServer[serverId] ?? 0,
+    serverAgendaCostCounters:
+      host.state.serverAgendaCostCountersByServer[serverId] ?? 0,
   };
   return {
     handled: true,
     sourceCardId,
-    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
     counterPlaced: true,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),
   };
 }
 
-function resolveISpyPutSpyCounter(
+function resolveSuccessfulRunFortCounterExpose(
   host: SuccessfulRunInterventionHost,
   legalAction: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -1271,7 +1277,7 @@ function resolveISpyPutSpyCounter(
   if (
     runnerUtilityLongtailKindForDefinition(
       host.cards.definitionFor(sourceCardId).id,
-    ) !== "i_spy_successful_run_fort_counter_expose"
+    ) !== "successful_run_fort_counter_expose"
   )
     throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
   if (serverId !== run.attackedServerId)

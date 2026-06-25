@@ -36,9 +36,6 @@ export type ScoredAgendaFlowHost = {
     hasSubtype: (definition: CardDefinition, subtype: string) => boolean;
     isOveradvanceAgendaDefinition: (definitionId: string) => boolean;
   };
-  constants: {
-    employeeEmpowermentId: string;
-  };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
     cleanupEmptyRemotes: () => void;
@@ -67,16 +64,17 @@ export type ScoredAgendaFlowHost = {
   };
   flags: {
     markScoredBlackOpsAgendaThisTurn: () => void;
-    employeeEmpowermentResolvedSourceIds: () => CardInstanceId[];
-    markEmployeeEmpowermentResolved: (cardId: CardInstanceId) => void;
+    scoredAgendaStartDrawChoiceResolvedSourceIds: () => CardInstanceId[];
+    markScoredAgendaStartDrawChoiceResolved: (cardId: CardInstanceId) => void;
   };
   effects: {
     executeOnScore: (
       definition: CardDefinition,
       cardId: CardInstanceId,
     ) => void;
-    appendEmployeeEmpowermentDrawEffect: (
+    appendScoredAgendaStartDrawChoiceEffect: (
       cardId: CardInstanceId,
+      sourceDefinitionId: string,
       drawnCount: number,
     ) => void;
   };
@@ -84,13 +82,13 @@ export type ScoredAgendaFlowHost = {
     drawCorpCard: () => void;
   };
   choices: {
-    startDataFortReclamation: (cardId: CardInstanceId) => void;
-    startPriorityRequisition: (cardId: CardInstanceId) => void;
-    startCorporateDownsizing: (
+    startHqToNewRemoteInstallRez: (cardId: CardInstanceId) => void;
+    startScoredAgendaFreeRez: (cardId: CardInstanceId) => void;
+    startScoredAgendaHqShuffleCredits: (
       cardId: CardInstanceId,
       creditPerAgendaPoint: number,
     ) => void;
-    resolveSecurityPurge: (cardId: CardInstanceId) => void;
+    resolveAgendaPurge: (cardId: CardInstanceId) => void;
   };
 };
 

@@ -15,7 +15,7 @@ import {
   startCorpArchivesToHqChoice,
   startRunnerGripTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
-  startSynchronizedAttackOnHqRetainChoice,
+  startCorpHqRetainPaymentChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./nonsearch-choice-handlers";
 
@@ -165,7 +165,7 @@ function makeHost(input: {
         if (!found) throw new Error(`missing instance ${cardId}`);
         return found;
       },
-      smithsPawnshopGainCredits: () => 2,
+      installedResourceTrashCreditGain: () => 2,
     },
     zones: {
       removeFromAllZones: (cardId) => {
@@ -301,7 +301,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const discard = "discard" as CardInstanceId;
     const host = makeHost({ corpHq: [keep, discard] });
 
-    startSynchronizedAttackOnHqRetainChoice(host, sourceId);
+    startCorpHqRetainPaymentChoice(host, sourceId);
     host.playerAction = playerAction([`card_${keep}`]);
     const result = handleHiddenZoneNonSearchChoice(host);
 
@@ -310,7 +310,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.archives).toEqual([discard]);
     expect(host.state.corp.credits).toBe(4);
     expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       retainedCount: 1,
       discardedCount: 1,
       paidCredits: 2,

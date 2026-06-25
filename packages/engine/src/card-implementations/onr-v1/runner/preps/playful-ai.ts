@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const playfulAiImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_104_playful-ai",
   runnerEventLongtail: {
-    kind: "playful_ai_dice_loop",
+    kind: "random_dice_loop",
     dieFaces: 6,
     choiceOn: [1, 2, 3],
     visibility: "public",

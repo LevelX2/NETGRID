@@ -62,7 +62,7 @@ describe("runner hosted install action builders", () => {
       ],
       visibility: "public",
     });
-    expect(action.payload?.v1922ZetatechOverlayInstall).toBeUndefined();
+    expect(action.payload?.programOverlayInstallRequested).toBeUndefined();
     expect(state).toEqual(before);
   });
 
@@ -93,11 +93,11 @@ describe("runner hosted install action builders", () => {
       payload: {
         cardId,
         hostOnCardId: hostCardId,
-        v1922ZetatechOverlayInstall: true,
+        programOverlayInstallRequested: true,
       },
       targetRequirements: [
         {
-          id: "zetatechOverlayHost",
+          id: "programOverlayHost",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.rig.programs"],

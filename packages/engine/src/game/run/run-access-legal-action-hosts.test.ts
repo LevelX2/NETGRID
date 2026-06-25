@@ -133,12 +133,12 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
       finishRun: (_state: GameState, successful: boolean) =>
         calls.push(`finishRun:${successful}`),
       successfulRunInterventionHost: (targetState: GameState) =>
         ({ state: targetState }) as never,
-      startExpertScheduleAnalyzerPostAccessChoice: () => false,
+      startPostAccessInstalledProgramChoice: () => false,
     },
     access: {
       advanceArchivesBreachPastNonDecisionCards: () =>
@@ -174,13 +174,13 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       setup: "setup",
       trap: "trap",
       crybaby: "crybaby",
-      dedicatedResponseTeam: "drt",
-      dieterEsslin: "dieter",
-      turbeauDelacroix: "turbeau",
-      corprunnersShatteredRemains: "shattered",
-      experimentalAi: "experimental",
-      vacantSoulkiller: "soulkiller",
-      virusTestSite: "virus",
+      taggedRunnerMeatDamageUpgrade: "drt",
+      accessNetDamageUpgrade: "dieter",
+      oncePerRunAccessTraceUpgrade: "turbeau",
+      hardwareTrashByAdvancementAsset: "shattered",
+      programTrashByAdvancementAsset: "experimental",
+      advancementCoreDamageAsset: "soulkiller",
+      advancementNetDamageAsset: "virus",
       chimera: "chimera",
     },
     callbacks: {
@@ -202,8 +202,8 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       trace: {
         calculateRunnerLink: () => 0,
         traceBidChoice: () => ({}) as never,
-        addHackerTrackerTraceCounters: () => 0,
-        hackerTrackerCounterTotal: () => 0,
+        addCorpTraceCounterPoolCounters: () => 0,
+        corpTraceCounterPoolTotal: () => 0,
         recurringTraceCreditPoolTotal: () => 0,
         rabbitTraceLimitReductionForIceTrace: () => 0,
         resolveTraceHardwareWreckerSuccess: () => ({}),
@@ -294,10 +294,10 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       },
       misc: {
         drawCorpCards: () => calls.push("drawCorpCards"),
-        acmeSavingsAndLoanObligationCount: () => 0,
-        addAcmeSavingsAndLoanObligation: () => undefined,
+        activeObligationCount: () => 0,
+        addActiveObligation: () => undefined,
         applyRunnerForgoNextAction: () => undefined,
-        hasInstalledMicrotechTrodeSet: () => false,
+        hasInstalledRunnerApDamageReducerHardware: () => false,
         traceCounterEffectDefinitionFor: () => undefined,
         installedRunnerVirusSourceIds: () => [],
         virusCounterImplementationForCard: () => undefined,

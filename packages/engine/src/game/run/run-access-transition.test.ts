@@ -11,7 +11,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
-  resolvePriorityWreckSpendChoice,
+  resolveSuccessfulRunCreditLossSpendChoice,
   enterAccessFromSuccessfulRun,
   type RunAccessTransitionHost,
 } from "./run-access-transition";
@@ -178,8 +178,8 @@ function makeHost(options: {
       advanceArchivesBreachPastNonDecisionCards: () => {
         archivesAutoAdvanced += 1;
       },
-      findMicrotechAiInterfacePreAccessSource: () => undefined,
-      isMicrotechAiInterfacePreAccessSource: () => false,
+      findPreAccessTopRdReorderSource: () => undefined,
+      isPreAccessTopRdReorderSource: () => false,
       startRunnerPrivateLookChoice: (_sourceCardId, _sourceDefinitionId, zone, count) => {
         privateLooks.push({ zone, count });
         return true;
@@ -306,15 +306,15 @@ describe("run access transition", () => {
       accessSkipped: true,
       replacementApplied: "runner_spend_corp_lose_credits",
     });
-    expect(fixture.state.pendingChoice?.source).toContain("p3_33.priority_wreck");
+    expect(fixture.state.pendingChoice?.source).toContain("successful_run.credit_loss_spend");
     expect(startAction.payload).toMatchObject({
       accessReplacement: "runner_spend_corp_lose_credits",
-      priorityWreckChoiceOpened: true,
+      successfulRunCreditLossSpendChoiceOpened: true,
       hiddenZoneBarrier: true,
     });
 
     const resolveAction = { payload: {} } as LegalAction;
-    resolvePriorityWreckSpendChoice(
+    resolveSuccessfulRunCreditLossSpendChoice(
       fixture.host,
       resolveAction,
       {

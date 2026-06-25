@@ -17,7 +17,7 @@ import {
   type DamageCoreHost,
 } from "../damage/damage-core";
 import {
-  applyBodyweightDataCrecheSuccessfulRun,
+  applySuccessfulRunExtraRunFollowup,
   applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
   finalizeDelayedSuccessfulRunAfterPassedIce,
@@ -505,7 +505,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       selectedIceDefinitionId: "hq_ice_def",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_dr_dreff_temporary_encounter",
+      hiddenZoneAction: "successful_run_temporary_encounter",
     });
     expect(legalAction.payload).not.toHaveProperty("unselectedHqCardIds");
   });
@@ -544,7 +544,7 @@ describe("successful run interventions", () => {
     expect(legalAction.payload).toMatchObject({
       installCostPaid: 2,
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_jenny_jett_install_approach",
+      hiddenZoneAction: "successful_run_install_approach",
     });
   });
 
@@ -592,26 +592,26 @@ describe("successful run interventions", () => {
     expect(actions.map((action) => action.payload)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          v1922RunnerProgramAbility: "false_echo_force_rez",
+          v1922RunnerProgramAbility: "successful_run_force_rez",
         }),
         expect.objectContaining({
-          v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+          v1922RunnerProgramAbility: "successful_run_reverse_ice",
         }),
         expect.objectContaining({
-          runnerUtilityAbility: "i_spy_put_spy_counter",
+          runnerUtilityAbility: "successful_run_fort_counter_expose",
         }),
       ]),
     );
 
     const falseEchoAction = actions.find(
       (action) =>
-        action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
+        action.payload?.v1922RunnerProgramAbility === "successful_run_force_rez",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, falseEchoAction);
     expect(fixture.state.runner.credits).toBe(3);
     expect(fixture.state.corp.credits).toBe(4);
     expect(falseEchoAction.payload).toMatchObject({
-      falseEchoCreditCost: 2,
+      successfulRunForceRezCreditCost: 2,
       checkedIceCount: 2,
       rezzedIceCount: 2,
       rezCostPaid: 6,
@@ -625,7 +625,7 @@ describe("successful run interventions", () => {
     const netspaceAction = actions.find(
       (action) =>
         action.payload?.v1922RunnerProgramAbility ===
-        "netspace_inverter_reverse_ice",
+        "successful_run_reverse_ice",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, netspaceAction);
     expect(fixture.servers[0]!.ice).toEqual(beforeOrder.reverse());
@@ -636,7 +636,7 @@ describe("successful run interventions", () => {
     };
     const iSpyAction = actions.find(
       (action) =>
-        action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter",
+        action.payload?.runnerUtilityAbility === "successful_run_fort_counter_expose",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, iSpyAction);
     expect(fixture.trashedRunnerIds).toEqual(["i_spy"]);
@@ -786,7 +786,7 @@ describe("successful run interventions", () => {
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
     const karl = applyDirectSuccessfulRunTriggers(fixture.host, legalAction);
-    const bodyweight = applyBodyweightDataCrecheSuccessfulRun(
+    const bodyweight = applySuccessfulRunExtraRunFollowup(
       fixture.host,
       legalAction,
     );
@@ -798,13 +798,13 @@ describe("successful run interventions", () => {
     });
     expect(fixture.state.runner.credits).toBe(6);
     expect(fixture.state.runnerTurnFlags).toMatchObject({
-      bodyweightDataCrecheExtraRunPending: true,
-      bodyweightDataCrecheExtraRunUsedThisTurn: true,
-      allNighterBonusRunPending: true,
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: true,
+      bonusRunPending: true,
     });
     expect(legalAction.payload).toMatchObject({
       karlSuccessfulRunCreditGain: 1,
-      bodyweightDataCrecheExtraRunPending: true,
+      successfulRunExtraRunPending: true,
       sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
     });
   });

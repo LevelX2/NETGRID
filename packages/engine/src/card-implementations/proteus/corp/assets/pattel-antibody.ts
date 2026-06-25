@@ -15,7 +15,7 @@ export const pattelAntibodyImplementation: CardImplementationDefinition = {
       effects: [
         {
           kind: "add_counter_to_all_installed_runner_icebreakers",
-          counterType: "pattel_antibody",
+          counterType: "breaker_strength_penalty",
           amount: 1,
           visibility: "public",
         },

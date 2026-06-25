@@ -2,7 +2,7 @@ import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Turbeau Delacroix
 // text: Trace 10-If trace is successful, give Runner a tag. Use this ability only when Runner accesses Turbeau Delacroix, and only once during each run on this fort.
-export const turbeauDelacroixImplementation: CardImplementationDefinition = {
+export const oncePerRunAccessTraceUpgradeImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_372_turbeau-delacroix",
   accessEffects: [
     {

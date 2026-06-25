@@ -54,8 +54,6 @@ import {
   visibleRisksForPlan,
   type RunnerPlanKind,
 } from "./runner-plan-metadata";
-import { delayedInstallAbilityForAction } from "../actions/delayed-install-action";
-
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
   "onr_v1_309_bbs-whispering-campaign";
 
@@ -2925,18 +2923,29 @@ function bestCitySurveillanceDrawProjection(
 function citySurveillanceDrawProjectionForAction(
   action: LegalAction,
 ): CitySurveillanceDrawProjection {
-  const sourceCount = Number(action.payload?.citySurveillanceSourceCount ?? 0);
+  const sourceCount = Number(
+    action.payload?.drawTaxSourceCount ??
+      action.payload?.citySurveillanceSourceCount ??
+      0,
+  );
   if (!Number.isFinite(sourceCount) || sourceCount <= 0) {
     return { sourceCount: 0, creditsPaid: 0, tagsAdded: 0, decision: "none" };
   }
   const creditsPaid = Number(
-    action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+    action.payload?.drawTaxProjectedCreditsPaid ??
+      action.payload?.citySurveillanceProjectedCreditsPaid ??
+      0,
   );
   const tagsAdded = Number(
-    action.payload?.citySurveillanceProjectedTagsAdded ?? 0,
+    action.payload?.drawTaxProjectedTagsAdded ??
+      action.payload?.citySurveillanceProjectedTagsAdded ??
+      0,
   );
   const decision =
-    action.payload?.citySurveillanceDrawDecision === "pay" ? "pay" : "tag";
+    action.payload?.drawTaxDecision === "pay" ||
+    action.payload?.citySurveillanceDrawDecision === "pay"
+      ? "pay"
+      : "tag";
   return {
     sourceCount,
     creditsPaid: Number.isFinite(creditsPaid) ? creditsPaid : 0,
@@ -5324,7 +5333,7 @@ function classifyShellTradersAction(
     return undefined;
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
-  const ability = delayedInstallAbilityForAction(action);
+  const ability = shellTradersAbility(action);
   if (ability !== "set_aside_from_grip" && ability !== "remove_shell_counter")
     return undefined;
   const sourceCard = findVisibleCard(input, action.source);
@@ -5380,6 +5389,16 @@ function classifyShellTradersAction(
       : {}),
     directInstallUrgency,
   };
+}
+
+function shellTradersAbility(action: LegalAction): string | undefined {
+  const payload = action.payload;
+  if (!payload) return undefined;
+  return typeof payload.delayedInstallAbility === "string"
+    ? payload.delayedInstallAbility
+    : typeof payload.shellTradersAbility === "string"
+      ? payload.shellTradersAbility
+      : undefined;
 }
 
 function shellTradersTargetValue(

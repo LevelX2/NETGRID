@@ -291,9 +291,11 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return `Viral Pipeline: Zu Beginn jedes Korp-Zugs muss die Korp pro Pipe-Counter 1 Aktion aussetzen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "spy":
       return "I Spy: Solange der Spy-Counter auf diesem Fort liegt, bleiben alle installierten Korp-Karten in oder auf diesem Fort für den Runner sichtbar. Die Korp kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Spy-Counter zu entfernen.";
-    case "doppelganger_antibody":
+    case "trace_tag_counter":
+      return `Data Raven: Zu Beginn jedes Runner-Zugs erhält der Runner pro Data-Raven-Counter 1 Tag. Der Runner kann 1 Aktion nehmen und 1 Credit zahlen, um 1 Data-Raven-Counter zu entfernen.`;
+    case "link_reduction_counter":
       return `Doppelganger Antibody: Zu Beginn jedes Runner-Zugs verliert der Runner pro Doppelganger-Counter 1 Credit. Der Runner kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Doppelganger-Counter zu entfernen.`;
-    case "pattel_antibody":
+    case "breaker_strength_penalty":
       return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
     case "mark":
       if (display.id === "ice_transmutation")
@@ -1238,13 +1240,21 @@ export function shouldUseFieldCardChoice(
   );
 }
 
+export function fieldCardChoiceOptionsForCard(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+  view: PlayerView,
+  card: Pick<VisibleCard, "instanceId">,
+): NonNullable<PlayerView["pendingChoice"]>["options"] {
+  if (!choice || !shouldUseFieldCardChoice(choice, view)) return [];
+  return choice.options.filter((option) => option.selectable !== false && fieldCardChoiceOptionTargetsCard(option, card));
+}
+
 export function fieldCardChoiceOptionForCard(
   choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
   view: PlayerView,
   card: Pick<VisibleCard, "instanceId">,
 ): NonNullable<PlayerView["pendingChoice"]>["options"][number] | null {
-  if (!choice || !shouldUseFieldCardChoice(choice, view)) return null;
-  return choice.options.find((option) => option.selectable !== false && fieldCardChoiceOptionTargetsCard(option, card)) ?? null;
+  return fieldCardChoiceOptionsForCard(choice, view, card)[0] ?? null;
 }
 
 function fieldCardChoiceOptionTargetsCard(
@@ -1606,14 +1616,17 @@ function normalizeBreakerRulesText(value: string): string {
   return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
-export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {
+export function groupRunnerRigCards(
+  cards: VisibleCard[],
+  options: { includeEmptyProgramGroup?: boolean } = {}
+): Array<{ key: string; label: string; cards: VisibleCard[] }> {
   const groups = [
     { key: "program", label: "Programme", cards: cards.filter((card) => card.type === "program") },
     { key: "hardware", label: "Hardware", cards: cards.filter((card) => card.type === "hardware") },
     { key: "resource", label: "Ressourcen", cards: cards.filter((card) => card.type === "resource") },
     { key: "other", label: "Sonstiges", cards: cards.filter((card) => card.type !== "program" && card.type !== "hardware" && card.type !== "resource") }
   ];
-  return groups.filter((group) => group.cards.length > 0);
+  return groups.filter((group) => group.cards.length > 0 || (group.key === "program" && options.includeEmptyProgramGroup));
 }
 
 export function runnerRigMemorySummary(view: PlayerView, owner: "own" | "opponent"): { used: number; limit: number; text: string; ariaLabel: string } | null {

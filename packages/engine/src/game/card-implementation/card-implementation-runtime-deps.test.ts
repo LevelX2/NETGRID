@@ -159,10 +159,10 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           unrezzedInstalledIceIds: () => [],
           installedIceIds: () => [],
           rezzedBlackIceIds: () => [],
-          startCoreCommandJettisonIceChoice: () => undefined,
-          startSecurityCodeWormChipTrashIceChoice: () => undefined,
-          startForgedActivationOrdersTargetChoice: () => undefined,
-          startAnonymousTipDerezBlackIceChoice: () => undefined,
+          startPayRezCostToTrashRezzedIceChoice: () => undefined,
+          startTrashUnrezzedIceChoice: () => undefined,
+          startCorpChoiceRezOrTrashIceChoice: () => undefined,
+          startDerezRezzedBlackIceChoice: () => undefined,
         },
         runner: {
           ensureTurnFlags: (gameState) =>
@@ -190,7 +190,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           amount,
           counterType: counterType as Extract<
             CounterType,
-            "militech" | "pattel_antibody"
+            "militech" | "breaker_strength_penalty"
           >,
           countersAfter: amount,
           publicPayload: {},
@@ -255,7 +255,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         publicPayload: { trashedCardsCount: 2 },
       }),
       rezCostForCard: () => 0,
-      startOpenEndedMileageProgramReturnChoice: () => {
+      startPaidSourceReturnToGripChoice: () => {
         calls.push("return_choice");
       },
       startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
@@ -392,11 +392,11 @@ describe("game card implementation runtime deps root", () => {
       returnUnusedAtRunEnd: true,
     });
     expect(result.publicPayload).toMatchObject({
-      allNighterBonusRunOnFinish: true,
+      bonusRunOnFinish: true,
       bypassFirstIce: true,
       runTraceLinkBonus: 3,
       runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
-      v1922RunnerEventAbility: "lucidrine_booster_drug_run_temporary_credits",
+      v1922RunnerEventAbility: "run_temporary_credits",
       temporaryRunCredits: 4,
       temporaryRunCreditsRemaining: 4,
       afterRunUnpreventableCoreDamage: 1,

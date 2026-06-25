@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const iGotARockImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_327_i-got-a-rock",
   uniqueDirectLongtail: {
-    kind: "i_got_a_rock_tagged_meat_damage",
+    kind: "tagged_meat_damage",
     requiredRunnerTags: 2,
     agendaPointCost: 3,
     damageType: "meat",

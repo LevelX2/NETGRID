@@ -94,7 +94,7 @@ function host(): TraceRuntimeDepsHost {
           runnerInstalledCardIds: () => [],
           hasCardImplementationForDefinition: () => false,
           activatedTraceAbilities: () => [],
-          isSubmarineUplinkSource: () => false,
+          isTraceLinkForceJackOutSource: () => false,
         },
         payment: {
           corpTracePaymentDeps: {} as never,
@@ -112,14 +112,14 @@ function host(): TraceRuntimeDepsHost {
         },
         counters: {
           cardCounter: () => 0,
-          hackerTrackerCounterTotal: () => 0,
+          corpTraceCounterPoolTotal: () => 0,
           recurringTraceCreditPoolTotal: () => 0,
         },
         fort: {
           fortTraceBitPoolSource: () => undefined,
         },
         run: {
-          markSubmarineUplinkJackOutAfterEncounter: () => undefined,
+          markTraceLinkForceJackOutAfterEncounter: () => undefined,
           applyPrintedTraceSuccessFollowups: () => ({
             handled: true,
             payload: {},
@@ -131,11 +131,8 @@ function host(): TraceRuntimeDepsHost {
         },
         callbacks: {
           sanitizeId: (value) => value.replace(/[^a-zA-Z0-9_.-]/g, "_"),
-          addHackerTrackerTraceCounters: () => 0,
+          addCorpTraceCounterPoolCounters: () => 0,
           resolveTraceTrashRunnerResourceSuccess: () => ({}),
-        },
-        constants: {
-          PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: "paris" as CardDefinitionId,
         },
       }),
       resolveRunnerLastTurnInstalledResourceTargetId: (_gameState, targetRef) =>

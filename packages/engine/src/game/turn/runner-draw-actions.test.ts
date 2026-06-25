@@ -11,7 +11,7 @@ describe("runner draw main actions", () => {
     });
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 0,
+      drawTaxSourceCount: 0,
       projectedDrawCount: 1,
     });
 
@@ -39,7 +39,7 @@ describe("runner draw main actions", () => {
     state.runner.credits = 3;
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 1,
+      drawTaxSourceCount: 1,
       projectedDrawCount: 2,
     });
 
@@ -50,11 +50,11 @@ describe("runner draw main actions", () => {
       label: "Karte ziehen (City Surveillance: 2 Credits zahlen)",
       costs: [{ clicks: 1, credits: 2 }],
       payload: {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceProjectedDrawCount: 2,
-        citySurveillanceDrawDecision: "pay",
-        citySurveillanceProjectedCreditsPaid: 2,
-        citySurveillanceProjectedTagsAdded: 0,
+        drawTaxSourceCount: 1,
+        drawTaxProjectedDrawCount: 2,
+        drawTaxDecision: "pay",
+        drawTaxProjectedCreditsPaid: 2,
+        drawTaxProjectedTagsAdded: 0,
       },
     });
     expect(actions[1]).toMatchObject({
@@ -63,11 +63,11 @@ describe("runner draw main actions", () => {
       label: "Karte ziehen (City Surveillance: 1 Tag nehmen)",
       costs: [{ clicks: 1 }],
       payload: {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceProjectedDrawCount: 2,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded: 2,
+        drawTaxSourceCount: 1,
+        drawTaxProjectedDrawCount: 2,
+        drawTaxDecision: "tag",
+        drawTaxProjectedCreditsPaid: 0,
+        drawTaxProjectedTagsAdded: 2,
       },
     });
   });
@@ -80,7 +80,7 @@ describe("runner draw main actions", () => {
     state.runner.credits = 1;
 
     const actions = buildRunnerDrawCardActions(state, {
-      citySurveillanceSourceCount: 2,
+      drawTaxSourceCount: 2,
       projectedDrawCount: 1,
     });
 
@@ -90,11 +90,11 @@ describe("runner draw main actions", () => {
       label: "Karte ziehen (City Surveillance: 2 Tags nehmen)",
       costs: [{ clicks: 1 }],
       payload: {
-        citySurveillanceSourceCount: 2,
-        citySurveillanceProjectedDrawCount: 1,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded: 2,
+        drawTaxSourceCount: 2,
+        drawTaxProjectedDrawCount: 1,
+        drawTaxDecision: "tag",
+        drawTaxProjectedCreditsPaid: 0,
+        drawTaxProjectedTagsAdded: 2,
       },
     });
   });

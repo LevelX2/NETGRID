@@ -65,16 +65,16 @@ export function handleCorpZoneChoice(
   host: CorpZoneChoiceHandlerHost,
 ): CorpZoneChoiceHandlerResult {
   const source = host.state.pendingChoice?.source ?? "";
-  if (source.startsWith("v1917.corp_negotiating_center"))
-    return resolveCorporateNegotiatingCenterChoice(host);
+  if (source.startsWith("v1917.corp_hq_agenda_reveal"))
+    return resolveCorpHqAgendaRevealChoice(host);
   if (source.startsWith("p3_36.show_hq_agendas_for_credits"))
     return resolveShowHqAgendasForCreditsChoice(host);
-  if (source.startsWith("p3_50.corporate_downsizing"))
-    return resolveCorporateDownsizingScoreChoice(host);
+  if (source.startsWith("scored_agenda.hq_agenda_shuffle_credits"))
+    return resolveScoredAgendaHqShuffleCreditsChoice(host);
   return { handled: false };
 }
 
-export function startCorporateNegotiatingCenterChoice(
+export function startCorpHqAgendaRevealChoice(
   host: CorpZoneChoiceHandlerHost,
 ): void {
   const sourceIds = host.zones
@@ -91,10 +91,10 @@ export function startCorporateNegotiatingCenterChoice(
   const agendaIds = hqAgendaIds(host);
   if (agendaIds.length === 0) return;
   host.state.pendingChoice = {
-    choiceId: `v1917_corp_negotiating_center_${host.state.stateVersion + 1}`,
+    choiceId: `v1917_corp_hq_agenda_reveal_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `v1917.corp_negotiating_center:${sourceIds.join(",")}:${host.state.stateVersion + 1}`,
-    prompt: "Corporate Negotiating Center: HQ-Agenden zeigen",
+    source: `v1917.corp_hq_agenda_reveal:${sourceIds.join(",")}:${host.state.stateVersion + 1}`,
+    prompt: "HQ-Agenden zeigen",
     kind: "select_cards",
     options: agendaChoiceOptions(host, agendaIds),
     minSelections: 0,
@@ -124,7 +124,7 @@ export function startShowHqAgendasForCreditsChoice(
     choiceId: `p3_36_show_hq_agendas_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `p3_36.show_hq_agendas_for_credits:${input.sourceCardId}:${input.sourceDefinitionId}:${input.creditPerAgenda}:${host.state.stateVersion + 1}`,
-    prompt: "Corporate Negotiating Center: HQ-Agenden zeigen",
+    prompt: "HQ-Agenden zeigen",
     kind: "select_cards",
     options: agendaChoiceOptions(host, agendaIds),
     minSelections: 0,
@@ -135,14 +135,14 @@ export function startShowHqAgendasForCreditsChoice(
   return {
     publicPayload: {
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_corporate_negotiating_center_choice",
+      hiddenZoneAction: "corp_hq_agenda_reveal_choice",
       sourceDefinitionId: input.sourceDefinitionId,
       creditPerAgenda: input.creditPerAgenda,
     },
   };
 }
 
-export function startCorporateDownsizingScoreChoice(
+export function startScoredAgendaHqShuffleCreditsChoice(
   host: CorpZoneChoiceHandlerHost,
   input: {
     sourceCardId: CardInstanceId;
@@ -162,9 +162,9 @@ export function startCorporateDownsizingScoreChoice(
   if (agendaIds.length === 0) {
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-      agendaAbility: "corporate_downsizing",
+      agendaAbility: "scored_agenda_hq_agenda_shuffle_credits",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
       shownCount: 0,
       shuffledIntoRndCount: 0,
       gainedCredits: 0,
@@ -173,10 +173,10 @@ export function startCorporateDownsizingScoreChoice(
     return;
   }
   host.state.pendingChoice = {
-    choiceId: `p3_50_corporate_downsizing_${host.state.stateVersion + 1}`,
+    choiceId: `scored_agenda_hq_agenda_shuffle_credits_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_50.corporate_downsizing:${input.sourceCardId}:${input.creditPerAgendaPoint}:${host.state.stateVersion + 1}`,
-    prompt: "Corporate Downsizing: HQ-Agenden zeigen",
+    source: `scored_agenda.hq_agenda_shuffle_credits:${input.sourceCardId}:${input.creditPerAgendaPoint}:${host.state.stateVersion + 1}`,
+    prompt: "Scored Agenda: HQ-Agenden zeigen",
     kind: "select_cards",
     options: agendaChoiceOptions(host, agendaIds),
     minSelections: 0,
@@ -186,9 +186,9 @@ export function startCorporateDownsizingScoreChoice(
   };
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    agendaAbility: "corporate_downsizing_choice",
+    agendaAbility: "scored_agenda_hq_agenda_shuffle_credits_choice",
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "corporate_downsizing_hq_agendas",
+    hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
     hqAgendaChoiceCount: agendaIds.length,
   };
 }
@@ -225,7 +225,7 @@ export function resolveReschedulerHqShuffleDraw(
   };
 }
 
-export function resolveAiChiefFinancialOfficer(
+export function resolveHqArchivesShuffleDraw(
   host: CorpZoneChoiceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpZoneChoiceHandlerResult {
@@ -237,7 +237,7 @@ export function resolveAiChiefFinancialOfficer(
   host.state.corp.archives = [];
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     merge,
-    `v192.shuffle.${sourceDefinition.id}.hq_archives_into_rd.${host.state.stateVersion + 1}`,
+    `scored_agenda.shuffle.hq_archives_into_rd.${host.state.stateVersion + 1}`,
   );
   refreshCorpRndZones(host, { faceup: false, rezzed: false });
   const drawAmount = host.cards.scoredAgendaDrawCount(agendaId);
@@ -250,7 +250,7 @@ export function resolveAiChiefFinancialOfficer(
     cardDefinitionId: sourceDefinition.id,
     sourceDefinitionId: sourceDefinition.id,
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+    hiddenZoneAction: "hq_archives_shuffle_into_rd",
     shuffledCardsCount: previousHq.length + previousArchives.length,
     drawnCardsCount,
   };
@@ -266,10 +266,10 @@ export function resolveAiChiefFinancialOfficer(
   };
 }
 
-function resolveCorporateNegotiatingCenterChoice(
+function resolveCorpHqAgendaRevealChoice(
   host: CorpZoneChoiceHandlerHost,
 ): CorpZoneChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine Corporate-Negotiating-Center-Choice offen.");
+  const choice = requireChoice(host, "Es ist keine HQ-Agenda-Reveal-Choice offen.");
   const sourceText = choice.source.split(":")[1] ?? "";
   const sourceIds = sourceText.split(",").filter(Boolean) as CardInstanceId[];
   if (
@@ -281,9 +281,9 @@ function resolveCorporateNegotiatingCenterChoice(
           host.constants.corpHqAgendaRevealCardId,
     )
   )
-    throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
+    throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
-  assertSelectedHqAgendas(host, selectedIds, "Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
+  assertSelectedHqAgendas(host, selectedIds, "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.");
   const sourceDefinition = host.cards.definitionFor(sourceIds[0]!);
   const revealedDefinitions = selectedIds.map((cardId) =>
     host.cards.definitionFor(cardId),
@@ -293,7 +293,7 @@ function resolveCorporateNegotiatingCenterChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+    hiddenZoneAction: "corp_hq_agenda_reveal",
     sourceDefinitionId: sourceDefinition.id,
     sourceTitle: sourceDefinition.title,
     ...revealedDefinitionsPayload(revealedDefinitions),
@@ -323,9 +323,9 @@ function resolveShowHqAgendasForCreditsChoice(
     !Number.isInteger(creditPerAgenda) ||
     creditPerAgenda <= 0
   )
-    throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
+    throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
-  assertSelectedHqAgendas(host, selectedIds, "Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
+  assertSelectedHqAgendas(host, selectedIds, "Die HQ-Agenda-Reveal-Choice darf nur HQ-Agenden zeigen.");
   const sourceDefinition = host.cards.definitionFor(sourceCardId as CardInstanceId);
   const revealedDefinitions = selectedIds.map((cardId) =>
     host.cards.definitionFor(cardId),
@@ -336,7 +336,7 @@ function resolveShowHqAgendasForCreditsChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+    hiddenZoneAction: "corp_hq_agenda_reveal",
     sourceDefinitionId: sourceDefinition.id,
     sourceTitle: sourceDefinition.title,
     ...revealedDefinitionsPayload(revealedDefinitions),
@@ -348,10 +348,13 @@ function resolveShowHqAgendasForCreditsChoice(
   return revealChoiceResult(host, selectedIds, revealedDefinitions, gainedCredits);
 }
 
-function resolveCorporateDownsizingScoreChoice(
+function resolveScoredAgendaHqShuffleCreditsChoice(
   host: CorpZoneChoiceHandlerHost,
 ): CorpZoneChoiceHandlerResult {
-  const choice = requireChoice(host, "Es ist keine Corporate-Downsizing-Choice offen.");
+  const choice = requireChoice(
+    host,
+    "Es ist keine Scored-Agenda-HQ-Choice offen.",
+  );
   const [, sourceCardId = "", creditPerAgendaPointRaw = ""] =
     choice.source.split(":");
   const creditPerAgendaPoint = Number(creditPerAgendaPointRaw);
@@ -363,9 +366,13 @@ function resolveCorporateDownsizingScoreChoice(
     !Number.isInteger(creditPerAgendaPoint) ||
     creditPerAgendaPoint < 0
   )
-    throw new Error("Corporate Downsizing ist nicht mehr aktiv.");
+    throw new Error("Die Scored-Agenda-HQ-Choice ist nicht mehr aktiv.");
   const selectedIds = selectedChoiceCardIds(host, choice);
-  assertSelectedHqAgendas(host, selectedIds, "Corporate Downsizing darf nur HQ-Agenden zeigen.");
+  assertSelectedHqAgendas(
+    host,
+    selectedIds,
+    "Diese Scored Agenda darf nur HQ-Agenden zeigen.",
+  );
   const selectedSet = new Set(selectedIds);
   const sourceDefinition = host.cards.definitionFor(sourceCardId as CardInstanceId);
   const revealedDefinitions = selectedIds.map((cardId) =>
@@ -381,7 +388,7 @@ function resolveCorporateDownsizingScoreChoice(
   host.state.corp.hq = host.state.corp.hq.filter(
     (cardId) => !selectedSet.has(cardId),
   );
-  const randomPurpose = `p3_50.corporate_downsizing.hq_agendas_into_rd.${sourceCardId}.${host.state.stateVersion + 1}`;
+  const randomPurpose = `scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.${sourceCardId}.${host.state.stateVersion + 1}`;
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     [...host.state.corp.rd, ...selectedIds],
     randomPurpose,
@@ -390,9 +397,9 @@ function resolveCorporateDownsizingScoreChoice(
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
-    agendaAbility: "corporate_downsizing",
+    agendaAbility: "scored_agenda_hq_agenda_shuffle_credits",
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "corporate_downsizing_hq_agendas",
+    hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
     sourceDefinitionId: sourceDefinition.id,
     sourceTitle: sourceDefinition.title,
     ...revealedDefinitionsPayload(revealedDefinitions),

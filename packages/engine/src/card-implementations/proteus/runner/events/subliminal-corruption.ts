@@ -12,7 +12,7 @@ export const proteusSubliminalCorruptionImplementation: CardImplementationDefini
         {
           kind: "make_run",
           target: { kind: "chosen_server" },
-          badPublicityRunAftermath: "subliminal_corruption",
+          badPublicityRunAftermath: "bad_publicity_run_replacement",
           visibility: "public",
         },
       ],

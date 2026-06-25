@@ -48,17 +48,15 @@ export type CorpMainActionGenerationHost = {
   corp: {
     corpActionDebtPending: HostFn<number>;
     filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
-    acmeSavingsAndLoanObligationCount: HostFn<number>;
+    activeObligationCount: HostFn<number>;
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<{ kind?: string } | undefined>;
-    powerGridOverloadLegalActions: HostFn<LegalAction[]>;
-    systematicLayoffsLegalActions: HostFn<LegalAction[]>;
+    hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
+    advancementPlacementLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
     uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
-    corpInstalledEconomyActionProfileForDefinition: HostFn<any>;
-    corpInstalledEconomyActionPayload: HostFn<LegalAction["payload"]>;
   };
   runner: {
     isConcealedRunnerResource: HostFn<boolean>;
@@ -80,7 +78,7 @@ export type CorpMainActionGenerationHost = {
     rootInstallRezzesOnInstall: HostFn<boolean>;
     rezCostForCard: HostFn<number>;
     rezCostReductionSourceDefinitionIdsFor: HostFn<string[]>;
-    isAcmeSavingsAndLoanDefinition: HostFn<boolean>;
+    isObligationDebtDefinition: HostFn<boolean>;
   };
   abilities: {
     corpTraceDamageAbilityHost: HostFn<unknown>;
@@ -96,17 +94,10 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS: ReadonlySet<string>;
-    HIDDEN_ZONE_REORDER_ASSET_CARD_IDS: ReadonlySet<string>;
-    CORP_HQ_SHUFFLE_DRAW_CARD_ID: string;
-    COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID: string;
-    DISINFECTANT_VIRUS_COUNTER_ASSET_ID: string;
-    COUNTER_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    TAG_CONDITION_UPGRADE_CARD_IDS: ReadonlySet<string>;
-    COUNTER_ASSET_CARD_IDS: ReadonlySet<string>;
-    INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID: string;
-    ACTION_ASSET_CARD_IDS: ReadonlySet<string>;
-    SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID: string;
+    INSTALLED_CARD_LIMIT_ASSET_SOURCE: string;
+    VIRUS_COUNTER_ASSET_SOURCE: string;
+    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
+    ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: string;
   };
 };
 
@@ -161,21 +152,17 @@ export function buildCorpMainActions(
     host.corp.filterActionsForRestrictedExtraActions ??
     ((_state: GameState, _side: "corp", candidateActions: LegalAction[]) =>
       candidateActions);
-  const acmeSavingsAndLoanObligationCount =
-    host.corp.acmeSavingsAndLoanObligationCount;
+  const activeObligationCount =
+    host.corp.activeObligationCount;
   const canPlayCorpOperation = host.corp.canPlayCorpOperation;
   const corpUtilityImplementationForDefinition =
     host.corp.corpUtilityImplementationForDefinition;
-  const powerGridOverloadLegalActions = host.corp.powerGridOverloadLegalActions;
-  const systematicLayoffsLegalActions = host.corp.systematicLayoffsLegalActions;
+  const hardwareTrashByCounterLegalActions = host.corp.hardwareTrashByCounterLegalActions;
+  const advancementPlacementLegalActions = host.corp.advancementPlacementLegalActions;
   const corpAgendaPointTotal = host.corp.corpAgendaPointTotal;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
-  const corpInstalledEconomyActionProfileForDefinition =
-    host.corp.corpInstalledEconomyActionProfileForDefinition;
-  const corpInstalledEconomyActionPayload =
-    host.corp.corpInstalledEconomyActionPayload;
   const isConcealedRunnerResource = host.runner.isConcealedRunnerResource;
   const hiddenRunnerResourceSlotId = host.runner.hiddenRunnerResourceSlotId;
   const corpNewDataFortCreationLocked =
@@ -197,8 +184,8 @@ export function buildCorpMainActions(
   const rezCostForCard = host.rez.rezCostForCard;
   const rezCostReductionSourceDefinitionIdsFor =
     host.rez.rezCostReductionSourceDefinitionIdsFor;
-  const isAcmeSavingsAndLoanDefinition =
-    host.rez.isAcmeSavingsAndLoanDefinition;
+  const isObligationDebtDefinition =
+    host.rez.isObligationDebtDefinition;
   const corpTraceDamageAbilityHost = host.abilities.corpTraceDamageAbilityHost;
   const corpSpecialDamageAbilityHost =
     host.abilities.corpSpecialDamageAbilityHost;
@@ -209,25 +196,13 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS =
-    host.constants.HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS;
-  const HIDDEN_ZONE_REORDER_ASSET_CARD_IDS =
-    host.constants.HIDDEN_ZONE_REORDER_ASSET_CARD_IDS;
-  const CORP_HQ_SHUFFLE_DRAW_CARD_ID =
-    host.constants.CORP_HQ_SHUFFLE_DRAW_CARD_ID;
-  const COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID =
-    host.constants.COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID;
-  const DISINFECTANT_VIRUS_COUNTER_ASSET_ID =
-    host.constants.DISINFECTANT_VIRUS_COUNTER_ASSET_ID;
-  const COUNTER_UPGRADE_CARD_IDS = host.constants.COUNTER_UPGRADE_CARD_IDS;
-  const TAG_CONDITION_UPGRADE_CARD_IDS =
-    host.constants.TAG_CONDITION_UPGRADE_CARD_IDS;
-  const COUNTER_ASSET_CARD_IDS = host.constants.COUNTER_ASSET_CARD_IDS;
-  const INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID =
-    host.constants.INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID;
-  const ACTION_ASSET_CARD_IDS = host.constants.ACTION_ASSET_CARD_IDS;
-  const SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID =
-    host.constants.SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID;
+  const INSTALLED_CARD_LIMIT_ASSET_SOURCE =
+    host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE;
+  const VIRUS_COUNTER_ASSET_SOURCE =
+    host.constants.VIRUS_COUNTER_ASSET_SOURCE;
+  const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
+  const ADVANCEMENT_PLACEMENT_OPERATION_SOURCE =
+    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_SOURCE;
 
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
@@ -345,7 +320,7 @@ export function buildCorpMainActions(
     }
   }
   actions.push(buildCorpGainCreditAction(state));
-  if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
+  if (activeObligationCount(state) > 0 && state.corp.credits >= 12) {
     actions.push(
       action(
         state,
@@ -355,11 +330,11 @@ export function buildCorpMainActions(
         "game_rule",
         [{ clicks: 1, credits: 12 }],
         {
-          acmeSavingsAndLoanAbility: "remove_obligation",
-          acmeSavingsAndLoanCreditCost: 12,
-          acmeSavingsAndLoanScoreAgendaPoints: 1,
-          acmeSavingsAndLoanObligationsBefore:
-            acmeSavingsAndLoanObligationCount(state),
+          obligationDebtAbility: "remove_obligation",
+          obligationDebtCreditCost: 12,
+          obligationDebtScoreAgendaPoints: 1,
+          obligationDebtCountBefore:
+            activeObligationCount(state),
         },
       ),
     );
@@ -467,13 +442,13 @@ export function buildCorpMainActions(
     ) {
       if (
         corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "power_grid_overload"
+        "installed_hardware_trash_by_counter"
       ) {
-        actions.push(...powerGridOverloadLegalActions(state, id, definition));
+        actions.push(...hardwareTrashByCounterLegalActions(state, id, definition));
         continue;
       }
-      if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
-        actions.push(...systematicLayoffsLegalActions(state, id, definition));
+      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_SOURCE) {
+        actions.push(...advancementPlacementLegalActions(state, id, definition));
         continue;
       }
       const implementationActions =
@@ -602,14 +577,14 @@ export function buildCorpMainActions(
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
         state.corp.credits >= rezCost &&
-        (!isAcmeSavingsAndLoanDefinition(definition.id) ||
+        (!isObligationDebtDefinition(definition.id) ||
           corpAgendaPointTotal(state) >= 1)
       ) {
         const acmeRezCost =
-          isAcmeSavingsAndLoanDefinition(definition.id)
+          isObligationDebtDefinition(definition.id)
             ? {
                 agendaPointCost: 1,
-                acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+                obligationDebtAbility: "rez_with_agenda_point_cost",
               }
             : {};
         actions.push(
@@ -655,42 +630,7 @@ export function buildCorpMainActions(
     );
     if (specialDamageActions.handled)
       actions.push(...specialDamageActions.actions);
-    if (
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reveal_rd_top" },
-        ),
-      );
-    }
-    if (
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length >= 2
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze anordnen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reorder_rd_top2" },
-        ),
-      );
-    }
-    if (
-      definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
-      hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")
-    ) {
+    if (hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")) {
       actions.push(
         action(
           state,
@@ -703,10 +643,7 @@ export function buildCorpMainActions(
         ),
       );
     }
-    if (
-      definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID ||
-      hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")
-    ) {
+    if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
       for (const targetCardId of corpInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
@@ -719,7 +656,7 @@ export function buildCorpMainActions(
             [{ clicks: 1 }],
             {
               cardId: assetId,
-              v1951CorpUtilityAbility: "cowboy_sysop_uninstall_corp_card_to_hq",
+              v1951CorpUtilityAbility: "corp_installed_card_to_hq",
               targetCardId,
             },
           ),
@@ -727,7 +664,7 @@ export function buildCorpMainActions(
       }
     }
     if (
-      definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID &&
+      definition.id === VIRUS_COUNTER_ASSET_SOURCE &&
       !hasCorpUtilityKind(state, assetId, "counter_prevention_replacement")
     ) {
       for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
@@ -751,7 +688,7 @@ export function buildCorpMainActions(
         );
       }
     }
-    if (COUNTER_UPGRADE_CARD_IDS.has(definition.id)) {
+    if (COUNTER_UPGRADE_SOURCES.has(definition.id)) {
       actions.push(
         action(
           state,
@@ -769,122 +706,6 @@ export function buildCorpMainActions(
         ),
       );
     }
-    if (
-      TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      state.runner.tags > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: getaggten Runner besteuern`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "tag_condition_credit",
-            gainCreditsAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      COUNTER_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Power-Counter laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "add_power_counter",
-            counterType: "power",
-            addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      definition.id === INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      const advancementCounterCount = Math.max(
-        0,
-        Math.floor(mustInstance(state.cardInstances, assetId).advancementCounters),
-      );
-      const gainCreditsAmount = advancementCounterCount * 4;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${gainCreditsAmount} Credits und trashen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "gain_credits",
-            advancementCounterCount,
-            gainCreditsAmount,
-            trashOnUse: true,
-          },
-        ),
-      );
-    }
-    if (
-      ACTION_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      uniqueDirectLongtailKindForDefinition(definition.id) !==
-        "nevinyrral_action_and_lose_on_rezzed_leave"
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 2 Aktionen nehmen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1920AssetAbility: "gain_actions",
-            gainedActions: 2,
-          },
-        ),
-      );
-    }
-    const economyProfile = corpInstalledEconomyActionProfileForDefinition(
-      definition.id,
-    );
-    if (!economyProfile) continue;
-    const gainLabel =
-      `${definition.title}: ${economyProfile.creditGain} Credits` +
-      (economyProfile.trashSource ? " und trashen" : "");
-    actions.push(
-      action(
-        state,
-        "corp",
-        "gain_credit",
-        gainLabel,
-        assetId,
-        [
-          {
-            clicks: economyProfile.clickCost,
-            ...(economyProfile.creditCost > 0
-              ? { credits: economyProfile.creditCost }
-              : {}),
-          },
-        ],
-        corpInstalledEconomyActionPayload(economyProfile, assetId),
-      ),
-    );
   }
   const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
   const scoredAgendaTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);

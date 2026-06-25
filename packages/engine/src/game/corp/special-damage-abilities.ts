@@ -84,7 +84,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForCard(sourceCardId);
-  if (implementation?.kind === "i_got_a_rock_tagged_meat_damage") {
+  if (implementation?.kind === "tagged_meat_damage") {
     if (
       host.state.runner.tags < implementation.requiredRunnerTags ||
       host.agendaPoints.total() < implementation.agendaPointCost
@@ -106,7 +106,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
           [{ clicks: 1 }],
           {
             cardId: sourceCardId,
-            v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+            v1920AssetAbility: "tagged_meat_damage",
             agendaPointCost: implementation.agendaPointCost,
             damageType: implementation.damageType,
             damageAmount: implementation.damageAmount,
@@ -117,7 +117,7 @@ export function buildCorpSpecialDamageAbilityActionsForCard(
       sourceDefinitionId: definition.id,
     };
   }
-  if (implementation?.kind === "schlaghund_tag_die_meat_damage") {
+  if (implementation?.kind === "tag_threshold_meat_damage_asset") {
     return {
       handled: true,
       actions: [
@@ -144,10 +144,10 @@ export function handleCorpSpecialDamageAbilityAction(
   if (!legalAction || legalAction.type !== "gain_credit") return { handled: false };
   if (
     legalAction.payload?.v1920AssetAbility ===
-    "i_got_a_rock_tagged_meat_damage"
+    "tagged_meat_damage"
   ) {
     const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-    handleIGotARockAction(host, sourceCardId);
+    handleTaggedMeatDamageAction(host, sourceCardId);
     return {
       handled: true,
       stateChanged: true,
@@ -185,22 +185,22 @@ export function handleCorpSpecialDamageAbilityAction(
   return { handled: false };
 }
 
-function handleIGotARockAction(
+function handleTaggedMeatDamageAction(
   host: CorpSpecialDamageAbilityHost,
   sourceCardId: CardInstanceId,
 ): void {
   const legalAction = requireLegalAction(host);
   if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf I Got a Rock nutzen.");
+    throw new Error("Nur die Korp darf diese Tagged-Damage-Faehigkeit nutzen.");
   if (!host.cards.rezzedCorpRootCardIds().includes(sourceCardId))
-    throw new Error("I Got a Rock ist nicht rezzed installiert.");
+    throw new Error("Die Tagged-Damage-Faehigkeit ist nicht rezzed installiert.");
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForDefinition(definition.id);
-  if (implementation?.kind !== "i_got_a_rock_tagged_meat_damage")
-    throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
+  if (implementation?.kind !== "tagged_meat_damage")
+    throw new Error("Die Tagged-Damage-Faehigkeit passt nicht zur Karte.");
   if (host.state.runner.tags < implementation.requiredRunnerTags)
-    throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
+    throw new Error("Die Tagged-Damage-Faehigkeit verlangt mehr Runner-Tags.");
   const forfeitedAgendaIds = chooseCorpAgendasForPointCost(
     host,
     implementation.agendaPointCost,
@@ -210,7 +210,7 @@ function handleIGotARockAction(
     0,
   );
   if (paidPoints < implementation.agendaPointCost)
-    throw new Error("I Got a Rock braucht 3 Agenda-Punkte.");
+    throw new Error("Die Tagged-Damage-Faehigkeit braucht Agenda-Punkte.");
   const forfeitedDefinitionIds = forfeitedAgendaIds
     .map((cardId) => host.cards.definitionFor(cardId).id)
     .join(",");
@@ -219,7 +219,7 @@ function handleIGotARockAction(
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+    v1920AssetAbility: "tagged_meat_damage",
     sourceDefinitionId: definition.id,
     sourceCardId,
     runnerTagsBefore: host.state.runner.tags,
@@ -228,7 +228,7 @@ function handleIGotARockAction(
     forfeitedAgendaDefinitionIds: forfeitedDefinitionIds,
     specialZone: "removed_from_game",
     specialZoneVisibility: "public",
-    specialZoneReason: "v1920_i_got_a_rock",
+    specialZoneReason: "tagged_meat_damage_agenda_point_cost",
   };
   host.damage.resolveDamageOperation(
     implementation.damageType,
@@ -265,7 +265,7 @@ function handleSchlaghundAction(
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForDefinition(definition.id);
-  if (implementation?.kind !== "schlaghund_tag_die_meat_damage")
+  if (implementation?.kind !== "tag_threshold_meat_damage_asset")
     throw new Error(
       "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
     );

@@ -76,9 +76,9 @@ describe("trace payment pools", () => {
     expect(payload).toMatchObject({
       corpBid: 6,
       corpCreditBid: 2,
-      parisCityGridPoolSpent: 2,
-      parisCityGridPoolRemaining: 0,
-      parisCityGridPoolServerId: "remote_1",
+      fortTraceBitPoolSpent: 2,
+      fortTraceBitPoolRemaining: 0,
+      fortTraceBitPoolServerId: "remote_1",
       recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
       traceHostedCreditBoost: 1,
@@ -127,7 +127,7 @@ describe("trace payment pools", () => {
         {
           sourceCardInstanceId: hellsId,
           sourceDefinitionId: hellsDefinitionId,
-          publicKind: "hells_run_trace_credit",
+          publicKind: "runner_trace_link_bonus_credit",
         },
       ],
       hostedPaymentCredits: (_state, cardId) => hostedCredits.get(cardId) ?? 0,
@@ -143,7 +143,7 @@ describe("trace payment pools", () => {
     expect(quote).toMatchObject({
       canPay: true,
       traceLinkCreditsToPay: 2,
-      hellsRunCreditsToPay: 1,
+      bonusTraceLinkCreditsToPay: 1,
       normalCreditsToPay: 2,
     });
     expect(quote.breakdown.map((entry) => entry.kind)).toEqual([
@@ -152,7 +152,7 @@ describe("trace payment pools", () => {
       "runner_credits",
     ]);
     expect(quote.breakdown[1]).toMatchObject({
-      publicKind: "hells_run_trace_credit",
+      publicKind: "runner_trace_link_bonus_credit",
     });
 
     const receipt = payRunnerTraceBidQuote(deps, state, quote);
@@ -160,13 +160,13 @@ describe("trace payment pools", () => {
 
     expect(receipt).toMatchObject({
       traceLinkCreditsSpent: 2,
-      hellsRunTraceCreditsSpent: 1,
+      bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 2,
       sourceDefinitionIds: [hellsDefinitionId, pkDefinitionId],
     });
     expect(payload).toMatchObject({
       traceLinkCreditsSpent: 2,
-      hellsRunTraceCreditsSpent: 1,
+      bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 2,
       traceLinkCreditSourceDefinitionIds: "hells_run,pk_6089a",
     });

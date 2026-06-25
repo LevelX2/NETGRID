@@ -217,16 +217,16 @@ export function buildSearchStackInstallPayload(input: {
   };
 }
 
-export function buildSelfModifyingCodeSearchInstallChoice(input: {
+export function buildPaidStackProgramInstallChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   options: ChoiceOptions;
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_self_modifying_code_install_program_${nextStateVersion}`,
+    choiceId: `v1911_hidden_stack_program_install_${nextStateVersion}`,
     side: "runner",
-    source: `v1911.self_modifying_code_install_program:${input.sourceCardId}:${nextStateVersion}`,
+    source: `v1911.hidden_stack_program_install:${input.sourceCardId}:${nextStateVersion}`,
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: input.options,
@@ -252,7 +252,7 @@ export function buildSelfModifyingCodeSearchInstallChoice(input: {
   };
 }
 
-export function buildSneakPreviewSourceChoice(input: {
+export function buildTemporaryProgramInstallSourceChoice(input: {
   stateVersion: number;
   sourcePrefix: string;
   sourceCardId?: CardInstanceId | undefined;
@@ -261,11 +261,11 @@ export function buildSneakPreviewSourceChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_sneak_preview_source_${nextStateVersion}`,
+    choiceId: `v1911_temporary_program_install_source_${nextStateVersion}`,
     side: "runner",
     source:
-      input.sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_source:${nextStateVersion}`
+      input.sourcePrefix === "v1911.temporary_program_install"
+        ? `v1911.temporary_program_install_source:${nextStateVersion}`
         : `${input.sourcePrefix}_source:${input.sourceCardId ?? ""}:${input.sourceDefinitionId}:${nextStateVersion}`,
     prompt: "Sneak-Preview-Quelle wählen",
     kind: "select_cards",
@@ -277,15 +277,15 @@ export function buildSneakPreviewSourceChoice(input: {
   };
 }
 
-export function buildSneakPreviewSourceChoicePayload(): HiddenZonePayload {
+export function buildTemporaryProgramInstallSourceChoicePayload(): HiddenZonePayload {
   return {
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "sneak_preview_source_choice",
+    hiddenZoneAction: "temporary_program_install_source_choice",
     choiceVisibility: "runner_private",
   };
 }
 
-export function buildSneakPreviewProgramChoice(input: {
+export function buildTemporaryProgramInstallChoice(input: {
   stateVersion: number;
   sourceZone: InstallSourceZone;
   sourcePrefix: string;
@@ -295,11 +295,11 @@ export function buildSneakPreviewProgramChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1911_sneak_preview_${input.sourceZone}_install_${nextStateVersion}`,
+    choiceId: `v1911_temporary_program_install_${input.sourceZone}_install_${nextStateVersion}`,
     side: "runner",
     source:
-      input.sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_${input.sourceZone}_install:${nextStateVersion}`
+      input.sourcePrefix === "v1911.temporary_program_install"
+        ? `v1911.temporary_program_install_${input.sourceZone}_install:${nextStateVersion}`
         : `${input.sourcePrefix}:${input.sourceCardId ?? ""}:${input.sourceDefinitionId}:${input.sourceZone}:${nextStateVersion}`,
     prompt:
       input.sourceZone === "heap"
@@ -324,7 +324,7 @@ export function buildSneakPreviewProgramChoice(input: {
   };
 }
 
-export function buildMysteryBoxInstallChoice(input: {
+export function buildRevealedStackProgramInstallChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   topCards: readonly CardInstanceId[];
@@ -332,10 +332,10 @@ export function buildMysteryBoxInstallChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `v1915_mystery_box_${nextStateVersion}`,
+    choiceId: `v1915_revealed_stack_program_install_${nextStateVersion}`,
     side: "runner",
-    source: `v1915.mystery_box:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
-    prompt: "Mystery-Box-Programm installieren",
+    source: `v1915.revealed_stack_program_install:${input.sourceCardId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    prompt: "Programm aus offengelegtem Stack installieren",
     kind: "select_cards",
     options: input.options,
     minSelections: 1,
@@ -345,7 +345,7 @@ export function buildMysteryBoxInstallChoice(input: {
   };
 }
 
-export function buildMysteryBoxCorpReviewChoice(input: {
+export function buildRevealedStackProgramInstallCorpReviewChoice(input: {
   stateVersion: number;
   sourceCardId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
@@ -355,12 +355,12 @@ export function buildMysteryBoxCorpReviewChoice(input: {
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
   return {
-    choiceId: `p3_38_mystery_box_corp_review_${nextStateVersion}`,
+    choiceId: `p3_38_revealed_stack_program_install_corp_review_${nextStateVersion}`,
     side: "corp",
-    source: `p3_38.mystery_box_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    source: `p3_38.revealed_stack_program_install_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
     prompt: input.programFound
-      ? "Mystery Box: Stack-Spitze ansehen"
-      : "Mystery Box: keine Programmkarte",
+      ? "Stack-Spitze ansehen"
+      : "Keine Programmkarte im offengelegten Stack",
     kind: "select_cards",
     options: [
       ...input.options,

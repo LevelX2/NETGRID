@@ -19,7 +19,9 @@ export type SemanticRuntimeCorpEvidenceDependencies<
   hasRemoteInstability: (input: AiDecisionInput) => boolean;
   hasNakedScoreLine: (input: AiDecisionInput) => boolean;
   hasUnsafeRemoteScoreAction: (input: AiDecisionInput) => boolean;
+  hasContestableRemoteScoreAction: (input: AiDecisionInput) => boolean;
   hasRemoteRezFloorFundingNeed: (input: AiDecisionInput) => boolean;
+  hasCentralRezFloorFundingNeed: (input: AiDecisionInput) => boolean;
   advancementCounterPlacementAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -71,11 +73,17 @@ export function semanticRuntimeCorpEvidence<TServer extends CorpServerLike>(
   if (dependencies.hasNakedScoreLine(input)) {
     evidence.push("corp_remote_risk:naked_score_line_present");
   }
-  if (dependencies.hasUnsafeRemoteScoreAction(input)) {
+  if (
+    dependencies.hasUnsafeRemoteScoreAction(input) ||
+    dependencies.hasContestableRemoteScoreAction(input)
+  ) {
     evidence.push("corp_remote_risk:unsafe_score_action_available");
   }
   if (dependencies.hasRemoteRezFloorFundingNeed(input)) {
     evidence.push("remote_rez_floor_funding_need:true");
+  }
+  if (dependencies.hasCentralRezFloorFundingNeed(input)) {
+    evidence.push("central_rez_floor_funding_need:true");
   }
   if (action.type === "gain_credit") {
     evidence.push("corp_safe_alternative:economy");

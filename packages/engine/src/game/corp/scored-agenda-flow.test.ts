@@ -14,7 +14,7 @@ import type { CardScoredAgendaImplementation } from "../../ability-engine/defini
 import {
   handleScoredAgendaFlowChoice,
   scoreAgenda,
-  startEmployeeEmpowermentStartDrawChoice,
+  startScoredAgendaStartDrawChoice,
 } from "./scored-agenda-flow";
 import type { ScoredAgendaFlowHost } from "./scored-agenda/scored-agenda-flow-host";
 
@@ -151,7 +151,7 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       cardId: CardInstanceId;
       creditPerAgendaPoint: number;
     }>,
-    securityPurge: 0,
+    agendaPurge: 0,
     cleanup: 0,
   };
   const state = {
@@ -183,9 +183,6 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
         cardDefinition.subtypes?.includes(subtype) ?? false,
       isOveradvanceAgendaDefinition: (definitionId) =>
         input.overadvanceDefinitionIds?.includes(definitionId) ?? false,
-    },
-    constants: {
-      employeeEmpowermentId: "employee_empowerment",
     },
     zones: {
       removeFromAllZones: (cardId) => removed.push(cardId),
@@ -219,13 +216,13 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
     },
     flags: {
       markScoredBlackOpsAgendaThisTurn: () => undefined,
-      employeeEmpowermentResolvedSourceIds: () => employeeResolved,
-      markEmployeeEmpowermentResolved: (cardId) =>
+      scoredAgendaStartDrawChoiceResolvedSourceIds: () => employeeResolved,
+      markScoredAgendaStartDrawChoiceResolved: (cardId) =>
         employeeResolved.push(cardId),
     },
     effects: {
       executeOnScore: () => undefined,
-      appendEmployeeEmpowermentDrawEffect: () => undefined,
+      appendScoredAgendaStartDrawChoiceEffect: () => undefined,
     },
     draw: {
       drawCorpCard: () => {
@@ -233,12 +230,12 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       },
     },
     choices: {
-      startDataFortReclamation: (cardId) => callbacks.dataFort.push(cardId),
-      startPriorityRequisition: (cardId) => callbacks.priority.push(cardId),
-      startCorporateDownsizing: (cardId, creditPerAgendaPoint) =>
+      startHqToNewRemoteInstallRez: (cardId) => callbacks.dataFort.push(cardId),
+      startScoredAgendaFreeRez: (cardId) => callbacks.priority.push(cardId),
+      startScoredAgendaHqShuffleCredits: (cardId, creditPerAgendaPoint) =>
         callbacks.downsizing.push({ cardId, creditPerAgendaPoint }),
-      resolveSecurityPurge: () => {
-        callbacks.securityPurge += 1;
+      resolveAgendaPurge: () => {
+        callbacks.agendaPurge += 1;
       },
     },
   };
@@ -349,7 +346,7 @@ describe("scored agenda flow", () => {
     });
     scoreAgenda(host, "code_agenda" as CardInstanceId);
     expect(host.state.pendingChoice?.source).toContain(
-      "v162.scored_subtype_reveal",
+      "scored_agenda.subtype_reveal",
     );
     const choice = host.state.pendingChoice!;
     const resolveHost = {
@@ -363,7 +360,7 @@ describe("scored agenda flow", () => {
     expect(host.state.pendingChoice).toBeUndefined();
     expect(host.state.cardInstances.code_gate_1?.faceup).toBe(true);
     expect(legalAction.payload).toMatchObject({
-      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
+      hiddenZoneAction: "scored_subtype_reveal_code_gates",
       revealedCount: 1,
       gainedCredits: 2,
       publicRevealDefinitionIds: "code_gate_1_def",
@@ -415,7 +412,7 @@ describe("scored agenda flow", () => {
       },
     ]);
     expect(choice.prompt).toBe(
-      "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+      "Scored Agenda: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     );
     expect(legalAction.payload).toMatchObject({
       cardImplementationAbilityId: "ice_transmutation:scored_ice_mark:0",
@@ -440,7 +437,7 @@ describe("scored agenda flow", () => {
       cardImplementationAbilityKey: "scored_ice_mark:0",
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
-      agendaAbility: "v1920_ice_transmutation",
+      agendaAbility: "scored_rezzed_ice_mark_modifier",
       targetIceId: "ice_1",
       cardImplementationTargetKind: "rezzed_installed_ice",
       cardImplementationCounterType: "mark",
@@ -500,7 +497,7 @@ describe("scored agenda flow", () => {
       cardImplementationPrimitiveKind: "select_rezzed_ice_mark_modifier",
       cardImplementationEffectKind: "mark_modifier",
       scoredAgendaPrimitiveSkippedReason: "no_rezzed_ice",
-      iceTransmutationSkippedReason: "no_rezzed_ice",
+      scoredIceMarkModifierSkippedReason: "no_rezzed_ice",
     });
   });
 
@@ -524,9 +521,16 @@ describe("scored agenda flow", () => {
           { side: "corp", zone: "scoreArea" },
         ),
       },
+      implementations: {
+        employee_empowerment: {
+          kind: "corp_start_turn_optional_draw",
+          drawCount: 1,
+          visibility: "public",
+        },
+      },
     });
 
-    const startResult = startEmployeeEmpowermentStartDrawChoice(host);
+    const startResult = startScoredAgendaStartDrawChoice(host);
     expect(startResult.handled).toBe(true);
     const choice = host.state.pendingChoice!;
     host.state.phase = "corp_draw_phase";
@@ -542,7 +546,7 @@ describe("scored agenda flow", () => {
     expect(legalAction.payload).toMatchObject({
       choiceVisibility: "public",
       sourceDefinitionId: "employee_empowerment",
-      employeeEmpowermentStartDrawDecision: "draw",
+      scoredAgendaStartDrawDecision: "draw",
       drawnCount: 1,
     });
   });

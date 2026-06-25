@@ -19,16 +19,16 @@ import type {
   CardEffectHostedCreditsResult,
   CardEffectCounterResult,
   CardEffectTrashSourceResult,
-} from "./effect-interpreter";
+} from "./effect-execution-types";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime";
 
 type PublicEffectPayload = Record<string, string | number | boolean>;
 
 type RunnerDrawSummaryForCardImplementation = {
   drawnCount: number;
-  citySurveillanceSourceCount: number;
-  citySurveillanceCreditsPaid: number;
-  citySurveillanceTagsAdded: number;
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
 };
 
 export type CardImplementationEffectAdapterHost = {
@@ -179,8 +179,7 @@ export function createCardImplementationEffectAdapters(
     amount: number | "all",
   ): CardEffectHostedCreditsResult {
     const available = host.cardCounter(state, sourceCardId, "bit");
-    if (available <= 0)
-      throw new Error("Auf der Quelle liegen keine Credits.");
+    if (available <= 0) throw new Error("Auf der Quelle liegen keine Credits.");
     const taken = amount === "all" ? available : Math.min(available, amount);
     host.spendCardCounter(state, sourceCardId, "bit", taken);
     host.credits(state, side, taken);

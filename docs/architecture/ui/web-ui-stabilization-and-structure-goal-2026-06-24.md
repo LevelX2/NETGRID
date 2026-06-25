@@ -1,0 +1,276 @@
+# Web-UI-Stabilisierung und Strukturvervollständigung
+
+Status: Umsetzung abgeschlossen, finale Integration läuft im Worktree `C:\Projekte\NETGRID_WEB_UI_STABILIZATION_STRUCTURE` auf Branch `codex/web-ui-stabilization-structure`.
+
+Quelle: Nutzerauftrag vom 2026-06-24 mit direkter Ausführung über `$paketprozess-worktree-goal`.
+
+## Ziel
+
+Der Webclient soll wieder vollständig verifizierbar sein und danach nur dort strukturell weiter geschnitten werden, wo ein klarer, risikoarmer und behavior-preserving Nutzen vorliegt.
+
+Finale Gates:
+
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `corepack pnpm --filter @netgrid/web test`
+- `corepack pnpm --filter @netgrid/web build`
+- `git diff --check`
+- keine neuen Importzyklen
+- LegalAction-, Hidden-Info-, Replay-, Randomness- und StateHash-Grenzen bleiben unverändert
+
+## Sicherheitsgrenzen
+
+- Die Rules Engine bleibt einzige Regelautorität.
+- Die UI zeigt und sendet nur vorhandene LegalActions.
+- Keine verdeckten Kartendaten in PlayerViews, PublicEvents, KI-Inputs, WebSocket-Payloads, Reconnect-Payloads, Undo-Previews, Replays, Logs oder Client-Fehlern.
+- Keine Spielregel-, KI-, API-, Replay- oder StateHash-Änderung ohne zwingenden Vertragsgrund.
+- Refactorings müssen behavior-preserving bleiben.
+- Keine neue State-Management-Library, kein CSS-Framework-Wechsel, kein React-/Next-Framework-Wechsel.
+
+## Ausgangsinventur
+
+Git:
+
+- Startbranch: `main`
+- Start-HEAD: `ddcdd6dace8444df264e0bc35ea9fb1f67a16c8f`
+- Arbeitsbranch: `codex/web-ui-stabilization-structure`
+- Worktree: `C:\Projekte\NETGRID_WEB_UI_STABILIZATION_STRUCTURE`
+
+Install:
+
+- `corepack pnpm install --frozen-lockfile` erfolgreich.
+- Hinweis von pnpm: Build-Scripts für `esbuild@0.27.7` und `sharp@0.34.5` wurden nicht automatisch ausgeführt.
+
+Baseline-Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: rot.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 423 Tests.
+- `corepack pnpm --filter @netgrid/web build`: rot nach erfolgreicher Compilation beim TypeScript-Schritt.
+- `git diff --check`: grün.
+
+Bekannte TypeScript-Fehler:
+
+- `apps/web/app/action-board-ui.test.ts`: `data_raven` ist nicht Teil von `CounterType`.
+- `apps/web/app/action-board-ui.test.ts`: `pattel_antibody` ist nicht Teil von `CounterType`.
+- `apps/web/app/action-board-ui.ts`: `doppelganger_antibody` und `pattel_antibody` sind nicht mit `CounterType | undefined` vergleichbar.
+- `apps/web/app/chronicle.ts`: `pattel_antibody` ist nicht mit `CounterType | undefined` vergleichbar.
+
+Aktueller Shared-Vertrag:
+
+- `CounterType` in `packages/shared/src/index.ts` enthält unter anderem `advancement`, `virus`, `cockroach`, `cascade`, `doom`, `crumble`, `garbage`, `highlighter`, `scaldan`, `tax`, `vienna`, `socket_archives`, `socket_hq`, `socket_rd`, `pipe`, `spy`, `mark`, `dividend`, `core_damage`, `shell`, `bit`.
+- Die Werte `data_raven`, `doppelganger_antibody` und `pattel_antibody` fehlen im Shared-Vertrag, werden aber in Engine-/Runtime-/Web-Kontexten verwendet.
+
+Größte UI-Dateien zu Beginn:
+
+| Datei | Zeilen |
+| --- | ---: |
+| `apps/web/app/globals.css` | 11195 |
+| `apps/web/app/page.tsx` | 4168 |
+| `apps/web/app/action-board-ui.ts` | 1610 |
+| `apps/web/features/debug/AiDecisionDebugOverlay.tsx` | 1319 |
+| `apps/web/features/decks/DeckEditorPanel.tsx` | 1221 |
+| `apps/web/features/catalog/CatalogPanel.tsx` | 484 |
+
+## Paketfolge
+
+1. Prozessartefakt und Ausgangsinventur.
+2. `CounterType`-Vertrag für `data_raven`, `doppelganger_antibody`, `pattel_antibody` fachlich synchronisieren.
+3. `DamageImpactOverlay`-Test auf aktuellen Modulort und Verhalten prüfen oder anpassen.
+4. Baseline vollständig wiederherstellen.
+5. Import-/Utility-Zielstruktur dokumentieren und kleine reine Helper zielgerichtet verschieben.
+6. Session-Bootstrap und Match-Transport aus `page.tsx` lösen, sofern behavior-preserving möglich.
+7. Catalog-Workspace-Controller aus `page.tsx` lösen, sofern behavior-preserving möglich.
+8. Ersatzmonolithen nur bei konkretem Schnitt verbessern.
+9. CSS-Domänenstruktur nur bei grünen Gates und niedrigem Kaskadenrisiko schneiden.
+10. Abschlussbericht, Projektlog, finale Gates, Merge nach `main`, Worktree entfernen.
+
+## Paketentscheidungen
+
+### Paket 0
+
+Entscheidung: Separater Worktree und Branch wurden erstellt. Die technische Baseline ist rot ausschließlich an der `CounterType`-Synchronisierung; die Web-Tests sind bereits grün. Das DamageImpactOverlay-Paket wird dennoch geprüft, weil die Vorgabe einen Strukturvertrag verlangt.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: rot, CounterType-Vertrag.
+- `corepack pnpm --filter @netgrid/web test`: grün.
+- `corepack pnpm --filter @netgrid/web build`: rot, CounterType-Vertrag.
+- `git diff --check`: grün.
+
+### Paket 1
+
+Entscheidung: Die drei roten Werte werden nicht als neue `CounterType`-Werte ergänzt. Die Engine und die CardImplementation-Verträge verwenden bereits kanonische Shared-Counter:
+
+| Fachlicher Counter | Kanonischer `CounterType` | Produzent |
+| --- | --- | --- |
+| Data-Raven-Counter | `trace_tag_counter` | `packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts` |
+| Doppelganger-Counter | `link_reduction_counter` | `packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts` |
+| Pattel-Counter | `breaker_strength_penalty` | `packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts` |
+
+Begründung:
+
+- `data_raven`, `doppelganger_antibody` und `pattel_antibody` waren Web-/Chronicle-Alt- oder Anzeigenamen, aber keine aktuellen Shared-Vertragswerte.
+- Die Engine erzeugt und serialisiert die kanonischen Werte bereits über LegalActions, ResolvedEffects und VisibleCard-CounterDisplays.
+- Die sichtbaren UI-Labels bleiben kartenspezifisch: Data-Raven-Counter, Doppelganger-Counter und Pattel-Counter.
+- `counterLabel` akzeptiert alte Strings weiterhin als robuste Legacy-Beschriftung, ohne den aktuellen `CounterType`-Vertrag zu erweitern.
+
+Geänderte Bereiche:
+
+- `apps/web/app/action-board-ui.ts`
+- `apps/web/app/action-board-ui.test.ts`
+- `apps/web/app/chronicle.ts`
+- `apps/web/app/chronicle.test.ts`
+- `apps/web/features/cards/CardBadges.tsx`
+- `apps/web/features/chronicle/ChroniclePanel.tsx`
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts chronicle.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 423 Tests.
+- `corepack pnpm --filter @netgrid/engine test -- src/game/counters/proteus-antibody-access.test.ts src/index-tests/originalset/per-card-followups.test.ts src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Engine-Suite, 173 Dateien, 1517 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- `git diff --check`: grün.
+
+### Paket 2
+
+Entscheidung: Der Test bleibt ein gezielter Source-Vertragstest, liest aber nicht mehr `page.tsx`. Er prüft ausschließlich die aktuelle Feature-Datei `apps/web/features/actions/DamageImpactOverlay.tsx`.
+
+Begründung:
+
+- Für dieses Paket wurde keine neue Render-Test-Infrastruktur eingeführt.
+- Der alte Root-Dateipfad war als Architekturvertrag ungeeignet, weil `DamageImpactOverlay` bereits ausgelagert ist.
+- Die geprüften Verträge sind weiterhin behavior-orientiert: manuelle Bestätigung, keine Auto-Dismiss-Quelle, Null-Linie, Overkill, Prevented-State ohne Meter, Queue-Hinweis, Flatline- und Core-Damage-Copy.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web test -- damage-impact-overlay.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `git diff --check`: grün.
+
+### Paket 3
+
+Entscheidung: Die technische Web-Baseline ist nach Paket 1 und 2 vollständig wiederhergestellt. Weitere Strukturpakete dürfen gestartet werden.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- `git diff --check`: grün.
+
+Hinweis: `next build` schaltet `apps/web/next-env.d.ts` lokal von `./.next/dev/types/routes.d.ts` auf `./.next/types/routes.d.ts` um. Diese generierte Nebenwirkung wurde nicht übernommen.
+
+### Paket 4
+
+Entscheidung: Kein Big-Bang-Schnitt an `action-board-ui.ts`. Stattdessen wurden drei reine, häufig von Features genutzte Helfer an Feature-Zielorte verschoben und die alten `app`-Dateien als Re-Export-Shims erhalten.
+
+Import-/Verantwortungsmatrix:
+
+| Alter Ort | Neuer Ort | Verantwortung | Ergebnis |
+| --- | --- | --- | --- |
+| `apps/web/app/card-image-service.ts` | `apps/web/features/cards/card-image-service.ts` | Card-Image-URL und Bildkomponente | Feature-Konsumenten importieren direkt aus `features/cards` |
+| `apps/web/app/catalog-ui.ts` | `apps/web/features/catalog/catalog-model.ts` | Catalog-Filter, Statuslabels, Set-/Rarity-Helfer | Catalog-, Cards- und Deck-Features importieren direkt aus `features/catalog` |
+| `apps/web/app/deck-editor-ui.ts` | `apps/web/features/decks/deck-editor-model.ts` | Deck-Agenda-Regel und Statusberechnung | Deck-Features importieren direkt aus `features/decks` |
+
+Nicht geschnitten:
+
+- `action-board-ui.ts` bleibt vorerst als größerer Präsentationsvertrag bestehen, weil mehrere Board-/Action-/Card-Features daran hängen und ein weiterer Schnitt ein eigenes Paket braucht.
+- `action-cues.ts` bleibt vorerst im `app`-Bereich, weil es Chronicle-, Highlight-, Sound- und Damage-Cue-Ableitungen kombiniert und für Paket 5/7 sauberer bewertet werden sollte.
+- `chronicle.ts` bleibt vorerst als bestehender Formatierungsvertrag bestehen.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test -- card-image-service.test.ts catalog-ui.test.ts deck-editor-ui.test.ts`: grün; wegen Vitest-Argumentübergabe lief die vollständige Web-Suite, 33 Dateien, 424 Tests.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 174 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
+
+### Paket 5
+
+Entscheidung: Der WebSocket-Transport wurde aus `page.tsx` in `apps/web/features/match-session/useMatchTransport.ts` verschoben. Der Schnitt ist bewusst klein:
+
+- Der Hook besitzt Socket-Lebenszyklus, Connection-State-Updates, Join-on-open, Offline-Guard, Senden bestehender Socket-Nachrichten und Close.
+- `page.tsx` behält Session, Payload, Lobby, Notice, LegalAction-Auswahl und die Anwendung von Servernachrichten.
+- `applyServerMessage` bleibt im Root, weil es viele Root-State-Bereiche koordiniert und ein weiterer Schnitt ohne Testharness zu groß wäre.
+- LegalAction-Payloads, Action-IDs, StateVersion und IdempotencyKeys wurden nicht verändert.
+
+Ergebnis:
+
+- `apps/web/app/page.tsx`: 4168 -> 4095 Zeilen.
+- Kein Mega-Hook: nur Transport, kein Bootstrap, keine LegalAction-Ermittlung, keine Darstellung.
+- SessionToken und ReconnectToken bleiben getrennt; der Hook verwendet nur den bestehenden `sessionToken` für den Socket-Join.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 175 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
+
+### Paket 6
+
+Entscheidung: Catalog-State, Filterableitungen, Listenfetch, Detailfetch und Detailcache wurden in `apps/web/features/catalog/useCatalogWorkspace.ts` verschoben.
+
+Schnitt:
+
+- `useCatalogWorkspace` besitzt Catalog-Suche, Side-/Status-/Set-/Rarity-/AI-/Type-/Blockstatus-Filter, sichtbare Cards, aktuelle Auswahl, Detailfetch, Detailcache und das Nachladen von Event-/Board-Kartendetails.
+- `page.tsx` erhält `catalogPanelProps`, `allCatalogCards`, `catalogDetailsById` und `ensureCatalogDetails`.
+- Deck-spezifische Nutzung bleibt im Root, fordert aber fehlende Catalog-Details nur noch über `ensureCatalogDetails` an.
+- `CatalogPanel` bleibt präsentational.
+
+Ergebnis:
+
+- `apps/web/app/page.tsx`: 4095 -> 3845 Zeilen.
+- Keine direkten Requests auf `/api/cards/catalog` mehr in `page.tsx`.
+- Hidden-Info-Projektionen bleiben unverändert; der Controller arbeitet nur mit bestehenden `PlayerView`-/PublicEvent-Daten und sichtbaren Catalog-Details.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.
+- `corepack pnpm --filter @netgrid/web test`: grün, 33 Dateien, 424 Tests.
+- `corepack pnpm --filter @netgrid/web build`: grün.
+- Lokale statische relative TS-Importanalyse über `apps/web`: 176 Dateien, 0 Zyklen.
+- `git diff --check`: grün.
+
+### Paket 7
+
+Entscheidung: Kein Code-Schnitt in diesem Paket.
+
+Bewertung:
+
+- `apps/web/features/debug/AiDecisionDebugOverlay.tsx` ist mit 1319 Zeilen weiterhin groß, enthält aber stark gekoppelte Projektion, Export, Redaction, Plan-Labels, Memory-Labels und Darstellung. Ein sinnvoller Schnitt müsste zuerst die reinen Export-/Projektionsfunktionen inklusive ihrer Label-Helfer geschlossen extrahieren; das wäre ein eigenes, größeres Paket mit gezielten Tests für Redaction.
+- `apps/web/features/decks/DeckEditorPanel.tsx` ist mit 1221 Zeilen groß, aber nach Paket 4 liegen Agenda-Regeln bereits in `features/decks/deck-editor-model.ts`. Weitere Hooks für Auswahl, Filter oder Table-Settings sollten nur mit UI-Verhaltenstests geschnitten werden.
+- Eine Aufteilung allein nach Zeilenzahl würde Ersatzmonolithen erzeugen und wurde verworfen.
+
+Checks:
+
+- Keine Codeänderung.
+- `git diff --check`: grün.
+
+### Paket 8
+
+Entscheidung: Kein CSS-Move in diesem Paket.
+
+Begründung:
+
+- `apps/web/app/globals.css` umfasst zu Beginn 11195 Zeilen und steuert viele überlappende UI-Domänen, Responsive-Regeln und Z-Index-Flächen.
+- Ein reiner Dateisplit ohne Selektoränderung wäre nur dann risikoarm, wenn die bisherige Reihenfolge automatisiert inventarisiert und mit visuellen Desktop-/Mobile-Screenshots gegengeprüft wird.
+- Die bisherigen Paket-Gates decken TypeScript, Unit-Tests, Build und Whitespace ab, aber keine visuelle Kaskadenregression.
+- Das Ziel dieses Goal war bereits technisch grün und strukturell bei Utilities, Transport und Catalog verbessert; ein CSS-Schnitt würde den grünen Stand ohne zwingenden Bugfix riskieren.
+
+Restaufgabe: CSS-Domänensplit als eigenes Paket mit vorherigem Reihenfolge-Inventar, unveränderter Importreihenfolge und Browser-Screenshotvergleich für Matchstart, aktives Match, Decks, Catalog, Chronicle, Overlays und schmale Viewports.
+
+## Abschlusskriterien
+
+Abschlussstand vor Integration:
+
+- CounterType-Vertrag fachlich synchronisiert.
+- DamageImpactOverlay-Test auf aktuellen Feature-Ort umgestellt.
+- Web-Typecheck, Web-Tests und Web-Build zuletzt grün.
+- Utilities, Match-Transport und Catalog-Workspace strukturell geschnitten.
+- AI-Debug- und CSS-Schnitt bewusst als eigene Folgepakete dokumentiert.
+- Abschlussbericht: `docs/reviews/ui/web-ui-stabilization-and-structure-final-report-2026-06-24.md`.
+- Projektlog aktualisiert: `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`.
+
+Das Goal wird erst abgeschlossen, wenn die finalen Gates nach Dokumentation erneut grün sind, der Arbeitsbranch sauber in den lokalen `main` integriert ist und der separate Worktree entfernt wurde.

@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const investmentFirmImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_329_investment-firm",
   remainingReplacementLongtail: {
-    kind: "investment_firm_credit_diversion",
+    kind: "basic_credit_diversion_to_recurring_credits",
     counterType: "recurring_credit",
     hostedCreditsPerDivertedCredit: 2,
     startTurnTakeCredits: 1,

@@ -790,7 +790,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       (action) =>
         action.type === "gain_credit" &&
         action.payload?.v1951CorpUtilityAbility ===
-          "cowboy_sysop_uninstall_corp_card_to_hq" &&
+          "corp_installed_card_to_hq" &&
         action.payload?.targetCardId === corpTargetId,
     );
     const removedTarget = structuredClone(cowboy);
@@ -813,7 +813,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     cowboy = apply(cowboy, "corp", (action) => action.actionId === cowboyAction.actionId);
     expect(cowboy.corp.hq).toContain(corpTargetId);
     expect(cowboy.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "corp_installed_card_to_hq",
     });
 
     for (const definitionId of [

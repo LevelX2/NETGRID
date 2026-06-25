@@ -15,10 +15,10 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
-  applyShellTradersStartOfTurn,
+  applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
-  shellTradersPreparedTargetIds,
-  shellTradersPrepareTargetIds,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "./runner-special-trigger-execution";
@@ -65,7 +65,7 @@ describe("runner special trigger execution", () => {
     });
     const action = triggerAction(state, {
       cardId: sourceId,
-      resourceAbility: "junkyard_bbs_return_top_heap",
+      resourceAbility: "return_top_heap_card",
       targetCardId: heapId,
       targetCardDefinitionId: "heap_card",
     }, [{ clicks: 1, credits: 1 }]);
@@ -108,7 +108,7 @@ describe("runner special trigger execution", () => {
       shellCounterAmount: 3,
     }, [{ clicks: 1 }]);
 
-    expect(shellTradersPrepareTargetIds(host)).toEqual([targetId]);
+    expect(delayedInstallPrepareTargetIds(host)).toEqual([targetId]);
     handleRunnerSpecialTriggerExecution(host, action);
 
     expect(state.runner.clicks).toBe(1);
@@ -160,7 +160,7 @@ describe("runner special trigger execution", () => {
       targetCardDefinitionId: "program_a",
     }, [{ credits: 1 }]);
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([targetId]);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([targetId]);
     handleRunnerSpecialTriggerExecution(host, action);
 
     expect(state.runner.credits).toBe(1);
@@ -208,8 +208,8 @@ describe("runner special trigger execution", () => {
     });
     const effects: ResolvedGameEffect[] = [];
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
-    applyShellTradersStartOfTurn(host, effects);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([]);
+    applyDelayedInstallStartOfTurn(host, effects);
 
     expect(effects).toEqual([]);
     expect(counter(state, targetId, "shell")).toBe(1);
@@ -251,15 +251,15 @@ describe("runner special trigger execution", () => {
     });
     const effects: ResolvedGameEffect[] = [];
 
-    expect(shellTradersPreparedTargetIds(host)).toEqual([targetId]);
-    applyShellTradersStartOfTurn(host, effects);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([targetId]);
+    applyDelayedInstallStartOfTurn(host, effects);
 
     expect(counter(state, targetId, "shell")).toBe(1);
     expect(state.specialZones?.setAside).toEqual([targetId]);
     expect(state.runner.rig.programs).toEqual([]);
     expect(state.runner.memoryUsed).toBe(4);
     expect(effects).toHaveLength(1);
-    expect(shellTradersPreparedTargetIds(host)).toEqual([]);
+    expect(delayedInstallPreparedTargetIds(host)).toEqual([]);
   });
 
   it("starts the same Self-Modifying Code hidden-zone search after trashing source", () => {
@@ -280,7 +280,7 @@ describe("runner special trigger execution", () => {
         stack_program_def: definition("stack_program_def", "program"),
       },
       {
-        startSelfModifyingCodeStackActivation: (sourceCardId) => {
+        startHiddenStackProgramInstallActivation: (sourceCardId) => {
           activations.push(sourceCardId);
           state.pendingChoice = {
             id: "choice_smc",
@@ -298,7 +298,7 @@ describe("runner special trigger execution", () => {
     );
     const action = triggerAction(state, {
       cardId: sourceId,
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      v1911HiddenZoneAbility: "hidden_stack_program_install",
     });
 
     handleRunnerSpecialTriggerExecution(host, action);
@@ -310,7 +310,7 @@ describe("runner special trigger execution", () => {
     expect(action.payload).toMatchObject({
       hiddenZoneBarrier: true,
       sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "hidden_stack_program_install",
       trashOnUse: true,
       trashedCardDefinitionId: SELF_MODIFYING_CODE_ID,
     });
@@ -367,7 +367,7 @@ function triggerAction(
 }
 
 type HostOverrides = {
-  startSelfModifyingCodeStackActivation?: (
+  startHiddenStackProgramInstallActivation?: (
     sourceCardId: CardInstanceId,
     legalAction: LegalAction,
   ) => void;
@@ -453,12 +453,12 @@ function testHost(
       runnerMemoryLimit: (stateToRead) => stateToRead.runner.memoryLimit,
     },
     hiddenZone: {
-      startSelfModifyingCodeStackActivation:
-        overrides.startSelfModifyingCodeStackActivation ??
+      startHiddenStackProgramInstallActivation:
+        overrides.startHiddenStackProgramInstallActivation ??
         (() => undefined),
     },
     constants: {
-      BUTCHER_BOY_ID: "butcher_boy",
+      BUTCHER_BOY_ID: "successful_hq_run_pair_credit",
       JUNKYARD_BBS_ID,
       SELF_MODIFYING_CODE_ID,
       SHELL_TRADERS_ID,

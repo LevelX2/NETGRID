@@ -550,12 +550,7 @@ export function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  const exactStealthLoss = breakerDefinition.id === PILE_DRIVER_ID;
-  if (exactStealthLoss && availableStealth < lossAmount)
-    throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
-  const requiredLoss = exactStealthLoss
-    ? lossAmount
-    : Math.min(lossAmount, availableStealth);
+  const requiredLoss = Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return { handled: false };
   if (stealthSources.length > 1) {
     startHammerStealthLossChoice(host, breakerId, requiredLoss, stealthSources);
@@ -587,10 +582,10 @@ export function applyPostBreakStealthLoss(
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
     ...(breakerDefinition.id === RAMMING_PISTON_ID
-      ? { v1922RunnerProgramAbility: "ramming_piston_stealth_loss" }
+      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
     ...(breakerDefinition.id === PILE_DRIVER_ID
-      ? { v1922RunnerProgramAbility: "pile_driver_stealth_loss" }
+      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
   };
   return {

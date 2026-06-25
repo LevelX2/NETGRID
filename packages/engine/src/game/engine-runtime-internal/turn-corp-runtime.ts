@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RuntimeDeps, GameState, LegalAction, PlayerAction, ChoiceRequest, Side, CardDefinition, CardDefinitionId, CardInstanceId, CorpServer, CounterType, DamageSummary, ResolvedGameEffect, ServerId, PendingChoiceResolutionHost, HiddenZoneSearchActivationHandlerHost, HiddenZoneSearchChoiceHandlerHost, HiddenZoneArrangeChoiceHandlerHost, HiddenZoneNonSearchChoiceHandlerHost, CorpZoneChoiceHandlerHost, CardRunnerEventLongtailImplementation } from "./runtime-shared";
 
 export function createTurnCorpRuntime(deps: RuntimeDeps) {
@@ -485,7 +484,7 @@ function resolveCardImplementationMoveAdvancementChoice(
   delete state.pendingChoice;
 }
 
-function resolveManagementShakeUpOperation(
+function resolveCorpOperationAddAdvancementCounters(
   state: GameState,
   legalAction: LegalAction,
 ): void {
@@ -510,7 +509,7 @@ function resolveManagementShakeUpOperation(
     v1919OperationAbility: "add_advancement_counters",
     addedAdvancementCounters: 3,
     targetCount,
-    managementShakeUpDistribution: Object.entries(placements)
+    advancementCounterDistribution: Object.entries(placements)
       .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
       .join(","),
   };
@@ -555,7 +554,7 @@ function awardRunnerEventAgendaPoint(
     moveAdvancementOptions,
     startCardImplementationMoveAdvancementChoice,
     resolveCardImplementationMoveAdvancementChoice,
-    resolveManagementShakeUpOperation,
+    resolveCorpOperationAddAdvancementCounters,
     awardRunnerEventAgendaPoint
   };
 }

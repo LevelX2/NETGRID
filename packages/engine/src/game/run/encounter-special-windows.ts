@@ -40,13 +40,13 @@ export type EncounterSpecialWindowResult = {
   stateChanged?: boolean;
 };
 
-export type TooManyDoorsSecretBidResult = EncounterSpecialWindowResult & {
+export type SecretSpendCompareResult = EncounterSpecialWindowResult & {
   secretBidCorpAmount?: number;
   secretBidRunnerAmount?: number;
   revealed?: boolean;
 };
 
-export type VacuumLinkRepositionResult = EncounterSpecialWindowResult & {
+export type RezzedIceRewindResult = EncounterSpecialWindowResult & {
   dieRoll?: number;
   repositionIceId?: CardInstanceId;
   repositionIndex?: number;
@@ -103,7 +103,7 @@ export function resolveEncounterSpecialWindowSubroutine(
     "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
   ) {
     const run = mustRun(host.state);
-    startTooManyDoorsSecretSpendCorpChoice(
+    startSecretSpendCompareCorpChoice(
       host,
       mustEncounteredIce(run),
       subroutineIndex,
@@ -114,23 +114,23 @@ export function resolveEncounterSpecialWindowSubroutine(
     return { handled: true, suspended: true, stateChanged: true };
   }
   if (subroutine.type === "rewind_run_to_rezzed_ice_by_die")
-    return resolveVacuumLinkRewindSubroutine(host, legalAction);
+    return resolveRezzedIceRewindSubroutine(host, legalAction);
   return { handled: false };
 }
 
-export function startTooManyDoorsSecretSpendCorpChoice(
+export function startSecretSpendCompareCorpChoice(
   host: EncounterSpecialWindowHost,
   sourceIceId: CardInstanceId,
   subroutineIndex: number,
   legalAction?: LegalAction,
-): TooManyDoorsSecretBidResult {
+): SecretSpendCompareResult {
   const state = host.state;
   if (state.pendingChoice || state.secretSpendComparison)
     throw new Error("Es ist bereits eine Secret-Spend-Choice offen.");
   const run = mustRun(state);
-  const source = `p3_56.too_many_doors_secret_spend:${run.runId}:${sourceIceId}:${subroutineIndex}`;
+  const source = `card_implementation.secret_spend_compare:${run.runId}:${sourceIceId}:${subroutineIndex}`;
   state.secretSpendComparison = {
-    source: "too_many_doors",
+    source: "secret_spend_compare",
     runId: run.runId,
     sourceIceId,
     subroutineIndex,
@@ -139,7 +139,7 @@ export function startTooManyDoorsSecretSpendCorpChoice(
     state,
     "corp",
     source,
-    "Too Many Doors: Korp geheim 0, 1 oder 2 Credits ausgeben.",
+    "Secret Spend Compare: Korp geheim 0, 1 oder 2 Credits ausgeben.",
     state.corp.credits,
   );
   state.activeSide = "corp";
@@ -151,23 +151,23 @@ export function startTooManyDoorsSecretSpendCorpChoice(
   return { handled: true, stateChanged: true };
 }
 
-export function resolveTooManyDoorsSecretSpendChoice(
+export function resolveSecretSpendCompareChoice(
   host: EncounterSpecialWindowHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
-): TooManyDoorsSecretBidResult {
+): SecretSpendCompareResult {
   const state = host.state;
   const choice = state.pendingChoice;
   const comparison = state.secretSpendComparison;
   if (
     !choice ||
     !comparison ||
-    !choice.source.startsWith("p3_56.too_many_doors_secret_spend")
+    !choice.source.startsWith("card_implementation.secret_spend_compare")
   )
-    throw new Error("Too-Many-Doors-Secret-Spend-Choice ist nicht offen.");
+    throw new Error("Secret-Spend-Compare-Choice ist nicht offen.");
   const selected = selectedBidAmount(choice, playerAction);
   if (selected < 0 || selected > 2)
-    throw new Error("Too Many Doors erlaubt nur 0, 1 oder 2 Credits.");
+    throw new Error("Secret Spend Compare erlaubt nur 0, 1 oder 2 Credits.");
   if (choice.side === "corp") {
     if (state.corp.credits < selected)
       throw new Error("Die Korp kann diesen Secret Spend nicht bezahlen.");
@@ -179,7 +179,7 @@ export function resolveTooManyDoorsSecretSpendChoice(
       state,
       "runner",
       choice.source,
-      "Too Many Doors: Runner geheim 0, 1 oder 2 Credits ausgeben.",
+      "Secret Spend Compare: Runner geheim 0, 1 oder 2 Credits ausgeben.",
       state.runner.credits,
     );
     state.activeSide = "runner";
@@ -216,7 +216,7 @@ export function resolveTooManyDoorsSecretSpendChoice(
     secretSpendRevealed: true,
     secretSpendCorp: corpSpend,
     secretSpendRunner: selected,
-    tooManyDoorsEndRun: endRun,
+    secretSpendEndRun: endRun,
     corpCreditsAfter: state.corp.credits,
     runnerCreditsAfter: state.runner.credits,
     sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
@@ -231,16 +231,16 @@ export function resolveTooManyDoorsSecretSpendChoice(
   };
 }
 
-export function resolveVacuumLinkRewindSubroutine(
+export function resolveRezzedIceRewindSubroutine(
   host: EncounterSpecialWindowHost,
   legalAction?: LegalAction,
-): VacuumLinkRepositionResult {
+): RezzedIceRewindResult {
   const state = host.state;
   const run = mustRun(state);
   if (!run.encounteredIceId)
-    throw new Error("Vacuum-Link-Rewind benötigt einen aktiven ICE-Encounter.");
+    throw new Error("Rezzed-ICE-Rewind benötigt einen aktiven ICE-Encounter.");
   if (run.position.kind !== "ice")
-    throw new Error("Vacuum-Link-Rewind erwartet eine ICE-Position.");
+    throw new Error("Rezzed-ICE-Rewind erwartet eine ICE-Position.");
   const server = mustServer(state, run.position.serverId);
   const currentIndex =
     server.ice[run.position.iceIndex] === run.encounteredIceId
@@ -248,14 +248,14 @@ export function resolveVacuumLinkRewindSubroutine(
       : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
   if (currentIndex < 0)
     throw new Error(
-      "Vacuum-Link-Rewind konnte das Encounter-ICE nicht finden.",
+      "Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.",
     );
 
-  const randomPurpose = `${definitionFor(state, run.encounteredIceId).id}.rewind.${run.runId}.${run.encounteredIceId}`;
+  const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
   const die = rollDie(host, randomPurpose);
-  legalActionPayload(legalAction, { vacuumLinkDieRoll: die });
+  legalActionPayload(legalAction, { rezzedIceRewindDieRoll: die });
   if (die >= 4) {
-    legalActionPayload(legalAction, { vacuumLinkRewindApplied: false });
+    legalActionPayload(legalAction, { rezzedIceRewindApplied: false });
     return {
       handled: true,
       dieRoll: die,
@@ -278,7 +278,7 @@ export function resolveVacuumLinkRewindSubroutine(
   const targetIceId = mustArrayValue(
     server.ice,
     targetIndex,
-    "Vacuum-Link-Ziel-ICE fehlt.",
+    "Rezzed-ICE-Rewind-Ziel-ICE fehlt.",
   );
 
   const {
@@ -300,10 +300,10 @@ export function resolveVacuumLinkRewindSubroutine(
   state.activeSide = "runner";
   host.callbacks?.resetBreakerStrength?.();
   legalActionPayload(legalAction, {
-    vacuumLinkRewindApplied: true,
-    vacuumLinkRewindRezzedIceBack: die,
-    vacuumLinkTargetIceId: targetIceId,
-    vacuumLinkTargetIceIndex: targetIndex,
+    rezzedIceRewindApplied: true,
+    rezzedIceRewindRezzedIceBack: die,
+    rezzedIceRewindTargetIceId: targetIceId,
+    rezzedIceRewindTargetIceIndex: targetIndex,
   });
   return {
     handled: true,
@@ -315,7 +315,7 @@ export function resolveVacuumLinkRewindSubroutine(
   };
 }
 
-export function applyRioDeJaneiroCityGridPassedIceTrigger(
+export function applyPassedIceRunEndTrigger(
   host: EncounterSpecialWindowHost,
   passedIceId: CardInstanceId,
   legalAction?: LegalAction,
@@ -606,24 +606,24 @@ export function resolveFullyBrokenPassedIceTrash(
   };
 }
 
-export function isSubmarineUplinkSource(
+export function isTraceLinkForceJackOutSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
       ?.runnerUtilityLongtail?.kind ===
-    "submarine_uplink_trace_link_force_jack_out"
+    "trace_link_force_jack_out"
   );
 }
 
-export function markSubmarineUplinkJackOutAfterEncounter(
+export function markTraceLinkForceJackOutAfterEncounter(
   host: EncounterSpecialWindowHost,
   cardId: CardInstanceId,
   legalAction: LegalAction,
 ): SubmarinePostBidMarkerResult {
   const state = host.state;
-  if (!state.run || !isSubmarineUplinkSource(state, cardId))
+  if (!state.run || !isTraceLinkForceJackOutSource(state, cardId))
     return { handled: false };
   state.run.forceJackOutAfterEncounterSourceId = cardId;
   const sourceDefinitionId = definitionFor(state, cardId).id;
