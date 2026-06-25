@@ -63,3 +63,21 @@ export function semanticRuntimeVisibleSourceCard(
       action.label.toLowerCase().includes(card.title.toLowerCase()),
   );
 }
+
+export function findVisibleCorpServerCard(
+  input: AiDecisionInput,
+  instanceId: string,
+):
+  | {
+      card: VisibleCard;
+      server: AiDecisionInput["playerView"]["servers"][number];
+    }
+  | undefined {
+  for (const server of input.playerView.servers) {
+    const card = [...server.ice, ...server.root].find(
+      (candidate) => candidate.instanceId === instanceId && candidate.known,
+    );
+    if (card) return { card, server };
+  }
+  return undefined;
+}

@@ -171,6 +171,7 @@ import {
 } from "./runtime/encounter-action";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import {
+  findVisibleCorpServerCard,
   findVisibleCard,
   semanticRuntimeVisibleSourceCard,
 } from "./runtime/visible-card-lookup";
@@ -11210,24 +11211,6 @@ function shellTradersPrepareBaselinePenalty(
   if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2)
     penalty += 70;
   return penalty;
-}
-
-function findVisibleCorpServerCard(
-  input: AiDecisionInput,
-  instanceId: string,
-):
-  | {
-      card: VisibleCard;
-      server: AiDecisionInput["playerView"]["servers"][number];
-    }
-  | undefined {
-  for (const server of input.playerView.servers) {
-    const card = [...server.ice, ...server.root].find(
-      (candidate) => candidate.instanceId === instanceId && candidate.known,
-    );
-    if (card) return { card, server };
-  }
-  return undefined;
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
