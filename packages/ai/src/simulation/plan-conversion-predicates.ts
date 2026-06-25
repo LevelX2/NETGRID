@@ -15,6 +15,7 @@ export type PlanConversionDecisionEntry = {
   runnerReserveTarget?: number;
   runnerReservePreservingEconomy?: boolean;
   runnerRelevantRemoteTrashTaken?: boolean;
+  runnerRemoteTrashTaken?: boolean;
   runnerHandUseActionTaken?: boolean;
   runnerRigInstallAction?: boolean;
   runnerLowValueDuplicateInstallAction?: boolean;
@@ -293,6 +294,26 @@ export function serverTargetsMatch(
 ): boolean {
   if (!first.targetServerId || !second.targetServerId) return true;
   return first.targetServerId === second.targetServerId;
+}
+
+export function runnerRunHasFollowupValue<T extends PlanConversionDecisionEntry>(
+  sequence: T[],
+  runIndex: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  const run = sequence[runIndex]!;
+  if (isMeaningfulProgress(run)) return true;
+  return nextEntries(sequence, runIndex).some(
+    (later) =>
+      serverTargetsMatch(run, later) &&
+      (later.actionType === "steal_agenda" ||
+        later.runnerRelevantRemoteTrashTaken === true ||
+        later.actionType === "trash_accessed_card" ||
+        later.runnerRemoteTrashTaken === true ||
+        (later.actionType === "access_card" &&
+          (isRemoteServerTarget(later.targetServerId) ||
+            centralServerId(later.targetServerId) !== undefined))),
+  );
 }
 
 function isCorpRemoteAdvancementProgressForPlan(

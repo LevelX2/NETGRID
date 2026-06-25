@@ -468,6 +468,7 @@ import {
   planKindForConversion,
   previousOwnStrategicWindow,
   remoteTargetsMatch,
+  runnerRunHasFollowupValue,
   serverTargetsMatch,
 } from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
@@ -21214,7 +21215,9 @@ function runnerEconomyConvertsToRunOrRig(
     (entry) =>
       entry.side === "runner" &&
       ((entry.actionType === "start_run" &&
-        runnerRunHasFollowupValue(sequence, sequence.indexOf(entry))) ||
+        runnerRunHasFollowupValue(
+          sequence, sequence.indexOf(entry), isMeaningfulBoardProgress
+        )) ||
         isRunnerRigProgressAction(entry)),
   );
 }
@@ -21227,7 +21230,9 @@ function runnerRigConvertsToRun(
     (entry) =>
       entry.side === "runner" &&
       entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(sequence, sequence.indexOf(entry)),
+      runnerRunHasFollowupValue(
+        sequence, sequence.indexOf(entry), isMeaningfulBoardProgress
+      ),
   );
 }
 
@@ -21380,7 +21385,9 @@ function setupActionConvertsToRun(
     (entry, offset) =>
       entry.side === "runner" &&
       entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(sequence, index + offset + 1),
+      runnerRunHasFollowupValue(
+        sequence, index + offset + 1, isMeaningfulBoardProgress
+      ),
   );
 }
 
@@ -21393,7 +21400,9 @@ function economyActionConvertsToRun(
     (entry, offset) =>
       entry.side === "runner" &&
       entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(sequence, index + offset + 1),
+      runnerRunHasFollowupValue(
+        sequence, index + offset + 1, isMeaningfulBoardProgress
+      ),
   );
 }
 
@@ -21406,7 +21415,9 @@ function rigActionConvertsToRun(
     (entry, offset) =>
       entry.side === "runner" &&
       entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(sequence, index + offset + 1),
+      runnerRunHasFollowupValue(
+        sequence, index + offset + 1, isMeaningfulBoardProgress
+      ),
   );
 }
 
@@ -21467,25 +21478,6 @@ function centralPressureConvertsToSteal(
       later.actionType === "steal_agenda" &&
       centralServerId(later.targetServerId) !== undefined &&
       serverTargetsMatch(entry, later),
-  );
-}
-
-function runnerRunHasFollowupValue(
-  sequence: PlanConversionActionEntry[],
-  runIndex: number,
-): boolean {
-  const run = sequence[runIndex]!;
-  if (isMeaningfulBoardProgress(run)) return true;
-  return nextEntries(sequence, runIndex).some(
-    (later) =>
-      serverTargetsMatch(run, later) &&
-      (later.actionType === "steal_agenda" ||
-        later.runnerRelevantRemoteTrashTaken === true ||
-        later.actionType === "trash_accessed_card" ||
-        later.runnerRemoteTrashTaken === true ||
-        (later.actionType === "access_card" &&
-          (isRemoteServerTarget(later.targetServerId) ||
-            centralServerId(later.targetServerId) !== undefined))),
   );
 }
 
