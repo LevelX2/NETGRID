@@ -524,6 +524,8 @@ import {
   type AiDoctrineQualityCaseAnalysis,
   type AiDoctrineQualityCaseExample,
   type AiDoctrineQualityDelta,
+  type AiDoctrineQualityGateResult,
+  type AiDoctrineQualityGateThresholds,
   type AiDoctrineQualityMetricName,
   type AiDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
@@ -753,6 +755,8 @@ export type {
   AiDoctrineQualityCaseAnalysis,
   AiDoctrineQualityCaseExample,
   AiDoctrineQualityDelta,
+  AiDoctrineQualityGateResult,
+  AiDoctrineQualityGateThresholds,
   AiDoctrineQualityMetricName,
   AiDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
@@ -2609,24 +2613,6 @@ export type AiMatchProgressionBenchmarkResult = {
   profileComparisons: AiMatchProgressionProfileComparison[];
   baselineRun: V143SimulationRunResult;
   candidateRun: V143SimulationRunResult;
-};
-
-export type AiDoctrineQualityGateThresholds = {
-  maxCandidateIllegalActions: number;
-  maxCandidateReplayFailures: number;
-  maxTimeoutRateDelta: number;
-  maxFallbackRateDelta: number;
-  maxNakedAgendaInstallDelta: number;
-  maxScoreWindowMissedDelta: number;
-  maxEconomyStallDelta: number;
-  maxRepeatedLowValueCentralRunDelta: number;
-};
-
-export type AiDoctrineQualityGateResult = {
-  accepted: boolean;
-  thresholds: AiDoctrineQualityGateThresholds;
-  hardFailures: string[];
-  warnings: string[];
 };
 
 export type AiSoakResult = {

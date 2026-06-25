@@ -71,6 +71,24 @@ export type AiDoctrineQualityCaseAnalysis = {
   redactionSafe: boolean;
 };
 
+export type AiDoctrineQualityGateThresholds = {
+  maxCandidateIllegalActions: number;
+  maxCandidateReplayFailures: number;
+  maxTimeoutRateDelta: number;
+  maxFallbackRateDelta: number;
+  maxNakedAgendaInstallDelta: number;
+  maxScoreWindowMissedDelta: number;
+  maxEconomyStallDelta: number;
+  maxRepeatedLowValueCentralRunDelta: number;
+};
+
+export type AiDoctrineQualityGateResult = {
+  accepted: boolean;
+  thresholds: AiDoctrineQualityGateThresholds;
+  hardFailures: string[];
+  warnings: string[];
+};
+
 export function qualityTagsForActionWithDependencies(
   input: AiDecisionInput,
   action: LegalAction,
