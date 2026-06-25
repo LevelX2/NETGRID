@@ -4,6 +4,8 @@ Status: `ready_for_local_merge`
 
 Quelle: `docs/architecture/ai/deck-strategy-runtime-process-2026-06-25.md`
 
+Hardening-Nachtrag: Der spätere Hardening-Lauf `docs/architecture/ai/deck-strategy-runtime-hardening-process-2026-06-25.md` ist für den aktuellen Runtime-Vertrag maßgeblich. `DeckDoctrineV2Diagnostic` bleibt report-only und wird nicht produktiv gemergt; Rollenstatus, Zielvektor, Reserve, Hysterese, Action-Fit, DecisionDebug und produktive E2E-Regressionen wurden dort nachgeschärft.
+
 ## Ergebnis
 
 Der Deckstrategie-Runtime-Prozess DSR-00 bis DSR-11 ist fachlich umgesetzt. Die aus dem eigenen Deck abgeleitete Strategie ist jetzt für Runner und Corp eine produktive, persistente und begrenzte Steuerungsebene:

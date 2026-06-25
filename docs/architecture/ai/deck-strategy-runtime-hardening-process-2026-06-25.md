@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H07_done`
+Status: `DSR-H08_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -84,8 +84,8 @@ preflight
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `done`.
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `done`.
 8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `done`.
-9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `active`.
-10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `pending`.
+9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `done`.
+10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `active`.
 
 ## Paketdetails
 
@@ -190,6 +190,10 @@ Commit: `test(ai): add productive deck strategy regressions`
 Ziel: Überholte Adapter, tote State-/Debug-/Goal-Pfade und irreführende Statusfelder entfernen; verbleibendes Legacy begründet abgrenzen.
 
 Kernartefakte: Source cleanup, Prozess-/Final-/Hardening-Review, Wissensbasis, Betriebslog.
+
+Ergebnis: `SemanticDecisionFrame` validiert den verbliebenen Doctrine-v2-Kanal jetzt ausdrücklich als report-only/no-effect. `deck-strategy-runtime-hardening-cleanup-2026-06-25.md` klassifiziert produktive Runtime-, report-only- und Legacy-/Fallback-Pfade. Ältere DSR-Prozess-, Consumer-Audit- und Final-Report-Artefakte haben Hardening-Nachträge, damit historische Zwischenstände nicht mehr als aktueller Runtime-Vertrag gelesen werden.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `semantic-decision-frame`, `neutral-goal-synthesis`, `semantic-shadow-decision` grün mit 24 Tests; Diff-Check grün.
 
 Commit: `docs(ai): finalize deck strategy hardening`
 

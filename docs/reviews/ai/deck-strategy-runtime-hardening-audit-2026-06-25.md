@@ -163,6 +163,25 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --maxWorkers=1 --testTimeout=30000`: grün, 534 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 
+## DSR-H08-Ergebnis
+
+Status: `done`
+
+Doppelzuständigkeiten und veraltete Vertragsaussagen sind bereinigt oder ausdrücklich als historische Ausgangslage markiert.
+
+Umgesetzt:
+
+- `SemanticDecisionFrame.doctrineDiagnostic` ist als report-only Diagnosekanal dokumentiert und validiert `scope`, `productiveUseAllowed`, `source` und alle `noEffectFlags`.
+- `semantic-decision-frame.test.ts` sichert zulässige report-only Diagnostics und blockierte produktiv markierte Diagnostics ab.
+- `docs/reviews/ai/deck-strategy-runtime-hardening-cleanup-2026-06-25.md` klassifiziert produktive Runtime-, report-only- und Legacy-/Fallback-Pfade.
+- Der ursprüngliche DSR-Prozess, Consumer-Audit und Final-Report haben Hardening-Nachträge, damit frühere Doctrine-v2-Runtime-Formulierungen nicht als aktueller Vertrag gelten.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-decision-frame.test.ts src/decision/neutral-goal-synthesis.test.ts src/decision/semantic-shadow-decision.test.ts --maxWorkers=1 --testTimeout=30000`: grün, 24 Tests.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.
