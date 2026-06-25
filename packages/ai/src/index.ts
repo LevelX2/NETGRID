@@ -435,6 +435,7 @@ import {
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
 import {
+  countSameStrategicPlanRepeatsWithoutProgress,
   isEndgameKnownInfoOpportunity,
   isEndgameKnownInfoTaken,
   isEndgameLowValueRepeatAction,
@@ -15511,7 +15512,13 @@ function summarizeActionLimitEndgameMetrics(
     );
     const lowValueRepeatActions =
       strategicWindow.filter(isEndgameLowValueRepeatAction).length +
-      countSameStrategicPlanRepeatsWithoutProgress(strategicWindow);
+      countSameStrategicPlanRepeatsWithoutProgress(
+        strategicWindow,
+        (entry) => ({
+          planKind: planKindForConversion(entry),
+          meaningfulBoardProgress: isMeaningfulBoardProgress(entry),
+        }),
+      );
 
     finalStrategicWindowNoProgressActions += windowNoProgress.length;
     finalStrategicWindowRunnerNoProgressActions += runnerNoProgress.length;
@@ -15645,31 +15652,6 @@ function summarizeActionLimitEndgameMetrics(
     actionLimitLikelyStrategyIssue,
     actionLimitLikelyMetricArtifact,
   };
-}
-
-function countSameStrategicPlanRepeatsWithoutProgress(
-  strategicWindow: PlanConversionActionEntry[],
-): number {
-  let repeats = 0;
-  const lastPlanBySide: Partial<Record<Side, string>> = {};
-  const progressSinceLastPlanBySide: Partial<Record<Side, boolean>> = {};
-  for (const entry of strategicWindow) {
-    const planKind = planKindForConversion(entry);
-    if (!planKind) continue;
-    if (
-      lastPlanBySide[entry.side] === planKind &&
-      progressSinceLastPlanBySide[entry.side] === false
-    ) {
-      repeats += 1;
-    }
-    lastPlanBySide[entry.side] = planKind;
-    progressSinceLastPlanBySide[entry.side] = isMeaningfulBoardProgress(entry);
-    if (isMeaningfulBoardProgress(entry)) {
-      progressSinceLastPlanBySide.runner = true;
-      progressSinceLastPlanBySide.corp = true;
-    }
-  }
-  return repeats;
 }
 
 function summarizeStrategicPlanConversionMetrics(

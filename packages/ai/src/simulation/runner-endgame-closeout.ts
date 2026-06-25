@@ -32,6 +32,11 @@ type RunnerEndgameCloseoutCandidate = {
   attempted: boolean;
 };
 
+type StrategicPlanRepeatContext = {
+  planKind: string | undefined;
+  meaningfulBoardProgress: boolean;
+};
+
 export type RunnerEndgameCloseoutEntry = {
   side?: string;
   actionType?: string;
@@ -470,6 +475,36 @@ export function isCorpEndgameStallSymptom(
         planKind?.includes("protect") === true ||
         planKind?.includes("economy") === true))
   );
+}
+
+export function countSameStrategicPlanRepeatsWithoutProgress<
+  T extends RunnerEndgameCloseoutEntry,
+>(
+  strategicWindow: T[],
+  contextForEntry: (entry: T) => StrategicPlanRepeatContext,
+): number {
+  let repeats = 0;
+  const lastPlanBySide: Record<string, string | undefined> = {};
+  const progressSinceLastPlanBySide: Record<string, boolean | undefined> = {};
+  for (const entry of strategicWindow) {
+    if (!entry.side) continue;
+    const context = contextForEntry(entry);
+    const planKind = context.planKind;
+    if (!planKind) continue;
+    if (
+      lastPlanBySide[entry.side] === planKind &&
+      progressSinceLastPlanBySide[entry.side] === false
+    ) {
+      repeats += 1;
+    }
+    lastPlanBySide[entry.side] = planKind;
+    progressSinceLastPlanBySide[entry.side] = context.meaningfulBoardProgress;
+    if (context.meaningfulBoardProgress) {
+      progressSinceLastPlanBySide.runner = true;
+      progressSinceLastPlanBySide.corp = true;
+    }
+  }
+  return repeats;
 }
 
 function isCorpRemoteAdvancementProgressForEndgame(
