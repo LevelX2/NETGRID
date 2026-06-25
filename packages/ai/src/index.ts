@@ -434,6 +434,10 @@ import {
   playfulAiGainValue,
   selectableChoiceOptions,
 } from "./runtime/choice-option";
+import {
+  discardOptionInstanceId,
+  stableDiscardChoiceOptionIds,
+} from "./runtime/discard-choice-option";
 import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   createRunnerCentralMemoryContext,
@@ -7526,35 +7530,6 @@ function selectedDiscardChoiceOptionIds(
     )
     .slice(0, count)
     .map((entry) => entry.option.id);
-}
-
-function stableDiscardChoiceOptionIds(
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-  count: number,
-): string[] {
-  return selectableOptions
-    .slice()
-    .sort(
-      (left, right) =>
-        left.label.localeCompare(right.label, "de") ||
-        left.id.localeCompare(right.id),
-    )
-    .slice(0, count)
-    .map((option) => option.id);
-}
-
-function discardOptionInstanceId(
-  option: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"][number],
-): string | undefined {
-  if (typeof option.value === "string") return option.value;
-  if (option.card?.instanceId) return option.card.instanceId;
-  return option.id.startsWith("card_")
-    ? option.id.slice("card_".length)
-    : undefined;
 }
 
 function discardKeepScore(
