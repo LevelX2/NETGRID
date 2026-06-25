@@ -566,6 +566,11 @@ import {
   isCorpRemoteAdvancementProgress,
   progressionEntriesWithRunTargets,
 } from "./simulation/progression-action-sequence";
+import type {
+  BreakerOntologyCoverageMetricKey,
+  RemoteRoleKindMetricKey,
+  RemoteRoleServerScopeMetricKey,
+} from "./simulation/ontology-metric-key-types";
 import {
   agendaPointsForMetrics,
   definitionTypeForMetrics,
@@ -15524,17 +15529,6 @@ function incrementCoverageTypes(
   }
 }
 
-type BreakerOntologyCoverageMetricKey =
-  | "breakerOntologyCoverageWall"
-  | "breakerOntologyCoverageSentry"
-  | "breakerOntologyCoverageCodeGate"
-  | "breakerOntologyCoverageAp"
-  | "breakerOntologyCoverageTrace"
-  | "breakerOntologyCoverageWatchdog"
-  | "breakerOntologyCoverageBlackIce"
-  | "breakerOntologyCoverageUniversal"
-  | "breakerOntologyCoverageUnknownSpecial";
-
 const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
   string,
   BreakerOntologyCoverageMetricKey
@@ -15550,17 +15544,6 @@ const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
   unknown_special: "breakerOntologyCoverageUnknownSpecial",
 };
 
-type RemoteRoleKindMetricKey =
-  | "remoteRoleKindScoringProtection"
-  | "remoteRoleKindAgendaStealTax"
-  | "remoteRoleKindRunTax"
-  | "remoteRoleKindRemoteCapacity"
-  | "remoteRoleKindAssetEconomy"
-  | "remoteRoleKindBait"
-  | "remoteRoleKindAmbush"
-  | "remoteRoleKindIceModifier"
-  | "remoteRoleKindTaxFort";
-
 const REMOTE_ROLE_KIND_METRIC_KEYS: Record<string, RemoteRoleKindMetricKey> = {
   scoring_protection: "remoteRoleKindScoringProtection",
   agenda_steal_tax: "remoteRoleKindAgendaStealTax",
@@ -15572,12 +15555,6 @@ const REMOTE_ROLE_KIND_METRIC_KEYS: Record<string, RemoteRoleKindMetricKey> = {
   ice_modifier: "remoteRoleKindIceModifier",
   tax_fort: "remoteRoleKindTaxFort",
 };
-
-type RemoteRoleServerScopeMetricKey =
-  | "remoteRoleServerScopeFort"
-  | "remoteRoleServerScopeRemote"
-  | "remoteRoleServerScopeCentral"
-  | "remoteRoleServerScopeServer";
 
 const REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS: Record<
   string,
