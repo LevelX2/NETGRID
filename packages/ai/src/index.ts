@@ -568,6 +568,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
+import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
 import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
@@ -6488,21 +6489,6 @@ function resolveBenchmarkDeckReference(
       ok: false,
       reason: error instanceof Error ? error.message : String(error),
     };
-  }
-}
-
-function deckReferenceLabel(reference: AiBenchmarkDeckReference): string {
-  switch (reference.kind) {
-    case "runtime_deck_id":
-      return reference.deckId;
-    case "snapshot":
-      return reference.snapshotId;
-    case "frozen_local_snapshot":
-      return reference.snapshotId;
-    case "local_editable_deck":
-      return `${reference.expectedName} (${reference.localDeckId})`;
-    case "pending_real_scene":
-      return reference.label;
   }
 }
 
