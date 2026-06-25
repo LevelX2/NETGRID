@@ -167,6 +167,7 @@ import {
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
 import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
+import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -668,9 +669,6 @@ import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
-import {
-  selectEfficientPostBidLinkOption,
-} from "./trace-bid-efficiency";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -7410,34 +7408,12 @@ function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.source.startsWith("trace_post_bid_link")) {
-    const strongestLinkOption =
-      choice.options
-        .filter((option) => option.id.startsWith("trace_link_"))
-        .sort((left, right) => {
-          const leftDelta = Number(/\+(\d+)\s+Link/.exec(left.label)?.[1] ?? 0);
-          const rightDelta = Number(
-            /\+(\d+)\s+Link/.exec(right.label)?.[1] ?? 0,
-          );
-          return (
-            rightDelta - leftDelta ||
-            left.label.localeCompare(right.label, "de")
-          );
-        })[0] ??
-      choice.options.find((option) => option.id === "pass") ??
-      choice.options[0];
-    const selected =
-      selectEfficientPostBidLinkOption({
-        options: choice.options.map((option) => ({
-          id: option.id,
-          label: option.label,
-        })),
-        ...(strongestLinkOption
-          ? { fallbackOptionId: strongestLinkOption.id }
-          : {}),
-        ...latestTraceContext(input),
-      }).option ?? strongestLinkOption;
-    return selected
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
+    const selectedOptionId = selectedPostBidLinkChoiceOptionId(
+      choice,
+      latestTraceContext(input),
+    );
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind !== "bid_amount") {
