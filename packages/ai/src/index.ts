@@ -138,6 +138,8 @@ import {
 import {
   advancedAgendaStealSourceForAction,
   cardTargetTypeForInstance,
+  remoteHasNearFinalAgenda,
+  rezCostForDefinitionId,
 } from "./runtime/simulation-card-target";
 import {
   remoteTrashCostBucket,
@@ -25715,23 +25717,6 @@ function isProtectBeforeAdvanceSimulationAction(
   return false;
 }
 
-function remoteHasNearFinalAgenda(state: GameState, serverId: string): boolean {
-  const server = state.corp.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  return server.root.some((cardId) => {
-    const instance = state.cardInstances[cardId];
-    if (!instance) return false;
-    if (cardTargetTypeForInstance(state, cardId) !== "agenda") return false;
-    const requirement =
-      DEMO_CARDS_BY_ID[instance.definitionId]?.advancementRequirement ??
-      RUNTIME_CARDS[instance.definitionId]?.numeric.advancementRequirement ??
-      0;
-    return Math.max(0, requirement - instance.advancementCounters) <= 2;
-  });
-}
-
 function remoteProtectionScoreForSimulation(
   state: GameState,
   input: AiDecisionInput,
@@ -25799,15 +25784,6 @@ function runnerContestRiskForSimulation(
   if (runnerCredits >= 6 && breakers > 0) return "high";
   if (rezzedIce > 0 || runnerCredits <= 3 || breakers === 0) return "low";
   return "medium";
-}
-
-function rezCostForDefinitionId(definitionId: string | undefined): number {
-  if (!definitionId) return 0;
-  return (
-    DEMO_CARDS_BY_ID[definitionId]?.rezCost ??
-    RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
-    0
-  );
 }
 
 function metricsFor(
