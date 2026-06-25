@@ -181,6 +181,9 @@ import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
 import {
   corpVisibleRunnerHardwarePayoffEvidence,
 } from "./runtime/runner-hardware-payoff-evidence";
+import {
+  traceTagExpectedSuccessEstimate,
+} from "./runtime/trace-tag-success-estimate";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10964,15 +10967,6 @@ function tagPunishPayoffPriorityBonus(
     default:
       return 10;
   }
-}
-
-function traceTagExpectedSuccessEstimate(input: AiDecisionInput): number {
-  if (input.side !== "corp") return 0;
-  if (input.playerView.own.credits >= input.playerView.opponent.credits + 2)
-    return 1;
-  if (input.playerView.own.credits >= input.playerView.opponent.credits)
-    return 0.5;
-  return 0.25;
 }
 
 function corpTagPunishSkipReason(
