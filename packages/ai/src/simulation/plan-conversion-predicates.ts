@@ -1,3 +1,5 @@
+import { centralServerId, isRemoteServerTarget } from "../runtime/server-target";
+
 export type PlanConversionDecisionEntry = {
   side?: string;
   actionType?: string;
@@ -7,6 +9,8 @@ export type PlanConversionDecisionEntry = {
   advancementCountersAdded?: number;
   runnerRelevantRemoteTrashTaken?: boolean;
   runnerHandUseActionTaken?: boolean;
+  runnerRigInstallAction?: boolean;
+  runnerLowValueDuplicateInstallAction?: boolean;
   evidence?: readonly string[];
 };
 
@@ -127,6 +131,62 @@ export function isCorpRemoteProtectionActionEntry(
         entry.installPlacement === "ice" &&
         Boolean(entry.targetServerId?.startsWith("remote_"))))
   );
+}
+
+export function isRunnerRigProgressAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.runnerRigInstallAction === true &&
+    entry.runnerLowValueDuplicateInstallAction !== true
+  );
+}
+
+export function isCorpRemoteBuildAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    isRemoteServerTarget(entry.targetServerId) &&
+    (entry.actionType === "install_card" || entry.actionType === "rez_ice")
+  );
+}
+
+export function isRunnerRemoteContestRun(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.actionType === "start_run" &&
+    isRemoteServerTarget(entry.targetServerId)
+  );
+}
+
+export function isRunnerCentralPressureAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.actionType === "start_run" &&
+    centralServerId(entry.targetServerId) !== undefined
+  );
+}
+
+export function remoteTargetsMatch(
+  first: PlanConversionDecisionEntry,
+  second: PlanConversionDecisionEntry,
+): boolean {
+  if (!isRemoteServerTarget(first.targetServerId)) return false;
+  return serverTargetsMatch(first, second);
+}
+
+export function serverTargetsMatch(
+  first: PlanConversionDecisionEntry,
+  second: PlanConversionDecisionEntry,
+): boolean {
+  if (!first.targetServerId || !second.targetServerId) return true;
+  return first.targetServerId === second.targetServerId;
 }
 
 function hasPlanConversionEvidenceFlag(

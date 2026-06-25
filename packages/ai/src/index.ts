@@ -452,10 +452,16 @@ import {
 } from "./simulation/runner-endgame-closeout";
 import {
   isCorpProtectionScoreConversionAction,
+  isCorpRemoteBuildAction,
   isCorpRemoteProtectionActionEntry,
+  isRunnerCentralPressureAction,
+  isRunnerRemoteContestRun,
+  isRunnerRigProgressAction,
   isStrategicPlanDecision,
   ownStrategicWindow,
   previousOwnStrategicWindow,
+  remoteTargetsMatch,
+  serverTargetsMatch,
 } from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
@@ -21602,56 +21608,6 @@ function isRunnerEconomyProgressAction(
   if (typeof reserve === "number" && before < reserve && after >= reserve)
     return true;
   return after - before >= 3;
-}
-
-function isRunnerRigProgressAction(entry: PlanConversionActionEntry): boolean {
-  return (
-    entry.side === "runner" &&
-    entry.runnerRigInstallAction === true &&
-    entry.runnerLowValueDuplicateInstallAction !== true
-  );
-}
-
-function isCorpRemoteBuildAction(entry: PlanConversionActionEntry): boolean {
-  return (
-    entry.side === "corp" &&
-    isRemoteServerTarget(entry.targetServerId) &&
-    (entry.actionType === "install_card" || entry.actionType === "rez_ice")
-  );
-}
-
-function isRunnerRemoteContestRun(entry: PlanConversionActionEntry): boolean {
-  return (
-    entry.side === "runner" &&
-    entry.actionType === "start_run" &&
-    isRemoteServerTarget(entry.targetServerId)
-  );
-}
-
-function isRunnerCentralPressureAction(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.side === "runner" &&
-    entry.actionType === "start_run" &&
-    centralServerId(entry.targetServerId) !== undefined
-  );
-}
-
-function remoteTargetsMatch(
-  first: PlanConversionActionEntry,
-  second: PlanConversionActionEntry,
-): boolean {
-  if (!isRemoteServerTarget(first.targetServerId)) return false;
-  return serverTargetsMatch(first, second);
-}
-
-function serverTargetsMatch(
-  first: PlanConversionActionEntry,
-  second: PlanConversionActionEntry,
-): boolean {
-  if (!first.targetServerId || !second.targetServerId) return true;
-  return first.targetServerId === second.targetServerId;
 }
 
 function summarizeCentralCloseoutRepeatMetrics(
