@@ -2,11 +2,13 @@ import type { AiDecisionInput, Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
+import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
+import type { StrategicIntentState } from "../strategic-intent-state";
 import type { TacticalPlanRuntimeResult } from "../plans/tactical-plan-types";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
 
@@ -41,6 +43,8 @@ export type SemanticDecisionFrame = {
   doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
+  strategicIntentState?: StrategicIntentState;
+  corpStrategicIntent?: CorpStrategicIntentProfile;
   beliefSummary?: unknown;
   economyContext?: SemanticDecisionEconomyContext;
   runner?: {
@@ -58,6 +62,8 @@ export type BuildSemanticDecisionFrameParams = {
   doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
+  strategicIntentState?: StrategicIntentState;
+  corpStrategicIntent?: CorpStrategicIntentProfile;
   beliefSummary?: unknown;
   runner?: {
     runTargets?: readonly RunnerRunTargetEvaluation[];
@@ -105,6 +111,12 @@ export function buildSemanticDecisionFrame(
     ...(params.tacticalPlan ? { tacticalPlan: params.tacticalPlan } : {}),
     ...(params.deckCapabilities
       ? { deckCapabilities: params.deckCapabilities }
+      : {}),
+    ...(params.strategicIntentState
+      ? { strategicIntentState: params.strategicIntentState }
+      : {}),
+    ...(params.corpStrategicIntent
+      ? { corpStrategicIntent: params.corpStrategicIntent }
       : {}),
     ...(params.beliefSummary !== undefined
       ? { beliefSummary: params.beliefSummary }

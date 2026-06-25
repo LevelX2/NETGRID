@@ -19,6 +19,8 @@ import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import type { KnownRemoteAccessCommitment } from "./decision/known-remote-access-commitment";
+import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
+import type { TacticalGoalLike } from "./decision/semantic-decision-frame";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -38,7 +40,9 @@ import {
   redactedRunnerTacticalGoalFacts,
   type RunnerTacticalGoal,
 } from "./runner-tactical-goals";
+import type { CorpStrategicIntentProfile } from "./corp-strategic-intent";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import type { StrategicIntentState } from "./strategic-intent-state";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
 import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
@@ -128,6 +132,15 @@ export function evaluateTacticalPlans(
   const deckCapabilitiesUsed = context.deckCapabilities
     ? redactedDeckCapabilityFacts(context.deckCapabilities)
     : [];
+  const strategicIntentStateUsed = context.strategicIntentState
+    ? redactedStrategicIntentStateFacts(context.strategicIntentState)
+    : [];
+  const corpStrategicIntentUsed = context.corpStrategicIntent
+    ? redactedCorpStrategicIntentFacts(context.corpStrategicIntent)
+    : [];
+  const tacticalGoalsUsed = context.tacticalGoals
+    ? redactedMergedTacticalGoalFacts(context.tacticalGoals)
+    : [];
   const runnerStrategicIntentUsed = context.runnerStrategicIntent
     ? redactedRunnerStrategicIntentFacts(context.runnerStrategicIntent)
     : [];
@@ -169,6 +182,11 @@ export function evaluateTacticalPlans(
       return {
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+        ...(strategicIntentStateUsed.length > 0
+          ? { strategicIntentStateUsed }
+          : {}),
+        ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+        ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
         ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
         ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
         ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
@@ -195,6 +213,11 @@ export function evaluateTacticalPlans(
   return {
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+    ...(strategicIntentStateUsed.length > 0
+      ? { strategicIntentStateUsed }
+      : {}),
+    ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+    ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
     ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
     ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
     ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
@@ -228,6 +251,34 @@ function redactedRunnerStrategicIntentFacts(
     `runner_risk_profile:${intent.riskProfile.join("|") || "none"}`,
     `runner_rejected_intents:${intent.rejectedIntents.join("|") || "none"}`,
     `runner_intent_confidence:${intent.confidence}`,
+  ];
+}
+
+function redactedStrategicIntentStateFacts(
+  state: StrategicIntentState,
+): string[] {
+  return [
+    `strategic_intent_state:${state.primaryStrategy.strategyId}`,
+    `strategic_intent_phase:${state.phase}`,
+    `strategic_intent_family:${state.primaryStrategy.family}`,
+    `strategic_intent_completeness:${state.primaryStrategy.completeness}`,
+    `strategic_intent_target:${state.targetVector.kind}`,
+    `strategic_intent_blocker_count:${state.blockers.length}`,
+    `strategic_intent_transition:${state.transition.status}`,
+  ];
+}
+
+function redactedCorpStrategicIntentFacts(
+  intent: CorpStrategicIntentProfile,
+): string[] {
+  return [
+    `corp_strategic_intent:${intent.primaryWinIntent}`,
+    `corp_score_plan:${intent.scorePlan.join("|") || "none"}`,
+    `corp_defense_plan:${intent.defensePlan.join("|") || "none"}`,
+    `corp_economy_plan:${intent.economyPlan.join("|") || "none"}`,
+    `corp_punish_plan:${intent.punishPlan.join("|") || "none"}`,
+    `corp_risk_profile:${intent.riskProfile.join("|") || "none"}`,
+    `corp_intent_confidence:${intent.confidence}`,
   ];
 }
 
@@ -2805,14 +2856,20 @@ function runnerRunTargetStepRationale(
 }
 
 function runnerTacticalGoalEvidence(context: TacticalPlanBuildContext): string[] {
-  return (context.runnerTacticalGoals ?? []).slice(0, 6).map((goal) =>
+  return tacticalGoalsForPlanEvidence(context).slice(0, 6).map((goal) =>
     [
-      `runner_tactical_goal:${goal.goalId}`,
+      `tactical_goal:${goal.goalId}`,
       `priority:${goal.priority}`,
-      `urgency:${goal.urgency}`,
+      `urgency:${goal.urgency ?? "unknown"}`,
       ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
     ].join("|"),
   );
+}
+
+function tacticalGoalsForPlanEvidence(
+  context: TacticalPlanBuildContext,
+): readonly TacticalGoalLike[] {
+  return context.tacticalGoals ?? context.runnerTacticalGoals ?? [];
 }
 
 function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {

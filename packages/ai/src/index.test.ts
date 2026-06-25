@@ -197,6 +197,11 @@ describe("MVP 0.3 AI controller contract", () => {
         hiddenInfoPolicy: "player_view_only",
       },
     });
+    expect(corpInput.ownDeckDoctrineV2Diagnostic).toMatchObject({
+      side: "corp",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+    });
     expect(corpInput.ownCorpStrategicIntent).toMatchObject({
       side: "corp",
       source: {
@@ -205,6 +210,11 @@ describe("MVP 0.3 AI controller contract", () => {
       },
     });
     expect(corpInput.ownRunnerStrategicIntent).toBeUndefined();
+    expect(runnerInput.ownDeckDoctrineV2Diagnostic).toMatchObject({
+      side: "runner",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+    });
     expect(runnerInput.ownStrategicIntentState?.side).toBe("runner");
     expect(runnerInput.ownRunnerStrategicIntent?.side).toBe("runner");
     expect(runnerInput.ownCorpStrategicIntent).toBeUndefined();

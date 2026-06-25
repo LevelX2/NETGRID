@@ -267,6 +267,9 @@ describe("SemanticRuntimeDebug", () => {
       },
       planProgressionReason: "mapping_selected",
       deckCapabilitiesUsed: ["coverage:wall"],
+      strategicIntentStateUsed: ["strategic_intent_state:runner.rnd_pressure"],
+      corpStrategicIntentUsed: ["corp_strategic_intent:corp.score_agendas"],
+      tacticalGoalsUsed: ["tactical_goal:runner.build_economy_base"],
       runnerTacticalGoalsUsed: ["goal:contest_remote"],
     };
 
@@ -281,6 +284,15 @@ describe("SemanticRuntimeDebug", () => {
       "why_not_other_plan:plan-bank:bank_tool_not_installed",
     );
     expect(items).toContain("deck_capability_used:coverage:wall");
+    expect(items).toContain(
+      "strategic_intent_state_used:strategic_intent_state:runner.rnd_pressure",
+    );
+    expect(items).toContain(
+      "corp_strategic_intent_used:corp_strategic_intent:corp.score_agendas",
+    );
+    expect(items).toContain(
+      "tactical_goal_used:tactical_goal:runner.build_economy_base",
+    );
     expect(items).toContain("runner_tactical_goal_used:goal:contest_remote");
     expect(items).toEqual(
       expect.arrayContaining([

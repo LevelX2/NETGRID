@@ -15,7 +15,11 @@ import {
   buildDeckDoctrineProfile,
   type AiDeckDoctrineDeckSnapshot,
 } from "../deck-doctrine";
-import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
+import {
+  buildDeckDoctrineV2Diagnostic,
+  buildDeckStrategyProfile,
+  type DeckDoctrineV2Diagnostic,
+} from "../deck-doctrine-strategy";
 import {
   buildCorpStrategicIntentProfile,
   type CorpStrategicIntentProfile,
@@ -50,6 +54,7 @@ export type AiDecisionSideSelection =
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
   ownStrategicIntentState?: StrategicIntentState;
   ownCorpStrategicIntent?: CorpStrategicIntentProfile;
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
@@ -108,6 +113,9 @@ export function buildAiDecisionInput(
     deckSnapshot: options.ownDeckSnapshot,
   });
   const ownDeckStrategyProfile = buildDeckStrategyProfile(options.ownDeckSnapshot);
+  const ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic(
+    options.ownDeckSnapshot,
+  );
   const ownStrategicIntentState = buildStrategicIntentState({
     side,
     stateVersion: playerView.stateVersion,
@@ -133,6 +141,7 @@ export function buildAiDecisionInput(
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
+    ownDeckDoctrineV2Diagnostic,
     ownStrategicIntentState,
     ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),
     ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),

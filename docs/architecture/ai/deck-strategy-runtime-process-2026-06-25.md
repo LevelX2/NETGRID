@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-04 next`
+Status: `active: DSR-05 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -81,8 +81,8 @@ preflight
 1. `DSR-00` Ist-Zustand und Consumer verifizieren. Status: `done`, Commit: `77ebf459`.
 2. `DSR-01` Einheitlichen strategischen Laufzeitvertrag festlegen. Status: `done`, Commit: `79decae4`.
 3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: `c5a1b920`.
-4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: pending.
-5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen.
+4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: `8a0e9e55`.
+5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: pending.
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen.
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen.
 8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung.
@@ -189,6 +189,22 @@ Done-Gate:
 
 - Doctrine-Ziele und bestehende TacticalGoals werden gleichzeitig berücksichtigt.
 - Debug zeigt Quelle, Priorität, Blocker und Evidence.
+
+Umsetzung:
+
+- `buildAiDecisionInput` trägt bei Decksnapshot-Inputs zusätzlich eine side-sichere `DeckDoctrineV2Diagnostic` als interne Runtime-Metadaten.
+- `decision/tactical-goal-merge.ts` führt bestehende Runner-TacticalGoals, StrategicIntentState-Ziele, CorpStrategicIntent-Ziele, Neutral-Ziele, Corp-Boardstate-Ziele und Doctrine-v2-Ziele dedupliziert zusammen.
+- `chooseSemanticRuntimeAction` baut einen `SemanticDecisionFrame` für die Zielzusammenführung und übergibt die gemergte Zielmenge an `evaluateTacticalPlans`.
+- `TacticalPlanRuntimeResult` und `semanticRuntimeDebugTacticalPlanItems` zeigen StrategicIntentState-, CorpIntent- und gemergte TacticalGoal-Facts redaction-safe an.
+- Lokale Play-Strength-Pilot-Scope-Frames bleiben beim bisherigen Runner-Zielkontext, damit DSR-04 keine Pilot-Auswahlregeln verschiebt.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/decision/tactical-goal-merge.test.ts src/decision/neutral-goal-synthesis.test.ts src/decision/doctrine-goal-synthesis.test.ts src/diagnostics/semantic-runtime-debug.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "projects side-safe deck strategy runtime fields" --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `feat(ai): merge strategic and tactical goals`
 

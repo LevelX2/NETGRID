@@ -25,8 +25,10 @@ import {
   semanticPlayStrengthPilotEnabled,
 } from "../decision/pilot-scope-registry";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
+import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import type {
   SemanticRuntimeChoice,
@@ -245,12 +247,40 @@ export function chooseSemanticRuntimeAction(
         deckCapabilities,
       })
     : undefined;
+  const inputMetadata = input as AiDecisionInputWithDeckCapabilities;
+  const strategicIntentState = inputMetadata.ownStrategicIntentState;
+  const corpStrategicIntent =
+    input.side === "corp" ? inputMetadata.ownCorpStrategicIntent : undefined;
+  const doctrineDiagnostic = inputMetadata.ownDeckDoctrineV2Diagnostic;
+  const goalFrame = buildSemanticDecisionFrame({
+    input,
+    actionCandidates: actionSemanticCandidates,
+    tacticalGoals: runnerTacticalGoals ?? [],
+    ...(doctrineDiagnostic ? { doctrineDiagnostic } : {}),
+    deckCapabilities,
+    ...(strategicIntentState ? { strategicIntentState } : {}),
+    ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
+    runner: {
+      ...(runnerRunTargetEvaluations
+        ? { runTargets: runnerRunTargetEvaluations }
+        : {}),
+      ...(runnerEconomyPosture ? { economyPosture: runnerEconomyPosture } : {}),
+    },
+    evidence: ["semantic_runtime:tactical_goal_merge_input"],
+  });
+  const tacticalGoals = buildMergedTacticalGoals({
+    frame: goalFrame,
+    tacticalGoals: runnerTacticalGoals ?? [],
+  });
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
     : dependencies.evaluateTacticalPlans({
         input,
         ...(previousPlan ? { previousPlan } : {}),
         deckCapabilities,
+        ...(strategicIntentState ? { strategicIntentState } : {}),
+        ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
+        tacticalGoals,
         ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
         ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
         ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
@@ -314,7 +344,7 @@ export function chooseSemanticRuntimeAction(
       input,
       choices,
       initialChoice,
-    );
+  );
   const choice = runOnlyActionAdjusted.choice;
   const pilotChoice = semanticPlayStrengthPilotEnabled()
     ? (() => {
@@ -322,8 +352,11 @@ export function chooseSemanticRuntimeAction(
           input,
           actionCandidates: actionSemanticCandidates,
           tacticalGoals: runnerTacticalGoals ?? [],
+          ...(doctrineDiagnostic ? { doctrineDiagnostic } : {}),
           tacticalPlan: effectivePlanRuntime,
           deckCapabilities,
+          ...(strategicIntentState ? { strategicIntentState } : {}),
+          ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
           runner: {
             ...(runnerRunTargetEvaluations
               ? { runTargets: runnerRunTargetEvaluations }

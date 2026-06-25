@@ -389,6 +389,15 @@ export function semanticRuntimeDebugTacticalPlanItems(
     ...(planRuntime.deckCapabilitiesUsed ?? [])
       .slice(0, 12)
       .map((fact) => `deck_capability_used:${fact}`),
+    ...(planRuntime.strategicIntentStateUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `strategic_intent_state_used:${fact}`),
+    ...(planRuntime.corpStrategicIntentUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `corp_strategic_intent_used:${fact}`),
+    ...(planRuntime.tacticalGoalsUsed ?? [])
+      .slice(0, 16)
+      .map((fact) => `tactical_goal_used:${fact}`),
     ...(planRuntime.runnerStrategicIntentUsed ?? [])
       .slice(0, 12)
       .map((fact) => `runner_strategic_intent_used:${fact}`),
