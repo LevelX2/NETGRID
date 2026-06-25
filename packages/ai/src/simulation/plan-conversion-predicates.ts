@@ -478,6 +478,43 @@ export function planIntentConvertedWithin<
   );
 }
 
+export function runnerEconomyConvertsToRunOrRig<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (entry) =>
+      entry.side === "runner" &&
+      ((entry.actionType === "start_run" &&
+        runnerRunHasFollowupValue(
+          sequence,
+          sequence.indexOf(entry),
+          isMeaningfulProgress,
+        )) ||
+        isRunnerRigProgressAction(entry)),
+  );
+}
+
+export function runnerRigConvertsToRun<T extends PlanConversionDecisionEntry>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (entry) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(
+        sequence,
+        sequence.indexOf(entry),
+        isMeaningfulProgress,
+      ),
+  );
+}
+
 export function strategicPlanConvertsWithinOwnDecisions<
   T extends PlanConversionDecisionEntry,
 >(

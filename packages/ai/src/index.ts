@@ -472,7 +472,8 @@ import {
   remoteBuildConvertsToAdvanceOrScore,
   remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
-  runnerRunHasFollowupValue,
+  runnerEconomyConvertsToRunOrRig,
+  runnerRigConvertsToRun,
   serverTargetsMatch,
   rigActionConvertsToRun,
   setupActionConvertsToRun,
@@ -15824,11 +15825,23 @@ function summarizeStrategicPlanConversionMetrics(
         planIntentAbandonedWithoutReason += 1;
 
       if (entry.side === "runner" && planKind.includes("recover_economy")) {
-        if (runnerEconomyConvertsToRunOrRig(strategicEntries, index))
+        if (
+          runnerEconomyConvertsToRunOrRig(
+            strategicEntries,
+            index,
+            isMeaningfulBoardProgress,
+          )
+        )
           runnerEconomyConvertedToRunOrRig += 1;
       }
       if (entry.side === "runner" && planKind.includes("rig")) {
-        if (runnerRigConvertsToRun(strategicEntries, index))
+        if (
+          runnerRigConvertsToRun(
+            strategicEntries,
+            index,
+            isMeaningfulBoardProgress,
+          )
+        )
           runnerRigConvertedToRun += 1;
       }
       if (entry.side === "runner" && planKind.includes("safe_probe")) {
@@ -21221,35 +21234,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function runnerEconomyConvertsToRunOrRig(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  return ownStrategicWindow(sequence, index, 3).some(
-    (entry) =>
-      entry.side === "runner" &&
-      ((entry.actionType === "start_run" &&
-        runnerRunHasFollowupValue(
-          sequence, sequence.indexOf(entry), isMeaningfulBoardProgress
-        )) ||
-        isRunnerRigProgressAction(entry)),
-  );
-}
-
-function runnerRigConvertsToRun(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  return ownStrategicWindow(sequence, index, 3).some(
-    (entry) =>
-      entry.side === "runner" &&
-      entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(
-        sequence, sequence.indexOf(entry), isMeaningfulBoardProgress
-      ),
-  );
 }
 
 function runnerProbeConvertsToUsefulInfoOrPivot(
