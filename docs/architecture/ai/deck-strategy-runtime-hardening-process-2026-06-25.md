@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H06_done`
+Status: `DSR-H07_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -83,8 +83,8 @@ preflight
 5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `done`.
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `done`.
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `done`.
-8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `active`.
-9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `pending`.
+8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `done`.
+9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `active`.
 10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `pending`.
 
 ## Paketdetails
@@ -178,6 +178,10 @@ Commit: `feat(ai): explain strategic runtime decisions`
 Ziel: Produktive Akzeptanzfälle laufen über realitätsnahe `GameState`-/`buildAiDecisionInput`-Pfade ohne manuelle StrategyProfile- oder TargetVector-Injektion.
 
 Kernartefakte: `strategic-vertical-slices.test.ts` oder fokussierte E2E-Slice-Tests.
+
+Ergebnis: `packages/ai/src/index.test.ts` enthält nun einen produktiven Regressionstest für Corp und Runner, der jeweils von einem echten Engine-`GameState` über `buildAiDecisionInput` mit Decksnapshot bis zu `chooseCorpAction`/`chooseRunnerAction` läuft. Der Test injiziert keine StrategyProfiles, TargetVectors oder ReserveRequirements manuell. Er sichert produktive `AiDeckStrategyProfile`-Quelle, report-only Doctrine-Diagnostic, `StrategicIntentState` aus `runtime_context`, legale Action-Auswahl, Semantic-Runtime-Debugsektionen `strategic_runtime`/`selection_score`, Preview-Memory und Hidden-Info-Redaction ab.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierter Test `index` grün mit 534 Tests.
 
 Commit: `test(ai): add productive deck strategy regressions`
 

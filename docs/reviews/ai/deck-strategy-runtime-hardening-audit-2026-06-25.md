@@ -146,6 +146,23 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1641 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H07-Ergebnis
+
+Status: `done`
+
+Produktive End-to-End-Regressionen laufen jetzt explizit über echte Engine-Inputs statt über manuell injizierte Strategieobjekte.
+
+Umgesetzt:
+
+- Neuer Integrationstest in `packages/ai/src/index.test.ts` baut Corp- und Runner-Inputs aus realen `GameState`s und Decksnapshots über `buildAiDecisionInput`.
+- Die Entscheidungen laufen über `chooseCorpAction` und `chooseRunnerAction` mit aktivierter Semantic Runtime; es werden keine `AiDeckStrategyProfile`, TargetVectors oder ReserveRequirements manuell gesetzt.
+- Der Test prüft produktiven StrategyProfile-Vertrag, report-only `DeckDoctrineV2Diagnostic`, `StrategicIntentState` aus `runtime_context`, legale Action-Auswahl, Preview-Memory, Debugsektionen `strategic_runtime`/`selection_score` und Hidden-Info-Redaction.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --maxWorkers=1 --testTimeout=30000`: grün, 534 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.
