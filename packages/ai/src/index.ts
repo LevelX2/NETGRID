@@ -174,6 +174,7 @@ import {
   findVisibleCorpServerCard,
   findVisibleCard,
   semanticRuntimeVisibleSourceCard,
+  sourceDefinitionIdForAction,
 } from "./runtime/visible-card-lookup";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
@@ -10986,19 +10987,6 @@ function tagPunishPayoffPriorityBonus(
     default:
       return 10;
   }
-}
-
-function sourceDefinitionIdForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string {
-  if (action.source === "basic_action" || action.source === "game_rule")
-    return "";
-  return (
-    findVisibleCard(input, action.source)?.definitionId ??
-    semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
-    ""
-  );
 }
 
 function traceTagExpectedSuccessEstimate(input: AiDecisionInput): number {

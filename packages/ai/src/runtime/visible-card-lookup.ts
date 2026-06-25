@@ -81,3 +81,16 @@ export function findVisibleCorpServerCard(
   }
   return undefined;
 }
+
+export function sourceDefinitionIdForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string {
+  if (action.source === "basic_action" || action.source === "game_rule")
+    return "";
+  return (
+    findVisibleCard(input, action.source)?.definitionId ??
+    semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
+    ""
+  );
+}
