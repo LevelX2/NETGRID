@@ -153,6 +153,11 @@ import {
   breakSubroutineIndexesForAction,
   parseSubroutineIndexes,
 } from "./runtime/subroutine-indexes";
+import {
+  isEndRunSubroutine,
+  isImmediateSafetyThreatSubroutine,
+  type VisibleEncounterSubroutine,
+} from "./runtime/encounter-subroutine";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -4522,10 +4527,6 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
   practicalMicroRuntimeCandidates,
 });
 
-type VisibleEncounterSubroutine = NonNullable<
-  NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
->;
-
 function blinkRiskAssessmentForEncounterBreak(
   input: AiDecisionInput,
   action: LegalAction,
@@ -4841,28 +4842,6 @@ function encounterRemotePayoffAfterBreakAssessment(
       `encounter_remote_root_trash_cost:${cheapestTrashCost}`,
     ],
   };
-}
-
-function isImmediateSafetyThreatSubroutine(
-  subroutine: VisibleEncounterSubroutine,
-): boolean {
-  const type = subroutine.type.toLowerCase();
-  return (
-    type === "do_damage" ||
-    type === "give_runner_tag" ||
-    type === "initiate_trace" ||
-    type === "trash_installed_program" ||
-    type === "trash_program_unless_runner_pays" ||
-    type === "trash_installed_program_unless_runner_pays" ||
-    subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true
-  );
-}
-
-function isEndRunSubroutine(subroutine: VisibleEncounterSubroutine): boolean {
-  return (
-    subroutine.type === "end_the_run" ||
-    subroutine.type === "end_the_run_unless_runner_pays"
-  );
 }
 
 function runnerCardMechanicsForAi(definitionId: string): string[] {
