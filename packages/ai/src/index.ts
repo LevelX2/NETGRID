@@ -571,6 +571,7 @@ import {
 import { missingBenchmarkDeckFormatProfile } from "./simulation/benchmark-deck-format-profile";
 import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
 import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
+import { benchmarkProfileById } from "./simulation/benchmark-profile-lookup";
 import { resolveLocalDeckEditorDecksDir } from "./simulation/local-deck-editor-dir";
 import { classifyLocalEditableBenchmarkDeck } from "./simulation/local-editable-benchmark-classification";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
@@ -5947,8 +5948,14 @@ export function runDoctrineQualityBenchmark(
 ): AiDoctrineQualityBenchmarkResult {
   const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
   const candidateProfileId = config.candidateProfile ?? "current_candidate";
-  const baselineProfile = benchmarkProfileById(baselineProfileId);
-  const candidateProfile = benchmarkProfileById(candidateProfileId);
+  const baselineProfile = benchmarkProfileById(
+    baselineProfileId,
+    BENCHMARK_PROFILES_143.profiles,
+  );
+  const candidateProfile = benchmarkProfileById(
+    candidateProfileId,
+    BENCHMARK_PROFILES_143.profiles,
+  );
   const seeds =
     config.includeHoldout === false
       ? SOAK_SEEDS_143.tuningSeeds
@@ -5992,8 +5999,14 @@ export function runMatchProgressionBenchmark(
 ): AiMatchProgressionBenchmarkResult {
   const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
   const candidateProfileId = config.candidateProfile ?? "current_candidate";
-  const baselineProfile = benchmarkProfileById(baselineProfileId);
-  const candidateProfile = benchmarkProfileById(candidateProfileId);
+  const baselineProfile = benchmarkProfileById(
+    baselineProfileId,
+    BENCHMARK_PROFILES_143.profiles,
+  );
+  const candidateProfile = benchmarkProfileById(
+    candidateProfileId,
+    BENCHMARK_PROFILES_143.profiles,
+  );
   const seeds =
     config.includeHoldout === false
       ? SOAK_SEEDS_143.tuningSeeds
@@ -6020,7 +6033,11 @@ export function runMatchProgressionBenchmark(
     return {
       profile: profileId,
       metrics: summarizeMatchProgressionMetrics(
-        runV143Profile(benchmarkProfileById(profileId), seeds, config)
+        runV143Profile(
+          benchmarkProfileById(profileId, BENCHMARK_PROFILES_143.profiles),
+          seeds,
+          config,
+        )
           .summaries,
       ),
     };
@@ -6762,20 +6779,6 @@ function runV143Profile(
     replayFailures: summaries.filter((summary) => !summary.replayOk).length,
     notableExploitRefs: sortedUnique(exploitRefs),
     summaries,
-  };
-}
-
-function benchmarkProfileById(
-  profileId: SimulationBenchmarkProfileId,
-): SimulationBenchmarkProfile {
-  const profile = BENCHMARK_PROFILES_143.profiles.find(
-    (candidate) => candidate.benchmarkProfileId === profileId,
-  );
-  if (profile) return profile;
-  return {
-    benchmarkProfileId: profileId,
-    runnerMode: profileId,
-    corpMode: profileId,
   };
 }
 
