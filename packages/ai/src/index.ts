@@ -168,6 +168,7 @@ import {
 } from "./runtime/simulation-action-target";
 import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
+import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -431,10 +432,7 @@ import {
   mergedPublicHistory as mergedAiPublicHistory,
   serverIdFromEvent as aiServerIdFromEvent,
 } from "./runtime/public-event-history";
-import {
-  playfulAiGainValue,
-  selectableChoiceOptions,
-} from "./runtime/choice-option";
+import { selectableChoiceOptions } from "./runtime/choice-option";
 import {
   selectedDiscardChoiceOptionIds,
 } from "./runtime/discard-choice-selection";
@@ -7397,14 +7395,9 @@ function selectedChoicesForDecision(
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
   if (choice.source.startsWith("v1921.playful_ai")) {
-    const selected =
-      choice.options.slice().sort((left, right) => {
-        const leftValue = playfulAiGainValue(left);
-        const rightValue = playfulAiGainValue(right);
-        return rightValue - leftValue || left.id.localeCompare(right.id);
-      })[0] ?? choice.options[0];
-    return selected
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
+    const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.source.startsWith("trace_post_bid_link")) {
