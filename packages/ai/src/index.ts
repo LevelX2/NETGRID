@@ -128,6 +128,9 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import {
+  visibleRootIsKnownAgenda as visibleRootIsKnownAgendaRuntime,
+} from "./runtime/visible-root-agenda";
+import {
   buildObservedFacts as buildObservedFactsRuntime,
   type AiObservedFacts as RuntimeAiObservedFacts,
 } from "./runtime/observed-facts";
@@ -4707,13 +4710,7 @@ function blinkEncounterPayoffOverride(
 function visibleRootIsKnownAgenda(
   card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
 ): boolean {
-  const definitionId = card.definitionId;
-  return (
-    card.known &&
-    (card.type === "agenda" ||
-      (definitionId !== undefined &&
-        definitionTypeForMetrics(definitionId) === "agenda"))
-  );
+  return visibleRootIsKnownAgendaRuntime(card, definitionTypeForMetrics);
 }
 
 function breakAccessPathAssessment(
