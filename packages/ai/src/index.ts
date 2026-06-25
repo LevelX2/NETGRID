@@ -476,6 +476,7 @@ import {
   serverTargetsMatch,
   rigActionConvertsToRun,
   setupActionConvertsToRun,
+  strategicPlanConvertsWithinOwnDecisions,
 } from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
@@ -15803,11 +15804,18 @@ function summarizeStrategicPlanConversionMetrics(
       if (lastPlan?.planKind === planKind && !lastPlan.progressSince) {
         sameStrategicPlanRepeatedWithoutProgress += 1;
       }
-      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 1))
+      const planConvertsWithinOwnDecisions = (ownDecisions: number) =>
+        strategicPlanConvertsWithinOwnDecisions(
+          strategicEntries,
+          index,
+          ownDecisions,
+          isMeaningfulBoardProgress,
+        );
+      if (planConvertsWithinOwnDecisions(1))
         planIntentConvertedWithin1OwnDecision += 1;
-      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 2))
+      if (planConvertsWithinOwnDecisions(2))
         planIntentConvertedWithin2OwnDecisions += 1;
-      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 3))
+      if (planConvertsWithinOwnDecisions(3))
         planIntentConvertedWithin3OwnDecisions += 1;
       else if (
         !hasEvidenceFlag(entry, "plan_abort_taken:true") &&
@@ -21213,18 +21221,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function strategicPlanConvertsWithinOwnDecisions(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownDecisions: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (isMeaningfulBoardProgress(entry)) return true;
-  return ownStrategicWindow(sequence, index, ownDecisions).some(
-    isMeaningfulBoardProgress,
-  );
 }
 
 function runnerEconomyConvertsToRunOrRig(

@@ -478,6 +478,21 @@ export function planIntentConvertedWithin<
   );
 }
 
+export function strategicPlanConvertsWithinOwnDecisions<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  ownDecisions: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, ownDecisions).some(
+    isMeaningfulProgress,
+  );
+}
+
 function isCorpRemoteAdvancementProgressForPlan(
   entry: PlanConversionDecisionEntry,
 ): boolean {
