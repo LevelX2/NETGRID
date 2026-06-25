@@ -521,6 +521,11 @@ import {
   isEconomyStallExemptAction,
   qualityTagsForActionWithDependencies,
   summarizeDoctrineQualityMetrics,
+  type AiDoctrineQualityCaseAnalysis,
+  type AiDoctrineQualityCaseExample,
+  type AiDoctrineQualityDelta,
+  type AiDoctrineQualityMetricName,
+  type AiDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
 import {
   averageTurnsFromFinalAdvanceToScoreOrSteal,
@@ -743,6 +748,13 @@ export {
 export {
   analyzeDoctrineQualityCases,
   summarizeDoctrineQualityMetrics,
+} from "./simulation/doctrine-quality-tags";
+export type {
+  AiDoctrineQualityCaseAnalysis,
+  AiDoctrineQualityCaseExample,
+  AiDoctrineQualityDelta,
+  AiDoctrineQualityMetricName,
+  AiDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
 export { evaluateV143TuningGate } from "./simulation/v143-tuning-gate";
 export type {
@@ -1083,20 +1095,6 @@ export type AiQualityMetrics = {
   holdout: boolean;
   doctrine: AiDoctrineQualityMetrics;
 };
-
-export type AiDoctrineQualityMetrics = {
-  nakedAgendaInstalls: number;
-  agendaFloodExposure: number;
-  scoreWindowMissed: number;
-  remoteOverbuild: number;
-  economyStall: number;
-  repeatedLowValueCentralRun: number;
-  rigStall: number;
-  assetTrashNeglect: number;
-};
-
-export type AiDoctrineQualityMetricName = keyof AiDoctrineQualityMetrics;
-export type AiDoctrineQualityDelta = AiDoctrineQualityMetrics;
 
 export type AiDoctrineQualityBenchmarkResult = {
   version: "ai-deck-doctrine-quality-v1";
@@ -2629,26 +2627,6 @@ export type AiDoctrineQualityGateResult = {
   thresholds: AiDoctrineQualityGateThresholds;
   hardFailures: string[];
   warnings: string[];
-};
-
-export type AiDoctrineQualityCaseExample = {
-  metric: AiDoctrineQualityMetricName;
-  seed: string;
-  actionIndex: number;
-  stateVersionBefore: number;
-  side: Side;
-  actionType: LegalAction["type"];
-  reasonCode: string;
-  targetServerId?: string;
-  qualityTags: string[];
-};
-
-export type AiDoctrineQualityCaseAnalysis = {
-  version: "ai-deck-doctrine-case-analysis-v1";
-  maxExamplesPerMetric: number;
-  totals: AiDoctrineQualityMetrics;
-  examples: Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>;
-  redactionSafe: boolean;
 };
 
 export type AiSoakResult = {

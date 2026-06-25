@@ -3,13 +3,10 @@ import {
   type AiDecision,
   type AiDecisionInput,
   type LegalAction,
+  type Side,
   type VisibleCard,
 } from "@netgrid/shared";
 import type {
-  AiDoctrineQualityCaseAnalysis,
-  AiDoctrineQualityCaseExample,
-  AiDoctrineQualityMetricName,
-  AiDoctrineQualityMetrics,
   AiSimulationSummary,
 } from "../index";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
@@ -38,6 +35,40 @@ type DoctrineQualityTagDependencies = {
     instanceId: string,
   ) => VisibleCard | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+};
+
+export type AiDoctrineQualityMetrics = {
+  nakedAgendaInstalls: number;
+  agendaFloodExposure: number;
+  scoreWindowMissed: number;
+  remoteOverbuild: number;
+  economyStall: number;
+  repeatedLowValueCentralRun: number;
+  rigStall: number;
+  assetTrashNeglect: number;
+};
+
+export type AiDoctrineQualityMetricName = keyof AiDoctrineQualityMetrics;
+export type AiDoctrineQualityDelta = AiDoctrineQualityMetrics;
+
+export type AiDoctrineQualityCaseExample = {
+  metric: AiDoctrineQualityMetricName;
+  seed: string;
+  actionIndex: number;
+  stateVersionBefore: number;
+  side: Side;
+  actionType: LegalAction["type"];
+  reasonCode: string;
+  targetServerId?: string;
+  qualityTags: string[];
+};
+
+export type AiDoctrineQualityCaseAnalysis = {
+  version: "ai-deck-doctrine-case-analysis-v1";
+  maxExamplesPerMetric: number;
+  totals: AiDoctrineQualityMetrics;
+  examples: Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>;
+  redactionSafe: boolean;
 };
 
 export function qualityTagsForActionWithDependencies(
