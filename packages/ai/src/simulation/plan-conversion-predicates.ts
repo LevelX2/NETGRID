@@ -240,6 +240,57 @@ export function runnerStealsBeforeNextCorpScore<
   return false;
 }
 
+export function corpRemoteCreatedConverts<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number, ownDecisions: number): boolean {
+  return (
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "agenda") ||
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "asset") ||
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "bait")
+  );
+}
+
+export function corpRemoteCreatedConvertsTo<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  ownDecisions: number,
+  target: "agenda" | "asset" | "bait",
+): boolean {
+  return ownStrategicWindow(sequence, index, ownDecisions)
+    .filter((entry) => entry.side === "corp")
+    .some((entry) => {
+      if (target === "agenda") {
+        return (
+          entry.actionType === "score_agenda" ||
+          entry.actionType === "advance_card" ||
+          entry.targetCardType === "agenda" ||
+          hasPlanConversionEvidenceFlag(
+            entry,
+            "corp_agenda_installed_in_protected_remote:true",
+          )
+        );
+      }
+      if (target === "bait") {
+        return (
+          entry.reasonCode?.includes("bait") === true ||
+          hasPlanConversionEvidenceFlag(entry, "plan:bait_runner")
+        );
+      }
+      return (
+        entry.actionType === "install_card" &&
+        (entry.reasonCode?.includes("asset") === true ||
+          (entry.evidence ?? []).some(
+            (item) =>
+              item.includes("remote_support") ||
+              item.includes("economy_asset") ||
+              item.includes("asset_trash_target"),
+          ))
+      );
+    });
+}
+
 export function isRunnerRigProgressAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {

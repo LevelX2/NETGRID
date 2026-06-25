@@ -459,6 +459,8 @@ import {
   corpEconomyConvertsToRezInstallScore,
   corpProtectionConvertsToScoreSafety,
   corpRemoteBuildConvertsToAdvanceProtectOrScore,
+  corpRemoteCreatedConverts,
+  corpRemoteCreatedConvertsTo,
   economyActionConvertsToRun,
   isCorpProtectionScoreConversionAction,
   isCorpRemoteProtectionActionEntry,
@@ -21158,57 +21160,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
   };
-}
-
-function corpRemoteCreatedConverts(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownDecisions: number,
-): boolean {
-  return (
-    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "agenda") ||
-    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "asset") ||
-    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "bait")
-  );
-}
-
-function corpRemoteCreatedConvertsTo(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  ownDecisions: number,
-  target: "agenda" | "asset" | "bait",
-): boolean {
-  return ownStrategicWindow(sequence, index, ownDecisions)
-    .filter((entry) => entry.side === "corp")
-    .some((entry) => {
-      if (target === "agenda") {
-        return (
-          entry.actionType === "score_agenda" ||
-          entry.actionType === "advance_card" ||
-          entry.targetCardType === "agenda" ||
-          hasEvidenceFlag(
-            entry,
-            "corp_agenda_installed_in_protected_remote:true",
-          )
-        );
-      }
-      if (target === "bait") {
-        return (
-          entry.reasonCode.includes("bait") ||
-          hasEvidenceFlag(entry, "plan:bait_runner")
-        );
-      }
-      return (
-        entry.actionType === "install_card" &&
-        (entry.reasonCode.includes("asset") ||
-          (entry.evidence ?? []).some(
-            (item) =>
-              item.includes("remote_support") ||
-              item.includes("economy_asset") ||
-              item.includes("asset_trash_target"),
-          ))
-      );
-    });
 }
 
 function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {
