@@ -203,7 +203,7 @@ Ziel: Vollständige Verifikation, Source-Review, `main`-Integration, erneute `ma
 
 Checks: `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/ai test`, `git diff --check -- packages/ai docs KI-Wissen-NETGRID`; zusätzliche Package-Checks nur bei tatsächlich geändertem Scope.
 
-Ergebnis: Lokaler `main` wurde konfliktfrei in den Arbeitsbranch integriert; nach erneutem Main-Fortschritt wurde der Abgleich mit `0c92c209` wiederholt. Der finale Hardening-Report liegt unter `docs/reviews/ai/deck-strategy-runtime-hardening-final-report-2026-06-25.md`. Branch-Verifikation nach dem finalen Main-Sync: `@netgrid/ai` Typecheck grün, vollständiger `@netgrid/ai`-Testlauf grün mit 148 Testdateien und 1643 Tests, Diff-Check grün. Danach folgt die lokale Integration des Arbeitsbranches nach `main` und die erneute Main-Prüfung.
+Ergebnis: Lokaler `main` wurde wegen paralleler lokaler Refactor-Commits mehrfach konfliktfrei in den Arbeitsbranch integriert; letzter Sync vor der lokalen Main-Integration ist `3a1fa580`. Der finale Hardening-Report liegt unter `docs/reviews/ai/deck-strategy-runtime-hardening-final-report-2026-06-25.md`. Branch-Verifikation: `@netgrid/ai` Typecheck grün, vollständiger `@netgrid/ai`-Testlauf grün mit 148 Testdateien und 1643 Tests, Diff-Check grün; nach dem letzten Sync wurde Typecheck erneut grün ausgeführt. Danach folgt die lokale Integration des Arbeitsbranches nach `main` und die erneute Main-Prüfung.
 
 Commit: `chore(ai): validate deck strategy hardening`
 

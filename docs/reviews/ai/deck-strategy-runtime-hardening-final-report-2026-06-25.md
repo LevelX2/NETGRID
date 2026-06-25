@@ -20,12 +20,9 @@ Der Hardening-Lauf DSR-H00 bis DSR-H09 ist im Arbeitsbranch abgeschlossen. Die D
 
 ## Integration
 
-Der lokale `main`-Stand wurde vor der Abschlussvalidierung konfliktfrei in den Arbeitsbranch gemergt. Weil `main` während H09 noch einmal weiterlief, wurde der Abgleich wiederholt:
+Der lokale `main`-Stand wurde während H09 mehrfach konfliktfrei in den Arbeitsbranch gemergt, weil parallele lokale Refactor-Commits auf `main` hinzukamen. Der letzte Sync vor der lokalen Main-Integration ist `3a1fa580 Merge branch 'main' into codex/deck-strategy-runtime-hardening`.
 
-- `e3da5b39 Merge branch 'main' into codex/deck-strategy-runtime-hardening`
-- `0c92c209 Merge branch 'main' into codex/deck-strategy-runtime-hardening`
-
-Die finalen H09-Gates wurden nach `0c92c209` erneut ausgeführt.
+Die finalen H09-Gates im Arbeitsbranch wurden nach `69fd0600` vollständig wiederholt. Nach `3a1fa580` wurde zusätzlich `@netgrid/ai` Typecheck erneut ausgeführt; das entscheidende vollständige Abschlussgate läuft nach dem lokalen Merge auf `main`.
 
 ## Verifikation im Arbeitsbranch
 
