@@ -1,4 +1,5 @@
 import type { AiSimulationSummary } from "../index";
+import { isRemoteServerTarget } from "../runtime/server-target";
 import { averageNumber } from "./simulation-metric-aggregation";
 
 export function progressionEntriesWithRunTargets(
@@ -103,4 +104,13 @@ export function countCorpMultiIceInstallOrderOptimized(
           previous.corpFutureRunIceInstalled !== true,
       );
   }).length;
+}
+
+export function isCorpRemoteAdvancementProgress(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  if (entry.side !== "corp") return false;
+  if (!isRemoteServerTarget(entry.targetServerId)) return false;
+  if (entry.actionType === "advance_card") return true;
+  return (entry.advancementCountersAdded ?? 0) > 0;
 }

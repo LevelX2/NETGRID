@@ -400,6 +400,7 @@ import {
   averageTurnsFromFinalAdvanceToScoreOrSteal,
   countCorpMultiIceInstallOrderFutureEffectDead,
   countCorpMultiIceInstallOrderOptimized,
+  isCorpRemoteAdvancementProgress,
   progressionEntriesWithRunTargets,
 } from "./simulation/progression-action-sequence";
 import {
@@ -22554,15 +22555,6 @@ function summarizeAdvancedRemoteThreatMetrics(
     turnsFromRemoteThreatCreatedToContest: averageNumber(contestDeltas),
     turnsFromRemoteThreatCreatedToScoreOrSteal: averageNumber(resolveDeltas),
   };
-}
-
-function isCorpRemoteAdvancementProgress(
-  entry: AiSimulationSummary["actionSequence"][number],
-): boolean {
-  if (entry.side !== "corp") return false;
-  if (!isRemoteServerTarget(entry.targetServerId)) return false;
-  if (entry.actionType === "advance_card") return true;
-  return (entry.advancementCountersAdded ?? 0) > 0;
 }
 
 type RunnerCoveragePressureForMetrics = {
