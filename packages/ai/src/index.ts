@@ -216,6 +216,7 @@ import {
   staleKnownRndRepeatRunPenalty,
 } from "./runtime/runner-rnd-repeat-run-score";
 import { isLowValueKnownAccessCard } from "./runtime/runner-low-value-known-access-card";
+import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10966,38 +10967,6 @@ function scoreRunTarget(
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   score -= staleCentralRepeatPenalty;
   return score;
-}
-
-function staleKnownHqRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "hq"
-  )
-    return 0;
-  if (
-    input.legalActions.some(
-      (candidate) =>
-        candidate.type === "trash_accessed_card" ||
-        candidate.type === "steal_agenda",
-    )
-  )
-    return 0;
-  const hqHandMemory =
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
-  if (
-    !hqHandMemory?.allCardsKnown ||
-    hqHandMemory.knownDefinitions.length === 0
-  )
-    return 0;
-  return hqHandMemory.knownDefinitions.every((definitionId) =>
-    isLowValueKnownAccessCard(definitionId, input.playerView.own.credits),
-  )
-    ? 430
-    : 0;
 }
 
 function staleKnownArchivesRepeatRunPenalty(
