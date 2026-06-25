@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-11 next`
+Status: `ready_for_local_merge`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -88,8 +88,8 @@ preflight
 8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: `f9381d5f`.
 9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `done`, Commit: `f44c4cc0`.
 10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `done`, Commit: `6b92b1d5`.
-11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen. Status: `done`, Commit: pending.
-12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration. Status: `next`.
+11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen. Status: `done`, Commit: `7c921e19`.
+12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration. Status: `done`, Commit: final package commit.
 
 ## Paketdetails
 
@@ -415,6 +415,18 @@ Done-Gate:
 
 - Definition of Done aus der Vorgabe ist erfüllt.
 - `main` ist nach Merge geprüft.
+
+Umsetzung:
+
+- Abschlussreview `docs/reviews/ai/deck-strategy-runtime-final-report-2026-06-25.md` erstellt.
+- Wissensbasis aktualisiert: `Aktueller Projektstatus` und `03 Betrieb/Log 2026-06.md`.
+- Finaler AI-Gate vor lokalem Merge ausgeführt.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai test`: pass, 146 Testdateien, 1628 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `git diff --check`: pass.
 
 Commit: `docs(ai): finalize deck strategy runtime review`
 
