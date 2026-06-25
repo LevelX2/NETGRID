@@ -400,6 +400,7 @@ import {
   addStringsToCounter as addCardsToCounter,
   addStringsToCounter as addKindsToCounter,
   incrementStringCounter,
+  incrementTypedCounter,
 } from "./runtime/counter";
 import {
   minNumberOrZero as minDefined,
@@ -10012,13 +10013,6 @@ function previousEncounterTagBefore(
     .some((entry) => entry.corpTagCreatedDuringEncounter === true);
 }
 
-function incrementSkipReason(
-  counters: Record<CorpTagPunishSkipReason, number>,
-  reason: CorpTagPunishSkipReason | undefined,
-): void {
-  counters[reason ?? "unknown"] += 1;
-}
-
 function strongestCorpTagSourceOpportunity(
   input: AiDecisionInput,
 ): { action: LegalAction; traceTag: boolean } | undefined {
@@ -19349,9 +19343,9 @@ function summarizeTagPunishWindowMetrics(
         corpVisibleTagPunishTaken += 1;
       if (entry.corpVisibleTagPunishSkipped === true) {
         corpVisibleTagPunishSkipped += 1;
-        incrementSkipReason(
+        incrementTypedCounter(
           visiblePunishSkippedByReason,
-          entry.corpVisibleTagPunishSkippedReason,
+          entry.corpVisibleTagPunishSkippedReason ?? "unknown",
         );
         if (
           entry.corpVisibleTagPunishSkippedReason ===
@@ -19542,9 +19536,9 @@ function summarizeTagPunishWindowMetrics(
             corpTagPunishFunnelTerminalDamageOrEconomicHit += 1;
         } else {
           corpPunishSkipped += 1;
-          incrementSkipReason(
+          incrementTypedCounter(
             punishSkippedByReason,
-            entry.corpPunishSkippedReason,
+            entry.corpPunishSkippedReason ?? "unknown",
           );
         }
       }
@@ -19575,9 +19569,9 @@ function summarizeTagPunishWindowMetrics(
         if (entry.corpTraceTagTaken === true) corpTraceTagTaken += 1;
         else {
           corpTraceTagSkipped += 1;
-          incrementSkipReason(
+          incrementTypedCounter(
             traceSkippedByReason,
-            entry.corpTraceTagSkippedReason,
+            entry.corpTraceTagSkippedReason ?? "unknown",
           );
         }
       }
