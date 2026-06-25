@@ -106,6 +106,26 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai test`: grün, 147 Testdateien und 1637 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H05-Ergebnis
+
+Status: `done`
+
+Strategischer Action-Fit und TacticalPlan-Override sind präziser und stärker an echte Ziel-/Phasenlage gebunden.
+
+Umgesetzt:
+
+- Runner-Zentral- und Remote-Fit respektiert konkrete `targetVector.targetId`; Off-Target-Runs erhalten keinen strategischen Fit.
+- Fit-Evidence unterscheidet `strategic_action_fit_target_match:exact`, `kind` und `none`.
+- `fund` und `recover` blockieren strategischen Druckaufbau; legale Abschlussaktionen und echte Tag-Punish-Fenster bleiben möglich.
+- TacticalPlan-Override nutzt dynamische Schwellen: exakter strategischer Fit bricht früher aus Plänen aus, generischer Fit benötigt größere Score-Gaps; strategisch exakte Plan-Mappings werden stärker geschützt.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `strategic-action-fit`, `semantic-choice-ranking`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices`, `tactical-plans`: grün, 125 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1640 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.

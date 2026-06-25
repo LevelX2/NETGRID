@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H04_done`
+Status: `DSR-H05_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -81,8 +81,8 @@ preflight
 3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `done`.
 4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `done`.
 5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `done`.
-6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `active`.
-7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `pending`.
+6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `done`.
+7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `active`.
 8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `pending`.
 9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `pending`.
 10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `pending`.
@@ -154,6 +154,10 @@ Commit: `feat(ai): complete strategic intent state machine`
 Ziel: Strategischer Fit nutzt präzise Semantik, Phase und Target; Planfortsetzung und Mapping-Schutz bleiben begrenzt und dynamisch.
 
 Kernartefakte: `runtime/strategic-action-fit.ts`, `runtime/semantic-choice-ranking.ts`, TacticalPlan-Fortsetzung.
+
+Ergebnis: StrategicActionFit unterscheidet exakten Target-Fit, generischen Kind-Fit und Nicht-Fit. Zielspezifische Runner-Runs erhalten nur noch Fit auf das konkrete Ziel; Fund-/Recover-Phasen blockieren strategischen Druckaufbau, lassen aber legale Abschluss- und echte Tag-Punish-Fenster zu. Plan-Override-Schwellen sind nach exaktem vs. generischem strategischem Fit dynamisch.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `strategic-action-fit`, `semantic-choice-ranking`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices`, `tactical-plans` grün mit 125 Tests; vollständiger `@netgrid/ai`-Testlauf grün mit 148 Testdateien und 1640 Tests; Diff-Check grün.
 
 Commit: `feat(ai): refine strategic action fit`
 
