@@ -437,6 +437,9 @@ import {
 import {
   isEndgameKnownInfoOpportunity,
   isEndgameKnownInfoTaken,
+  isCorpEndgameScorePathOpportunity,
+  isCorpEndgameScorePathTaken,
+  isEndgameScoreOrStealPressureAction,
   isRunnerEndgameMeaningfulRunOpportunity,
   isRunnerEndgameMeaningfulRunTaken,
   summarizeRunnerEndgameCloseoutWindow,
@@ -15626,44 +15629,6 @@ function summarizeActionLimitEndgameMetrics(
     actionLimitLikelyStrategyIssue,
     actionLimitLikelyMetricArtifact,
   };
-}
-
-function isCorpEndgameScorePathOpportunity(
-  entry: PlanConversionActionEntry,
-): boolean {
-  if (entry.side !== "corp") return false;
-  return (
-    (entry.scoreActionsAvailable ?? 0) > 0 ||
-    entry.finalAdvance === true ||
-    entry.protectedFinalAdvance === true ||
-    entry.protectBeforeAdvance === true ||
-    isCorpRemoteAdvancementProgress(entry) ||
-    (isCorpRemoteBuildAction(entry) && entry.targetCardType === "agenda")
-  );
-}
-
-function isCorpEndgameScorePathTaken(
-  entry: PlanConversionActionEntry,
-): boolean {
-  if (entry.side !== "corp") return false;
-  return (
-    entry.actionType === "score_agenda" ||
-    isCorpRemoteAdvancementProgress(entry) ||
-    entry.protectedFinalAdvance === true ||
-    entry.protectBeforeAdvance === true
-  );
-}
-
-function isEndgameScoreOrStealPressureAction(
-  entry: PlanConversionActionEntry,
-): boolean {
-  return (
-    entry.actionType === "score_agenda" ||
-    entry.actionType === "steal_agenda" ||
-    entry.actionType === "trash_accessed_card" ||
-    isCorpRemoteAdvancementProgress(entry) ||
-    (entry.side === "runner" && entry.actionType === "start_run")
-  );
 }
 
 function isEndgameSetupOrEconomyAction(

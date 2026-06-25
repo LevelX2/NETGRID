@@ -1,3 +1,5 @@
+import { isRemoteServerTarget } from "../runtime/server-target";
+
 export type RunnerEndgameCloseoutWindowSummary = {
   raw: number;
   deduped: number;
@@ -33,6 +35,7 @@ export type RunnerEndgameCloseoutEntry = {
   side?: string;
   actionType?: string;
   targetServerId?: string;
+  targetCardType?: string;
   hqKnownAgendaCount?: number;
   knownRemoteAgendas?: number;
   knownRemoteTrashableCards?: number;
@@ -63,6 +66,11 @@ export type RunnerEndgameCloseoutEntry = {
   runnerRelevantRemoteTrashTaken?: boolean;
   runnerRemoteRunOpportunityAgainstAdvancedRemote?: boolean;
   remoteTrashBoostedByKnownRemoteTrashable?: boolean;
+  scoreActionsAvailable?: number;
+  finalAdvance?: boolean;
+  protectedFinalAdvance?: boolean;
+  protectBeforeAdvance?: boolean;
+  advancementCountersAdded?: number;
 };
 
 export function summarizeRunnerEndgameCloseoutWindow(
@@ -320,5 +328,63 @@ export function isEndgameKnownInfoTaken(
           entry.remoteRunBoostedByKnownRemoteAgenda === true ||
           entry.remoteTrashBoostedByKnownRemoteTrashable === true ||
           (entry.knownUnrezzedIceFromExpose ?? 0) > 0)))
+  );
+}
+
+export function isCorpEndgameScorePathOpportunity(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  return (
+    (entry.scoreActionsAvailable ?? 0) > 0 ||
+    entry.finalAdvance === true ||
+    entry.protectedFinalAdvance === true ||
+    entry.protectBeforeAdvance === true ||
+    isCorpRemoteAdvancementProgressForEndgame(entry) ||
+    (isCorpRemoteBuildActionForEndgame(entry) &&
+      entry.targetCardType === "agenda")
+  );
+}
+
+export function isCorpEndgameScorePathTaken(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  return (
+    entry.actionType === "score_agenda" ||
+    isCorpRemoteAdvancementProgressForEndgame(entry) ||
+    entry.protectedFinalAdvance === true ||
+    entry.protectBeforeAdvance === true
+  );
+}
+
+export function isEndgameScoreOrStealPressureAction(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "steal_agenda" ||
+    entry.actionType === "trash_accessed_card" ||
+    isCorpRemoteAdvancementProgressForEndgame(entry) ||
+    (entry.side === "runner" && entry.actionType === "start_run")
+  );
+}
+
+function isCorpRemoteAdvancementProgressForEndgame(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  if (!isRemoteServerTarget(entry.targetServerId)) return false;
+  if (entry.actionType === "advance_card") return true;
+  return (entry.advancementCountersAdded ?? 0) > 0;
+}
+
+function isCorpRemoteBuildActionForEndgame(
+  entry: RunnerEndgameCloseoutEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    isRemoteServerTarget(entry.targetServerId) &&
+    (entry.actionType === "install_card" || entry.actionType === "rez_ice")
   );
 }
