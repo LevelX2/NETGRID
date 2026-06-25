@@ -2796,6 +2796,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
   - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
+- `AI-COMPLETE-03` zweihundertfünfundsiebzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/subroutine-indexes.ts` kapselt Subroutine-Index-Payload-Parsing und Break-Subroutine-Zielindex-Ermittlung als kleines Runtime-Modul.
+  - `packages/ai/src/index.ts` importiert `parseSubroutineIndexes` und `breakSubroutineIndexesForAction` und entfernt die lokalen Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.850 auf 24.835 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

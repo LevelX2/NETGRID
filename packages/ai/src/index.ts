@@ -149,6 +149,10 @@ import {
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
 import { latestTraceContext } from "./runtime/trace-context";
+import {
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "./runtime/subroutine-indexes";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -4837,14 +4841,6 @@ function encounterRemotePayoffAfterBreakAssessment(
       `encounter_remote_root_trash_cost:${cheapestTrashCost}`,
     ],
   };
-}
-
-function breakSubroutineIndexesForAction(action: LegalAction): Set<number> {
-  const indexes = parseSubroutineIndexes(action.payload?.subroutineIndexes);
-  const singleIndex = Number(action.payload?.subroutineIndex);
-  if (Number.isInteger(singleIndex) && singleIndex >= 0)
-    indexes.add(singleIndex);
-  return indexes;
 }
 
 function isImmediateSafetyThreatSubroutine(
@@ -12078,19 +12074,6 @@ function encounterRunRemainderEffectAssessment(
     remainingVisibleIceCount,
     evidence,
   };
-}
-
-function parseSubroutineIndexes(value: unknown): Set<number> {
-  if (typeof value !== "string") return new Set();
-  const indexes = new Set<number>();
-  for (const rawIndex of value.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isFinite(index) || !Number.isInteger(index) || index < 0)
-      continue;
-    indexes.add(index);
-  }
-  return indexes;
 }
 
 function isTrashUnlessRunnerPaysSubroutine(type: string | undefined): boolean {
