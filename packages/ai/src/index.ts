@@ -393,6 +393,11 @@ import {
   sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
 import {
+  isAgendaFloodExposureExemptAction,
+  isEconomyStallExemptAction,
+  repeatedLowValueCentralRunTags,
+} from "./simulation/doctrine-quality-tags";
+import {
   averageTurnsFromFinalAdvanceToScoreOrSteal,
   countCorpMultiIceInstallOrderFutureEffectDead,
   countCorpMultiIceInstallOrderOptimized,
@@ -25986,83 +25991,6 @@ function qualityTagsForAction(
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
-}
-
-function isEconomyStallExemptAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  decision: AiDecision,
-): boolean {
-  if (decision.fallbackUsed) return true;
-  if (decision.reasonCode.endsWith(".recover_economy")) return true;
-  if (
-    action.type === "mandatory_draw" ||
-    action.type === "end_turn" ||
-    action.type === "decline_rez" ||
-    action.type === "resolve_choice"
-  )
-    return true;
-  if (input.side !== "runner") return false;
-  return (
-    action.type === "pump_breaker" ||
-    action.type === "break_subroutine" ||
-    action.type === "continue_run" ||
-    action.type === "access_card" ||
-    action.type === "steal_agenda"
-  );
-}
-
-function isAgendaFloodExposureExemptAction(
-  action: LegalAction,
-  decision: AiDecision,
-  sourceDefinition?: { type?: string },
-): boolean {
-  if (decision.fallbackUsed) return true;
-  if (decision.reasonCode.endsWith(".recover_economy")) return true;
-  if (
-    decision.reasonCode.endsWith(".protect_hq") ||
-    decision.reasonCode.endsWith(".protect_rnd")
-  )
-    return true;
-  if (
-    action.type === "install_card" &&
-    action.payload?.placement !== "ice" &&
-    sourceDefinition?.type !== "agenda"
-  )
-    return true;
-  return (
-    action.type === "mandatory_draw" ||
-    action.type === "end_turn" ||
-    action.type === "decline_rez" ||
-    action.type === "rez_ice" ||
-    action.type === "resolve_choice"
-  );
-}
-
-function repeatedLowValueCentralRunTags(
-  actionSequence: AiSimulationSummary["actionSequence"],
-): string[] {
-  const tags: string[] = [];
-  const lastCentralRunByServer = new Map<string, number>();
-  for (const [index, entry] of actionSequence.entries()) {
-    if (
-      entry.side !== "runner" ||
-      entry.actionType !== "start_run" ||
-      !entry.targetServerId ||
-      !["rd", "hq", "archives"].includes(entry.targetServerId)
-    )
-      continue;
-    const previous = lastCentralRunByServer.get(entry.targetServerId);
-    if (
-      previous !== undefined &&
-      index - previous <= 4 &&
-      !entry.reasonCode.includes("contest") &&
-      !entry.reasonCode.includes("trash")
-    )
-      tags.push("repeated_low_value_central_run");
-    lastCentralRunByServer.set(entry.targetServerId, index);
-  }
-  return tags;
 }
 
 function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
