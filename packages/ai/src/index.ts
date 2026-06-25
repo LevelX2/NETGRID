@@ -580,6 +580,7 @@ import type {
 import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
 import type { RunnerSetupMissingCoverageType } from "./simulation/runner-setup-coverage-types";
 import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
+import type { AiSimulationConfig } from "./simulation/ai-simulation-config";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -2632,6 +2633,9 @@ export type AiMatchProgressionBenchmarkResult = {
 };
 
 export type {
+  AiSimulationConfig,
+} from "./simulation/ai-simulation-config";
+export type {
   SimulationControllerMode,
   SimulationBenchmarkProfileId,
   SimulationBenchmarkProfile,
@@ -2823,47 +2827,6 @@ const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     ...LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS,
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
-
-export type AiSimulationConfig = {
-  seed?: string;
-  maxActions?: number;
-  agendaPointsToWin?: number;
-  runnerDifficulty?: AiDifficulty;
-  corpDifficulty?: AiDifficulty;
-  runnerProfileId?: string;
-  corpProfileId?: string;
-  runnerDeckId?:
-    | "demo_runner_001"
-    | "demo_runner_004"
-    | "demo_runner_008"
-    | "demo_runner_096"
-    | "demo_runner_097"
-    | "demo_runner_098"
-    | "demo_runner_099";
-  corpDeckId?:
-    | "demo_corp_001"
-    | "demo_corp_004"
-    | "demo_corp_008"
-    | "demo_corp_096"
-    | "demo_corp_097"
-    | "demo_corp_098"
-    | "demo_corp_099";
-  runnerDeck?: DeckDefinition;
-  corpDeck?: DeckDefinition;
-  runnerDeckMetadata?: DeckPublicMetadata;
-  corpDeckMetadata?: DeckPublicMetadata;
-  runnerControllerMode?: SimulationControllerMode;
-  corpControllerMode?: SimulationControllerMode;
-  simulationRngSeed?: string;
-  beliefWorld?: SimulationWorld;
-  includeActionAlternativesForFindings?: boolean;
-  maxAlternativesPerFinding?: number;
-  aiDecisionRuntimeOptions?: AiDecisionRuntimeOptions;
-  opportunitySnapshotRequests?: Array<{
-    seed: string;
-    actionIndices: number[];
-  }>;
-};
 
 export type AiSimulationSummary = {
   seed: string;
