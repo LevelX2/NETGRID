@@ -572,6 +572,11 @@ import type {
   RemoteRoleServerScopeMetricKey,
 } from "./simulation/ontology-metric-key-types";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
+import type {
+  RunnerCoveragePressureForMetrics,
+  RunnerPressureReadyForMetrics,
+  RunnerPressureReadyTargetForMetrics,
+} from "./simulation/runner-pressure-metric-types";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -19386,34 +19391,6 @@ function summarizeAdvancedRemoteThreatMetrics(
     turnsFromRemoteThreatCreatedToScoreOrSteal: averageNumber(resolveDeltas),
   };
 }
-
-type RunnerCoveragePressureForMetrics = {
-  blockedServers: Set<string>;
-  knownIceBlockedServers: Set<string>;
-  missingBreakerRoles: Set<string>;
-  matchingInstallActionIds: Set<string>;
-  searchActionIds: Set<string>;
-  recoveryActionIds: Set<string>;
-  heapMatchingBreakerCount: number;
-};
-
-type RunnerPressureReadyTargetForMetrics = {
-  serverId: string;
-  targetType: "hq" | "rnd" | "archives" | "remote";
-};
-
-type RunnerPressureReadyForMetrics = {
-  broadReady: boolean;
-  readyTargets: RunnerPressureReadyTargetForMetrics[];
-  falsePositive: boolean;
-  blockers: Set<
-    | "insufficient_credits"
-    | "missing_post_run_reserve"
-    | "stale_central"
-    | "remote_too_dangerous"
-    | "no_valuable_target"
-  >;
-};
 
 function corpIcePortfolioDiagnosticsForSimulationAction(
   input: AiDecisionInput,
