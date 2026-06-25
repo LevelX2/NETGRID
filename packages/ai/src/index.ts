@@ -19,10 +19,6 @@ import {
   type DeckFormatProfile,
   type EditableDeck,
 } from "@netgrid/decks";
-import localRealisticBenchmarkDeckSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
-import localRealisticBenchmarkDecksData from "../../../data/ai/ai-local-realistic-benchmark-decks-2026-05-23.json";
-import realSceneBenchmarkDeckSnapshotsData from "../../../data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json";
-import realSceneBenchmarkDecksData from "../../../data/ai/ai-real-scene-benchmark-decks-2026-05-24.json";
 import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import {
   assessCorpFutureRunIcePlacement,
@@ -521,11 +517,14 @@ import type {
   AiBenchmarkLocalEditableDeckResult,
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
-  FrozenLocalBenchmarkDeckSnapshot,
-  LocalRealisticBenchmarkDeckManifest,
-  RealSceneBenchmarkDeckManifest,
 } from "./simulation/benchmark-deck-types";
 import { DECK_SNAPSHOTS_08 } from "./simulation/benchmark-deck-snapshot-data";
+import {
+  LOCAL_REALISTIC_BENCHMARK_DECKS,
+  LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS,
+  REAL_SCENE_BENCHMARK_DECKS,
+  REAL_SCENE_FROZEN_DECK_SNAPSHOTS,
+} from "./simulation/benchmark-local-deck-data";
 import {
   createSimulationRng,
   type SimulationRng,
@@ -1166,21 +1165,6 @@ export type {
 
 const AI_HINTS = createAiHintsByCard();
 
-const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = (
-  localRealisticBenchmarkDeckSnapshotsData as {
-    snapshots: FrozenLocalBenchmarkDeckSnapshot[];
-  }
-).snapshots;
-const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = (
-  realSceneBenchmarkDeckSnapshotsData as {
-    snapshots: FrozenLocalBenchmarkDeckSnapshot[];
-  }
-).snapshots;
-
-const LOCAL_REALISTIC_BENCHMARK_DECKS =
-  localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest;
-const REAL_SCENE_BENCHMARK_DECKS =
-  realSceneBenchmarkDecksData as RealSceneBenchmarkDeckManifest;
 const BENCHMARK_RUNTIME_CARDS_BY_ID = createRuntimeCardsById();
 const BENCHMARK_DECK_FORMAT_PROFILE: DeckFormatProfile =
   (deckFormatProfiles130Data.profiles as DeckFormatProfile[]).find(
