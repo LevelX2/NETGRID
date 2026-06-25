@@ -437,7 +437,7 @@ import {
   discardEvidenceForInput,
 } from "./runtime/discard-plan";
 import {
-  discardKeepScore as discardKeepScoreRuntime,
+  createDiscardKeepScore,
 } from "./runtime/discard-keep-score";
 import {
   isSearchChoice,
@@ -3944,6 +3944,15 @@ const {
     ),
   visibleBreakerRoles: visibleBreakerRolesForAi,
 });
+const discardKeepScore = createDiscardKeepScore({
+  rolesForCardId,
+  definitionTypeForCardId: cardDefinitionTypeForAi,
+  visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
+  runnerCardAddressesVisibleBreakerNeed,
+  runnerBadPublicityOrTraceTechCard,
+  isRunnerEconomyRole,
+  runnerCardLooksLikeCreditPayout,
+});
 const {
   semanticRuntimeRunnerMultiRunEventExclusion,
   runnerMultiRunEventAssessment,
@@ -6870,23 +6879,6 @@ function selectedChoicesForDecision(
     selectedRunnerForcedProgramTrashOptionIds,
     extractAiFeatures,
     rolesForCardId,
-  });
-}
-
-function discardKeepScore(
-  input: AiDecisionInput,
-  card: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"][number]["card"],
-) {
-  return discardKeepScoreRuntime(input, card, {
-    rolesForCardId,
-    definitionTypeForCardId: cardDefinitionTypeForAi,
-    visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-    runnerCardAddressesVisibleBreakerNeed,
-    runnerBadPublicityOrTraceTechCard,
-    isRunnerEconomyRole,
-    runnerCardLooksLikeCreditPayout,
   });
 }
 

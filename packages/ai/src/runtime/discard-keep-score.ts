@@ -144,3 +144,12 @@ export function discardKeepScore(
     ]),
   };
 }
+
+export function createDiscardKeepScore(
+  dependencies: DiscardKeepScoreDependencies,
+): (
+  input: AiDecisionInput,
+  card: VisibleCard | undefined,
+) => DiscardCandidateScore {
+  return (input, card) => discardKeepScore(input, card, dependencies);
+}
