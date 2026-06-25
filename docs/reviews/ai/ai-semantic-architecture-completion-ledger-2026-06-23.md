@@ -2878,6 +2878,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
+- `AI-COMPLETE-03` zweihundertvierundachtzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/visible-card-lookup.ts` kapselt den generischen bekannten Visible-Card-Lookup über PlayerView-Zonen.
+  - `packages/ai/src/index.ts` importiert `findVisibleCard` und entfernt den lokalen Lookup-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.746 auf 24.735 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 77 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 141 Dateien, 1602 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

@@ -170,6 +170,7 @@ import {
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
+import { findVisibleCard } from "./runtime/visible-card-lookup";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -11206,19 +11207,6 @@ function shellTradersPrepareBaselinePenalty(
   if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2)
     penalty += 70;
   return penalty;
-}
-
-function findVisibleCard(input: AiDecisionInput, instanceId: string) {
-  const zones = [
-    input.playerView.own.gripOrHq,
-    input.playerView.own.heapOrArchives,
-    input.playerView.own.scoreArea,
-    input.playerView.own.rig ?? [],
-    ...input.playerView.servers.flatMap((server) => [server.ice, server.root]),
-  ];
-  return zones
-    .flat()
-    .find((card) => card.instanceId === instanceId && card.known);
 }
 
 function semanticRuntimeVisibleSourceCard(
