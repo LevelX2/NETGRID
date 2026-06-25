@@ -256,6 +256,7 @@ describe("AI public export contract", () => {
       "./simulation/card-metric-lookup",
       "./simulation/progression-action-sequence",
       "./simulation/simulation-metric-aggregation",
+      "./simulation/visible-break-cost-metric",
       "./reports/shadow-league-report-formatters",
       "./reports/selfplay-promotion-activity-formatters",
     ];

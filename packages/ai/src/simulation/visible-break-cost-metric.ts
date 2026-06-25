@@ -1,0 +1,30 @@
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+
+export function visibleBreakCostForKnownIceDefinition(
+  input: AiDecisionInput,
+  definitionId: string,
+): number {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  if (!definition) return 0;
+  const assessment = assessKnownRezzedIcePath(
+    [
+      {
+        instanceId: `known_unrezzed_${definitionId}`,
+        known: true,
+        definitionId,
+        type: "ice",
+        subtypes: definition.subtypes ?? [],
+        rezzed: true,
+        strength: definition.strength,
+        subroutines: definition.subroutines ?? [],
+        owner: "corp",
+        controller: "corp",
+      } as VisibleCard,
+    ],
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+  );
+  return assessment.visibleBreakCost ?? 0;
+}

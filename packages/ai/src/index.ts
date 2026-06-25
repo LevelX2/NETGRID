@@ -410,6 +410,7 @@ import {
   remoteRootTrashCostForMetrics,
   trashCostForDefinitionForMetrics,
 } from "./simulation/card-metric-lookup";
+import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
@@ -25146,33 +25147,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function visibleBreakCostForKnownIceDefinition(
-  input: AiDecisionInput,
-  definitionId: string,
-): number {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
-  if (!definition) return 0;
-  const assessment = assessKnownRezzedIcePath(
-    [
-      {
-        instanceId: `known_unrezzed_${definitionId}`,
-        known: true,
-        definitionId,
-        type: "ice",
-        subtypes: definition.subtypes ?? [],
-        rezzed: true,
-        strength: definition.strength,
-        subroutines: definition.subroutines ?? [],
-        owner: "corp",
-        controller: "corp",
-      } as VisibleCard,
-    ],
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-  );
-  return assessment.visibleBreakCost ?? 0;
 }
 
 function isCentralPressureCardForMetrics(
