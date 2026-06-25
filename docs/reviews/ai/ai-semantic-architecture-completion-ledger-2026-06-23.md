@@ -2968,6 +2968,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
+- `AI-COMPLETE-03` zweihundertvierundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/tag-punish-payoff-mapping.ts` kapselt Ontology-Payoff-Mappings auf sichtbare Payoff-Kategorien und Corp-Punish-Kinds.
+  - `packages/ai/src/index.ts` importiert `corpVisibleTagPayoffCategoryFromOntology` und `corpPunishKindFromOntologyPayoff` und entfernt die lokalen Mapping-Helfer.
+  - `packages/ai/src/index.ts` sank weiter von 24.566 auf 24.534 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 146 Dateien, 1628 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

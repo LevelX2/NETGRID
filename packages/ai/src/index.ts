@@ -188,6 +188,10 @@ import {
 import {
   tagPunishPayoffPriorityBonus,
 } from "./runtime/tag-punish-payoff-priority";
+import {
+  corpPunishKindFromOntologyPayoff,
+  corpVisibleTagPayoffCategoryFromOntology,
+} from "./runtime/tag-punish-payoff-mapping";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -9605,23 +9609,6 @@ function corpVisibleTagPayoffCategoryForAction(
   return "unknown";
 }
 
-function corpVisibleTagPayoffCategoryFromOntology(
-  payoffKind: StructuredTagPunishPayoffKind,
-): CorpVisibleTagPayoffCategory {
-  switch (payoffKind) {
-    case "damage":
-    case "scored_agenda_damage_like":
-      return "damage";
-    case "economic":
-      return "economic";
-    case "resource_trash":
-    case "hardware_trash":
-      return "trash";
-    default:
-      return "unknown";
-  }
-}
-
 function applyCorpVisibleTagPunishTakenWindowDiagnostics(
   diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
   input: AiDecisionInput,
@@ -10835,27 +10822,6 @@ function corpVisibleRunnerResourceTrashEvidence(
     };
   }
   return { valueBonus: 0, evidence: [] };
-}
-
-function corpPunishKindFromOntologyPayoff(
-  payoffKind: StructuredTagPunishPayoffKind,
-): CorpPunishKind {
-  switch (payoffKind) {
-    case "damage":
-      return "scorched_earth_like";
-    case "economic":
-      return "closed_accounts_like";
-    case "resource_trash":
-      return "resource_trash_like";
-    case "hardware_trash":
-      return "power_grid_overload_like";
-    case "scored_agenda_damage_like":
-      return "scored_agenda_damage_like";
-    case "scored_agenda_trace_tag_like":
-      return "scored_agenda_trace_tag_like";
-    default:
-      return "unknown";
-  }
 }
 
 function corpOntologyPayoffAvailableForTagSource(
