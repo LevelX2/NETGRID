@@ -141,6 +141,7 @@ import {
 import {
   remoteTrashActionTotalCost,
   remoteTrashCostBucket,
+  remoteTrashDedicatedCreditsForMetrics,
   type RemoteTrashCostBucket,
 } from "./runtime/remote-trash-cost";
 import {
@@ -26895,58 +26896,6 @@ function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
       action.side === "runner" &&
       action.type === "trash_accessed_card" &&
       isRemoteServerTarget(input.playerView.run?.attackedServerId),
-  );
-}
-
-function remoteTrashDedicatedCreditsForMetrics(
-  input: AiDecisionInput,
-  action: LegalAction,
-  accessed: VisibleCard,
-): number {
-  const scatter =
-    accessed.type === "upgrade" &&
-    typeof action.payload?.scatterShotRecurringCreditsAvailable === "number"
-      ? action.payload.scatterShotRecurringCreditsAvailable
-      : 0;
-  const poltergeist =
-    accessed.type === "asset" &&
-    typeof action.payload?.poltergeistRecurringCreditsAvailable === "number"
-      ? action.payload.poltergeistRecurringCreditsAvailable
-      : 0;
-  const payloadCredits = scatter + poltergeist;
-  const rigCredits =
-    input.playerView.own.rig?.reduce((sum, card) => {
-      const runtimeDefinition = card.definitionId
-        ? RUNTIME_CARDS[card.definitionId]
-        : undefined;
-      const demoDefinition = card.definitionId
-        ? DEMO_CARDS_BY_ID[card.definitionId]
-        : undefined;
-      const mechanics = [
-        ...("mechanics" in (runtimeDefinition ?? {})
-          ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
-              ?.mechanics ?? [])
-          : []),
-        ...(demoDefinition?.mechanics ?? []),
-      ];
-      const supportsUpgradeTrash =
-        accessed.type === "upgrade" &&
-        mechanics.some((mechanic: string) =>
-          mechanic.includes("upgrade_trash_payment"),
-        );
-      const supportsAssetTrash =
-        accessed.type === "asset" &&
-        mechanics.some((mechanic: string) =>
-          mechanic.includes("node_trash_recurring_credit"),
-        );
-      if (!supportsUpgradeTrash && !supportsAssetTrash) return sum;
-      return (
-        sum + (card.counters?.recurring_credit ?? 0) + (card.counters?.bit ?? 0)
-      );
-    }, 0) ?? 0;
-  return Math.min(
-    remoteTrashActionTotalCost(action),
-    Math.max(payloadCredits, rigCredits),
   );
 }
 
