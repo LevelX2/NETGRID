@@ -190,14 +190,14 @@ Gesamtvalidierung und lokaler Main-Abgleich im Arbeitsbranch sind abgeschlossen.
 
 Umgesetzt:
 
-- Lokaler `main` wurde konfliktfrei in `codex/deck-strategy-runtime-hardening` gemergt.
+- Lokaler `main` wurde konfliktfrei in `codex/deck-strategy-runtime-hardening` gemergt; ein späterer zusätzlicher Main-Commit wurde mit `0c92c209` ebenfalls integriert.
 - `docs/reviews/ai/deck-strategy-runtime-hardening-final-report-2026-06-25.md` fasst den gehärteten Runtime-Vertrag, die Safety-Grenzen und die Abschlusschecks zusammen.
 - Die Wissensbasis verweist auf den finalen Hardening-Stand.
 
 Checks:
 
-- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
-- `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1643 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün nach finalem Main-Sync.
+- `corepack pnpm --filter @netgrid/ai test`: grün nach finalem Main-Sync, 148 Testdateien und 1643 Tests.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
 ## DSR-H00-Ergebnis

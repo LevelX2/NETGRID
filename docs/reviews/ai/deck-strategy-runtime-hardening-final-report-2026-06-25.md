@@ -20,7 +20,12 @@ Der Hardening-Lauf DSR-H00 bis DSR-H09 ist im Arbeitsbranch abgeschlossen. Die D
 
 ## Integration
 
-Der lokale `main`-Stand wurde vor der Abschlussvalidierung konfliktfrei in den Arbeitsbranch gemergt: `e3da5b39 Merge branch 'main' into codex/deck-strategy-runtime-hardening`.
+Der lokale `main`-Stand wurde vor der Abschlussvalidierung konfliktfrei in den Arbeitsbranch gemergt. Weil `main` während H09 noch einmal weiterlief, wurde der Abgleich wiederholt:
+
+- `e3da5b39 Merge branch 'main' into codex/deck-strategy-runtime-hardening`
+- `0c92c209 Merge branch 'main' into codex/deck-strategy-runtime-hardening`
+
+Die finalen H09-Gates wurden nach `0c92c209` erneut ausgeführt.
 
 ## Verifikation im Arbeitsbranch
 
