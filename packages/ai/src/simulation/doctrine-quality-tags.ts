@@ -1,10 +1,12 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type {
+  AiDoctrineQualityCaseAnalysis,
   AiDoctrineQualityCaseExample,
   AiDoctrineQualityMetricName,
   AiDoctrineQualityMetrics,
   AiSimulationSummary,
 } from "../index";
+import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { countValue as countTag } from "../runtime/collection";
 import { DOCTRINE_QUALITY_METRIC_NAMES } from "./simulation-metric-aggregation";
 
@@ -192,4 +194,13 @@ export function doctrineCaseExample(
     ...(entry.targetServerId ? { targetServerId: entry.targetServerId } : {}),
     qualityTags: entry.qualityTags.slice().sort(),
   };
+}
+
+export function isRedactionSafeCaseAnalysis(
+  analysis: AiDoctrineQualityCaseAnalysis,
+): boolean {
+  const serialized = JSON.stringify(analysis);
+  return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
+    serialized.includes(needle),
+  );
 }

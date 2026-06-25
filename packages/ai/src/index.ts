@@ -399,6 +399,7 @@ import {
   emptyDoctrineCaseExamples,
   isAgendaFloodExposureExemptAction,
   isEconomyStallExemptAction,
+  isRedactionSafeCaseAnalysis,
   repeatedLowValueCentralRunTags,
 } from "./simulation/doctrine-quality-tags";
 import {
@@ -25995,15 +25996,6 @@ function qualityTagsForAction(
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
-}
-
-function isRedactionSafeCaseAnalysis(
-  analysis: AiDoctrineQualityCaseAnalysis,
-): boolean {
-  const serialized = JSON.stringify(analysis);
-  return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
-    serialized.includes(needle),
-  );
 }
 
 function isHoldoutSeed(seed: string): boolean {
