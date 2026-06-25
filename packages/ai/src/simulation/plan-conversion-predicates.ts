@@ -208,6 +208,23 @@ export function isRunnerCentralPressureAction(
   );
 }
 
+export function planKindForConversion(
+  entry: PlanConversionDecisionEntry,
+): string | undefined {
+  const explicitPlan = entry.reasonCode?.match(
+    /^(?:runner|corp)\.plan\.([a-z0-9_]+)/i,
+  )?.[1];
+  if (explicitPlan) return explicitPlan;
+  if (isRunnerSetupAction(entry)) return "setup";
+  if (isRunnerEconomyProgressAction(entry)) return "economy";
+  if (isRunnerRigProgressAction(entry)) return "rig";
+  if (isCorpRemoteBuildAction(entry)) return "remote_build";
+  if (isCorpRemoteAdvancementProgressForPlan(entry)) return "advance";
+  if (isRunnerRemoteContestRun(entry)) return "remote_contest";
+  if (isRunnerCentralPressureAction(entry)) return "central_pressure";
+  return undefined;
+}
+
 export function remoteTargetsMatch(
   first: PlanConversionDecisionEntry,
   second: PlanConversionDecisionEntry,
@@ -222,6 +239,15 @@ export function serverTargetsMatch(
 ): boolean {
   if (!first.targetServerId || !second.targetServerId) return true;
   return first.targetServerId === second.targetServerId;
+}
+
+function isCorpRemoteAdvancementProgressForPlan(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  if (!isRemoteServerTarget(entry.targetServerId)) return false;
+  if (entry.actionType === "advance_card") return true;
+  return (entry.advancementCountersAdded ?? 0) > 0;
 }
 
 function hasPlanConversionEvidenceFlag(

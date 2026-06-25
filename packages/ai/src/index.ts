@@ -461,6 +461,7 @@ import {
   isRunnerSetupAction,
   isStrategicPlanDecision,
   ownStrategicWindow,
+  planKindForConversion,
   previousOwnStrategicWindow,
   remoteTargetsMatch,
   serverTargetsMatch,
@@ -21386,23 +21387,6 @@ function corpProtectionConvertsToScoreSafety(
         later.protectBeforeAdvance === true ||
         planKindForConversion(later)?.includes("remote_build") === true),
   );
-}
-
-function planKindForConversion(
-  entry: PlanConversionActionEntry,
-): string | undefined {
-  const explicitPlan = entry.reasonCode?.match(
-    /^(?:runner|corp)\.plan\.([a-z0-9_]+)/i,
-  )?.[1];
-  if (explicitPlan) return explicitPlan;
-  if (isRunnerSetupAction(entry)) return "setup";
-  if (isRunnerEconomyProgressAction(entry)) return "economy";
-  if (isRunnerRigProgressAction(entry)) return "rig";
-  if (isCorpRemoteBuildAction(entry)) return "remote_build";
-  if (isCorpRemoteAdvancementProgress(entry)) return "advance";
-  if (isRunnerRemoteContestRun(entry)) return "remote_contest";
-  if (isRunnerCentralPressureAction(entry)) return "central_pressure";
-  return undefined;
 }
 
 function planIntentConvertedWithin(
