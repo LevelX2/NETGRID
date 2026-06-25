@@ -10,6 +10,7 @@ import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
 } from "../runtime/semantic-runtime-types";
+import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
 import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
 import type { TacticalPlan, TacticalPlanRuntimeResult } from "../tactical-plans";
 import { formatDebugFieldValue } from "./debug-format";
@@ -150,6 +151,8 @@ export function semanticRuntimeDebugPlanSelectionScoreBreakdown(
   const reason = [
     `rawSemanticScore:${choice.score}`,
     `finalSelectionScore:${displayScore}`,
+    "displayOnlyScore:true",
+    "runtimeScoreUnchanged:true",
     context.selectedPlanType ? `selectedPlan:${context.selectedPlanType}` : "",
     context.planMatchDisplayBoost
       ? `planMatchDisplayBoost:${context.planMatchDisplayBoost}`
@@ -179,6 +182,7 @@ export function semanticRuntimeDebugActionWhyChosen(
       "selected_by_plan_mapping",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${choice.score + context.planMatchDisplayBoost}`,
+      "displayOnlyScore:true",
       ...(context.selectedPlanType
         ? [`selectedPlan:${context.selectedPlanType}`]
         : []),
@@ -199,12 +203,64 @@ export function semanticRuntimeDebugActionWhyNot(
       mapped ? "selected_by_plan_mapping" : "excluded_by_current_plan",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${displayScore}`,
+      "displayOnlyScore:true",
       ...(displayScore < choice.score
         ? ["lower_final_score_after_adjustment"]
         : []),
     ];
   }
   return ["semantic_score_below_selected"];
+}
+
+export function semanticRuntimeDebugStrategicRuntimeItems(
+  input: AiDecisionInput,
+  selectedEvidence: readonly string[],
+): string[] {
+  const state = (input as AiDecisionInputWithDeckCapabilities)
+    .ownStrategicIntentState;
+  if (!state) return [];
+  return scrubEvidence([
+    `strategic_intent_state:${state.primaryStrategy.strategyId}`,
+    `strategic_intent_family:${state.primaryStrategy.family}`,
+    `strategic_intent_phase:${state.phase}`,
+    `strategic_intent_transition:${state.transition.status}`,
+    `strategic_intent_completeness:${state.primaryStrategy.completeness}`,
+    `strategic_intent_target:${state.targetVector.kind}`,
+    ...(state.targetVector.targetId
+      ? [`strategic_intent_target_id:${state.targetVector.targetId}`]
+      : []),
+    `strategic_intent_reserve:${state.reserve.kind}:${state.reserve.required}:${state.reserve.available ?? "unknown"}:${state.reserve.satisfied}`,
+    `strategic_intent_blocker_count:${state.blockers.length}`,
+    ...state.blockers
+      .slice(0, 4)
+      .map((blocker) => `strategic_intent_blocker:${blocker.reason}:${blocker.severity}`),
+    ...selectedEvidence
+      .filter(
+        (entry) =>
+          entry.startsWith("semantic_strategic_action_fit") ||
+          entry.startsWith("strategic_action_fit_"),
+      )
+      .slice(0, 12),
+  ]);
+}
+
+export function semanticRuntimeDebugSelectionScoreItems(
+  selected: SemanticRuntimeChoice,
+  displayScore: number,
+  context: SemanticRuntimeDebugPlanContext,
+): string[] {
+  return scrubEvidence([
+    `runtime_raw_score:${selected.score}`,
+    `debug_display_score:${displayScore}`,
+    `debug_display_score_delta:${roundScore(displayScore - selected.score)}`,
+    "display_score_only:true",
+    "runtime_score_source:semantic_components",
+    `selected_by_plan_mapping:${context.selectedByPlanMapping}`,
+    `plan_match_display_boost:${context.planMatchDisplayBoost}`,
+    ...(context.selectedPlanType
+      ? [`selected_plan_type:${context.selectedPlanType}`]
+      : []),
+  ]);
 }
 
 export function semanticRuntimeDebugRankedAlternatives(

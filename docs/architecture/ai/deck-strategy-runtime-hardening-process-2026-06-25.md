@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H05_done`
+Status: `DSR-H06_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -82,8 +82,8 @@ preflight
 4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `done`.
 5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `done`.
 6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `done`.
-7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `active`.
-8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `pending`.
+7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `done`.
+8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `active`.
 9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `pending`.
 10. `DSR-H09` Gesamtvalidierung, Source-Review und Integration. Status: `pending`.
 
@@ -166,6 +166,10 @@ Commit: `feat(ai): refine strategic action fit`
 Ziel: DecisionDebug trennt echte Runtime-Scores, display-only Erklärung, Strategy/Intent, Goals, Plan, Fit und Override redaction-safe.
 
 Kernartefakte: `diagnostics/semantic-runtime-debug.ts`, `diagnostics/semantic-runtime-decision-debug.ts`, Debug-Tests.
+
+Ergebnis: DecisionDebug enthält nun separate redaction-safe Sektionen für strategischen Runtime-State/Fit und den Score-Vertrag. Runtime-Rohscore, Debug-Anzeigescore, Plan-Mapping-Boost und display-only Status werden ausdrücklich getrennt; `finalSelectionScore` bleibt nur als Anzeige-/Erklärwert markiert.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `decision-debug`, `semantic-runtime-debug`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices` grün mit 82 Tests; vollständiger `@netgrid/ai`-Testlauf grün mit 148 Testdateien und 1641 Tests; Diff-Check grün.
 
 Commit: `feat(ai): explain strategic runtime decisions`
 

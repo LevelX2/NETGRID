@@ -21,6 +21,8 @@ describe("DecisionDebug diagnostics", () => {
       ],
       selectedPlan: { planId: "runner-plan-1", type: "runner.build_credit_bank" },
       selectedStepKind: "gain_credits",
+      strategicRuntimeItems: ["strategic_intent_state:runner.rnd_pressure"],
+      selectionScoreItems: ["runtime_raw_score:120", "display_score_only:true"],
       tacticalPlanItems: ["selected_step_kind:gain_credits"],
       memoryItems: ["memory_fact:visible"],
       memorySectionTitle: "Memory",
@@ -43,6 +45,16 @@ describe("DecisionDebug diagnostics", () => {
     );
     expect(diagnostics.detailSections).toEqual([
       expect.objectContaining({ id: "semantic_runtime" }),
+      {
+        id: "strategic_runtime",
+        title: "Strategic Runtime",
+        items: ["strategic_intent_state:runner.rnd_pressure"],
+      },
+      {
+        id: "selection_score",
+        title: "Selection Score",
+        items: ["runtime_raw_score:120", "display_score_only:true"],
+      },
       {
         id: "tactical_plan",
         title: "Tactical Plan",

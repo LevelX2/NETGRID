@@ -126,6 +126,26 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1640 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H06-Ergebnis
+
+Status: `done`
+
+DecisionDebug trennt Strategie, State, Auswahlbegründung und Anzeige-Scores jetzt explizit.
+
+Umgesetzt:
+
+- Neue Debug-Sektion `strategic_runtime` mit StrategicIntent-State, Phase, Transition, Target, Reserve, Blockern und ausgewählter StrategicActionFit-Evidence.
+- Neue Debug-Sektion `selection_score` mit `runtime_raw_score`, `debug_display_score`, Delta, Plan-Mapping-Boost und `display_score_only:true`.
+- Plan-Mapping-Scorebreakdowns und Why-Chosen/Why-Not enthalten `displayOnlyScore:true` und `runtimeScoreUnchanged:true`, damit `finalSelectionScore` nicht als produktiver Rohscore missverstanden wird.
+- Ein Runtime-Test prüft die neuen Sektionen in echter `chooseRunnerAction`-DecisionDebug-Ausgabe.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `decision-debug`, `semantic-runtime-debug`, `semantic-ai-runtime-cutover`, `strategic-vertical-slices`: grün, 82 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 148 Testdateien und 1641 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.

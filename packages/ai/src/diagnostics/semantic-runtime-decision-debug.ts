@@ -22,6 +22,8 @@ import {
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
   semanticRuntimeDebugShadowTopItems,
+  semanticRuntimeDebugSelectionScoreItems,
+  semanticRuntimeDebugStrategicRuntimeItems,
   semanticRuntimeDebugTacticalPlanItems,
   semanticRuntimeDebugTargetChoiceShadowItems,
 } from "./semantic-runtime-debug";
@@ -83,6 +85,15 @@ export function buildSemanticRuntimeDecisionDebug({
         }
       : {}),
     ...(selectedStep ? { selectedStepKind: selectedStep.kind } : {}),
+    strategicRuntimeItems: semanticRuntimeDebugStrategicRuntimeItems(
+      input,
+      selected.evidence,
+    ),
+    selectionScoreItems: semanticRuntimeDebugSelectionScoreItems(
+      selected,
+      selectedDisplayScore,
+      selectedPlanSelection,
+    ),
     ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
       ? { tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime) }
       : {}),

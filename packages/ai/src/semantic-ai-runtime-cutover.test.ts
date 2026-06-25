@@ -430,6 +430,25 @@ describe("Semantic AI runtime cutover", () => {
         }),
       ]),
     );
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "strategic_runtime",
+          items: expect.arrayContaining([
+            "strategic_intent_state:runner.rnd_pressure",
+            "strategic_intent_target_id:rd",
+            "strategic_action_fit_target_match:exact",
+          ]),
+        }),
+        expect.objectContaining({
+          id: "selection_score",
+          items: expect.arrayContaining([
+            expect.stringMatching(/^runtime_raw_score:/),
+            "display_score_only:true",
+          ]),
+        }),
+      ]),
+    );
   });
 
   it("persists StrategicIntent memory by default and respects preview mode", () => {

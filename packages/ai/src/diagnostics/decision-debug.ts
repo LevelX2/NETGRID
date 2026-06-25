@@ -32,6 +32,8 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   selectedEvidence?: readonly string[];
   selectedPlan?: SemanticDecisionDebugPlanReference;
   selectedStepKind?: string;
+  strategicRuntimeItems?: readonly string[];
+  selectionScoreItems?: readonly string[];
   tacticalPlanItems?: readonly string[];
   memoryItems?: readonly string[];
   memorySectionTitle?: string;
@@ -158,6 +160,24 @@ export function buildSemanticDecisionDebugDiagnostics(
       title: "Semantic Runtime",
       items: detailItems,
     },
+    ...(input.strategicRuntimeItems && input.strategicRuntimeItems.length > 0
+      ? [
+          {
+            id: "strategic_runtime",
+            title: "Strategic Runtime",
+            items: sideSafeDebugItems(input.strategicRuntimeItems),
+          },
+        ]
+      : []),
+    ...(input.selectionScoreItems && input.selectionScoreItems.length > 0
+      ? [
+          {
+            id: "selection_score",
+            title: "Selection Score",
+            items: sideSafeDebugItems(input.selectionScoreItems),
+          },
+        ]
+      : []),
     ...semanticDecisionTraceDiagnosticSections([
       {
         id: "semantic_shadow_top",
