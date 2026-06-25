@@ -166,6 +166,7 @@ import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
+import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -669,7 +670,6 @@ import {
 } from "./legacy/legacy-baseline";
 import {
   selectEfficientPostBidLinkOption,
-  selectEfficientTraceBidOption,
 } from "./trace-bid-efficiency";
 import {
   evaluateTacticalPlans,
@@ -7447,44 +7447,13 @@ function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
 
-  const bidOptions = choice.options
-    .map((option) => ({
-      id: option.id,
-      amount: typeof option.value === "number" ? option.value : Number.NaN,
-    }))
-    .filter((option) => Number.isInteger(option.amount) && option.amount >= 0)
-    .sort((left, right) => left.amount - right.amount);
-  const maxBid = bidOptions.at(-1)?.amount ?? 0;
-  let desired = 0;
-  if (input.side === "corp") {
-    desired =
-      input.difficulty === "hard"
-        ? Math.min(2, maxBid)
-        : input.difficulty === "normal"
-          ? Math.min(1, maxBid)
-          : 0;
-  } else {
-    const traceContext = latestTraceContext(input);
-    const tieBid = Math.max(
-      0,
-      (traceContext.traceStrength ?? 0) - (traceContext.runnerLink ?? 0),
-    );
-    desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, tieBid);
-  }
-  let selected =
-    bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
-  if (input.side === "runner" && selected) {
-    const traceContext = latestTraceContext(input);
-    selected =
-      selectEfficientTraceBidOption({
-        side: input.side,
-        bidOptions,
-        desiredAmount: desired,
-        ...traceContext,
-      }).option ?? selected;
-  }
-  return selected
-    ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
+  const selectedOptionId = selectedBidChoiceOptionId(
+    input,
+    choice,
+    latestTraceContext(input),
+  );
+  return selectedOptionId !== undefined
+    ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
 }
 
