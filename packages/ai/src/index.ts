@@ -113,11 +113,12 @@ import {
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { buildObservedFacts } from "./observed-facts-public";
 import {
-  FORBIDDEN_AI_INPUT_FIELDS,
   buildAiDecisionInput,
   selectAiDecisionSideForState,
   type AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
+import { assertAiInputIsSideSafe } from "./simulation/side-safe-input";
+import { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
@@ -930,6 +931,8 @@ export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
+export { assertAiInputIsSideSafe } from "./simulation/side-safe-input";
+export { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 
 export {
   chooseCorpPlanAction,
@@ -2662,13 +2665,6 @@ const {
   semanticRuntimeScoreFromComponents,
 );
 
-export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
-  const serialized = JSON.stringify(input);
-  if (FORBIDDEN_AI_INPUT_FIELDS.some((needle) => serialized.includes(needle)))
-    return false;
-  return true;
-}
-
 function selfplayTraceFactsForDecision(decision: AiDecision): {
   planKind?: string;
   debugFacts?: string[];
@@ -3416,23 +3412,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     ambiguousNames: [],
     unsupportedCards,
     nonDeckLegalCards,
-  };
-}
-
-export function createBeliefSimulationWorld(
-  input: AiDecisionInput,
-  seed: string = `${input.seed}:belief:${input.actionNumber}`,
-): SimulationWorld {
-  const belief = reconstructBeliefState(input);
-  const hypotheses = belief.entries
-    .filter((entry) => entry.kind === "hypothesis")
-    .map((entry) => entry.subject);
-  return {
-    worldId: `simworld:${input.side}:${belief.version}:${seed}`,
-    sourceBeliefVersion: belief.version,
-    seed,
-    hiddenAssumptions: hypotheses.slice(0, 12),
-    redactionSafe: assertAiInputIsSideSafe(input),
   };
 }
 
