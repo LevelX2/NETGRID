@@ -7,7 +7,6 @@ import {
   applyAction,
   createGame,
   createGameAfterSetup,
-  getLegalActions,
   getPlayerView,
   hashState,
   replayEvents,
@@ -668,6 +667,10 @@ import {
   selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime,
   stripSelfplayActionAlternatives as stripSelfplayActionAlternativesRuntime,
 } from "./simulation/selfplay-trace-facts";
+import {
+  applyFixtureAction,
+  applyFixtureChoiceFirstOption,
+} from "./simulation/fixture-actions";
 import {
   countPassiveActionWithScoreLineAvailable,
   countUnsafeScoreChosen,
@@ -6698,68 +6701,6 @@ function evaluateV143RndRepeatAccessFreshnessFixture(
       ? "ok:selected_gain_credit_on_stale_rnd_top"
       : `expected_gain_credit_on_stale_rnd_top:selected_${selectedType}:reason_${decision.reasonCode}`,
   };
-}
-
-function applyFixtureAction(
-  state: GameState,
-  side: Side,
-  predicate: (action: LegalAction) => boolean,
-  label: string,
-): { ok: true; state: GameState } | { ok: false; message: string } {
-  const legalAction = getLegalActions(state, side).find(predicate);
-  if (!legalAction) {
-    return { ok: false, message: `missing_legal_action:${label}` };
-  }
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: legalAction.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    idempotencyKey: `${label}:${state.stateVersion}:${legalAction.actionId}`,
-  });
-  if (!result.ok) {
-    return {
-      ok: false,
-      message: `${label}:${result.error.code}:${result.error.message}`,
-    };
-  }
-  return { ok: true, state: result.state };
-}
-
-function applyFixtureChoiceFirstOption(
-  state: GameState,
-  side: Side,
-  label: string,
-): { ok: true; state: GameState } | { ok: false; message: string } {
-  const pendingChoice = state.pendingChoice;
-  if (!pendingChoice || pendingChoice.side !== side)
-    return { ok: false, message: `missing_pending_choice:${label}` };
-  const optionId = selectableChoiceOptions(pendingChoice.options)[0]?.id;
-  if (optionId === undefined || optionId === null)
-    return { ok: false, message: `missing_choice_option:${label}` };
-  const choiceAction = getLegalActions(state, side).find(
-    (action) => action.type === "resolve_choice",
-  );
-  if (!choiceAction)
-    return { ok: false, message: `missing_resolve_choice_action:${label}` };
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: choiceAction.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    selectedChoices: {
-      choiceId: pendingChoice.choiceId,
-      selectedOptionIds: [String(optionId)],
-    },
-    idempotencyKey: `${label}:${state.stateVersion}:${choiceAction.actionId}`,
-  });
-  if (!result.ok) {
-    return {
-      ok: false,
-      message: `${label}:${result.error.code}:${result.error.message}`,
-    };
-  }
-  return { ok: true, state: result.state };
 }
 
 function simulationDeckConfig(
