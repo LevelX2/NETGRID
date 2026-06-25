@@ -412,6 +412,7 @@ import {
   trashCostForDefinitionForMetrics,
 } from "./simulation/card-metric-lookup";
 import {
+  centralPressureTargetIsGoodForMetrics,
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
@@ -25138,35 +25139,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function centralPressureTargetIsGoodForMetrics(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === target,
-  );
-  if (!server) return false;
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
-  if (assessment.blocked) return false;
-  const cheap =
-    (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
-  if (!cheap) return false;
-  if (target === "archives")
-    return server.root.some((card) => card.known && card.type === "agenda");
-  if (
-    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <=
-    2
-  )
-    return true;
-  if (target === "hq") return input.playerView.opponent.handCount >= 3;
-  return true;
 }
 
 function bestTrueCentralCloseoutProfileForMetrics(input: AiDecisionInput): {

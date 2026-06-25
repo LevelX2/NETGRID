@@ -3,7 +3,9 @@ import { cardRolesForId } from "../runtime/card-role-lookup";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
 import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
+import type { AiDecisionInput } from "@netgrid/shared";
 import { definitionTypeForMetrics } from "./card-metric-lookup";
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
 const CENTRAL_PRESSURE_AI_HINTS = createAiHintsByCard();
 
@@ -53,4 +55,33 @@ export function centralPressureTargetsForCard(
 
 function centralPressureRolesForCard(definitionId: string): string[] {
   return cardRolesForId(definitionId, CENTRAL_PRESSURE_AI_HINTS);
+}
+
+export function centralPressureTargetIsGoodForMetrics(
+  input: AiDecisionInput,
+  target: CentralServerId,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === target,
+  );
+  if (!server) return false;
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (assessment.blocked) return false;
+  const cheap =
+    (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
+  if (!cheap) return false;
+  if (target === "archives")
+    return server.root.some((card) => card.known && card.type === "agenda");
+  if (
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <=
+    2
+  )
+    return true;
+  if (target === "hq") return input.playerView.opponent.handCount >= 3;
+  return true;
 }
