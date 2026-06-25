@@ -603,6 +603,7 @@ import {
 import {
   metricsForSimulationActionSequence,
   type AiQualityMetrics,
+  type AiSoakResult,
 } from "./simulation/quality-metrics";
 import {
   hasRunnerInstallableBreakerActionForSimulation,
@@ -778,7 +779,10 @@ export type {
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
 } from "./simulation/benchmark-deck-types";
-export type { AiQualityMetrics } from "./simulation/quality-metrics";
+export type {
+  AiQualityMetrics,
+  AiSoakResult,
+} from "./simulation/quality-metrics";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
@@ -2605,20 +2609,6 @@ export type AiMatchProgressionBenchmarkResult = {
   profileComparisons: AiMatchProgressionProfileComparison[];
   baselineRun: V143SimulationRunResult;
   candidateRun: V143SimulationRunResult;
-};
-
-export type AiSoakResult = {
-  summaries: AiSimulationSummary[];
-  aggregate: {
-    seeds: number;
-    illegalActions: number;
-    replayFailures: number;
-    fallbackRate: number;
-    timeoutRate: number;
-    reasonCodeCoverage: string[];
-    actionTypeCoverage: string[];
-    holdoutSeeds: string[];
-  };
 };
 
 export type {

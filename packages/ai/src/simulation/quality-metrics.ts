@@ -14,6 +14,20 @@ export type AiQualityMetrics = {
   doctrine: AiDoctrineQualityMetrics;
 };
 
+export type AiSoakResult = {
+  summaries: AiSimulationSummary[];
+  aggregate: {
+    seeds: number;
+    illegalActions: number;
+    replayFailures: number;
+    fallbackRate: number;
+    timeoutRate: number;
+    reasonCodeCoverage: string[];
+    actionTypeCoverage: string[];
+    holdoutSeeds: string[];
+  };
+};
+
 export function metricsForSimulationActionSequence(
   actionSequence: AiSimulationSummary["actionSequence"],
   errors: string[],
