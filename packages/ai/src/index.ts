@@ -177,6 +177,7 @@ import {
   sourceDefinitionIdForAction,
 } from "./runtime/visible-card-lookup";
 import { titleForCardId } from "./runtime/card-title";
+import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -10883,15 +10884,6 @@ function corpVisibleRunnerRigTrashTarget(
   return (input.playerView.opponent.rig ?? []).find(
     (card) => card.known && targetIds.includes(card.instanceId),
   );
-}
-
-function corpVisibleCardStoredCredits(card: VisibleCard): number {
-  return Object.entries(card.counters ?? {}).reduce((total, [key, value]) => {
-    const normalizedKey = key.toLowerCase();
-    if (!normalizedKey.includes("credit") && normalizedKey !== "bit")
-      return total;
-    return total + (typeof value === "number" ? value : 0);
-  }, 0);
 }
 
 function corpVisibleRunnerHardwareTrashTarget(
