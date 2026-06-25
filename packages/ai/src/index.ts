@@ -4670,7 +4670,7 @@ function breakAccessPathAssessment(
     };
 
   const creditsAfterBreak =
-    input.playerView.own.credits - creditCostForAiAction(action);
+    input.playerView.own.credits - actionCreditCost(action);
   const remainingCurrentEndRunAfterBreak =
     quote && breakIndexes.size > 0
       ? quote.subroutines.filter(
@@ -11125,7 +11125,7 @@ function shellTradersDirectInstallUrgency(
   directInstall: LegalAction,
 ): number {
   const remainingCredits =
-    input.playerView.own.credits - creditCostForAiAction(directInstall);
+    input.playerView.own.credits - actionCreditCost(directInstall);
   let urgency = 0;
   if (
     roles.some(
@@ -11157,7 +11157,7 @@ function shellTradersDirectInstallPreparePenalty(
   input: AiDecisionInput,
 ): number {
   let penalty = 35 + Math.min(170, urgency);
-  if (input.playerView.own.credits - creditCostForAiAction(directInstall) >= 2)
+  if (input.playerView.own.credits - actionCreditCost(directInstall) >= 2)
     penalty += 35;
   return penalty;
 }
@@ -11735,7 +11735,7 @@ function pumpViabilityAssessment(
     };
   }
 
-  const pumpCost = creditCostForAiAction(action);
+  const pumpCost = actionCreditCost(action);
   const pumpAmount = pumpStrengthAmountForAction(action, breaker.definitionId);
   if (pumpCost < 0 || pumpAmount <= 0)
     return {
@@ -12141,7 +12141,7 @@ function estimatedEncounterBreakCost(
         breakerIdForEncounterAction(candidate) === breakerId &&
         (!targetIceId || candidate.payload?.iceId === targetIceId),
     )
-    .map((candidate) => creditCostForAiAction(candidate));
+    .map((candidate) => actionCreditCost(candidate));
   if (currentBreakCosts.length > 0) return Math.min(...currentBreakCosts);
   const breaker = findVisibleCard(input, action.source);
   if (!breaker?.definitionId) return 1;
@@ -12160,7 +12160,7 @@ function encounterBreakReserveContext(
 ): { preserveReserve: boolean; evidence: string[] } {
   const reserveTarget = runnerCreditReserveTargetForInput(input);
   const creditsAfterBreak =
-    input.playerView.own.credits - creditCostForAiAction(action);
+    input.playerView.own.credits - actionCreditCost(action);
   const preserveReserve = creditsAfterBreak < Math.max(2, reserveTarget - 1);
   return {
     preserveReserve,
@@ -12301,14 +12301,6 @@ function breakerIdForEncounterAction(action: LegalAction): string | undefined {
   return action.source === "basic_action" || action.source === "game_rule"
     ? undefined
     : action.source;
-}
-
-function creditCostForAiAction(action: LegalAction): number {
-  return action.costs.reduce(
-    (sum, cost) =>
-      sum + (Number.isFinite(cost.credits) ? (cost.credits ?? 0) : 0),
-    0,
-  );
 }
 
 function pumpStrengthAmountForAction(
