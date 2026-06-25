@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-10 next`
+Status: `active: DSR-11 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -87,9 +87,9 @@ preflight
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: `fc8e7908`.
 8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: `f9381d5f`.
 9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `done`, Commit: `f44c4cc0`.
-10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `done`, Commit: pending.
-11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen. Status: `next`.
-12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration.
+10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `done`, Commit: `6b92b1d5`.
+11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen. Status: `done`, Commit: pending.
+12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration. Status: `next`.
 
 ## Paketdetails
 
@@ -383,6 +383,20 @@ Done-Gate:
 
 - Neue produktive Strategielogik hängt nicht mehr an festen alten PlanWeights.
 - Verbleibendes Legacy ist begründet.
+
+Umsetzung:
+
+- Die Semantic Runtime nutzt keine direkten `ownDeckDoctrine.planWeights`-Scorekomponenten mehr für Runner-Run-, Corp-Score-, Advance- oder Install-Entscheidungen.
+- Alte `deck_doctrine_runtime_weight`-/Suppression-Scorekomponenten und die daraus abgeleitete DecisionDebug-Sonderstrecke wurden entfernt.
+- Tests wurden auf den neuen Vertrag umgestellt: Doctrine-v1-PlanWeights bleiben in Legacy-Planern und Opening-/Discard-Fallbacks, erscheinen aber nicht mehr als produktive Semantic-Runtime-Gewichte.
+- `buildDeckDoctrineProfile`, `planWeightsFor`, Legacy-Planer und Discard-Fit bleiben begründet erhalten, weil sie Opening-Hand, Mulligan, forced legacy und Legacy-Fallbacks tragen.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/semantic-ai-runtime-cutover.test.ts src/diagnostics/semantic-runtime-debug.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `refactor(ai): remove obsolete doctrine legacy paths`
 

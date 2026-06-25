@@ -300,24 +300,6 @@ export function semanticRuntimeDebugTargetChoiceShadowItems(
   }
 }
 
-export function semanticRuntimeDebugDoctrineGoalItems(
-  input: AiDecisionInput,
-  scoreBreakdown: readonly AiDecisionScoreComponent[],
-): string[] {
-  const doctrineComponents = scoreBreakdown.filter((component) =>
-    component.key.startsWith("deck_doctrine_runtime_weight"),
-  );
-  if (doctrineComponents.length === 0) return [];
-  return scrubEvidence([
-    "doctrine_goal_trace:decision_debug",
-    `doctrine_side:${input.ownDeckDoctrine?.side ?? input.side}`,
-    ...(input.ownDeckDoctrine?.archetypeTags ?? [])
-      .slice(0, 3)
-      .map((tag) => `doctrine_archetype:${tag}`),
-    ...doctrineComponents.flatMap(doctrineGoalComponentDebugItems),
-  ]).slice(0, 24);
-}
-
 export function semanticRuntimeDebugMistakeSummaryItems(
   evidence: readonly string[],
 ): string[] {
@@ -328,40 +310,6 @@ export function semanticRuntimeDebugMistakeSummaryItems(
         entry.startsWith("observed_mistake_count:"),
     ),
   );
-}
-
-function doctrineGoalComponentDebugItems(
-  component: AiDecisionScoreComponent,
-): string[] {
-  const fields = debugReasonFields(component.reason);
-  return [
-    `doctrine_goal_component:${component.key}`,
-    `doctrine_goal_weight:${component.value}`,
-    ...(fields.get("plan") ? [`doctrine_goal_plan:${fields.get("plan")}`] : []),
-    ...(fields.get("consumer")
-      ? [`doctrine_goal_consumer:${fields.get("consumer")}`]
-      : []),
-    ...(fields.get("deck_doctrine_runtime_gate_reason")
-      ? [
-          `doctrine_goal_gate_reason:${fields.get(
-            "deck_doctrine_runtime_gate_reason",
-          )}`,
-        ]
-      : []),
-    ...(component.key === "deck_doctrine_runtime_weight_suppressed"
-      ? ["doctrine_goal_suppressed:true"]
-      : []),
-  ];
-}
-
-function debugReasonFields(reason: string | undefined): Map<string, string> {
-  const fields = new Map<string, string>();
-  for (const part of reason?.split("|") ?? []) {
-    const separator = part.indexOf(":");
-    if (separator <= 0) continue;
-    fields.set(part.slice(0, separator), part.slice(separator + 1));
-  }
-  return fields;
 }
 
 export function semanticRuntimeDebugTacticalPlanItems(

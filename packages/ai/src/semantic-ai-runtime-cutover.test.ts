@@ -214,7 +214,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
+  it("does not surface Doctrine v1 plan-weight trace items in DecisionDebug", () => {
     const rdRun = legalAction(
       "run-rd",
       "runner",
@@ -231,19 +231,13 @@ describe("Semantic AI runtime cutover", () => {
     const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
 
     expect(decision.actionId).toBe("run-rd");
-    expect(decision.decisionDebug?.detailSections).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "doctrine_goal",
-          title: "Doctrine Goal",
-          items: expect.arrayContaining([
-            "doctrine_goal_trace:decision_debug",
-            "doctrine_goal_plan:pressure_rnd",
-            "doctrine_goal_consumer:runner_pressure_rnd",
-            "doctrine_goal_weight:120",
-          ]),
-        }),
-      ]),
+    expect(
+      decision.decisionDebug?.detailSections?.some(
+        (section) => section.id === "doctrine_goal",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "doctrine_goal_weight",
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,

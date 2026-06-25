@@ -8355,7 +8355,7 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("applies deck doctrine to semantic Corp scoreline actions", () => {
+  it("does not apply DeckDoctrine v1 weights to semantic Corp scoreline actions", () => {
     const input = corpActionPhaseInput(
       "ai-corp-semantic-doctrine-scoreline",
       (state) => {
@@ -8391,19 +8391,19 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     const doctrineWeight = scoreAlternative?.scoreBreakdown?.find(
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
+    const scoreComponent = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_score_available_agenda",
+    );
 
     expect(decision.actionId).toBe(score.actionId);
-    expect(doctrineWeight?.value).toBe(240);
-    expect(String(doctrineWeight?.reason)).toContain("plan:score_now");
-    expect(String(doctrineWeight?.reason)).toContain("bounded:24");
-    expect(String(doctrineWeight?.reason)).toContain("consumer:corp_score_now");
-    expect(String(doctrineWeight?.reason)).toContain("clamp:24");
+    expect(doctrineWeight).toBeUndefined();
+    expect(scoreComponent?.value).toBe(1200);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("clamps doctrine runtime weights by Corp score-next-turn consumer", () => {
+  it("ignores DeckDoctrine v1 weights for semantic Corp score-next-turn actions", () => {
     const input = corpActionPhaseInput(
       "ai-corp-semantic-doctrine-score-next-turn-clamp",
       (state) => {
@@ -8443,22 +8443,19 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     const doctrineWeight = advanceAlternative?.scoreBreakdown?.find(
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
+    const advanceComponent = advanceAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_advance_score_line",
+    );
 
     expect(decision.actionId).toBe(advance.actionId);
-    expect(doctrineWeight?.value).toBe(180);
-    expect(String(doctrineWeight?.reason)).toContain("plan:score_next_turn");
-    expect(String(doctrineWeight?.reason)).toContain("raw:24");
-    expect(String(doctrineWeight?.reason)).toContain("bounded:18");
-    expect(String(doctrineWeight?.reason)).toContain(
-      "consumer:corp_score_next_turn",
-    );
-    expect(String(doctrineWeight?.reason)).toContain("clamp:18");
+    expect(doctrineWeight).toBeUndefined();
+    expect(advanceComponent?.value).toBe(600);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("suppresses score now doctrine when score is unsafe", () => {
+  it("keeps unsafe semantic score evidence without Doctrine v1 suppression rows", () => {
     const input = corpActionPhaseInput(
       "ai-corp-semantic-doctrine-scoreline-unsafe",
       (state) => {
@@ -8512,12 +8509,7 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       score.actionId,
     );
     expect(doctrineWeight).toBeUndefined();
-    expect(String(suppressed?.reason)).toContain(
-      "corp_scoreline_safety_gate_blocks_doctrine:true",
-    );
-    expect(String(suppressed?.reason)).toContain(
-      "score_now_doctrine_suppressed:true",
-    );
+    expect(suppressed).toBeUndefined();
     expect(safetyGate?.value).toBeLessThan(0);
     expect(String(safetyGate?.reason)).toMatch(
       /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
@@ -16190,7 +16182,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
-  it("applies deck doctrine to semantic Runner access pressure", () => {
+  it("does not apply DeckDoctrine v1 weights to semantic Runner access pressure", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-semantic-doctrine-access-pressure",
       (state) => {
@@ -16225,21 +16217,19 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const doctrineWeight = runAlternative?.scoreBreakdown?.find(
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
+    const rndPressure = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_rnd_pressure",
+    );
 
     expect(decision.actionId).toBe(rdRun.actionId);
-    expect(doctrineWeight?.value).toBe(120);
-    expect(String(doctrineWeight?.reason)).toContain("plan:pressure_rnd");
-    expect(String(doctrineWeight?.reason)).toContain("bounded:12");
-    expect(String(doctrineWeight?.reason)).toContain(
-      "consumer:runner_pressure_rnd",
-    );
-    expect(String(doctrineWeight?.reason)).toContain("clamp:12");
+    expect(doctrineWeight).toBeUndefined();
+    expect(rndPressure?.value).toBe(640);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("applies deck doctrine to semantic Runner remote contest", () => {
+  it("does not apply DeckDoctrine v1 weights to semantic Runner remote contest", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-semantic-doctrine-remote-contest",
       (state) => {
@@ -16276,20 +16266,18 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const doctrineWeight = runAlternative?.scoreBreakdown?.find(
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
-
-    expect(doctrineWeight?.value).toBe(90);
-    expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
-    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
-    expect(String(doctrineWeight?.reason)).toContain(
-      "consumer:runner_contest_remote",
+    const remoteThreat = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_remote_root_threat",
     );
-    expect(String(doctrineWeight?.reason)).toContain("clamp:9");
+
+    expect(doctrineWeight).toBeUndefined();
+    expect(remoteThreat?.value).toBeGreaterThan(0);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("suppresses remote contest doctrine on known no-payoff remotes", () => {
+  it("keeps known no-payoff remote evidence without Doctrine v1 suppression rows", () => {
     const input = knownRemoteRootMemoryInput(
       "ai-runner-doctrine-known-no-payoff-remote",
       "onr_v1_311_braindance-campaign",
@@ -16329,19 +16317,13 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(doctrineWeight).toBeUndefined();
-    expect(suppressed?.value).toBe(0);
-    expect(String(suppressed?.reason)).toContain(
-      "runner_known_remote_no_payoff_guard:true",
-    );
-    expect(String(suppressed?.reason)).toContain(
-      "deck_doctrine_remote_contest_suppressed:true",
-    );
+    expect(suppressed).toBeUndefined();
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("keeps remote contest doctrine on plausible scoring remotes", () => {
+  it("keeps plausible scoring remote evidence without Doctrine v1 weights", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-doctrine-plausible-scoring-remote",
       (state) => {
@@ -16378,13 +16360,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const doctrineWeight = runAlternative?.scoreBreakdown?.find(
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
-
-    expect(doctrineWeight?.value).toBe(90);
-    expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
-    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
-    expect(String(doctrineWeight?.reason)).toContain(
-      "consumer:runner_contest_remote",
+    const remoteThreat = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_remote_root_threat",
     );
+
+    expect(doctrineWeight).toBeUndefined();
+    expect(remoteThreat?.value).toBeGreaterThan(0);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
