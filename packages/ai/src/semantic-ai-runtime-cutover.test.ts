@@ -773,6 +773,117 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("defers a protected but contestable remote agenda install", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-contestable-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in protected remote",
+        { credits: 0 },
+        {
+          source: agenda.instanceId,
+          payload: { placement: "root", serverId: "remote_1" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_remote_risk:unsafe_score_action_available",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(debugText).toContain("corp_remote_score_line:contestable_by_runner");
+    expect(debugText).toContain("remote_contestable_by_runner:true");
+  });
+
+  it("does not advance a protected but contestable remote score line", () => {
+    const remoteAgenda = visibleCard("contestable-remote-agenda", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-contestable-agenda",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(debugText).toContain("remote_contestable_by_runner:true");
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining(["blocked_plan_count:1"]),
+        }),
+      ]),
+    );
+  });
+
   it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
     const remoteAgenda = visibleCard("remote-agenda-below-rez-floor", "corp", "agenda", {
       advancementCounters: 1,
@@ -873,6 +984,52 @@ describe("Semantic AI runtime cutover", () => {
         "low_rez_reserve:false",
       ]),
     );
+  });
+
+  it("funds HQ rez reserve before installing unrezzable HQ ICE over agenda exposure", () => {
+    const agenda = visibleCard("agenda-in-hq", "corp", "agenda", {
+      advancementRequirement: 3,
+    });
+    const expensiveIce = visibleCard("expensive-hq-ice", "corp", "ice", {
+      rezCost: 4,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "install-hq-ice-below-rez-floor",
+        "corp",
+        "install_card",
+        "Install ICE protecting HQ",
+        { credits: 0 },
+        {
+          source: expensiveIce.instanceId,
+          payload: { placement: "ice", serverId: "hq" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [agenda, expensiveIce];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "central_rez_floor_funding_need:true",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(debugText).toContain("corp_central_rez_floor_penalty");
+    expect(debugText).toContain("corp_hq_agenda_exposure:true");
+    expect(debugText).toContain("central_rez_reserve_below_floor:true");
   });
 
   it("uses a breaker coverage plan step before a blocked remote contest", () => {

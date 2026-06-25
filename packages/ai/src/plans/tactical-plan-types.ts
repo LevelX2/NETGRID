@@ -111,6 +111,7 @@ export type PlanBlockerKind =
   | "bank_tool_not_installed"
   | "bank_empty"
   | "score_window_unprotected"
+  | "score_window_contestable"
   | "missing_rez_reserve"
   | "missing_credits"
   | "missing_legal_action"

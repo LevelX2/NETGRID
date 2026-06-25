@@ -9751,6 +9751,28 @@ function semanticRuntimeCorpScoreComponents(
         reason: rezFloor.evidence.join("|"),
       });
     }
+    const centralRezFloor = semanticRuntimeCorpCentralRezReserveAssessment(
+      input,
+      action,
+    );
+    if (centralRezFloor?.blockedByFloor) {
+      components.push({
+        key: "corp_central_rez_floor_penalty",
+        label: "Zentrale Rez-Reserve",
+        value: -2600,
+        reason: centralRezFloor.evidence.join("|"),
+      });
+    }
+  }
+  const contestableScoreLine =
+    semanticRuntimeCorpRemoteScoreContestabilityAssessment(input, action);
+  if (contestableScoreLine?.contestable) {
+    components.push({
+      key: "corp_contestable_remote_score_penalty",
+      label: "Contestable Remote-Scoreline",
+      value: -3000,
+      reason: contestableScoreLine.evidence.join("|"),
+    });
   }
   const advancementPlacement =
     semanticRuntimeCorpAdvancementCounterPlacementAssessment(input, action);
@@ -9789,6 +9811,14 @@ function semanticRuntimeCorpScoreComponents(
         reason: "low_rez_reserve",
       });
     }
+    if (semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_central_rez_floor_credit_reserve",
+        label: "Zentrale Rez-Reserve",
+        value: 900,
+        reason: "central_rez_reserve_needed",
+      });
+    }
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
@@ -9811,6 +9841,14 @@ function semanticRuntimeCorpScoreComponents(
         label: "Remote-Rez-Floor",
         value: 450,
         reason: "low_rez_reserve",
+      });
+    }
+    if (semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)) {
+      components.push({
+        key: "corp_central_rez_floor_draw_fallback",
+        label: "Zentrale Rez-Reserve",
+        value: 450,
+        reason: "central_rez_reserve_needed",
       });
     }
   }
@@ -10403,22 +10441,39 @@ function corpUnprotectedTagAssetSetupPenalty(
   const unprotected =
     serverId === "new_remote" ||
     (server !== undefined && server.ice.length === 0);
-  if (!unprotected) return undefined;
+  const contestability = serverId
+    ? semanticRuntimeCorpRemoteContestabilityAssessment(input, serverId)
+    : undefined;
+  const contestable = contestability?.contestable === true;
+  if (!unprotected && !contestable) return undefined;
   const immediateOperationAvailable =
     corpImmediateOperationTagSourceWithPayoffAvailable(input, action.actionId);
   const value =
-    (action.type === "rez_ice" ? -1350 : -1200) +
+    (action.type === "rez_ice"
+      ? contestable
+        ? -2200
+        : -1350
+      : contestable
+        ? -1700
+        : -1200) +
     (immediateOperationAvailable ? -350 : 0);
   return {
-    key: "corp_unprotected_tag_asset_setup_penalty",
-    label: "Ungeschuetztes Tag-Asset-Setup",
+    key: contestable
+      ? "corp_contestable_tag_asset_setup_penalty"
+      : "corp_unprotected_tag_asset_setup_penalty",
+    label: contestable
+      ? "Contestable Tag-Asset-Setup"
+      : "Ungeschuetztes Tag-Asset-Setup",
     value,
     reason: [
-      "corp_unprotected_tag_asset_setup:true",
+      contestable
+        ? "corp_contestable_tag_asset_setup:true"
+        : "corp_unprotected_tag_asset_setup:true",
       `source_definition:${sourceDefinitionId}`,
       `server:${serverId ?? "unknown"}`,
       `server_ice_count:${server?.ice.length ?? 0}`,
       `immediate_operation_tag_source_available:${immediateOperationAvailable}`,
+      ...(contestability?.evidence ?? []),
       ...profile.evidence,
     ].join("|"),
   };
@@ -11805,6 +11860,145 @@ function semanticRuntimeCorpAdvanceRemoteScore(
     : -1700;
 }
 
+type CorpRemoteContestabilityAssessment = {
+  serverId: string;
+  contestable: boolean;
+  evidence: string[];
+};
+
+function semanticRuntimeCorpRemoteScoreContestabilityAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpRemoteContestabilityAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.type !== "advance_card" && action.type !== "install_card")
+    return undefined;
+  if (
+    action.type === "install_card" &&
+    (action.payload?.placement === "ice" ||
+      !semanticRuntimeCorpActionIsScoreLine(input, action))
+  )
+    return undefined;
+  if (semanticRuntimeCorpAdvanceCompletesScore(input, action))
+    return undefined;
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (!serverId || !isRemoteServerTarget(serverId)) return undefined;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  if (!semanticRuntimeCorpRemoteIsProtected(server)) return undefined;
+  const assessment = semanticRuntimeCorpRemoteContestabilityAssessment(
+    input,
+    serverId,
+  );
+  if (!assessment?.contestable) return undefined;
+  return {
+    ...assessment,
+    evidence: [
+      "corp_remote_score_line:contestable_by_runner",
+      `action_type:${action.type}`,
+      ...assessment.evidence,
+    ],
+  };
+}
+
+function semanticRuntimeCorpRemoteContestabilityAssessment(
+  input: AiDecisionInput,
+  serverId: string,
+): CorpRemoteContestabilityAssessment | undefined {
+  if (input.side !== "corp" || !isRemoteServerTarget(serverId)) return undefined;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  if (!server || server.ice.length === 0) return undefined;
+  const runnerRig = input.playerView.opponent.rig ?? [];
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    runnerRig,
+    input.playerView.opponent.credits,
+    server.root,
+  );
+  if (assessment.assessedKnownIceCount <= 0) return undefined;
+  const contestable =
+    assessment.canReachAccess === true && assessment.creditsAfterPath >= 0;
+  return {
+    serverId,
+    contestable,
+    evidence: [
+      `server:${serverId}`,
+      `remote_contestable_by_runner:${contestable}`,
+      `runner_credits:${input.playerView.opponent.credits}`,
+      `runner_visible_rig_count:${runnerRig.length}`,
+      `assessed_known_ice_count:${assessment.assessedKnownIceCount}`,
+      `can_reach_access:${assessment.canReachAccess}`,
+      `credits_after_path:${assessment.creditsAfterPath}`,
+      ...(assessment.visibleBreakCost !== undefined
+        ? [`visible_break_cost:${assessment.visibleBreakCost}`]
+        : []),
+      ...(assessment.noAccessReason
+        ? [`no_access_reason:${assessment.noAccessReason}`]
+        : []),
+    ],
+  };
+}
+
+type CorpCentralRezReserveAssessment = {
+  serverId: "hq";
+  sourceDefinitionId: string;
+  rezFloor: number;
+  creditsAfterAction: number;
+  blockedByFloor: boolean;
+  evidence: string[];
+};
+
+function semanticRuntimeCorpCentralRezReserveAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpCentralRezReserveAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.type !== "install_card" || action.payload?.placement !== "ice")
+    return undefined;
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (serverId !== "hq") return undefined;
+  if (!semanticRuntimeCorpHasAgendaInHq(input)) return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (!sourceDefinitionId) return undefined;
+  const rezFloor = semanticRuntimeCorpActionIceRezCost(input, action);
+  if (rezFloor <= 0) return undefined;
+  const creditsAfterAction =
+    input.playerView.own.credits - actionCreditCost(action);
+  const blockedByFloor = creditsAfterAction < rezFloor;
+  return {
+    serverId: "hq",
+    sourceDefinitionId,
+    rezFloor,
+    creditsAfterAction,
+    blockedByFloor,
+    evidence: [
+      "corp_central_rez_floor:true",
+      "corp_hq_agenda_exposure:true",
+      `central_rez_floor_server:${serverId}`,
+      `source_definition:${sourceDefinitionId}`,
+      `central_rez_floor:${rezFloor}`,
+      `credits_after_action:${creditsAfterAction}`,
+      `central_rez_reserve_below_floor:${blockedByFloor}`,
+    ],
+  };
+}
+
+function semanticRuntimeCorpActionIceRezCost(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
+  const sourceDefinitionId =
+    sourceCard?.definitionId ?? sourceDefinitionIdForAction(input, action);
+  return (
+    sourceCard?.rezCost ??
+    (sourceDefinitionId
+      ? (RUNTIME_CARDS[sourceDefinitionId]?.numeric.rezCost ??
+        DEMO_CARDS_BY_ID[sourceDefinitionId]?.rezCost)
+      : undefined) ??
+    0
+  );
+}
+
 type CorpRemoteRezFloorAssessment = {
   serverId: string;
   rezFloor: number;
@@ -11900,6 +12094,19 @@ function semanticRuntimeCorpHasRemoteRezFloorFundingNeed(
   }
   return input.legalActions.some((action) => {
     const assessment = semanticRuntimeCorpRemoteRezFloorAssessment(
+      input,
+      action,
+    );
+    return assessment?.blockedByFloor === true;
+  });
+}
+
+function semanticRuntimeCorpHasCentralRezFloorFundingNeed(
+  input: AiDecisionInput,
+): boolean {
+  if (input.side !== "corp") return false;
+  return input.legalActions.some((action) => {
+    const assessment = semanticRuntimeCorpCentralRezReserveAssessment(
       input,
       action,
     );
@@ -12036,6 +12243,12 @@ function semanticRuntimeCorpHasRemoteInstability(
     ) ||
     input.legalActions.some((action) =>
       semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action),
+    ) ||
+    input.legalActions.some((action) =>
+      Boolean(
+        semanticRuntimeCorpRemoteScoreContestabilityAssessment(input, action)
+          ?.contestable,
+      ),
     )
   );
 }
@@ -12624,6 +12837,9 @@ function semanticRuntimeCorpEvidence(
   if (semanticRuntimeCorpHasRemoteRezFloorFundingNeed(input)) {
     evidence.push("remote_rez_floor_funding_need:true");
   }
+  if (semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)) {
+    evidence.push("central_rez_floor_funding_need:true");
+  }
   if (action.type === "gain_credit") {
     evidence.push("corp_safe_alternative:economy");
   }
@@ -12655,7 +12871,12 @@ function semanticRuntimeCorpEvidence(
   ) {
     evidence.push("corp_protection:central_ice");
   }
-  if (!isRemoteServerTarget(serverId)) return evidence;
+  const centralRezFloorAssessment =
+    semanticRuntimeCorpCentralRezReserveAssessment(input, action);
+  if (centralRezFloorAssessment) {
+    evidence.push(...centralRezFloorAssessment.evidence);
+  }
+  if (!serverId || !isRemoteServerTarget(serverId)) return evidence;
 
   evidence.push(
     serverId === "new_remote"
@@ -12690,6 +12911,12 @@ function semanticRuntimeCorpEvidence(
   ) {
     evidence.push("corp_remote_risk:naked_advance_line");
   }
+  const remoteContestability =
+    semanticRuntimeCorpRemoteContestabilityAssessment(input, serverId);
+  if (remoteContestability) evidence.push(...remoteContestability.evidence);
+  const scoreContestability =
+    semanticRuntimeCorpRemoteScoreContestabilityAssessment(input, action);
+  if (scoreContestability) evidence.push(...scoreContestability.evidence);
   if (semanticRuntimeCorpAdvanceCompletesScore(input, action)) {
     evidence.push("corp_remote_score_line:scoreable_after_action");
   }
@@ -12715,8 +12942,16 @@ function semanticRuntimeCorpHasNakedScoreLine(input: AiDecisionInput): boolean {
 function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
   input: AiDecisionInput,
 ): boolean {
-  return input.legalActions.some((action) =>
-    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action),
+  return input.legalActions.some(
+    (action) =>
+      semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(
+        input,
+        action,
+      ) ||
+      Boolean(
+        semanticRuntimeCorpRemoteScoreContestabilityAssessment(input, action)
+          ?.contestable,
+      ),
   );
 }
 
