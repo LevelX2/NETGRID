@@ -315,6 +315,7 @@ import {
   hasEvidencePrefix,
 } from "./runtime/evidence-value";
 import { roundNumber as round } from "./runtime/number-rounding";
+import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
   eventMayChangeArchives as aiEventMayChangeArchives,
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
@@ -7810,14 +7811,7 @@ function discardEvidenceForInput(input: AiDecisionInput): string[] {
 }
 
 function discardRolesForCardId(cardId: string | undefined): string[] {
-  if (!cardId) return [];
-  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
-  const hint = AI_HINTS.get(cardId);
-  return sortedUnique([
-    ...(roleRecord?.roles ?? []),
-    ...(hint?.roles ?? []),
-    ...(hint?.planRoles ?? []),
-  ]);
+  return cardRolesForId(cardId, AI_HINTS);
 }
 
 function discardVisibleCardCost(
@@ -10455,14 +10449,7 @@ function findVisibleCorpServerCard(
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
-  if (!cardId) return [];
-  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
-  const hint = AI_HINTS.get(cardId);
-  return sortedUnique([
-    ...(roleRecord?.roles ?? []),
-    ...(hint?.roles ?? []),
-    ...(hint?.planRoles ?? []),
-  ]);
+  return cardRolesForId(cardId, AI_HINTS);
 }
 
 function profileWeights(input: AiDecisionInput): Record<string, number> {
