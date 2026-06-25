@@ -443,6 +443,10 @@ import {
   discardPlanFitBonus,
 } from "./runtime/discard-fit-bonus";
 import {
+  discardCurrentPlanKind,
+  discardEvidenceForInput,
+} from "./runtime/discard-plan";
+import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
 } from "./runtime/search-choice-option";
@@ -7498,6 +7502,12 @@ function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
   return isVisibleIcebreakerProgramRuntime(card, visibleBreakerRolesForAi);
 }
 
+function definitionTypeForDiscardPlan(
+  cardId: string | undefined,
+): string | undefined {
+  return cardId ? DEMO_CARDS_BY_ID[cardId]?.type : undefined;
+}
+
 function selectedDiscardChoiceOptionIds(
   input: AiDecisionInput,
   choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
@@ -7638,12 +7648,11 @@ function discardKeepScore(
   if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
     baseValue -= 60;
 
-  const planFit = discardPlanFitBonus(
-    input,
-    roles,
-    type,
-    discardCurrentPlanKind(input),
-  );
+  const currentPlan = discardCurrentPlanKind(input, {
+    rolesForCardId,
+    definitionTypeForCardId: definitionTypeForDiscardPlan,
+  });
+  const planFit = discardPlanFitBonus(input, roles, type, currentPlan);
   const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
   return {
     total: baseValue + planFit + doctrineFit,
@@ -7656,81 +7665,6 @@ function discardKeepScore(
       ...(doctrineFit > 0 ? ["discard_score:doctrinefit"] : []),
     ]),
   };
-}
-
-function discardCurrentPlanKind(input: AiDecisionInput): string | undefined {
-  const hand = input.playerView.own.gripOrHq;
-  if (input.side === "runner") {
-    if (input.playerView.own.credits < 4) return "recover_economy";
-    const hasInstalledBreaker = (input.playerView.own.rig ?? []).some((card) =>
-      rolesForCardId(card.definitionId).some((role) =>
-        role.startsWith("breaker_"),
-      ),
-    );
-    if (
-      !hasInstalledBreaker &&
-      hand.some((card) =>
-        rolesForCardId(card.definitionId).some(
-          (role) =>
-            role.startsWith("breaker_") ||
-            role === "memory" ||
-            role === "setup",
-        ),
-      )
-    )
-      return "build_rig";
-  } else {
-    const hasAgenda = hand.some(
-      (card) =>
-        (card.type ??
-          (card.definitionId
-            ? DEMO_CARDS_BY_ID[card.definitionId]?.type
-            : undefined)) === "agenda",
-    );
-    const hasRemoteSupport = hand.some((card) => {
-      const roles = rolesForCardId(card.definitionId);
-      const type =
-        card.type ??
-        (card.definitionId
-          ? DEMO_CARDS_BY_ID[card.definitionId]?.type
-          : undefined);
-      return (
-        type === "ice" ||
-        roles.some(
-          (role) =>
-            role.includes("remote") ||
-            role.includes("ice") ||
-            role.includes("economy"),
-        )
-      );
-    });
-    if (hasAgenda && hasRemoteSupport) return "score_next_turn";
-    if (input.playerView.own.credits < 5) return "recover_economy";
-  }
-  return discardStrongestDoctrinePlan(input);
-}
-
-function discardStrongestDoctrinePlan(
-  input: AiDecisionInput,
-): string | undefined {
-  return Object.entries(input.ownDeckDoctrine?.planWeights ?? {})
-    .filter(([, weight]) => weight > 0)
-    .sort(
-      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
-    )[0]?.[0];
-}
-
-function discardEvidenceForInput(input: AiDecisionInput): string[] {
-  const evidence = ["discard_score:base"];
-  const plan = discardCurrentPlanKind(input);
-  if (plan) evidence.push("discard_score:planfit", `discard_keep:${plan}`);
-  const tags = input.ownDeckDoctrine?.archetypeTags ?? [];
-  if (tags.length > 0) {
-    evidence.push("discard_score:doctrinefit");
-    for (const tag of tags.slice(0, 3))
-      evidence.push(`discard_keep:doctrine_${tag}`);
-  }
-  return sortedUnique(evidence);
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
@@ -7824,7 +7758,13 @@ function scoreRunnerAction(
           evidence.push(
             "choice_source:discard_phase",
             "discard_selection:keep_value",
-            ...discardEvidenceForInput(input),
+            ...discardEvidenceForInput(
+              input,
+              discardCurrentPlanKind(input, {
+                rolesForCardId,
+                definitionTypeForCardId: definitionTypeForDiscardPlan,
+              }),
+            ),
           );
       }
       break;
@@ -8326,7 +8266,13 @@ function scoreCorpAction(
           evidence.push(
             "choice_source:discard_phase",
             "discard_selection:keep_value",
-            ...discardEvidenceForInput(input),
+            ...discardEvidenceForInput(
+              input,
+              discardCurrentPlanKind(input, {
+                rolesForCardId,
+                definitionTypeForCardId: definitionTypeForDiscardPlan,
+              }),
+            ),
           );
       }
       break;
