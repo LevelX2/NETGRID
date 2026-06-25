@@ -430,8 +430,10 @@ import {
   runnerCentralRunPressureJustificationReasons as runnerCentralRunPressureJustificationReasonsWithDeps,
 } from "./simulation/central-run-pressure-justification";
 import {
+  bestTrueCentralCloseoutProfile as bestTrueCentralCloseoutProfileWithDeps,
   centralRunEventGoodForTarget as centralRunEventGoodForTargetWithSource,
   noFreshCentralSubstitutionTypeForAction as noFreshCentralSubstitutionTypeForActionWithDeps,
+  trueCentralCloseoutProfile as trueCentralCloseoutProfileWithDeps,
 } from "./simulation/no-fresh-central";
 import {
   centralRunStreakWithoutValueForMetrics,
@@ -24219,90 +24221,22 @@ function bestTrueCentralCloseoutProfileForMetrics(input: AiDecisionInput): {
   reasons: string[];
   target?: "hq" | "rd" | "archives";
 } {
-  const profiles = (["rd", "hq", "archives"] as const)
-    .map((target) => ({
-      target,
-      ...trueCentralCloseoutProfileForMetrics(input, target),
-    }))
-    .filter((profile) => profile.opportunity)
-    .sort(
-      (left, right) =>
-        right.reasons.length - left.reasons.length ||
-        left.target.localeCompare(right.target),
-    );
-  return profiles[0] ?? { opportunity: false, reasons: [] };
+  return bestTrueCentralCloseoutProfileWithDeps(input, {
+    assessKnownRezzedIcePath,
+    rolesForCardId,
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  });
 }
 
 function trueCentralCloseoutProfileForMetrics(
   input: AiDecisionInput,
   target: "hq" | "rd" | "archives",
 ): { opportunity: boolean; reasons: string[] } {
-  const pointsNeeded =
-    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints;
-  if (pointsNeeded > 2) return { opportunity: false, reasons: [] };
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === target,
-  );
-  if (!server) return { opportunity: false, reasons: [] };
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
-  if (assessment.blocked) return { opportunity: false, reasons: [] };
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const openOrCheap = visibleBreakCost <= 1 || server.ice.length === 0;
-  if (!openOrCheap) return { opportunity: false, reasons: [] };
-  if (target === "archives") {
-    const visibleAgenda = server.root.some(
-      (card) => card.known && card.type === "agenda",
-    );
-    return {
-      opportunity: visibleAgenda,
-      reasons: visibleAgenda ? ["archives_visible_agenda"] : [],
-    };
-  }
-  const installedTargets = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) =>
-        isCentralPressureCardForMetrics(card.definitionId, true),
-      )
-      .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
-  );
-  const matchingInterface = installedTargets.has(target);
-  const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
-    rolesForCardId(card.definitionId).some((role) =>
-      role.includes("multiaccess"),
-    ),
-  );
-  const hasRunEvent = input.legalActions.some((action) => {
-    if (action.side !== "runner" || action.type !== "play_event") return false;
-    return centralPressureTargetsForCard(
-      sourceDefinitionIdForSimulationAction(input, action),
-    ).includes(target);
+  return trueCentralCloseoutProfileWithDeps(input, target, {
+    assessKnownRezzedIcePath,
+    rolesForCardId,
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   });
-  const hqPressure =
-    target === "hq" && input.playerView.opponent.handCount >= 5;
-  const rndFreshness = false;
-  const reasons = [
-    "near_win",
-    ...(matchingInterface ? ["interface"] : []),
-    ...(anyMultiaccess ? ["multiaccess"] : []),
-    ...(hasRunEvent ? ["run_event"] : []),
-    ...(hqPressure ? ["hq_pressure"] : []),
-    ...(rndFreshness ? ["rnd_freshness"] : []),
-  ];
-  const hasSpecificPressure =
-    matchingInterface ||
-    anyMultiaccess ||
-    hasRunEvent ||
-    hqPressure ||
-    rndFreshness;
-  return {
-    opportunity: hasSpecificPressure,
-    reasons,
-  };
 }
 
 function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
