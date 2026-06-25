@@ -447,6 +447,7 @@ import {
   runnerHasVisibleRemoteScoreThreat,
   runnerRemoteHasKnownRelevantTrashTarget,
   runnerRemoteThreatProfile as runnerRemoteThreatProfileWithReserve,
+  runnerRemoteThreatTargetingDiagnosticsForAction as runnerRemoteThreatTargetingDiagnosticsForActionWithDeps,
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
   type RunnerRemoteThreatProfile,
@@ -24578,117 +24579,20 @@ function runnerRemoteThreatTargetingDiagnosticsForAction(
   action: LegalAction,
   targetServerId: string | undefined,
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (input.side !== "runner" || action.side !== "runner") return {};
-  const legalRemoteProfiles = input.legalActions
-    .filter(
-      (candidate) =>
-        candidate.type === "start_run" &&
-        typeof candidate.payload?.serverId === "string" &&
-        isRemoteServerTarget(candidate.payload.serverId),
-    )
-    .map((candidate) =>
-      runnerRemoteThreatProfile(input, String(candidate.payload?.serverId)),
-    );
-  const advancedProfiles = legalRemoteProfiles.filter(
-    (profile) => profile.advanced,
+  return runnerRemoteThreatTargetingDiagnosticsForActionWithDeps(
+    input,
+    action,
+    targetServerId,
+    {
+      runnerRemoteThreatProfile,
+      runnerCentralRunHasClearPressureJustification:
+        runnerCentralRunHasClearPressureJustificationForInput,
+      runnerCentralRunPressureJustificationReasons:
+        runnerCentralRunPressureJustificationReasonsForInput,
+      runnerCentralRunBurnsRemoteContestReserve:
+        runnerCentralRunBurnsRemoteContestReserveForInput,
+    },
   );
-  if (advancedProfiles.length === 0) return {};
-  const contestableProfiles = advancedProfiles.filter(
-    (profile) => profile.contestable,
-  );
-  const selectedProfile = targetServerId
-    ? advancedProfiles.find((profile) => profile.serverId === targetServerId)
-    : undefined;
-  const centralRun =
-    action.type === "start_run" &&
-    (targetServerId === "hq" ||
-      targetServerId === "rd" ||
-      targetServerId === "archives");
-  const centralJustified =
-    centralRun && targetServerId
-      ? runnerCentralRunHasClearPressureJustificationForInput(
-          input,
-          targetServerId,
-          contestableProfiles.length > 0,
-        )
-      : false;
-  const centralJustificationReasons =
-    centralRun && targetServerId
-      ? runnerCentralRunPressureJustificationReasonsForInput(
-          input,
-          targetServerId,
-          contestableProfiles.length > 0,
-        )
-      : [];
-  const centralBurnedReserve =
-    centralRun &&
-    targetServerId !== undefined &&
-    contestableProfiles.length > 0 &&
-    runnerCentralRunBurnsRemoteContestReserveForInput(
-      input,
-      targetServerId,
-      contestableProfiles,
-    );
-  const contested =
-    action.type === "start_run" &&
-    targetServerId !== undefined &&
-    selectedProfile !== undefined;
-  const blockedByCredits = advancedProfiles.some(
-    (profile) =>
-      profile.blockedByKnownIceCost || profile.blockedByPostRunReserve,
-  );
-  const blockedByPostRunReserve = advancedProfiles.some(
-    (profile) => profile.blockedByPostRunReserve,
-  );
-  const blockedByBreakerCoverage = advancedProfiles.some(
-    (profile) => profile.blockedByBreakerCoverage,
-  );
-  const blockedByKnownIceCost = advancedProfiles.some(
-    (profile) => profile.blockedByKnownIceCost,
-  );
-  return {
-    runnerAdvancedRemoteThreatServerIds: advancedProfiles.map(
-      (profile) => profile.serverId,
-    ),
-    ...(contestableProfiles.length > 0
-      ? {
-          runnerContestableAdvancedRemoteThreatServerIds:
-            contestableProfiles.map((profile) => profile.serverId),
-        }
-      : {}),
-    ...(contested
-      ? { runnerContestedAdvancedRemoteServerId: selectedProfile.serverId }
-      : {}),
-    ...(centralRun && contestableProfiles.length > 0
-      ? { runnerCentralRunInsteadOfContestableAdvancedRemote: true }
-      : {}),
-    ...(centralJustified ? { runnerCentralRunInsteadWasJustified: true } : {}),
-    ...(centralRun && centralJustificationReasons[0]
-      ? { runnerCentralRunJustificationReason: centralJustificationReasons[0] }
-      : {}),
-    ...(centralBurnedReserve
-      ? { runnerCentralRunBurnedRemoteContestReserve: true }
-      : {}),
-    ...(blockedByCredits ? { runnerRemoteContestBlockedByCredits: true } : {}),
-    ...(blockedByPostRunReserve
-      ? { runnerRemoteContestBlockedByPostRunReserve: true }
-      : {}),
-    ...(blockedByBreakerCoverage
-      ? { runnerRemoteContestBlockedByBreakerCoverage: true }
-      : {}),
-    ...(blockedByKnownIceCost
-      ? { runnerRemoteContestBlockedByKnownIceCost: true }
-      : {}),
-    ...(centralRun && contestableProfiles.length > 0 && !centralJustified
-      ? { runnerRepeatedCentralRunWhileSameRemoteThreat: true }
-      : {}),
-    ...(selectedProfile !== undefined && !selectedProfile.contestable
-      ? { runnerRemoteRunStartedWithInsufficientPostRunReserve: true }
-      : {}),
-    ...(selectedProfile?.contestable === true
-      ? { runnerRemoteRunStartedWithSufficientPostRunReserve: true }
-      : {}),
-  };
 }
 
 function runnerRemoteThreatProfile(
