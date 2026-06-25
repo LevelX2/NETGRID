@@ -9868,6 +9868,11 @@ function semanticRuntimeCorpScoreComponents(
   );
   if (taggedMeatDamagePayoffPressure)
     components.push(taggedMeatDamagePayoffPressure);
+  const taggedRunnerPayoffPressure = corpTaggedRunnerPayoffPressure(
+    input,
+    action,
+  );
+  if (taggedRunnerPayoffPressure) components.push(taggedRunnerPayoffPressure);
   const tagSourcePayoffPressure = corpTagSourceVisiblePayoffPressure(
     input,
     action,
@@ -9887,6 +9892,9 @@ function semanticRuntimeCorpScoreComponents(
     action,
   );
   if (taggedSlowSetupPenalty) components.push(taggedSlowSetupPenalty);
+  const taggedPayoffPassivePenalty =
+    corpTaggedPayoffWindowPassiveActionPenalty(input, action);
+  if (taggedPayoffPassivePenalty) components.push(taggedPayoffPassivePenalty);
   const unprotectedTagAssetPenalty = corpUnprotectedTagAssetSetupPenalty(
     input,
     action,
@@ -10562,6 +10570,17 @@ type CorpInstalledEconomyActionAssessment = {
   evidence: string[];
 };
 
+type CorpTaggedRunnerPayoffActionProfile = {
+  kind:
+    | "economic"
+    | "resource_trash"
+    | "hardware_trash"
+    | "scored_agenda_damage_like"
+    | "unknown";
+  value: number;
+  evidence: string[];
+};
+
 function corpTaggedMeatDamagePayoffPressure(
   input: AiDecisionInput,
   action: LegalAction,
@@ -10644,6 +10663,257 @@ function corpTaggedMeatDamagePayoffPressure(
       ...prevention.evidence,
     ].join("|"),
   };
+}
+
+function corpTaggedRunnerPayoffPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const profile = corpTaggedRunnerPayoffProfile(input, action);
+  if (!profile) return undefined;
+  return {
+    key: "corp_tagged_runner_payoff_pressure",
+    label: "Tagged-Runner-Payoff",
+    value: profile.value,
+    reason: [
+      "corp_tagged_runner_payoff:true",
+      "corp_tagged_payoff_followup_plan:active",
+      ...profile.evidence,
+    ].join("|"),
+  };
+}
+
+function corpTaggedPayoffWindowPassiveActionPenalty(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (input.playerView.opponent.tags <= 0) return undefined;
+  if (corpTaggedRunnerPayoffProfile(input, action)) return undefined;
+  if (
+    action.type === "score_agenda" ||
+    semanticRuntimeCorpAdvanceCompletesScore(input, action)
+  ) {
+    return undefined;
+  }
+  const availablePayoff = corpBestTaggedRunnerPayoffProfile(
+    input,
+    action.actionId,
+  );
+  if (!availablePayoff) return undefined;
+
+  const installedEconomy = corpInstalledEconomyActionAssessment(input, action);
+  let passiveKind: string | undefined;
+  let value = 0;
+  if (installedEconomy) {
+    passiveKind = "installed_economy";
+    value = -1700;
+  } else if (action.type === "gain_credit") {
+    passiveKind = "basic_economy";
+    value = -1100;
+  } else if (action.type === "draw_card") {
+    passiveKind = "draw";
+    value = -900;
+  } else if (action.type === "install_card") {
+    if (semanticRuntimeCorpActionIsScoreLine(input, action)) return undefined;
+    passiveKind = "install_setup";
+    value = -800;
+  } else if (action.type === "rez_ice") {
+    passiveKind = "rez_setup";
+    value = -650;
+  } else if (action.type === "end_turn") {
+    passiveKind = "end_turn";
+    value = -1200;
+  }
+  if (!passiveKind || value >= 0) return undefined;
+  return {
+    key: "corp_tagged_payoff_window_passive_penalty",
+    label: "Tagged-Payoff-Fenster nicht verpassen",
+    value,
+    reason: [
+      `passive_kind:${passiveKind}`,
+      `runner_tags:${input.playerView.opponent.tags}`,
+      `available_tagged_payoff_kind:${availablePayoff.kind}`,
+      ...availablePayoff.evidence,
+    ].join("|"),
+  };
+}
+
+function corpBestTaggedRunnerPayoffProfile(
+  input: AiDecisionInput,
+  excludedActionId?: string,
+): CorpTaggedRunnerPayoffActionProfile | undefined {
+  return input.legalActions
+    .filter((action) => action.actionId !== excludedActionId)
+    .map((action) => corpTaggedRunnerPayoffProfile(input, action))
+    .filter(
+      (profile): profile is CorpTaggedRunnerPayoffActionProfile =>
+        profile !== undefined,
+    )
+    .sort((left, right) => right.value - left.value)[0];
+}
+
+function corpTaggedRunnerPayoffProfile(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpTaggedRunnerPayoffActionProfile | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const runnerTags = input.playerView.opponent.tags;
+  if (runnerTags <= 0) return undefined;
+
+  if (action.type === "trash_resource") {
+    const target = corpVisibleRunnerRigTrashTarget(input, action);
+    if (!target?.definitionId) return undefined;
+    const profile = runnerTagPunishResourceTrashProfile(target);
+    if (!profile) return undefined;
+    const targetBonus =
+      profile.kind === "high_risk_runner_economy"
+        ? Math.min(420, corpVisibleCardStoredCredits(target) * 60)
+        : profile.kind === "tag_defense"
+          ? 260
+          : 120;
+    return {
+      kind: "resource_trash",
+      value: profile.baseValue + Math.min(500, runnerTags * 85) + targetBonus,
+      evidence: [
+        `tagged_payoff_kind:resource_trash`,
+        `runner_tags:${runnerTags}`,
+        `target_definition:${target.definitionId}`,
+        `resource_trash_kind:${profile.kind}`,
+        ...profile.evidence,
+      ],
+    };
+  }
+
+  const assessment = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (!assessment?.isPunishPayoff) return undefined;
+  if (assessment.payoffKind === "damage") return undefined;
+  if (assessment.payoffKind === "scored_agenda_damage_like") return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const creditCost = actionCreditCost(action);
+  const affordabilityPressure =
+    input.playerView.own.credits >= creditCost ? 0 : -400;
+
+  if (assessment.payoffKind === "economic") {
+    const runnerCreditPressure =
+      input.playerView.opponent.credits <= 2
+        ? 300
+        : input.playerView.opponent.credits <= 5
+          ? 150
+          : 0;
+    return {
+      kind: "economic",
+      value:
+        1850 +
+        Math.min(420, runnerTags * 70) +
+        runnerCreditPressure +
+        affordabilityPressure,
+      evidence: [
+        "tagged_payoff_kind:economic",
+        `runner_tags:${runnerTags}`,
+        `runner_credits:${input.playerView.opponent.credits}`,
+        `source_definition:${sourceDefinitionId || "unknown"}`,
+        ...assessment.evidence,
+      ],
+    };
+  }
+
+  if (assessment.payoffKind === "hardware_trash") {
+    const hardwareProfile = runnerVisibleHardwareTrashPayoffProfile(input);
+    return {
+      kind: "hardware_trash",
+      value:
+        1700 +
+        Math.min(420, runnerTags * 70) +
+        (hardwareProfile?.baseValue ?? 0) +
+        affordabilityPressure,
+      evidence: [
+        "tagged_payoff_kind:hardware_trash",
+        `runner_tags:${runnerTags}`,
+        `source_definition:${sourceDefinitionId || "unknown"}`,
+        ...assessment.evidence,
+        ...(hardwareProfile?.evidence ?? ["runner_hardware_payoff:unknown"]),
+      ],
+    };
+  }
+
+  if (assessment.payoffKind === "resource_trash") {
+    const target = corpVisibleRunnerRigTrashTarget(input, action);
+    const resourceProfile = target
+      ? runnerTagPunishResourceTrashProfile(target)
+      : undefined;
+    return {
+      kind: "resource_trash",
+      value:
+        1400 +
+        Math.min(420, runnerTags * 70) +
+        (resourceProfile?.baseValue ?? 0) +
+        affordabilityPressure,
+      evidence: [
+        "tagged_payoff_kind:resource_trash",
+        `runner_tags:${runnerTags}`,
+        `source_definition:${sourceDefinitionId || "unknown"}`,
+        ...assessment.evidence,
+        ...(target?.definitionId ? [`target_definition:${target.definitionId}`] : []),
+        ...(resourceProfile?.evidence ?? []),
+      ],
+    };
+  }
+
+  if (assessment.payoffKind === "unknown") {
+    return {
+      kind: "unknown",
+      value: 1150 + Math.min(300, runnerTags * 60) + affordabilityPressure,
+      evidence: [
+        "tagged_payoff_kind:unknown",
+        `runner_tags:${runnerTags}`,
+        `source_definition:${sourceDefinitionId || "unknown"}`,
+        ...assessment.evidence,
+      ],
+    };
+  }
+
+  return undefined;
+}
+
+function runnerVisibleHardwareTrashPayoffProfile(input: AiDecisionInput):
+  | {
+      baseValue: number;
+      evidence: string[];
+    }
+  | undefined {
+  const visibleHardware = (input.playerView.opponent.rig ?? []).filter(
+    (card) => card.known && card.type === "hardware" && card.definitionId,
+  );
+  const candidates = visibleHardware.map((card) => {
+    const definition =
+      RUNTIME_CARDS[card.definitionId ?? ""] ??
+      DEMO_CARDS_BY_ID[card.definitionId ?? ""];
+    const text = [
+      card.title,
+      card.rulesText,
+      cardDefinitionText(definition),
+      ...rolesForCardId(card.definitionId),
+      ...cardDefinitionMechanics(definition),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const multiaccess =
+      /multiaccess|additional card|access .*additional|r&d|hq interface|rd_pressure|access/.test(
+        text,
+      );
+    return {
+      baseValue: multiaccess ? 420 : 180,
+      evidence: [
+        `runner_hardware_target_definition:${card.definitionId}`,
+        multiaccess
+          ? "runner_hardware_payoff:multiaccess"
+          : "runner_hardware_payoff:visible_hardware",
+      ],
+    };
+  });
+  return candidates.sort((left, right) => right.baseValue - left.baseValue)[0];
 }
 
 function corpTaggedEndgameResourceTrashPressure(
@@ -10828,6 +11098,7 @@ function corpTagPunishImmediatePressureAvailable(
   return input.legalActions.some((action) => {
     if (action.actionId === excludedActionId || action.side !== "corp")
       return false;
+    if (corpTaggedRunnerPayoffProfile(input, action)) return true;
     if (corpTagPunishActionIsImmediatePayoff(input, action)) return true;
     if (action.type !== "trash_resource") return false;
     const target = corpVisibleRunnerRigTrashTarget(input, action);
@@ -10951,6 +11222,23 @@ function runnerTagPunishResourceTrashProfile(
       kind: "high_risk_runner_economy",
       baseValue: 850,
       evidence: ["runner_resource_high_risk_economy_visible:true"],
+    });
+  }
+  const storedCredits = corpVisibleCardStoredCredits(card);
+  const creditBankVisible =
+    storedCredits > 0 ||
+    /credit bank|stored credits|hosted credits|bits? from|take all the bits|take all .*credits|recurring credit|resource_action|pool_payout/.test(
+      text,
+    );
+  if (creditBankVisible) {
+    candidates.push({
+      kind: "high_risk_runner_economy",
+      baseValue: Math.min(1300, 950 + storedCredits * 55),
+      evidence: [
+        "runner_resource_high_risk_economy_visible:true",
+        "runner_resource_credit_bank_visible:true",
+        `runner_resource_stored_credits:${storedCredits}`,
+      ],
     });
   }
   return candidates.sort((left, right) => right.baseValue - left.baseValue)[0];
