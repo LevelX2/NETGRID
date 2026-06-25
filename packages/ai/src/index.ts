@@ -451,6 +451,7 @@ import {
   summarizeRunnerEndgameCloseoutWindow,
 } from "./simulation/runner-endgame-closeout";
 import {
+  actionsUntil,
   isCorpProtectionScoreConversionAction,
   isCorpRemoteBuildAction,
   isCorpRemoteProtectionActionEntry,
@@ -17419,21 +17420,6 @@ function nextRunnerEntries(
     if (entries.length >= ownActionWindow) break;
   }
   return entries;
-}
-
-function actionsUntil(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-  predicate: (entry: PlanConversionActionEntry) => boolean,
-): number | undefined {
-  for (
-    let candidateIndex = index;
-    candidateIndex < sequence.length;
-    candidateIndex += 1
-  ) {
-    if (predicate(sequence[candidateIndex]!)) return candidateIndex - index;
-  }
-  return undefined;
 }
 
 type BreakerOntologyCoverageMetricKey =

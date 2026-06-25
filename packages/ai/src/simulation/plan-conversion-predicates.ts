@@ -128,6 +128,21 @@ export function hasMeaningfulProgressWithin<T>(
     .some(isMeaningfulProgress);
 }
 
+export function actionsUntil<T>(
+  sequence: T[],
+  index: number,
+  predicate: (entry: T) => boolean,
+): number | undefined {
+  for (
+    let candidateIndex = index;
+    candidateIndex < sequence.length;
+    candidateIndex += 1
+  ) {
+    if (predicate(sequence[candidateIndex]!)) return candidateIndex - index;
+  }
+  return undefined;
+}
+
 export function isCorpProtectionScoreConversionAction(
   entry: PlanConversionDecisionEntry,
 ): boolean {
