@@ -669,6 +669,10 @@ import {
   stripSelfplayActionAlternatives as stripSelfplayActionAlternativesRuntime,
 } from "./simulation/selfplay-trace-facts";
 import {
+  countPassiveActionWithScoreLineAvailable,
+  countUnsafeScoreChosen,
+} from "./simulation/score-window-counts";
+import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
@@ -6238,60 +6242,6 @@ export function runAiSelfplayTraceMining(
     topFindings,
     aggregate,
   };
-}
-
-function countUnsafeScoreChosen(summaries: AiSimulationSummary[]): number {
-  return summaries.reduce(
-    (sum, summary) =>
-      sum +
-      summary.actionSequence.filter(
-        (entry) =>
-          entry.side === "corp" &&
-          entry.actionType === "score_agenda" &&
-          entry.corpScoreTerminalWindow === true &&
-          entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true &&
-          entry.corpScoreTerminalWindowProtectedRemoteReady !== true,
-      ).length,
-    0,
-  );
-}
-
-function countPassiveActionWithScoreLineAvailable(
-  summaries: AiSimulationSummary[],
-): number {
-  return summaries.reduce(
-    (sum, summary) =>
-      sum +
-      summary.actionSequence.filter(
-        (entry) =>
-          entry.side === "corp" &&
-          entry.corpScoreTerminalWindow === true &&
-          entry.corpScoreTerminalSkipped === true &&
-          isPassiveCorpScoreLineSkip(entry),
-      ).length,
-    0,
-  );
-}
-
-function isPassiveCorpScoreLineSkip(
-  entry: AiSimulationSummary["actionSequence"][number],
-): boolean {
-  if (
-    entry.actionType === "score_agenda" ||
-    entry.actionType === "advance_card"
-  )
-    return false;
-  return (
-    entry.corpScoreTerminalSkippedForEconomy === true ||
-    entry.corpScoreTerminalSkippedForDraw === true ||
-    entry.corpScoreTerminalSkippedForProtection === true ||
-    entry.corpScoreTerminalSkippedForInstallIce === true ||
-    entry.corpScoreTerminalSkippedForInstallAssetOrUpgrade === true ||
-    entry.corpScoreTerminalSkippedForHqProtection === true ||
-    entry.corpScoreTerminalSkippedForRndProtection === true ||
-    entry.corpScoreTerminalSkippedForRemotePortfolio === true ||
-    entry.corpScoreTerminalSkippedForUnknownHigherPriority === true
-  );
 }
 
 function runMatchProgressionBenchmarkSlot(
