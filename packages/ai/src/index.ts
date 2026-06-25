@@ -230,6 +230,7 @@ import {
   scoreRunnerEvent,
   scoreRunnerInstall,
 } from "./runtime/runner-card-action-score";
+import { profileWeights } from "./runtime/profile-weights";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -8128,7 +8129,7 @@ function scoreRunnerAction(
   action: LegalAction,
 ): RankedChoice {
   const roles = rolesForAction(input, action);
-  const profile = profileWeights(input);
+  const profile = profileWeights(input, AI_PROFILES);
   let score = 0;
   let reasonCode = "runner.fallback.low_value";
   let explanation =
@@ -8650,7 +8651,7 @@ function scoreCorpAction(
   action: LegalAction,
 ): RankedChoice {
   const roles = rolesForAction(input, action);
-  const profile = profileWeights(input);
+  const profile = profileWeights(input, AI_PROFILES);
   let score = 0;
   let reasonCode = "corp.fallback.low_value";
   let explanation =
@@ -10891,17 +10892,6 @@ function shellTradersTargetRoles(
 
 function rolesForCardId(cardId: string | undefined): string[] {
   return cardRolesForId(cardId, AI_HINTS);
-}
-
-function profileWeights(input: AiDecisionInput): Record<string, number> {
-  const profile =
-    AI_PROFILES.find((candidate) => candidate.profileId === input.profileId) ??
-    AI_PROFILES.find(
-      (candidate) =>
-        candidate.side === input.side &&
-        candidate.difficulty === input.difficulty,
-    );
-  return profile?.weights ?? {};
 }
 
 function pumpViabilityAssessment(
