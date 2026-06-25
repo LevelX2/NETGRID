@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { actionCreditCost } from "./action-cost";
 import { shellTradersAbility } from "./shell-traders-action";
 
 export function shellTradersDirectInstallAction(
@@ -45,6 +46,17 @@ export function shellTradersImmediateRemoveAvailable(
       typeof action.payload?.remainingCountersBefore === "number" &&
       action.payload.remainingCountersBefore <= 1,
   );
+}
+
+export function shellTradersDirectInstallPreparePenalty(
+  urgency: number,
+  directInstall: LegalAction,
+  input: AiDecisionInput,
+): number {
+  let penalty = 35 + Math.min(170, urgency);
+  if (input.playerView.own.credits - actionCreditCost(directInstall) >= 2)
+    penalty += 35;
+  return penalty;
 }
 
 export function shellTradersPrepareBaselinePenalty(

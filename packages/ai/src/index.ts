@@ -199,6 +199,7 @@ import {
 import {
   shellTradersBacklog,
   shellTradersDirectInstallAction,
+  shellTradersDirectInstallPreparePenalty,
   shellTradersImmediateRemoveAvailable,
   shellTradersPrepareBaselinePenalty,
 } from "./runtime/shell-traders-context";
@@ -10970,17 +10971,6 @@ function shellTradersDirectInstallUrgency(
   if (remainingCredits >= 2) urgency += 45;
   else if (remainingCredits < 1) urgency -= 35;
   return Math.max(0, urgency);
-}
-
-function shellTradersDirectInstallPreparePenalty(
-  urgency: number,
-  directInstall: LegalAction,
-  input: AiDecisionInput,
-): number {
-  let penalty = 35 + Math.min(170, urgency);
-  if (input.playerView.own.credits - actionCreditCost(directInstall) >= 2)
-    penalty += 35;
-  return penalty;
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
