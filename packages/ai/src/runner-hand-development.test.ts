@@ -650,7 +650,7 @@ function strategicIntent(
     schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
     side: "runner",
     source: {
-      deckStrategyProfile: "diagnostic_only",
+      deckStrategyProfile: "ai_internal_strategy_profile",
       deckCapabilities: "ai_internal",
       plannerEffect: "runtime_projection",
     },

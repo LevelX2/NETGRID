@@ -18,6 +18,8 @@ import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 
 // Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
 const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
+const STRATEGIC_OVERRIDE_SCORE_GAP = 360;
+const STRATEGIC_MAPPING_PROTECTION_SCORE_GAP = 900;
 
 export function bestSemanticRuntimeChoice(
   choices: readonly SemanticRuntimeChoice[],
@@ -65,6 +67,10 @@ export function tacticalPlanMappedChoice(
     overrideChoice.action.actionId !== mappedChoice.action.actionId
   ) {
     const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
+    const threshold = tacticalPlanOverrideScoreGapThreshold(
+      mappedChoice,
+      overrideChoice,
+    );
     if (
       tacticalPlanCoverageMappingBlocksRunOverride(
         mapping,
@@ -72,9 +78,16 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         mappedActionIds,
         scoreGap,
+        threshold.scoreGap,
       )
     ) {
-      return { choice: mappedChoice };
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "coverage_plan_mapping",
+        scoreGap,
+        threshold: threshold.scoreGap,
+      });
     }
     if (
       tacticalPlanHandBufferMappingBlocksProbeRunOverride(
@@ -83,26 +96,45 @@ export function tacticalPlanMappedChoice(
         scoreGap,
       )
     ) {
-      return { choice: mappedChoice };
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "hand_buffer_plan_mapping",
+        scoreGap,
+        threshold: 1800,
+      });
     }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
-    if (
-      mappedNonPositiveAgainstPositive ||
-      tacticalPlanRepeatedRunMappingShouldYield(
-        input,
-        mappedChoice,
-        overrideChoice,
-        scoreGap,
-      ) ||
-      scoreGap > PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
-    ) {
+    const repeatedRunShouldYield = tacticalPlanRepeatedRunMappingShouldYield(
+      input,
+      mappedChoice,
+      overrideChoice,
+      scoreGap,
+    );
+    if (mappedNonPositiveAgainstPositive || repeatedRunShouldYield || scoreGap > threshold.scoreGap) {
       return {
         overrideChoice,
         overriddenMappedChoice: mappedChoice,
+        overrideReason: mappedNonPositiveAgainstPositive
+          ? "mapped_nonpositive_against_positive"
+          : repeatedRunShouldYield
+            ? "repeated_run_mapping_yield"
+            : threshold.reason,
+        overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
     }
+    return tacticalPlanBlockedOverrideResult({
+      mappedChoice,
+      overrideChoice,
+      reason:
+        threshold.reason === "strategic_mapping_protected"
+          ? "strategic_mapping_protected"
+          : "semantic_score_gap_below_threshold",
+      scoreGap,
+      threshold: threshold.scoreGap,
+    });
   }
   return { choice: mappedChoice };
 }
@@ -115,6 +147,7 @@ function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
   return (
     mapping.plan.type === "runner.restore_hand_buffer" &&
     overrideChoice.action.type === "start_run" &&
+    !semanticRuntimeChoiceHasStrategicFit(overrideChoice) &&
     scoreGap <= 1800
   );
 }
@@ -139,9 +172,13 @@ export function tacticalPlanMappingOverrideEvidence(
   const mappedChoice = result.overriddenMappedChoice;
   if (!mappedChoice) return [];
   return [
+    "tactical_plan_override_allowed:true",
     "tactical_plan_mapping_overridden:true",
-    "tactical_plan_override_reason:semantic_score_gap",
+    `tactical_plan_override_reason:${result.overrideReason ?? "semantic_score_gap"}`,
     `tactical_plan_mapping_score_gap:${result.scoreGap ?? 0}`,
+    ...(result.overrideThreshold !== undefined
+      ? [`tactical_plan_mapping_score_gap_threshold:${result.overrideThreshold}`]
+      : []),
   ];
 }
 
@@ -191,6 +228,7 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
   scoreGap: number,
+  threshold: number,
 ): boolean {
   if (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
@@ -205,8 +243,71 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     overrideChoice.action.type === "start_run" &&
     !mappedActionIds.has(overrideChoice.action.actionId) &&
-    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
+    scoreGap <= threshold
   );
+}
+
+function tacticalPlanOverrideScoreGapThreshold(
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): { scoreGap: number; reason: string } {
+  const mappedStrategic = semanticRuntimeChoiceHasStrategicFit(mappedChoice);
+  const overrideStrategic = semanticRuntimeChoiceHasStrategicFit(overrideChoice);
+  if (overrideStrategic && !mappedStrategic) {
+    return {
+      scoreGap: STRATEGIC_OVERRIDE_SCORE_GAP,
+      reason: "strategic_score_gap",
+    };
+  }
+  if (mappedStrategic && !overrideStrategic) {
+    return {
+      scoreGap: STRATEGIC_MAPPING_PROTECTION_SCORE_GAP,
+      reason: "strategic_mapping_protected",
+    };
+  }
+  return {
+    scoreGap: PLAN_MAPPED_CHOICE_MAX_SCORE_GAP,
+    reason: "semantic_score_gap",
+  };
+}
+
+function semanticRuntimeChoiceHasStrategicFit(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.evidence.some((entry) =>
+    entry.startsWith("semantic_strategic_action_fit:true"),
+  );
+}
+
+function tacticalPlanBlockedOverrideResult(params: {
+  mappedChoice: SemanticRuntimeChoice;
+  overrideChoice: SemanticRuntimeChoice;
+  reason: string;
+  scoreGap: number;
+  threshold: number;
+}): TacticalPlanMappedChoiceResult {
+  return {
+    choice: semanticRuntimeChoiceWithAddedEvidence(params.mappedChoice, [
+      "tactical_plan_mapping_override_blocked:true",
+      `tactical_plan_override_blocked_reason:${params.reason}`,
+      `tactical_plan_mapping_score_gap:${params.scoreGap}`,
+      `tactical_plan_mapping_score_gap_threshold:${params.threshold}`,
+    ]),
+    overrideBlockedChoice: params.overrideChoice,
+    overrideBlockedReason: params.reason,
+    overrideThreshold: params.threshold,
+    scoreGap: params.scoreGap,
+  };
+}
+
+function semanticRuntimeChoiceWithAddedEvidence(
+  choice: SemanticRuntimeChoice,
+  evidence: readonly string[],
+): SemanticRuntimeChoice {
+  return {
+    ...choice,
+    evidence: [...choice.evidence, ...evidence],
+  };
 }
 
 function tacticalPlanMappingForChoice(

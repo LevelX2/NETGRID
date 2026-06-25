@@ -17,6 +17,7 @@ import {
   semanticRuntimeScopeForAction,
   type SemanticRuntimeScopeDependencies,
 } from "./semantic-runtime-scope";
+import { semanticRuntimeStrategicActionFitEvidence } from "./strategic-action-fit";
 
 export type SemanticRuntimeChoiceBuilderDependencies = {
   scope: SemanticRuntimeScopeDependencies;
@@ -134,6 +135,12 @@ function scoreSemanticRuntimeAction(
             `semantic_exclusion_reason:${exclusion.reason}`,
           ]
         : []),
+      ...semanticRuntimeStrategicActionFitEvidence(
+        input,
+        action,
+        scopeId,
+        actionSemanticCandidate,
+      ),
       ...dependencies.evidence(input, action, scopeId),
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),

@@ -2,11 +2,14 @@ import type { AiDecisionInput, LegalAction, Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { AccessOutcomeMemoryStatus } from "../access/access-outcome-memory";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
+import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { KnownRemoteAccessCommitment } from "../decision/known-remote-access-commitment";
+import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import type { RunnerEconomyPosture, RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+import type { StrategicIntentState } from "../strategic-intent-state";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
 
@@ -31,7 +34,8 @@ export type TacticalPlanType =
   | "runner.cash_out_credit_bank"
   | "corp.create_score_window"
   | "corp.build_credit_bank"
-  | "corp.rez_defense";
+  | "corp.rez_defense"
+  | "corp.apply_punish_pressure";
 
 export type PlanStepKind =
   | "install_breaker"
@@ -53,7 +57,8 @@ export type PlanStepKind =
   | "probe_central"
   | "rez_outer_ice"
   | "advance_score_card"
-  | "score_agenda";
+  | "score_agenda"
+  | "apply_punish_pressure";
 
 export type PlanMappingStatus =
   | "unmapped"
@@ -218,6 +223,9 @@ export type TacticalPlanBuildContext = {
   candidates?: readonly ActionSemanticCandidate[];
   previousPlan?: TacticalPlanSnapshot;
   deckCapabilities?: DeckCapabilityProfile;
+  strategicIntentState?: StrategicIntentState;
+  corpStrategicIntent?: CorpStrategicIntentProfile;
+  tacticalGoals?: readonly TacticalGoalLike[];
   runnerStrategicIntent?: RunnerStrategicIntentProfile;
   runnerRunTargetEvaluations?: readonly RunnerRunTargetEvaluation[];
   runnerEconomyPosture?: RunnerEconomyPosture;
@@ -265,6 +273,9 @@ export type PlanStepMappingResult = {
 export type TacticalPlanRuntimeResult = {
   previousPlan?: TacticalPlanMemorySnapshot;
   deckCapabilitiesUsed?: string[];
+  strategicIntentStateUsed?: string[];
+  corpStrategicIntentUsed?: string[];
+  tacticalGoalsUsed?: string[];
   runnerStrategicIntentUsed?: string[];
   runnerRunTargetEvaluationsUsed?: string[];
   runnerEconomyPostureUsed?: string[];

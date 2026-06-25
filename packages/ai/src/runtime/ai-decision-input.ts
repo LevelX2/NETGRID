@@ -15,11 +15,24 @@ import {
   buildDeckDoctrineProfile,
   type AiDeckDoctrineDeckSnapshot,
 } from "../deck-doctrine";
-import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
+import {
+  buildDeckDoctrineV2Diagnostic,
+  buildDeckStrategyProfile,
+  type DeckDoctrineV2Diagnostic,
+} from "../deck-doctrine-strategy";
+import {
+  buildCorpStrategicIntentProfile,
+  type CorpStrategicIntentProfile,
+} from "../corp-strategic-intent";
 import {
   buildRunnerStrategicIntentProfile,
   type RunnerStrategicIntentProfile,
 } from "../runner-strategic-intent";
+import {
+  buildStrategicIntentState,
+  type StrategicIntentState,
+} from "../strategic-intent-state";
+import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
 
@@ -42,6 +55,9 @@ export type AiDecisionSideSelection =
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
+  ownStrategicIntentState?: StrategicIntentState;
+  ownCorpStrategicIntent?: CorpStrategicIntentProfile;
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
   ownRunnerTacticalGoals?: RunnerTacticalGoal[];
 };
@@ -97,16 +113,45 @@ export function buildAiDecisionInput(
     legalActions,
     deckSnapshot: options.ownDeckSnapshot,
   });
+  const ownDeckStrategyProfile = buildDeckStrategyProfile(options.ownDeckSnapshot);
+  const ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic(
+    options.ownDeckSnapshot,
+  );
+  const previousStrategicIntentState = getStrategicIntentMemorySnapshot(
+    input,
+    options.ownDeckSnapshot.deckSnapshotId,
+  )?.state;
+  const ownStrategicIntentState = buildStrategicIntentState({
+    side,
+    stateVersion: playerView.stateVersion,
+    strategyProfile: ownDeckStrategyProfile,
+    deckCapabilities: ownDeckCapabilities,
+    ...(previousStrategicIntentState
+      ? { previousState: previousStrategicIntentState }
+      : {}),
+    availableCredits: playerView.own.credits,
+  });
   const ownRunnerStrategicIntent =
     side === "runner"
       ? buildRunnerStrategicIntentProfile({
-          strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
+          strategyProfile: ownDeckStrategyProfile,
           deckCapabilities: ownDeckCapabilities,
+        })
+      : undefined;
+  const ownCorpStrategicIntent =
+    side === "corp"
+      ? buildCorpStrategicIntentProfile({
+          strategyProfile: ownDeckStrategyProfile,
+          deckCapabilities: ownDeckCapabilities,
+          strategicIntentState: ownStrategicIntentState,
         })
       : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
+    ownDeckDoctrineV2Diagnostic,
+    ownStrategicIntentState,
+    ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),
     ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),
   };
   return enriched;

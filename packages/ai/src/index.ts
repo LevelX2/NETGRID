@@ -123,9 +123,6 @@ import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
-import {
-  buildSemanticDecisionDebugScoreComponent,
-} from "./diagnostics/decision-debug";
 import { buildLegacyBaselineDecisionDebug } from "./diagnostics/legacy-baseline-debug";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
 import { compareAction } from "./runtime/action-order";
@@ -378,15 +375,6 @@ import {
 import {
   createRunnerStrategicIntentContext,
 } from "./runtime/runner-strategic-intent-context";
-import {
-  createSemanticRuntimeDoctrineScoreContext,
-} from "./runtime/semantic-runtime-doctrine-score";
-import {
-  createSemanticRuntimeRunnerDoctrineContext,
-} from "./runtime/semantic-runtime-runner-doctrine-context";
-import {
-  createSemanticRuntimeCorpDoctrineContext,
-} from "./runtime/semantic-runtime-corp-doctrine-context";
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
@@ -720,7 +708,10 @@ export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
-export type { AiDecisionSideSelection } from "./runtime/ai-decision-input";
+export type {
+  AiDecisionInputWithDeckCapabilities,
+  AiDecisionSideSelection,
+} from "./runtime/ai-decision-input";
 
 export {
   chooseCorpPlanAction,
@@ -4993,41 +4984,6 @@ const {
 });
 
 const {
-  semanticRuntimeDoctrineRawWeight,
-  semanticRuntimeDoctrinePlanWeightComponent,
-  semanticRuntimeDoctrineSuppressedComponent,
-} = createSemanticRuntimeDoctrineScoreContext({
-  scoreComponent: buildSemanticDecisionDebugScoreComponent,
-});
-
-const {
-  semanticRuntimeDoctrineActionGate,
-  semanticRuntimeRunnerDoctrineActionGate,
-  semanticRuntimeRunnerDoctrineRunWeight,
-  semanticRuntimeRunnerRemoteContestDoctrineGuard,
-} = createSemanticRuntimeRunnerDoctrineContext({
-  actionCreditCost,
-  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-  runnerRunTargetEvaluation: semanticRuntimeRunnerRunTargetEvaluation,
-  recentRunnerStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-  recentRecoveryActions: semanticRuntimeRecentRunnerRecoveryActions,
-  recoveryFundingNeedContext: runnerRecoveryFundingNeedContext,
-  isRemoteServerTarget,
-  rawWeight: semanticRuntimeDoctrineRawWeight,
-  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
-  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-});
-
-const {
-  semanticRuntimeCorpDoctrineWeight,
-  semanticRuntimeCorpScoreNowDoctrineWeight,
-} = createSemanticRuntimeCorpDoctrineContext({
-  rawWeight: semanticRuntimeDoctrineRawWeight,
-  actionGate: semanticRuntimeDoctrineActionGate,
-  suppressedComponent: semanticRuntimeDoctrineSuppressedComponent,
-  planWeightComponent: semanticRuntimeDoctrinePlanWeightComponent,
-});
-const {
   semanticRuntimeRunnerScoreComponents,
 } = createRunnerScoreComponentsContext({
   loanLiabilityAssessment: runnerLoanLiabilityAssessment,
@@ -5069,7 +5025,6 @@ const {
   },
   startRun: {
     serverId: semanticRuntimeServerId,
-    doctrineRunWeight: semanticRuntimeRunnerDoctrineRunWeight,
     hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
     rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
     archivesComponents: semanticRuntimeRunnerArchivesComponents,
@@ -5094,9 +5049,7 @@ const {
   {
     actionCreditCost,
     rolesForAction,
-    corpScoreNowDoctrineWeight: semanticRuntimeCorpScoreNowDoctrineWeight,
     corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-    corpDoctrineWeight: semanticRuntimeCorpDoctrineWeight,
     corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
     corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
     corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,

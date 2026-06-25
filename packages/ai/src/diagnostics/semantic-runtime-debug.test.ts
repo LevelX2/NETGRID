@@ -12,7 +12,6 @@ import {
   semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
-  semanticRuntimeDebugDoctrineGoalItems,
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
@@ -165,51 +164,6 @@ describe("SemanticRuntimeDebug", () => {
     );
   });
 
-  it("formats doctrine goal debug items from score reasons", () => {
-    const items = semanticRuntimeDebugDoctrineGoalItems(
-      {
-        side: "runner",
-        ownDeckDoctrine: {
-          schemaVersion: "ai-deck-doctrine-v1",
-          deckSnapshotId: "doctrine-debug-test",
-          deckHash: "test:doctrine-debug-test",
-          side: "runner",
-          confidence: 0.8,
-          archetypeTags: ["pressure", "rig", "economy", "extra"],
-          roleCounts: {},
-          roleDensity: {},
-          planWeights: {},
-          mulliganWeights: {},
-          riskFlags: [],
-          evidence: [],
-        },
-      } as never,
-      [
-        {
-          key: "deck_doctrine_runtime_weight_suppressed",
-          label: "Doctrine",
-          value: -25,
-          reason:
-            "plan:runner_central_pressure|consumer:runtime|deck_doctrine_runtime_gate_reason:blocked",
-        },
-      ],
-    );
-
-    expect(items).toEqual([
-      "doctrine_goal_trace:decision_debug",
-      "doctrine_side:runner",
-      "doctrine_archetype:pressure",
-      "doctrine_archetype:rig",
-      "doctrine_archetype:economy",
-      "doctrine_goal_component:deck_doctrine_runtime_weight_suppressed",
-      "doctrine_goal_weight:-25",
-      "doctrine_goal_plan:runner_central_pressure",
-      "doctrine_goal_consumer:runtime",
-      "doctrine_goal_gate_reason:blocked",
-      "doctrine_goal_suppressed:true",
-    ]);
-  });
-
   it("formats tactical plan runtime diagnostics without runtime selection logic", () => {
     const selectedAction = action("install-breaker", "install_card");
     const selectedPlan = tacticalPlan({
@@ -267,6 +221,9 @@ describe("SemanticRuntimeDebug", () => {
       },
       planProgressionReason: "mapping_selected",
       deckCapabilitiesUsed: ["coverage:wall"],
+      strategicIntentStateUsed: ["strategic_intent_state:runner.rnd_pressure"],
+      corpStrategicIntentUsed: ["corp_strategic_intent:corp.score_agendas"],
+      tacticalGoalsUsed: ["tactical_goal:runner.build_economy_base"],
       runnerTacticalGoalsUsed: ["goal:contest_remote"],
     };
 
@@ -281,6 +238,15 @@ describe("SemanticRuntimeDebug", () => {
       "why_not_other_plan:plan-bank:bank_tool_not_installed",
     );
     expect(items).toContain("deck_capability_used:coverage:wall");
+    expect(items).toContain(
+      "strategic_intent_state_used:strategic_intent_state:runner.rnd_pressure",
+    );
+    expect(items).toContain(
+      "corp_strategic_intent_used:corp_strategic_intent:corp.score_agendas",
+    );
+    expect(items).toContain(
+      "tactical_goal_used:tactical_goal:runner.build_economy_base",
+    );
     expect(items).toContain("runner_tactical_goal_used:goal:contest_remote");
     expect(items).toEqual(
       expect.arrayContaining([

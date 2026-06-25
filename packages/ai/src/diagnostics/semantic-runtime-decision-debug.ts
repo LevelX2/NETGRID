@@ -18,7 +18,6 @@ import {
   semanticRuntimeDebugActionDisplayScore,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
-  semanticRuntimeDebugDoctrineGoalItems,
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
@@ -97,10 +96,6 @@ export function buildSemanticRuntimeDecisionDebug({
     ),
     targetChoiceShadowItems: semanticRuntimeDebugTargetChoiceShadowItems(
       selected.action,
-    ),
-    doctrineGoalItems: semanticRuntimeDebugDoctrineGoalItems(
-      input,
-      selectedScoreBreakdown,
     ),
     mistakeSummaryItems: semanticRuntimeDebugMistakeSummaryItems(
       selected.evidence,

@@ -19,6 +19,8 @@ import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import type { KnownRemoteAccessCommitment } from "./decision/known-remote-access-commitment";
+import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
+import type { TacticalGoalLike } from "./decision/semantic-decision-frame";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -38,7 +40,9 @@ import {
   redactedRunnerTacticalGoalFacts,
   type RunnerTacticalGoal,
 } from "./runner-tactical-goals";
+import type { CorpStrategicIntentProfile } from "./corp-strategic-intent";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import type { StrategicIntentState } from "./strategic-intent-state";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
 import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
@@ -128,6 +132,15 @@ export function evaluateTacticalPlans(
   const deckCapabilitiesUsed = context.deckCapabilities
     ? redactedDeckCapabilityFacts(context.deckCapabilities)
     : [];
+  const strategicIntentStateUsed = context.strategicIntentState
+    ? redactedStrategicIntentStateFacts(context.strategicIntentState)
+    : [];
+  const corpStrategicIntentUsed = context.corpStrategicIntent
+    ? redactedCorpStrategicIntentFacts(context.corpStrategicIntent)
+    : [];
+  const tacticalGoalsUsed = context.tacticalGoals
+    ? redactedMergedTacticalGoalFacts(context.tacticalGoals)
+    : [];
   const runnerStrategicIntentUsed = context.runnerStrategicIntent
     ? redactedRunnerStrategicIntentFacts(context.runnerStrategicIntent)
     : [];
@@ -169,6 +182,11 @@ export function evaluateTacticalPlans(
       return {
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+        ...(strategicIntentStateUsed.length > 0
+          ? { strategicIntentStateUsed }
+          : {}),
+        ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+        ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
         ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
         ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
         ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
@@ -195,6 +213,11 @@ export function evaluateTacticalPlans(
   return {
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+    ...(strategicIntentStateUsed.length > 0
+      ? { strategicIntentStateUsed }
+      : {}),
+    ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+    ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
     ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
     ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
     ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
@@ -228,6 +251,34 @@ function redactedRunnerStrategicIntentFacts(
     `runner_risk_profile:${intent.riskProfile.join("|") || "none"}`,
     `runner_rejected_intents:${intent.rejectedIntents.join("|") || "none"}`,
     `runner_intent_confidence:${intent.confidence}`,
+  ];
+}
+
+function redactedStrategicIntentStateFacts(
+  state: StrategicIntentState,
+): string[] {
+  return [
+    `strategic_intent_state:${state.primaryStrategy.strategyId}`,
+    `strategic_intent_phase:${state.phase}`,
+    `strategic_intent_family:${state.primaryStrategy.family}`,
+    `strategic_intent_completeness:${state.primaryStrategy.completeness}`,
+    `strategic_intent_target:${state.targetVector.kind}`,
+    `strategic_intent_blocker_count:${state.blockers.length}`,
+    `strategic_intent_transition:${state.transition.status}`,
+  ];
+}
+
+function redactedCorpStrategicIntentFacts(
+  intent: CorpStrategicIntentProfile,
+): string[] {
+  return [
+    `corp_strategic_intent:${intent.primaryWinIntent}`,
+    `corp_score_plan:${intent.scorePlan.join("|") || "none"}`,
+    `corp_defense_plan:${intent.defensePlan.join("|") || "none"}`,
+    `corp_economy_plan:${intent.economyPlan.join("|") || "none"}`,
+    `corp_punish_plan:${intent.punishPlan.join("|") || "none"}`,
+    `corp_risk_profile:${intent.riskProfile.join("|") || "none"}`,
+    `corp_intent_confidence:${intent.confidence}`,
   ];
 }
 
@@ -1387,6 +1438,13 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       return actionType === "advance_card";
     case "score_agenda":
       return actionType === "score_agenda";
+    case "apply_punish_pressure":
+      return (
+        actionType === "play_operation" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability" ||
+        actionType === "trash_resource"
+      );
   }
 }
 
@@ -1765,13 +1823,19 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       emptyRemoteRunActions.includes(action) ||
       noPayoffRemoteRunActions.includes(action)
     ) continue;
+    const remoteGoal = runnerRemoteGoalForServer(context, serverId);
+    const strategicBoost = tacticalGoalPriorityBoost(remoteGoal);
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
         side: "runner",
         type: "runner.contest_remote",
         status: "active",
-        priority: runnerAdjustedPlanPriority(context, action, 820),
+        priority: runnerAdjustedPlanPriority(
+          context,
+          action,
+          820 + strategicBoost,
+        ),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
         currentStep: runnerRunTargetCurrentStep(context, action, {
@@ -1786,9 +1850,13 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         evidence: [
           `remote_run_action:${action.actionId}`,
           ...runnerRunTargetPlanEvidence(context, action),
+          ...tacticalGoalEvidence(remoteGoal),
           ...runnerGoalEvidence,
         ],
-        scoreBreakdown: runnerRunTargetPlanScoreBreakdown(context, action, 820),
+        scoreBreakdown: [
+          ...runnerRunTargetPlanScoreBreakdown(context, action, 820),
+          ...tacticalGoalScoreBreakdown(remoteGoal, strategicBoost),
+        ],
         stateVersion,
       }),
     );
@@ -1900,6 +1968,8 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       serverId,
     );
     const basePriority = serverId === "rd" ? 760 : 740;
+    const pressureGoal = runnerPressureGoalForServer(context, serverId);
+    const strategicBoost = tacticalGoalPriorityBoost(pressureGoal);
     plans.push(
       createTacticalPlan({
         planId: `runner.opportunistic_central_run:${serverId}`,
@@ -1909,7 +1979,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         priority: runnerAdjustedPlanPriority(
           context,
           action,
-          basePriority + pressureAllowance.priorityBonus,
+          basePriority + pressureAllowance.priorityBonus + strategicBoost,
         ),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
@@ -1926,8 +1996,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           `central_run_action:${action.actionId}`,
           ...pressureAllowance.evidence,
           ...runnerRunTargetPlanEvidence(context, action),
+          ...tacticalGoalEvidence(pressureGoal),
           ...runnerGoalEvidence,
         ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(pressureGoal, strategicBoost),
         stateVersion,
       }),
     );
@@ -2805,13 +2877,138 @@ function runnerRunTargetStepRationale(
 }
 
 function runnerTacticalGoalEvidence(context: TacticalPlanBuildContext): string[] {
-  return (context.runnerTacticalGoals ?? []).slice(0, 6).map((goal) =>
+  return tacticalGoalsForPlanEvidence(context).slice(0, 6).map((goal) =>
     [
-      `runner_tactical_goal:${goal.goalId}`,
+      `tactical_goal:${goal.goalId}`,
       `priority:${goal.priority}`,
-      `urgency:${goal.urgency}`,
+      `urgency:${goal.urgency ?? "unknown"}`,
       ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
     ].join("|"),
+  );
+}
+
+function tacticalGoalsForPlanEvidence(
+  context: TacticalPlanBuildContext,
+): readonly TacticalGoalLike[] {
+  return context.tacticalGoals ?? context.runnerTacticalGoals ?? [];
+}
+
+function strongestTacticalGoal(
+  context: TacticalPlanBuildContext,
+  predicate: (goal: TacticalGoalLike) => boolean,
+): TacticalGoalLike | undefined {
+  return tacticalGoalsForPlanEvidence(context)
+    .filter(predicate)
+    .sort(
+      (left, right) =>
+        right.priority - left.priority ||
+        urgencyRank(right.urgency) - urgencyRank(left.urgency) ||
+        left.goalId.localeCompare(right.goalId),
+    )[0];
+}
+
+function tacticalGoalPriorityBoost(
+  goal: TacticalGoalLike | undefined,
+  maxBoost = 140,
+): number {
+  if (!goal) return 0;
+  const urgencyBonus = goal.urgency === "high" ? 25 : 0;
+  return Math.min(maxBoost, Math.max(0, Math.round(goal.priority / 10) + urgencyBonus));
+}
+
+function tacticalGoalEvidence(
+  goal: TacticalGoalLike | undefined,
+): string[] {
+  if (!goal) return [];
+  return [
+    `strategic_plan_goal:${goal.goalId}`,
+    `strategic_plan_goal_priority:${goal.priority}`,
+    `strategic_plan_goal_urgency:${goal.urgency ?? "unknown"}`,
+    ...(goal.targetServerId ? [`strategic_plan_goal_target:${goal.targetServerId}`] : []),
+    ...(goal.evidence ?? []).slice(0, 6),
+  ];
+}
+
+function tacticalGoalScoreBreakdown(
+  goal: TacticalGoalLike | undefined,
+  boost: number,
+): PlanScoreBreakdown[] {
+  if (!goal || boost <= 0) return [];
+  return [
+    {
+      key: "strategic_tactical_goal_fit",
+      label: "Strategic goal fit",
+      value: boost,
+      reason: goal.goalId,
+    },
+  ];
+}
+
+function isStrategicTacticalGoal(goal: TacticalGoalLike): boolean {
+  return (
+    goal.source === "strategic_intent" ||
+    goal.evidence?.some((entry) =>
+      entry.startsWith("strategic_goal_source:"),
+    ) === true
+  );
+}
+
+function urgencyRank(urgency: TacticalGoalLike["urgency"]): number {
+  switch (urgency) {
+    case "high":
+      return 3;
+    case "medium":
+      return 2;
+    case "low":
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+function runnerPressureGoalForServer(
+  context: TacticalPlanBuildContext,
+  serverId: string,
+): TacticalGoalLike | undefined {
+  return strongestTacticalGoal(
+    context,
+    (goal) =>
+      isStrategicTacticalGoal(goal) &&
+      goal.family === "pressure" &&
+      (goal.targetServerId === undefined || goal.targetServerId === serverId) &&
+      (
+        goal.goalId === "runner.strategic.central_pressure" ||
+        goal.goalId === "runner.pressure_good_central_target" ||
+        goal.goalId.includes("central_pressure") ||
+        goal.goalId.includes("rnd_pressure") ||
+        goal.goalId.includes("hq_pressure")
+      ),
+  );
+}
+
+function runnerRemoteGoalForServer(
+  context: TacticalPlanBuildContext,
+  serverId: string,
+): TacticalGoalLike | undefined {
+  return strongestTacticalGoal(
+    context,
+    (goal) =>
+      isStrategicTacticalGoal(goal) &&
+      (goal.family === "remote_contest" || goal.goalId.includes("remote")) &&
+      (goal.targetServerId === undefined || goal.targetServerId === serverId),
+  );
+}
+
+function corpGoalForFamily(
+  context: TacticalPlanBuildContext,
+  family: string,
+): TacticalGoalLike | undefined {
+  return strongestTacticalGoal(
+    context,
+    (goal) =>
+      isStrategicTacticalGoal(goal) &&
+      goal.goalId.startsWith("corp.") &&
+      goal.family === family,
   );
 }
 
@@ -2819,14 +3016,21 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
   const input = context.input;
   const stateVersion = input.playerView.stateVersion;
   const plans: TacticalPlan[] = [];
+  const scorelineGoal = corpGoalForFamily(context, "corp_scoreline");
+  const defenseGoal = corpGoalForFamily(context, "corp_ice_defense");
+  const economyGoal = corpGoalForFamily(context, "economy");
+  const punishGoal =
+    corpGoalForFamily(context, "tag_punish") ??
+    corpGoalForFamily(context, "damage_pressure");
   for (const action of input.legalActions.filter((candidate) => candidate.type === "score_agenda")) {
+    const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     plans.push(
       createTacticalPlan({
         planId: `corp.create_score_window:${action.actionId}`,
         side: "corp",
         type: "corp.create_score_window",
         status: "active",
-        priority: 980,
+        priority: 980 + strategicBoost,
         horizonTurns: 1,
         currentStep: createPlanStep({
           stepId: `score_agenda:${action.actionId}`,
@@ -2838,7 +3042,9 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         evidence: [
           `score_action:${action.actionId}`,
           "corp_score_sequence:score_now",
+          ...tacticalGoalEvidence(scorelineGoal),
         ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(scorelineGoal, strategicBoost),
         stateVersion,
       }),
     );
@@ -2847,6 +3053,7 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
     const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
     const blockers = corpScoreWindowBlockers(input, serverId, action);
     const currentStep = corpScoreWindowCurrentStep(action, blockers);
+    const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     if (
       serverId &&
       !remoteIsProtected(input.playerView, serverId) &&
@@ -2861,7 +3068,9 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         side: "corp",
         type: "corp.create_score_window",
         status: blockers.length > 0 ? "blocked" : "active",
-        priority: serverId && remoteIsProtected(input.playerView, serverId) ? 900 : 760,
+        priority:
+          (serverId && remoteIsProtected(input.playerView, serverId) ? 900 : 760) +
+          strategicBoost,
         horizonTurns: 1,
         ...(serverId ? { target: { kind: "server", id: serverId } } : {}),
         blockers,
@@ -2870,21 +3079,24 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         evidence: [
           `advance_action:${action.actionId}`,
           "corp_score_sequence:advance_score_card",
+          ...tacticalGoalEvidence(scorelineGoal),
           ...blockers.flatMap((blocker) => blocker.evidence),
         ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(scorelineGoal, strategicBoost),
         stateVersion,
       }),
     );
   }
   for (const action of input.legalActions.filter((candidate) => candidate.type === "rez_ice")) {
     const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
+    const strategicBoost = tacticalGoalPriorityBoost(defenseGoal);
     plans.push(
       createTacticalPlan({
         planId: `corp.rez_defense:${action.actionId}`,
         side: "corp",
         type: "corp.rez_defense",
         status: "active",
-        priority: 930,
+        priority: 930 + strategicBoost,
         horizonTurns: 1,
         ...(serverId ? { target: { kind: "server", id: serverId } } : {}),
         currentStep: createPlanStep({
@@ -2893,13 +3105,59 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
           desiredActionSemantics: ["corp_window.rez"],
           rationale: ["rez window can turn existing ICE into defense"],
         }),
-        evidence: [`rez_action:${action.actionId}`],
+        evidence: [
+          `rez_action:${action.actionId}`,
+          ...tacticalGoalEvidence(defenseGoal),
+        ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(defenseGoal, strategicBoost),
+        stateVersion,
+      }),
+    );
+  }
+  for (const candidate of corpPunishCandidates(context, punishGoal)) {
+    const action = input.legalActions.find(
+      (legalAction) => legalAction.actionId === candidate.actionId,
+    );
+    if (!action) continue;
+    const strategicBoost = tacticalGoalPriorityBoost(punishGoal);
+    plans.push(
+      createTacticalPlan({
+        planId: `corp.apply_punish_pressure:${action.actionId}`,
+        side: "corp",
+        type: "corp.apply_punish_pressure",
+        status: "active",
+        priority: 730 + strategicBoost,
+        horizonTurns: 1,
+        currentStep: createPlanStep({
+          stepId: `apply_punish_pressure:${action.actionId}`,
+          kind: "apply_punish_pressure",
+          desiredActionSemantics: [
+            "tag.source",
+            "trace.source",
+            "tag.payoff",
+            "damage.payoff",
+            "corp_window.punish",
+            "card_ability.trigger",
+            "card_ability.unknown",
+            "play.corp_operation",
+          ],
+          rationale: ["strategic Corp punish pressure maps to an existing legal action"],
+        }),
+        evidence: [
+          `punish_action:${action.actionId}`,
+          `punish_semantic:${candidate.semanticActionType}`,
+          ...candidate.actionTacticSignals.map((signal) => `punish_tactic:${signal}`),
+          ...candidate.cardContextSignals.map((signal) => `punish_card_signal:${signal}`),
+          ...tacticalGoalEvidence(punishGoal),
+        ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(punishGoal, strategicBoost),
         stateVersion,
       }),
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
   const corpBankToolEvidence = bankToolEvidence(context, "corp");
+  const economyStrategicBoost = tacticalGoalPriorityBoost(economyGoal, 100);
   if (
     bankBuildActions.length > 0 &&
     input.playerView.own.credits >= 4 &&
@@ -2911,7 +3169,7 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         side: "corp",
         type: "corp.build_credit_bank",
         status: "active",
-        priority: 690,
+        priority: 690 + economyStrategicBoost,
         horizonTurns: 2,
         target: { kind: "bank", id: "corp_credit_bank" },
         currentStep: createPlanStep({
@@ -2932,12 +3190,35 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         evidence: [
           ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
           ...corpBankToolEvidence,
+          ...tacticalGoalEvidence(economyGoal),
         ],
+        scoreBreakdown: tacticalGoalScoreBreakdown(
+          economyGoal,
+          economyStrategicBoost,
+        ),
         stateVersion,
       }),
     );
   }
   return plans;
+}
+
+function corpPunishCandidates(
+  context: TacticalPlanBuildContext,
+  punishGoal: TacticalGoalLike | undefined,
+): ActionSemanticCandidate[] {
+  if (!punishGoal) return [];
+  return (context.candidates ?? []).filter((candidate) => {
+    if (candidate.actorSide !== "corp") return false;
+    if (
+      candidate.primaryProjectionStatus === "blocked" ||
+      candidate.primaryProjectionStatus === "hidden_info_blocked"
+    ) {
+      return false;
+    }
+    const text = candidateSemanticText(candidate);
+    return /tag\.source|trace\.source|tag\.payoff|damage\.payoff|punish|trash_runner_resource|flatline|net_damage|meat_damage/.test(text);
+  });
 }
 
 function corpScoreWindowBlockers(

@@ -1,0 +1,323 @@
+import type {
+  AiDecisionInput,
+  AiDecisionScoreComponent,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decision-debug";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+
+export function semanticRuntimeStrategicActionFitScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  actionSemanticCandidate?: ActionSemanticCandidate,
+): AiDecisionScoreComponent[] {
+  const fit = semanticRuntimeStrategicActionFit(
+    input,
+    action,
+    scopeId,
+    actionSemanticCandidate,
+  );
+  if (!fit) return [];
+  return [
+    buildSemanticDecisionDebugScoreComponent({
+      key: "semantic_strategic_action_fit",
+      label: "StrategicIntent-Fit",
+      value: fit.value,
+      reason: fit.evidence.join("|"),
+    }),
+  ];
+}
+
+export function semanticRuntimeStrategicActionFitEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  actionSemanticCandidate?: ActionSemanticCandidate,
+): string[] {
+  const fit = semanticRuntimeStrategicActionFit(
+    input,
+    action,
+    scopeId,
+    actionSemanticCandidate,
+  );
+  if (!fit) return [];
+  return [
+    "semantic_strategic_action_fit:true",
+    `semantic_strategic_action_fit_value:${fit.value}`,
+    ...fit.evidence,
+  ];
+}
+
+function semanticRuntimeStrategicActionFit(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  actionSemanticCandidate?: ActionSemanticCandidate,
+): { value: number; evidence: string[] } | undefined {
+  const state = (input as AiDecisionInputWithDeckCapabilities)
+    .ownStrategicIntentState;
+  if (!state || state.primaryStrategy.family === "neutral") return undefined;
+  if (state.blockers.some((blocker) => blocker.severity === "hard")) {
+    return undefined;
+  }
+  const baseValue =
+    input.side === "runner"
+      ? runnerStrategicActionFitValue(action, scopeId, state)
+      : corpStrategicActionFitValue(
+          input,
+          action,
+          scopeId,
+          state,
+          actionSemanticCandidate,
+        );
+  if (baseValue <= 0) return undefined;
+  const phaseBonus = strategicIntentPhaseActionBonus(state.phase);
+  const targetBonus = strategicIntentActionTargetMatches(state, action) ? 50 : 0;
+  const value = Math.min(260, baseValue + phaseBonus + targetBonus);
+  return {
+    value,
+    evidence: [
+      `strategic_action_fit_family:${state.primaryStrategy.family}`,
+      `strategic_action_fit_strategy:${state.primaryStrategy.strategyId}`,
+      `strategic_action_fit_phase:${state.phase}`,
+      `strategic_action_fit_target:${state.targetVector.kind}`,
+      `strategic_action_fit_target_match:${targetBonus > 0}`,
+      `strategic_action_fit_scope:${scopeId}`,
+    ],
+  };
+}
+
+function runnerStrategicActionFitValue(
+  action: LegalAction,
+  scopeId: string,
+  state: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >,
+): number {
+  const serverId = semanticRuntimeServerId(action);
+  switch (state.primaryStrategy.family) {
+    case "runner_central_pressure":
+      return action.type === "start_run" &&
+        (serverId === "hq" || serverId === "rd")
+        ? 170
+        : 0;
+    case "runner_remote_contest":
+    case "runner_remote_trash":
+      if (action.type === "trash_accessed_card") return 190;
+      return action.type === "start_run" && isRemoteServerTarget(serverId)
+        ? 170
+        : 0;
+    case "runner_setup":
+      return runnerStrategicSetupAction(action, scopeId) ? 125 : 0;
+    case "runner_tempo":
+      return action.type === "start_run" || action.type === "play_event"
+        ? 130
+        : 0;
+    case "runner_survival":
+      return action.type === "draw_card" ||
+        action.type === "remove_tag" ||
+        action.type === "jack_out"
+        ? 160
+        : 0;
+    default:
+      return 0;
+  }
+}
+
+function corpStrategicActionFitValue(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  state: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): number {
+  switch (state.primaryStrategy.family) {
+    case "corp_scoreline":
+    case "corp_fast_advance":
+      if (action.type === "score_agenda") return 230;
+      if (action.type === "advance_card") return 170;
+      return action.type === "install_card" &&
+        corpActionLooksLikeScoreLine(input, action)
+        ? 130
+        : 0;
+    case "corp_ice_tax":
+    case "corp_central_defense":
+      if (action.type === "rez_ice") return 160;
+      return action.type === "install_card" &&
+        action.payload?.placement === "ice"
+        ? 130
+        : 0;
+    case "corp_asset_economy":
+    case "corp_economy_reserve":
+      if (action.type === "gain_credit") return 120;
+      return action.type === "install_card" &&
+        corpActionLooksLikeEconomy(input, action)
+        ? 130
+        : 0;
+    case "corp_tag_trace_punish":
+    case "corp_damage_kill":
+    case "corp_ambush":
+      return strategicIntentActionTargetMatches(state, action) ||
+        corpStrategicPunishAction(action, scopeId, actionSemanticCandidate)
+        ? 180
+        : 0;
+    default:
+      return 0;
+  }
+}
+
+function runnerStrategicSetupAction(
+  action: LegalAction,
+  scopeId: string,
+): boolean {
+  return (
+    scopeId.includes("setup") ||
+    action.type === "install_card" ||
+    action.type === "play_event" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability" ||
+    action.type === "draw_card"
+  );
+}
+
+function corpStrategicPunishAction(
+  action: LegalAction,
+  scopeId: string,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (scopeId === "corp_tag_punish") return true;
+  const joinedSignals = [
+    actionSemanticCandidate?.semanticActionType,
+    ...(actionSemanticCandidate?.actionTacticSignals ?? []),
+    ...(actionSemanticCandidate?.cardContextSignals ?? []),
+  ].join("|");
+  return (
+    action.type === "play_operation" ||
+    action.type === "trash_resource" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) && /tag\.|trace\.|damage|punish|flatline/.test(joinedSignals);
+}
+
+function strategicIntentPhaseActionBonus(
+  phase: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >["phase"],
+): number {
+  switch (phase) {
+    case "convert":
+    case "closeout":
+      return 35;
+    case "pressure":
+    case "enable":
+      return 20;
+    default:
+      return 0;
+  }
+}
+
+function strategicIntentActionTargetMatches(
+  state: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >,
+  action: LegalAction,
+): boolean {
+  const target = state.targetVector;
+  const serverId = semanticRuntimeServerId(action);
+  if (target.targetId && target.targetId === serverId) return true;
+  if (target.kind === "central") return serverId === "hq" || serverId === "rd";
+  if (target.kind === "remote") return isRemoteServerTarget(serverId);
+  if (target.kind === "scoreline") {
+    return action.type === "score_agenda" || action.type === "advance_card";
+  }
+  if (target.kind === "economy") return action.type === "gain_credit";
+  if (target.kind === "tag" || target.kind === "damage") {
+    return (
+      action.type === "play_operation" ||
+      action.type === "trash_resource" ||
+      action.type === "trigger_ability" ||
+      action.type === "activated_card_ability"
+    );
+  }
+  return false;
+}
+
+function corpActionLooksLikeScoreLine(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const source = visibleSourceCard(input, action);
+  return (
+    source?.type === "agenda" ||
+    typeof source?.advancementRequirement === "number" ||
+    action.payload?.cardType === "agenda" ||
+    action.payload?.targetCardType === "agenda"
+  );
+}
+
+function corpActionLooksLikeEconomy(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const source = visibleSourceCard(input, action);
+  const text = [
+    source?.title,
+    source?.definitionId,
+    source?.rulesText,
+    action.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return /economy|credit|bit|gain|bank|asset/.test(text);
+}
+
+function visibleSourceCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  const sourceId = String(action.source ?? "");
+  const payloadSourceId =
+    stringPayload(action, "sourceCardId") ??
+    stringPayload(action, "sourceCardInstanceId");
+  const ids = new Set([sourceId, payloadSourceId].filter(Boolean));
+  return allVisibleCards(input).find(
+    (card) =>
+      ids.has(card.instanceId) ||
+      ids.has(card.definitionId ?? "") ||
+      stringPayload(action, "sourceDefinitionId") === card.definitionId ||
+      stringPayload(action, "sourceCardDefinitionId") === card.definitionId,
+  );
+}
+
+function allVisibleCards(input: AiDecisionInput): VisibleCard[] {
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...(input.playerView.own.rig ?? []),
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.opponent.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ];
+}
+
+function semanticRuntimeServerId(action: LegalAction): string | undefined {
+  const serverId = action.payload?.serverId;
+  return typeof serverId === "string" ? serverId : undefined;
+}
+
+function isRemoteServerTarget(serverId: string | undefined): boolean {
+  return serverId?.startsWith("remote_") === true;
+}
+
+function stringPayload(action: LegalAction, key: string): string | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}

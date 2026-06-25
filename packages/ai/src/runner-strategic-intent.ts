@@ -2,6 +2,7 @@ import type { Side } from "@netgrid/shared";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import type {
   AiDeckStrategyProfile,
+  DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "./deck-doctrine-strategy";
 
@@ -43,8 +44,8 @@ export type RunnerStrategicIntentProfile = {
   schemaVersion: typeof RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION;
   side: Extract<Side, "runner">;
   source: {
-    deckStrategyProfile: "diagnostic_only";
-    deckCapabilities: "ai_internal";
+    deckStrategyProfile: "ai_internal_strategy_profile" | "missing";
+    deckCapabilities: "ai_internal" | "missing";
     plannerEffect: "runtime_projection";
   };
   primaryWinIntent: RunnerPrimaryWinIntent;
@@ -75,11 +76,7 @@ export function buildRunnerStrategicIntentProfile(
     return {
       schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
       side: "runner",
-      source: {
-        deckStrategyProfile: "diagnostic_only",
-        deckCapabilities: "ai_internal",
-        plannerEffect: "runtime_projection",
-      },
+      source: sourceFor(params),
       primaryWinIntent: "runner.unknown",
       setupEngine: [],
       pressureVectors: [],
@@ -144,11 +141,7 @@ export function buildRunnerStrategicIntentProfile(
   return {
     schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
     side: "runner",
-    source: {
-      deckStrategyProfile: "diagnostic_only",
-      deckCapabilities: "ai_internal",
-      plannerEffect: "runtime_projection",
-    },
+    source: sourceFor(params),
     primaryWinIntent: "runner.steal_agendas_default",
     ...(executionStyle ? { executionStyle } : {}),
     setupEngine,
@@ -358,7 +351,7 @@ function confidenceFor(
 ): RunnerStrategicIntentConfidence {
   if (!strategyProfile && !deckCapabilities) return "low";
   if (
-    strategyProfile?.source.plannerEffect === "none" &&
+    strategyProfile?.source.plannerEffect === "strategic_intent_input" &&
     deckCapabilities?.confidence === "high" &&
     setupEngine.length >= 2 &&
     pressureVectors.length > 0
@@ -421,7 +414,26 @@ function redactedStrategyScoreEvidence(
     `anchor=${score.anchorScore}`,
     `support=${score.supportScore}`,
     `final=${score.finalScore}`,
+    `runtime=${runtimeStatusForEvidence(score.runtimeStatus)}`,
   ].join(":");
+}
+
+function sourceFor(
+  params: BuildRunnerStrategicIntentProfileParams,
+): RunnerStrategicIntentProfile["source"] {
+  return {
+    deckStrategyProfile: params.strategyProfile
+      ? "ai_internal_strategy_profile"
+      : "missing",
+    deckCapabilities: params.deckCapabilities ? "ai_internal" : "missing",
+    plannerEffect: "runtime_projection",
+  };
+}
+
+function runtimeStatusForEvidence(
+  status: DeckStrategyRuntimeStatus | undefined,
+): DeckStrategyRuntimeStatus | "unknown" {
+  return status ?? "unknown";
 }
 
 function sortedIntentValues<T extends string>(values: readonly T[]): T[] {

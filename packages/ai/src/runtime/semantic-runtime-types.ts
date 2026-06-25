@@ -21,6 +21,10 @@ export type TacticalPlanMappedChoiceResult = {
   choice?: SemanticRuntimeChoice;
   overrideChoice?: SemanticRuntimeChoice;
   overriddenMappedChoice?: SemanticRuntimeChoice;
+  overrideReason?: string;
+  overrideBlockedChoice?: SemanticRuntimeChoice;
+  overrideBlockedReason?: string;
+  overrideThreshold?: number;
   scoreGap?: number;
 };
 

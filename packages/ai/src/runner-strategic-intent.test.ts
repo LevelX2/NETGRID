@@ -13,7 +13,7 @@ const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
 }>;
 
 describe("Runner StrategicIntentProjection", () => {
-  it("projects Blink Pressure Rig diagnostics into a generic Runner intent profile", () => {
+  it("projects Blink Pressure Rig strategy signals into a generic Runner intent profile", () => {
     const snapshot = benchmarkSnapshotById(
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",
     );
@@ -35,11 +35,16 @@ describe("Runner StrategicIntentProjection", () => {
       primaryWinIntent: "runner.steal_agendas_default",
       executionStyle: "runner.run_event_tempo",
       source: {
-        deckStrategyProfile: "diagnostic_only",
+        deckStrategyProfile: "ai_internal_strategy_profile",
         deckCapabilities: "ai_internal",
         plannerEffect: "runtime_projection",
       },
     });
+    expect(intent.evidence).toEqual(
+      expect.arrayContaining([
+        "deck_strategy_planner_effect:strategic_intent_input",
+      ]),
+    );
     expect(intent.setupEngine).toEqual(
       expect.arrayContaining([
         "runner.search_breaker_setup",
@@ -92,6 +97,7 @@ describe("Runner StrategicIntentProjection", () => {
       notRejected: ["runner.dedicated_rnd_multiaccess"],
       evidenceNeedles: [
         "strategy_score:runner.rnd_pressure",
+        "runtime=productive",
         "setup_engine:",
         "pressure_vectors:",
       ],
@@ -129,6 +135,7 @@ describe("Runner StrategicIntentProjection", () => {
       ],
       evidenceNeedles: [
         "strategy_score:runner.hq_pressure",
+        "runtime=productive",
         "setup_engine:",
         "pressure_vectors:",
       ],
@@ -169,6 +176,7 @@ describe("Runner StrategicIntentProjection", () => {
       notRejected: [],
       evidenceNeedles: [
         "strategy_score:runner.rnd_pressure",
+        "runtime=productive",
         "setup_engine:",
         "pressure_vectors:",
       ],

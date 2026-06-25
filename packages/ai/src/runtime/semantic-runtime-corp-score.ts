@@ -28,20 +28,10 @@ type SemanticRuntimeCorpContestabilityAssessment = {
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  corpScoreNowDoctrineWeight: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => AiDecisionScoreComponent | undefined;
   corpScoreNowSafetyGate: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => SemanticRuntimeCorpSafetyGate;
-  corpDoctrineWeight: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    planKey: string,
-    consumer: TConsumer,
-  ) => AiDecisionScoreComponent | undefined;
   corpAdvanceRemoteScore: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -104,11 +94,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: 1200,
       reason: "score_agenda",
     });
-    const doctrineWeight = dependencies.corpScoreNowDoctrineWeight(
-      input,
-      action,
-    );
-    if (doctrineWeight) components.push(doctrineWeight);
     const safetyGate = dependencies.corpScoreNowSafetyGate(input, action);
     if (!safetyGate.allowed) {
       components.push({
@@ -126,13 +111,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: 600,
       reason: "advance_card",
     });
-    const doctrineWeight = dependencies.corpDoctrineWeight(
-      input,
-      action,
-      "score_next_turn",
-      "corp_score_next_turn" as TConsumer,
-    );
-    if (doctrineWeight) components.push(doctrineWeight);
     const remoteScore = dependencies.corpAdvanceRemoteScore(input, action);
     if (remoteScore !== 0) {
       components.push({
@@ -169,13 +147,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         value: 550,
         reason: "score_line",
       });
-      const doctrineWeight = dependencies.corpDoctrineWeight(
-        input,
-        action,
-        "build_scoring_remote",
-        "corp_build_scoring_remote" as TConsumer,
-      );
-      if (doctrineWeight) components.push(doctrineWeight);
     }
     if (
       action.payload?.placement === "ice" ||

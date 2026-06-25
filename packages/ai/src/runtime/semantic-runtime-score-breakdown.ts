@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { buildSemanticDecisionDebugScoreComponent } from "../diagnostics/decision-debug";
+import { semanticRuntimeStrategicActionFitScoreComponents } from "./strategic-action-fit";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { semanticRuntimeTypeTieBreakerScore } from "./semantic-runtime-score-components";
 
@@ -58,6 +59,7 @@ export function createSemanticRuntimeScoreBreakdownContext(
       action,
       scopeId,
       ...(exclusion ? { exclusion } : {}),
+      ...(actionSemanticCandidate ? { actionSemanticCandidate } : {}),
       dependencies: {
         contextComponents: (componentInput, componentAction, componentScopeId) =>
           componentInput.side === "runner"
@@ -85,6 +87,7 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
   action: LegalAction;
   scopeId: string;
   exclusion?: SemanticRuntimeExclusion;
+  actionSemanticCandidate?: ActionSemanticCandidate;
   dependencies: SemanticRuntimeScoreBreakdownDependencies;
 }): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
   const typeTieBreaker = semanticRuntimeTypeTieBreakerScore(
@@ -117,6 +120,12 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
         ]
       : []),
     ...contextComponents,
+    ...semanticRuntimeStrategicActionFitScoreComponents(
+      params.input,
+      params.action,
+      params.scopeId,
+      params.actionSemanticCandidate,
+    ),
     ...(privateBonus !== 0
       ? [
           buildSemanticDecisionDebugScoreComponent({

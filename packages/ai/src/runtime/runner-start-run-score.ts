@@ -8,11 +8,6 @@ type RunnerStartRunServer = AiDecisionInput["playerView"]["servers"][number];
 
 export type RunnerStartRunScoreDependencies = {
   serverId: (action: LegalAction) => string | undefined;
-  doctrineRunWeight: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    serverId: string | undefined,
-  ) => AiDecisionScoreComponent | undefined;
   hqMemoryComponents: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -51,12 +46,6 @@ export function runnerStartRunScoreComponents(
   if (action.type !== "start_run") return [];
   const components: AiDecisionScoreComponent[] = [];
   const serverId = dependencies.serverId(action);
-  const doctrineWeight = dependencies.doctrineRunWeight(
-    input,
-    action,
-    serverId,
-  );
-  if (doctrineWeight) components.push(doctrineWeight);
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
   );

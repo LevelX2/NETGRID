@@ -12,7 +12,10 @@ import {
   resetTacticalPlanMemory,
 } from "./tactical-plans";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
-import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import {
+  buildActionSemanticCandidates,
+  type ActionSemanticCandidate,
+} from "./action-semantic-candidate";
 import type {
   RunnerHandDevelopmentEvaluation,
   RunnerPersistentInstallEvaluation,
@@ -2090,6 +2093,101 @@ describe("tactical plan model", () => {
       expect.arrayContaining(["breaker.wall=in_deck/draw_only"]),
     );
     expect(facts).not.toMatch(/onr_v1_|Dwarf|Broker/);
+  });
+
+  it("translates Runner strategic central pressure into a targeted central plan", () => {
+    const hqRun = legalAction("run-hq", "runner", "start_run", { serverId: "hq" });
+    const rdRun = legalAction("run-rd", "runner", "start_run", { serverId: "rd" });
+    const input = aiInput("runner", [hqRun, rdRun]);
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates,
+      tacticalGoals: [
+        {
+          goalId: "runner.strategic.central_pressure",
+          family: "pressure",
+          priority: 900,
+          urgency: "high",
+          targetServerId: "hq",
+          source: "strategic_intent",
+          evidence: ["test:strategic_hq_pressure"],
+        },
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.opportunistic_central_run:hq",
+      type: "runner.opportunistic_central_run",
+      priority: expect.any(Number),
+    });
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-hq",
+    ]);
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_plan_goal:runner.strategic.central_pressure",
+        "test:strategic_hq_pressure",
+      ]),
+    );
+  });
+
+  it("translates Corp punish intent into a mapped punish pressure plan", () => {
+    const punish = legalAction(
+      "play-punish",
+      "corp",
+      "play_operation",
+      { sourceDefinitionId: "corp-punish-card" },
+      { source: "corp-punish-card" },
+    );
+    const input = aiInput("corp", [punish]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+      cardSemanticProfilesByDefinitionId: {
+        "corp-punish-card": {
+          cardId: "corp-punish-card",
+          tacticSignals: ["tag.source", "tag.payoff"],
+        },
+      },
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates,
+      tacticalGoals: [
+        {
+          goalId: "corp.intent.punish",
+          family: "tag_punish",
+          priority: 820,
+          urgency: "medium",
+          source: "strategic_intent",
+          evidence: ["test:corp_punish_intent"],
+        },
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "corp.apply_punish_pressure:play-punish",
+      type: "corp.apply_punish_pressure",
+    });
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "play-punish",
+    ]);
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_plan_goal:corp.intent.punish",
+        "punish_card_signal:tag.source",
+        "punish_card_signal:tag.payoff",
+      ]),
+    );
   });
 });
 

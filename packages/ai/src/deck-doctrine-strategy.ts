@@ -30,7 +30,15 @@ export type DeckStrategyScore = {
   supportEvidence: DeckStrategyEvidence[];
   supportGaps: string[];
   confidence: DeckStrategyConfidence;
+  runtimeStatus?: DeckStrategyRuntimeStatus;
+  runtimeBlockers?: string[];
 };
+
+export type DeckStrategyRuntimeStatus =
+  | "productive"
+  | "supporting"
+  | "blocked"
+  | "diagnostic_only";
 
 export type RunnerDeckStrategyProfiles = {
   coverageProfile: {
@@ -121,11 +129,11 @@ export type AiDeckStrategyProfile = {
   runnerProfile?: RunnerDeckStrategyProfiles;
   corpProfile?: CorpDeckStrategyProfiles;
   source: {
-    mode: "diagnostic_only";
+    mode: "ai_internal_strategy_profile";
     strategyGoals: "data/ai/strategy-goals-v1.json";
     compiledHints: "data/ai/ai-card-hints-compiled.json";
     inspectorIndex: "data/ai/ai-hint-inspector-index.json";
-    plannerEffect: "none";
+    plannerEffect: "strategic_intent_input";
   };
 };
 
@@ -348,6 +356,25 @@ const BREAKER_COVERAGE_SIGNAL_IDS = new Set([
   "breaker.wall",
   "breaker.watchdog",
 ]);
+const SUPPORT_ONLY_STRATEGY_IDS = new Set([
+  "runner.economy_first",
+  "runner.survival_defense",
+  "corp.economy_rez_reserve",
+  "corp.central_stabilize",
+]);
+const HARD_PRODUCTIVE_GAPS = new Set([
+  "missing_wall_coverage",
+  "missing_code_gate_coverage",
+  "weak_sentry_coverage",
+  "weak_breaker_coverage",
+  "low_economy_support",
+  "low_rez_economy",
+  "insufficient_etr_ice",
+  "weak_remote_protection",
+  "low_tag_sources",
+  "payoff_without_enablers",
+  "low_punish_payoff_density",
+]);
 
 export function buildDeckStrategyProfile(
   snapshot: AiDeckDoctrineDeckSnapshot,
@@ -364,6 +391,14 @@ export function buildDeckStrategyProfile(
     const anchorScore = scoreAnchors(anchorEvidence);
     const support = scoreSupport(goal, stats, anchorEvidence);
     const finalScore = scoreFinal(goal, anchorScore, support.score);
+    const runtimeReadiness = strategyRuntimeReadiness(
+      goal,
+      anchorScore,
+      support.score,
+      finalScore,
+      support.gaps,
+      anchorEvidence,
+    );
     strategyScores[goal.strategyId] = {
       anchorScore,
       supportScore: support.score,
@@ -372,6 +407,8 @@ export function buildDeckStrategyProfile(
       supportEvidence: support.evidence,
       supportGaps: support.gaps,
       confidence: confidenceFor(anchorScore, support.score, finalScore),
+      runtimeStatus: runtimeReadiness.status,
+      runtimeBlockers: runtimeReadiness.blockers,
     };
   }
 
@@ -382,13 +419,15 @@ export function buildDeckStrategyProfile(
       left[0].localeCompare(right[0]),
   );
   const primaryStrategies = rankedStrategies
-    .filter(([, score]) => score.finalScore >= 45)
+    .filter(([, score]) => score.finalScore >= 45 && score.runtimeStatus === "productive")
     .slice(0, 3)
     .map(([strategyId]) => strategyId);
   const secondaryStrategies = rankedStrategies
     .filter(
       ([strategyId, score]) =>
-        score.finalScore >= 30 && !primaryStrategies.includes(strategyId),
+        score.finalScore >= 30 &&
+        score.runtimeStatus === "productive" &&
+        !primaryStrategies.includes(strategyId),
     )
     .slice(0, 5)
     .map(([strategyId]) => strategyId);
@@ -409,11 +448,11 @@ export function buildDeckStrategyProfile(
       ? { runnerProfile: buildRunnerProfiles(stats, strategyScores) }
       : { corpProfile: buildCorpProfiles(stats, strategyScores) }),
     source: {
-      mode: "diagnostic_only",
+      mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       compiledHints: "data/ai/ai-card-hints-compiled.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
-      plannerEffect: "none",
+      plannerEffect: "strategic_intent_input",
     },
   });
 }
@@ -1529,6 +1568,87 @@ function scoreFinal(
     0,
     100,
   );
+}
+
+function strategyRuntimeReadiness(
+  goal: StrategyGoal,
+  anchorScore: number,
+  supportScore: number,
+  finalScore: number,
+  supportGaps: readonly string[],
+  anchorEvidence: readonly DeckStrategyEvidence[],
+): { status: DeckStrategyRuntimeStatus; blockers: string[] } {
+  const blockers = strategyRuntimeBlockers(
+    goal,
+    anchorScore,
+    supportScore,
+    finalScore,
+    supportGaps,
+    anchorEvidence,
+  );
+  if (blockers.some((blocker) => blocker.startsWith("supporting_only"))) {
+    return { status: "supporting", blockers };
+  }
+  if (blockers.length > 0) {
+    return {
+      status:
+        anchorScore > 0 || finalScore >= 30 ? "blocked" : "diagnostic_only",
+      blockers,
+    };
+  }
+  return { status: "productive", blockers: [] };
+}
+
+function strategyRuntimeBlockers(
+  goal: StrategyGoal,
+  anchorScore: number,
+  supportScore: number,
+  finalScore: number,
+  supportGaps: readonly string[],
+  anchorEvidence: readonly DeckStrategyEvidence[],
+): string[] {
+  const blockers: string[] = [];
+  if (finalScore < 45) blockers.push("below_productive_score_threshold");
+  if (
+    (goal.detectionMode === "engine_anchor" ||
+      goal.detectionMode === "payoff_anchor") &&
+    anchorEvidence.length === 0
+  ) {
+    blockers.push("missing_strategy_anchor");
+  }
+  if (
+    SUPPORT_ONLY_STRATEGY_IDS.has(goal.strategyId) &&
+    anchorEvidence.length === 0
+  ) {
+    blockers.push(`supporting_only:${goal.strategyId}`);
+  }
+  for (const gap of supportGaps) {
+    if (HARD_PRODUCTIVE_GAPS.has(gap)) {
+      blockers.push(`hard_support_gap:${gap}`);
+    }
+  }
+  if (
+    goal.strategyId === "corp.tag_trace_punish" &&
+    (supportGaps.includes("low_tag_sources") ||
+      supportGaps.includes("payoff_without_enablers") ||
+      supportGaps.includes("low_punish_payoff_density"))
+  ) {
+    blockers.push("tag_punish_source_payoff_pair_incomplete");
+  }
+  if (
+    goal.strategyId === "corp.damage_kill" &&
+    supportGaps.includes("payoff_without_enablers")
+  ) {
+    blockers.push("damage_payoff_enabler_incomplete");
+  }
+  if (
+    goal.detectionMode === "structural_density" &&
+    anchorEvidence.length === 0 &&
+    supportScore < 65
+  ) {
+    blockers.push("structural_density_too_weak_for_productive_line");
+  }
+  return sortedUnique(blockers);
 }
 
 function confidenceFor(

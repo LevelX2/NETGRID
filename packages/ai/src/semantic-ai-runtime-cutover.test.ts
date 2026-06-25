@@ -5,7 +5,11 @@ import * as aiPublicApi from "./index";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "./decision/semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./decision/semantic-shadow-decision";
-import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
+import {
+  buildDeckDoctrineV2Diagnostic,
+  type AiDeckStrategyProfile,
+} from "./deck-doctrine-strategy";
+import { buildStrategicIntentState } from "./strategic-intent-state";
 import { buildRealEngineDecisionCorpusScenarios } from "./evaluation/real-engine-decision-corpus-fixtures";
 import { buildRealEngineDecisionCorpus } from "./evaluation/real-engine-decision-corpus";
 import {
@@ -19,6 +23,7 @@ import {
   getTacticalPlanMemorySnapshot,
   resetTacticalPlanMemory,
 } from "./tactical-plans";
+import { getStrategicIntentMemorySnapshot } from "./strategic-intent-memory";
 import {
   chooseSemanticRuntimeAction,
   type SemanticRuntimeDependencies,
@@ -209,7 +214,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("surfaces side-safe doctrine goal trace items in DecisionDebug", () => {
+  it("does not surface Doctrine v1 plan-weight trace items in DecisionDebug", () => {
     const rdRun = legalAction(
       "run-rd",
       "runner",
@@ -226,19 +231,13 @@ describe("Semantic AI runtime cutover", () => {
     const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
 
     expect(decision.actionId).toBe("run-rd");
-    expect(decision.decisionDebug?.detailSections).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "doctrine_goal",
-          title: "Doctrine Goal",
-          items: expect.arrayContaining([
-            "doctrine_goal_trace:decision_debug",
-            "doctrine_goal_plan:pressure_rnd",
-            "doctrine_goal_consumer:runner_pressure_rnd",
-            "doctrine_goal_weight:120",
-          ]),
-        }),
-      ]),
+    expect(
+      decision.decisionDebug?.detailSections?.some(
+        (section) => section.id === "doctrine_goal",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "doctrine_goal_weight",
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
@@ -279,6 +278,206 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.reason).toBe(decision.reasonCode);
     expect(decision.evidence).not.toEqual(
       expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
+    );
+  });
+
+  it("passes merged tactical goals into the default TacticalPlan context", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    const observedGoals: string[] = [];
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [gain, draw]) as AiDecisionInput & {
+      ownDeckDoctrineV2Diagnostic?: ReturnType<typeof buildDeckDoctrineV2Diagnostic>;
+      ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
+    };
+    input.ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic({
+      deckSnapshotId: "runtime-goal-merge-runner",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_081_custodial-position", quantity: 2 },
+        { cardId: "onr_v1_085_executive-wiretaps", quantity: 2 },
+      ],
+    });
+    input.ownStrategicIntentState = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      targetVector: {
+        kind: "central",
+        targetId: "rd",
+        evidence: ["test:runtime_goal_merge"],
+      },
+      availableCredits: input.playerView.own.credits,
+      strategyProfile: {
+        schemaVersion: "ai-deck-strategy-profile-v1",
+        taskId: "AI006",
+        deckId: "runtime-goal-merge-runner",
+        side: "runner",
+        cardCount: 4,
+        primaryStrategies: ["runner.rnd_pressure"],
+        secondaryStrategies: [],
+        strategyScores: {
+          "runner.rnd_pressure": {
+            anchorScore: 80,
+            supportScore: 80,
+            finalScore: 80,
+            confidence: "high",
+            supportGaps: [],
+            runtimeStatus: "productive",
+            runtimeBlockers: [],
+            anchorEvidence: [
+              {
+                cardId: "onr_v1_081_custodial-position",
+                quantity: 2,
+                source: "derivedStrategyAnchor",
+                strategyId: "runner.rnd_pressure",
+                reason: "test",
+              },
+            ],
+            supportEvidence: [],
+          },
+        },
+        functionSignalCounts: {},
+        legacySignalCounts: {},
+        warnings: [],
+        source: {
+          mode: "ai_internal_strategy_profile",
+          strategyGoals: "data/ai/strategy-goals-v1.json",
+          compiledHints: "data/ai/ai-card-hints-compiled.json",
+          inspectorIndex: "data/ai/ai-hint-inspector-index.json",
+          plannerEffect: "strategic_intent_input",
+        },
+      },
+    });
+    const runtimeChoices = [
+      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
+      semanticRuntimeChoice(draw, 80, "runner.semantic.basic_economy_draw"),
+    ];
+
+    chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("draw", "legacy.runner.draw"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+        observedTacticalGoals: observedGoals,
+      }),
+    );
+
+    expect(observedGoals).toEqual(
+      expect.arrayContaining([
+        "runner.build_economy_base",
+        "runner.strategic.central_pressure",
+        "runner.neutral.economy",
+        "runner.doctrine.rnd_pressure_coverage",
+      ]),
+    );
+  });
+
+  it("adds bounded StrategicIntent action fit to semantic runtime scoring", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    const rdRun = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const draw = legalAction("draw", "runner", "draw_card", "Draw", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [rdRun, draw]) as AiDecisionInput & {
+      ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
+    };
+    input.playerView.own.credits = 6;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.ownStrategicIntentState = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      targetVector: {
+        kind: "central",
+        targetId: "rd",
+        evidence: ["test:strategic_action_fit"],
+      },
+      availableCredits: input.playerView.own.credits,
+      strategyProfile: runtimeRunnerStrategyProfile(),
+    });
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_family:runner_central_pressure",
+      ]),
+    );
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "semantic_strategic_action_fit",
+          reason: expect.stringContaining(
+            "strategic_action_fit_family:runner_central_pressure",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("persists StrategicIntent memory by default and respects preview mode", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [gain]) as AiDecisionInput & {
+      ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
+    };
+    input.ownStrategicIntentState = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      availableCredits: input.playerView.own.credits,
+      strategyProfile: runtimeRunnerStrategyProfile(),
+    });
+    const runtimeChoices = [
+      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const preview = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      { persistTacticalPlanMemory: false },
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+      }),
+    );
+
+    expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
+    expect(preview.evidence).toContain("strategic_intent_memory_preview_only:true");
+
+    const persisted = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+      }),
+    );
+
+    expect(getStrategicIntentMemorySnapshot(input)).toMatchObject({
+      side: "runner",
+      primaryStrategyId: "runner.rnd_pressure",
+    });
+    expect(persisted.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_intent_memory:runner.rnd_pressure",
+        "strategic_intent_memory_phase:enable",
+      ]),
     );
   });
 
@@ -3154,6 +3353,49 @@ function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
   };
 }
 
+function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
+  return {
+    schemaVersion: "ai-deck-strategy-profile-v1",
+    taskId: "AI006",
+    deckId: "runtime-runner-strategy",
+    side: "runner",
+    cardCount: 4,
+    primaryStrategies: ["runner.rnd_pressure"],
+    secondaryStrategies: [],
+    strategyScores: {
+      "runner.rnd_pressure": {
+        anchorScore: 80,
+        supportScore: 80,
+        finalScore: 80,
+        confidence: "high",
+        supportGaps: [],
+        runtimeStatus: "productive",
+        runtimeBlockers: [],
+        anchorEvidence: [
+          {
+            cardId: "onr_v1_081_custodial-position",
+            quantity: 2,
+            source: "derivedStrategyAnchor",
+            strategyId: "runner.rnd_pressure",
+            reason: "test",
+          },
+        ],
+        supportEvidence: [],
+      },
+    },
+    functionSignalCounts: {},
+    legacySignalCounts: {},
+    warnings: [],
+    source: {
+      mode: "ai_internal_strategy_profile",
+      strategyGoals: "data/ai/strategy-goals-v1.json",
+      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
+      plannerEffect: "strategic_intent_input",
+    },
+  };
+}
+
 function semanticRuntimeDependencies(
   choices: SemanticRuntimeChoice[],
   options: {
@@ -3168,6 +3410,7 @@ function semanticRuntimeDependencies(
     };
     rememberedActions?: string[];
     runTargets?: unknown[];
+    observedTacticalGoals?: string[];
   },
 ): SemanticRuntimeDependencies {
   return {
@@ -3196,10 +3439,15 @@ function semanticRuntimeDependencies(
           evidence: ["test_goal:economy"],
         },
       ] as any,
-    evaluateTacticalPlans: () => ({
-      planAlternatives: [],
-      blockedPlans: [],
-    }),
+    evaluateTacticalPlans: (context) => {
+      options.observedTacticalGoals?.push(
+        ...(context.tacticalGoals?.map((goal) => goal.goalId) ?? []),
+      );
+      return {
+        planAlternatives: [],
+        blockedPlans: [],
+      };
+    },
     bestSemanticRuntimeChoice: () =>
       choices.find(
         (choice) =>
