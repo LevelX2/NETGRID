@@ -422,7 +422,10 @@ import {
   centralRunStreakWithoutValueForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
-import { remoteServerHasScoreThreat } from "./simulation/remote-server-threat";
+import {
+  remoteServerHasScoreThreat,
+  remoteTrashAccessProtectsAcuteThreatForMetrics,
+} from "./simulation/remote-server-threat";
 import {
   remoteTrashRoleForAccessedVisibleCard,
   remoteTrashRoleForVisibleCard,
@@ -26897,28 +26900,6 @@ function hasRunnerRemoteTrashAction(input: AiDecisionInput): boolean {
       action.type === "trash_accessed_card" &&
       isRemoteServerTarget(input.playerView.run?.attackedServerId),
   );
-}
-
-function remoteTrashAccessProtectsAcuteThreatForMetrics(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  if (remoteServerHasScoreThreat(input, serverId)) return true;
-  return server.root.some((card) => {
-    if (!card.known || card.type !== "agenda" || !card.definitionId)
-      return false;
-    return (
-      input.playerView.own.agendaPoints +
-        (RUNTIME_CARDS[card.definitionId]?.numeric.agendaPoints ??
-          DEMO_CARDS_BY_ID[card.definitionId]?.agendaPoints ??
-          0) >=
-      input.playerView.agendaPointsToWin - 1
-    );
-  });
 }
 
 function isRunnerEconomyAction(
