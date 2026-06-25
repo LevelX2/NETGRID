@@ -578,6 +578,7 @@ import type {
   RunnerPressureReadyTargetForMetrics,
 } from "./simulation/runner-pressure-metric-types";
 import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
+import type { RunnerSetupMissingCoverageType } from "./simulation/runner-setup-coverage-types";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -20725,13 +20726,6 @@ function runnerHandUseDiagnosticsForSimulationAction(
     ...(handUseActionTaken ? { runnerHandUseActionTaken: true } : {}),
   };
 }
-
-type RunnerSetupMissingCoverageType =
-  | "wall"
-  | "code_gate"
-  | "sentry"
-  | "universal"
-  | "special";
 
 function runnerEconomySetupDiagnosticsForSimulationAction(
   input: AiDecisionInput,
