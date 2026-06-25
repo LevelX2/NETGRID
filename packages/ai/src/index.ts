@@ -296,7 +296,6 @@ import {
   incrementStringCounter,
 } from "./runtime/counter";
 import {
-  countValue as countTag,
   minNumberOrZero as minDefined,
   sortedUnique,
 } from "./runtime/collection";
@@ -393,6 +392,11 @@ import {
   sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
 import {
+  collectRepeatedLowValueCentralRunExamples,
+  doctrineCaseExample,
+  doctrineMetricForQualityTag,
+  doctrineMetricsFor,
+  emptyDoctrineCaseExamples,
   isAgendaFloodExposureExemptAction,
   isEconomyStallExemptAction,
   repeatedLowValueCentralRunTags,
@@ -25991,108 +25995,6 @@ function qualityTagsForAction(
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
-}
-
-function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
-  return {
-    nakedAgendaInstalls: countTag(tags, "naked_agenda_install"),
-    agendaFloodExposure: countTag(tags, "agenda_flood_exposure"),
-    scoreWindowMissed: countTag(tags, "score_window_missed"),
-    remoteOverbuild: countTag(tags, "remote_overbuild"),
-    economyStall: countTag(tags, "economy_stall"),
-    repeatedLowValueCentralRun: countTag(
-      tags,
-      "repeated_low_value_central_run",
-    ),
-    rigStall: countTag(tags, "rig_stall"),
-    assetTrashNeglect: countTag(tags, "asset_trash_neglect"),
-  };
-}
-
-function emptyDoctrineCaseExamples(): Record<
-  AiDoctrineQualityMetricName,
-  AiDoctrineQualityCaseExample[]
-> {
-  return DOCTRINE_QUALITY_METRIC_NAMES.reduce(
-    (examples, metric) => ({
-      ...examples,
-      [metric]: [],
-    }),
-    {} as Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>,
-  );
-}
-
-function doctrineMetricForQualityTag(
-  tag: string,
-): AiDoctrineQualityMetricName | undefined {
-  switch (tag) {
-    case "naked_agenda_install":
-      return "nakedAgendaInstalls";
-    case "agenda_flood_exposure":
-      return "agendaFloodExposure";
-    case "score_window_missed":
-      return "scoreWindowMissed";
-    case "remote_overbuild":
-      return "remoteOverbuild";
-    case "economy_stall":
-      return "economyStall";
-    case "rig_stall":
-      return "rigStall";
-    case "asset_trash_neglect":
-      return "assetTrashNeglect";
-    default:
-      return undefined;
-  }
-}
-
-function collectRepeatedLowValueCentralRunExamples(
-  summary: AiSimulationSummary,
-  examples: Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>,
-  maxExamplesPerMetric: number,
-): void {
-  const metric: AiDoctrineQualityMetricName = "repeatedLowValueCentralRun";
-  const lastCentralRunByServer = new Map<string, number>();
-  for (const [actionIndex, entry] of summary.actionSequence.entries()) {
-    if (
-      entry.side !== "runner" ||
-      entry.actionType !== "start_run" ||
-      !entry.targetServerId ||
-      !["rd", "hq", "archives"].includes(entry.targetServerId)
-    )
-      continue;
-    const previous = lastCentralRunByServer.get(entry.targetServerId);
-    if (
-      previous !== undefined &&
-      actionIndex - previous <= 4 &&
-      !entry.reasonCode.includes("contest") &&
-      !entry.reasonCode.includes("trash") &&
-      examples[metric].length < maxExamplesPerMetric
-    ) {
-      examples[metric].push(
-        doctrineCaseExample(summary.seed, actionIndex, entry, metric),
-      );
-    }
-    lastCentralRunByServer.set(entry.targetServerId, actionIndex);
-  }
-}
-
-function doctrineCaseExample(
-  seed: string,
-  actionIndex: number,
-  entry: AiSimulationSummary["actionSequence"][number],
-  metric: AiDoctrineQualityMetricName,
-): AiDoctrineQualityCaseExample {
-  return {
-    metric,
-    seed,
-    actionIndex,
-    stateVersionBefore: entry.stateVersionBefore,
-    side: entry.side,
-    actionType: entry.actionType,
-    reasonCode: entry.reasonCode,
-    ...(entry.targetServerId ? { targetServerId: entry.targetServerId } : {}),
-    qualityTags: entry.qualityTags.slice().sort(),
-  };
 }
 
 function isRedactionSafeCaseAnalysis(
