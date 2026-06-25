@@ -4,7 +4,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-type AiProfileWeightsData = {
+export type AiProfileWeightsData = {
   profileId: string;
   side: Side;
   difficulty: AiDifficulty;

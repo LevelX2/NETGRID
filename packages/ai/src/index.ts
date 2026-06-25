@@ -259,7 +259,10 @@ import {
   scoreCorpOperation,
   scoreCorpRootInstall,
 } from "./runtime/corp-card-action-score";
-import { profileWeights } from "./runtime/profile-weights";
+import {
+  profileWeights,
+  type AiProfileWeightsData,
+} from "./runtime/profile-weights";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -1107,13 +1110,6 @@ type RankedChoice = {
   score: number;
   evidence: string[];
   confidence?: number;
-};
-
-type AiProfileData = {
-  profileId: string;
-  side: Side;
-  difficulty: AiDifficulty;
-  weights: Record<string, number>;
 };
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
@@ -2622,7 +2618,7 @@ export type {
   SimulationWorld,
 } from "./simulation/simulation-types";
 
-const AI_PROFILES = aiProfilesData.profiles as AiProfileData[];
+const AI_PROFILES = aiProfilesData.profiles as AiProfileWeightsData[];
 const SOAK_SEEDS = soakSeedsData as {
   tuningSeeds: string[];
   holdoutSeeds: string[];
