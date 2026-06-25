@@ -115,6 +115,47 @@ export function buildCorpStrategicIntentProfile(
       evidence: ["projection_input_side:not_corp"],
     };
   }
+  if (!hasProductiveStrategyAnchor(strategyProfile, strategicIntentState)) {
+    const rejectedIntents = sortedIntentValues<CorpRejectedIntent>(
+      rejectedCorpIntents(strategyProfile),
+    );
+    const riskProfile = sortedIntentValues<CorpStrategicIntentRisk>([
+      ...(!strategyProfile && !deckCapabilities && !strategicIntentState
+        ? ["corp.low_confidence_strategy_projection" as const]
+        : []),
+      "corp.no_productive_anchor",
+      ...(strategicIntentState?.reserve.satisfied === false
+        ? ["corp.reserve_shortfall" as const]
+        : []),
+    ]);
+    return {
+      schemaVersion: CORP_STRATEGIC_INTENT_SCHEMA_VERSION,
+      side: "corp",
+      source: sourceFor(params),
+      primaryWinIntent: "corp.unknown",
+      scorePlan: [],
+      defensePlan: [],
+      economyPlan: [],
+      punishPlan: [],
+      riskProfile,
+      rejectedIntents,
+      confidence: "low",
+      evidence: [
+        "productive_strategy_anchor:false",
+        ...strategicIntentEvidence({
+          strategyProfile,
+          deckCapabilities,
+          strategicIntentState,
+          scorePlan: [],
+          defensePlan: [],
+          economyPlan: [],
+          punishPlan: [],
+          riskProfile,
+          rejectedIntents,
+        }),
+      ],
+    };
+  }
 
   const scorePlan = sortedIntentValues<CorpScorePlan>([
     ...(productiveOrAnchored(strategyProfile, "corp.remote_scoring") ||
@@ -278,6 +319,29 @@ function productiveOrAnchored(
     score &&
       (score.runtimeStatus === "productive" ||
         (score.anchorScore > 0 && score.finalScore >= SCORE_THRESHOLD)),
+  );
+}
+
+function hasProductiveStrategyAnchor(
+  strategyProfile: AiDeckStrategyProfile | undefined,
+  strategicIntentState: StrategicIntentState | undefined,
+): boolean {
+  if (
+    strategicIntentState &&
+    strategicIntentState.primaryStrategy.family !== "neutral" &&
+    strategicIntentState.primaryStrategy.score.anchor > 0 &&
+    !strategicIntentState.blockers.some(
+      (blocker) => blocker.reason === "no_strategy_anchor",
+    )
+  ) {
+    return true;
+  }
+  if (!strategyProfile) return false;
+  return Object.values(strategyProfile.strategyScores).some(
+    (score) =>
+      score.runtimeStatus === "productive" &&
+      score.anchorScore > 0 &&
+      score.anchorEvidence.length > 0,
   );
 }
 

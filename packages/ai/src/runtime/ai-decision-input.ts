@@ -18,6 +18,7 @@ import {
 import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
+  type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
 } from "../deck-doctrine-strategy";
 import {
@@ -35,6 +36,7 @@ import {
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
 
 export type AiDecisionSideSelection =
   | {
@@ -55,6 +57,9 @@ export type AiDecisionSideSelection =
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownDeckStrategyProfile?: AiDeckStrategyProfile;
+  // Report-only diagnostic: keep it available for audits and debug reports, but
+  // productive runtime consumers must use ownDeckStrategyProfile/StrategicIntentState.
   ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
   ownStrategicIntentState?: StrategicIntentState;
   ownCorpStrategicIntent?: CorpStrategicIntentProfile;
@@ -121,6 +126,13 @@ export function buildAiDecisionInput(
     input,
     options.ownDeckSnapshot.deckSnapshotId,
   )?.state;
+  const strategicRuntimeContext = buildStrategicRuntimeContext({
+    side,
+    playerView,
+    legalActions,
+    strategyProfile: ownDeckStrategyProfile,
+    deckCapabilities: ownDeckCapabilities,
+  });
   const ownStrategicIntentState = buildStrategicIntentState({
     side,
     stateVersion: playerView.stateVersion,
@@ -130,6 +142,9 @@ export function buildAiDecisionInput(
       ? { previousState: previousStrategicIntentState }
       : {}),
     availableCredits: playerView.own.credits,
+    roleStatuses: strategicRuntimeContext.roleStatuses,
+    targetVector: strategicRuntimeContext.targetVector,
+    reserveRequirement: strategicRuntimeContext.reserveRequirement,
   });
   const ownRunnerStrategicIntent =
     side === "runner"
@@ -149,6 +164,7 @@ export function buildAiDecisionInput(
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
+    ownDeckStrategyProfile,
     ownDeckDoctrineV2Diagnostic,
     ownStrategicIntentState,
     ...(ownCorpStrategicIntent ? { ownCorpStrategicIntent } : {}),

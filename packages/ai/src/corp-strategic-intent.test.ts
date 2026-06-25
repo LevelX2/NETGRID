@@ -148,6 +148,26 @@ describe("CorpStrategicIntentProfile", () => {
     );
     expect(profile.riskProfile).toContain("corp.no_productive_anchor");
   });
+
+  it("does not turn capability-only support into Corp score or punish plans", () => {
+    const profile = buildCorpStrategicIntentProfile({
+      deckCapabilities: corpCapabilities(),
+    });
+
+    expect(profile.primaryWinIntent).toBe("corp.unknown");
+    expect(profile.scorePlan).toEqual([]);
+    expect(profile.defensePlan).toEqual([]);
+    expect(profile.economyPlan).toEqual([]);
+    expect(profile.punishPlan).toEqual([]);
+    expect(profile.confidence).toBe("low");
+    expect(profile.riskProfile).toContain("corp.no_productive_anchor");
+    expect(profile.evidence).toEqual(
+      expect.arrayContaining([
+        "productive_strategy_anchor:false",
+        "deck_capabilities:present",
+      ]),
+    );
+  });
 });
 
 function strategyProfile(

@@ -281,7 +281,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("passes merged tactical goals into the default TacticalPlan context", () => {
+  it("passes productive merged tactical goals into the default TacticalPlan context", () => {
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
     const observedGoals: string[] = [];
     const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -372,8 +372,10 @@ describe("Semantic AI runtime cutover", () => {
         "runner.build_economy_base",
         "runner.strategic.central_pressure",
         "runner.neutral.economy",
-        "runner.doctrine.rnd_pressure_coverage",
       ]),
+    );
+    expect(observedGoals.some((goalId) => goalId.includes(".doctrine."))).toBe(
+      false,
     );
   });
 
@@ -425,6 +427,25 @@ describe("Semantic AI runtime cutover", () => {
           reason: expect.stringContaining(
             "strategic_action_fit_family:runner_central_pressure",
           ),
+        }),
+      ]),
+    );
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "strategic_runtime",
+          items: expect.arrayContaining([
+            "strategic_intent_state:runner.rnd_pressure",
+            "strategic_intent_target_id:rd",
+            "strategic_action_fit_target_match:exact",
+          ]),
+        }),
+        expect.objectContaining({
+          id: "selection_score",
+          items: expect.arrayContaining([
+            expect.stringMatching(/^runtime_raw_score:/),
+            "display_score_only:true",
+          ]),
         }),
       ]),
     );

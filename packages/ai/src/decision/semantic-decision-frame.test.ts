@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import {
   buildSemanticDecisionFrame,
   type TacticalGoalLike,
@@ -172,6 +173,57 @@ describe("SemanticDecisionFrame", () => {
     expect(trace.selectedActionId).toBeUndefined();
     expect(trace.noRuntimeEffect).toBe(true);
   });
+
+  it("accepts Doctrine diagnostics only as report-only no-effect frame data", () => {
+    const input = inputFor("runner", [
+      legalAction("runner-1", "gain_credit", "runner"),
+    ]);
+    const reportOnlyDiagnostic = doctrineDiagnostic();
+
+    const frame = buildSemanticDecisionFrame({
+      input,
+      doctrineDiagnostic: reportOnlyDiagnostic,
+    });
+
+    expect(frame.doctrineDiagnostic).toMatchObject({
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+      source: { mode: "report_only", plannerEffect: "none" },
+    });
+    expect(() =>
+      buildSemanticDecisionFrame({
+        input,
+        doctrineDiagnostic: {
+          ...reportOnlyDiagnostic,
+          productiveUseAllowed: true,
+        } as unknown as DeckDoctrineV2Diagnostic,
+      }),
+    ).toThrow(/report-only\/no-effect/);
+    expect(() =>
+      buildSemanticDecisionFrame({
+        input,
+        doctrineDiagnostic: {
+          ...reportOnlyDiagnostic,
+          source: {
+            ...reportOnlyDiagnostic.source,
+            plannerEffect: "goal_and_plan_input",
+          },
+        } as unknown as DeckDoctrineV2Diagnostic,
+      }),
+    ).toThrow(/report-only\/no-effect/);
+    expect(() =>
+      buildSemanticDecisionFrame({
+        input,
+        doctrineDiagnostic: {
+          ...reportOnlyDiagnostic,
+          noEffectFlags: {
+            ...reportOnlyDiagnostic.noEffectFlags,
+            actionSelection: true,
+          },
+        } as unknown as DeckDoctrineV2Diagnostic,
+      }),
+    ).toThrow(/report-only\/no-effect/);
+  });
 });
 
 function goal(goalId: string, family: string): TacticalGoalLike {
@@ -266,5 +318,45 @@ function legalAction(
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 12,
+  };
+}
+
+function doctrineDiagnostic(): DeckDoctrineV2Diagnostic {
+  return {
+    schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+    scope: "diagnostic_only",
+    productiveUseAllowed: false,
+    deckSnapshotId: "runner-test",
+    side: "runner",
+    status: "complete",
+    neutralDoctrine: false,
+    strategyDiagnostics: [],
+    rolesStatus: {
+      status: "complete",
+      cardCount: 0,
+      cardRows: 0,
+      completeCards: 0,
+      partialCards: 0,
+      anchorlessCards: 0,
+      cardsWithoutRoles: [],
+      roleSignalCount: 0,
+      functionSignalCount: 0,
+      strategyAnchorCount: 0,
+    },
+    cardRoles: [],
+    warnings: [],
+    source: {
+      strategyProfile: "buildDeckStrategyProfile",
+      mode: "report_only",
+      plannerEffect: "none",
+    },
+    noEffectFlags: {
+      actionSelection: false,
+      plannerWeights: false,
+      scoring: false,
+      legalActionGeneration: false,
+      engineMutation: false,
+      hiddenInfoProjection: false,
+    },
   };
 }

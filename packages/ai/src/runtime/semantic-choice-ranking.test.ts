@@ -74,22 +74,22 @@ describe("tacticalPlanMappedChoice", () => {
     const result = tacticalPlanMappedChoice(
       aiInput(),
       [
-        choice(run, 7425, ["semantic_strategic_action_fit:true"]),
+        choice(run, 7425, strategicEvidence("exact")),
         choice(gain, 7025),
       ],
       coverageMapping([gain]),
-      choice(run, 7425, ["semantic_strategic_action_fit:true"]),
+      choice(run, 7425, strategicEvidence("exact")),
     );
 
     expect(result.overrideChoice?.action.actionId).toBe("run-rd");
     expect(result.overriddenMappedChoice?.action.actionId).toBe("gain");
-    expect(result.overrideReason).toBe("strategic_score_gap");
-    expect(result.overrideThreshold).toBe(360);
+    expect(result.overrideReason).toBe("strategic_exact_score_gap");
+    expect(result.overrideThreshold).toBe(320);
     expect(tacticalPlanMappingOverrideEvidence(result)).toEqual(
       expect.arrayContaining([
         "tactical_plan_override_allowed:true",
-        "tactical_plan_override_reason:strategic_score_gap",
-        "tactical_plan_mapping_score_gap_threshold:360",
+        "tactical_plan_override_reason:strategic_exact_score_gap",
+        "tactical_plan_mapping_score_gap_threshold:320",
       ]),
     );
   });
@@ -103,7 +103,7 @@ describe("tacticalPlanMappedChoice", () => {
       aiInput(),
       [
         choice(run, 7785),
-        choice(mappedRun, 7025, ["semantic_strategic_action_fit:true"]),
+        choice(mappedRun, 7025, strategicEvidence("exact")),
       ],
       remoteContestMapping([mappedRun]),
       choice(run, 7785),
@@ -112,15 +112,35 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("run-remote");
     expect(result.overrideChoice).toBeUndefined();
     expect(result.overrideBlockedChoice?.action.actionId).toBe("run-rd");
-    expect(result.overrideBlockedReason).toBe("strategic_mapping_protected");
+    expect(result.overrideBlockedReason).toBe(
+      "strategic_exact_mapping_protected",
+    );
     expect(result.overrideThreshold).toBe(900);
     expect(result.choice?.evidence).toEqual(
       expect.arrayContaining([
         "tactical_plan_mapping_override_blocked:true",
-        "tactical_plan_override_blocked_reason:strategic_mapping_protected",
+        "tactical_plan_override_blocked_reason:strategic_exact_mapping_protected",
         "tactical_plan_mapping_score_gap_threshold:900",
       ]),
     );
+  });
+
+  it("uses a wider override gap for kind-level strategic fit", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(run, 7485, strategicEvidence("kind")),
+        choice(gain, 7025),
+      ],
+      coverageMapping([gain]),
+      choice(run, 7485, strategicEvidence("kind")),
+    );
+
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideChoice).toBeUndefined();
+    expect(result.overrideThreshold).toBe(480);
   });
 });
 
@@ -140,6 +160,13 @@ function choice(
     explanation: action.label,
     evidence,
   };
+}
+
+function strategicEvidence(targetMatch: "exact" | "kind"): string[] {
+  return [
+    "semantic_strategic_action_fit:true",
+    `strategic_action_fit_target_match:${targetMatch}`,
+  ];
 }
 
 function coverageMapping(

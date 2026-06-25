@@ -40,6 +40,8 @@ export type SemanticDecisionFrame = {
   legalActionIds: string[];
   actionCandidates: ActionSemanticCandidate[];
   tacticalGoals: TacticalGoalLike[];
+  // Report-only diagnostic channel for shadow traces; productive runtime goals
+  // must come from StrategicIntentState, CorpStrategicIntent or tacticalGoals.
   doctrineDiagnostic?: DeckDoctrineV2Diagnostic;
   tacticalPlan?: TacticalPlanRuntimeResult;
   deckCapabilities?: DeckCapabilityProfile;
@@ -86,6 +88,7 @@ export function buildSemanticDecisionFrame(
       `SemanticDecisionFrame received non-legal action candidates: ${invalidCandidateIds.join(", ")}`,
     );
   }
+  assertDoctrineDiagnosticIsReportOnly(params.doctrineDiagnostic);
   const candidatesByActionId = new Map(
     (params.actionCandidates ?? []).map((candidate) => [
       candidate.actionId,
@@ -195,4 +198,21 @@ export function assertSemanticDecisionFrameIsSideSafe(
   frame: SemanticDecisionFrame,
 ): void {
   assertSemanticObjectSideSafe(frame, "SemanticDecisionFrame");
+}
+
+function assertDoctrineDiagnosticIsReportOnly(
+  diagnostic: DeckDoctrineV2Diagnostic | undefined,
+): void {
+  if (!diagnostic) return;
+  if (
+    diagnostic.scope !== "diagnostic_only" ||
+    diagnostic.productiveUseAllowed !== false ||
+    diagnostic.source.mode !== "report_only" ||
+    diagnostic.source.plannerEffect !== "none" ||
+    Object.values(diagnostic.noEffectFlags).some((value) => value !== false)
+  ) {
+    throw new Error(
+      "SemanticDecisionFrame doctrineDiagnostic must remain report-only/no-effect.",
+    );
+  }
 }

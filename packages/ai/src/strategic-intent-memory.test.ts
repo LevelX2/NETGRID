@@ -98,6 +98,51 @@ describe("StrategicIntent memory", () => {
 
     expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
   });
+
+  it("does not use report-only Doctrine diagnostics as a productive memory key", () => {
+    const input = aiInput("runner", "match-diagnostic-only", "deck-runner-a");
+    delete (input as any).ownDeckStrategyProfile;
+    (input as any).ownDeckDoctrineV2Diagnostic = {
+      deckSnapshotId: "diagnostic-only-deck",
+      scope: "diagnostic_only",
+      productiveUseAllowed: false,
+    };
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 5,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+
+    const snapshot = rememberStrategicIntentState(input, state);
+
+    expect(snapshot?.deckSnapshotId).toBe("no_deck_snapshot");
+    expect(
+      getStrategicIntentMemorySnapshot(input, "diagnostic-only-deck"),
+    ).toBeUndefined();
+  });
+
+  it("expires abandoned strategic states immediately", () => {
+    const input = aiInput("runner", "match-abandoned", "deck-runner-a");
+    const active = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 8,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+    const abandoned = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 9,
+      previousState: active,
+      availableCredits: 8,
+    });
+
+    const snapshot = rememberStrategicIntentState(input, abandoned);
+
+    expect(abandoned.transition.status).toBe("abandoned");
+    expect(snapshot?.ttlDecisionsRemaining).toBe(0);
+    expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
+  });
 });
 
 function strategyProfile(
@@ -167,8 +212,8 @@ function aiInput(
     decisionId: `${decisionScope}:10:${side}`,
     actionNumber: 10,
     profileId,
-    ownDeckDoctrineV2Diagnostic: {
-      deckSnapshotId,
+    ownDeckStrategyProfile: {
+      deckId: deckSnapshotId,
     },
   } as unknown as AiDecisionInput;
 }

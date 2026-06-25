@@ -257,11 +257,43 @@ describe("Runner StrategicIntentProjection", () => {
 
     expect(strategyProfile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
     expect(strategyProfile.strategyScores["runner.hq_pressure"]?.anchorScore).toBe(0);
-    expect(intent.primaryWinIntent).toBe("runner.steal_agendas_default");
+    expect(intent.primaryWinIntent).toBe("runner.unknown");
+    expect(intent.setupEngine).toEqual([]);
+    expect(intent.pressureVectors).toEqual([]);
+    expect(intent.confidence).toBe("low");
     expect(intent.rejectedIntents).toEqual(
       expect.arrayContaining([
         "runner.dedicated_rnd_multiaccess",
         "runner.dedicated_hq_multiaccess",
+      ]),
+    );
+    expect(intent.evidence).toContain("productive_strategy_anchor:false");
+  });
+
+  it("does not turn capability-only support into a Runner strategy projection", () => {
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      deckSnapshot: {
+        deckSnapshotId: "runner-capability-only-fixture",
+        side: "runner",
+        cards: [
+          { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
+          { cardId: "onr_v1_154_broker", quantity: 2 },
+        ],
+      },
+      legalActions: [],
+    });
+
+    const intent = buildRunnerStrategicIntentProfile({ deckCapabilities });
+
+    expect(intent.primaryWinIntent).toBe("runner.unknown");
+    expect(intent.setupEngine).toEqual([]);
+    expect(intent.pressureVectors).toEqual([]);
+    expect(intent.confidence).toBe("low");
+    expect(intent.evidence).toEqual(
+      expect.arrayContaining([
+        "productive_strategy_anchor:false",
+        "deck_capabilities:present",
       ]),
     );
   });

@@ -16,7 +16,9 @@ import {
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
   semanticRuntimeDebugRankedAlternatives,
+  semanticRuntimeDebugSelectionScoreItems,
   semanticRuntimeDebugShadowTopItems,
+  semanticRuntimeDebugStrategicRuntimeItems,
   semanticRuntimeDebugTacticalPlanItems,
   semanticRuntimeDebugTargetChoiceShadowItems,
 } from "./semantic-runtime-debug";
@@ -43,6 +45,7 @@ describe("SemanticRuntimeDebug", () => {
       "selected_by_plan_mapping",
       "rawSemanticScore:80",
       "finalSelectionScore:330",
+      "displayOnlyScore:true",
       "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     expect(
@@ -52,6 +55,7 @@ describe("SemanticRuntimeDebug", () => {
       "selected_by_plan_mapping",
       "rawSemanticScore:120",
       "finalSelectionScore:120",
+      "displayOnlyScore:true",
     ]);
     expect(
       semanticRuntimeDebugPlanSelectionScoreBreakdown(selected, true, 330, context),
@@ -62,6 +66,65 @@ describe("SemanticRuntimeDebug", () => {
         value: 250,
       }),
     ]);
+  });
+
+  it("formats strategic runtime and selection-score contracts", () => {
+    const selected = choice(action("run-rd", "start_run"), 140, {
+      evidence: [
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_value:260",
+        "strategic_action_fit_target_match:exact",
+      ],
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "run-rd",
+      selectedChoice: selected,
+      mappedActionIds: ["run-rd"],
+      selectedPlanType: "runner.pressure_central",
+    });
+    const input = {
+      side: "runner",
+      ownStrategicIntentState: {
+        primaryStrategy: {
+          strategyId: "runner.rnd_pressure",
+          family: "runner_central_pressure",
+          completeness: "complete",
+        },
+        phase: "pressure",
+        transition: { status: "continued" },
+        targetVector: { kind: "central", targetId: "rd" },
+        reserve: {
+          kind: "credits",
+          required: 4,
+          available: 6,
+          satisfied: true,
+        },
+        blockers: [],
+      },
+    } as any;
+
+    expect(
+      semanticRuntimeDebugStrategicRuntimeItems(input, selected.evidence),
+    ).toEqual(
+      expect.arrayContaining([
+        "strategic_intent_state:runner.rnd_pressure",
+        "strategic_intent_phase:pressure",
+        "strategic_intent_target_id:rd",
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_target_match:exact",
+      ]),
+    );
+    expect(
+      semanticRuntimeDebugSelectionScoreItems(selected, 390, context),
+    ).toEqual(
+      expect.arrayContaining([
+        "runtime_raw_score:140",
+        "debug_display_score:390",
+        "debug_display_score_delta:250",
+        "display_score_only:true",
+        "selected_by_plan_mapping:true",
+      ]),
+    );
   });
 
   it("adds coverage-only score rows without choosing actions", () => {

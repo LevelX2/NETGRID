@@ -256,12 +256,10 @@ export function chooseSemanticRuntimeAction(
   const strategicIntentState = inputMetadata.ownStrategicIntentState;
   const corpStrategicIntent =
     input.side === "corp" ? inputMetadata.ownCorpStrategicIntent : undefined;
-  const doctrineDiagnostic = inputMetadata.ownDeckDoctrineV2Diagnostic;
   const goalFrame = buildSemanticDecisionFrame({
     input,
     actionCandidates: actionSemanticCandidates,
     tacticalGoals: runnerTacticalGoals ?? [],
-    ...(doctrineDiagnostic ? { doctrineDiagnostic } : {}),
     deckCapabilities,
     ...(strategicIntentState ? { strategicIntentState } : {}),
     ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
@@ -358,7 +356,6 @@ export function chooseSemanticRuntimeAction(
           input,
           actionCandidates: actionSemanticCandidates,
           tacticalGoals: runnerTacticalGoals ?? [],
-          ...(doctrineDiagnostic ? { doctrineDiagnostic } : {}),
           tacticalPlan: effectivePlanRuntime,
           deckCapabilities,
           ...(strategicIntentState ? { strategicIntentState } : {}),

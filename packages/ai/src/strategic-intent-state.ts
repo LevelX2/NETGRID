@@ -194,7 +194,12 @@ const FAMILY_BY_STRATEGY_ID: Record<string, StrategicIntentFamily> = {
 export function buildStrategicIntentState(
   params: BuildStrategicIntentStateParams,
 ): StrategicIntentState {
-  const primaryStrategy = selectPrimaryStrategy(params);
+  const candidatePrimaryStrategy = selectPrimaryStrategy(params);
+  const commitmentSelection = committedPrimaryStrategy(
+    params,
+    candidatePrimaryStrategy,
+  );
+  const primaryStrategy = commitmentSelection.primaryStrategy;
   const secondaryStrategies = selectSecondaryStrategies(params, primaryStrategy);
   const roleStatuses = sortedRoleStatuses(params.roleStatuses ?? []);
   const reserve =
@@ -206,7 +211,13 @@ export function buildStrategicIntentState(
   const blockers = buildBlockers(primaryStrategy, roleStatuses, reserve);
   const targetVector =
     params.targetVector ?? defaultTargetVector(primaryStrategy, blockers);
-  const transition = transitionFor(params.previousState, primaryStrategy, blockers);
+  const transition = transitionFor(
+    params.previousState,
+    primaryStrategy,
+    blockers,
+    candidatePrimaryStrategy,
+    commitmentSelection.holdReason,
+  );
   const commitment = commitmentFor(
     params.previousState,
     primaryStrategy,
@@ -282,6 +293,57 @@ function selectSecondaryStrategies(
         right.score.final - left.score.final ||
         left.strategyId.localeCompare(right.strategyId),
     );
+}
+
+function committedPrimaryStrategy(
+  params: BuildStrategicIntentStateParams,
+  candidate: StrategicLineState,
+): {
+  primaryStrategy: StrategicLineState;
+  holdReason?: "min_commitment_not_met" | "switch_margin_not_met";
+} {
+  const previous = params.previousState;
+  if (!previous) return { primaryStrategy: candidate };
+  if (previous.primaryStrategy.strategyId === candidate.strategyId) {
+    return { primaryStrategy: candidate };
+  }
+  if (candidate.family === "neutral" || previous.primaryStrategy.family === "neutral") {
+    return { primaryStrategy: candidate };
+  }
+  if (previous.blockers.some((blocker) => blocker.severity === "hard")) {
+    return { primaryStrategy: candidate };
+  }
+  const previousCurrent = currentLineForPreviousStrategy(params, previous);
+  if (!previousCurrent || previousCurrent.completeness === "none") {
+    return { primaryStrategy: candidate };
+  }
+  const candidateLead = candidate.score.final - previousCurrent.score.final;
+  if (
+    previous.commitment.decisionsCommitted <
+    previous.commitment.minCommitmentDecisions
+  ) {
+    return {
+      primaryStrategy: previousCurrent,
+      holdReason: "min_commitment_not_met",
+    };
+  }
+  if (candidateLead < previous.commitment.switchMargin) {
+    return {
+      primaryStrategy: previousCurrent,
+      holdReason: "switch_margin_not_met",
+    };
+  }
+  return { primaryStrategy: candidate };
+}
+
+function currentLineForPreviousStrategy(
+  params: BuildStrategicIntentStateParams,
+  previous: StrategicIntentState,
+): StrategicLineState | undefined {
+  const previousStrategyId = previous.primaryStrategy.strategyId;
+  const currentScore = params.strategyProfile?.strategyScores[previousStrategyId];
+  if (!currentScore) return undefined;
+  return lineFromScore(previousStrategyId, currentScore);
 }
 
 function lineFromScore(
@@ -515,12 +577,29 @@ function transitionFor(
   previous: StrategicIntentState | undefined,
   primary: StrategicLineState,
   blockers: readonly StrategicIntentBlocker[],
+  candidate: StrategicLineState,
+  holdReason: "min_commitment_not_met" | "switch_margin_not_met" | undefined,
 ): StrategicIntentTransition {
   if (!previous) {
     return {
       status: "selected",
       reason: "initial_strategy_selection",
       evidence: [`selected:${primary.strategyId}`],
+    };
+  }
+  if (
+    previous.primaryStrategy.family !== "neutral" &&
+    primary.family === "neutral"
+  ) {
+    return {
+      status: "abandoned",
+      reason: "no_current_strategy_anchor",
+      previousStrategyId: previous.primaryStrategy.strategyId,
+      evidence: [
+        `previous:${previous.primaryStrategy.strategyId}`,
+        `selected:${primary.strategyId}`,
+        "abandon_reason:no_current_strategy_anchor",
+      ],
     };
   }
   if (blockers.some((blocker) => blocker.severity === "hard")) {
@@ -534,9 +613,17 @@ function transitionFor(
   if (previous.primaryStrategy.strategyId === primary.strategyId) {
     return {
       status: "continued",
-      reason: "same_primary_strategy",
+      reason: holdReason ?? "same_primary_strategy",
       previousStrategyId: previous.primaryStrategy.strategyId,
-      evidence: [`continued:${primary.strategyId}`],
+      evidence: [
+        `continued:${primary.strategyId}`,
+        ...(holdReason
+          ? [
+              `held_candidate:${candidate.strategyId}`,
+              `hold_reason:${holdReason}`,
+            ]
+          : []),
+      ],
     };
   }
   return {

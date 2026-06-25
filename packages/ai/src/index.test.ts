@@ -197,10 +197,27 @@ describe("MVP 0.3 AI controller contract", () => {
         hiddenInfoPolicy: "player_view_only",
       },
     });
+    expect(corpInput.ownStrategicIntentState?.targetVector.evidence).toContain(
+      "target_source:runtime_context",
+    );
+    expect(corpInput.ownStrategicIntentState?.reserve.evidence).toContain(
+      "reserve_source:runtime_context",
+    );
+    expect(corpInput.ownDeckStrategyProfile).toMatchObject({
+      side: "corp",
+      source: {
+        mode: "ai_internal_strategy_profile",
+        plannerEffect: "strategic_intent_input",
+      },
+    });
     expect(corpInput.ownDeckDoctrineV2Diagnostic).toMatchObject({
       side: "corp",
       scope: "diagnostic_only",
       productiveUseAllowed: false,
+      source: {
+        mode: "report_only",
+        plannerEffect: "none",
+      },
     });
     expect(corpInput.ownCorpStrategicIntent).toMatchObject({
       side: "corp",
@@ -214,12 +231,103 @@ describe("MVP 0.3 AI controller contract", () => {
       side: "runner",
       scope: "diagnostic_only",
       productiveUseAllowed: false,
+      source: {
+        mode: "report_only",
+        plannerEffect: "none",
+      },
+    });
+    expect(runnerInput.ownDeckStrategyProfile).toMatchObject({
+      side: "runner",
+      source: {
+        mode: "ai_internal_strategy_profile",
+        plannerEffect: "strategic_intent_input",
+      },
     });
     expect(runnerInput.ownStrategicIntentState?.side).toBe("runner");
+    expect(runnerInput.ownStrategicIntentState?.targetVector.evidence).toContain(
+      "target_source:runtime_context",
+    );
+    expect(runnerInput.ownStrategicIntentState?.reserve.evidence).toContain(
+      "reserve_source:runtime_context",
+    );
     expect(runnerInput.ownRunnerStrategicIntent?.side).toBe("runner");
     expect(runnerInput.ownCorpStrategicIntent).toBeUndefined();
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("chooses productive actions from engine-built deck strategy runtime inputs", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const assertProductiveRuntimeDecision = (
+      input: AiDecisionInputWithDeckCapabilities,
+      decision: ReturnType<typeof chooseCorpAction>,
+    ) => {
+      expect(input.ownDeckStrategyProfile?.source.plannerEffect).toBe(
+        "strategic_intent_input",
+      );
+      expect(input.ownDeckDoctrineV2Diagnostic).toMatchObject({
+        scope: "diagnostic_only",
+        productiveUseAllowed: false,
+        source: { mode: "report_only", plannerEffect: "none" },
+      });
+      expect(input.ownStrategicIntentState?.source.plannerEffect).toBe(
+        "goal_and_plan_input",
+      );
+      expect(input.ownStrategicIntentState?.targetVector.evidence).toContain(
+        "target_source:runtime_context",
+      );
+      expect(input.ownStrategicIntentState?.reserve.evidence).toContain(
+        "reserve_source:runtime_context",
+      );
+      expect(input.legalActions.map((action) => action.actionId)).toContain(
+        decision.actionId,
+      );
+      expect(decision.fallbackUsed).toBe(false);
+      expect(decision.evidence).toEqual(
+        expect.arrayContaining([
+          "semantic_runtime_default:true",
+          "strategic_intent_memory_preview_only:true",
+        ]),
+      );
+      expect(
+        decision.decisionDebug?.detailSections?.map((section) => section.id),
+      ).toEqual(expect.arrayContaining(["strategic_runtime", "selection_score"]));
+      expect(
+        JSON.stringify({
+          input,
+          decisionDebug: decision.decisionDebug,
+        }),
+      ).not.toMatch(
+        /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|secretGripIds/i,
+      );
+      expect(assertAiInputIsSideSafe(input)).toBe(true);
+    };
+
+    const corpInput = buildAiDecisionInput(
+      createGameAfterSetup({ seed: "ai-productive-runtime-corp" }),
+      "corp",
+      {
+        ownDeckSnapshot: snapshotById("demo_corp_008_snapshot_v0_8"),
+      },
+    ) as AiDecisionInputWithDeckCapabilities;
+    const corpDecision = chooseCorpAction(corpInput, {
+      persistTacticalPlanMemory: false,
+    });
+    assertProductiveRuntimeDecision(corpInput, corpDecision);
+
+    const runnerInput = buildAiDecisionInput(
+      toRunnerTurn(
+        createGameAfterSetup({ seed: "ai-productive-runtime-runner" }),
+      ),
+      "runner",
+      {
+        ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
+      },
+    ) as AiDecisionInputWithDeckCapabilities;
+    const runnerDecision = chooseRunnerAction(runnerInput, {
+      persistTacticalPlanMemory: false,
+    });
+    assertProductiveRuntimeDecision(runnerInput, runnerDecision);
   });
 
   it("keeps release-default profile policy stable", () => {

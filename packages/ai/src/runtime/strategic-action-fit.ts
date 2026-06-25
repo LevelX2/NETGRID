@@ -63,6 +63,7 @@ function semanticRuntimeStrategicActionFit(
   if (state.blockers.some((blocker) => blocker.severity === "hard")) {
     return undefined;
   }
+  if (!strategicIntentPhaseAllowsAction(input, state, action)) return undefined;
   const baseValue =
     input.side === "runner"
       ? runnerStrategicActionFitValue(action, scopeId, state)
@@ -75,7 +76,9 @@ function semanticRuntimeStrategicActionFit(
         );
   if (baseValue <= 0) return undefined;
   const phaseBonus = strategicIntentPhaseActionBonus(state.phase);
-  const targetBonus = strategicIntentActionTargetMatches(state, action) ? 50 : 0;
+  const targetMatch = strategicIntentActionTargetMatch(state, action);
+  const targetBonus =
+    targetMatch === "exact" ? 75 : targetMatch === "kind" ? 25 : 0;
   const value = Math.min(260, baseValue + phaseBonus + targetBonus);
   return {
     value,
@@ -84,7 +87,7 @@ function semanticRuntimeStrategicActionFit(
       `strategic_action_fit_strategy:${state.primaryStrategy.strategyId}`,
       `strategic_action_fit_phase:${state.phase}`,
       `strategic_action_fit_target:${state.targetVector.kind}`,
-      `strategic_action_fit_target_match:${targetBonus > 0}`,
+      `strategic_action_fit_target_match:${targetMatch}`,
       `strategic_action_fit_scope:${scopeId}`,
     ],
   };
@@ -100,16 +103,29 @@ function runnerStrategicActionFitValue(
   const serverId = semanticRuntimeServerId(action);
   switch (state.primaryStrategy.family) {
     case "runner_central_pressure":
-      return action.type === "start_run" &&
-        (serverId === "hq" || serverId === "rd")
-        ? 170
-        : 0;
+      if (
+        action.type !== "start_run" ||
+        (serverId !== "hq" && serverId !== "rd")
+      ) {
+        return 0;
+      }
+      if (state.targetVector.targetId) {
+        return serverId === state.targetVector.targetId ? 185 : 0;
+      }
+      return 160;
     case "runner_remote_contest":
     case "runner_remote_trash":
       if (action.type === "trash_accessed_card") return 190;
-      return action.type === "start_run" && isRemoteServerTarget(serverId)
-        ? 170
-        : 0;
+      if (action.type !== "start_run" || !isRemoteServerTarget(serverId)) {
+        return 0;
+      }
+      if (
+        state.targetVector.targetId &&
+        state.targetVector.targetId !== "best_visible_remote"
+      ) {
+        return serverId === state.targetVector.targetId ? 185 : 0;
+      }
+      return 160;
     case "runner_setup":
       return runnerStrategicSetupAction(action, scopeId) ? 125 : 0;
     case "runner_tempo":
@@ -162,7 +178,7 @@ function corpStrategicActionFitValue(
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":
-      return strategicIntentActionTargetMatches(state, action) ||
+      return strategicIntentActionTargetMatch(state, action) !== "none" ||
         corpStrategicPunishAction(action, scopeId, actionSemanticCandidate)
         ? 180
         : 0;
@@ -221,30 +237,69 @@ function strategicIntentPhaseActionBonus(
   }
 }
 
-function strategicIntentActionTargetMatches(
+function strategicIntentPhaseAllowsAction(
+  input: AiDecisionInput,
   state: NonNullable<
     AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
   >,
   action: LegalAction,
 ): boolean {
+  if (state.phase === "recover") return false;
+  if (state.phase !== "fund") return true;
+  if (
+    state.targetVector.kind === "tag" &&
+    input.playerView.opponent.tags > 0 &&
+    (action.type === "play_operation" ||
+      action.type === "trash_resource" ||
+      action.type === "trigger_ability" ||
+      action.type === "activated_card_ability")
+  ) {
+    return true;
+  }
+  return (
+    action.type === "score_agenda" ||
+    action.type === "steal_agenda" ||
+    action.type === "trash_accessed_card" ||
+    action.type === "gain_credit" ||
+    action.type === "draw_card" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  );
+}
+
+function strategicIntentActionTargetMatch(
+  state: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >,
+  action: LegalAction,
+): "exact" | "kind" | "none" {
   const target = state.targetVector;
   const serverId = semanticRuntimeServerId(action);
-  if (target.targetId && target.targetId === serverId) return true;
-  if (target.kind === "central") return serverId === "hq" || serverId === "rd";
-  if (target.kind === "remote") return isRemoteServerTarget(serverId);
-  if (target.kind === "scoreline") {
-    return action.type === "score_agenda" || action.type === "advance_card";
+  if (target.targetId && target.targetId === serverId) return "exact";
+  if (target.kind === "central") {
+    return serverId === "hq" || serverId === "rd" ? "kind" : "none";
   }
-  if (target.kind === "economy") return action.type === "gain_credit";
+  if (target.kind === "remote") {
+    if (!isRemoteServerTarget(serverId)) return "none";
+    return target.targetId === "best_visible_remote" ? "kind" : "none";
+  }
+  if (target.kind === "scoreline") {
+    return action.type === "score_agenda" || action.type === "advance_card"
+      ? "kind"
+      : "none";
+  }
+  if (target.kind === "economy") {
+    return action.type === "gain_credit" ? "kind" : "none";
+  }
   if (target.kind === "tag" || target.kind === "damage") {
     return (
       action.type === "play_operation" ||
       action.type === "trash_resource" ||
       action.type === "trigger_ability" ||
       action.type === "activated_card_ability"
-    );
+    ) ? "kind" : "none";
   }
-  return false;
+  return "none";
 }
 
 function corpActionLooksLikeScoreLine(

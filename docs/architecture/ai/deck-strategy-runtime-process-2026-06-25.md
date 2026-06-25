@@ -4,6 +4,8 @@ Status: `ready_for_local_merge`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
+Hardening-Nachtrag: Der spätere Lauf `docs/architecture/ai/deck-strategy-runtime-hardening-process-2026-06-25.md` präzisiert den hier erreichten Stand. Insbesondere ist `DeckDoctrineV2Diagnostic` nach H01/H08 ausschließlich report-only; produktive Runtime-Ziele und TacticalPlans nutzen `AiDeckStrategyProfile`, `StrategicIntentState`, Corp-/Runner-StrategicIntent und PlayerView-/LegalAction-Kontext. Frühere DSR-04-Formulierungen zu Doctrine-v2 als Runtime-Metadaten oder produktiv gemergten Doctrine-v2-Zielen sind damit als historische Zwischenbeschreibung zu lesen.
+
 ## Zielprüfung
 
 Die Vorgabe ist ausreichend präzise für automatische Abarbeitung. Gesamtziel, Stufenfolge, Sicherheitsgrenzen, relevante Startartefakte, Verifikationsregeln und Definition of Done sind definiert. Kleine Lücken werden konservativ geschlossen: Dateischnitte folgen vorhandenen `packages/ai/src/**`-Mustern, neue Logik bleibt AI-intern, und produktive Wirkung wird nur über bereits angebotene `LegalActions` erzielt.

@@ -4,6 +4,18 @@ Status: `DSR-00 done`
 
 Quelle: `docs/architecture/ai/deck-strategy-runtime-process-2026-06-25.md`
 
+## Hardening-Nachtrag 2026-06-25
+
+Dieser Consumer-Audit dokumentiert die Ausgangslage vor DSR-01 bis DSR-11 und vor dem späteren Hardening-Lauf. Für den aktuellen Runtime-Vertrag gelten zusätzlich `docs/architecture/ai/deck-strategy-runtime-hardening-process-2026-06-25.md` und `docs/reviews/ai/deck-strategy-runtime-hardening-cleanup-2026-06-25.md`.
+
+Aktueller Stand nach Hardening:
+
+- `buildDeckStrategyProfile` liefert produktive AI-interne Strategieanker über `AiDeckStrategyProfile`, nicht mehr `diagnostic_only`.
+- `StrategicIntentState`, Runner-StrategicIntent und Corp-StrategicIntent sind produktiv in die Semantic Runtime integriert.
+- Rollenstatus, Zielvektor und Reservebedarf stammen im Defaultpfad aus `PlayerView`, `LegalActions`, StrategyProfile und Capabilities.
+- `DeckDoctrineV2Diagnostic` bleibt report-only und wird nicht in produktive Runtime-Frames, neutralen Goal-Merge, TacticalPlan-Mapping oder StrategicIntent-Memory eingespeist.
+- `SemanticDecisionFrame.doctrineDiagnostic` bleibt nur ein report-only Kanal für Shadow-/Trace-Reports und validiert no-effect Marker.
+
 ## Kurzbefund
 
 Die aktuelle KI besitzt bereits einen produktiven Semantic-Runtime-Pfad mit `DeckCapabilityProfile`, Runner-StrategicIntent, Runner-TacticalGoals, TacticalPlans, Plan-Memory, ActionSemanticCandidates und begrenzten Plan-Overrides. Die aus `buildDeckStrategyProfile` gebaute Strategy-Taxonomie ist im Source noch als `diagnostic_only` und `plannerEffect: none` markiert, wirkt aber bei vorhandenem Decksnapshot bereits indirekt auf Runner: `runtime/ai-decision-input.ts` baut daraus `ownRunnerStrategicIntent`, und `chooseSemanticRuntimeAction` nutzt dieses Profil für Runner-Handentwicklung, Economy, RunTargetEvaluation, Runner-TacticalGoals und TacticalPlans.

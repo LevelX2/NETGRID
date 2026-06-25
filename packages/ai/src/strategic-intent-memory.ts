@@ -1,5 +1,4 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
-import type { DeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
 import {
   STRATEGIC_INTENT_STATE_SCHEMA_VERSION,
   type StrategicIntentState,
@@ -26,7 +25,9 @@ export type StrategicIntentMemorySnapshot = {
 };
 
 type StrategicIntentInputMetadata = {
-  ownDeckDoctrineV2Diagnostic?: DeckDoctrineV2Diagnostic;
+  ownDeckStrategyProfile?: {
+    deckId?: string;
+  };
 };
 
 const strategicIntentMemoryByKey = new Map<
@@ -164,7 +165,7 @@ function strategicIntentMemoryContextId(input: AiDecisionInput): string {
 function deckId(input: AiDecisionInput, deckSnapshotId?: string): string {
   if (deckSnapshotId) return deckSnapshotId;
   return (
-    (input as StrategicIntentInputMetadata).ownDeckDoctrineV2Diagnostic
-      ?.deckSnapshotId ?? "no_deck_snapshot"
+    (input as StrategicIntentInputMetadata).ownDeckStrategyProfile?.deckId ??
+    "no_deck_snapshot"
   );
 }
