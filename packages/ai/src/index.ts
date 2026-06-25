@@ -425,6 +425,8 @@ import {
 import {
   remoteServerHasScoreThreat,
   remoteTrashAccessProtectsAcuteThreatForMetrics,
+  runnerHasVisibleRemoteScoreThreat,
+  runnerRemoteHasKnownRelevantTrashTarget,
 } from "./simulation/remote-server-threat";
 import {
   remoteTrashCardIsBbsWhisperingCampaign,
@@ -26469,30 +26471,6 @@ function runnerStealBlockedByCredits(
     !input.legalActions.some((action) => action.type === "steal_agenda") &&
     input.playerView.own.credits < reserveTarget
   );
-}
-
-function runnerHasVisibleRemoteScoreThreat(input: AiDecisionInput): boolean {
-  return input.playerView.servers.some(
-    (server) =>
-      isRemoteServerTarget(server.id) &&
-      remoteServerHasScoreThreat(input, server.id),
-  );
-}
-
-function runnerRemoteHasKnownRelevantTrashTarget(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  return server.root.some((card) => {
-    if (!card.known || remoteTrashCostForVisibleCard(card) === undefined)
-      return false;
-    const role = remoteTrashRoleForVisibleCard(card);
-    return role !== "low_value" && role !== "unknown";
-  });
 }
 
 function runnerRemoteTrashAccessContext(
