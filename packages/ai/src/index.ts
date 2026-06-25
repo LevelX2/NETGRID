@@ -425,6 +425,11 @@ import {
   isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
 import {
+  runnerCentralRunBurnsRemoteContestReserve as runnerCentralRunBurnsRemoteContestReserveWithDeps,
+  runnerCentralRunHasClearPressureJustification as runnerCentralRunHasClearPressureJustificationWithDeps,
+  runnerCentralRunPressureJustificationReasons as runnerCentralRunPressureJustificationReasonsWithDeps,
+} from "./simulation/central-run-pressure-justification";
+import {
   centralRunEventGoodForTarget as centralRunEventGoodForTargetWithSource,
   noFreshCentralSubstitutionTypeForAction as noFreshCentralSubstitutionTypeForActionWithDeps,
 } from "./simulation/no-fresh-central";
@@ -24785,12 +24790,17 @@ function runnerCentralRunHasClearPressureJustificationForInput(
   targetServerId: string,
   contestableRemoteThreatVisible: boolean,
 ): boolean {
-  return (
-    runnerCentralRunPressureJustificationReasonsForInput(
-      input,
-      targetServerId,
-      contestableRemoteThreatVisible,
-    ).length > 0
+  return runnerCentralRunHasClearPressureJustificationWithDeps(
+    input,
+    targetServerId,
+    contestableRemoteThreatVisible,
+    {
+      assessKnownRezzedIcePath,
+      recentCentralRunSameTargetWithoutRefresh,
+      rolesForCardId,
+      runnerCreditReserveTargetForInput,
+      trueCentralCloseoutProfileForMetrics,
+    },
   );
 }
 
@@ -24799,75 +24809,18 @@ function runnerCentralRunPressureJustificationReasonsForInput(
   targetServerId: string,
   contestableRemoteThreatVisible: boolean,
 ): string[] {
-  if (
-    targetServerId !== "hq" &&
-    targetServerId !== "rd" &&
-    targetServerId !== "archives"
-  )
-    return [];
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
-  );
-  const assessment = assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server?.root ?? [],
-  );
-  if (assessment.blocked) return [];
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const installedTargets = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) =>
-        isCentralPressureCardForMetrics(card.definitionId, true),
-      )
-      .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
-  );
-  const matchingInterface = installedTargets.has(
-    targetServerId as "hq" | "rd" | "archives",
-  );
-  const hasAnyInterface = installedTargets.size > 0;
-  const hasMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
-    rolesForCardId(card.definitionId).some((role) =>
-      role.includes("multiaccess"),
-    ),
-  );
-  const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
-  const preservesReserve =
-    input.playerView.own.credits - visibleBreakCost >=
-    runnerCreditReserveTargetForInput(input);
-  if (!openOrCheap || !preservesReserve) return [];
-  const closeout = trueCentralCloseoutProfileForMetrics(
+  return runnerCentralRunPressureJustificationReasonsWithDeps(
     input,
-    targetServerId as "hq" | "rd" | "archives",
-  ).opportunity;
-  const hqPressure =
-    targetServerId === "hq" && input.playerView.opponent.handCount >= 5;
-  const rndFreshness =
-    targetServerId === "rd" &&
-    !recentCentralRunSameTargetWithoutRefresh(input, "rd");
-  const remoteUncontestable = !contestableRemoteThreatVisible;
-  const reasons = [
-    ...(matchingInterface ? ["interface"] : []),
-    ...(hasMultiaccess ? ["multiaccess"] : []),
-    ...(closeout ? ["closeout"] : []),
-    ...(remoteUncontestable ? ["remote_uncontestable"] : []),
-    ...(hqPressure ? ["hq_pressure"] : []),
-    ...(rndFreshness ? ["rnd_freshness"] : []),
-    ...(!matchingInterface && hasAnyInterface ? ["generic_interface"] : []),
-  ];
-  if (contestableRemoteThreatVisible) {
-    return reasons.filter((reason) =>
-      [
-        "interface",
-        "multiaccess",
-        "closeout",
-        "hq_pressure",
-        "rnd_freshness",
-      ].includes(reason),
-    );
-  }
-  return reasons;
+    targetServerId,
+    contestableRemoteThreatVisible,
+    {
+      assessKnownRezzedIcePath,
+      recentCentralRunSameTargetWithoutRefresh,
+      rolesForCardId,
+      runnerCreditReserveTargetForInput,
+      trueCentralCloseoutProfileForMetrics,
+    },
+  );
 }
 
 function runnerCentralRunBurnsRemoteContestReserveForInput(
@@ -24875,22 +24828,12 @@ function runnerCentralRunBurnsRemoteContestReserveForInput(
   targetServerId: string,
   contestableProfiles: RunnerRemoteThreatProfile[],
 ): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
+  return runnerCentralRunBurnsRemoteContestReserveWithDeps(
+    input,
+    targetServerId,
+    contestableProfiles,
+    { assessKnownRezzedIcePath },
   );
-  const assessment = assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server?.root ?? [],
-  );
-  if (assessment.blocked || contestableProfiles.length === 0) return false;
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
-  const requiredReserve = Math.max(
-    ...contestableProfiles.map((profile) => profile.postRunReserveTarget),
-  );
-  return creditsAfterPath < requiredReserve;
 }
 
 function runnerCreditReserveTargetForInput(input: AiDecisionInput): number {
