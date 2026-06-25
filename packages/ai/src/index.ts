@@ -13278,7 +13278,7 @@ function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
 }
 
 function semanticRuntimeExplanation(side: Side, scopeId: string): string {
-  return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
+  return `${side} Semantic Runtime wählt eine legale Aktion im Scope ${scopeId}.`;
 }
 
 function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {

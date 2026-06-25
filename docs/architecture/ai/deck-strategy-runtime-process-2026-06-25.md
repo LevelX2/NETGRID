@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-09 next`
+Status: `active: DSR-10 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -86,9 +86,9 @@ preflight
 6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: `16a70206`.
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: `fc8e7908`.
 8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `done`, Commit: `f9381d5f`.
-9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `done`, Commit: pending.
-10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `next`.
-11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen.
+9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren. Status: `done`, Commit: `f44c4cc0`.
+10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten. Status: `done`, Commit: pending.
+11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen. Status: `next`.
 12. `DSR-11` Gesamtvalidierung, Review, Wissenspflege und Integration.
 
 ## Paketdetails
@@ -352,6 +352,20 @@ Done-Gate:
 
 - Runtime-Wirkung und Debug stimmen überein.
 - Keine produktiv genutzte Struktur wird als diagnostics-only beschrieben.
+
+Umsetzung:
+
+- `AiDeckStrategyProfile.source` beschreibt den produktiven Verbrauch jetzt als `ai_internal_strategy_profile` mit `plannerEffect: strategic_intent_input`.
+- Runner-StrategicIntent nutzt denselben Quellenvertrag wie Corp und gibt redaction-safe Runtime-Status pro StrategyScore in der Evidence aus.
+- Manuelle StrategyProfile-Fixtures wurden auf den produktiven Quellenstatus angehoben; echte `DeckDoctrineV2Diagnostic`-Reports bleiben explizit report-only.
+- Die sichtbare Semantic-Runtime-Erklärung verwendet normales deutsches `wählt`.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-strategy.test.ts src/runner-strategic-intent.test.ts src/corp-strategic-intent.test.ts src/diagnostics/semantic-runtime-debug.test.ts src/semantic-ai-runtime-cutover.test.ts src/strategic-vertical-slices.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `docs(ai): align strategic diagnostics and comments`
 

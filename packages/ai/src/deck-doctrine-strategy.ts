@@ -129,11 +129,11 @@ export type AiDeckStrategyProfile = {
   runnerProfile?: RunnerDeckStrategyProfiles;
   corpProfile?: CorpDeckStrategyProfiles;
   source: {
-    mode: "diagnostic_only";
+    mode: "ai_internal_strategy_profile";
     strategyGoals: "data/ai/strategy-goals-v1.json";
     compiledHints: "data/ai/ai-card-hints-compiled.json";
     inspectorIndex: "data/ai/ai-hint-inspector-index.json";
-    plannerEffect: "none";
+    plannerEffect: "strategic_intent_input";
   };
 };
 
@@ -448,11 +448,11 @@ export function buildDeckStrategyProfile(
       ? { runnerProfile: buildRunnerProfiles(stats, strategyScores) }
       : { corpProfile: buildCorpProfiles(stats, strategyScores) }),
     source: {
-      mode: "diagnostic_only",
+      mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       compiledHints: "data/ai/ai-card-hints-compiled.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
-      plannerEffect: "none",
+      plannerEffect: "strategic_intent_input",
     },
   });
 }

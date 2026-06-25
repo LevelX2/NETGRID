@@ -238,11 +238,15 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toEqual([]);
   });
 
-  it("keeps the diagnostic output side-safe and deterministic", () => {
+  it("keeps the strategy profile output side-safe and deterministic", () => {
     const snapshot = snapshotById("onr_origin_runner_ai_snapshot_v1");
     const profile = buildDeckStrategyProfile(snapshot);
 
     expect(profile).toEqual(buildDeckStrategyProfile(snapshot));
+    expect(profile.source).toMatchObject({
+      mode: "ai_internal_strategy_profile",
+      plannerEffect: "strategic_intent_input",
+    });
     expect(JSON.stringify(profile)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|stateHash|deckHash|legalActions/i,
     );
