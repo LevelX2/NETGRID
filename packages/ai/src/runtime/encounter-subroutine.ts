@@ -27,3 +27,12 @@ export function isEndRunSubroutine(
     subroutine.type === "end_the_run_unless_runner_pays"
   );
 }
+
+export function isTrashUnlessRunnerPaysSubroutine(
+  type: string | undefined,
+): boolean {
+  return (
+    type === "trash_program_unless_runner_pays" ||
+    type === "trash_installed_program_unless_runner_pays"
+  );
+}

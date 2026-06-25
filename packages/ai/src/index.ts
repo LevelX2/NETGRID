@@ -156,6 +156,7 @@ import {
 import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
+  isTrashUnlessRunnerPaysSubroutine,
   type VisibleEncounterSubroutine,
 } from "./runtime/encounter-subroutine";
 import {
@@ -12057,13 +12058,6 @@ function encounterRunRemainderEffectAssessment(
     remainingVisibleIceCount,
     evidence,
   };
-}
-
-function isTrashUnlessRunnerPaysSubroutine(type: string | undefined): boolean {
-  return (
-    type === "trash_program_unless_runner_pays" ||
-    type === "trash_installed_program_unless_runner_pays"
-  );
 }
 
 function runnerHasInstalledPrograms(input: AiDecisionInput): boolean {
