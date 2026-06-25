@@ -497,6 +497,10 @@ import type {
   V143SoakResult,
 } from "./simulation/v143-tuning-gate";
 import type {
+  AiDoctrineQualityBenchmarkConfig,
+  AiDoctrineQualityBenchmarkResult,
+} from "./simulation/doctrine-quality-benchmark-types";
+import type {
   V143ExploitFixture,
   V143ExploitRegressionResult,
 } from "./simulation/v143-fixture-types";
@@ -776,6 +780,10 @@ export type {
   V143SoakResult,
   V143TuningGateResult,
 } from "./simulation/v143-tuning-gate";
+export type {
+  AiDoctrineQualityBenchmarkConfig,
+  AiDoctrineQualityBenchmarkResult,
+} from "./simulation/doctrine-quality-benchmark-types";
 export type {
   V143ExploitFixture,
   V143ExploitRegressionResult,
@@ -1105,24 +1113,6 @@ type AiProfileData = {
 };
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
-
-export type AiDoctrineQualityBenchmarkResult = {
-  version: "ai-deck-doctrine-quality-v1";
-  baselineProfile: SimulationBenchmarkProfileId;
-  candidateProfile: SimulationBenchmarkProfileId;
-  seeds: string[];
-  baseline: AiDoctrineQualityMetrics;
-  candidate: AiDoctrineQualityMetrics;
-  delta: AiDoctrineQualityDelta;
-  safety: {
-    illegalActionDelta: number;
-    replayFailureDelta: number;
-    timeoutRateDelta: number;
-    fallbackRateDelta: number;
-  };
-  baselineRun: V143SimulationRunResult;
-  candidateRun: V143SimulationRunResult;
-};
 
 export type AiMatchProgressionMetrics = {
   games: number;
@@ -2627,12 +2617,6 @@ export type {
   SimulationBenchmarkProfile,
   SimulationWorld,
 } from "./simulation/simulation-types";
-
-export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
-  baselineProfile?: SimulationBenchmarkProfileId;
-  candidateProfile?: SimulationBenchmarkProfileId;
-  comparisonProfiles?: SimulationBenchmarkProfileId[];
-};
 
 const AI_PROFILES = aiProfilesData.profiles as AiProfileData[];
 const SOAK_SEEDS = soakSeedsData as {
