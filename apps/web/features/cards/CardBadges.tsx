@@ -93,6 +93,14 @@ export function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
+export function IceStrengthBadge({ strength }: { strength: number }) {
+  return (
+    <span className="iceStrengthBadge" aria-hidden="true" data-testid="ice-strength-badge">
+      Stärke {strength}
+    </span>
+  );
+}
+
 export function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<VisibleCard["counterDisplays"]>[number]; scoreState: boolean }) {
   const amount = safeCounterDisplayAmount(display.amount);
   if (amount <= 0) return null;

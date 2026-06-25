@@ -43,7 +43,7 @@ import {
 import { cardDetailLines, cardWithoutDevelopmentCounters } from "./card-detail-lines";
 import type { DisplayVisibleCard } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
-import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, StrengthBoostBadge } from "./CardBadges";
+import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, IceStrengthBadge, StrengthBoostBadge } from "./CardBadges";
 import { ScoreCardStateBadges, scoreCardStateBadges, type ScoredAgendaStateLine } from "./ScoredAgendaState";
 
 type CardChoiceShortcut = {
@@ -191,13 +191,15 @@ export function CardView({
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
+  const iceStrength = card.known && card.type === "ice" && card.strength !== undefined && !preview && !forceCardBack ? Math.max(0, Math.floor(card.strength)) : null;
   const tapped = card.known && card.tapped === true && !preview && !forceCardBack;
   const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
   const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
   const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
   const tappedAriaSuffix = tapped ? "getappt" : "";
-  const cardStateAriaText = [tappedAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const iceStrengthAriaSuffix = iceStrength !== null ? `Stärke ${iceStrength}` : "";
+  const cardStateAriaText = [tappedAriaSuffix, iceStrengthAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -625,6 +627,7 @@ export function CardView({
           </span>
         ) : null}
         {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
+        {iceStrength !== null ? <IceStrengthBadge strength={iceStrength} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {renderedCounterDisplays.map((display) => (
           <CounterDisplayBadge key={`${card.instanceId}-counter-display-${display.id}`} display={display} scoreState={showScoreStateBadges} />
