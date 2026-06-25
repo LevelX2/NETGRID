@@ -34,7 +34,8 @@ export type TacticalPlanType =
   | "runner.cash_out_credit_bank"
   | "corp.create_score_window"
   | "corp.build_credit_bank"
-  | "corp.rez_defense";
+  | "corp.rez_defense"
+  | "corp.apply_punish_pressure";
 
 export type PlanStepKind =
   | "install_breaker"
@@ -56,7 +57,8 @@ export type PlanStepKind =
   | "probe_central"
   | "rez_outer_ice"
   | "advance_score_card"
-  | "score_agenda";
+  | "score_agenda"
+  | "apply_punish_pressure";
 
 export type PlanMappingStatus =
   | "unmapped"

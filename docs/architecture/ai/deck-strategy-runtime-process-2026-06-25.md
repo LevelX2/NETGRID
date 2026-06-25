@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-06 next`
+Status: `active: DSR-07 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -83,9 +83,9 @@ preflight
 3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: `c5a1b920`.
 4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: `8a0e9e55`.
 5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: `30506fea`.
-6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: pending.
-7. `DSR-06` StrategicIntent in TacticalPlans übersetzen.
-8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung.
+6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: `16a70206`.
+7. `DSR-06` StrategicIntent in TacticalPlans übersetzen. Status: `done`, Commit: pending.
+8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung. Status: `next`.
 9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren.
 10. `DSR-09` Diagnose und Kommentare auf neue Entscheidungsabsicht ausrichten.
 11. `DSR-10` Legacy-Abhängigkeiten abbauen und unnötigen Code entfernen.
@@ -255,6 +255,20 @@ Done-Gate:
 
 - Produktive Strategien besitzen sinnvolle Pfade von Setup/Enable zu Pressure/Convert/Closeout oder neutrale Behandlung.
 - Fehlende Fähigkeiten erzeugen Blocker oder Vorbereitung, keine falschen Action-Matches.
+
+Umsetzung:
+
+- Gemergte `TacticalGoalLike`-Ziele aus StrategicIntent und Boardstate geben vorhandenen Runner-Remote- und Runner-Central-Plänen einen begrenzten Prioritätsbonus mit Evidence und ScoreBreakdown.
+- Corp-Scoreline-, Advance-, Rez-Defense- und Economy-Pläne berücksichtigen passende strategische Ziel-Familien, bleiben aber weiter auf vorhandene `LegalActions` gemappt.
+- Eine neue Corp-Planfamilie `corp.apply_punish_pressure` bildet Tag-/Trace-/Damage-/Punish-Intent auf vorhandene Operationen oder Kartenfähigkeiten ab.
+- Punish-Pläne werden nur aus side-safe ActionSemanticCandidates mit semantischen Taktik- oder Kartensignalen erzeugt; neue Actions werden nicht konstruiert.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `feat(ai): translate strategic intent into tactical plans`
 
