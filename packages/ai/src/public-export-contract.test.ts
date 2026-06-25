@@ -248,6 +248,7 @@ describe("AI public export contract", () => {
       "./runtime/runner-goal-fit-score",
       "./runtime/legacy-decision-provider",
       "./runtime/reactive-action",
+      "./runtime/remote-trash-cost",
       "./simulation/simulation-metric-aggregation",
       "./reports/shadow-league-report-formatters",
       "./reports/selfplay-promotion-activity-formatters",

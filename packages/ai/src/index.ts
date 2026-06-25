@@ -140,6 +140,10 @@ import {
   type ProgressionCardTargetType,
 } from "./runtime/progression-card-target";
 import {
+  remoteTrashCostBucket,
+  type RemoteTrashCostBucket,
+} from "./runtime/remote-trash-cost";
+import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
   semanticRuntimeActionTypeIsReactive,
@@ -3066,7 +3070,7 @@ export type AiSimulationSummary = {
     runnerRemoteTrashPreservedReserve?: boolean;
     runnerRemoteTrashProtectedScoreThreat?: boolean;
     runnerRemoteTrashWithoutImmediateThreat?: boolean;
-    runnerRemoteTrashCostBucket?: "0_1" | "2_3" | "4_5" | "6_plus";
+    runnerRemoteTrashCostBucket?: RemoteTrashCostBucket;
     runnerRemoteTrashLegalActionCount?: number;
     runnerRemoteTrashAssetEconomy?: boolean;
     runnerRemoteTrashFinitePoolEconomy?: boolean;
@@ -27568,13 +27572,6 @@ function remoteTrashCostForVisibleCard(card: VisibleCard): number | undefined {
     RUNTIME_CARDS[card.definitionId]?.numeric.trashCost ??
     DEMO_CARDS_BY_ID[card.definitionId]?.trashCost
   );
-}
-
-function remoteTrashCostBucket(cost: number): "0_1" | "2_3" | "4_5" | "6_plus" {
-  if (cost <= 1) return "0_1";
-  if (cost <= 3) return "2_3";
-  if (cost <= 5) return "4_5";
-  return "6_plus";
 }
 
 function isRunnerEconomyAction(
