@@ -5,7 +5,10 @@ import * as aiPublicApi from "./index";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "./decision/semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./decision/semantic-shadow-decision";
-import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
+import {
+  buildDeckDoctrineV2Diagnostic,
+  type AiDeckStrategyProfile,
+} from "./deck-doctrine-strategy";
 import { buildStrategicIntentState } from "./strategic-intent-state";
 import { buildRealEngineDecisionCorpusScenarios } from "./evaluation/real-engine-decision-corpus-fixtures";
 import { buildRealEngineDecisionCorpus } from "./evaluation/real-engine-decision-corpus";
@@ -20,6 +23,7 @@ import {
   getTacticalPlanMemorySnapshot,
   resetTacticalPlanMemory,
 } from "./tactical-plans";
+import { getStrategicIntentMemorySnapshot } from "./strategic-intent-memory";
 import {
   chooseSemanticRuntimeAction,
   type SemanticRuntimeDependencies,
@@ -375,6 +379,57 @@ describe("Semantic AI runtime cutover", () => {
         "runner.strategic.central_pressure",
         "runner.neutral.economy",
         "runner.doctrine.rnd_pressure_coverage",
+      ]),
+    );
+  });
+
+  it("persists StrategicIntent memory by default and respects preview mode", () => {
+    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
+    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+      credits: 0,
+    });
+    const input = aiInput("runner", [gain]) as AiDecisionInput & {
+      ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
+    };
+    input.ownStrategicIntentState = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      availableCredits: input.playerView.own.credits,
+      strategyProfile: runtimeRunnerStrategyProfile(),
+    });
+    const runtimeChoices = [
+      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
+    ];
+
+    const preview = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      { persistTacticalPlanMemory: false },
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+      }),
+    );
+
+    expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
+    expect(preview.evidence).toContain("strategic_intent_memory_preview_only:true");
+
+    const persisted = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision("gain-credit", "legacy.runner.economy"),
+      {},
+      semanticRuntimeDependencies(runtimeChoices, {
+        initiallySelectedActionId: gain.actionId,
+      }),
+    );
+
+    expect(getStrategicIntentMemorySnapshot(input)).toMatchObject({
+      side: "runner",
+      primaryStrategyId: "runner.rnd_pressure",
+    });
+    expect(persisted.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_intent_memory:runner.rnd_pressure",
+        "strategic_intent_memory_phase:enable",
       ]),
     );
   });
@@ -3248,6 +3303,49 @@ function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
     recommendation: "run_now",
     score: 100,
     evidence: ["test_safe_access"],
+  };
+}
+
+function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
+  return {
+    schemaVersion: "ai-deck-strategy-profile-v1",
+    taskId: "AI006",
+    deckId: "runtime-runner-strategy",
+    side: "runner",
+    cardCount: 4,
+    primaryStrategies: ["runner.rnd_pressure"],
+    secondaryStrategies: [],
+    strategyScores: {
+      "runner.rnd_pressure": {
+        anchorScore: 80,
+        supportScore: 80,
+        finalScore: 80,
+        confidence: "high",
+        supportGaps: [],
+        runtimeStatus: "productive",
+        runtimeBlockers: [],
+        anchorEvidence: [
+          {
+            cardId: "onr_v1_081_custodial-position",
+            quantity: 2,
+            source: "derivedStrategyAnchor",
+            strategyId: "runner.rnd_pressure",
+            reason: "test",
+          },
+        ],
+        supportEvidence: [],
+      },
+    },
+    functionSignalCounts: {},
+    legacySignalCounts: {},
+    warnings: [],
+    source: {
+      mode: "diagnostic_only",
+      strategyGoals: "data/ai/strategy-goals-v1.json",
+      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
+      plannerEffect: "none",
+    },
   };
 }
 

@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Process 2026-06-25
 
-Status: `active: DSR-05 next`
+Status: `active: DSR-06 next`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Stufenplan.md`
 
@@ -82,8 +82,8 @@ preflight
 2. `DSR-01` Einheitlichen strategischen Laufzeitvertrag festlegen. Status: `done`, Commit: `79decae4`.
 3. `DSR-02` DeckStrategyProfile und Doctrine fachlich härten. Status: `done`, Commit: `c5a1b920`.
 4. `DSR-03` Runner- und Corp-StrategicIntent produktiv machen. Status: `done`, Commit: `8a0e9e55`.
-5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: pending.
-6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen.
+5. `DSR-04` Doctrine-, Boardstate-, Neutral- und Threat-Ziele zusammenführen. Status: `done`, Commit: `30506fea`.
+6. `DSR-05` Persistenten StrategicIntentState und Phasenfortschritt einführen. Status: `done`, Commit: pending.
 7. `DSR-06` StrategicIntent in TacticalPlans übersetzen.
 8. `DSR-07` Begrenzte strategische Übersteuerung der Einzelaktionswertung.
 9. `DSR-08` Vertikale Spielstärke-Slices implementieren und kalibrieren.
@@ -222,6 +222,22 @@ Done-Gate:
 
 - Strategie wird replayfähig fortgeschrieben, pausiert, gewechselt und aufgegeben.
 - Keine Memory-Leaks zwischen Spielen, Seiten oder Decks.
+
+Umsetzung:
+
+- `strategic-intent-memory.ts` speichert `StrategicIntentState` AI-intern nach Match-/DecisionScope, Seite, Profil und Decksnapshot-ID.
+- `buildAiDecisionInput` liest vorhandene StrategicIntent-Memory und reicht sie als `previousState` an `buildStrategicIntentState` weiter.
+- `chooseSemanticRuntimeAction` persistiert StrategicIntent-Memory zusammen mit dem bestehenden Memory-Flag; bei `persistTacticalPlanMemory: false` bleibt der Zustand Preview-only.
+- `resetTacticalPlanMemory` leert auch StrategicIntent-Memory, damit bestehende Test- und Replay-Resetpfade vollständig bleiben.
+- Memory-Snapshots enthalten nur side-sichere strategische Facts, Phasen, Transition, Commitment, Blocker-IDs und den gespeicherten State.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts src/tactical-plans.test.ts src/strategic-intent-memory.test.ts --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "projects side-safe deck strategy runtime fields" --maxWorkers=1`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai test`
+- `git diff --check`
 
 Commit: `feat(ai): persist strategic intent state`
 

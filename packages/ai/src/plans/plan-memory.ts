@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { resetStrategicIntentMemory } from "../strategic-intent-memory";
 import { TACTICAL_PLAN_SCHEMA_VERSION } from "./tactical-plan-types";
 import type {
   PlanProgressionStatus,
@@ -51,6 +52,7 @@ export function rememberTacticalPlanRuntime(
 
 export function resetTacticalPlanMemory(): void {
   tacticalPlanMemoryByKey.clear();
+  resetStrategicIntentMemory();
 }
 
 function tacticalPlanMemoryKey(input: AiDecisionInput): string {
@@ -129,4 +131,3 @@ function planMemoryStatus(
   }
   return "active";
 }
-

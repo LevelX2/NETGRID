@@ -32,6 +32,7 @@ import {
   buildStrategicIntentState,
   type StrategicIntentState,
 } from "../strategic-intent-state";
+import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import { type RunnerTacticalGoal } from "../runner-tactical-goals";
 import { buildAiDecisionInputDto } from "../input-dto";
 
@@ -116,11 +117,18 @@ export function buildAiDecisionInput(
   const ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic(
     options.ownDeckSnapshot,
   );
+  const previousStrategicIntentState = getStrategicIntentMemorySnapshot(
+    input,
+    options.ownDeckSnapshot.deckSnapshotId,
+  )?.state;
   const ownStrategicIntentState = buildStrategicIntentState({
     side,
     stateVersion: playerView.stateVersion,
     strategyProfile: ownDeckStrategyProfile,
     deckCapabilities: ownDeckCapabilities,
+    ...(previousStrategicIntentState
+      ? { previousState: previousStrategicIntentState }
+      : {}),
     availableCredits: playerView.own.credits,
   });
   const ownRunnerStrategicIntent =

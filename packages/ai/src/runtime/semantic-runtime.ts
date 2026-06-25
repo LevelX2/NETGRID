@@ -28,6 +28,7 @@ import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame"
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
+import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import type {
@@ -399,6 +400,10 @@ export function chooseSemanticRuntimeAction(
           : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
+  const updatedStrategicIntentMemory =
+    persistTacticalPlanMemory && strategicIntentState
+      ? rememberStrategicIntentState(input, strategicIntentState)
+      : undefined;
   return {
     actionId: selectedChoice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
@@ -429,8 +434,18 @@ export function chooseSemanticRuntimeAction(
             `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
           ]
         : []),
+      ...(updatedStrategicIntentMemory
+        ? [
+            `strategic_intent_memory:${updatedStrategicIntentMemory.primaryStrategyId}`,
+            `strategic_intent_memory_phase:${updatedStrategicIntentMemory.phase}`,
+            `strategic_intent_memory_transition:${updatedStrategicIntentMemory.transitionStatus}`,
+          ]
+        : []),
       ...(!persistTacticalPlanMemory && effectivePlanRuntime.selectedPlan
         ? ["tactical_plan_memory_preview_only:true"]
+        : []),
+      ...(!persistTacticalPlanMemory && strategicIntentState
+        ? ["strategic_intent_memory_preview_only:true"]
         : []),
       ...(pilotChoice ? pilotChoice.evidence : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
