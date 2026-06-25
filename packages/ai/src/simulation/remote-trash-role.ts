@@ -19,6 +19,8 @@ export type RemoteTrashRole =
   | "unknown";
 
 const REMOTE_TRASH_ROLE_AI_HINTS = createAiHintsByCard();
+const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
+  "onr_v1_309_bbs-whispering-campaign";
 
 export function remoteTrashRoleForVisibleCard(
   card: VisibleCard,
@@ -144,5 +146,59 @@ function accessedCardContributesToVisibleRunTaxForMetrics(
         definitionId,
       ),
     ) === true
+  );
+}
+
+export function remoteTrashCardIsBbsWhisperingCampaign(
+  card: VisibleCard,
+): boolean {
+  return card.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID;
+}
+
+export function remoteTrashVisibleCorpValueRemaining(
+  card: VisibleCard,
+): number {
+  return Math.max(
+    0,
+    card.counters?.bit ?? 0,
+    card.counters?.recurring_credit ?? 0,
+  );
+}
+
+export function remoteTrashCardLooksLikeFinitePoolForMetrics(
+  card: VisibleCard,
+): boolean {
+  if (remoteTrashCardIsBbsWhisperingCampaign(card)) return true;
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? [])
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const runtimeText =
+    (runtimeDefinition as { text?: string } | undefined)?.text ?? "";
+  const demoText =
+    (demoDefinition as { text?: string } | undefined)?.text ?? "";
+  const rulesText = `${runtimeText} ${demoText} ${
+    card.rulesText ?? ""
+  }`.toLowerCase();
+  return (
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("finite_economy_pool") ||
+        mechanic.includes("hosted_credits") ||
+        mechanic.includes("bit_counter"),
+    ) ||
+    (rulesText.includes("put") &&
+      rulesText.includes("from the bank") &&
+      rulesText.includes("take") &&
+      rulesText.includes("bits"))
   );
 }

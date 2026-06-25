@@ -427,8 +427,11 @@ import {
   remoteTrashAccessProtectsAcuteThreatForMetrics,
 } from "./simulation/remote-server-threat";
 import {
+  remoteTrashCardIsBbsWhisperingCampaign,
+  remoteTrashCardLooksLikeFinitePoolForMetrics,
   remoteTrashRoleForAccessedVisibleCard,
   remoteTrashRoleForVisibleCard,
+  remoteTrashVisibleCorpValueRemaining,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
@@ -3566,9 +3569,6 @@ export type AiSimulationSummary = {
   cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
   metrics: AiQualityMetrics;
 };
-
-const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
-  "onr_v1_309_bbs-whispering-campaign";
 
 type CorpPunishKind =
   | "scorched_earth_like"
@@ -26575,7 +26575,7 @@ function runnerRemoteTrashAccessContext(
     targetType !== "unknown" &&
     remoteTrashCostForVisibleCard(accessed) !== undefined;
   const bbsWhisperingCampaign =
-    accessed.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID;
+    remoteTrashCardIsBbsWhisperingCampaign(accessed);
   const corpValueRemaining = remoteTrashVisibleCorpValueRemaining(accessed);
   const finitePoolEconomy =
     bbsWhisperingCampaign ||
@@ -26713,52 +26713,6 @@ function runnerRemoteTrashAccessContext(
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };
-}
-
-function remoteTrashVisibleCorpValueRemaining(card: VisibleCard): number {
-  return Math.max(
-    0,
-    card.counters?.bit ?? 0,
-    card.counters?.recurring_credit ?? 0,
-  );
-}
-
-function remoteTrashCardLooksLikeFinitePoolForMetrics(
-  card: VisibleCard,
-): boolean {
-  if (card.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID) return true;
-  const runtimeDefinition = card.definitionId
-    ? RUNTIME_CARDS[card.definitionId]
-    : undefined;
-  const demoDefinition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
-    : undefined;
-  const mechanics = [
-    ...("mechanics" in (runtimeDefinition ?? {})
-      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
-          ?.mechanics ?? [])
-      : []),
-    ...(demoDefinition?.mechanics ?? []),
-  ];
-  const runtimeText =
-    (runtimeDefinition as { text?: string } | undefined)?.text ?? "";
-  const demoText =
-    (demoDefinition as { text?: string } | undefined)?.text ?? "";
-  const rulesText = `${runtimeText} ${demoText} ${
-    card.rulesText ?? ""
-  }`.toLowerCase();
-  return (
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("finite_economy_pool") ||
-        mechanic.includes("hosted_credits") ||
-        mechanic.includes("bit_counter"),
-    ) ||
-    (rulesText.includes("put") &&
-      rulesText.includes("from the bank") &&
-      rulesText.includes("take") &&
-      rulesText.includes("bits"))
-  );
 }
 
 function runnerAdvancedRemoteContestContext(
