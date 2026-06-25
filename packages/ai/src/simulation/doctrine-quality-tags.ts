@@ -14,7 +14,10 @@ import type {
 } from "../index";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { countValue as countTag, sortedUnique } from "../runtime/collection";
-import { DOCTRINE_QUALITY_METRIC_NAMES } from "./simulation-metric-aggregation";
+import {
+  DOCTRINE_QUALITY_METRIC_NAMES,
+  sumDoctrineMetrics,
+} from "./simulation-metric-aggregation";
 
 type CentralRunActionSequenceEntry = {
   side?: string;
@@ -333,4 +336,42 @@ export function isRedactionSafeCaseAnalysis(
   return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
     serialized.includes(needle),
   );
+}
+
+export function analyzeDoctrineQualityCases(
+  summaries: AiSimulationSummary[],
+  options: { maxExamplesPerMetric?: number } = {},
+): AiDoctrineQualityCaseAnalysis {
+  const maxExamplesPerMetric = options.maxExamplesPerMetric ?? 3;
+  const examples = emptyDoctrineCaseExamples();
+  for (const summary of summaries) {
+    for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+      for (const tag of entry.qualityTags) {
+        const metric = doctrineMetricForQualityTag(tag);
+        if (!metric || examples[metric].length >= maxExamplesPerMetric)
+          continue;
+        examples[metric].push(
+          doctrineCaseExample(summary.seed, actionIndex, entry, metric),
+        );
+      }
+    }
+    collectRepeatedLowValueCentralRunExamples(
+      summary,
+      examples,
+      maxExamplesPerMetric,
+    );
+  }
+  const analysis: AiDoctrineQualityCaseAnalysis = {
+    version: "ai-deck-doctrine-case-analysis-v1",
+    maxExamplesPerMetric,
+    totals: sumDoctrineMetrics(
+      summaries.map((summary) => summary.metrics.doctrine),
+    ),
+    examples,
+    redactionSafe: true,
+  };
+  return {
+    ...analysis,
+    redactionSafe: isRedactionSafeCaseAnalysis(analysis),
+  };
 }

@@ -503,13 +503,9 @@ import {
   sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
 import {
-  collectRepeatedLowValueCentralRunExamples,
-  doctrineCaseExample,
-  doctrineMetricForQualityTag,
-  emptyDoctrineCaseExamples,
+  analyzeDoctrineQualityCases,
   isAgendaFloodExposureExemptAction,
   isEconomyStallExemptAction,
-  isRedactionSafeCaseAnalysis,
   qualityTagsForActionWithDependencies,
   summarizeDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
@@ -731,7 +727,10 @@ export {
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./simulation/benchmark-reports";
-export { summarizeDoctrineQualityMetrics } from "./simulation/doctrine-quality-tags";
+export {
+  analyzeDoctrineQualityCases,
+  summarizeDoctrineQualityMetrics,
+} from "./simulation/doctrine-quality-tags";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
@@ -6473,44 +6472,6 @@ function resolveBenchmarkDeckReference(
       reason: error instanceof Error ? error.message : String(error),
     };
   }
-}
-
-export function analyzeDoctrineQualityCases(
-  summaries: AiSimulationSummary[],
-  options: { maxExamplesPerMetric?: number } = {},
-): AiDoctrineQualityCaseAnalysis {
-  const maxExamplesPerMetric = options.maxExamplesPerMetric ?? 3;
-  const examples = emptyDoctrineCaseExamples();
-  for (const summary of summaries) {
-    for (const [actionIndex, entry] of summary.actionSequence.entries()) {
-      for (const tag of entry.qualityTags) {
-        const metric = doctrineMetricForQualityTag(tag);
-        if (!metric || examples[metric].length >= maxExamplesPerMetric)
-          continue;
-        examples[metric].push(
-          doctrineCaseExample(summary.seed, actionIndex, entry, metric),
-        );
-      }
-    }
-    collectRepeatedLowValueCentralRunExamples(
-      summary,
-      examples,
-      maxExamplesPerMetric,
-    );
-  }
-  const analysis: AiDoctrineQualityCaseAnalysis = {
-    version: "ai-deck-doctrine-case-analysis-v1",
-    maxExamplesPerMetric,
-    totals: sumDoctrineMetrics(
-      summaries.map((summary) => summary.metrics.doctrine),
-    ),
-    examples,
-    redactionSafe: true,
-  };
-  return {
-    ...analysis,
-    redactionSafe: isRedactionSafeCaseAnalysis(analysis),
-  };
 }
 
 export function evaluateV143TuningGate(
