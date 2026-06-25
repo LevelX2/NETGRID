@@ -664,6 +664,11 @@ import {
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
 import {
+  retainActionAlternativesForFindingWindows as retainActionAlternativesForFindingWindowsRuntime,
+  selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime,
+  stripSelfplayActionAlternatives as stripSelfplayActionAlternativesRuntime,
+} from "./simulation/selfplay-trace-facts";
+import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
@@ -5099,27 +5104,10 @@ function selfplayTraceFactsForDecision(decision: AiDecision): {
   debugFacts?: string[];
   actionAlternatives?: AiDecisionActionAlternative[];
 } {
-  const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
-  if (!safeDebug) return {};
-  const debugFacts = safeSelfplayFacts([
-    ...(safeDebug.planKind ? [`planKind:${safeDebug.planKind}`] : []),
-    ...(safeDebug.selectedActionType
-      ? [`selectedActionType:${safeDebug.selectedActionType}`]
-      : []),
-    ...(safeDebug.visibleReasons ?? []),
-    ...(safeDebug.warnings ?? []),
-    ...(safeDebug.evidence ?? []),
-    ...(safeDebug.detailSections?.flatMap((section) =>
-      section.items.slice(0, 4).map((item) => `${section.id}:${item}`),
-    ) ?? []),
-  ]);
-  return {
-    ...(safeDebug.planKind ? { planKind: safeDebug.planKind } : {}),
-    ...(debugFacts.length > 0 ? { debugFacts } : {}),
-    ...(safeDebug.actionAlternatives && safeDebug.actionAlternatives.length > 0
-      ? { actionAlternatives: safeDebug.actionAlternatives }
-      : {}),
-  };
+  return selfplayTraceFactsForSimulationDecisionRuntime(decision, true, {
+    sanitizeAiDecisionDebug,
+    safeSelfplayFacts,
+  });
 }
 
 function selfplayTraceFactsForSimulationDecision(
@@ -5130,26 +5118,21 @@ function selfplayTraceFactsForSimulationDecision(
   debugFacts?: string[];
   actionAlternatives?: AiDecisionActionAlternative[];
 } {
-  const facts = selfplayTraceFactsForDecision(decision);
-  if (config.includeActionAlternativesForFindings === true) return facts;
-  const { actionAlternatives: _actionAlternatives, ...withoutAlternatives } =
-    facts;
-  return withoutAlternatives;
+  return selfplayTraceFactsForSimulationDecisionRuntime(
+    decision,
+    config.includeActionAlternativesForFindings,
+    {
+      sanitizeAiDecisionDebug,
+      safeSelfplayFacts,
+    },
+  );
 }
 
 function stripSelfplayActionAlternatives(
   summaries: AiSimulationSummary[],
 ): void {
-  for (const summary of summaries) {
-    for (const entry of summary.actionSequence) {
-      delete entry.actionAlternatives;
-    }
-  }
+  stripSelfplayActionAlternativesRuntime(summaries);
 }
-
-const SELFPLAY_ACTION_ALTERNATIVE_FINDING_DETECTORS = new Set([
-  "action_limit_reached",
-]);
 
 function retainActionAlternativesForFindingWindows(
   summaries: AiSimulationSummary[],
@@ -5160,101 +5143,12 @@ function retainActionAlternativesForFindingWindows(
     actionIndices: number[];
   }> = [],
 ): void {
-  const keep = new Set<string>();
-  const requestedBySeed = new Map(
-    opportunitySnapshotRequests.map((request) => [
-      request.seed,
-      new Set(
-        request.actionIndices.filter(
-          (index) => Number.isInteger(index) && index >= 0,
-        ),
-      ),
-    ]),
+  retainActionAlternativesForFindingWindowsRuntime(
+    summaries,
+    findings,
+    maxAlternativesPerFinding,
+    opportunitySnapshotRequests,
   );
-  let firstAvailable:
-    | {
-        summaryIndex: number;
-        actionIndex: number;
-      }
-    | undefined;
-  let firstAvailableAlternatives: AiDecisionActionAlternative[] | undefined;
-  let sawEligibleFinding = false;
-  for (const [summaryIndex, summary] of summaries.entries()) {
-    const actionIndex = summary.actionSequence.findIndex(
-      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
-    );
-    if (actionIndex >= 0) {
-      firstAvailable = { summaryIndex, actionIndex };
-      firstAvailableAlternatives =
-        summary.actionSequence[actionIndex]?.actionAlternatives?.slice();
-      break;
-    }
-  }
-  for (const finding of findings) {
-    if (
-      "detectorIds" in finding &&
-      Array.isArray(finding.detectorIds) &&
-      !finding.detectorIds.some((detectorId) =>
-        SELFPLAY_ACTION_ALTERNATIVE_FINDING_DETECTORS.has(String(detectorId)),
-      )
-    ) {
-      continue;
-    }
-    sawEligibleFinding = true;
-    const summary = summaries[finding.summaryIndex];
-    if (!summary) continue;
-    // Action-limit findings usually point at the terminal action; keep a small
-    // lookback so the preceding actionable decision alternatives survive.
-    const from = Math.max(0, finding.actionIndex - 5);
-    const to = Math.min(
-      summary.actionSequence.length - 1,
-      finding.actionIndex + 1,
-    );
-    for (let index = from; index <= to; index += 1) {
-      keep.add(`${finding.summaryIndex}:${index}`);
-    }
-  }
-  for (const [summaryIndex, summary] of summaries.entries()) {
-    const requested = requestedBySeed.get(summary.seed);
-    if (!requested) continue;
-    for (const actionIndex of requested) {
-      // Opportunity snapshots are diagnostic-only: they retain the already
-      // redacted legal-action alternative list at an explicitly requested
-      // decision point without changing the simulated decision.
-      keep.add(`${summaryIndex}:${actionIndex}`);
-    }
-  }
-  for (const [summaryIndex, summary] of summaries.entries()) {
-    for (const [actionIndex, entry] of summary.actionSequence.entries()) {
-      if (!keep.has(`${summaryIndex}:${actionIndex}`)) {
-        delete entry.actionAlternatives;
-        continue;
-      }
-      if (entry.actionAlternatives) {
-        entry.actionAlternatives = entry.actionAlternatives.slice(
-          0,
-          Math.max(1, maxAlternativesPerFinding),
-        );
-      }
-    }
-  }
-  const retained = summaries.some((summary) =>
-    summary.actionSequence.some(
-      (entry) => (entry.actionAlternatives?.length ?? 0) > 0,
-    ),
-  );
-  if (!retained && sawEligibleFinding && firstAvailable) {
-    const entry =
-      summaries[firstAvailable.summaryIndex]?.actionSequence[
-        firstAvailable.actionIndex
-      ];
-    if (entry && firstAvailableAlternatives) {
-      entry.actionAlternatives = firstAvailableAlternatives.slice(
-        0,
-        Math.max(1, maxAlternativesPerFinding),
-      );
-    }
-  }
 }
 
 export function simulateAiGame(
