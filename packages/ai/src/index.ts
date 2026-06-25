@@ -8462,7 +8462,15 @@ function scoreRunnerAction(
           typeof action.payload?.shellCounterAmount === "number"
             ? action.payload.shellCounterAmount
             : 0;
-        const targetRoles = shellTradersTargetRoles(input, action);
+        const targetCardId =
+          typeof action.payload?.targetCardId === "string"
+            ? action.payload.targetCardId
+            : "";
+        const targetDefinitionId =
+          typeof action.payload?.targetCardDefinitionId === "string"
+            ? action.payload.targetCardDefinitionId
+            : findVisibleCard(input, targetCardId)?.definitionId;
+        const targetRoles = rolesForCardId(targetDefinitionId);
         const directInstall = shellTradersDirectInstallAction(input, action);
         const installedRigRoles = new Set(
           (input.playerView.own.rig ?? []).flatMap((card) =>
@@ -10873,21 +10881,6 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
     return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
-}
-
-function shellTradersTargetRoles(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string[] {
-  const targetCardId =
-    typeof action.payload?.targetCardId === "string"
-      ? action.payload.targetCardId
-      : "";
-  const targetDefinitionId =
-    typeof action.payload?.targetCardDefinitionId === "string"
-      ? action.payload.targetCardDefinitionId
-      : findVisibleCard(input, targetCardId)?.definitionId;
-  return rolesForCardId(targetDefinitionId);
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
