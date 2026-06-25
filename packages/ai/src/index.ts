@@ -169,6 +169,7 @@ import {
 import { selectedBidChoiceOptionId } from "./runtime/bid-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
+import { selectedShellTradersStartTurnChoiceOptionId } from "./runtime/shell-traders-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -7314,24 +7315,9 @@ function selectedChoicesForDecision(
     choice.kind === "select_cards" &&
     choice.source.startsWith("v1912.shell_traders_start_turn")
   ) {
-    const selected =
-      choice.options.slice().sort((left, right) => {
-        const leftCounter = Number(
-          /\((\d+)\)\s*$/.exec(left.label)?.[1] ?? Number.MAX_SAFE_INTEGER,
-        );
-        const rightCounter = Number(
-          /\((\d+)\)\s*$/.exec(right.label)?.[1] ?? Number.MAX_SAFE_INTEGER,
-        );
-        const leftProgramBias = left.card?.type === "program" ? -1 : 0;
-        const rightProgramBias = right.card?.type === "program" ? -1 : 0;
-        return (
-          leftCounter - rightCounter ||
-          leftProgramBias - rightProgramBias ||
-          left.label.localeCompare(right.label, "de")
-        );
-      })[0] ?? choice.options[0];
-    return selected
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
+    const selectedOptionId = selectedShellTradersStartTurnChoiceOptionId(choice);
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (
