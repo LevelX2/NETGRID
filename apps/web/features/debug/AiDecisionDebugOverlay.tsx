@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 
-import { aiDecisionDebugHqHandRows } from "../../app/ai-decision-debug-ui";
+import { aiDecisionDebugDeckStrategySummary, aiDecisionDebugHqHandRows } from "../../app/ai-decision-debug-ui";
 import {
   aiTraceActionRows,
   aiTraceDebugGapNotes,
@@ -281,6 +281,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
       <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
       <AiDecisionDebugPlanLayer detail={detail} defaultOpen />
+      <AiDecisionDebugDeckStrategy detail={detail} />
       {actionRows.length > 0 ? (
         <AiDecisionDebugCollapsibleSection title={mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"} defaultOpen>
           <div className="aiDecisionDebugActions">
@@ -402,6 +403,7 @@ function serializeAiDecisionDebugVisibleJsonExport(
       })),
       scoreRows: aiTraceScoreRows(detail, 8),
       doctrineRows: aiTraceDoctrineRows(detail),
+      deckStrategy: aiDecisionDebugDeckStrategySummary(detail),
       memory,
       privateHand,
       followUpNotes: aiTraceDebugGapNotes(detail).slice(0, 3),
@@ -532,6 +534,18 @@ function aiDecisionDebugActionTypeLabel(actionType: string | undefined): string 
     trigger_ability: "Fähigkeit nutzen",
   };
   return actionType ? labels[actionType] ?? actionType : "";
+}
+
+function AiDecisionDebugDeckStrategy({ detail }: { detail: Record<string, unknown> }) {
+  const summary = aiDecisionDebugDeckStrategySummary(detail);
+  if (summary.rows.length === 0 && summary.blockers.length === 0 && summary.warnings.length === 0) return null;
+  return (
+    <AiDecisionDebugCollapsibleSection title="Deckstrategie" defaultOpen={false}>
+      <AiDecisionDebugRows rows={summary.rows} />
+      <AiDecisionDebugChips title="Strategie-Blocker" items={summary.blockers} tone="warning" />
+      <AiDecisionDebugChips title="Profilwarnungen" items={summary.warnings} tone="muted" />
+    </AiDecisionDebugCollapsibleSection>
+  );
 }
 
 function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown> }) {

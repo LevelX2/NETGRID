@@ -35,9 +35,9 @@ describe("SemanticRuntimeDebug", () => {
     });
 
     expect(context.selectedByPlanMapping).toBe(true);
-    expect(semanticRuntimeDebugActionDisplayScore(selected, true, context)).toBe(
-      330,
-    );
+    expect(
+      semanticRuntimeDebugActionDisplayScore(selected, true, context),
+    ).toBe(330);
     expect(
       semanticRuntimeDebugActionDisplayScore(lowerPlanFit, false, context),
     ).toBe(120);
@@ -58,7 +58,12 @@ describe("SemanticRuntimeDebug", () => {
       "displayOnlyScore:true",
     ]);
     expect(
-      semanticRuntimeDebugPlanSelectionScoreBreakdown(selected, true, 330, context),
+      semanticRuntimeDebugPlanSelectionScoreBreakdown(
+        selected,
+        true,
+        330,
+        context,
+      ),
     ).toEqual([
       expect.objectContaining({
         key: "selected_by_plan_mapping",
@@ -84,6 +89,25 @@ describe("SemanticRuntimeDebug", () => {
     });
     const input = {
       side: "runner",
+      ownDeckStrategyProfile: {
+        side: "runner",
+        cardCount: 45,
+        primaryStrategies: ["runner.rnd_pressure"],
+        secondaryStrategies: ["runner.remote_contest"],
+        strategyScores: {
+          "runner.rnd_pressure": {
+            finalScore: 72,
+            confidence: "high",
+            runtimeStatus: "productive",
+          },
+          "runner.remote_contest": {
+            finalScore: 51,
+            confidence: "medium",
+            runtimeStatus: "productive",
+          },
+        },
+        warnings: ["missing_compiled_hint:runner_x"],
+      },
       ownStrategicIntentState: {
         primaryStrategy: {
           strategyId: "runner.rnd_pressure",
@@ -107,6 +131,10 @@ describe("SemanticRuntimeDebug", () => {
       semanticRuntimeDebugStrategicRuntimeItems(input, selected.evidence),
     ).toEqual(
       expect.arrayContaining([
+        "deck_strategy_profile:ai_internal_strategy_profile",
+        "deck_strategy_card_count:45",
+        "deck_strategy_primary:runner.rnd_pressure:72:high:productive",
+        "deck_strategy_secondary:runner.remote_contest:51:medium:productive",
         "strategic_intent_state:runner.rnd_pressure",
         "strategic_intent_phase:pressure",
         "strategic_intent_target_id:rd",
@@ -222,9 +250,9 @@ describe("SemanticRuntimeDebug", () => {
       "mistake_summary:avoided_loop",
       "observed_mistake_count:1",
     ]);
-    expect(semanticRuntimeDebugTargetChoiceShadowItems(selected.action)).toEqual(
-      [],
-    );
+    expect(
+      semanticRuntimeDebugTargetChoiceShadowItems(selected.action),
+    ).toEqual([]);
   });
 
   it("formats tactical plan runtime diagnostics without runtime selection logic", () => {

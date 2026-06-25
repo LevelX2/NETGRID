@@ -12,7 +12,10 @@ import type {
 } from "../runtime/semantic-runtime-types";
 import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
 import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
-import type { TacticalPlan, TacticalPlanRuntimeResult } from "../tactical-plans";
+import type {
+  TacticalPlan,
+  TacticalPlanRuntimeResult,
+} from "../tactical-plans";
 import { formatDebugFieldValue } from "./debug-format";
 import { buildSemanticDecisionDebugScoreComponent } from "./decision-debug";
 
@@ -216,10 +219,11 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
   input: AiDecisionInput,
   selectedEvidence: readonly string[],
 ): string[] {
-  const state = (input as AiDecisionInputWithDeckCapabilities)
-    .ownStrategicIntentState;
+  const enrichedInput = input as AiDecisionInputWithDeckCapabilities;
+  const state = enrichedInput.ownStrategicIntentState;
   if (!state) return [];
   return scrubEvidence([
+    ...semanticRuntimeDebugDeckStrategyItems(enrichedInput),
     `strategic_intent_state:${state.primaryStrategy.strategyId}`,
     `strategic_intent_family:${state.primaryStrategy.family}`,
     `strategic_intent_phase:${state.phase}`,
@@ -233,7 +237,10 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
     `strategic_intent_blocker_count:${state.blockers.length}`,
     ...state.blockers
       .slice(0, 4)
-      .map((blocker) => `strategic_intent_blocker:${blocker.reason}:${blocker.severity}`),
+      .map(
+        (blocker) =>
+          `strategic_intent_blocker:${blocker.reason}:${blocker.severity}`,
+      ),
     ...selectedEvidence
       .filter(
         (entry) =>
@@ -242,6 +249,67 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
       )
       .slice(0, 12),
   ]);
+}
+
+function semanticRuntimeDebugDeckStrategyItems(
+  input: AiDecisionInputWithDeckCapabilities,
+): string[] {
+  const profile = input.ownDeckStrategyProfile;
+  if (!profile) {
+    return ["deck_strategy_profile:missing"];
+  }
+  return [
+    "deck_strategy_profile:ai_internal_strategy_profile",
+    `deck_strategy_side:${profile.side}`,
+    `deck_strategy_card_count:${profile.cardCount}`,
+    `deck_strategy_primary_count:${profile.primaryStrategies.length}`,
+    `deck_strategy_secondary_count:${profile.secondaryStrategies.length}`,
+    ...profile.primaryStrategies
+      .slice(0, 3)
+      .map((strategyId) =>
+        semanticRuntimeDebugDeckStrategyLine(
+          "deck_strategy_primary",
+          strategyId,
+          profile.strategyScores[strategyId],
+        ),
+      ),
+    ...profile.secondaryStrategies
+      .slice(0, 4)
+      .map((strategyId) =>
+        semanticRuntimeDebugDeckStrategyLine(
+          "deck_strategy_secondary",
+          strategyId,
+          profile.strategyScores[strategyId],
+        ),
+      ),
+    ...profile.warnings
+      .slice(0, 4)
+      .map((warning) => `deck_strategy_warning:${warning}`),
+  ];
+}
+
+function semanticRuntimeDebugDeckStrategyLine(
+  prefix: "deck_strategy_primary" | "deck_strategy_secondary",
+  strategyId: string,
+  score:
+    | NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+      >["strategyScores"][string]
+    | undefined,
+): string {
+  const finalScore =
+    score && typeof score === "object" && "finalScore" in score
+      ? Number(score.finalScore)
+      : 0;
+  const confidence =
+    score && typeof score === "object" && "confidence" in score
+      ? String(score.confidence)
+      : "unknown";
+  const runtimeStatus =
+    score && typeof score === "object" && "runtimeStatus" in score
+      ? String(score.runtimeStatus ?? "unknown")
+      : "unknown";
+  return `${prefix}:${strategyId}:${roundScore(finalScore)}:${confidence}:${runtimeStatus}`;
 }
 
 export function semanticRuntimeDebugSelectionScoreItems(
@@ -263,16 +331,14 @@ export function semanticRuntimeDebugSelectionScoreItems(
   ]);
 }
 
-export function semanticRuntimeDebugRankedAlternatives(
-  params: {
-    rankedChoices: readonly SemanticRuntimeChoice[];
-    selectedActionId: string;
-    scoreBreakdownForChoice: (
-      choice: SemanticRuntimeChoice,
-    ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
-    scrubEvidence: (evidence: string[]) => string[];
-  },
-): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
+export function semanticRuntimeDebugRankedAlternatives(params: {
+  rankedChoices: readonly SemanticRuntimeChoice[];
+  selectedActionId: string;
+  scoreBreakdownForChoice: (
+    choice: SemanticRuntimeChoice,
+  ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
+  scrubEvidence: (evidence: string[]) => string[];
+}): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
   return params.rankedChoices
     .filter((choice) => !choice.exclusion)
     .slice(0, 24)
