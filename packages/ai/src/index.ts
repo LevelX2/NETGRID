@@ -217,6 +217,7 @@ import {
 } from "./runtime/runner-rnd-repeat-run-score";
 import { isLowValueKnownAccessCard } from "./runtime/runner-low-value-known-access-card";
 import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
+import { staleKnownArchivesRepeatRunPenalty } from "./runtime/runner-archives-repeat-run-score";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -381,11 +382,10 @@ import {
 import { roundNumber as round } from "./runtime/number-rounding";
 import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
-  eventMayChangeArchives as aiEventMayChangeArchives,
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
   eventVersion as aiEventVersion,
   findLastHistoryIndex as findLastAiHistoryIndex,
-  isArchivesAccessEvent as isAiArchivesAccessEvent,
+  mergedPublicHistory as mergedAiPublicHistory,
   serverIdFromEvent as aiServerIdFromEvent,
 } from "./runtime/public-event-history";
 import {
@@ -10969,47 +10969,6 @@ function scoreRunTarget(
   return score;
 }
 
-function staleKnownArchivesRepeatRunPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  if (
-    input.side !== "runner" ||
-    action.type !== "start_run" ||
-    action.payload?.serverId !== "archives"
-  )
-    return 0;
-  if (
-    input.legalActions.some(
-      (candidate) =>
-        candidate.type === "trash_accessed_card" ||
-        candidate.type === "steal_agenda",
-    )
-  )
-    return 0;
-  const archives = input.playerView.servers.find(
-    (server) => server.id === "archives",
-  );
-  const visibleArchivesCards = archives?.root ?? [];
-  if (
-    visibleArchivesCards.length === 0 ||
-    visibleArchivesCards.some((card) => !card.known || !card.definitionId)
-  )
-    return 0;
-  const history = mergedAiPublicHistory(input);
-  const lastArchivesAccessIndex = findLastAiHistoryIndex(history, (event) =>
-    isAiArchivesAccessEvent(event),
-  );
-  if (lastArchivesAccessIndex < 0) return 0;
-  if (
-    history
-      .slice(lastArchivesAccessIndex + 1)
-      .some((event) => aiEventMayChangeArchives(event))
-  )
-    return 0;
-  return 520;
-}
-
 function recentRemoteJackOutRepeatRunPenalty(
   input: AiDecisionInput,
   action: LegalAction,
@@ -11087,16 +11046,6 @@ function aiEventMayRefreshRemoteRun(
     actionType === "play_event" ||
     actionType === "trigger_ability" ||
     actionType === "rez_ice"
-  );
-}
-
-function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) => aiEventVersion(left) - aiEventVersion(right),
   );
 }
 
