@@ -135,6 +135,11 @@ import { compareAction } from "./runtime/action-order";
 import { isProtectionDefinitionId } from "./runtime/protection-definition";
 import { advancementCountersAddedForSimulationAction } from "./runtime/simulation-action-event";
 import {
+  progressionCardTargetType,
+  sortedUniqueProgressionCardTargetTypes,
+  type ProgressionCardTargetType,
+} from "./runtime/progression-card-target";
+import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
   semanticRuntimeActionTypeIsReactive,
@@ -3511,13 +3516,6 @@ export type AiSimulationSummary = {
   cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
   metrics: AiQualityMetrics;
 };
-
-type ProgressionCardTargetType =
-  | "agenda"
-  | "asset"
-  | "upgrade"
-  | "ice"
-  | "unknown";
 
 type RemoteTrashTargetType = "asset_node" | "upgrade" | "ice" | "unknown";
 type RemoteTrashRole =
@@ -27723,25 +27721,6 @@ function cardTargetTypeForInstance(
   const type =
     DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
   return progressionCardTargetType(type);
-}
-
-function progressionCardTargetType(
-  type: string | undefined,
-): ProgressionCardTargetType {
-  if (
-    type === "agenda" ||
-    type === "asset" ||
-    type === "upgrade" ||
-    type === "ice"
-  )
-    return type;
-  return "unknown";
-}
-
-function sortedUniqueProgressionCardTargetTypes(
-  values: ProgressionCardTargetType[],
-): ProgressionCardTargetType[] {
-  return [...new Set(values)].sort();
 }
 
 function advancedAgendaStealSourceForAction(

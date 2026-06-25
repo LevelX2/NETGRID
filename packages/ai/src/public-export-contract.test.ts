@@ -143,6 +143,7 @@ describe("AI public export contract", () => {
       "./runtime/evidence-value",
       "./runtime/number-rounding",
       "./runtime/public-event-history",
+      "./runtime/progression-card-target",
       "./runtime/protection-definition",
       "./runtime/simulation-action-event",
       "./runtime/stable-hash",
