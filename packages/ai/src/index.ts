@@ -571,6 +571,7 @@ import {
 import { missingBenchmarkDeckFormatProfile } from "./simulation/benchmark-deck-format-profile";
 import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
 import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
+import { resolveLocalDeckEditorDecksDir } from "./simulation/local-deck-editor-dir";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
@@ -5714,7 +5715,10 @@ export function benchmarkDeckFromLocalEditableDeck(
   reference: Extract<AiBenchmarkDeckReference, { kind: "local_editable_deck" }>,
 ): AiBenchmarkLocalEditableDeckResult {
   const filePath = path.join(
-    resolveLocalDeckEditorDecksDir(reference.baseDir),
+    resolveLocalDeckEditorDecksDir({
+      ...(reference.baseDir ? { baseDir: reference.baseDir } : {}),
+      storage: LOCAL_REALISTIC_BENCHMARK_DECKS.storage,
+    }),
     reference.fileName,
   );
   const emptyFailure = (
@@ -5895,19 +5899,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards,
     nonDeckLegalCards,
   };
-}
-
-function resolveLocalDeckEditorDecksDir(baseDir?: string): string {
-  if (baseDir) return baseDir;
-  const override =
-    process.env[LOCAL_REALISTIC_BENCHMARK_DECKS.storage.overrideEnv];
-  if (override) return override;
-  return path.join(
-    process.env.APPDATA ?? "",
-    ...LOCAL_REALISTIC_BENCHMARK_DECKS.storage.relativeDirectory.split(
-      /[\\/]+/,
-    ),
-  );
 }
 
 function classifyLocalEditableBenchmarkDeck(input: {
