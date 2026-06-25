@@ -19,6 +19,9 @@ export type PlanConversionDecisionEntry = {
   runnerHandUseActionTaken?: boolean;
   runnerRigInstallAction?: boolean;
   runnerLowValueDuplicateInstallAction?: boolean;
+  runnerCentralRunWithMultiaccess?: boolean;
+  runnerCentralRunWithInterfaceInstalled?: boolean;
+  runnerRepeatedCentralRunWithFreshValue?: boolean;
   evidence?: readonly string[];
 };
 
@@ -532,6 +535,45 @@ export function runnerProbeConvertsToUsefulInfoOrPivot<
       ["recover_economy", "rig", "remote_contest"].some((needle) =>
         planKindForConversion(later)?.includes(needle),
       ),
+  );
+}
+
+export function runnerCentralPressureConvertsToStealOrFreshValue<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      (later.actionType === "steal_agenda" &&
+        centralServerId(later.targetServerId) !== undefined) ||
+      later.runnerCentralRunWithMultiaccess === true ||
+      later.runnerCentralRunWithInterfaceInstalled === true ||
+      later.runnerRepeatedCentralRunWithFreshValue === true ||
+      hasPlanConversionEvidenceFlag(later, "plan_abort_taken:true"),
+  );
+}
+
+export function runnerRemoteContestConvertsToStealTrashOrAbort<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      (serverTargetsMatch(entry, later) &&
+        (later.actionType === "steal_agenda" ||
+          later.runnerRelevantRemoteTrashTaken === true ||
+          later.actionType === "trash_accessed_card")) ||
+      hasPlanConversionEvidenceFlag(later, "plan_abort_taken:true"),
   );
 }
 

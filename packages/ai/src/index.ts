@@ -472,8 +472,10 @@ import {
   remoteBuildConvertsToAdvanceOrScore,
   remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
+  runnerCentralPressureConvertsToStealOrFreshValue,
   runnerEconomyConvertsToRunOrRig,
   runnerProbeConvertsToUsefulInfoOrPivot,
+  runnerRemoteContestConvertsToStealTrashOrAbort,
   runnerRigConvertsToRun,
   serverTargetsMatch,
   rigActionConvertsToRun,
@@ -15860,6 +15862,7 @@ function summarizeStrategicPlanConversionMetrics(
           runnerCentralPressureConvertsToStealOrFreshValue(
             strategicEntries,
             index,
+            isMeaningfulBoardProgress,
           )
         )
           runnerCentralPressureConvertedToStealOrFreshValue += 1;
@@ -15869,6 +15872,7 @@ function summarizeStrategicPlanConversionMetrics(
           runnerRemoteContestConvertsToStealTrashOrAbort(
             strategicEntries,
             index,
+            isMeaningfulBoardProgress,
           )
         )
           runnerRemoteContestConvertedToStealTrashOrCorrectAbort += 1;
@@ -21241,39 +21245,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function runnerCentralPressureConvertsToStealOrFreshValue(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (isMeaningfulBoardProgress(entry)) return true;
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      (later.actionType === "steal_agenda" &&
-        centralServerId(later.targetServerId) !== undefined) ||
-      later.runnerCentralRunWithMultiaccess === true ||
-      later.runnerCentralRunWithInterfaceInstalled === true ||
-      later.runnerRepeatedCentralRunWithFreshValue === true ||
-      hasEvidenceFlag(later, "plan_abort_taken:true"),
-  );
-}
-
-function runnerRemoteContestConvertsToStealTrashOrAbort(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (isMeaningfulBoardProgress(entry)) return true;
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      (serverTargetsMatch(entry, later) &&
-        (later.actionType === "steal_agenda" ||
-          later.runnerRelevantRemoteTrashTaken === true ||
-          later.actionType === "trash_accessed_card")) ||
-      hasEvidenceFlag(later, "plan_abort_taken:true"),
-  );
 }
 
 function corpRemoteBuildConvertsToAdvanceProtectOrScore(
