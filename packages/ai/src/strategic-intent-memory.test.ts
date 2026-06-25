@@ -121,6 +121,28 @@ describe("StrategicIntent memory", () => {
       getStrategicIntentMemorySnapshot(input, "diagnostic-only-deck"),
     ).toBeUndefined();
   });
+
+  it("expires abandoned strategic states immediately", () => {
+    const input = aiInput("runner", "match-abandoned", "deck-runner-a");
+    const active = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 8,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+    const abandoned = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 9,
+      previousState: active,
+      availableCredits: 8,
+    });
+
+    const snapshot = rememberStrategicIntentState(input, abandoned);
+
+    expect(abandoned.transition.status).toBe("abandoned");
+    expect(snapshot?.ttlDecisionsRemaining).toBe(0);
+    expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
+  });
 });
 
 function strategyProfile(

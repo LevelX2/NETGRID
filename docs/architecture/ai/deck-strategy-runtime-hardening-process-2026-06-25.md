@@ -1,6 +1,6 @@
 # Deck Strategy Runtime Hardening Process 2026-06-25
 
-Status: `DSR-H03_done`
+Status: `DSR-H04_done`
 
 Quelle/Vorgabe: `C:\Users\Lui\Downloads\NETGRID_Codex_Goal_Deckstrategie_Runtime_Hardening_Debug.md`
 
@@ -80,8 +80,8 @@ preflight
 2. `DSR-H01` Produktiven Strategie-Vertrag und report-only Diagnostic strikt trennen. Status: `done`.
 3. `DSR-H02` Anchor-Disziplin und Capability-Grenze härten. Status: `done`.
 4. `DSR-H03` Rollenstatus, Zielvektor und Reserve aus echtem Runtime-Kontext ableiten. Status: `done`.
-5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `active`.
-6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `pending`.
+5. `DSR-H04` StrategicIntent-State-Machine, Hysterese und Memory vervollständigen. Status: `done`.
+6. `DSR-H05` Strategischen Action-Fit und Plan-Override semantisch präzisieren. Status: `active`.
 7. `DSR-H06` KI-Debugbewertung um Strategie, State und Auswahlbegründung ergänzen. Status: `pending`.
 8. `DSR-H07` Echte produktive End-to-End- und Regressionsnachweise ergänzen. Status: `pending`.
 9. `DSR-H08` Doppelzuständigkeiten, tote Pfade, Legacy und Dokumentationsstatus bereinigen. Status: `pending`.
@@ -142,6 +142,10 @@ Commit: `feat(ai): derive strategic role and target context`
 Ziel: Alle Phasen und Transitionen sind erreichbar, Memory ist isoliert und preview-safe, Switch-Margin und Mindestbindung wirken real.
 
 Kernartefakte: `strategic-intent-state`, `strategic-intent-memory`, Multi-Decision-Tests.
+
+Ergebnis: `buildStrategicIntentState` hält vorherige Strategien während Mindestbindung oder bei zu kleiner Score-Marge, wechselt erst bei erfüllter Bindung und ausreichendem Vorsprung und markiert neutrale Rückfälle als `abandoned`. Memory lässt `abandoned`-States sofort auslaufen; Preview-Verhalten und Isolation bleiben unverändert abgesichert.
+
+Checks: `@netgrid/ai` Typecheck grün; fokussierte Tests `strategic-intent-state`, `strategic-intent-memory`, `semantic-ai-runtime-cutover`, `runtime/strategic-runtime-context` grün mit 78 Tests; vollständiger `@netgrid/ai`-Testlauf grün mit 147 Testdateien und 1637 Tests; Diff-Check grün.
 
 Commit: `feat(ai): complete strategic intent state machine`
 

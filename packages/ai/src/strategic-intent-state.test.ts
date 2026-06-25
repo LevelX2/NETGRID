@@ -133,6 +133,163 @@ describe("StrategicIntentState contract", () => {
     });
     expect(continued.commitment.decisionsCommitted).toBe(2);
   });
+
+  it("holds the previous strategy until minimum commitment is met", () => {
+    const first = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 30,
+      strategyProfile: profile("runner", {
+        primary: ["runner.rnd_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 70,
+            support: 70,
+            final: 70,
+            confidence: "high",
+          }),
+        },
+      }),
+      availableCredits: 8,
+    });
+    const held = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 31,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 78,
+            support: 78,
+            final: 78,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 85,
+            support: 85,
+            final: 85,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: first,
+      availableCredits: 8,
+    });
+
+    expect(held.primaryStrategy.strategyId).toBe("runner.rnd_pressure");
+    expect(held.transition).toMatchObject({
+      status: "continued",
+      reason: "min_commitment_not_met",
+      previousStrategyId: "runner.rnd_pressure",
+    });
+    expect(held.transition.evidence).toContain(
+      "held_candidate:runner.hq_pressure",
+    );
+  });
+
+  it("switches strategy after commitment when the score margin is high enough", () => {
+    const first = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 40,
+      strategyProfile: profile("runner", {
+        primary: ["runner.rnd_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+        },
+      }),
+      availableCredits: 8,
+    });
+    const committed = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 41,
+      strategyProfile: profile("runner", {
+        primary: ["runner.rnd_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: first,
+      availableCredits: 8,
+    });
+    const switched = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 42,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+          "runner.hq_pressure": score({
+            anchor: 95,
+            support: 95,
+            final: 95,
+            confidence: "high",
+          }),
+        },
+      }),
+      previousState: committed,
+      availableCredits: 8,
+    });
+
+    expect(committed.commitment.decisionsCommitted).toBe(2);
+    expect(switched.primaryStrategy.strategyId).toBe("runner.hq_pressure");
+    expect(switched.transition).toMatchObject({
+      status: "switched",
+      reason: "primary_strategy_changed",
+      previousStrategyId: "runner.rnd_pressure",
+    });
+  });
+
+  it("abandons previous strategy when the current profile has no productive anchor", () => {
+    const previous = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 50,
+      strategyProfile: profile("runner", {
+        primary: ["runner.rnd_pressure"],
+        scores: {
+          "runner.rnd_pressure": score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            confidence: "high",
+          }),
+        },
+      }),
+      availableCredits: 8,
+    });
+    const abandoned = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 51,
+      previousState: previous,
+      availableCredits: 8,
+    });
+
+    expect(abandoned.primaryStrategy.family).toBe("neutral");
+    expect(abandoned.transition).toMatchObject({
+      status: "abandoned",
+      reason: "no_current_strategy_anchor",
+      previousStrategyId: "runner.rnd_pressure",
+    });
+  });
 });
 
 function profile(

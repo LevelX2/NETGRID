@@ -85,6 +85,27 @@ Checks:
 - `corepack pnpm --filter @netgrid/ai test`: grün, 147 Testdateien und 1633 Tests bestanden.
 - `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
 
+## DSR-H04-Ergebnis
+
+Status: `done`
+
+Die StrategicIntent-State-Machine nutzt jetzt echte Bindungslogik und macht alle Transitionen produktiv erreichbar.
+
+Umgesetzt:
+
+- Mindestbindung hält eine vorherige Strategie, bis `minCommitmentDecisions` erreicht ist.
+- `switchMargin` verhindert Strategie-Flattern bei zu kleinem Score-Vorsprung.
+- Bei ausreichend gebundener vorheriger Strategie und großem Score-Vorsprung wechselt der State mit `transition.status: "switched"`.
+- Fehlt nach einer vorherigen Strategie ein produktiver Anker, wird `transition.status: "abandoned"` gesetzt.
+- StrategicIntent-Memory lässt `abandoned`-States mit TTL `0` sofort auslaufen.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- Fokussierte Tests `strategic-intent-state`, `strategic-intent-memory`, `semantic-ai-runtime-cutover`, `runtime/strategic-runtime-context`: grün, 78 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: grün, 147 Testdateien und 1637 Tests bestanden.
+- `git diff --check -- packages/ai docs KI-Wissen-NETGRID`: grün.
+
 ## DSR-H00-Ergebnis
 
 Der Ausgangszustand ist reproduzierbar, testgrün und ausreichend eingegrenzt. Es wurde kein Code geändert. DSR-H01 kann den gefundenen no-effect-Vertragsbruch zwischen `DeckDoctrineV2Diagnostic` und produktivem TacticalGoal-Merge beheben.
