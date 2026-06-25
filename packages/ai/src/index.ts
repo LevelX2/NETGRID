@@ -452,14 +452,14 @@ import {
 } from "./simulation/runner-endgame-closeout";
 import {
   actionsUntil,
+  advanceConvertsToScore,
+  centralPressureConvertsToSteal,
   economyActionConvertsToRun,
   isCorpProtectionScoreConversionAction,
-  isCorpRemoteBuildAction,
   isCorpRemoteProtectionActionEntry,
   hasMeaningfulProgressWithin,
   isRunnerCentralPressureAction,
   isRunnerEconomyProgressAction,
-  isRunnerRemoteContestRun,
   isRunnerRigProgressAction,
   isRunnerSetupAction,
   isStrategicPlanDecision,
@@ -468,6 +468,8 @@ import {
   ownStrategicWindow,
   planKindForConversion,
   previousOwnStrategicWindow,
+  remoteBuildConvertsToAdvanceOrScore,
+  remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
   runnerRunHasFollowupValue,
   serverTargetsMatch,
@@ -15323,9 +15325,16 @@ function summarizePlanConversionMetrics(
         economyActionConvertedToRun += 1;
       if (rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
         rigActionConvertedToRun += 1;
-      if (remoteBuildConvertsToAdvanceOrScore(sequence, index))
+      if (
+        remoteBuildConvertsToAdvanceOrScore(
+          sequence,
+          index,
+          isCorpRemoteAdvancementProgress,
+        )
+      )
         remoteBuildConvertedToAdvanceOrScore += 1;
-      if (advanceConvertsToScore(sequence, index)) advanceConvertedToScore += 1;
+      if (advanceConvertsToScore(sequence, index, isCorpRemoteAdvancementProgress))
+        advanceConvertedToScore += 1;
       if (remoteContestConvertsToStealOrTrash(sequence, index))
         remoteContestConvertedToStealOrTrash += 1;
       if (centralPressureConvertsToSteal(sequence, index))
@@ -21370,74 +21379,22 @@ function planIntentConvertedWithin(
       isMeaningfulBoardProgress(sequence[index]!)
     );
   if (planKind.includes("remote_build") || planKind.includes("protect"))
-    return remoteBuildConvertsToAdvanceOrScore(sequence, index);
+    return remoteBuildConvertsToAdvanceOrScore(
+      sequence,
+      index,
+      isCorpRemoteAdvancementProgress,
+    );
   if (planKind.includes("advance"))
-    return advanceConvertsToScore(sequence, index);
+    return advanceConvertsToScore(
+      sequence,
+      index,
+      isCorpRemoteAdvancementProgress,
+    );
   if (planKind.includes("remote_contest"))
     return remoteContestConvertsToStealOrTrash(sequence, index);
   if (planKind.includes("central") || planKind.includes("pressure"))
     return centralPressureConvertsToSteal(sequence, index);
   return hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress);
-}
-
-function remoteBuildConvertsToAdvanceOrScore(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (!isCorpRemoteBuildAction(entry)) return false;
-  return nextEntries(sequence, index).some(
-    (later) =>
-      later.side === "corp" &&
-      remoteTargetsMatch(entry, later) &&
-      (isCorpRemoteAdvancementProgress(later) ||
-        later.actionType === "score_agenda"),
-  );
-}
-
-function advanceConvertsToScore(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (!isCorpRemoteAdvancementProgress(entry)) return false;
-  return nextEntries(sequence, index).some(
-    (later) =>
-      later.side === "corp" &&
-      later.actionType === "score_agenda" &&
-      remoteTargetsMatch(entry, later),
-  );
-}
-
-function remoteContestConvertsToStealOrTrash(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (!isRunnerRemoteContestRun(entry)) return false;
-  return nextEntries(sequence, index).some(
-    (later) =>
-      later.side === "runner" &&
-      remoteTargetsMatch(entry, later) &&
-      (later.actionType === "steal_agenda" ||
-        later.runnerRelevantRemoteTrashTaken === true ||
-        later.actionType === "trash_accessed_card"),
-  );
-}
-
-function centralPressureConvertsToSteal(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (!isRunnerCentralPressureAction(entry)) return false;
-  return nextEntries(sequence, index).some(
-    (later) =>
-      later.side === "runner" &&
-      later.actionType === "steal_agenda" &&
-      centralServerId(later.targetServerId) !== undefined &&
-      serverTargetsMatch(entry, later),
-  );
 }
 
 function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {

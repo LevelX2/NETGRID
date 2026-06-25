@@ -374,6 +374,68 @@ export function rigActionConvertsToRun<T extends PlanConversionDecisionEntry>(
   );
 }
 
+export function remoteBuildConvertsToAdvanceOrScore<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isCorpRemoteBuildAction(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "corp" &&
+      remoteTargetsMatch(entry, later) &&
+      (isCorpRemoteAdvancementProgress(later) ||
+        later.actionType === "score_agenda"),
+  );
+}
+
+export function advanceConvertsToScore<T extends PlanConversionDecisionEntry>(
+  sequence: T[],
+  index: number,
+  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isCorpRemoteAdvancementProgress(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "corp" &&
+      later.actionType === "score_agenda" &&
+      remoteTargetsMatch(entry, later),
+  );
+}
+
+export function remoteContestConvertsToStealOrTrash<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  const entry = sequence[index]!;
+  if (!isRunnerRemoteContestRun(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "runner" &&
+      remoteTargetsMatch(entry, later) &&
+      (later.actionType === "steal_agenda" ||
+        later.runnerRelevantRemoteTrashTaken === true ||
+        later.actionType === "trash_accessed_card"),
+  );
+}
+
+export function centralPressureConvertsToSteal<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  const entry = sequence[index]!;
+  if (!isRunnerCentralPressureAction(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "runner" &&
+      later.actionType === "steal_agenda" &&
+      centralServerId(later.targetServerId) !== undefined &&
+      serverTargetsMatch(entry, later),
+  );
+}
+
 function isCorpRemoteAdvancementProgressForPlan(
   entry: PlanConversionDecisionEntry,
 ): boolean {
