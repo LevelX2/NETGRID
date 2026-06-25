@@ -568,6 +568,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
+import { missingBenchmarkDeckFormatProfile } from "./simulation/benchmark-deck-format-profile";
 import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
 import { benchmarkDeckManifestEntry } from "./simulation/benchmark-deck-manifest-entry";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
@@ -5894,12 +5895,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards,
     nonDeckLegalCards,
   };
-}
-
-function missingBenchmarkDeckFormatProfile(): never {
-  throw new Error(
-    "Missing netgrid_private_local_v1 deck format profile for AI benchmark local deck adapter.",
-  );
 }
 
 function resolveLocalDeckEditorDecksDir(baseDir?: string): string {
