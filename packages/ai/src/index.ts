@@ -438,6 +438,10 @@ import {
   discardOptionInstanceId,
   stableDiscardChoiceOptionIds,
 } from "./runtime/discard-choice-option";
+import {
+  isSearchChoice,
+  selectedSearchChoiceOptionIds,
+} from "./runtime/search-choice-option";
 import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   createRunnerCentralMemoryContext,
@@ -7378,9 +7382,12 @@ function selectedChoicesForDecision(
   }
   if (choice.kind === "select_cards") {
     const searchSelected = selectedSearchChoiceOptionIds(
-      input,
       choice,
       selectableOptions,
+      {
+        features: extractAiFeatures(input),
+        rolesForCardId,
+      },
     );
     if (searchSelected)
       return { choiceId: choice.choiceId, selectedOptionIds: searchSelected };
@@ -7905,107 +7912,6 @@ function discardVisibleCardCost(
     0,
     definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0,
   );
-}
-
-function selectedSearchChoiceOptionIds(
-  input: AiDecisionInput,
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-  selectableOptions: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"],
-): string[] | undefined {
-  if (!isSearchChoice(choice)) return undefined;
-  const count = boundedSelectionCount(
-    choice.minSelections,
-    choice.maxSelections,
-    selectableOptions.length,
-  );
-  if (count <= 0) return [];
-  return selectableOptions
-    .slice()
-    .sort((left, right) => {
-      const scoreDelta =
-        scoreSearchChoiceOption(input, choice, right) -
-        scoreSearchChoiceOption(input, choice, left);
-      return (
-        scoreDelta ||
-        left.label.localeCompare(right.label, "de") ||
-        left.id.localeCompare(right.id)
-      );
-    })
-    .slice(0, count)
-    .map((option) => option.id);
-}
-
-function isSearchChoice(
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-): boolean {
-  return Boolean(
-    choice.cardSearchPresentation ||
-    choice.stackSearchResolution ||
-    /search|stack/i.test(choice.source),
-  );
-}
-
-function scoreSearchChoiceOption(
-  input: AiDecisionInput,
-  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
-  option: NonNullable<
-    AiDecisionInput["playerView"]["pendingChoice"]
-  >["options"][number],
-): number {
-  const card = option.card;
-  if (!card) return 0;
-  const destination =
-    choice.cardSearchPresentation?.destination ??
-    choice.stackSearchResolution?.destination;
-  const roles = rolesForCardId(card.definitionId);
-  const subtypes = (card.subtypes ?? []).map((subtype) =>
-    subtype.toLowerCase(),
-  );
-  const features = extractAiFeatures(input);
-  let score = 100;
-
-  if (card.type === "program")
-    score += destination === "install_program" ? 1000 : 520;
-  else if (destination === "install_program") score -= 600;
-
-  if (destination === "install_program") {
-    const memoryCost = card.memoryCost ?? 0;
-    score +=
-      memoryCost <= features.memoryRemaining
-        ? 180
-        : -260 - (memoryCost - features.memoryRemaining) * 40;
-    const installCost = card.installCost ?? card.cost ?? 0;
-    score +=
-      installCost <= features.credits
-        ? 110
-        : -160 - (installCost - features.credits) * 30;
-  }
-
-  const breakerRoles = roles.filter((role) => role.startsWith("breaker_"));
-  if (
-    breakerRoles.length > 0 ||
-    subtypes.some((subtype) =>
-      ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
-        subtype,
-      ),
-    )
-  ) {
-    score += 220;
-    for (const role of breakerRoles)
-      score += features.rigRoles.has(role) ? 40 : 180;
-    if (features.rigRoles.size === 0) score += 120;
-  }
-
-  if (roles.includes("memory") || (card.memoryLimitBonus ?? 0) > 0)
-    score += features.memoryRemaining <= 1 ? 170 : 60;
-  if (roles.includes("economy")) score += features.credits < 4 ? 90 : 25;
-  if (card.definitionId && features.rigDefinitionIds.has(card.definitionId))
-    score -= 90;
-  score -= Math.max(0, card.memoryCost ?? 0) * 5;
-  score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
-  return score;
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
