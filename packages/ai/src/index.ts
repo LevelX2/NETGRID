@@ -165,7 +165,10 @@ import {
   currentRunRemainingIce,
   encounterHasImmediateUnbrokenThreat,
 } from "./runtime/current-encounter";
-import { breakerIdForEncounterAction } from "./runtime/encounter-action";
+import {
+  breakerIdForEncounterAction,
+  pumpStrengthAmountForAction,
+} from "./runtime/encounter-action";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -12223,18 +12226,6 @@ function projectFutureIceForUnbrokenEffects(
         : {}),
     },
   };
-}
-
-function pumpStrengthAmountForAction(
-  action: LegalAction,
-  breakerDefinitionId: string,
-): number {
-  if (typeof action.payload?.pumpStrengthAmount === "number")
-    return action.payload.pumpStrengthAmount;
-  const pumpAbility = DEMO_CARDS_BY_ID[breakerDefinitionId]?.abilities?.find(
-    (ability) => ability.type === "pump_strength",
-  );
-  return Math.max(0, pumpAbility?.amount ?? 1);
 }
 
 function scoreCorpRootInstall(

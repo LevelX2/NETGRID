@@ -1,4 +1,4 @@
-import { type LegalAction } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type LegalAction } from "@netgrid/shared";
 
 export function breakerIdForEncounterAction(
   action: LegalAction,
@@ -8,4 +8,16 @@ export function breakerIdForEncounterAction(
   return action.source === "basic_action" || action.source === "game_rule"
     ? undefined
     : action.source;
+}
+
+export function pumpStrengthAmountForAction(
+  action: LegalAction,
+  breakerDefinitionId: string,
+): number {
+  if (typeof action.payload?.pumpStrengthAmount === "number")
+    return action.payload.pumpStrengthAmount;
+  const pumpAbility = DEMO_CARDS_BY_ID[breakerDefinitionId]?.abilities?.find(
+    (ability) => ability.type === "pump_strength",
+  );
+  return Math.max(0, pumpAbility?.amount ?? 1);
 }
