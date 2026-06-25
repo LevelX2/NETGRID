@@ -171,6 +171,7 @@ import { selectedPostBidLinkChoiceOptionId } from "./runtime/post-bid-link-choic
 import { selectedPlayfulAiChoiceOptionId } from "./runtime/playful-ai-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./runtime/shell-traders-choice-option";
 import { selectedDefaultCardChoiceOptionIds } from "./runtime/select-card-choice-option";
+import { selectedSetupMulliganChoiceOptionId } from "./runtime/setup-mulligan-choice-option";
 import { latestTraceContext } from "./runtime/trace-context";
 import {
   breakSubroutineIndexesForAction,
@@ -7296,11 +7297,12 @@ function selectedChoicesForDecision(
       input.side === "corp"
         ? evaluateCorpOpeningHand(input)
         : evaluateRunnerOpeningHand(input);
-    const selected =
-      choice.options.find((option) => option.id === opening.decision) ??
-      choice.options[0];
-    return selected
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] }
+    const selectedOptionId = selectedSetupMulliganChoiceOptionId(
+      choice,
+      opening.decision,
+    );
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
