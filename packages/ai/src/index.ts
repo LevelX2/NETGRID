@@ -151,6 +151,7 @@ import {
   targetCardIdsForSimulationAction,
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
+import { isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -22606,10 +22607,6 @@ function averageTurnsFromFinalAdvanceToScoreOrSteal(
   });
   if (deltas.length === 0) return 0;
   return round(deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length);
-}
-
-function isRemoteServerTarget(serverId: string | undefined): boolean {
-  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
 }
 
 function countCorpMultiIceInstallOrderFutureEffectDead(
