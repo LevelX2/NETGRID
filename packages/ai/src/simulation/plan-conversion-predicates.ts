@@ -316,6 +316,64 @@ export function runnerRunHasFollowupValue<T extends PlanConversionDecisionEntry>
   );
 }
 
+export function setupActionConvertsToRun<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  if (!isRunnerSetupAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(
+        sequence,
+        index + offset + 1,
+        isMeaningfulProgress,
+      ),
+  );
+}
+
+export function economyActionConvertsToRun<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  if (!isRunnerEconomyProgressAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(
+        sequence,
+        index + offset + 1,
+        isMeaningfulProgress,
+      ),
+  );
+}
+
+export function rigActionConvertsToRun<T extends PlanConversionDecisionEntry>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+): boolean {
+  if (!isRunnerRigProgressAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(
+        sequence,
+        index + offset + 1,
+        isMeaningfulProgress,
+      ),
+  );
+}
+
 function isCorpRemoteAdvancementProgressForPlan(
   entry: PlanConversionDecisionEntry,
 ): boolean {

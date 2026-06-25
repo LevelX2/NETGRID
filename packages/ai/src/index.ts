@@ -452,6 +452,7 @@ import {
 } from "./simulation/runner-endgame-closeout";
 import {
   actionsUntil,
+  economyActionConvertsToRun,
   isCorpProtectionScoreConversionAction,
   isCorpRemoteBuildAction,
   isCorpRemoteProtectionActionEntry,
@@ -470,6 +471,8 @@ import {
   remoteTargetsMatch,
   runnerRunHasFollowupValue,
   serverTargetsMatch,
+  rigActionConvertsToRun,
+  setupActionConvertsToRun,
 } from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
@@ -15314,11 +15317,12 @@ function summarizePlanConversionMetrics(
         lastPlanBySide[entry.side] = { planKind, progressSince: false };
       }
 
-      if (setupActionConvertsToRun(sequence, index))
+      if (setupActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
         setupActionConvertedToRun += 1;
-      if (economyActionConvertsToRun(sequence, index))
+      if (economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
         economyActionConvertedToRun += 1;
-      if (rigActionConvertsToRun(sequence, index)) rigActionConvertedToRun += 1;
+      if (rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
+        rigActionConvertedToRun += 1;
       if (remoteBuildConvertsToAdvanceOrScore(sequence, index))
         remoteBuildConvertedToAdvanceOrScore += 1;
       if (advanceConvertsToScore(sequence, index)) advanceConvertedToScore += 1;
@@ -21357,12 +21361,12 @@ function planIntentConvertedWithin(
   planKind: string,
 ): boolean {
   if (planKind.includes("setup") || planKind.includes("draw"))
-    return setupActionConvertsToRun(sequence, index);
+    return setupActionConvertsToRun(sequence, index, isMeaningfulBoardProgress);
   if (planKind.includes("economy"))
-    return economyActionConvertsToRun(sequence, index);
+    return economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress);
   if (planKind.includes("rig") || planKind.includes("breaker"))
     return (
-      rigActionConvertsToRun(sequence, index) ||
+      rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress) ||
       isMeaningfulBoardProgress(sequence[index]!)
     );
   if (planKind.includes("remote_build") || planKind.includes("protect"))
@@ -21374,51 +21378,6 @@ function planIntentConvertedWithin(
   if (planKind.includes("central") || planKind.includes("pressure"))
     return centralPressureConvertsToSteal(sequence, index);
   return hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress);
-}
-
-function setupActionConvertsToRun(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  if (!isRunnerSetupAction(sequence[index]!)) return false;
-  return nextEntries(sequence, index).some(
-    (entry, offset) =>
-      entry.side === "runner" &&
-      entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(
-        sequence, index + offset + 1, isMeaningfulBoardProgress
-      ),
-  );
-}
-
-function economyActionConvertsToRun(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  if (!isRunnerEconomyProgressAction(sequence[index]!)) return false;
-  return nextEntries(sequence, index).some(
-    (entry, offset) =>
-      entry.side === "runner" &&
-      entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(
-        sequence, index + offset + 1, isMeaningfulBoardProgress
-      ),
-  );
-}
-
-function rigActionConvertsToRun(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  if (!isRunnerRigProgressAction(sequence[index]!)) return false;
-  return nextEntries(sequence, index).some(
-    (entry, offset) =>
-      entry.side === "runner" &&
-      entry.actionType === "start_run" &&
-      runnerRunHasFollowupValue(
-        sequence, index + offset + 1, isMeaningfulBoardProgress
-      ),
-  );
 }
 
 function remoteBuildConvertsToAdvanceOrScore(
