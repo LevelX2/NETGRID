@@ -483,6 +483,11 @@ import {
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
 import {
+  runnerCoverageRepairDiagnostic as runnerCoverageRepairDiagnosticWithDeps,
+  runnerKnownNoAccessLegalRunTargets as runnerKnownNoAccessLegalRunTargetsWithDeps,
+  type RunnerKnownNoAccessTarget,
+} from "./simulation/runner-known-no-access";
+import {
   countSameStrategicPlanRepeatsWithoutProgress,
   isEndgameKnownInfoOpportunity,
   isEndgameKnownInfoTaken,
@@ -25036,87 +25041,27 @@ function runnerKnownPathDiagnosticsForAction(
 
 function runnerKnownNoAccessLegalRunTargets(
   input: AiDecisionInput,
-): Array<{ serverId: string; assessment: KnownRezzedIcePathAssessment }> {
-  if (input.side !== "runner") return [];
-  return input.legalActions
-    .filter(
-      (action) =>
-        action.side === "runner" &&
-        action.type === "start_run" &&
-        typeof action.payload?.serverId === "string",
-    )
-    .map((action) => {
-      const serverId = String(action.payload?.serverId);
-      const server = input.playerView.servers.find(
-        (candidate) => candidate.id === serverId,
-      );
-      if (!server) return undefined;
-      const assessment = assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
-        server.root,
-      );
-      if (
-        assessment.canReachAccess ||
-        assessment.assessedKnownIceCount <= 0 ||
-        !runnerKnownPathAssessmentIsKnownNoAccess(assessment) ||
-        runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, serverId)
-      )
-        return undefined;
-      return { serverId, assessment };
-    })
-    .filter(
-      (
-        target,
-      ): target is {
-        serverId: string;
-        assessment: KnownRezzedIcePathAssessment;
-      } => target !== undefined,
-    );
+): RunnerKnownNoAccessTarget[] {
+  return runnerKnownNoAccessLegalRunTargetsWithDeps(input, {
+    assessKnownRezzedIcePath,
+    runnerKnownPathAssessmentIsKnownNoAccess,
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
+  });
 }
 
 function runnerCoverageRepairDiagnostic(
   input: AiDecisionInput,
   action: LegalAction,
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (runnerKnownNoAccessLegalRunTargets(input).length === 0) return {};
-  const definitionId =
-    typeof action.source === "string"
-      ? findVisibleCard(input, action.source)?.definitionId
-      : undefined;
-  const roles = definitionId ? rolesForCardId(definitionId) : [];
-  const actionKind = action.type;
-  const isSearchOrRecovery =
-    roles.some(
-      (role) =>
-        role.includes("search") ||
-        role.includes("tutor") ||
-        role.includes("recovery") ||
-        role.includes("trash_recovery"),
-    ) || actionKind === "resolve_choice";
-  const isRecovery = roles.some(
-    (role) => role.includes("recovery") || role.includes("trash_recovery"),
-  );
-  const isInstall = actionKind === "install_card";
-  const isDrawOrEconomy =
-    actionKind === "draw_card" ||
-    actionKind === "gain_credit" ||
-    (actionKind === "play_event" && roles.some((role) => role === "economy"));
-  return {
-    runnerCoverageRepairIntentCandidates: true,
-    ...(isSearchOrRecovery && !isRecovery
-      ? { runnerCoverageRepairIntentSearchTaken: true }
-      : {}),
-    ...(isRecovery ? { runnerCoverageRepairIntentRecoveryTaken: true } : {}),
-    ...(isInstall ? { runnerCoverageRepairIntentInstallTaken: true } : {}),
-    ...(isDrawOrEconomy
-      ? { runnerCoverageRepairIntentDrawOrEconomyTaken: true }
-      : {}),
-    ...(isSearchOrRecovery || isInstall || isDrawOrEconomy
-      ? { runnerCoverageRepairIntentSatisfied: true }
-      : { runnerCoverageRepairIntentNoFollowup: true }),
-  };
+  return runnerCoverageRepairDiagnosticWithDeps(input, action, {
+    runnerKnownNoAccessLegalRunTargets,
+    sourceDefinitionIdForAction: (diagnosticInput, diagnosticAction) =>
+      typeof diagnosticAction.source === "string"
+        ? findVisibleCard(diagnosticInput, diagnosticAction.source)
+            ?.definitionId
+        : undefined,
+    rolesForCardId,
+  });
 }
 
 function runnerRemoteTrashAccessContext(
