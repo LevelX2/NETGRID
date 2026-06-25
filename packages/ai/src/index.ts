@@ -176,6 +176,7 @@ import {
   semanticRuntimeVisibleSourceCard,
   sourceDefinitionIdForAction,
 } from "./runtime/visible-card-lookup";
+import { titleForCardId } from "./runtime/card-title";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -9982,11 +9983,6 @@ function corpUnknownSkipPayoffLethalOrNearLethal(
     opportunities.some((opportunity) => opportunity.category === "damage") &&
     input.playerView.opponent.handCount <= 3
   );
-}
-
-function titleForCardId(cardId: string | undefined): string | undefined {
-  if (!cardId) return undefined;
-  return RUNTIME_CARDS[cardId]?.title ?? DEMO_CARDS_BY_ID[cardId]?.title;
 }
 
 function applyCorpTagSourceWindowDiagnostics(
