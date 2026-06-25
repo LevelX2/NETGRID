@@ -134,6 +134,9 @@ import {
   visibleRootIsKnownAgenda as visibleRootIsKnownAgendaRuntime,
 } from "./runtime/visible-root-agenda";
 import {
+  isVisibleIcebreakerProgram as isVisibleIcebreakerProgramRuntime,
+} from "./runtime/visible-icebreaker-program";
+import {
   buildObservedFacts as buildObservedFactsRuntime,
   type AiObservedFacts as RuntimeAiObservedFacts,
 } from "./runtime/observed-facts";
@@ -7477,11 +7480,7 @@ function selectedChoicesForDecision(
 }
 
 function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
-  return (
-    card.known === true &&
-    card.type === "program" &&
-    visibleBreakerRolesForAi(card).length > 0
-  );
+  return isVisibleIcebreakerProgramRuntime(card, visibleBreakerRolesForAi);
 }
 
 function selectedDiscardChoiceOptionIds(
