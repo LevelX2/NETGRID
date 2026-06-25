@@ -396,7 +396,10 @@ import {
   medianNumber,
   sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
-import { progressionEntriesWithRunTargets } from "./simulation/progression-action-sequence";
+import {
+  averageTurnsFromFinalAdvanceToScoreOrSteal,
+  progressionEntriesWithRunTargets,
+} from "./simulation/progression-action-sequence";
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
@@ -22549,31 +22552,6 @@ function summarizeAdvancedRemoteThreatMetrics(
     turnsFromRemoteThreatCreatedToContest: averageNumber(contestDeltas),
     turnsFromRemoteThreatCreatedToScoreOrSteal: averageNumber(resolveDeltas),
   };
-}
-
-function averageTurnsFromFinalAdvanceToScoreOrSteal(
-  summaries: AiSimulationSummary[],
-): number {
-  const deltas = summaries.flatMap((summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return sequence
-      .map((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true)
-          return undefined;
-        const later = sequence
-          .slice(index + 1)
-          .find(
-            (candidate) =>
-              candidate.actionType === "score_agenda" ||
-              candidate.actionType === "steal_agenda",
-          );
-        if (!later?.turnNumber || !entry.turnNumber) return undefined;
-        return Math.max(0, later.turnNumber - entry.turnNumber);
-      })
-      .filter((value): value is number => typeof value === "number");
-  });
-  if (deltas.length === 0) return 0;
-  return round(deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length);
 }
 
 function countCorpMultiIceInstallOrderFutureEffectDead(
