@@ -133,6 +133,7 @@ import { projectAccessWindowChoice } from "./access/access-window-choice";
 import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
 import { compareAction } from "./runtime/action-order";
 import { isProtectionDefinitionId } from "./runtime/protection-definition";
+import { advancementCountersAddedForSimulationAction } from "./runtime/simulation-action-event";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -27972,23 +27973,6 @@ function rezCostForDefinitionId(definitionId: string | undefined): number {
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
   );
-}
-
-function advancementCountersAddedForSimulationAction(
-  action: LegalAction,
-  event: PublicGameEvent,
-): number {
-  const candidates = [
-    action.payload?.addedAdvancementCounters,
-    action.payload?.advancementCountersAdded,
-    event.publicPayload.addedAdvancementCounters,
-    event.publicPayload.advancementCountersAdded,
-  ];
-  for (const value of candidates) {
-    if (typeof value === "number" && Number.isFinite(value) && value > 0)
-      return value;
-  }
-  return action.type === "advance_card" ? 1 : 0;
 }
 
 function metricsFor(
