@@ -600,7 +600,10 @@ import {
   runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
   runnerCreditReserveTargetForInput as runnerCreditReserveTargetForInputWithRoles,
 } from "./simulation/runner-credit-reserve";
-import { metricsForSimulationActionSequence } from "./simulation/quality-metrics";
+import {
+  metricsForSimulationActionSequence,
+  type AiQualityMetrics,
+} from "./simulation/quality-metrics";
 import {
   hasRunnerInstallableBreakerActionForSimulation,
   hasRunnerPlayableEconomyActionForSimulation,
@@ -775,6 +778,7 @@ export type {
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
 } from "./simulation/benchmark-deck-types";
+export type { AiQualityMetrics } from "./simulation/quality-metrics";
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
@@ -1087,18 +1091,6 @@ type AiProfileData = {
 };
 
 export type AiObservedFacts = RuntimeAiObservedFacts;
-
-export type AiQualityMetrics = {
-  illegalActions: number;
-  fallbackRate: number;
-  timeoutRate: number;
-  reasonCodeCoverage: string[];
-  actionTypeCoverage: string[];
-  roleCoverage: string[];
-  progressScore: number;
-  holdout: boolean;
-  doctrine: AiDoctrineQualityMetrics;
-};
 
 export type AiDoctrineQualityBenchmarkResult = {
   version: "ai-deck-doctrine-quality-v1";

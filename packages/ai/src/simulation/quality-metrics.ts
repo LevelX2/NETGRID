@@ -1,9 +1,18 @@
-import type {
-  AiDoctrineQualityMetrics,
-  AiQualityMetrics,
-  AiSimulationSummary,
-} from "../index";
+import type { AiSimulationSummary } from "../index";
 import { sortedUnique } from "../runtime/collection";
+import type { AiDoctrineQualityMetrics } from "./doctrine-quality-tags";
+
+export type AiQualityMetrics = {
+  illegalActions: number;
+  fallbackRate: number;
+  timeoutRate: number;
+  reasonCodeCoverage: string[];
+  actionTypeCoverage: string[];
+  roleCoverage: string[];
+  progressScore: number;
+  holdout: boolean;
+  doctrine: AiDoctrineQualityMetrics;
+};
 
 export function metricsForSimulationActionSequence(
   actionSequence: AiSimulationSummary["actionSequence"],
