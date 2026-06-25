@@ -182,6 +182,10 @@ import {
   corpVisibleRunnerHardwarePayoffEvidence,
 } from "./runtime/runner-hardware-payoff-evidence";
 import {
+  corpVisibleRunnerHardwareTrashTarget,
+  corpVisibleRunnerRigTrashTarget,
+} from "./runtime/runner-rig-trash-target";
+import {
   traceTagExpectedSuccessEstimate,
 } from "./runtime/trace-tag-success-estimate";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
@@ -10875,29 +10879,6 @@ function corpVisibleRunnerResourceTrashEvidence(
     };
   }
   return { valueBonus: 0, evidence: [] };
-}
-
-function corpVisibleRunnerRigTrashTarget(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  const targetIds = [
-    action.payload?.cardId,
-    action.payload?.targetCardId,
-  ].filter(
-    (value): value is string => typeof value === "string" && value.length > 0,
-  );
-  return (input.playerView.opponent.rig ?? []).find(
-    (card) => card.known && targetIds.includes(card.instanceId),
-  );
-}
-
-function corpVisibleRunnerHardwareTrashTarget(
-  input: AiDecisionInput,
-): VisibleCard | undefined {
-  return (input.playerView.opponent.rig ?? []).find(
-    (card) => card.known && card.type === "hardware",
-  );
 }
 
 function corpPunishKindFromOntologyPayoff(
