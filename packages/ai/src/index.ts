@@ -450,6 +450,7 @@ import {
   isRunnerEndgameStallSymptom,
   summarizeRunnerEndgameCloseoutWindow,
 } from "./simulation/runner-endgame-closeout";
+import { isStrategicPlanDecision } from "./simulation/plan-conversion-predicates";
 import { visibleBreakCostForKnownIceDefinition } from "./simulation/visible-break-cost-metric";
 import {
   chooseCorpLegacyBaselineAction,
@@ -21124,54 +21125,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
   };
-}
-
-function isStrategicPlanDecision(entry: PlanConversionActionEntry): boolean {
-  if (
-    [
-      "continue_run",
-      "access_card",
-      "mandatory_draw",
-      "pump_breaker",
-      "break_subroutine",
-      "decline_rez",
-      "approach_ice",
-      "encounter_ice",
-    ].includes(entry.actionType)
-  )
-    return false;
-  if (entry.actionType === "resolve_choice")
-    return (
-      entry.advancementCountersAdded !== undefined ||
-      entry.runnerRelevantRemoteTrashTaken === true ||
-      entry.runnerHandUseActionTaken === true
-    );
-  if (entry.side === "runner") {
-    return [
-      "install_card",
-      "play_event",
-      "start_run",
-      "gain_credit",
-      "draw_card",
-      "trash_accessed_card",
-      "jack_out",
-      "activated_card_ability",
-      "trigger_ability",
-      "end_turn",
-    ].includes(entry.actionType);
-  }
-  return [
-    "score_agenda",
-    "advance_card",
-    "install_card",
-    "play_operation",
-    "gain_credit",
-    "draw_card",
-    "rez_ice",
-    "activated_card_ability",
-    "trigger_ability",
-    "end_turn",
-  ].includes(entry.actionType);
 }
 
 function ownStrategicWindow(

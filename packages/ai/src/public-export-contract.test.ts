@@ -257,6 +257,7 @@ describe("AI public export contract", () => {
       "./simulation/card-metric-lookup",
       "./simulation/central-pressure-card",
       "./simulation/central-run-history",
+      "./simulation/plan-conversion-predicates",
       "./simulation/progression-action-sequence",
       "./simulation/remote-server-threat",
       "./simulation/remote-trash-access-context",
