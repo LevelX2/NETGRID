@@ -684,6 +684,7 @@ import {
   countPassiveActionWithScoreLineAvailable,
   countUnsafeScoreChosen,
 } from "./simulation/score-window-counts";
+import { simulationSafeSelectedActionId } from "./simulation/selected-action-id";
 import {
   controllerModeForSide,
   deckSnapshotForSimulation,
@@ -5530,13 +5531,6 @@ export function simulateAiGame(
     cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
     metrics: metricsFor(actionSequence, errors, replay.ok, isHoldoutSeed(seed)),
   };
-}
-
-function simulationSafeSelectedActionId(
-  action: LegalAction,
-  targetServerId?: string,
-): string {
-  return [action.side, action.type, targetServerId].filter(Boolean).join(".");
 }
 
 export function simulateAiSoak(
