@@ -111,6 +111,7 @@ import {
   type ActionSemanticCandidate,
 } from "./action-semantic-candidate";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
+import { buildObservedFacts } from "./observed-facts-public";
 import {
   FORBIDDEN_AI_INPUT_FIELDS,
   buildAiDecisionInput,
@@ -137,10 +138,6 @@ import {
 import {
   createVisibleIcebreakerProgramPredicate,
 } from "./runtime/visible-icebreaker-program";
-import {
-  buildObservedFacts as buildObservedFactsRuntime,
-  type AiObservedFacts as RuntimeAiObservedFacts,
-} from "./runtime/observed-facts";
 import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
@@ -1126,6 +1123,7 @@ export {
   classifyTagSourceFromOntology,
 } from "./tag-punish-ontology-consumer";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
+export { buildObservedFacts };
 export type {
   AiDeckOntologyBreakerCoverageSummary,
   AiDeckOntologyConditionCounts,
@@ -1139,8 +1137,7 @@ export type {
   AiDeckOntologyTagPunishSummary,
   AiDeckOntologyValidationSummary,
 } from "./hint-ontology-doctrine";
-
-export type AiObservedFacts = RuntimeAiObservedFacts;
+export type { AiObservedFacts } from "./observed-facts-public";
 
 export type {
   AiBenchmarkDeckSlotResult,
@@ -6868,10 +6865,6 @@ function corpTagPunishSkipReason(
     return "install";
   if (action.type === "end_turn") return "end_turn";
   return "unknown_higher_priority";
-}
-
-export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
-  return buildObservedFactsRuntime(input);
 }
 
 function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
