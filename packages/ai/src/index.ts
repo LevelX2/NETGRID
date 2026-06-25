@@ -579,6 +579,7 @@ import type {
 } from "./simulation/runner-pressure-metric-types";
 import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
 import type { RunnerSetupMissingCoverageType } from "./simulation/runner-setup-coverage-types";
+import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
 import type { RunnerSetupAttributionMetricKey } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -2875,689 +2876,7 @@ export type AiSimulationSummary = {
   eventLogLength: number;
   replayOk: boolean;
   replayErrors: string[];
-  actionSequence: Array<{
-    side: Side;
-    stateVersionBefore: number;
-    selectedActionId?: string;
-    actionType: LegalAction["type"];
-    eventType?: string;
-    timingPoint?: string;
-    turnNumber?: number;
-    planKind?: string;
-    reasonCode: string;
-    explanation: string;
-    confidence: number;
-    evidence: string[];
-    debugFacts?: string[];
-    actionAlternatives?: AiDecisionActionAlternative[];
-    fallbackUsed: boolean;
-    timeoutUsed: boolean;
-    targetServerId?: string;
-    corpFutureRunIceInstallOpportunity?: boolean;
-    corpFutureRunIceInstalled?: boolean;
-    corpFutureRunIceClass?:
-      | "ball_and_chain"
-      | "canis"
-      | "bolter_or_data_darts"
-      | "future_run_ice";
-    corpFutureRunIceInstalledAsInnermost?: boolean;
-    corpFutureRunIceInstalledAsOutermost?: boolean;
-    corpFutureRunIceInstalledWithLaterIce?: boolean;
-    corpFutureRunIceInstalledWithoutLaterIce?: boolean;
-    corpFutureRunIceInstalledOnEmptyServer?: boolean;
-    corpFutureRunIceInstalledFirstOnEmptyServer?: boolean;
-    corpFutureRunIceInstalledAfterInnerIceExists?: boolean;
-    corpFutureRunIceInstalledAsDeadEffect?: boolean;
-    corpFutureRunIceInstalledAsLiveEffect?: boolean;
-    corpNextIceEffectInstalledLast?: boolean;
-    corpIceOrderFutureEffectDead?: boolean;
-    corpIceOrderFutureEffectLive?: boolean;
-    corpBallAndChainInstalledInnermost?: boolean;
-    corpBallAndChainInstalledWithoutLaterIce?: boolean;
-    corpBallAndChainInstalledWithLaterIce?: boolean;
-    corpCanisInstalledWithoutLaterIce?: boolean;
-    corpBolterOrDataDartsInstalledWithoutNextIce?: boolean;
-    corpHqIceCount?: number;
-    corpRndIceCount?: number;
-    corpArchivesIceCount?: number;
-    corpRemoteIceCount?: number;
-    corpHqUnrezzedIceCount?: number;
-    corpRndUnrezzedIceCount?: number;
-    corpCentralIceCount?: number;
-    corpCentralUnrezzedIceCount?: number;
-    corpCentralIceInstalled?: boolean;
-    corpHqIceInstalled?: boolean;
-    corpRndIceInstalled?: boolean;
-    corpArchivesIceInstalled?: boolean;
-    corpRemoteIceInstalled?: boolean;
-    corpHqOverIced?: boolean;
-    corpRndOverIced?: boolean;
-    corpCentralOverIced?: boolean;
-    corpCentralOverIcedWithoutPressure?: boolean;
-    corpCentralOverIcedWithLowRezReserve?: boolean;
-    corpHqFifthIceInstalled?: boolean;
-    corpCentralIceDiminishingReturnInstall?: boolean;
-    corpCentralIceInstallSuppressedByDiminishingReturns?: boolean;
-    corpCentralIceInstallPenalizedByDiminishingReturns?: boolean;
-    corpRezReserveCredits?: number;
-    corpRezReserveDeficit?: number;
-    corpInstalledIceWithoutRezReserve?: boolean;
-    corpInstalledCentralIceWithoutRezReserve?: boolean;
-    corpInstalledRemoteIceWithoutRezReserve?: boolean;
-    corpCanRezAtLeastOneCentralIce?: boolean;
-    corpCanRezAtLeastOneRemoteIce?: boolean;
-    corpCannotRezAnyNewlyInstalledIce?: boolean;
-    corpCreditsBelowCheapestRelevantRez?: boolean;
-    corpCreditsBelowEstimatedCentralRezNeed?: boolean;
-    corpHqProtectionJustifiedByAgendaFlood?: boolean;
-    corpHqProtectionJustifiedByRunnerPressure?: boolean;
-    corpRndProtectionJustifiedByRunnerPressure?: boolean;
-    corpCentralOverIceBlockedByRunnerPressure?: boolean;
-    corpCentralOverIceBlockedByAgendaFlood?: boolean;
-    corpCentralOverIceBlockedByNoRemotePlan?: boolean;
-    corpRemoteScoringUnderbuiltWhileCentralsOverIced?: boolean;
-    corpReadyRemoteExists?: boolean;
-    corpAgendaInHqWithReadyRemote?: boolean;
-    corpAgendaInHqWithoutReadyRemote?: boolean;
-    corpExtraCentralIceChosenOverReadyRemoteBuild?: boolean;
-    corpExtraCentralIceChosenOverEconomy?: boolean;
-    corpExtraCentralIceChosenOverRezReserve?: boolean;
-    corpExtraCentralIceChosenOverAgendaInstall?: boolean;
-    corpExtraCentralIceChosenOverAdvanceOrScore?: boolean;
-    corpIcePortfolioFixGateEligible?: boolean;
-    corpIcePortfolioFixGateSuspiciousCentralOverIce?: boolean;
-    corpIcePortfolioFixGateBlockedByAgendaFlood?: boolean;
-    corpIcePortfolioFixGateBlockedByRunnerCentralPressure?: boolean;
-    corpIcePortfolioFixGateBlockedByNoRemotePlan?: boolean;
-    corpIcePortfolioFixGateBlockedByEmergencyProtection?: boolean;
-    corpIcePortfolioEvidence?: string[];
-    advancementCountersAdded?: number;
-    scoreActionsAvailable?: number;
-    targetCardType?: ProgressionCardTargetType;
-    advancementTargetTypes?: ProgressionCardTargetType[];
-    advancedAgendaStolen?: boolean;
-    advancedAgendaStealSource?: "remote" | "central" | "unknown";
-    finalAdvance?: boolean;
-    unsafeFinalAdvance?: boolean;
-    protectedFinalAdvance?: boolean;
-    protectBeforeAdvance?: boolean;
-    remoteProtectionScore?: number;
-    runnerContestRisk?: "low" | "medium" | "high" | "unknown";
-    advancesRemainingAfterAction?: number;
-    runnerDrawAction?: boolean;
-    runnerClickDrawAction?: boolean;
-    runnerCardEffectDrawAction?: boolean;
-    runnerDrawWhileHoldingPlayableEconomy?: boolean;
-    runnerDrawWhileHoldingInstallableBreaker?: boolean;
-    runnerDrawWhileHoldingRunnablePressureCard?: boolean;
-    runnerDrawWhileRemoteTrashAvailable?: boolean;
-    runnerDiscardChoice?: boolean;
-    runnerDiscardedPlayableEconomy?: boolean;
-    runnerDiscardedInstallableBreaker?: boolean;
-    runnerDiscardedRunPressureCard?: boolean;
-    runnerInstallAction?: boolean;
-    runnerDuplicateInstallAction?: boolean;
-    runnerLowValueDuplicateInstallAction?: boolean;
-    runnerJunkyardBbsDuplicateInstall?: boolean;
-    runnerEconomyActionTaken?: boolean;
-    runnerEconomyDecisionWindow?: boolean;
-    runnerLegalEconomyActions?: number;
-    runnerLegalBurstEconomyActions?: number;
-    runnerLegalActionEconomyActions?: number;
-    runnerLegalFinitePoolEconomyActions?: number;
-    runnerLegalLoanDebtEconomyActions?: number;
-    runnerLegalRecurringEconomyActions?: number;
-    runnerLegalResourceEconomyActions?: number;
-    runnerLegalHardwareEconomyActions?: number;
-    runnerEconomyTaken?: boolean;
-    runnerEconomySkipped?: boolean;
-    runnerEconomySkippedWhileLowCredits?: boolean;
-    runnerEconomySkippedWhileKnownUnaffordablePath?: boolean;
-    runnerEconomySkippedForPressure?: boolean;
-    runnerEconomySkippedForRemoteContest?: boolean;
-    runnerEconomySkippedForSetup?: boolean;
-    runnerEconomySkippedForDraw?: boolean;
-    runnerEconomySkippedForRun?: boolean;
-    runnerEconomySkippedForInstallBreaker?: boolean;
-    runnerEconomySkippedForTrash?: boolean;
-    runnerEconomySkippedForEndTurn?: boolean;
-    runnerEconomySkippedForUnknownHigherPriority?: boolean;
-    runnerLowCreditDecisionWindow?: boolean;
-    runnerCreditStarvedWithLegalEconomy?: boolean;
-    runnerCreditStarvedEconomyTaken?: boolean;
-    runnerCreditStarvedEconomySkipped?: boolean;
-    runnerKnownUnaffordablePathWithLegalEconomy?: boolean;
-    runnerEconomyTakenToReachRunReserve?: boolean;
-    runnerEconomyTakenButStillBelowReserve?: boolean;
-    runnerEconomySkippedThenUnaffordableRun?: boolean;
-    runnerRunStartedBelowKnownPathCost?: boolean;
-    runnerRunStartedAfterSkippingEconomy?: boolean;
-    runnerEconomyChosenOverFreshCentralPressure?: boolean;
-    runnerEconomyChosenOverRemoteContest?: boolean;
-    runnerEconomyChosenOverBreakerInstall?: boolean;
-    runnerEconomyChosenOverCriticalSetup?: boolean;
-    runnerEconomyChosenOverRelevantTrash?: boolean;
-    runnerEconomyChosenWhileRich?: boolean;
-    runnerEconomyChosenWhilePressureReady?: boolean;
-    runnerEconomyChosenAsReserveSetup?: boolean;
-    runnerEconomyChoicePlausible?: boolean;
-    runnerEconomyChoiceSuspicious?: boolean;
-    runnerFinitePoolEconomySeen?: boolean;
-    runnerFinitePoolEconomyTaken?: boolean;
-    runnerFinitePoolEconomySkipped?: boolean;
-    runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted?: boolean;
-    runnerDebtEconomySeen?: boolean;
-    runnerDebtEconomyTaken?: boolean;
-    runnerDebtEconomySkipped?: boolean;
-    runnerDebtEconomyTakenWithoutNeed?: boolean;
-    runnerEconomyWithDownsideSeen?: boolean;
-    runnerEconomyWithDownsideTaken?: boolean;
-    runnerDelayedPenaltyEconomyTaken?: boolean;
-    runnerMemoryBottleneckDecisionWindow?: boolean;
-    runnerHandSizeBottleneckDecisionWindow?: boolean;
-    runnerLegalMemoryHardwareActions?: number;
-    runnerLegalHandSizeActions?: number;
-    runnerMemoryHardwareTaken?: boolean;
-    runnerHandSizeSupportTaken?: boolean;
-    runnerMemorySupportSkippedWhileGripHasPrograms?: boolean;
-    runnerHandSizeSupportSkippedWhileDamageRiskVisible?: boolean;
-    runnerHardwareSetupChosenOverEconomy?: boolean;
-    runnerHardwareSetupChosenOverPressure?: boolean;
-    runnerHandSizeFactUsedForDiagnosis?: boolean;
-    runnerLegalSearchActions?: number;
-    runnerLegalRecoveryActions?: number;
-    runnerSearchTaken?: boolean;
-    runnerRecoveryTaken?: boolean;
-    runnerSearchSkippedWhileMissingBreakerCoverage?: boolean;
-    runnerRecoverySkippedWhileMissingBreakerCoverage?: boolean;
-    runnerSearchTakenForBreakerCoverage?: boolean;
-    runnerRecoveryTakenForBreakerCoverage?: boolean;
-    runnerSearchOrRecoveryWindowWithNoInstallFollowup?: boolean;
-    runnerSearchRecoveryChosenOverEconomy?: boolean;
-    runnerSearchRecoveryChosenOverPressure?: boolean;
-    runnerEconomyFixGateEligibleStarvedSkip?: boolean;
-    runnerEconomyFixGateSuspiciousRichEconomy?: boolean;
-    runnerEconomyFixGateSuspiciousEconomyOverPressure?: boolean;
-    runnerEconomyFixGateSuspiciousEconomyOverRemoteContest?: boolean;
-    runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed?: boolean;
-    runnerSetupFixGateEligibleMemorySkip?: boolean;
-    runnerSetupFixGateEligibleSearchRecoverySkip?: boolean;
-    runnerSetupMissingCoverageTypes?: RunnerSetupMissingCoverageType[];
-    runnerSetupAttributionEvidence?: string[];
-    runnerEconomySetupClassifications?: string[];
-    runnerEconomySetupEvidence?: string[];
-    runnerRigInstallAction?: boolean;
-    runnerPressureActionTaken?: boolean;
-    runnerRemoteTrashOpportunity?: boolean;
-    runnerRemoteTrashTaken?: boolean;
-    runnerRemoteAccessWithTrashableCard?: boolean;
-    runnerRemoteAccessWithRelevantTrashableCard?: boolean;
-    runnerAffordableRelevantRemoteTrashOpportunity?: boolean;
-    runnerRelevantRemoteTrashTaken?: boolean;
-    runnerSkippedAffordableRelevantRemoteTrash?: boolean;
-    runnerRemoteTrashTargetType?: RemoteTrashTargetType;
-    runnerRemoteTrashRole?: RemoteTrashRole;
-    runnerRemoteTrashDeclined?: boolean;
-    runnerRemoteTrashCost?: number;
-    runnerExpensiveRemoteTrashOpportunity?: boolean;
-    runnerExpensiveRemoteTrashTaken?: boolean;
-    runnerExpensiveRemoteTrashDeclined?: boolean;
-    runnerHighImpactRemoteTrashTaken?: boolean;
-    runnerHighImpactRemoteTrashDeferredByBudget?: boolean;
-    runnerHighImpactRemoteTrashSkippedNoThreat?: boolean;
-    runnerLowValueRemoteTrashSkipped?: boolean;
-    runnerRemoteTrashSpentEarlyGame?: boolean;
-    runnerCreditsAfterRemoteTrash?: number;
-    runnerRemoteTrashDroppedBelowReserve?: boolean;
-    runnerRemoteTrashPreservedReserve?: boolean;
-    runnerRemoteTrashProtectedScoreThreat?: boolean;
-    runnerRemoteTrashWithoutImmediateThreat?: boolean;
-    runnerRemoteTrashCostBucket?: RemoteTrashCostBucket;
-    runnerRemoteTrashLegalActionCount?: number;
-    runnerRemoteTrashAssetEconomy?: boolean;
-    runnerRemoteTrashFinitePoolEconomy?: boolean;
-    runnerRemoteTrashCorpValueRemaining?: number;
-    runnerBbsWhisperingCampaignAccessed?: boolean;
-    runnerBbsWhisperingCampaignTrashLegal?: boolean;
-    runnerBbsWhisperingCampaignTrashTaken?: boolean;
-    runnerBbsWhisperingCampaignTrashSkipped?: boolean;
-    runnerBbsWhisperingCampaignTrashSkippedAffordable?: boolean;
-    runnerFinitePoolAssetAccessed?: boolean;
-    runnerFinitePoolAssetTrashLegal?: boolean;
-    runnerFinitePoolAssetTrashTaken?: boolean;
-    runnerFinitePoolAssetTrashSkippedAffordable?: boolean;
-    runnerRemoteTrashFixGateEligible?: boolean;
-    runnerRemoteTrashFixGateBlockedByReserve?: boolean;
-    runnerRemoteTrashFixGateBlockedByLowCredits?: boolean;
-    runnerRemoteTrashFixGateBlockedByHigherThreat?: boolean;
-    runnerRemoteTrashFixGateSuspicious?: boolean;
-    dedicatedTrashCreditsUsed?: number;
-    generalCreditsSpentOnTrash?: number;
-    trashDecisionLeftRunnerUnableToContest?: boolean;
-    runnerRemoteRunOpportunityAgainstAdvancedRemote?: boolean;
-    runnerRemoteRunAgainstAdvancedRemote?: boolean;
-    runnerSkippedAdvancedRemoteContest?: boolean;
-    runnerCentralRunWhileRemoteScoreThreatVisible?: boolean;
-    runnerCentralRunWithMultiaccess?: boolean;
-    runnerCentralRunWithInterfaceInstalled?: boolean;
-    runnerHqRunWithHqInterface?: boolean;
-    runnerRndRunWithRndInterface?: boolean;
-    runnerCentralRunEventPlayed?: boolean;
-    runnerCentralRunEventWithGoodTarget?: boolean;
-    runnerRepeatedLowValueCentralRun?: boolean;
-    runnerCentralRunStreakWithoutValue?: number;
-    runnerCentralRunStartedWithInsufficientPostRunReserve?: boolean;
-    corpScoreTerminalWindow?: boolean;
-    corpScoreTerminalWindowScoreLegal?: boolean;
-    corpScoreTerminalWindowAdvanceToScoreLegal?: boolean;
-    corpScoreTerminalWindowAgendaInstallLegal?: boolean;
-    corpScoreTerminalWindowProtectedRemoteReady?: boolean;
-    corpScoreTerminalWindowRemoteContestLow?: boolean;
-    corpScoreTerminalWindowCreditsSufficient?: boolean;
-    corpScoreTerminalWindowRunnerAccessThreatHigh?: boolean;
-    corpScoreTerminalScoreTaken?: boolean;
-    corpScoreTerminalAdvanceTaken?: boolean;
-    corpScoreTerminalAgendaInstalled?: boolean;
-    corpScoreTerminalSkipped?: boolean;
-    corpScoreTerminalSkippedForProtection?: boolean;
-    corpScoreTerminalSkippedForEconomy?: boolean;
-    corpScoreTerminalSkippedForDraw?: boolean;
-    corpScoreTerminalSkippedForInstallIce?: boolean;
-    corpScoreTerminalSkippedForInstallAssetOrUpgrade?: boolean;
-    corpScoreTerminalSkippedForHqProtection?: boolean;
-    corpScoreTerminalSkippedForRndProtection?: boolean;
-    corpScoreTerminalSkippedForRemotePortfolio?: boolean;
-    corpScoreTerminalSkippedForUnknownHigherPriority?: boolean;
-    corpScoreConversionFixGateEligible?: boolean;
-    corpScoreConversionFixGateBlockedByCheapContest?: boolean;
-    corpScoreConversionFixGateBlockedByCredits?: boolean;
-    corpScoreConversionFixGateBlockedByRunnerContest?: boolean;
-    corpScoreConversionFixGateBlockedByHqThreat?: boolean;
-    corpScoreConversionFixGateSuspiciousProtectionLoop?: boolean;
-    corpScoreConversionFixGateSuspiciousEconomyLoop?: boolean;
-    corpScoreConversionFixGateSuspiciousDraw?: boolean;
-    corpScoreConversionFixGateSuspiciousRemotePortfolio?: boolean;
-    corpScoreConversionFixGateSuspiciousUnknown?: boolean;
-    corpScoreTerminalEvidence?: string[];
-    corpEconomyBeforeScoreDiagnosticWindow?: boolean;
-    corpEconomyBeforeScoreWindowWithInstalledAgenda?: boolean;
-    corpEconomyBeforeScoreWindowWithAdvancedAgenda?: boolean;
-    corpEconomyBeforeScoreWindowWithScoreLegalNext?: boolean;
-    corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext?: boolean;
-    corpEconomyBeforeScoreWindowWithReadyRemote?: boolean;
-    corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote?: boolean;
-    corpEconomyBeforeScoreWindowCreditsShort?: boolean;
-    corpEconomyBeforeScoreWindowCreditsAlreadyEnough?: boolean;
-    corpEconomyBeforeScoreWindowRemoteSafe?: boolean;
-    corpEconomyBeforeScoreWindowRemoteContestHigh?: boolean;
-    corpEconomyBeforeScoreTaken?: boolean;
-    corpEconomyBeforeScoreTakenAsNecessaryCredits?: boolean;
-    corpEconomyBeforeScoreTakenDespiteCreditsEnough?: boolean;
-    corpEconomyBeforeScoreTakenOverScoreLegal?: boolean;
-    corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal?: boolean;
-    corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote?: boolean;
-    corpEconomyBeforeScoreTakenOverHqAgendaExit?: boolean;
-    corpEconomyBeforeScoreTakenOverScoreAreaAbility?: boolean;
-    corpEconomyBeforeScorePlausibleCreditsNeeded?: boolean;
-    corpEconomyBeforeScorePlausibleRezOrAdvanceReserve?: boolean;
-    corpEconomyBeforeScorePlausibleHqOrRndSafety?: boolean;
-    corpEconomyBeforeScorePlausibleRunnerContestTooHigh?: boolean;
-    corpEconomyBeforeScorePlausibleNoAgendaExit?: boolean;
-    corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough?: boolean;
-    corpEconomyBeforeScoreSuspiciousDelayedTerminalAction?: boolean;
-    corpEconomyBeforeScoreSuspiciousRemoteStillSafe?: boolean;
-    corpEconomyBeforeScoreUnclassified?: boolean;
-    corpEconomyBeforeScoreFixGateEligible?: boolean;
-    corpEconomyBeforeScoreFixGateBlockedByCredits?: boolean;
-    corpEconomyBeforeScoreFixGateBlockedByCheapContest?: boolean;
-    corpEconomyBeforeScoreFixGateBlockedByRunnerContest?: boolean;
-    corpEconomyBeforeScoreFixGateBlockedBySafety?: boolean;
-    corpEconomyBeforeScoreFixGateSuspicious?: boolean;
-    corpEconomyBeforeScoreEvidence?: string[];
-    hqKnownCards?: number;
-    hqUnknownCards?: number;
-    hqKnownFraction?: number;
-    hqFullyKnown?: boolean;
-    hqKnownAgendaCount?: number;
-    hqKnownNonAgendaCount?: number;
-    hqKnownAgendaPoints?: number;
-    hqMemoryInvalidatedByDraw?: boolean;
-    hqMemoryInvalidatedByInstall?: boolean;
-    hqMemoryInvalidatedByPlay?: boolean;
-    hqMemoryInvalidatedByDiscard?: boolean;
-    hqMemoryInvalidatedByShuffleOrReorder?: boolean;
-    hqRunValueFromKnownCards?: number;
-    hqRunValueFromUnknownCards?: number;
-    hqRunSuppressedBecauseFullyKnownNoAgenda?: boolean;
-    hqRunBoostedBecauseKnownAgenda?: boolean;
-    hqRunBoostedBecauseUnknownCardsRemain?: boolean;
-    hqRunRepeatedWithoutNewHqInfo?: boolean;
-    knownRndTopCard?: boolean;
-    knownRndTopMovedToHq?: boolean;
-    knownRndTopInvalidated?: boolean;
-    hqKnownFromRndDraw?: boolean;
-    hqRunBoostedByRndToHqAgenda?: boolean;
-    hqRunSuppressedByRndToHqNonAgenda?: boolean;
-    rndAccessRemovedTopCard?: boolean;
-    rndAccessStoleAgenda?: boolean;
-    rndAccessTrashedCard?: boolean;
-    rndAccessLeftTopCardUnchanged?: boolean;
-    rndTopFreshenedByRunnerAccess?: boolean;
-    rndKnownTopAdvancedAfterAccess?: boolean;
-    rndKnownTopSequenceAdvanced?: boolean;
-    rndRepeatRunAfterTopRemoved?: boolean;
-    rndRepeatRunAfterTopUnchanged?: boolean;
-    rndRepeatRunBoostedByFreshTop?: boolean;
-    rndRepeatRunSuppressedBecauseKnownStaleTop?: boolean;
-    rndRepeatRunBoostedByKnownAgendaTop?: boolean;
-    rndRepeatRunSuppressedBecauseKnownNonAgendaTop?: boolean;
-    rndFreshTopPressureOpportunity?: boolean;
-    rndFreshTopPressureTaken?: boolean;
-    rndFreshTopPressureSkipped?: boolean;
-    rndStaleTopRepeatMistake?: boolean;
-    rndAccessNoValueRepeatStale?: boolean;
-    rndCloseoutOpportunityAfterTopRemoved?: boolean;
-    knownRemoteCards?: number;
-    knownRemoteAgendas?: number;
-    knownRemoteTrashableCards?: number;
-    remoteMemoryRetainedAfterAccess?: boolean;
-    remoteMemoryInvalidatedByInstallOrMove?: boolean;
-    remoteRunBoostedByKnownRemoteAgenda?: boolean;
-    remoteRunSuppressedByKnownLowValueRemote?: boolean;
-    remoteTrashBoostedByKnownRemoteTrashable?: boolean;
-    knownUnrezzedIceFromExpose?: number;
-    knownUnrezzedIceRetained?: boolean;
-    knownUnrezzedIceInvalidated?: boolean;
-    runCostAdjustedByKnownUnrezzedIce?: number;
-    jackOutInfluencedByKnownUnrezzedIce?: boolean;
-    rigPlanInfluencedByKnownUnrezzedIce?: boolean;
-    runnerMissingBreakerCoverageByType?: number;
-    runnerVisibleIceBlockingByType?: number;
-    runnerKnownIceBlockingByType?: number;
-    runnerPathBlockedByMissingCoverage?: boolean;
-    runnerInstallableBreakerForBlockedPath?: boolean;
-    runnerSearchCardAvailableForMissingBreaker?: boolean;
-    runnerSearchCardUsedForMissingBreaker?: boolean;
-    runnerSearchCardAvailableButUnused?: boolean;
-    runnerTutorConvertedToBreakerInstall?: boolean;
-    runnerTutorConvertedToUsefulRun?: boolean;
-    runnerBreakerInstallConvertedToUsefulRun?: boolean;
-    runnerCoverageImproved?: boolean;
-    runnerCoverageReadyButNoPressure?: boolean;
-    runnerSetupContinuedAfterCoverageReady?: boolean;
-    runnerPressureReadyWindow?: boolean;
-    runnerPressureReadyTrue?: boolean;
-    runnerPressureReadyFalsePositive?: boolean;
-    runnerPressureReadyByTargetHq?: boolean;
-    runnerPressureReadyByTargetRnd?: boolean;
-    runnerPressureReadyByTargetArchives?: boolean;
-    runnerPressureReadyByTargetRemote?: boolean;
-    runnerSetupContinuedAfterPressureReady?: boolean;
-    runnerPressureTakenAfterCoverageReady?: boolean;
-    runnerPressureSkippedAfterCoverageReady?: boolean;
-    runnerPressureSkippedReason?:
-      | "insufficient_credits"
-      | "missing_post_run_reserve"
-      | "stale_central"
-      | "remote_too_dangerous"
-      | "no_valuable_target"
-      | "better_immediate_action";
-    runnerSetupLoopAfterPressureReady?: boolean;
-    runnerPhaseExitBlockedByCost?: boolean;
-    runnerPhaseExitBlockedByCoverage?: boolean;
-    runnerPhaseExitBlockedByTargetValue?: boolean;
-    runnerProbeRevealedIceThenSearchedBreaker?: boolean;
-    runnerProbeRevealedIceButDidNotReact?: boolean;
-    runnerSetupBreakerSearchStalled?: boolean;
-    runnerSetupEconomyStalled?: boolean;
-    runnerPhaseExitToPressure?: boolean;
-    runnerTrueCentralCloseoutOpportunity?: boolean;
-    runnerCentralCloseoutOpportunityRaw?: boolean;
-    runnerCentralCloseoutSkippedWithGoodReason?: boolean;
-    runnerCentralCloseoutSkippedWithoutReason?: boolean;
-    runnerCentralCloseoutOpportunity?: boolean;
-    runnerCentralCloseoutRunTaken?: boolean;
-    runnerCentralCloseoutSuccess?: boolean;
-    runnerCentralCloseoutReason?: string;
-    runnerCentralRunRepeatWindow?: boolean;
-    runnerRepeatedCentralRunWithFreshValue?: boolean;
-    runnerRepeatedCentralRunWithoutFreshValue?: boolean;
-    runnerCentralRunStalePenaltyApplied?: boolean;
-    runnerCentralPressureNoopDecision?: boolean;
-    runnerCentralRunJustificationReason?: string;
-    runnerNoFreshCentralServerIds?: string[];
-    runnerNoFreshCentralRunTaken?: boolean;
-    runnerNoFreshCentralSubstitutionType?:
-      | "economy"
-      | "rig_unlock"
-      | "remote_contest"
-      | "pressure_install"
-      | "setup_search"
-      | "end_turn";
-    runnerNoFreshCentralBetterAlternativeTypes?: string[];
-    runnerStaleCentralAllowedReason?: string;
-    runnerInterfaceInstallOpportunity?: boolean;
-    runnerInterfaceInstallTaken?: boolean;
-    runnerInterfaceInstalledButUnusedTurn?: boolean;
-    runnerRemoteContestCreditReserveAfterRun?: number;
-    runnerAdvancedRemoteThreatServerIds?: string[];
-    runnerContestableAdvancedRemoteThreatServerIds?: string[];
-    runnerContestedAdvancedRemoteServerId?: string;
-    runnerCentralRunInsteadOfContestableAdvancedRemote?: boolean;
-    runnerCentralRunInsteadWasJustified?: boolean;
-    runnerCentralRunBurnedRemoteContestReserve?: boolean;
-    runnerRemoteContestBlockedByCredits?: boolean;
-    runnerRemoteContestBlockedByPostRunReserve?: boolean;
-    runnerRemoteContestBlockedByBreakerCoverage?: boolean;
-    runnerRemoteContestBlockedByKnownIceCost?: boolean;
-    runnerRemoteContestDeclinedAsBaitOrLowValue?: boolean;
-    runnerRepeatedCentralRunWhileSameRemoteThreat?: boolean;
-    runnerRemoteRunStartedWithInsufficientPostRunReserve?: boolean;
-    runnerRemoteRunStartedWithSufficientPostRunReserve?: boolean;
-    runnerHandUseOpportunity?: boolean;
-    runnerHandUseActionTaken?: boolean;
-    runnerCreditsBefore?: number;
-    runnerCreditsAfter?: number;
-    runnerCreditDelta?: number;
-    runnerReserveTarget?: number;
-    runnerBelowReserveBefore?: boolean;
-    runnerBelowReserveAfter?: boolean;
-    runnerEconomyCreditsGained?: number;
-    runnerEconomyCreditsSpent?: number;
-    runnerRunStartedBelowReserve?: boolean;
-    runnerRemoteRunStartedBelowReserve?: boolean;
-    runnerCentralRunStartedBelowReserve?: boolean;
-    runnerContestBlockedByCredits?: boolean;
-    runnerTrashBlockedByCredits?: boolean;
-    runnerStealBlockedByCredits?: boolean;
-    runnerSpendBelowReserve?: boolean;
-    runnerLowValueSpendBelowReserve?: boolean;
-    runnerExpensiveInstallBelowReserve?: boolean;
-    runnerReservePreservingEconomy?: boolean;
-    runnerReserveAfterSuccessfulRun?: number;
-    runnerReserveAfterRemoteAccess?: number;
-    runnerReserveAfterCentralRun?: number;
-    runnerReserveBeforeAdvancedRemoteContest?: number;
-    runKnownPathCostAtStart?: number;
-    runCreditsAfterKnownPathEstimate?: number;
-    runCreditsMissingForKnownPath?: number;
-    runStartedAgainstKnownUnaffordablePath?: boolean;
-    remoteRunStartedAgainstKnownUnaffordablePath?: boolean;
-    centralRunStartedAgainstKnownUnaffordablePath?: boolean;
-    runnerRunStartedAgainstKnownUnpayableFullPath?: boolean;
-    runnerRunStartedAgainstKnownUnpayableRemotePath?: boolean;
-    runnerRunStartedAgainstKnownUnpayableCentralPath?: boolean;
-    runnerKnownPathAccessReachable?: boolean;
-    runnerKnownPathAccessNotReachable?: boolean;
-    runnerKnownPathBlockedByUnbreakableIce?: boolean;
-    runnerKnownPathBlockedByMissingCoverage?: boolean;
-    runnerKnownPathBlockedByKnownEtr?: boolean;
-    runnerKnownPathBlockedByWall?: boolean;
-    runnerKnownPathBlockedByCodeGate?: boolean;
-    runnerKnownPathBlockedBySentry?: boolean;
-    runnerRunStartedAgainstKnownUnbreakablePath?: boolean;
-    runnerRunStartedAgainstKnownUnbreakableCentralPath?: boolean;
-    runnerRunStartedAgainstKnownUnbreakableRemotePath?: boolean;
-    runnerKnownUnbreakableRemoteTraceSampled?: boolean;
-    runnerKnownUnbreakableRemoteTrueBug?: boolean;
-    runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified?: boolean;
-    runnerKnownUnbreakableRemoteStateChanged?: boolean;
-    runnerKnownUnbreakableRemoteCoverageRepairMissing?: boolean;
-    runnerKnownUnbreakableRemoteMetricArtifact?: boolean;
-    runnerKnownUnbreakableRemoteUnclassified?: boolean;
-    runnerKnownUnbreakableRemoteRunSuppressed?: boolean;
-    runnerKnownUnbreakableRemoteRunPenalized?: boolean;
-    runnerKnownUnbreakableRemoteCoverageRepairTaken?: boolean;
-    runnerKnownUnbreakableRemoteCoverageRepairAvailable?: boolean;
-    runnerKnownUnbreakableRemoteRunTakenDespiteGate?: boolean;
-    runnerMultiaccessValueAvailable?: boolean;
-    runnerMultiaccessValueUsed?: boolean;
-    runnerMultiaccessValueSuppressedNoAccess?: boolean;
-    runnerCentralPressureSuppressedNoAccess?: boolean;
-    runnerHqInterfaceSuppressedNoAccess?: boolean;
-    runnerRndInterfaceSuppressedNoAccess?: boolean;
-    runnerRepeatKnownUnbreakableRunSuppressed?: boolean;
-    runnerRepeatKnownUnbreakableRunPenalized?: boolean;
-    runnerRepeatKnownUnbreakableCentralRunSuppressed?: boolean;
-    runnerRepeatKnownUnbreakableRemoteRunSuppressed?: boolean;
-    runnerRepeatKnownUnbreakableRunTakenDespiteSuppression?: boolean;
-    runnerCoverageRepairIntentCandidates?: boolean;
-    runnerCoverageRepairIntentSearchTaken?: boolean;
-    runnerCoverageRepairIntentRecoveryTaken?: boolean;
-    runnerCoverageRepairIntentInstallTaken?: boolean;
-    runnerCoverageRepairIntentDrawOrEconomyTaken?: boolean;
-    runnerCoverageRepairIntentSatisfied?: boolean;
-    runnerCoverageRepairIntentNoFollowup?: boolean;
-    runnerCoverageRepairIntentBlockedByHiddenTargetUncertain?: boolean;
-    runnerDataWallHqNoAccessSuppressed?: boolean;
-    runnerDataWallHqRepeatSuppressed?: boolean;
-    runnerHqInterfaceDataWallValueSuppressed?: boolean;
-    runnerKnownPathCanReachAccessFalse?: boolean;
-    runnerKnownPathCanBreakNextIceButNotFullPath?: boolean;
-    runnerRunAbortedAfterKnownUnpayableLaterIce?: boolean;
-    runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce?: boolean;
-    runnerRunCostQuoteUnderestimatedFullPath?: boolean;
-    runnerRepeatRunOnKnownUnpayablePath?: boolean;
-    runnerRepeatRunOnKnownUnpayableRemotePath?: boolean;
-    runnerRunCouldOnlyForceRezButNotAccess?: boolean;
-    runnerRunAllowedAsFirstProbeUnknownIce?: boolean;
-    runnerRunSuppressedAsKnownNoAccess?: boolean;
-    runnerRunPenalizedAsKnownNoAccess?: boolean;
-    runEndedAfterFirstIceDueToCredits?: boolean;
-    runStartedWithInsufficientStealOrTrashReserve?: boolean;
-    probeRunWithPositiveInfoValue?: boolean;
-    lowValueUnaffordableRun?: boolean;
-    runnerTagsBeforeAction?: number;
-    runnerTagsAfterAction?: number;
-    runnerTaggedAtCorpDecision?: boolean;
-    runnerTaggedAtEndOfRunnerTurn?: boolean;
-    runnerTaggedAtStartOfCorpTurn?: boolean;
-    runnerTagAddedByAction?: boolean;
-    runnerTagClearedByAction?: boolean;
-    runnerTaggedAfterTraceDuringRun?: boolean;
-    corpTagCreatedDuringRunnerTurn?: boolean;
-    corpTagCreatedDuringCorpTurn?: boolean;
-    corpTagCreatedDuringEncounter?: boolean;
-    corpTagCreatedByTraceSuccess?: boolean;
-    corpTagCreatedByAccessOrSteal?: boolean;
-    corpTagCreatedByPersistentEffect?: boolean;
-    corpTagCreatedByScoredAgendaAction?: boolean;
-    corpTagCreatedByOperation?: boolean;
-    corpTagCreatedByAssetOrNode?: boolean;
-    corpTagCreatedByIce?: boolean;
-    runnerTaggedAtCorpDecisionWithFunnelPayoffKnown?: boolean;
-    runnerTaggedAtCorpDecisionWithoutPayoffKnown?: boolean;
-    corpVisibleTagPunishLegalActions?: number;
-    corpVisibleTagPayoffLegalActionKinds?: string[];
-    corpVisibleTagPayoffLegalActionCards?: string[];
-    corpVisibleTagDamagePunishLegalActions?: boolean;
-    corpVisibleTagEconomicPunishLegalActions?: boolean;
-    corpVisibleTagTrashPunishLegalActions?: boolean;
-    corpVisibleTagRunLockPunishLegalActions?: boolean;
-    corpVisibleTagAmbushPunishLegalActions?: boolean;
-    corpVisibleTagPunishTaken?: boolean;
-    corpVisibleTagPunishSkipped?: boolean;
-    corpVisibleTagPunishSkippedReason?: CorpTagPunishSkipReason;
-    corpVisibleTagPunishUnknownSkipAttribution?: CorpTagPunishUnknownSkipAttribution;
-    corpVisibleTagPunishUnknownSkipPlausibility?: CorpTagPunishUnknownSkipPlausibility;
-    corpVisibleTagPunishUnknownSkipChosenFamily?: CorpTagPunishUnknownChosenFamily;
-    corpVisibleTagPunishUnknownSkipChosenActionType?: string;
-    corpVisibleTagPunishUnknownSkipChosenCardId?: string;
-    corpVisibleTagPunishUnknownSkipChosenCardTitle?: string;
-    corpVisibleTagPunishUnknownSkipFixGateEligible?: boolean;
-    corpVisibleTagPunishUnknownSkipFixGateBlockedBy?:
-      | "score"
-      | "advance_score"
-      | "safety"
-      | "affordability"
-      | "low_impact";
-    corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal?: boolean;
-    corpVisibleTagPunishDecisionWindow?: boolean;
-    corpVisibleTagPunishDecisionWindowTaken?: boolean;
-    corpVisibleTagPunishDecisionWindowSkipped?: boolean;
-    corpVisibleTagPunishDecisionWindowWithMultiplePayoffs?: boolean;
-    corpVisibleTagPunishAlternativePayoffsNotChosen?: number;
-    corpVisibleTagPunishChosenPayoffAmongAlternatives?: boolean;
-    corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff?: boolean;
-    corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization?: boolean;
-    corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen?: boolean;
-    corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization?: boolean;
-    corpVisibleTagPunishOperationChoiceAmongPayoffs?: boolean;
-    corpVisibleTagPunishChosenDamageOverEconomic?: boolean;
-    corpVisibleTagPunishChosenEconomicOverDamage?: boolean;
-    corpVisibleTagPunishChosenTrashOverDamage?: boolean;
-    corpVisibleTagPunishChosenLethalOverNonLethal?: boolean;
-    corpVisibleTagPunishChosenNonLethalOverLethal?: boolean;
-    corpVisibleTagPunishChosenLowerImpactOverHigherImpact?: boolean;
-    corpVisibleTagPunishChosenUnknownImpactOrdering?: boolean;
-    corpVisibleTagPunishFixGateEligibleWindowNormalized?: boolean;
-    corpVisibleTagPunishFixGateSuspiciousSkipNormalized?: boolean;
-    corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken?: boolean;
-    corpVisibleTagPunishPotentialPayoffOrderingIssue?: boolean;
-    corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed?: boolean;
-    corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage?: boolean;
-    corpFunnelSourcePayoffPairSeenInDeck?: boolean;
-    corpFunnelSourceActionTakenWithPayoffInDeck?: boolean;
-    corpFunnelSourceActionTakenWithVisiblePayoff?: boolean;
-    corpFunnelSourceActionTakenWithoutVisiblePayoff?: boolean;
-    runnerSurvivalCounterContextAvailable?: boolean;
-    runnerTraceDefenseVisibleAtTagSource?: boolean;
-    runnerDamagePreventionVisibleAtPayoffWindow?: boolean;
-    runnerFlatlinePreventionVisibleAtPayoffWindow?: boolean;
-    runnerLinkDefenseVisibleAtTrace?: boolean;
-    runnerSurvivalCounterContextSuppressedPunishValue?: boolean;
-    corpPunishOpportunity?: boolean;
-    corpPunishTaken?: boolean;
-    corpPunishKind?: CorpPunishKind;
-    corpPunishSkippedReason?: CorpTagPunishSkipReason;
-    corpTagSourceOpportunity?: boolean;
-    corpTagSourceTaken?: boolean;
-    corpTraceTagOpportunity?: boolean;
-    corpTraceTagTaken?: boolean;
-    corpTraceTagExpectedSuccess?: number;
-    corpTraceTagSkippedReason?: CorpTagPunishSkipReason;
-    corpTagPunishOntologyProfilesSeen?: boolean;
-    corpTagSourceOntologyProfilesSeen?: boolean;
-    corpTagPunishPayoffOntologyProfilesSeen?: boolean;
-    corpTagSourceOntologyUsed?: boolean;
-    corpTagPunishPayoffOntologyUsed?: boolean;
-    corpTagPunishOntologyFallbackUsed?: boolean;
-    corpTagPunishOntologyConflict?: boolean;
-    corpTagSourceLegalActionClassifiedByOntology?: boolean;
-    corpPunishLegalActionClassifiedByOntology?: boolean;
-    corpPunishOpportunityConfirmedByOntology?: boolean;
-    corpPunishSkippedDespiteOntologyOpportunity?: boolean;
-    corpTagSourceTakenWithOntologyPayoffAvailable?: boolean;
-    corpTagSourceTakenWithoutOntologyPayoff?: boolean;
-    corpTagSourceConvertedToOntologyPunishOpportunity?: boolean;
-    corpOntologyPunishOpportunityConverted?: boolean;
-    corpOntologyPunishOpportunityExpired?: boolean;
-    corpTagPunishOntologyKinds?: string[];
-    corpTagPunishConditionKinds?: string[];
-    qualityTags: string[];
-    stateHashAfter: string;
-    installPlacement?: string;
-  }>;
+  actionSequence: AiSimulationActionSequenceEntry[];
   errors: string[];
   cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
   metrics: AiQualityMetrics;
@@ -13150,8 +12469,6 @@ function averageRunnerContestRisk(
   return round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
-type PlanConversionActionEntry = AiSimulationSummary["actionSequence"][number];
-
 function summarizeRunnerRepeatRemoteNoTrashMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -14432,8 +13749,8 @@ function summarizeOutcomeFollowupMetrics(
 }
 
 function countRunnerCoverageConversions(
-  sequence: PlanConversionActionEntry[],
-  predicate: (entry: PlanConversionActionEntry) => boolean,
+  sequence: AiSimulationActionSequenceEntry[],
+  predicate: (entry: AiSimulationActionSequenceEntry) => boolean,
 ): number {
   return sequence.filter((entry, index) => {
     if (entry.side !== "runner" || !predicate(entry)) return false;
@@ -14450,8 +13767,8 @@ function countRunnerCoverageConversions(
 }
 
 function countRunnerPressureWithinOwnActions(
-  sequence: PlanConversionActionEntry[],
-  predicate: (entry: PlanConversionActionEntry) => boolean,
+  sequence: AiSimulationActionSequenceEntry[],
+  predicate: (entry: AiSimulationActionSequenceEntry) => boolean,
   ownActionWindow: number,
 ): number {
   return sequence.filter((entry, index) => {
@@ -14473,14 +13790,14 @@ function countRunnerPressureWithinOwnActions(
 }
 
 function countRunnerEconomySetupMetric(
-  sequence: PlanConversionActionEntry[],
-  metric: keyof PlanConversionActionEntry,
+  sequence: AiSimulationActionSequenceEntry[],
+  metric: keyof AiSimulationActionSequenceEntry,
 ): number {
   return sequence.filter((entry) => entry[metric] === true).length;
 }
 
 function countRunnerSearchRecoveryNoInstallFollowup(
-  sequence: PlanConversionActionEntry[],
+  sequence: AiSimulationActionSequenceEntry[],
 ): number {
   return sequence.filter((entry, index) => {
     if (
@@ -14789,7 +14106,7 @@ function summarizeRunnerSetupAttributionMetrics(
 
 function attributeRunnerSetupSupportWindows(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
 ): void {
   if (entry.runnerMemoryBottleneckDecisionWindow === true) {
     metrics.runnerMemoryAttributionWindows += 1;
@@ -14819,7 +14136,7 @@ function attributeRunnerSetupSupportWindows(
 
 function attributeStarvedEconomySkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: PlanConversionActionEntry[],
+  sequence: AiSimulationActionSequenceEntry[],
   index: number,
   summary: AiSimulationSummary,
 ): void {
@@ -14912,7 +14229,7 @@ function attributeStarvedEconomySkip(
 
 function attributeSearchRecoverySkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: PlanConversionActionEntry[],
+  sequence: AiSimulationActionSequenceEntry[],
   index: number,
   summary: AiSimulationSummary,
 ): void {
@@ -15003,7 +14320,7 @@ function attributeSearchRecoverySkip(
 
 function attributeNormalizedSearchRecoverySkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
   followup: {
     installFollowup: boolean;
     coverageResolved: boolean;
@@ -15080,7 +14397,7 @@ function attributeNormalizedSearchRecoverySkip(
 
 function attributeMemorySkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: PlanConversionActionEntry[],
+  sequence: AiSimulationActionSequenceEntry[],
   index: number,
   summary: AiSimulationSummary,
 ): void {
@@ -15154,7 +14471,7 @@ function attributeMemorySkip(
 
 function attributeNormalizedMemorySkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
   followup: {
     memoryInstalled: boolean;
     programBlocked: boolean;
@@ -15219,7 +14536,7 @@ function attributeNormalizedMemorySkip(
 
 function attributeHandSizeSkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: PlanConversionActionEntry[],
+  sequence: AiSimulationActionSequenceEntry[],
   index: number,
 ): void {
   const entry = sequence[index]!;
@@ -15249,7 +14566,7 @@ function attributeHandSizeSkip(
 
 function attributeNormalizedHandSizeSkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
   context: { blocked: boolean; suspicious: boolean },
 ): void {
   if (entry.runnerHandSizeBottleneckDecisionWindow !== true)
@@ -15283,7 +14600,7 @@ function incrementChosenFamily(
     | "runnerStarvedEconomySkip"
     | "runnerSearchRecoverySkip"
     | "runnerMemorySkip",
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
 ): void {
   const family = runnerSetupChosenFamilyForEntry(entry);
   if (prefix === "runnerMemorySkip" && family === "install") {
@@ -15343,7 +14660,7 @@ function capitalizeRunnerSetupFamily(
 
 function incrementCoverageTypes(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: PlanConversionActionEntry,
+  entry: AiSimulationActionSequenceEntry,
 ): void {
   const types = entry.runnerSetupMissingCoverageTypes ?? [];
   if (types.includes("wall")) {
@@ -16296,7 +15613,7 @@ function summarizeCorpEconomyBeforeScoreMetrics(
   let noConversionSuspicious = 0;
   let noConversionPlausible = 0;
 
-  const converted = (entry: PlanConversionActionEntry) =>
+  const converted = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpScoreTerminalScoreTaken === true ||
     entry.corpScoreTerminalAdvanceTaken === true ||
     entry.corpScoreTerminalAgendaInstalled === true ||
@@ -16306,28 +15623,28 @@ function summarizeCorpEconomyBeforeScoreMetrics(
     (entry.actionType === "install_card" &&
       entry.installPlacement !== "ice" &&
       entry.targetCardType === "agenda");
-  const economy = (entry: PlanConversionActionEntry) =>
+  const economy = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreTaken === true ||
     entry.corpScoreTerminalSkippedForEconomy === true ||
     entry.actionType === "gain_credit" ||
     hasEvidenceFlag(entry, "corp_economy_before_score_window:true");
-  const scoreLegal = (entry: PlanConversionActionEntry) =>
+  const scoreLegal = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreWindowWithScoreLegalNext === true ||
     entry.corpScoreTerminalWindowScoreLegal === true;
-  const advanceLegal = (entry: PlanConversionActionEntry) =>
+  const advanceLegal = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext === true ||
     entry.corpScoreTerminalWindowAdvanceToScoreLegal === true;
-  const agendaReadyLegal = (entry: PlanConversionActionEntry) =>
+  const agendaReadyLegal = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote === true ||
     entry.corpScoreTerminalWindowAgendaInstallLegal === true;
-  const blockedForPlausibleReason = (entry: PlanConversionActionEntry) =>
+  const blockedForPlausibleReason = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreFixGateBlockedByCredits === true ||
     entry.corpEconomyBeforeScoreFixGateBlockedByCheapContest === true ||
     entry.corpEconomyBeforeScoreFixGateBlockedByRunnerContest === true ||
     entry.corpEconomyBeforeScoreFixGateBlockedBySafety === true ||
     entry.corpEconomyBeforeScorePlausibleNoAgendaExit === true ||
     entry.corpEconomyBeforeScoreWindowRemoteContestHigh === true;
-  const fixGateSuspiciousEntry = (entry: PlanConversionActionEntry) =>
+  const fixGateSuspiciousEntry = (entry: AiSimulationActionSequenceEntry) =>
     entry.corpEconomyBeforeScoreFixGateEligible === true &&
     entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
     !blockedForPlausibleReason(entry) &&
@@ -16678,7 +15995,7 @@ function corpScoreTerminalFollowupMetrics(
     const future = actionSequence.slice(index + 1, index + 13);
     const futureCorp = future.filter((candidate) => candidate.side === "corp");
     const nextCorp = futureCorp[0];
-    const scoreLike = (candidate: PlanConversionActionEntry) =>
+    const scoreLike = (candidate: AiSimulationActionSequenceEntry) =>
       candidate.corpScoreTerminalScoreTaken === true ||
       candidate.corpScoreTerminalAdvanceTaken === true ||
       candidate.corpScoreTerminalAgendaInstalled === true ||
@@ -18980,7 +18297,7 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   };
 }
 
-function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {
+function isMeaningfulBoardProgress(entry: AiSimulationActionSequenceEntry): boolean {
   return planConversionEntryHasMeaningfulBoardProgress(
     entry,
     isCorpRemoteAdvancementProgress,
