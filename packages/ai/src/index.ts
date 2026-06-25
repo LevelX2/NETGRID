@@ -119,6 +119,10 @@ import {
   type AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
 import {
+  buildObservedFacts as buildObservedFactsRuntime,
+  type AiObservedFacts as RuntimeAiObservedFacts,
+} from "./runtime/observed-facts";
+import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
@@ -1007,12 +1011,7 @@ type ServerFeatures = {
   rezzedRootCount: number;
 };
 
-export type AiObservedFacts = {
-  eventCounts: Record<string, number>;
-  publicServers: string[];
-  tags: number;
-  agendaPoints: { own: number; opponent: number };
-};
+export type AiObservedFacts = RuntimeAiObservedFacts;
 
 export type AiQualityMetrics = {
   illegalActions: number;
@@ -10862,18 +10861,7 @@ function corpTagPunishSkipReason(
 }
 
 export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
-  const eventCounts: Record<string, number> = {};
-  for (const event of input.eventTail)
-    eventCounts[event.type] = (eventCounts[event.type] ?? 0) + 1;
-  return {
-    eventCounts,
-    publicServers: input.playerView.servers.map((server) => server.id).sort(),
-    tags: input.playerView.own.tags,
-    agendaPoints: {
-      own: input.playerView.own.agendaPoints,
-      opponent: input.playerView.opponent.agendaPoints,
-    },
-  };
+  return buildObservedFactsRuntime(input);
 }
 
 function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
