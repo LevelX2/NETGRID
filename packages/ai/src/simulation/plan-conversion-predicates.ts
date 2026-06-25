@@ -7,6 +7,13 @@ export type PlanConversionDecisionEntry = {
   installPlacement?: string;
   targetServerId?: string;
   advancementCountersAdded?: number;
+  reasonCode?: string;
+  runnerDrawAction?: boolean;
+  runnerEconomyActionTaken?: boolean;
+  runnerCreditsBefore?: number;
+  runnerCreditsAfter?: number;
+  runnerReserveTarget?: number;
+  runnerReservePreservingEconomy?: boolean;
   runnerRelevantRemoteTrashTaken?: boolean;
   runnerHandUseActionTaken?: boolean;
   runnerRigInstallAction?: boolean;
@@ -141,6 +148,34 @@ export function isRunnerRigProgressAction(
     entry.runnerRigInstallAction === true &&
     entry.runnerLowValueDuplicateInstallAction !== true
   );
+}
+
+export function isRunnerSetupAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  if (entry.side !== "runner") return false;
+  return (
+    entry.runnerDrawAction === true ||
+    entry.actionType === "draw_card" ||
+    entry.reasonCode?.includes("setup") === true ||
+    entry.reasonCode?.includes("search") === true
+  );
+}
+
+export function isRunnerEconomyProgressAction(
+  entry: PlanConversionDecisionEntry,
+): boolean {
+  if (entry.side !== "runner" || entry.runnerEconomyActionTaken !== true)
+    return false;
+  const before = entry.runnerCreditsBefore;
+  const after = entry.runnerCreditsAfter;
+  if (typeof before !== "number" || typeof after !== "number") return false;
+  if (after <= before) return false;
+  const reserve = entry.runnerReserveTarget;
+  if (entry.runnerReservePreservingEconomy === true) return true;
+  if (typeof reserve === "number" && before < reserve && after >= reserve)
+    return true;
+  return after - before >= 3;
 }
 
 export function isCorpRemoteBuildAction(

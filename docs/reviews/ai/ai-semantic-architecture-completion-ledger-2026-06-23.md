@@ -2381,6 +2381,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
+- `AI-COMPLETE-03` zweihunderteinunddreißigster Struktur-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` kapselt zusätzlich Runner-Setup- und Runner-Economy-Progress-Prädikate.
+  - `packages/ai/src/index.ts` nutzt die internen Runner-Setup-/Economy-Prädikate und entfernt die lokalen Funktionen.
+  - Der bestehende Public-Export-Vertrag sperrt den internen Plan-Conversion-Prädikat-Modulpfad weiterhin gegen Public-Facade-Exporte.
+  - `packages/ai/src/index.ts` sank weiter von 26.621 auf 26.597 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 70 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 134 Dateien, 1541 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
