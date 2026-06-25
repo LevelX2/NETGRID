@@ -454,6 +454,10 @@ import {
   actionsUntil,
   advanceConvertsToScore,
   centralPressureConvertsToSteal,
+  corpAdvanceConvertsToScoreOrProtectedWindow,
+  corpEconomyConvertsToRezInstallScore,
+  corpProtectionConvertsToScoreSafety,
+  corpRemoteBuildConvertsToAdvanceProtectOrScore,
   economyActionConvertsToRun,
   isCorpProtectionScoreConversionAction,
   isCorpRemoteProtectionActionEntry,
@@ -15882,6 +15886,8 @@ function summarizeStrategicPlanConversionMetrics(
           corpRemoteBuildConvertsToAdvanceProtectOrScore(
             strategicEntries,
             index,
+            isMeaningfulBoardProgress,
+            isCorpRemoteAdvancementProgress,
           )
         )
           corpRemoteBuildConvertedToAdvanceProtectOrScore += 1;
@@ -21245,71 +21251,6 @@ function runnerStealsBeforeNextCorpScore(
       return true;
   }
   return false;
-}
-
-function corpRemoteBuildConvertsToAdvanceProtectOrScore(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (isMeaningfulBoardProgress(entry)) return true;
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      later.side === "corp" &&
-      (remoteTargetsMatch(entry, later) || !later.targetServerId) &&
-      (isCorpRemoteAdvancementProgress(later) ||
-        later.actionType === "score_agenda" ||
-        later.protectBeforeAdvance === true ||
-        later.protectedFinalAdvance === true),
-  );
-}
-
-function corpAdvanceConvertsToScoreOrProtectedWindow(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  const entry = sequence[index]!;
-  if (
-    entry.protectedFinalAdvance === true ||
-    entry.actionType === "score_agenda"
-  )
-    return true;
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      later.side === "corp" &&
-      (later.actionType === "score_agenda" ||
-        later.protectedFinalAdvance === true ||
-        later.protectBeforeAdvance === true) &&
-      (remoteTargetsMatch(entry, later) || !later.targetServerId),
-  );
-}
-
-function corpEconomyConvertsToRezInstallScore(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      later.side === "corp" &&
-      ["rez_ice", "install_card", "advance_card", "score_agenda"].includes(
-        later.actionType,
-      ),
-  );
-}
-
-function corpProtectionConvertsToScoreSafety(
-  sequence: PlanConversionActionEntry[],
-  index: number,
-): boolean {
-  return ownStrategicWindow(sequence, index, 3).some(
-    (later) =>
-      later.side === "corp" &&
-      (later.actionType === "score_agenda" ||
-        later.actionType === "advance_card" ||
-        later.protectedFinalAdvance === true ||
-        later.protectBeforeAdvance === true ||
-        planKindForConversion(later)?.includes("remote_build") === true),
-  );
 }
 
 function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {

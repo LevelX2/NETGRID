@@ -7,6 +7,8 @@ export type PlanConversionDecisionEntry = {
   installPlacement?: string;
   targetServerId?: string;
   advancementCountersAdded?: number;
+  protectedFinalAdvance?: boolean;
+  protectBeforeAdvance?: boolean;
   reasonCode?: string;
   runnerDrawAction?: boolean;
   runnerEconomyActionTaken?: boolean;
@@ -574,6 +576,72 @@ export function runnerRemoteContestConvertsToStealTrashOrAbort<
           later.runnerRelevantRemoteTrashTaken === true ||
           later.actionType === "trash_accessed_card")) ||
       hasPlanConversionEvidenceFlag(later, "plan_abort_taken:true"),
+  );
+}
+
+export function corpRemoteBuildConvertsToAdvanceProtectOrScore<
+  T extends PlanConversionDecisionEntry,
+>(
+  sequence: T[],
+  index: number,
+  isMeaningfulProgress: (entry: T) => boolean,
+  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (remoteTargetsMatch(entry, later) || !later.targetServerId) &&
+      (isCorpRemoteAdvancementProgress(later) ||
+        later.actionType === "score_agenda" ||
+        later.protectBeforeAdvance === true ||
+        later.protectedFinalAdvance === true),
+  );
+}
+
+export function corpAdvanceConvertsToScoreOrProtectedWindow<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  const entry = sequence[index]!;
+  if (
+    entry.protectedFinalAdvance === true ||
+    entry.actionType === "score_agenda"
+  )
+    return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (later.actionType === "score_agenda" ||
+        later.protectedFinalAdvance === true ||
+        later.protectBeforeAdvance === true) &&
+      (remoteTargetsMatch(entry, later) || !later.targetServerId),
+  );
+}
+
+export function corpEconomyConvertsToRezInstallScore<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      ["rez_ice", "install_card", "advance_card", "score_agenda"].includes(
+        later.actionType ?? "",
+      ),
+  );
+}
+
+export function corpProtectionConvertsToScoreSafety<
+  T extends PlanConversionDecisionEntry,
+>(sequence: T[], index: number): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (later.actionType === "score_agenda" ||
+        later.actionType === "advance_card" ||
+        later.protectedFinalAdvance === true ||
+        later.protectBeforeAdvance === true ||
+        planKindForConversion(later)?.includes("remote_build") === true),
   );
 }
 
