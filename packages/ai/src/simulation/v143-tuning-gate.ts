@@ -1,4 +1,5 @@
 import type {
+  AiSimulationConfig,
   AiSimulationSummary,
 } from "../index";
 import { roundNumber as round } from "../runtime/number-rounding";
@@ -36,6 +37,10 @@ export type V143SoakResult = {
   profiles: V143SimulationRunResult[];
   holdoutSeeds: string[];
   tuningSeeds: string[];
+};
+
+export type V143LeagueConfig = Partial<AiSimulationConfig> & {
+  includeHoldout?: boolean;
 };
 
 export function evaluateV143TuningGate(

@@ -492,6 +492,7 @@ import type {
   SimulationWorld,
 } from "./simulation/simulation-types";
 import type {
+  V143LeagueConfig,
   V143SimulationRunResult,
   V143SoakResult,
 } from "./simulation/v143-tuning-gate";
@@ -770,6 +771,7 @@ export type {
 } from "./simulation/doctrine-quality-tags";
 export { evaluateV143TuningGate } from "./simulation/v143-tuning-gate";
 export type {
+  V143LeagueConfig,
   V143SimulationRunResult,
   V143SoakResult,
   V143TuningGateResult,
@@ -2625,10 +2627,6 @@ export type {
   SimulationBenchmarkProfile,
   SimulationWorld,
 } from "./simulation/simulation-types";
-
-export type V143LeagueConfig = Partial<AiSimulationConfig> & {
-  includeHoldout?: boolean;
-};
 
 export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
   baselineProfile?: SimulationBenchmarkProfileId;
