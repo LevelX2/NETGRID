@@ -68,7 +68,6 @@ import {
   remoteRoleIsScoringProtectionKind,
 } from "./remote-role-ontology-consumer";
 import {
-  classifyTagPunishLegalActionFromOntology,
   classifyTagPunishPayoffFromOntology,
   getStructuredTagPunishProfileForCard,
   type StructuredTagPunishPayoffKind,
@@ -174,9 +173,6 @@ import {
 import {
   tagPunishPayoffPriorityBonus,
 } from "./runtime/tag-punish-payoff-priority";
-import {
-  corpPunishKindFromOntologyPayoff,
-} from "./runtime/tag-punish-payoff-mapping";
 import { corpTagPunishSkipReason } from "./runtime/corp-tag-punish-skip-reason";
 import {
   shellTradersAbility,
@@ -638,15 +634,8 @@ import {
   countRunnerSearchRecoveryNoInstallFollowup,
 } from "./simulation/runner-setup-metric-counts";
 import {
-  CLOSED_ACCOUNTS_LIKE_PUNISH_IDS,
-  CORP_TAG_SOURCE_IDS,
-  CORP_TRACE_TAG_SOURCE_IDS,
-  DATAPOOL_LIKE_PUNISH_IDS,
-  POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS,
-  PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS,
-  SCORCHED_EARTH_LIKE_PUNISH_IDS,
-  URBAN_RENEWAL_LIKE_PUNISH_IDS,
-} from "./simulation/tag-punish-card-sets";
+  createCorpTagPunishActionContext,
+} from "./simulation/corp-tag-punish-action-context";
 import {
   ALL_NIGHTER_CARD_ID,
   BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
@@ -1150,6 +1139,16 @@ const {
   centralRunEventGoodForTarget,
 } = createSimulationActionDiagnosticsContext({
   findVisibleCard,
+  rolesForAction,
+});
+const {
+  strongestCorpTagSourceOpportunity,
+  corpPunishKindForAction,
+  isCorpTagSourceAction,
+  isCorpTraceTagSourceAction,
+  corpTagPunishOntologyAssessmentForAction,
+} = createCorpTagPunishActionContext({
+  sourceDefinitionIdForAction,
   rolesForAction,
 });
 const { corpVisibleTagPayoffCategoryForAction } =
@@ -3806,105 +3805,6 @@ function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
         cardId: string | undefined;
       } => opportunity !== undefined,
     );
-}
-
-function strongestCorpTagSourceOpportunity(
-  input: AiDecisionInput,
-): { action: LegalAction; traceTag: boolean } | undefined {
-  if (input.side !== "corp") return undefined;
-  const opportunity = input.legalActions.find((action) =>
-    isCorpTagSourceAction(input, action),
-  );
-  if (!opportunity) return undefined;
-  return {
-    action: opportunity,
-    traceTag: isCorpTraceTagSourceAction(input, opportunity),
-  };
-}
-
-function corpPunishKindForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpPunishKind | undefined {
-  if (input.side !== "corp") return undefined;
-  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
-  if (ontology?.isPunishPayoff)
-    return corpPunishKindFromOntologyPayoff(ontology.payoffKind);
-  if (action.type === "trash_resource") return "resource_trash_like";
-  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-  if (scoredAgenda?.kind === "scored_agenda_damage_punish")
-    return "scored_agenda_damage_like";
-  if (scoredAgenda?.kind === "scored_agenda_trace_tag")
-    return "scored_agenda_trace_tag_like";
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (SCORCHED_EARTH_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-    return "scorched_earth_like";
-  if (URBAN_RENEWAL_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-    return "urban_renewal_like";
-  if (PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-    return "punitive_counterstrike_like";
-  if (CLOSED_ACCOUNTS_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-    return "closed_accounts_like";
-  if (POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-    return "power_grid_overload_like";
-  if (DATAPOOL_LIKE_PUNISH_IDS.has(sourceDefinitionId)) return "datapool_like";
-  const roles = rolesForAction(input, action);
-  if (roles.includes("tag_punishment")) return "unknown";
-  return undefined;
-}
-
-function isCorpTagSourceAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
-  if (ontology?.isTagSource) return true;
-  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-  if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (CORP_TAG_SOURCE_IDS.has(sourceDefinitionId)) return true;
-  const roles = rolesForAction(input, action);
-  return roles.some(
-    (role) =>
-      role.includes("tag_source") ||
-      role.includes("tag_enabler") ||
-      role.includes("trace_tag"),
-  );
-}
-
-function isCorpTraceTagSourceAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
-  if (ontology?.isTraceTagSource) return true;
-  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-  if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (CORP_TRACE_TAG_SOURCE_IDS.has(sourceDefinitionId)) return true;
-  return rolesForAction(input, action).some((role) => role.includes("trace"));
-}
-
-function corpTagPunishOntologyAssessmentForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-) {
-  if (input.side !== "corp" || action.side !== "corp") return undefined;
-  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-  return classifyTagPunishLegalActionFromOntology(
-    action,
-    sourceDefinitionIdForAction(input, action),
-    {
-      runnerTagged: input.playerView.opponent.tags > 0,
-      legacyRoles: rolesForAction(input, action),
-      scoredAgendaKind:
-        scoredAgenda?.kind === "scored_agenda_trace_tag"
-          ? "trace_tag"
-          : scoredAgenda?.kind === "scored_agenda_damage_punish"
-            ? "damage_punish"
-            : undefined,
-    },
-  );
 }
 
 export function summarizeMatchProgressionMetrics(
