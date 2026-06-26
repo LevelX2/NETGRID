@@ -231,9 +231,7 @@ import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason,
 } from "./runtime/runner-known-ice-path-score";
-import {
-  createSemanticRuntimeCorpScoreContext,
-} from "./runtime/semantic-runtime-corp-score-context";
+import { createSemanticRuntimeCorpScoreComposition } from "./runtime/semantic-runtime-corp-score-composition";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -1601,31 +1599,29 @@ const {
 const {
   semanticRuntimeCorpScore,
   semanticRuntimeCorpScoreComponents,
-} = createSemanticRuntimeCorpScoreContext(
-  {
-    actionCreditCost,
-    rolesForAction,
-    corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-    corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
-    corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
-    corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
-    corpRemoteScoreContestabilityAssessment:
-      semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-    corpActionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-    corpInstallRemoteScore: semanticRuntimeCorpInstallRemoteScore,
-    corpAdvancementCounterPlacementAssessment:
-      semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-    corpHasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
-    corpHasRemoteRezFloorFundingNeed:
-      semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-    corpHasCentralRezFloorFundingNeed:
-      semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-    corpTaggedRunnerPayoffPressure,
-    corpTaggedPayoffWindowPassiveActionPenalty,
-    corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-  },
-  semanticRuntimeScoreFromComponents,
-);
+} = createSemanticRuntimeCorpScoreComposition({
+  actionCreditCost,
+  rolesForAction,
+  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
+  corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
+  corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
+  corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
+  corpRemoteScoreContestabilityAssessment:
+    semanticRuntimeCorpRemoteScoreContestabilityAssessment,
+  corpActionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  corpInstallRemoteScore: semanticRuntimeCorpInstallRemoteScore,
+  corpAdvancementCounterPlacementAssessment:
+    semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+  corpHasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
+  corpHasRemoteRezFloorFundingNeed:
+    semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
+  corpHasCentralRezFloorFundingNeed:
+    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
+  corpTaggedRunnerPayoffPressure,
+  corpTaggedPayoffWindowPassiveActionPenalty,
+  corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
+  scoreFromComponents: semanticRuntimeScoreFromComponents,
+});
 
 const {
   simulateAiGame,
