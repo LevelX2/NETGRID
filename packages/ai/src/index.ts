@@ -184,9 +184,6 @@ import {
 } from "./runtime/runner-multi-run-event-score";
 import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
 import { createRunnerEconomyCommitmentComposition } from "./runtime/runner-economy-commitment-composition";
-import {
-  createRunnerBadPublicityRelevanceContext,
-} from "./runtime/runner-bad-publicity-relevance-context";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
   createRunnerScoringSupportComposition,
@@ -1033,26 +1030,6 @@ const {
   compareAction,
 });
 const {
-  runnerBadPublicityRelevanceAssessment,
-  runnerBadPublicityRelevanceScoreComponent,
-} = createRunnerBadPublicityRelevanceContext({
-  sourceDefinitionIdForAction,
-  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-  actionCreditCost,
-  fakedHitCardId: FAKED_HIT_CARD_ID,
-  cardSupport: {
-    rolesForCardId,
-    hintEffectsForCard: (definitionId: string) =>
-      AI_HINTS.get(definitionId)?.effects,
-    rulesTextForCard: (definitionId: string) =>
-      DEMO_CARDS_BY_ID[definitionId]?.rulesText,
-    effectTarget: (effect: unknown) =>
-      effect && typeof effect === "object"
-        ? stringRecordValue(effect as Record<string, unknown>, "target")
-        : undefined,
-  },
-});
-const {
   visibleCardPlayOrInstallCostForAi,
   runnerCardLooksLikeCreditPayout,
   runnerBadPublicityOrTraceTechCard,
@@ -1566,6 +1543,23 @@ const {
   actionCreditCost,
   junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
   junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
+  badPublicityRelevance: {
+    sourceDefinitionIdForAction,
+    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+    actionCreditCost,
+    fakedHitCardId: FAKED_HIT_CARD_ID,
+    cardSupport: {
+      rolesForCardId,
+      hintEffectsForCard: (definitionId: string) =>
+        AI_HINTS.get(definitionId)?.effects,
+      rulesTextForCard: (definitionId: string) =>
+        DEMO_CARDS_BY_ID[definitionId]?.rulesText,
+      effectTarget: (effect: unknown) =>
+        effect && typeof effect === "object"
+          ? stringRecordValue(effect as Record<string, unknown>, "target")
+          : undefined,
+    },
+  },
   loanLiabilityAssessment: runnerLoanLiabilityAssessment,
   goalFit: {
     sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -1599,10 +1593,6 @@ const {
   startRun: {
     serverId: semanticRuntimeServerId,
     isRemoteServerTarget,
-  },
-  followup: {
-    badPublicityRelevanceScoreComponent:
-      runnerBadPublicityRelevanceScoreComponent,
   },
 });
 

@@ -1,4 +1,7 @@
 import {
+  createRunnerBadPublicityRelevanceContext,
+} from "./runner-bad-publicity-relevance-context";
+import {
   createRunnerCentralMemoryContext,
 } from "./runner-central-memory-context";
 import {
@@ -30,6 +33,9 @@ export type RunnerScoringSupportCompositionDependencies =
       RunnerScoreComponentsDependencies,
       "recoveryCommitment" | "startRun" | "followup"
     > & {
+      badPublicityRelevance: Parameters<
+        typeof createRunnerBadPublicityRelevanceContext
+      >[0];
       recoveryCommitment: Omit<
         RunnerScoreComponentsDependencies["recoveryCommitment"],
         | "blinkRecoveryScoreComponent"
@@ -45,10 +51,6 @@ export type RunnerScoringSupportCompositionDependencies =
         | "remoteComponents"
         | "knownIcePathComponents"
         | "repeatedRunTargetComponents"
-      >;
-      followup: Omit<
-        RunnerScoreComponentsDependencies["followup"],
-        "runTargetGuidanceComponent" | "accessTrashComponents"
       >;
     };
 
@@ -137,6 +139,12 @@ export function createRunnerScoringSupportComposition(
       dependencies.junkyardBbsReturnTopHeapAbility,
   });
 
+  const {
+    runnerBadPublicityRelevanceScoreComponent,
+  } = createRunnerBadPublicityRelevanceContext(
+    dependencies.badPublicityRelevance,
+  );
+
   return createRunnerScoreComponentsContext({
     loanLiabilityAssessment: dependencies.loanLiabilityAssessment,
     goalFit: dependencies.goalFit,
@@ -161,10 +169,11 @@ export function createRunnerScoringSupportComposition(
       repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
     },
     followup: {
-      ...dependencies.followup,
       runTargetGuidanceComponent:
         semanticRuntimeRunnerRunTargetGuidanceComponent,
       accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
+      badPublicityRelevanceScoreComponent:
+        runnerBadPublicityRelevanceScoreComponent,
     },
   });
 }
