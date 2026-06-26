@@ -552,6 +552,7 @@ import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progres
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
 import { runnerHqMemoryDiagnosticsForMetrics } from "./simulation/runner-hq-memory-diagnostics";
+import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/runner-hand-use-diagnostics";
 import { runnerKnownCardPositionDiagnosticsForMetrics } from "./simulation/runner-known-card-position-diagnostics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
@@ -1341,6 +1342,24 @@ const runnerReserveDiagnosticsForSimulationAction =
     runnerTrashBlockedByCredits,
     runnerStealBlockedByCredits,
     runnerContestBlockedByCredits,
+  });
+
+const runnerHandUseDiagnosticsForSimulationAction =
+  createRunnerHandUseDiagnosticsForSimulationAction({
+    runnerDrawKindForSimulationAction,
+    hasRunnerPlayableEconomyAction,
+    hasRunnerInstallableBreakerAction,
+    hasRunnerRunnablePressureAction,
+    hasRunnerRemoteTrashAction,
+    runnerDiscardChoiceRoles,
+    isRunnerDuplicateInstall,
+    isRunnerLowValueDuplicateInstall,
+    isRunnerEconomyAction,
+    isRunnerRigInstallAction,
+    isRunnerPressureAction,
+    sourceDefinitionIdForSimulationAction,
+    runnerRemoteTrashAccessContext,
+    runnerAdvancedRemoteContestContext,
   });
 
 const runnerEconomySetupActionClass =
@@ -11905,264 +11924,6 @@ function assessRunnerCoveragePressureForMetrics(
     searchActionIds,
     recoveryActionIds,
     heapMatchingBreakerCount,
-  };
-}
-
-function runnerHandUseDiagnosticsForSimulationAction(
-  input: AiDecisionInput,
-  decision: AiDecision,
-  action: LegalAction,
-  targetServerId: string | undefined,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (input.side !== "runner" || action.side !== "runner") return {};
-  const draw = runnerDrawKindForSimulationAction(input, action);
-  const playableEconomy = hasRunnerPlayableEconomyAction(
-    input,
-    action.actionId,
-  );
-  const installableBreaker = hasRunnerInstallableBreakerAction(
-    input,
-    action.actionId,
-  );
-  const runnablePressure = hasRunnerRunnablePressureAction(
-    input,
-    action.actionId,
-  );
-  const remoteTrashAvailable = hasRunnerRemoteTrashAction(input);
-  const discardRoles = runnerDiscardChoiceRoles(input, decision);
-  const installAction = action.type === "install_card";
-  const duplicateInstall =
-    installAction && isRunnerDuplicateInstall(input, action);
-  const lowValueDuplicate =
-    duplicateInstall && isRunnerLowValueDuplicateInstall(input, action);
-  const economyActionTaken = isRunnerEconomyAction(input, action);
-  const rigInstallAction =
-    installAction && isRunnerRigInstallAction(input, action);
-  const pressureActionTaken = isRunnerPressureAction(input, action);
-  const remoteTrashTaken =
-    action.type === "trash_accessed_card" &&
-    isRemoteServerTarget(
-      targetServerId ?? input.playerView.run?.attackedServerId,
-    );
-  const remoteTrash = runnerRemoteTrashAccessContext(input, action);
-  const advancedRemoteContest = runnerAdvancedRemoteContestContext(
-    input,
-    action,
-    targetServerId,
-  );
-  const handUseOpportunity =
-    playableEconomy ||
-    installableBreaker ||
-    runnablePressure ||
-    remoteTrashAvailable;
-  const handUseActionTaken =
-    economyActionTaken ||
-    rigInstallAction ||
-    pressureActionTaken ||
-    remoteTrashTaken;
-
-  return {
-    ...(draw.draw ? { runnerDrawAction: true } : {}),
-    ...(draw.click ? { runnerClickDrawAction: true } : {}),
-    ...(draw.cardEffect ? { runnerCardEffectDrawAction: true } : {}),
-    ...(draw.draw && playableEconomy
-      ? { runnerDrawWhileHoldingPlayableEconomy: true }
-      : {}),
-    ...(draw.draw && installableBreaker
-      ? { runnerDrawWhileHoldingInstallableBreaker: true }
-      : {}),
-    ...(draw.draw && runnablePressure
-      ? { runnerDrawWhileHoldingRunnablePressureCard: true }
-      : {}),
-    ...(draw.draw && remoteTrashAvailable
-      ? { runnerDrawWhileRemoteTrashAvailable: true }
-      : {}),
-    ...(discardRoles.length > 0 ? { runnerDiscardChoice: true } : {}),
-    ...(discardRoles.some((role) => isRunnerEconomyRole(role))
-      ? { runnerDiscardedPlayableEconomy: true }
-      : {}),
-    ...(discardRoles.some((role) => role.startsWith("breaker_"))
-      ? { runnerDiscardedInstallableBreaker: true }
-      : {}),
-    ...(discardRoles.some((role) => isRunnerPressureRole(role))
-      ? { runnerDiscardedRunPressureCard: true }
-      : {}),
-    ...(installAction ? { runnerInstallAction: true } : {}),
-    ...(duplicateInstall ? { runnerDuplicateInstallAction: true } : {}),
-    ...(lowValueDuplicate
-      ? { runnerLowValueDuplicateInstallAction: true }
-      : {}),
-    ...(duplicateInstall &&
-    sourceDefinitionIdForSimulationAction(input, action) ===
-      "onr_v1_165_junkyard-bbs"
-      ? { runnerJunkyardBbsDuplicateInstall: true }
-      : {}),
-    ...(economyActionTaken ? { runnerEconomyActionTaken: true } : {}),
-    ...(rigInstallAction ? { runnerRigInstallAction: true } : {}),
-    ...(pressureActionTaken ? { runnerPressureActionTaken: true } : {}),
-    ...(remoteTrashAvailable ? { runnerRemoteTrashOpportunity: true } : {}),
-    ...(remoteTrashTaken ? { runnerRemoteTrashTaken: true } : {}),
-    ...(remoteTrash.trashable
-      ? { runnerRemoteAccessWithTrashableCard: true }
-      : {}),
-    ...(remoteTrash.relevant
-      ? { runnerRemoteAccessWithRelevantTrashableCard: true }
-      : {}),
-    ...(remoteTrash.affordableRelevant
-      ? { runnerAffordableRelevantRemoteTrashOpportunity: true }
-      : {}),
-    ...(remoteTrash.relevantTaken
-      ? { runnerRelevantRemoteTrashTaken: true }
-      : {}),
-    ...(remoteTrash.skippedAffordableRelevant
-      ? { runnerSkippedAffordableRelevantRemoteTrash: true }
-      : {}),
-    ...(remoteTrash.targetType
-      ? { runnerRemoteTrashTargetType: remoteTrash.targetType }
-      : {}),
-    ...(remoteTrash.role ? { runnerRemoteTrashRole: remoteTrash.role } : {}),
-    ...(remoteTrash.trashable && action.type === "decline_trash"
-      ? { runnerRemoteTrashDeclined: true }
-      : {}),
-    ...(remoteTrash.trashable
-      ? {
-          runnerRemoteTrashCost: remoteTrash.trashCost,
-          runnerRemoteTrashCostBucket: remoteTrashCostBucket(
-            remoteTrash.trashCost,
-          ),
-          runnerRemoteTrashLegalActionCount: remoteTrash.legalTrashActionCount,
-        }
-      : {}),
-    ...(remoteTrash.role === "economy"
-      ? { runnerRemoteTrashAssetEconomy: true }
-      : {}),
-    ...(remoteTrash.finitePoolEconomy
-      ? { runnerRemoteTrashFinitePoolEconomy: true }
-      : {}),
-    ...(remoteTrash.corpValueRemaining > 0
-      ? { runnerRemoteTrashCorpValueRemaining: remoteTrash.corpValueRemaining }
-      : {}),
-    ...(remoteTrash.bbsWhisperingCampaign
-      ? { runnerBbsWhisperingCampaignAccessed: true }
-      : {}),
-    ...(remoteTrash.bbsWhisperingCampaign &&
-    remoteTrash.legalTrashActionCount > 0
-      ? { runnerBbsWhisperingCampaignTrashLegal: true }
-      : {}),
-    ...(remoteTrash.bbsWhisperingCampaign && remoteTrashTaken
-      ? { runnerBbsWhisperingCampaignTrashTaken: true }
-      : {}),
-    ...(remoteTrash.bbsWhisperingCampaign && action.type === "decline_trash"
-      ? { runnerBbsWhisperingCampaignTrashSkipped: true }
-      : {}),
-    ...(remoteTrash.bbsWhisperingCampaign &&
-    remoteTrash.skippedAffordableRelevant
-      ? { runnerBbsWhisperingCampaignTrashSkippedAffordable: true }
-      : {}),
-    ...(remoteTrash.finitePoolEconomy
-      ? { runnerFinitePoolAssetAccessed: true }
-      : {}),
-    ...(remoteTrash.finitePoolEconomy && remoteTrash.legalTrashActionCount > 0
-      ? { runnerFinitePoolAssetTrashLegal: true }
-      : {}),
-    ...(remoteTrash.finitePoolEconomy && remoteTrashTaken
-      ? { runnerFinitePoolAssetTrashTaken: true }
-      : {}),
-    ...(remoteTrash.finitePoolEconomy && remoteTrash.skippedAffordableRelevant
-      ? { runnerFinitePoolAssetTrashSkippedAffordable: true }
-      : {}),
-    ...(remoteTrash.skippedAffordableRelevant
-      ? { runnerRemoteTrashFixGateEligible: true }
-      : {}),
-    ...(remoteTrash.deferredByBudget
-      ? { runnerRemoteTrashFixGateBlockedByReserve: true }
-      : {}),
-    ...(remoteTrash.trashable &&
-    remoteTrash.legalTrashActionCount === 0 &&
-    input.playerView.own.credits < remoteTrash.trashCost
-      ? { runnerRemoteTrashFixGateBlockedByLowCredits: true }
-      : {}),
-    ...(remoteTrash.skippedAffordableRelevant && action.type === "steal_agenda"
-      ? { runnerRemoteTrashFixGateBlockedByHigherThreat: true }
-      : {}),
-    ...(remoteTrash.skippedAffordableRelevant &&
-    action.type !== "steal_agenda" &&
-    !remoteTrash.deferredByBudget
-      ? { runnerRemoteTrashFixGateSuspicious: true }
-      : {}),
-    ...(remoteTrash.expensive
-      ? { runnerExpensiveRemoteTrashOpportunity: true }
-      : {}),
-    ...(remoteTrash.expensive && remoteTrashTaken
-      ? { runnerExpensiveRemoteTrashTaken: true }
-      : {}),
-    ...(remoteTrash.expensive &&
-    remoteTrash.trashable &&
-    action.type === "decline_trash"
-      ? { runnerExpensiveRemoteTrashDeclined: true }
-      : {}),
-    ...(remoteTrash.highImpact && remoteTrashTaken
-      ? { runnerHighImpactRemoteTrashTaken: true }
-      : {}),
-    ...(remoteTrash.deferredByBudget
-      ? { runnerHighImpactRemoteTrashDeferredByBudget: true }
-      : {}),
-    ...(remoteTrash.highImpact &&
-    remoteTrash.expensive &&
-    !remoteTrash.acuteThreat &&
-    action.type === "decline_trash"
-      ? { runnerHighImpactRemoteTrashSkippedNoThreat: true }
-      : {}),
-    ...(remoteTrash.role === "low_value" && action.type === "decline_trash"
-      ? { runnerLowValueRemoteTrashSkipped: true }
-      : {}),
-    ...(remoteTrashTaken && input.actionNumber <= 20
-      ? { runnerRemoteTrashSpentEarlyGame: true }
-      : {}),
-    ...(remoteTrashTaken
-      ? {
-          runnerCreditsAfterRemoteTrash: remoteTrash.creditsAfterGeneralTrash,
-          dedicatedTrashCreditsUsed: remoteTrash.dedicatedTrashCredits,
-          generalCreditsSpentOnTrash: remoteTrash.generalCreditCost,
-        }
-      : {}),
-    ...(remoteTrashTaken && remoteTrash.dropsBelowReserve
-      ? { runnerRemoteTrashDroppedBelowReserve: true }
-      : {}),
-    ...(remoteTrashTaken && !remoteTrash.dropsBelowReserve
-      ? { runnerRemoteTrashPreservedReserve: true }
-      : {}),
-    ...(remoteTrashTaken && remoteTrash.acuteThreat
-      ? { runnerRemoteTrashProtectedScoreThreat: true }
-      : {}),
-    ...(remoteTrashTaken && !remoteTrash.acuteThreat
-      ? { runnerRemoteTrashWithoutImmediateThreat: true }
-      : {}),
-    ...(remoteTrashTaken &&
-    remoteTrash.dropsBelowReserve &&
-    !remoteTrash.acuteThreat
-      ? { trashDecisionLeftRunnerUnableToContest: true }
-      : {}),
-    ...(advancedRemoteContest.opportunity
-      ? { runnerRemoteRunOpportunityAgainstAdvancedRemote: true }
-      : {}),
-    ...(advancedRemoteContest.taken
-      ? { runnerRemoteRunAgainstAdvancedRemote: true }
-      : {}),
-    ...(advancedRemoteContest.skipped
-      ? { runnerSkippedAdvancedRemoteContest: true }
-      : {}),
-    ...(advancedRemoteContest.centralWhileThreat
-      ? { runnerCentralRunWhileRemoteScoreThreatVisible: true }
-      : {}),
-    ...(typeof advancedRemoteContest.reserveAfterRun === "number"
-      ? {
-          runnerRemoteContestCreditReserveAfterRun:
-            advancedRemoteContest.reserveAfterRun,
-        }
-      : {}),
-    ...(handUseOpportunity ? { runnerHandUseOpportunity: true } : {}),
-    ...(handUseActionTaken ? { runnerHandUseActionTaken: true } : {}),
   };
 }
 
