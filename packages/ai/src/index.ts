@@ -137,9 +137,7 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
-import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
-import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
-import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
+import { createSemanticRuntimeCorpScoringComposition } from "./runtime/semantic-runtime-corp-scoring-composition";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import {
@@ -948,29 +946,12 @@ const {
   isRunnerRigInstallAction,
 });
 const {
-  semanticRuntimeCorpActionServerId,
-  semanticRuntimeCorpServer,
-  semanticRuntimeCorpActionSourceCard,
-  semanticRuntimeCorpActionIsScoreLine,
-  semanticRuntimeCorpAdvanceCompletesScore,
-  semanticRuntimeCorpRemoteIsProtected,
-  semanticRuntimeCorpEmptyRemoteCount,
-  semanticRuntimeCorpHasRemoteInstability,
-  semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-  semanticRuntimeCorpHasNakedScoreLine,
-  semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-  semanticRuntimeCorpInstallRemoteScore,
-  semanticRuntimeCorpShouldBuildProtectedScoreRemote,
-  semanticRuntimeCorpAdvanceRemoteScore,
-  normalizedRulesTextForDefinition,
-  semanticRuntimeVisibleCardType,
-  semanticRuntimeVisibleCardAdvancementRequirement,
-  semanticRuntimeCorpRemoteRezFloorAssessment,
-  semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-  semanticRuntimeCorpCentralRezReserveAssessment,
-  semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-  semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-} = createSemanticRuntimeCorpBoardScoreComposition({
+  corpOntologyPayoffAvailableForTagSource,
+  tagPunishWindowDiagnosticsForSimulationAction,
+  semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+  semanticRuntimeCorpEvidence,
+  semanticRuntimeCorpScoreComponents,
+} = createSemanticRuntimeCorpScoringComposition({
   serverId: semanticRuntimeServerId,
   findVisibleCard,
   findVisibleCorpServerCard,
@@ -980,29 +961,17 @@ const {
   runtimeDefinition: runtimeCardDefinitionForAi,
   demoDefinition: demoCardDefinitionForAi,
   sourceDefinitionIdForAction,
-});
-const {
-  corpOntologyPayoffAvailableForTagSource,
-  tagPunishWindowDiagnosticsForSimulationAction,
-  corpTaggedPayoffWindowPassiveActionPenalty,
-  corpTaggedRunnerPayoffPressure,
-} = createCorpTagPunishWindowComposition({
   installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
-  sourceDefinitionIdForAction,
-  actionSourceCard: semanticRuntimeCorpActionSourceCard,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
   runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
-  actionCreditCost,
   runnerDamagePreventionEvidence:
     corpVisibleRunnerDamagePreventionEvidence,
   runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
   runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   corpVisibleTagPunishOpportunities,
   runnerSurvivalCounterContextForInput,
   corpTagPunishOntologyAssessmentForAction,
@@ -1012,48 +981,8 @@ const {
   strongestCorpTagSourceOpportunity,
   applyCorpTagSourceWindowDiagnostics,
   applyActualTagCreationDiagnostics,
-});
-const {
-  semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  semanticRuntimeCorpEvidence,
-  semanticRuntimeCorpScoreComponents,
-} = createSemanticRuntimeCorpScoringEvidenceComposition({
-  sourceDefinitionIdForAction,
-  normalizedRulesTextForDefinition,
-  actionCreditCost,
-  actionSourceCard: semanticRuntimeCorpActionSourceCard,
-  visibleServerCard: findVisibleCorpServerCard,
-  cardType: semanticRuntimeVisibleCardType,
-  cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
   teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
-  rolesForAction,
-  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
-  hasUnsafeRemoteScoreAction: semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-  actionServerId: semanticRuntimeCorpActionServerId,
-  server: semanticRuntimeCorpServer,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  isRemoteServerTarget,
-  shouldBuildProtectedScoreRemote:
-    semanticRuntimeCorpShouldBuildProtectedScoreRemote,
-  actionWouldCreateUnsafeRemoteScoreLine:
-    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
-  corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
-  corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
-  corpRemoteScoreContestabilityAssessment:
-    semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-  corpActionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  corpInstallRemoteScore: semanticRuntimeCorpInstallRemoteScore,
-  corpHasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
-  corpHasRemoteRezFloorFundingNeed:
-    semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-  corpHasCentralRezFloorFundingNeed:
-    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-  corpTaggedRunnerPayoffPressure,
-  corpTaggedPayoffWindowPassiveActionPenalty,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
 });
 const {
