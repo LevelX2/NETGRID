@@ -545,6 +545,7 @@ import { summarizeCorpIcePortfolioMetrics } from "./simulation/corp-ice-portfoli
 import { summarizeCentralCloseoutRepeatMetrics } from "./simulation/central-closeout-repeat-metrics";
 import { corpScoreTerminalFollowupMetrics } from "./simulation/corp-score-terminal-followup-metrics";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
+import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
@@ -722,7 +723,6 @@ import {
   nextEntries,
   nextEntriesForSide,
   ownStrategicWindow,
-  planConversionEntryHasMeaningfulBoardProgress,
   planKindForConversion,
   planIntentConvertedWithin,
   remoteBuildConvertsToAdvanceOrScore,
@@ -11473,13 +11473,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
   };
-}
-
-function isMeaningfulBoardProgress(entry: AiSimulationActionSequenceEntry): boolean {
-  return planConversionEntryHasMeaningfulBoardProgress(
-    entry,
-    isCorpRemoteAdvancementProgress,
-  );
 }
 
 function corpFutureRunIceDiagnosticsForSimulationAction(
