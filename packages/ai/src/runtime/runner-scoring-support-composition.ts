@@ -16,14 +16,18 @@ import {
   createRunnerScoreComponentsContext,
   type RunnerScoreComponentsDependencies,
 } from "./runner-score-components";
+import { reconstructBeliefState } from "../belief-state";
 
 export type RunnerScoringSupportCompositionDependencies =
   Parameters<typeof createRunnerRunTargetGuidanceContext>[0] &
-    Parameters<typeof createRunnerCentralMemoryContext>[0] &
+    Omit<
+      Parameters<typeof createRunnerCentralMemoryContext>[0],
+      "rndTopFreshness" | "hqHandMemory"
+    > &
     Parameters<typeof createRunnerRecentHistoryContext>[0] &
     Omit<
       Parameters<typeof createRunnerRunComponentsContext>[0],
-      "recentStartRunsOnServer"
+      "recentStartRunsOnServer" | "candidateMemory"
     > &
     Omit<
       Parameters<typeof createRunnerRecoveryContext>[0],
@@ -70,11 +74,13 @@ export function createRunnerScoringSupportComposition(
     semanticRuntimeRunnerRndMemoryComponents,
     semanticRuntimeRunnerHqMemoryComponents,
   } = createRunnerCentralMemoryContext({
-    rndTopFreshness: dependencies.rndTopFreshness,
+    rndTopFreshness: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
     staleKnownRndRepeatRunPenalty:
       dependencies.staleKnownRndRepeatRunPenalty,
     rndFreshRepeatRunBoost: dependencies.rndFreshRepeatRunBoost,
-    hqHandMemory: dependencies.hqHandMemory,
+    hqHandMemory: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
     definitionType: dependencies.definitionType,
     staleKnownHqRepeatRunPenalty: dependencies.staleKnownHqRepeatRunPenalty,
   });
@@ -103,7 +109,14 @@ export function createRunnerScoringSupportComposition(
     definitionType: dependencies.definitionType,
     knownIcePathAssessment: dependencies.knownIcePathAssessment,
     rootTrashCost: dependencies.rootTrashCost,
-    candidateMemory: dependencies.candidateMemory,
+    candidateMemory: (input, server) => {
+      return server
+        ? reconstructBeliefState(input)
+            .runnerOpponentModel?.hiddenRemoteCandidateMemory.slice()
+            .reverse()
+            .find((entry) => entry.serverId === server.id)
+        : undefined;
+    },
     recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
     isRemoteServerTarget: dependencies.isRemoteServerTarget,
   });

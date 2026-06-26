@@ -1235,12 +1235,8 @@ const {
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   isRemoteServerTarget,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
-  rndTopFreshness: (input: AiDecisionInput) =>
-    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
   staleKnownRndRepeatRunPenalty,
   rndFreshRepeatRunBoost,
-  hqHandMemory: (input: AiDecisionInput) =>
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
   definitionType: definitionTypeForMetrics,
   staleKnownHqRepeatRunPenalty,
   publicHistory: mergedAiPublicHistory,
@@ -1258,14 +1254,6 @@ const {
       server.root,
     ),
   rootTrashCost: remoteRootTrashCostForMetrics,
-  candidateMemory: (input, server) => {
-    return server
-      ? reconstructBeliefState(input)
-          .runnerOpponentModel?.hiddenRemoteCandidateMemory.slice()
-          .reverse()
-          .find((entry) => entry.serverId === server.id)
-      : undefined;
-  },
   targetServerId: semanticRuntimeServerId,
   blinkAssessment: runnerBlinkRecoveryAssessment,
   rolesForAction,
