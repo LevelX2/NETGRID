@@ -1,8 +1,4 @@
 import {
-  createLegacyActionScoringComposition,
-  type LegacyActionScoringCompositionDependencies,
-} from "../legacy/legacy-action-scoring-composition";
-import {
   scoreActionsForLegacy,
   type LegacyActionScorerDependencies,
 } from "../legacy/legacy-action-scorer";
@@ -13,47 +9,18 @@ import {
 
 export type AiActionEntrypointsCompositionDependencies =
   Omit<AiActionEntrypointDependencies, "scoreActions"> &
-    LegacyActionScoringCompositionDependencies &
-    Pick<LegacyActionScorerDependencies, "extractAiFeatures">;
+    LegacyActionScorerDependencies;
 
 export function createAiActionEntrypointsComposition(
   dependencies: AiActionEntrypointsCompositionDependencies,
 ) {
-  const { scoreRunnerAction, scoreCorpAction } =
-    createLegacyActionScoringComposition({
-      rolesForAction: dependencies.rolesForAction,
-      rolesForCardId: dependencies.rolesForCardId,
-      runnerProgramInstallTrashAssessment:
-        dependencies.runnerProgramInstallTrashAssessment,
-      runnerProgramInstallTrashAssessmentForAction:
-        dependencies.runnerProgramInstallTrashAssessmentForAction,
-      runnerProgramInstallDisplacementPenalty:
-        dependencies.runnerProgramInstallDisplacementPenalty,
-      runnerRemoteTrashAccessContext:
-        dependencies.runnerRemoteTrashAccessContext,
-      encounterBreakReserveContext: dependencies.encounterBreakReserveContext,
-      pumpViabilityAssessment: dependencies.pumpViabilityAssessment,
-      runnerMuPressureInstallPriorityBonus:
-        dependencies.runnerMuPressureInstallPriorityBonus,
-      runnerMuPressureFundingPriorityBonus:
-        dependencies.runnerMuPressureFundingPriorityBonus,
-      runnerPersistentInstallEvaluationForAction:
-        dependencies.runnerPersistentInstallEvaluationForAction,
-      runnerPersistentInstallLegacyScoreDelta:
-        dependencies.runnerPersistentInstallLegacyScoreDelta,
-      corpTagPunishOntologyAssessmentForAction:
-        dependencies.corpTagPunishOntologyAssessmentForAction,
-      corpOntologyPayoffAvailableForTagSource:
-        dependencies.corpOntologyPayoffAvailableForTagSource,
-    });
-
   const entrypoints = createAiActionEntrypoints({
     chooseSemanticRuntimeAction: dependencies.chooseSemanticRuntimeAction,
     scoreActions: (input, side) =>
       scoreActionsForLegacy(input, side, {
         extractAiFeatures: dependencies.extractAiFeatures,
-        scoreRunnerAction,
-        scoreCorpAction,
+        scoreRunnerAction: dependencies.scoreRunnerAction,
+        scoreCorpAction: dependencies.scoreCorpAction,
       }),
     decisionFromChoices: dependencies.decisionFromChoices,
     hasCorpPlanAction: dependencies.hasCorpPlanAction,
@@ -74,7 +41,7 @@ export function createAiActionEntrypointsComposition(
 
   return {
     ...entrypoints,
-    scoreRunnerAction,
-    scoreCorpAction,
+    scoreRunnerAction: dependencies.scoreRunnerAction,
+    scoreCorpAction: dependencies.scoreCorpAction,
   };
 }

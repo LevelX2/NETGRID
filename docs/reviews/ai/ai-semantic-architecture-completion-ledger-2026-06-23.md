@@ -5705,6 +5705,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
+- `AI-COMPLETE-03` fünfhundertsiebenundneunzigster Struktur-Schnitt:
+  - `packages/ai/src/index.ts` erzeugt Legacy-Runner-/Corp-Scorer einmal vor der Semantic-Runtime-Action-Exclusion und reicht sie an Action-Exclusion und Entrypoints weiter.
+  - `packages/ai/src/runtime/semantic-runtime-action-exclusion-composition.ts` baut `scoreRunnerActions` intern aus den übergebenen Legacy-Scorern und `scoreActionsForLegacy`.
+  - `packages/ai/src/runtime/ai-action-entrypoints-composition.ts` verwendet vorhandene Legacy-Scorer statt sie intern erneut zu erzeugen.
+  - `packages/ai/src/index.ts` enthält nach aktueller Suche keine inline `=>`-/Funktionsadapter mehr und liegt bei 1.321 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch weiter auf eine dünne Public-/Composition-Fassade verdichtet werden soll.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

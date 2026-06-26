@@ -288,7 +288,9 @@ import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
-import { scoreActionsForLegacy } from "./legacy/legacy-action-scorer";
+import {
+  createLegacyActionScoringComposition,
+} from "./legacy/legacy-action-scoring-composition";
 import {
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
@@ -300,9 +302,6 @@ import {
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
 } from "./tactical-plans";
-import {
-  type AiDecisionInput,
-} from "@netgrid/shared";
 export {
   beliefDebugSummary,
   beliefStateInvariantSignature,
@@ -1060,6 +1059,23 @@ const {
   corpTaggedPayoffWindowPassiveActionPenalty,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
 });
+const { scoreRunnerAction, scoreCorpAction } =
+  createLegacyActionScoringComposition({
+    rolesForAction,
+    rolesForCardId,
+    runnerProgramInstallTrashAssessment,
+    runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallDisplacementPenalty,
+    runnerRemoteTrashAccessContext,
+    encounterBreakReserveContext,
+    pumpViabilityAssessment,
+    runnerMuPressureInstallPriorityBonus,
+    runnerMuPressureFundingPriorityBonus,
+    runnerPersistentInstallEvaluationForAction,
+    runnerPersistentInstallLegacyScoreDelta,
+    corpTagPunishOntologyAssessmentForAction,
+    corpOntologyPayoffAvailableForTagSource,
+  });
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
   runnerSelfDamageGuardedDecision,
@@ -1084,12 +1100,11 @@ const {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  scoreRunnerActions: (input: AiDecisionInput) =>
-    scoreActionsForLegacy(input, "runner", {
-      extractAiFeatures,
-      scoreRunnerAction,
-      scoreCorpAction,
-    }),
+  legacyActionScoring: {
+    extractAiFeatures,
+    scoreRunnerAction,
+    scoreCorpAction,
+  },
   compareAction,
   selectedChoicesForDecision,
   scrubEvidence,
@@ -1238,11 +1253,11 @@ const {
   chooseCorpBaselineAction,
   chooseRunnerAction,
   chooseRunnerBaselineAction,
-  scoreRunnerAction,
-  scoreCorpAction,
 } = createAiActionEntrypointsComposition({
   chooseSemanticRuntimeAction,
   extractAiFeatures,
+  scoreRunnerAction,
+  scoreCorpAction,
   decisionFromChoices,
   hasCorpPlanAction,
   isCorpReactiveBaselineDecision,
@@ -1253,20 +1268,6 @@ const {
   runnerHasConditionalPaymentContinueDecision,
   chooseRunnerPlanAction,
   runnerSelfDamageGuardedDecision,
-  rolesForAction,
-  rolesForCardId,
-  runnerProgramInstallTrashAssessment,
-  runnerProgramInstallTrashAssessmentForAction,
-  runnerProgramInstallDisplacementPenalty,
-  runnerRemoteTrashAccessContext,
-  encounterBreakReserveContext,
-  pumpViabilityAssessment,
-  runnerMuPressureInstallPriorityBonus,
-  runnerMuPressureFundingPriorityBonus,
-  runnerPersistentInstallEvaluationForAction,
-  runnerPersistentInstallLegacyScoreDelta,
-  corpTagPunishOntologyAssessmentForAction,
-  corpOntologyPayoffAvailableForTagSource,
 });
 export {
   chooseAiAction,

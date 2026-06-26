@@ -1,5 +1,9 @@
 import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
 import {
+  scoreActionsForLegacy,
+  type LegacyActionScorerDependencies,
+} from "../legacy/legacy-action-scorer";
+import {
   createRunnerBlinkBreakExclusionContext,
   type RunnerBlinkBreakExclusionDependencies,
 } from "./runner-blink-break-exclusion";
@@ -44,7 +48,10 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
     "sourceDefinitionId" | "sourceDefinition"
   > &
     RunnerSimpleExclusionsContextDependencies &
-    Omit<RunnerSelfDamageContextDependencies, "hintEffectsForCard"> &
+    Omit<
+      RunnerSelfDamageContextDependencies,
+      "hintEffectsForCard" | "scoreRunnerActions"
+    > &
     Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
     Omit<RunnerEncounterActionExclusionDependencies, "blinkBreakExclusion"> &
     Omit<
@@ -67,6 +74,7 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
       hintForDefinitionId: (
         definitionId: string,
       ) => ActionExclusionHint | undefined;
+      legacyActionScoring: LegacyActionScorerDependencies;
     };
 
 export function createSemanticRuntimeActionExclusionComposition(
@@ -124,7 +132,8 @@ export function createSemanticRuntimeActionExclusionComposition(
       dependencies.hintForDefinitionId(definitionId)?.effects,
     fakedHitCardId: dependencies.fakedHitCardId,
     badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
-    scoreRunnerActions: dependencies.scoreRunnerActions,
+    scoreRunnerActions: (input) =>
+      scoreActionsForLegacy(input, "runner", dependencies.legacyActionScoring),
     compareAction: dependencies.compareAction,
     selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
     scrubEvidence: dependencies.scrubEvidence,
