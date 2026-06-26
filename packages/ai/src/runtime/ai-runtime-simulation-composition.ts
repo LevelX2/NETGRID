@@ -6,6 +6,10 @@ import {
   createSemanticRuntimeOrchestrationComposition,
   type SemanticRuntimeOrchestrationCompositionDependencies,
 } from "./semantic-runtime-orchestration-composition";
+import {
+  createSemanticRuntimeCorpScoringComposition,
+  type SemanticRuntimeCorpScoringCompositionDependencies,
+} from "./semantic-runtime-corp-scoring-composition";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
@@ -51,6 +55,10 @@ export type AiRuntimeSimulationCompositionDependencies =
   Omit<
     SemanticRuntimeOrchestrationCompositionDependencies,
     | "badPublicityRelevance"
+    | "corpAdvancementCounterPlacementAssessment"
+    | "corpComponents"
+    | "corpEvidence"
+    | "corpOntologyPayoffAvailableForTagSource"
     | "goalFit"
     | "recoveryCommitment"
     | "install"
@@ -63,12 +71,17 @@ export type AiRuntimeSimulationCompositionDependencies =
       | "chooseCorpAction"
       | "chooseRunnerBaselineAction"
       | "chooseCorpBaselineAction"
+      | "tagPunishWindowDiagnosticsForSimulationAction"
     > &
+    SemanticRuntimeCorpScoringCompositionDependencies<string> &
     AiRuntimeSimulationScoringDependencies;
 
 export function createAiRuntimeSimulationComposition(
   dependencies: AiRuntimeSimulationCompositionDependencies,
 ) {
+  const corpScoring =
+    createSemanticRuntimeCorpScoringComposition(dependencies);
+
   const semanticRuntimeDependencies: SemanticRuntimeOrchestrationCompositionDependencies =
     {
       ...dependencies,
@@ -116,6 +129,12 @@ export function createAiRuntimeSimulationComposition(
         serverId: dependencies.serverId,
         isRemoteServerTarget: dependencies.isRemoteServerTarget,
       },
+      corpAdvancementCounterPlacementAssessment:
+        corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+      corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
+      corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
+      corpOntologyPayoffAvailableForTagSource:
+        corpScoring.corpOntologyPayoffAvailableForTagSource,
     };
 
   const runtimeEntrypoints =
@@ -131,6 +150,8 @@ export function createAiRuntimeSimulationComposition(
     chooseRunnerBaselineAction:
       runtimeEntrypoints.chooseRunnerBaselineAction,
     chooseCorpBaselineAction: runtimeEntrypoints.chooseCorpBaselineAction,
+    tagPunishWindowDiagnosticsForSimulationAction:
+      corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
   });
 
   return {
