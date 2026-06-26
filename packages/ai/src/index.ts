@@ -173,15 +173,7 @@ import {
   createSemanticRuntimeEvidenceContext,
 } from "./runtime/semantic-runtime-evidence-context";
 import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
-import {
-  createCorpTaggedPayoffWindowContext,
-} from "./runtime/corp-tagged-payoff-window";
-import {
-  createCorpTaggedRunnerPayoffPressureContext,
-} from "./runtime/corp-tagged-runner-payoff-pressure";
-import {
-  createCorpTaggedRunnerPayoffProfileContext,
-} from "./runtime/corp-tagged-runner-payoff-profile";
+import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
 import {
   createSemanticRuntimeCorpPassiveScoreLineContext,
 } from "./runtime/semantic-runtime-corp-passive-scoreline-context";
@@ -1362,7 +1354,9 @@ const {
 });
 const {
   corpTaggedRunnerPayoffProfile,
-} = createCorpTaggedRunnerPayoffProfileContext({
+  corpTaggedPayoffWindowPassiveActionPenalty,
+  corpTaggedRunnerPayoffPressure,
+} = createCorpTaggedRunnerPayoffComposition({
   runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
@@ -1372,25 +1366,15 @@ const {
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
   runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
   runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
-});
-const {
-  corpTaggedPayoffWindowPassiveActionPenalty,
-} = createCorpTaggedPayoffWindowContext({
   immediateTagSourceAvailable: corpImmediateTagSourceAvailable,
   unprotectedPersistentTagAssetSetup: corpUnprotectedPersistentTagAssetSetup,
-  taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
-});
-const {
-  corpTaggedRunnerPayoffPressure,
-} = createCorpTaggedRunnerPayoffPressureContext({
   immediateTagSourceVisiblePayoffProfile:
     corpImmediateTagSourceVisiblePayoffProfile,
   installedEconomyActionProfile: corpInstalledEconomyActionProfile,
   tagPunishPayoffFundingProfile: corpTagPunishPayoffFundingProfile,
-  taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
