@@ -56,10 +56,8 @@ import {
   type RunnerTacticalGoal,
 } from "./runner-tactical-goals";
 import {
-  CARD_ROLES_BY_CARD,
   RUNTIME_CARDS,
   createAiHintsByCard,
-  type AiCardHint,
 } from "./ai-hints";
 import {
   assessKnownRezzedIcePath,
@@ -98,7 +96,6 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
-import { rolesForAction as rolesForActionRuntime } from "./runtime/action-role-lookup";
 import {
   extractAiFeatures as extractAiFeaturesRuntime,
   type AiFeatures,
@@ -335,6 +332,7 @@ import { stringRecordValue } from "./runtime/record-value";
 import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
+import { createRoleContext } from "./runtime/role-context";
 import {
   createRunnerRunOnlyActionContext,
   runnerRunActionSpendingCapAssessment,
@@ -422,7 +420,6 @@ import {
   hasEvidencePrefix,
 } from "./runtime/evidence-value";
 import { roundNumber as round } from "./runtime/number-rounding";
-import { cardRolesForId } from "./runtime/card-role-lookup";
 import {
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
   eventVersion as aiEventVersion,
@@ -1163,6 +1160,11 @@ export {
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 
 const AI_HINTS = createAiHintsByCard();
+
+const { rolesForAction, rolesForCardId } = createRoleContext({
+  findVisibleCard,
+  aiHints: AI_HINTS,
+});
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
@@ -5670,17 +5672,6 @@ function corpTagPunishOntologyAssessmentForAction(
             : undefined,
     },
   );
-}
-
-function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
-  return rolesForActionRuntime(input, action, {
-    findVisibleCard,
-    rolesForCardId,
-  });
-}
-
-function rolesForCardId(cardId: string | undefined): string[] {
-  return cardRolesForId(cardId, AI_HINTS);
 }
 
 function pumpViabilityAssessment(
