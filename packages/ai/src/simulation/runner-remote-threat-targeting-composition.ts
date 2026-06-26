@@ -1,8 +1,13 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import type { CentralServerId } from "../runtime/server-target";
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { createRunnerCentralRunPressureJustificationContext } from "./central-run-pressure-justification";
+import {
+  createTrueCentralCloseoutProfileContext,
+  type BestTrueCentralCloseoutProfile,
+  type TrueCentralCloseoutProfile,
+} from "./no-fresh-central";
 import {
   createRunnerRemoteThreatProfile,
   createRunnerRemoteThreatTargetingDiagnosticsForAction,
@@ -21,15 +26,34 @@ export type RunnerRemoteThreatTargetingCompositionDependencies = {
   ) => boolean;
   rolesForCardId: (definitionId: string | undefined) => string[];
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
-  trueCentralCloseoutProfileForMetrics: (
+  sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
-    target: CentralServerId,
-  ) => { opportunity: boolean };
+    action: LegalAction,
+  ) => string | undefined;
 };
 
 export function createRunnerRemoteThreatTargetingComposition(
   dependencies: RunnerRemoteThreatTargetingCompositionDependencies,
 ) {
+  const {
+    bestTrueCentralCloseoutProfile:
+      bestTrueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfile: trueCentralCloseoutProfileForMetrics,
+  }: {
+    bestTrueCentralCloseoutProfile: (
+      input: AiDecisionInput,
+    ) => BestTrueCentralCloseoutProfile;
+    trueCentralCloseoutProfile: (
+      input: AiDecisionInput,
+      target: CentralServerId,
+    ) => TrueCentralCloseoutProfile;
+  } = createTrueCentralCloseoutProfileContext({
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    rolesForCardId: dependencies.rolesForCardId,
+    sourceDefinitionIdForAction:
+      dependencies.sourceDefinitionIdForSimulationAction,
+  });
+
   const runnerPostRunReserveTargetForRemoteInput =
     createRunnerPostRunReserveTargetForRemoteInput({
       remoteServerHasScoreThreat: dependencies.remoteServerHasScoreThreat,
@@ -51,8 +75,7 @@ export function createRunnerRemoteThreatTargetingComposition(
     rolesForCardId: dependencies.rolesForCardId,
     runnerCreditReserveTargetForInput:
       dependencies.runnerCreditReserveTargetForInput,
-    trueCentralCloseoutProfileForMetrics:
-      dependencies.trueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfileForMetrics,
   });
 
   const runnerRemoteThreatTargetingDiagnosticsForAction =
@@ -64,6 +87,8 @@ export function createRunnerRemoteThreatTargetingComposition(
     });
 
   return {
+    bestTrueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfileForMetrics,
     runnerRemoteThreatProfile,
     runnerRemoteThreatTargetingDiagnosticsForAction,
   };

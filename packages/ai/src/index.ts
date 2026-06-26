@@ -319,9 +319,6 @@ import {
   visibleRootIsKnownAgendaForMetrics,
 } from "./simulation/visible-root-agenda-metrics";
 import {
-  createTrueCentralCloseoutProfileContext,
-} from "./simulation/no-fresh-central";
-import {
   centralRunStreakWithoutValueForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
@@ -807,14 +804,6 @@ const {
   visibleCitySurveillanceSourceCount,
   sourceDefinitionIdForAction,
 });
-const {
-  bestTrueCentralCloseoutProfile: bestTrueCentralCloseoutProfileForMetrics,
-  trueCentralCloseoutProfile: trueCentralCloseoutProfileForMetrics,
-} = createTrueCentralCloseoutProfileContext({
-  assessKnownRezzedIcePath,
-  rolesForCardId,
-  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-});
 
 const {
   runnerCreditReserveTargetForInput,
@@ -855,6 +844,8 @@ const {
 });
 
 const {
+  bestTrueCentralCloseoutProfileForMetrics,
+  trueCentralCloseoutProfileForMetrics,
   runnerRemoteThreatProfile,
   runnerRemoteThreatTargetingDiagnosticsForAction,
 } = createRunnerRemoteThreatTargetingComposition({
@@ -863,7 +854,7 @@ const {
   remoteServerHasScoreThreat,
   rolesForCardId,
   runnerCreditReserveTargetForInput,
-  trueCentralCloseoutProfileForMetrics,
+  sourceDefinitionIdForSimulationAction,
 });
 
 const {
