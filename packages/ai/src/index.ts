@@ -160,7 +160,6 @@ import {
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
-import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
 import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
 import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
@@ -1232,14 +1231,25 @@ const {
   corpUnprotectedPersistentTagAssetSetup,
   corpOntologyPayoffAvailableForTagSource,
   tagPunishWindowDiagnosticsForSimulationAction,
+  corpTaggedPayoffWindowPassiveActionPenalty,
+  corpTaggedRunnerPayoffPressure,
 } = createCorpTagPunishWindowComposition({
   installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
   sourceDefinitionIdForAction,
   actionSourceCard: semanticRuntimeCorpActionSourceCard,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
+  runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
+  runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
+  actionCreditCost,
+  runnerDamagePreventionEvidence:
+    corpVisibleRunnerDamagePreventionEvidence,
+  runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
+  runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   corpVisibleTagPunishOpportunities,
   runnerSurvivalCounterContextForInput,
   corpTagPunishOntologyAssessmentForAction,
@@ -1249,30 +1259,6 @@ const {
   strongestCorpTagSourceOpportunity,
   applyCorpTagSourceWindowDiagnostics,
   applyActualTagCreationDiagnostics,
-});
-const {
-  corpTaggedRunnerPayoffProfile,
-  corpTaggedPayoffWindowPassiveActionPenalty,
-  corpTaggedRunnerPayoffPressure,
-} = createCorpTaggedRunnerPayoffComposition({
-  runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
-  visibleCardStoredCredits: corpVisibleCardStoredCredits,
-  runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
-  tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
-  sourceDefinitionIdForAction,
-  actionCreditCost,
-  runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
-  runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
-  runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
-  immediateTagSourceAvailable: corpImmediateTagSourceAvailable,
-  unprotectedPersistentTagAssetSetup: corpUnprotectedPersistentTagAssetSetup,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
-  immediateTagSourceVisiblePayoffProfile:
-    corpImmediateTagSourceVisiblePayoffProfile,
-  installedEconomyActionProfile: corpInstalledEconomyActionProfile,
-  tagPunishPayoffFundingProfile: corpTagPunishPayoffFundingProfile,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,

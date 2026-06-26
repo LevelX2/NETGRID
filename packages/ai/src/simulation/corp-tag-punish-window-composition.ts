@@ -7,6 +7,10 @@ import {
   type CorpTagSourcePayoffContextDependencies,
 } from "../runtime/corp-tag-source-payoff-context";
 import {
+  createCorpTaggedRunnerPayoffComposition,
+  type CorpTaggedRunnerPayoffCompositionDependencies,
+} from "../runtime/corp-tagged-runner-payoff-composition";
+import {
   createTagPunishWindowDiagnosticsContext,
   type TagPunishWindowDiagnosticsContextDependencies,
 } from "./tag-punish-window-diagnostics-context";
@@ -14,6 +18,14 @@ import {
 export type CorpTagPunishWindowCompositionDependencies =
   CorpTagPunishPayoffProfileDependencies &
     CorpTagSourcePayoffContextDependencies &
+    Omit<
+      CorpTaggedRunnerPayoffCompositionDependencies,
+      | "immediateTagSourceAvailable"
+      | "unprotectedPersistentTagAssetSetup"
+      | "immediateTagSourceVisiblePayoffProfile"
+      | "installedEconomyActionProfile"
+      | "tagPunishPayoffFundingProfile"
+    > &
     Omit<
       TagPunishWindowDiagnosticsContextDependencies,
       "corpOntologyPayoffAvailableForTagSource"
@@ -71,6 +83,37 @@ export function createCorpTagPunishWindowComposition(
         dependencies.applyActualTagCreationDiagnostics,
     });
 
+  const {
+    corpTaggedRunnerPayoffProfile,
+    corpTaggedPayoffWindowPassiveActionPenalty,
+    corpTaggedRunnerPayoffPressure,
+  } = createCorpTaggedRunnerPayoffComposition({
+    runnerRigTrashTarget: dependencies.runnerRigTrashTarget,
+    visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
+    runnerResourceTrashEvidence:
+      dependencies.runnerResourceTrashEvidence,
+    tagPunishAssessmentForAction:
+      dependencies.tagPunishAssessmentForAction,
+    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    actionCreditCost: dependencies.actionCreditCost,
+    runnerDamagePreventionEvidence:
+      dependencies.runnerDamagePreventionEvidence,
+    runnerHardwareTrashTarget:
+      dependencies.runnerHardwareTrashTarget,
+    runnerHardwarePayoffEvidence:
+      dependencies.runnerHardwarePayoffEvidence,
+    immediateTagSourceAvailable: corpImmediateTagSourceAvailable,
+    unprotectedPersistentTagAssetSetup:
+      corpUnprotectedPersistentTagAssetSetup,
+    advanceCompletesScore: dependencies.advanceCompletesScore,
+    actionIsScoreLine: dependencies.actionIsScoreLine,
+    visibleMeatDamagePayoff: dependencies.visibleMeatDamagePayoff,
+    immediateTagSourceVisiblePayoffProfile:
+      corpImmediateTagSourceVisiblePayoffProfile,
+    installedEconomyActionProfile: corpInstalledEconomyActionProfile,
+    tagPunishPayoffFundingProfile: corpTagPunishPayoffFundingProfile,
+  });
+
   return {
     corpInstalledEconomyActionProfile,
     corpTagPunishPayoffFundingProfile,
@@ -79,5 +122,8 @@ export function createCorpTagPunishWindowComposition(
     corpUnprotectedPersistentTagAssetSetup,
     corpOntologyPayoffAvailableForTagSource,
     tagPunishWindowDiagnosticsForSimulationAction,
+    corpTaggedRunnerPayoffProfile,
+    corpTaggedPayoffWindowPassiveActionPenalty,
+    corpTaggedRunnerPayoffPressure,
   };
 }
