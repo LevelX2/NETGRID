@@ -550,7 +550,10 @@ import type {
   RunnerPressureReadyTargetForMetrics,
 } from "./simulation/runner-pressure-metric-types";
 import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
-import type { RunnerSetupMissingCoverageType } from "./simulation/runner-setup-coverage-types";
+import {
+  runnerMissingBreakerRolesForMetrics,
+  type RunnerSetupMissingCoverageType,
+} from "./simulation/runner-setup-coverage-types";
 import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
 import type { AiSimulationConfig } from "./simulation/ai-simulation-config";
 import type { AiSimulationSummary } from "./simulation/ai-simulation-summary";
@@ -15865,36 +15868,6 @@ function runnerVisibleIceCreatesCoverageNeedForMetrics(
       );
     }) === true
   );
-}
-
-function runnerMissingBreakerRolesForMetrics(definitionId: string): string[] {
-  const definition =
-    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
-  const subtypes = definition?.subtypes ?? [];
-  const roles = new Set<string>();
-  if (
-    subtypes.some((subtype) => runnerSubtypeKeyForMetrics(subtype) === "wall")
-  )
-    roles.add("breaker_fracter");
-  if (
-    subtypes.some(
-      (subtype) => runnerSubtypeKeyForMetrics(subtype) === "code_gate",
-    )
-  )
-    roles.add("breaker_decoder");
-  if (
-    subtypes.some((subtype) => runnerSubtypeKeyForMetrics(subtype) === "sentry")
-  )
-    roles.add("breaker_killer");
-  if (roles.size === 0) roles.add("breaker_generic");
-  return [...roles].sort();
-}
-
-function runnerSubtypeKeyForMetrics(subtype: string): string {
-  return subtype
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
 }
 
 function runnerCoverageSearchActionForMetrics(
