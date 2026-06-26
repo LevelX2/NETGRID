@@ -153,12 +153,7 @@ import {
   isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "./runtime/runner-role-classification";
-import {
-  createSemanticRuntimeDecisionContext,
-} from "./runtime/semantic-runtime-decision-context";
-import {
-  createPracticalMicroCandidatesContext,
-} from "./runtime/practical-micro-candidates-context";
+import { createSemanticRuntimeDecisionComposition } from "./runtime/semantic-runtime-decision-composition";
 import { createSemanticRuntimeCorpFundingContestabilityComposition } from "./runtime/semantic-runtime-corp-funding-contestability-composition";
 import {
   scrubEvidence,
@@ -253,7 +248,6 @@ import {
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
-import { createSemanticRuntimeDebugContext } from "./runtime/semantic-runtime-debug-context";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -1458,36 +1452,26 @@ const {
   compareAction,
 });
 
-const { practicalMicroRuntimeCandidates } =
-  createPracticalMicroCandidatesContext({
-    visibleSourceCard: semanticRuntimeVisibleSourceCard,
-    isVisibleIcebreakerProgram,
-    visibleBreakerCardCanAddressIce,
-    serverId: semanticRuntimeServerId,
-    knownPathAssessment: (server, runtimeInput) =>
-      assessKnownRezzedIcePath(
-        server.ice,
-        runtimeInput.playerView.own.rig ?? [],
-        runtimeInput.playerView.own.credits,
-        server.root,
-      ),
-    rolesForAction,
-    scoreTerminalWindow: assessCorpScoreTerminalWindow,
-    actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
-    runnerRunTargets: (runtimeInput) =>
-      evaluateRunnerRunTargets({ input: runtimeInput }),
-    runnerRunTargetPlausibleForMultiRun,
-    runnerRunTargetHighPayoff,
-  });
-
-const {
-  semanticRuntimeDecisionDebug,
-  semanticRuntimeCoverageSelectionDebug,
-} = createSemanticRuntimeDebugContext({
-  scoreBreakdown: semanticRuntimeScoreBreakdown,
+const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
-});
-const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
+  isVisibleIcebreakerProgram,
+  visibleBreakerCardCanAddressIce,
+  serverId: semanticRuntimeServerId,
+  knownPathAssessment: (server, runtimeInput) =>
+    assessKnownRezzedIcePath(
+      server.ice,
+      runtimeInput.playerView.own.rig ?? [],
+      runtimeInput.playerView.own.credits,
+      server.root,
+    ),
+  rolesForAction,
+  scoreTerminalWindow: assessCorpScoreTerminalWindow,
+  actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
+  runnerRunTargets: (runtimeInput) =>
+    evaluateRunnerRunTargets({ input: runtimeInput }),
+  runnerRunTargetPlausibleForMultiRun,
+  runnerRunTargetHighPayoff,
+  scoreBreakdown: semanticRuntimeScoreBreakdown,
   semanticRuntimeChoices,
   semanticRuntimeChoiceIsReactive,
   buildActionSemanticCandidates,
@@ -1507,12 +1491,9 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
   tacticalPlanMappingOverrideEvidence,
   tacticalPlanRuntimeAlignedToChoice,
   runnerRunOnlyActionAdjustedSemanticChoice,
-  semanticRuntimeCoverageSelectionDebug,
   selectedChoicesForDecision,
   rememberTacticalPlanRuntime,
   scrubEvidence,
-  semanticRuntimeDecisionDebug,
-  practicalMicroRuntimeCandidates,
 });
 const {
   chooseAiAction,
