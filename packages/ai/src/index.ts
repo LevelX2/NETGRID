@@ -559,6 +559,12 @@ import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-r
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
 import { summarizeStrategicPlanConversionMetrics } from "./simulation/strategic-plan-conversion-metrics";
+import {
+  isTerminalDamageOrEconomicPunish,
+  tagSourceConvertsToPunishOpportunity,
+  tagSourceConvertsToPunishTaken,
+  tagSourceConvertsToRunnerTagged,
+} from "./simulation/tag-punish-funnel-predicates";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
@@ -10704,53 +10710,6 @@ function summarizeTagPunishWindowMetrics(
     corpTagPunishConditionRequiresTraceSuccess:
       ontologyConditionByKind.requires_trace_success ?? 0,
   };
-}
-
-function tagSourceConvertsToRunnerTagged(
-  sequence: AiSimulationSummary["actionSequence"],
-  index: number,
-): boolean {
-  return sequence
-    .slice(index + 1, index + 8)
-    .some(
-      (entry) =>
-        entry.runnerTagAddedByAction === true ||
-        entry.runnerTaggedAtCorpDecision === true ||
-        (entry.runnerTagsAfterAction ?? 0) >
-          (entry.runnerTagsBeforeAction ?? 0),
-    );
-}
-
-function tagSourceConvertsToPunishOpportunity(
-  sequence: AiSimulationSummary["actionSequence"],
-  index: number,
-): boolean {
-  return sequence
-    .slice(index + 1, index + 12)
-    .some(
-      (entry) => entry.side === "corp" && entry.corpPunishOpportunity === true,
-    );
-}
-
-function tagSourceConvertsToPunishTaken(
-  sequence: AiSimulationSummary["actionSequence"],
-  index: number,
-): boolean {
-  return sequence
-    .slice(index + 1, index + 12)
-    .some((entry) => entry.side === "corp" && entry.corpPunishTaken === true);
-}
-
-function isTerminalDamageOrEconomicPunish(kind: CorpPunishKind | undefined) {
-  return (
-    kind === "scorched_earth_like" ||
-    kind === "urban_renewal_like" ||
-    kind === "punitive_counterstrike_like" ||
-    kind === "closed_accounts_like" ||
-    kind === "power_grid_overload_like" ||
-    kind === "scored_agenda_damage_like" ||
-    kind === "resource_trash_like"
-  );
 }
 
 function summarizeCorpUnsafeRemoteScoreConversionMetrics(
