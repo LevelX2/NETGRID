@@ -575,7 +575,7 @@ import type {
 import {
   attributeHandSizeSkip,
   attributeMemorySkip,
-  attributeNormalizedSearchRecoverySkip,
+  attributeSearchRecoverySkip,
   attributeRunnerSetupSupportWindows,
   incrementChosenFamily,
   incrementCoverageTypes,
@@ -10073,7 +10073,13 @@ function summarizeRunnerSetupAttributionMetrics(
       if (entry.runnerEconomyFixGateEligibleStarvedSkip === true)
         attributeStarvedEconomySkip(metrics, sequence, index, summary);
       if (entry.runnerSetupFixGateEligibleSearchRecoverySkip === true)
-        attributeSearchRecoverySkip(metrics, sequence, index, summary);
+        attributeSearchRecoverySkip(
+          metrics,
+          sequence,
+          index,
+          summary,
+          isMeaningfulBoardProgress,
+        );
       if (entry.runnerSetupFixGateEligibleMemorySkip === true)
         attributeMemorySkip(
           metrics,
@@ -10266,97 +10272,6 @@ function attributeStarvedEconomySkip(
   metrics.runnerEconomyFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerEconomyFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerEconomyFixGateAttributionSuspicious += 1;
-}
-
-function attributeSearchRecoverySkip(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: AiSimulationActionSequenceEntry[],
-  index: number,
-  summary: AiSimulationSummary,
-): void {
-  const entry = sequence[index]!;
-  metrics.runnerSearchRecoveryFixGateWindows += 1;
-  metrics.runnerSearchRecoveryAttributionWindows += 1;
-  metrics.runnerSearchRecoveryAttributionSkipped += 1;
-  metrics.runnerSetupAttributionByKindSearchRecovery += 1;
-  if ((entry.runnerLegalSearchActions ?? 0) > 0) {
-    metrics.runnerSearchRecoveryFixGateLegalSearch += 1;
-    metrics.runnerSearchRecoveryAttributionLegalSearch += 1;
-  }
-  if ((entry.runnerLegalRecoveryActions ?? 0) > 0) {
-    metrics.runnerSearchRecoveryFixGateLegalRecovery += 1;
-    metrics.runnerSearchRecoveryAttributionLegalRecovery += 1;
-  }
-  if (entry.runnerSearchTaken === true)
-    metrics.runnerSearchRecoveryAttributionSearchTaken += 1;
-  if (entry.runnerRecoveryTaken === true)
-    metrics.runnerSearchRecoveryAttributionRecoveryTaken += 1;
-  incrementCoverageTypes(metrics, entry);
-  incrementChosenFamily(metrics, "runnerSearchRecoverySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
-  const installFollowup = next.some(
-    (candidate) => candidate.actionType === "install_card",
-  );
-  const coverageResolved = next.some(
-    (candidate) => candidate.runnerCoverageImproved === true,
-  );
-  const knownUnaffordableRun = next.some(
-    (candidate) => candidate.runStartedAgainstKnownUnaffordablePath === true,
-  );
-  const noProgress = !hasMeaningfulProgressWithin(
-    sequence, index, 5, isMeaningfulBoardProgress
-  );
-  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
-  if (installFollowup) metrics.runnerSearchRecoverySkipThenInstallFollowup += 1;
-  if (coverageResolved)
-    metrics.runnerSearchRecoverySkipThenCoverageResolved += 1;
-  if (!coverageResolved)
-    metrics.runnerSearchRecoverySkipThenCoverageStillMissing += 1;
-  if (knownUnaffordableRun)
-    metrics.runnerSearchRecoverySkipThenKnownUnaffordableRun += 1;
-  if (noProgress) metrics.runnerSearchRecoverySkipThenNoProgress += 1;
-  if (actionLimit) metrics.runnerSearchRecoverySkipThenActionLimit += 1;
-  if (!installFollowup)
-    metrics.runnerSearchRecoveryWindowWithNoInstallFollowup += 1;
-
-  const blocked =
-    entry.runnerEconomyTaken === true ||
-    entry.runnerPressureActionTaken === true ||
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
-  if (entry.runnerEconomyTaken === true)
-    metrics.runnerSearchRecoverySkipPlausibleEconomyReserve += 1;
-  if (entry.runnerPressureActionTaken === true)
-    metrics.runnerSearchRecoverySkipPlausiblePressure += 1;
-  if (
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true
-  )
-    metrics.runnerSearchRecoverySkipPlausibleRemoteContest += 1;
-  if (
-    entry.runnerPressureReadyTrue === true &&
-    entry.runnerPathBlockedByMissingCoverage !== true
-  )
-    metrics.runnerSearchRecoverySkipPlausibleCurrentRigEnough += 1;
-  const suspiciousCoverage = !coverageResolved && !installFollowup;
-  if (suspiciousCoverage)
-    metrics.runnerSearchRecoverySkipSuspiciousCoverageStillMissing += 1;
-  if (noProgress) metrics.runnerSearchRecoverySkipSuspiciousNoProgress += 1;
-  if (knownUnaffordableRun)
-    metrics.runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun += 1;
-  const suspicious = suspiciousCoverage || noProgress || knownUnaffordableRun;
-  if (!blocked && !suspicious)
-    metrics.runnerSearchRecoverySkipUnclassified += 1;
-  metrics.runnerSearchRecoveryFixGateAttributionEligible += 1;
-  if (blocked) metrics.runnerSearchRecoveryFixGateAttributionBlocked += 1;
-  if (suspicious) metrics.runnerSearchRecoveryFixGateAttributionSuspicious += 1;
-  attributeNormalizedSearchRecoverySkip(metrics, entry, {
-    installFollowup,
-    coverageResolved,
-    knownUnaffordableRun,
-    noProgress,
-    actionLimit,
-  });
 }
 
 function summarizeBreakerOntologyMetrics(
