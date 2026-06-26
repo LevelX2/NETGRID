@@ -46,7 +46,6 @@ import {
 } from "./runner-tactical-goals";
 import {
   RUNTIME_CARDS,
-  createAiHintsByCard,
 } from "./ai-hints";
 import {
   assessKnownRezzedIcePath,
@@ -75,9 +74,7 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
-import {
-  createAiFeatureExtractorContext,
-} from "./runtime/ai-feature-extractor-context";
+import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -239,7 +236,6 @@ import { stringRecordValue } from "./runtime/record-value";
 import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
-import { createRoleContext } from "./runtime/role-context";
 import {
   createRunnerRunOnlyActionContext,
   runnerRunActionSpendingCapAssessment,
@@ -430,17 +426,8 @@ import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import {
-  createCorpVisibleTagPayoffCategoryContext,
-} from "./simulation/corp-visible-tag-payoff-category";
-import {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
 } from "./simulation/corp-visible-tag-punish-taken-diagnostics";
-import {
-  createCorpVisibleTagPunishUnknownSkipDiagnosticsContext,
-} from "./simulation/corp-visible-tag-punish-unknown-skip-diagnostics";
-import {
-  createCorpTagCreationDiagnosticsContext,
-} from "./simulation/corp-tag-creation-diagnostics";
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
@@ -495,12 +482,6 @@ import {
   runnerTrashBlockedByCredits,
 } from "./simulation/remote-server-threat";
 import {
-  createCorpTagPunishActionContext,
-} from "./simulation/corp-tag-punish-action-context";
-import {
-  createCorpVisibleTagPunishOpportunityContext,
-} from "./simulation/corp-visible-tag-punish-opportunities";
-import {
   createTagPunishWindowDiagnosticsContext,
 } from "./simulation/tag-punish-window-diagnostics-context";
 import {
@@ -525,9 +506,6 @@ import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
   createQualityTagsForAction,
 } from "./simulation/simulation-quality-adapters";
-import {
-  createSimulationActionDiagnosticsContext,
-} from "./simulation/simulation-action-diagnostics-context";
 import {
   createRunnerInstallClassificationContext,
 } from "./simulation/runner-install-classification";
@@ -971,62 +949,34 @@ export {
 } from "./simulation/benchmark-deck-snapshot-resolver";
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 
-const AI_HINTS = createAiHintsByCard();
-
-const { rolesForAction, rolesForCardId } = createRoleContext({
-  findVisibleCard,
-  aiHints: AI_HINTS,
-});
-const { extractAiFeatures } = createAiFeatureExtractorContext({
-  rolesForCardId,
-  buildObservedFacts,
-  buildServerFeatures,
-  assessKnownRezzedIcePath,
-  isBlockedByKnownRezzedIce,
-  visibleCitySurveillanceSourceCount,
-});
-
 const {
+  AI_HINTS,
+  rolesForAction,
+  rolesForCardId,
+  extractAiFeatures,
   sourceDefinitionIdForSimulationAction,
   corpFutureRunIceDiagnosticsForSimulationAction,
   corpScoreTerminalDiagnosticsForSimulationAction,
   corpEconomyBeforeScoreDiagnosticsForSimulationAction,
   definitionForSimulationAction,
   centralRunEventGoodForTarget,
-} = createSimulationActionDiagnosticsContext({
-  findVisibleCard,
-  rolesForAction,
-});
-const {
   strongestCorpTagSourceOpportunity,
   corpPunishKindForAction,
   isCorpTagSourceAction,
   isCorpTraceTagSourceAction,
   corpTagPunishOntologyAssessmentForAction,
-} = createCorpTagPunishActionContext({
-  sourceDefinitionIdForAction,
-  rolesForAction,
-});
-const { corpVisibleTagPayoffCategoryForAction } =
-  createCorpVisibleTagPayoffCategoryContext({
-    tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
-    rolesForAction,
-  });
-const { applyCorpVisibleTagPunishUnknownSkipDiagnostics } =
-  createCorpVisibleTagPunishUnknownSkipDiagnosticsContext({
-    sourceDefinitionIdForAction,
-    isCorpTraceTagSourceAction,
-  });
-const { corpVisibleTagPunishOpportunities } =
-  createCorpVisibleTagPunishOpportunityContext({
-    corpPunishKindForAction,
-    corpVisibleTagPayoffCategoryForAction,
-    sourceDefinitionIdForAction,
-  });
-const {
+  corpVisibleTagPayoffCategoryForAction,
+  applyCorpVisibleTagPunishUnknownSkipDiagnostics,
+  corpVisibleTagPunishOpportunities,
   applyCorpTagSourceWindowDiagnostics,
   applyActualTagCreationDiagnostics,
-} = createCorpTagCreationDiagnosticsContext({
+} = createAiFacadeFoundationContext({
+  findVisibleCard,
+  buildObservedFacts,
+  buildServerFeatures,
+  assessKnownRezzedIcePath,
+  isBlockedByKnownRezzedIce,
+  visibleCitySurveillanceSourceCount,
   sourceDefinitionIdForAction,
 });
 const {
