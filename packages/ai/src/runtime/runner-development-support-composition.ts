@@ -22,6 +22,12 @@ import {
   type RunnerViral15JackOutContextDependencies,
 } from "./runner-viral15-jack-out-context";
 
+type RunnerDevelopmentCardDefinition = {
+  title?: string;
+  rulesText?: string;
+  mechanics?: unknown;
+};
+
 export type RunnerDevelopmentSupportCompositionDependencies =
   RunnerLoanContextDependencies<
     DeckCapabilityProfile,
@@ -39,8 +45,18 @@ export type RunnerDevelopmentSupportCompositionDependencies =
     > &
     Omit<
       RunnerEconomyCommitmentCompositionDependencies,
-      "runnerHandFundingTarget" | "hintEffectsForDefinition"
-    >;
+      | "runnerHandFundingTarget"
+      | "hintEffectsForDefinition"
+      | "definitionForCardId"
+      | "rulesTextForDefinition"
+    > & {
+      runtimeDefinition: (
+        definitionId: string,
+      ) => RunnerDevelopmentCardDefinition | undefined;
+      demoDefinition: (
+        definitionId: string,
+      ) => RunnerDevelopmentCardDefinition | undefined;
+    };
 
 export function createRunnerDevelopmentSupportComposition(
   dependencies: RunnerDevelopmentSupportCompositionDependencies,
@@ -115,7 +131,9 @@ export function createRunnerDevelopmentSupportComposition(
     findVisibleCard: dependencies.findVisibleCard,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     rolesForCardId: dependencies.rolesForCardId,
-    definitionForCardId: dependencies.definitionForCardId,
+    definitionForCardId: (definitionId) =>
+      dependencies.runtimeDefinition(definitionId) ??
+      dependencies.demoDefinition(definitionId),
     actionCreditCost: dependencies.actionCreditCost,
     rolesForAction: dependencies.rolesForAction,
     serverId: dependencies.serverId,
@@ -125,7 +143,13 @@ export function createRunnerDevelopmentSupportComposition(
     hintEffectsForDefinition: (definitionId) =>
       dependencies.hintForDefinitionId(definitionId)?.effects ?? [],
     mechanicsForDefinition: dependencies.mechanicsForDefinition,
-    rulesTextForDefinition: dependencies.rulesTextForDefinition,
+    rulesTextForDefinition: (definitionId) => {
+      const runtimeDefinition = dependencies.runtimeDefinition(definitionId);
+      const demoDefinition = dependencies.demoDefinition(definitionId);
+      return [runtimeDefinition?.rulesText, demoDefinition?.rulesText]
+        .filter(Boolean)
+        .join(" ");
+    },
     isRunnerRigInstallAction: dependencies.isRunnerRigInstallAction,
   });
 

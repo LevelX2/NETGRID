@@ -955,25 +955,13 @@ const {
   rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
   previousPlan: getTacticalPlanMemorySnapshot,
   findVisibleCard,
-  definitionForCardId: (definitionId) =>
-    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId],
+  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
+  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
   serverId: semanticRuntimeServerId,
   definitionType: definitionTypeForMetrics,
   runnerRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runnerRunTargetHighPayoff,
   mechanicsForDefinition: runnerCardMechanicsForAi,
-  rulesTextForDefinition: (definitionId) => {
-    const runtimeDefinition = RUNTIME_CARDS[definitionId];
-    const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
-    return [
-      "rulesText" in (runtimeDefinition ?? {})
-        ? (runtimeDefinition as { rulesText?: string } | undefined)?.rulesText
-        : undefined,
-      demoDefinition?.rulesText,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  },
   isRunnerRigInstallAction,
 });
 const {
