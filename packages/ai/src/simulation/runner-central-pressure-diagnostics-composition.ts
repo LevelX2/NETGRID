@@ -83,11 +83,7 @@ export function createRunnerCentralPressureDiagnosticsComposition(
 
   return {
     bestTrueCentralCloseoutProfileForMetrics,
-    trueCentralCloseoutProfileForMetrics,
-    runnerRemoteThreatProfile,
     runnerRemoteThreatTargetingDiagnosticsForAction,
-    noFreshCentralSubstitutionTypeForAction,
-    runnerNoFreshCentralContextForMetrics,
     runnerCentralPressureDiagnosticsForSimulationAction,
   };
 }

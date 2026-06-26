@@ -142,8 +142,6 @@ export function createRunnerKnownPathDiagnosticsComposition(
     runnerCoverageSearchActionForMetrics,
     runnerCoverageRecoveryActionForMetrics,
     runnerRemoteTrashAccessContext,
-    runnerKnownNoAccessLegalRunTargets,
-    runnerCoverageRepairDiagnostic,
     runnerKnownPathDiagnosticsForAction,
   };
 }
