@@ -493,7 +493,6 @@ import type {
 } from "./simulation/v143-tuning-gate";
 import type {
   AiDoctrineQualityBenchmarkConfig,
-  AiDoctrineQualityBenchmarkResult,
 } from "./simulation/doctrine-quality-benchmark-types";
 import type {
   V143ExploitFixture,
@@ -515,9 +514,7 @@ import {
 import {
   DOCTRINE_QUALITY_METRIC_NAMES,
   averageNumber,
-  diffDoctrineMetrics,
   medianNumber,
-  sumDoctrineMetrics,
 } from "./simulation/simulation-metric-aggregation";
 import {
   analyzeDoctrineQualityCases,
@@ -756,6 +753,9 @@ import {
 import {
   createV143SimulationLeagueRunner,
 } from "./simulation/v143-simulation-league";
+import {
+  createDoctrineQualityBenchmarkRunner,
+} from "./simulation/doctrine-quality-benchmark-runner";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2386,6 +2386,10 @@ const { runV143SimulationLeague } = createV143SimulationLeagueRunner({
   runV143Profile,
 });
 export { runV143SimulationLeague };
+const { runDoctrineQualityBenchmark } = createDoctrineQualityBenchmarkRunner({
+  runV143Profile,
+});
+export { runDoctrineQualityBenchmark };
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2790,57 +2794,6 @@ export function simulateAiSoak(
 
 export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
   return MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) => ({ ...slot }));
-}
-
-export function runDoctrineQualityBenchmark(
-  config: AiDoctrineQualityBenchmarkConfig = {},
-): AiDoctrineQualityBenchmarkResult {
-  const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
-  const candidateProfileId = config.candidateProfile ?? "current_candidate";
-  const baselineProfile = benchmarkProfileById(
-    baselineProfileId,
-    BENCHMARK_PROFILES_143.profiles,
-  );
-  const candidateProfile = benchmarkProfileById(
-    candidateProfileId,
-    BENCHMARK_PROFILES_143.profiles,
-  );
-  const seeds =
-    config.includeHoldout === false
-      ? SOAK_SEEDS_143.tuningSeeds
-      : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
-  const baselineRun = runV143Profile(baselineProfile, seeds, config);
-  const candidateRun = runV143Profile(candidateProfile, seeds, config);
-  const baseline = sumDoctrineMetrics(
-    baselineRun.summaries.map((summary) => summary.metrics.doctrine),
-  );
-  const candidate = sumDoctrineMetrics(
-    candidateRun.summaries.map((summary) => summary.metrics.doctrine),
-  );
-  return {
-    version: "ai-deck-doctrine-quality-v1",
-    baselineProfile: baselineProfileId,
-    candidateProfile: candidateProfileId,
-    seeds,
-    baseline,
-    candidate,
-    delta: diffDoctrineMetrics(candidate, baseline),
-    safety: {
-      illegalActionDelta:
-        candidateRun.illegalActions - baselineRun.illegalActions,
-      replayFailureDelta:
-        candidateRun.replayFailures - baselineRun.replayFailures,
-      timeoutRateDelta: round(
-        candidateRun.timeouts / Math.max(candidateRun.games, 1) -
-          baselineRun.timeouts / Math.max(baselineRun.games, 1),
-      ),
-      fallbackRateDelta: round(
-        candidateRun.fallbackRate - baselineRun.fallbackRate,
-      ),
-    },
-    baselineRun,
-    candidateRun,
-  };
 }
 
 export function runMatchProgressionBenchmark(
