@@ -629,6 +629,19 @@ import {
   countRunnerPressureWithinOwnActions,
   countRunnerSearchRecoveryNoInstallFollowup,
 } from "./simulation/runner-setup-metric-counts";
+import {
+  CLOSED_ACCOUNTS_LIKE_PUNISH_IDS,
+  CORP_TAG_SOURCE_IDS,
+  CORP_TRACE_TAG_SOURCE_IDS,
+  DATAPOOL_LIKE_PUNISH_IDS,
+  POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS,
+  PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS,
+  RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS,
+  RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS,
+  RUNNER_TRACE_DEFENSE_CONTEXT_IDS,
+  SCORCHED_EARTH_LIKE_PUNISH_IDS,
+  URBAN_RENEWAL_LIKE_PUNISH_IDS,
+} from "./simulation/tag-punish-card-sets";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
@@ -4495,49 +4508,6 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     visibleCitySurveillanceSourceCount,
   });
 }
-
-const SCORCHED_EARTH_LIKE_PUNISH_IDS = new Set(["onr_v1_302_scorched-earth"]);
-const URBAN_RENEWAL_LIKE_PUNISH_IDS = new Set(["onr_v1_307_urban-renewal"]);
-const PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS = new Set([
-  "onr_v1_301_punitive-counterstrike",
-]);
-const CLOSED_ACCOUNTS_LIKE_PUNISH_IDS = new Set(["onr_v1_285_closed-accounts"]);
-const POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS = new Set([
-  "onr_v1_299_power-grid-overload",
-]);
-const DATAPOOL_LIKE_PUNISH_IDS = new Set(["onr_v1_287_datapool-by-zetatech"]);
-const CORP_TAG_SOURCE_IDS = new Set([
-  "onr_v1_283_audit-of-call-records",
-  "onr_v1_284_chance-observation",
-  "onr_v1_287_datapool-by-zetatech",
-  "onr_v1_293_netwatch-credit-voucher",
-  "onr_v1_306_trojan-horse",
-]);
-const CORP_TRACE_TAG_SOURCE_IDS = new Set([
-  "onr_v1_207_netwatch-operations-office",
-  "onr_v1_243_fetch-4-0-1",
-  "onr_v1_249_hunter",
-  "onr_v1_283_audit-of-call-records",
-  "onr_v1_284_chance-observation",
-  "onr_v1_213_private-cybernet-police",
-  "onr_v1_310_blood-cat",
-  "onr_v1_260_pocket-virtual-reality",
-]);
-
-const RUNNER_TRACE_DEFENSE_CONTEXT_IDS = new Set([
-  "onr_v1_003_baedekers-net-map",
-  "onr_v1_004_bakdoor",
-  "onr_v1_051_rabbit",
-  "onr_v1_063_signpost",
-]);
-const RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS = new Set([
-  "onr_v1_023_evil-twin",
-  "onr_v1_028_force-shield",
-  "onr_v1_061_shield",
-]);
-const RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS = new Set([
-  "onr_v1_022_emergency-self-construct",
-]);
 
 function tagPunishWindowDiagnosticsForSimulationAction(
   input: AiDecisionInput,
