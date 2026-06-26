@@ -132,9 +132,6 @@ import {
   targetServerIdForSimulationAction,
 } from "./runtime/simulation-action-target";
 import {
-  selectedChoicesForDecision as selectedChoicesForDecisionRuntime,
-} from "./runtime/selected-choices-for-decision";
-import {
   breakSubroutineIndexesForAction,
 } from "./runtime/subroutine-indexes";
 import {
@@ -727,9 +724,10 @@ import {
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
-  type LegacyBaselineChoice,
 } from "./legacy/legacy-baseline";
-import { decisionFromLegacyChoices } from "./legacy/decision-from-choices";
+import {
+  createLegacyDecisionContext,
+} from "./legacy/legacy-decision-context";
 import {
   retainActionAlternativesForFindingWindows,
   stripSelfplayActionAlternatives,
@@ -1545,6 +1543,20 @@ export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
     decisionFromChoices,
   });
 }
+
+const { decisionFromChoices, selectedChoicesForDecision } =
+  createLegacyDecisionContext({
+    evaluateCorpOpeningHand,
+    evaluateRunnerOpeningHand,
+    discardKeepScore: (input, card) => discardKeepScore(input, card),
+    selectedRunnerProgramInstallTrashOptionIds: (input, choice, options) =>
+      selectedRunnerProgramInstallTrashOptionIds(input, choice, options),
+    selectedRunnerForcedProgramTrashOptionIds: (input, options) =>
+      selectedRunnerForcedProgramTrashOptionIds(input, options),
+    extractAiFeatures,
+    rolesForCardId,
+    scrubEvidence,
+  });
 
 const {
   runnerSelfDamageGuardedDecision,
@@ -3327,32 +3339,6 @@ function runV143Profile(
     notableExploitRefs: sortedUnique(exploitRefs),
     summaries,
   };
-}
-
-// Legacy baseline decision assembly for fallback and reference decisions.
-function decisionFromChoices(
-  input: AiDecisionInput,
-  choices: LegacyBaselineChoice[],
-): AiDecision {
-  return decisionFromLegacyChoices(input, choices, {
-    selectedChoicesForDecision,
-    scrubEvidence,
-  });
-}
-
-function selectedChoicesForDecision(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecision["selectedChoices"] | undefined {
-  return selectedChoicesForDecisionRuntime(input, action, {
-    evaluateCorpOpeningHand,
-    evaluateRunnerOpeningHand,
-    discardKeepScore,
-    selectedRunnerProgramInstallTrashOptionIds,
-    selectedRunnerForcedProgramTrashOptionIds,
-    extractAiFeatures,
-    rolesForCardId,
-  });
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
