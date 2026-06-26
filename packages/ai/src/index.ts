@@ -576,6 +576,7 @@ import {
   attributeNormalizedHandSizeSkip,
   attributeNormalizedMemorySkip,
   attributeNormalizedSearchRecoverySkip,
+  attributeRunnerSetupSupportWindows,
   incrementChosenFamily,
   incrementCoverageTypes,
   RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS,
@@ -10166,36 +10167,6 @@ function summarizeRunnerSetupAttributionMetrics(
     metrics.runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
   else metrics[strongest[0]!.key] = 1;
   return metrics;
-}
-
-function attributeRunnerSetupSupportWindows(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: AiSimulationActionSequenceEntry,
-): void {
-  if (entry.runnerMemoryBottleneckDecisionWindow === true) {
-    metrics.runnerMemoryAttributionWindows += 1;
-    metrics.runnerMemoryNormalizedWindows += 1;
-    if ((entry.runnerLegalMemoryHardwareActions ?? 0) > 0)
-      metrics.runnerMemoryAttributionLegalSupport += 1;
-  }
-  if (entry.runnerHandSizeBottleneckDecisionWindow === true) {
-    metrics.runnerHandSizeAttributionWindows += 1;
-    metrics.runnerHandSizeNormalizedWindows += 1;
-    if ((entry.runnerLegalHandSizeActions ?? 0) > 0)
-      metrics.runnerHandSizeAttributionLegalSupport += 1;
-  }
-  if (entry.runnerMemoryHardwareTaken === true)
-    metrics.runnerMemoryAttributionSupportTaken += 1;
-  if (entry.runnerMemoryHardwareTaken === true)
-    metrics.runnerMemoryNormalizedTaken += 1;
-  if (entry.runnerHandSizeSupportTaken === true)
-    metrics.runnerHandSizeAttributionSupportTaken += 1;
-  if (entry.runnerHandSizeSupportTaken === true)
-    metrics.runnerHandSizeNormalizedTaken += 1;
-  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true) {
-    metrics.runnerSearchRecoveryNormalizedWindows += 1;
-    metrics.runnerSearchRecoveryNormalizedTaken += 1;
-  }
 }
 
 function attributeStarvedEconomySkip(
