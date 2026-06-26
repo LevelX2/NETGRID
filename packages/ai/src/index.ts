@@ -669,7 +669,10 @@ import {
   createQualityTagsForAction,
   metricsFor,
 } from "./simulation/simulation-quality-adapters";
-import { createSourceDefinitionIdForSimulationAction } from "./simulation/simulation-action-source-definition";
+import {
+  createDefinitionForSimulationAction,
+  createSourceDefinitionIdForSimulationAction,
+} from "./simulation/simulation-action-source-definition";
 import {
   createRunnerInstallClassificationContext,
 } from "./simulation/runner-install-classification";
@@ -1181,6 +1184,10 @@ const AI_HINTS = createAiHintsByCard();
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
+
+const definitionForSimulationAction = createDefinitionForSimulationAction(
+  sourceDefinitionIdForSimulationAction,
+);
 
 const centralRunEventGoodForTarget = createCentralRunEventGoodForTarget({
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
@@ -16687,16 +16694,6 @@ function runnerEconomySetupActionClass(
           (role) => role.includes("delayed") || role.includes("penalty"),
         )),
   };
-}
-
-function definitionForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-) {
-  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
-  return definitionId
-    ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
-    : undefined;
 }
 
 function runnerEconomySkipReasonForDiagnostics(context: {
