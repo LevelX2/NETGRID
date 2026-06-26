@@ -21,6 +21,7 @@ import {
   createRunnerViral15JackOutContext,
   type RunnerViral15JackOutContextDependencies,
 } from "./runner-viral15-jack-out-context";
+import { rolesMatch } from "./role-match";
 
 type RunnerDevelopmentCardDefinition = {
   title?: string;
@@ -35,7 +36,7 @@ export type RunnerDevelopmentSupportCompositionDependencies =
     RunnerHandDevelopmentEvaluation
   > &
     RunnerViral15JackOutContextDependencies &
-    RunnerHandFundingTargetDependencies &
+    Omit<RunnerHandFundingTargetDependencies, "rolesMatch"> &
     Omit<
       RunnerPersistentInstallContextDependencies<
         DeckCapabilityProfile,
@@ -103,7 +104,7 @@ export function createRunnerDevelopmentSupportComposition(
     cardLooksLikeCreditPayout: dependencies.cardLooksLikeCreditPayout,
     badPublicityOrTraceTechCard:
       dependencies.badPublicityOrTraceTechCard,
-    rolesMatch: dependencies.rolesMatch,
+    rolesMatch: (roles, needles) => rolesMatch([...roles], [...needles]),
   });
 
   const {

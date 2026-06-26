@@ -182,7 +182,6 @@ import {
 import {
   isSearchChoice,
 } from "./runtime/search-choice-option";
-import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason,
 } from "./runtime/runner-known-ice-path-score";
@@ -941,7 +940,6 @@ const {
   isVisibleIcebreakerProgram,
   cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
   badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-  rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
   previousPlan: getTacticalPlanMemorySnapshot,
   findVisibleCard,
   runtimeDefinition: runtimeCardDefinitionForAi,
