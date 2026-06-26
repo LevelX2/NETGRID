@@ -75,7 +75,7 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { createRunnerSemanticSupportComposition } from "./runtime/runner-semantic-support-composition";
-import { createAiActionEntrypointsComposition } from "./runtime/ai-action-entrypoints-composition";
+import { createSemanticRuntimeEntrypointsComposition } from "./runtime/semantic-runtime-entrypoints-composition";
 import { compareAction } from "./runtime/action-order";
 import {
   breakSubroutineIndexesForAction,
@@ -128,7 +128,6 @@ import {
   isRunnerEconomyRole,
   isRunnerPressureRole,
 } from "./runtime/runner-role-classification";
-import { createSemanticRuntimeDecisionComposition } from "./runtime/semantic-runtime-decision-composition";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -1024,7 +1023,13 @@ const {
     isRemoteServerTarget,
   },
 });
-const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition({
+const {
+  chooseAiAction,
+  chooseCorpAction,
+  chooseCorpBaselineAction,
+  chooseRunnerAction,
+  chooseRunnerBaselineAction,
+} = createSemanticRuntimeEntrypointsComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   isVisibleIcebreakerProgram,
   visibleBreakerCardCanAddressIce,
@@ -1077,15 +1082,6 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition
   selectedChoicesForDecision,
   rememberTacticalPlanRuntime,
   scrubEvidence,
-});
-const {
-  chooseAiAction,
-  chooseCorpAction,
-  chooseCorpBaselineAction,
-  chooseRunnerAction,
-  chooseRunnerBaselineAction,
-} = createAiActionEntrypointsComposition({
-  chooseSemanticRuntimeAction,
   extractAiFeatures,
   scoreRunnerAction,
   scoreCorpAction,
