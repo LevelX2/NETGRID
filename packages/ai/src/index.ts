@@ -1101,6 +1101,83 @@ const {
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
+const {
+  semanticRuntimeRunnerScoreComponents,
+} = createRunnerScoringSupportComposition({
+  evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
+  guidanceValue: runnerRunTargetSemanticGuidanceValue,
+  isRemoteServerTarget,
+  remoteRootTrashCost: remoteRootTrashCostForMetrics,
+  staleKnownRndRepeatRunPenalty,
+  rndFreshRepeatRunBoost,
+  definitionType: definitionTypeForMetrics,
+  staleKnownHqRepeatRunPenalty,
+  publicHistory: mergedAiPublicHistory,
+  eventVersion: aiEventVersion,
+  serverIdFromEvent: aiServerIdFromEvent,
+  closeout: bestTrueCentralCloseoutProfileForMetrics,
+  assessRunnerPressureReadyForMetrics,
+  trashAccessContext: runnerRemoteTrashAccessContext,
+  assessKnownRezzedIcePath,
+  rootTrashCost: remoteRootTrashCostForMetrics,
+  targetServerId: semanticRuntimeServerId,
+  blinkAssessment: runnerBlinkRecoveryAssessment,
+  rolesForAction,
+  sourceDefinitionIdForAction,
+  handFundingTarget: runnerHandFundingTarget,
+  bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
+  hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
+  findVisibleCard,
+  rolesForCardId,
+  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
+  isRunnerPressureRole,
+  isRunnerEconomyRole,
+  badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+  actionClickCost,
+  actionCreditCost,
+  junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
+  junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
+  hintForDefinitionId,
+  badPublicityRelevance: {
+    sourceDefinitionIdForAction,
+    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+    actionCreditCost,
+    fakedHitCardId: FAKED_HIT_CARD_ID,
+  },
+  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+  goalFit: {
+    sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
+    runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
+    runTargetEvaluationForAction:
+      semanticRuntimeRunnerRunTargetEvaluationForAction,
+  },
+  recoveryCommitment: {
+    muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
+    handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
+    viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
+    multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
+    bankInvestmentCommitmentScoreComponents:
+      runnerBankInvestmentCommitmentScoreComponents,
+    noRunEconomyCommitmentScoreComponents:
+      runnerNoRunEconomyCommitmentScoreComponents,
+  },
+  install: {
+    rolesForAction,
+    muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
+    persistentInstallFitScoreComponent:
+      runnerPersistentInstallFitScoreComponent,
+    isRunnerEconomyRole,
+    isRunnerPressureRole,
+    badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
+    programInstallTrashAssessmentForAction:
+      runnerProgramInstallTrashAssessmentForAction,
+    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+  },
+  startRun: {
+    serverId: semanticRuntimeServerId,
+    isRemoteServerTarget,
+  },
+});
 const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   isVisibleIcebreakerProgram,
@@ -1113,24 +1190,8 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetHighPayoff,
-  runnerComponents: (
-    componentInput,
-    componentAction,
-    componentScopeId,
-    actionSemanticCandidate,
-  ) =>
-    semanticRuntimeRunnerScoreComponents(
-      componentInput,
-      componentAction,
-      componentScopeId,
-      actionSemanticCandidate,
-    ),
-  corpComponents: (componentInput, componentAction, componentScopeId) =>
-    semanticRuntimeCorpScoreComponents(
-      componentInput,
-      componentAction,
-      componentScopeId,
-    ),
+  runnerComponents: semanticRuntimeRunnerScoreComponents,
+  corpComponents: semanticRuntimeCorpScoreComponents,
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
   programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
@@ -1214,84 +1275,6 @@ export {
   chooseRunnerAction,
   chooseRunnerBaselineAction,
 };
-
-const {
-  semanticRuntimeRunnerScoreComponents,
-} = createRunnerScoringSupportComposition({
-  evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
-  guidanceValue: runnerRunTargetSemanticGuidanceValue,
-  isRemoteServerTarget,
-  remoteRootTrashCost: remoteRootTrashCostForMetrics,
-  staleKnownRndRepeatRunPenalty,
-  rndFreshRepeatRunBoost,
-  definitionType: definitionTypeForMetrics,
-  staleKnownHqRepeatRunPenalty,
-  publicHistory: mergedAiPublicHistory,
-  eventVersion: aiEventVersion,
-  serverIdFromEvent: aiServerIdFromEvent,
-  closeout: bestTrueCentralCloseoutProfileForMetrics,
-  assessRunnerPressureReadyForMetrics,
-  trashAccessContext: runnerRemoteTrashAccessContext,
-  assessKnownRezzedIcePath,
-  rootTrashCost: remoteRootTrashCostForMetrics,
-  targetServerId: semanticRuntimeServerId,
-  blinkAssessment: runnerBlinkRecoveryAssessment,
-  rolesForAction,
-  sourceDefinitionIdForAction,
-  handFundingTarget: runnerHandFundingTarget,
-  bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
-  hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
-  findVisibleCard,
-  rolesForCardId,
-  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-  isRunnerPressureRole,
-  isRunnerEconomyRole,
-  badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-  actionClickCost,
-  actionCreditCost,
-  junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
-  junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
-  hintForDefinitionId,
-  badPublicityRelevance: {
-    sourceDefinitionIdForAction,
-    selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-    actionCreditCost,
-    fakedHitCardId: FAKED_HIT_CARD_ID,
-  },
-  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
-  goalFit: {
-    sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
-    runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
-    runTargetEvaluationForAction:
-      semanticRuntimeRunnerRunTargetEvaluationForAction,
-  },
-  recoveryCommitment: {
-    muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
-    handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
-    viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
-    multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
-    bankInvestmentCommitmentScoreComponents:
-      runnerBankInvestmentCommitmentScoreComponents,
-    noRunEconomyCommitmentScoreComponents:
-      runnerNoRunEconomyCommitmentScoreComponents,
-  },
-  install: {
-    rolesForAction,
-    muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
-    persistentInstallFitScoreComponent:
-      runnerPersistentInstallFitScoreComponent,
-    isRunnerEconomyRole,
-    isRunnerPressureRole,
-    badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-    programInstallTrashAssessmentForAction:
-      runnerProgramInstallTrashAssessmentForAction,
-    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
-  },
-  startRun: {
-    serverId: semanticRuntimeServerId,
-    isRemoteServerTarget,
-  },
-});
 
 const {
   simulateAiGame,
