@@ -217,6 +217,25 @@ export function capitalizeRunnerSetupFamily(
   return family.charAt(0).toUpperCase() + family.slice(1);
 }
 
+export function incrementChosenFamily(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  prefix:
+    | "runnerStarvedEconomySkip"
+    | "runnerSearchRecoverySkip"
+    | "runnerMemorySkip",
+  entry: AiSimulationActionSequenceEntry,
+): void {
+  const family = runnerSetupChosenFamilyForEntry(entry);
+  if (prefix === "runnerMemorySkip" && family === "install") {
+    metrics.runnerMemorySkipChosenInstallNonMemory += 1;
+    return;
+  }
+  const key = `${prefix}Chosen${capitalizeRunnerSetupFamily(family)}` as
+    | RunnerSetupAttributionMetricKey
+    | undefined;
+  if (key && key in metrics) metrics[key] += 1;
+}
+
 export function incrementCoverageTypes(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
   entry: AiSimulationActionSequenceEntry,

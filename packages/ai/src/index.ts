@@ -573,7 +573,7 @@ import type {
   AiMatchProgressionMetrics,
 } from "./simulation/ai-match-progression-types";
 import {
-  capitalizeRunnerSetupFamily,
+  incrementChosenFamily,
   incrementCoverageTypes,
   runnerSetupChosenFamilyForEntry,
   type RunnerSetupAttributionMetricKey,
@@ -10824,25 +10824,6 @@ function attributeNormalizedHandSizeSkip(
   }
 
   metrics.runnerHandSizeNormalizedMetricArtifact += 1;
-}
-
-function incrementChosenFamily(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  prefix:
-    | "runnerStarvedEconomySkip"
-    | "runnerSearchRecoverySkip"
-    | "runnerMemorySkip",
-  entry: AiSimulationActionSequenceEntry,
-): void {
-  const family = runnerSetupChosenFamilyForEntry(entry);
-  if (prefix === "runnerMemorySkip" && family === "install") {
-    metrics.runnerMemorySkipChosenInstallNonMemory += 1;
-    return;
-  }
-  const key = `${prefix}Chosen${capitalizeRunnerSetupFamily(family)}` as
-    | RunnerSetupAttributionMetricKey
-    | undefined;
-  if (key && key in metrics) metrics[key] += 1;
 }
 
 const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
