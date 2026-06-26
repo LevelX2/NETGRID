@@ -464,3 +464,68 @@ export function attributeNormalizedHandSizeSkip(
 
   metrics.runnerHandSizeNormalizedMetricArtifact += 1;
 }
+
+export function attributeNormalizedMemorySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: AiSimulationActionSequenceEntry,
+  followup: {
+    memoryInstalled: boolean;
+    programBlocked: boolean;
+    coverageStillMissing: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  if (entry.runnerMemoryBottleneckDecisionWindow !== true)
+    metrics.runnerMemoryNormalizedWindows += 1;
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryNormalizedTaken += 1;
+  else metrics.runnerMemoryNormalizedSkipped += 1;
+
+  const legalMemorySupport = (entry.runnerLegalMemoryHardwareActions ?? 0) > 0;
+  if (!legalMemorySupport) {
+    metrics.runnerMemoryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (entry.runnerMemorySupportSkippedWhileGripHasPrograms !== true) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByNoProgramPressure += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.memoryInstalled &&
+    (followup.programBlocked ||
+      followup.coverageStillMissing ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerMemoryNormalizedSuspicious += 1;
+    metrics.runnerMemoryNormalizedTrueRigBottleneck += 1;
+    metrics.runnerMemoryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  metrics.runnerMemoryNormalizedUnclassified += 1;
+}
