@@ -678,8 +678,8 @@ import {
 } from "./simulation/runner-run-target-context";
 import {
   createRunnerCoverageRepairDiagnostic,
+  createRunnerKnownPathDiagnosticsForAction,
   createRunnerKnownNoAccessLegalRunTargets,
-  runnerKnownPathDiagnosticsForAction as runnerKnownPathDiagnosticsForActionWithDeps,
 } from "./simulation/runner-known-no-access";
 import {
   countSameStrategicPlanRepeatsWithoutProgress,
@@ -1197,6 +1197,20 @@ const runnerCoverageRepairDiagnostic = createRunnerCoverageRepairDiagnostic({
   findVisibleCard,
   rolesForCardId,
 });
+
+const runnerKnownPathDiagnosticsForAction =
+  createRunnerKnownPathDiagnosticsForAction({
+    assessKnownRezzedIcePath,
+    remoteServerHasScoreThreat,
+    rolesForAction,
+    rolesForCardId,
+    runnerCoverageRepairDiagnostic,
+    runnerHasRecentRunOnServer,
+    runnerKnownPathAssessmentIsKnownNoAccess,
+    runnerKnownPathAssessmentIsUnbreakableNoAccess,
+    runnerRemoteHasKnownRelevantTrashTarget,
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
+  });
 
 const {
   runnerDrawKindForSimulationAction,
@@ -17601,30 +17615,4 @@ function runnerCentralRunBurnsRemoteContestReserveForInput(
 
 function runnerCreditReserveTargetForInput(input: AiDecisionInput): number {
   return runnerCreditReserveTargetForInputWithRoles(input, rolesForCardId);
-}
-
-function runnerKnownPathDiagnosticsForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-  reserveTarget: number,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  return runnerKnownPathDiagnosticsForActionWithDeps(
-    input,
-    action,
-    targetServerId,
-    reserveTarget,
-    {
-      assessKnownRezzedIcePath,
-      remoteServerHasScoreThreat,
-      rolesForAction,
-      rolesForCardId,
-      runnerCoverageRepairDiagnostic,
-      runnerHasRecentRunOnServer,
-      runnerKnownPathAssessmentIsKnownNoAccess,
-      runnerKnownPathAssessmentIsUnbreakableNoAccess,
-      runnerRemoteHasKnownRelevantTrashTarget,
-      runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-    },
-  );
 }

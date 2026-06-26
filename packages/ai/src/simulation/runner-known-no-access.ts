@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 type VisibleCardDefinitionLookup = (
   input: AiDecisionInput,
@@ -485,6 +486,24 @@ export function runnerKnownPathDiagnosticsForAction(
       ? { lowValueUnaffordableRun: true }
       : {}),
   };
+}
+
+export function createRunnerKnownPathDiagnosticsForAction(
+  dependencies: RunnerKnownPathDiagnosticsDependencies,
+): (
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+  reserveTarget: number,
+) => Partial<AiSimulationSummary["actionSequence"][number]> {
+  return (input, action, targetServerId, reserveTarget) =>
+    runnerKnownPathDiagnosticsForAction(
+      input,
+      action,
+      targetServerId,
+      reserveTarget,
+      dependencies,
+    );
 }
 
 export function runnerCoverageRepairDiagnostic(
