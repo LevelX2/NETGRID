@@ -110,16 +110,22 @@ export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHand
   const iceCount = handRoles.filter(isIceRole).length;
   const economyCount = handRoles.filter((role) => role.includes("economy") || role.includes("draw")).length;
   const remoteRootCount = handRoles.filter((role) => role.includes("asset") || role.includes("upgrade") || role.includes("remote_support")).length;
-  const doctrine = input.ownDeckDoctrine;
-  const hasRush = doctrine?.archetypeTags.includes("rush") ?? false;
-  const hasGlacier = doctrine?.archetypeTags.includes("glacier") ?? false;
+  const semanticContext = openingSemanticContext(input);
+  const hasScorelineStrategy = semanticContext.strategies.some((strategy) =>
+    strategy === "corp.remote_scoring" ||
+    strategy === "corp.rush_score" ||
+    strategy === "corp.fast_advance",
+  );
+  const hasRemoteProtectionSupport =
+    semanticContext.corpRemoteProtectionTools > 0 ||
+    semanticContext.strategies.includes("corp.ice_tax_glacier");
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
     `opening_agendas:${agendaCount}`,
     `opening_ice:${iceCount}`,
     `opening_economy:${economyCount}`,
-    ...doctrineOpeningEvidence(doctrine)
+    ...semanticOpeningEvidence(semanticContext)
   ];
 
   score += iceCount >= 2 ? 25 : iceCount === 1 ? 16 : 0;
@@ -128,9 +134,9 @@ export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHand
   if (economyCount === 0) reasons.push("no_opening_economy");
   score += agendaCount === 0 ? 20 : agendaCount === 1 ? 17 : agendaCount === 2 && iceCount >= 2 ? 9 : 0;
   if (agendaCount >= 3) reasons.push("agenda_flood");
-  score += iceCount > 0 && agendaCount <= 2 ? 15 : remoteRootCount > 0 && hasGlacier ? 10 : 0;
+  score += iceCount > 0 && agendaCount <= 2 ? 15 : remoteRootCount > 0 && hasRemoteProtectionSupport ? 10 : 0;
   score += economyCount > 0 || input.playerView.own.gripOrHq.length >= 4 ? 10 : 0;
-  score += hasRush && iceCount > 0 && agendaCount <= 2 ? 10 : hasGlacier && iceCount >= 2 ? 10 : 5;
+  score += hasScorelineStrategy && iceCount > 0 && agendaCount <= 2 ? 10 : hasRemoteProtectionSupport && iceCount >= 2 ? 10 : 5;
 
   if (agendaCount >= 3 && iceCount === 0) score = Math.min(score, 28);
   if (agendaCount >= 3 && economyCount === 0) score = Math.min(score, 38);
@@ -151,8 +157,7 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
   const setupCount = handRoles.filter((role) => role === "runner_program" || role === "setup_runner" || role === "setup_hardware" || role === "runner_resource" || role === "memory").length;
   const pressureCount = handRoles.filter((role) => role === "run_pressure" || role === "pressure_rnd" || role === "pressure_hq" || role === "remote_contest" || role === "multiaccess").length;
   const handSize = input.playerView.own.gripOrHq.length;
-  const doctrine = input.ownDeckDoctrine;
-  const tags = doctrine?.archetypeTags ?? [];
+  const semanticContext = openingSemanticContext(input);
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
@@ -160,7 +165,7 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
     `opening_economy:${economyCount}`,
     `opening_setup:${setupCount}`,
     `opening_pressure:${pressureCount}`,
-    ...doctrineOpeningEvidence(doctrine)
+    ...semanticOpeningEvidence(semanticContext)
   ];
 
   score += breakerCount >= 2 ? 24 : breakerCount === 1 ? 18 : 0;
@@ -171,9 +176,9 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
   score += pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : pressureCount > 0 ? 4 : 0;
   score += handSize >= 4 && handSize <= 6 ? 14 : handSize >= 3 ? 8 : 0;
 
-  if (tags.includes("rig_builder")) score += breakerCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
-  else if (tags.includes("economy_dense")) score += economyCount > 0 ? 12 : 4;
-  else if (tags.some((tag) => tag === "rnd_pressure" || tag === "hq_pressure" || tag === "remote_contest")) score += pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : 4;
+  if (semanticContext.strategies.some((strategy) => strategy === "runner.rig_first" || strategy === "runner.search.breaker")) score += breakerCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
+  else if (semanticContext.runnerEconomyTools > 0 && semanticContext.strategies.includes("runner.economy_first")) score += economyCount > 0 ? 12 : 4;
+  else if (semanticContext.strategies.some((strategy) => strategy === "runner.rnd_pressure" || strategy === "runner.hq_pressure" || strategy === "runner.remote_contest")) score += pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : 4;
   else score += 6;
 
   if (breakerCount === 0 && economyCount === 0) score = Math.min(score, 30);
@@ -301,6 +306,71 @@ function isIceRole(role: string): boolean {
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values)].sort();
+}
+
+type OpeningSemanticContext = {
+  strategies: string[];
+  strategyProfileStatus: "present" | "neutral" | "missing";
+  runnerEconomyTools: number;
+  corpRemoteProtectionTools: number;
+  capabilityConfidence?: string;
+};
+
+function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext {
+  const semanticInput = input as AiDecisionInput & {
+    ownDeckStrategyProfile?: {
+      primaryStrategies: string[];
+      secondaryStrategies: string[];
+      warnings: string[];
+    };
+    ownDeckCapabilities?: {
+      confidence?: string;
+      runner?: {
+        economyBankTools?: readonly unknown[];
+      };
+      corp?: {
+        remotePlanProfile?: {
+          remoteProtectionToolsKnown?: number;
+        };
+      };
+    };
+  };
+  const strategyProfile = semanticInput.ownDeckStrategyProfile;
+  const strategies = sortedUnique([
+    ...(strategyProfile?.primaryStrategies ?? []),
+    ...(strategyProfile?.secondaryStrategies ?? []),
+  ]);
+  const neutral =
+    strategyProfile?.warnings.includes("strategy_profile:neutral_missing_snapshot") ===
+      true || strategies.length === 0;
+  return {
+    strategies,
+    strategyProfileStatus: strategyProfile
+      ? neutral
+        ? "neutral"
+        : "present"
+      : "missing",
+    runnerEconomyTools:
+      semanticInput.ownDeckCapabilities?.runner?.economyBankTools?.length ?? 0,
+    corpRemoteProtectionTools:
+      semanticInput.ownDeckCapabilities?.corp?.remotePlanProfile
+        ?.remoteProtectionToolsKnown ?? 0,
+    ...(semanticInput.ownDeckCapabilities?.confidence
+      ? { capabilityConfidence: semanticInput.ownDeckCapabilities.confidence }
+      : {}),
+  };
+}
+
+function semanticOpeningEvidence(context: OpeningSemanticContext): string[] {
+  return [
+    `strategy_profile:${context.strategyProfileStatus}`,
+    `strategy_lines:${context.strategies.slice(0, 3).join(",") || "none"}`,
+    `runner_economy_tools:${context.runnerEconomyTools}`,
+    `corp_remote_protection_tools:${context.corpRemoteProtectionTools}`,
+    ...(context.capabilityConfidence
+      ? [`deck_capability_confidence:${context.capabilityConfidence}`]
+      : []),
+  ];
 }
 
 function doctrineOpeningEvidence(

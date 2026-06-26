@@ -162,16 +162,34 @@ describe("MVP 0.3 AI controller contract", () => {
 
     expect(corpInput.side).toBe("corp");
     expect(runnerInput.side).toBe("runner");
-    expect(Object.keys(corpInput).sort()).toEqual(
-      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
-        (field) => field !== "ownDeckDoctrine",
-      ).sort(),
+    for (const field of AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
+      (field) => field !== "ownDeckDoctrine",
+    )) {
+      expect(corpInput).toHaveProperty(field);
+      expect(runnerInput).toHaveProperty(field);
+    }
+    expect(corpInput).not.toHaveProperty("ownDeckDoctrine");
+    expect(runnerInput).not.toHaveProperty("ownDeckDoctrine");
+    expect(
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
+        ?.warnings,
+    ).toEqual(
+      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
     );
-    expect(Object.keys(runnerInput).sort()).toEqual(
-      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
-        (field) => field !== "ownDeckDoctrine",
-      ).sort(),
+    expect(
+      (runnerInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
+        ?.warnings,
+    ).toEqual(
+      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
     );
+    expect(
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState
+        ?.primaryStrategy.family,
+    ).toBe("neutral");
+    expect(
+      (runnerInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState
+        ?.primaryStrategy.family,
+    ).toBe("neutral");
     expect(corpInput.legalActions).toEqual(getLegalActions(state, "corp"));
     expect(runnerInput.playerView).toEqual(getPlayerView(state, "runner"));
     expect(JSON.stringify(corpInput)).not.toContain("cardInstances");
@@ -497,10 +515,17 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(
       runnerInput.legalActions.some((action) => "secretPaymentToken" in action),
     ).toBe(false);
-    expect(Object.keys(corpInput).sort()).toEqual(
-      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
-        (field) => field !== "ownDeckDoctrine",
-      ).sort(),
+    for (const field of AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
+      (field) => field !== "ownDeckDoctrine",
+    )) {
+      expect(corpInput).toHaveProperty(field);
+    }
+    expect(corpInput).not.toHaveProperty("ownDeckDoctrine");
+    expect(
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
+        ?.warnings,
+    ).toEqual(
+      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
     );
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
@@ -3190,16 +3215,11 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
-  it("adds Runner rig-builder doctrine and planfit to discard keep values", () => {
-    const doctrine = runnerDoctrineForTest(
-      "discard-rig-builder",
-      ["rig_builder"],
-      { build_rig: 24, pressure_hq: -4 },
-    );
+  it("adds Runner rig strategy and planfit to discard keep values", () => {
     const input = discardDecisionInputForTest("runner", {
       credits: 5,
       cards: ["simple_fracter", "simple_run_event"],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["runner.rig_first"],
     });
     const decision = chooseRunnerAction(input);
 
@@ -3211,24 +3231,19 @@ describe("MVP 0.3 AI controller contract", () => {
       expect.arrayContaining([
         "discard_score:base",
         "discard_score:planfit",
-        "discard_score:doctrinefit",
+        "discard_score:strategic_intent_fit",
         "discard_keep:build_rig",
-        "discard_keep:doctrine_rig_builder",
+        "discard_keep:strategy_runner.rig_first",
       ]),
     );
   });
 
-  it("keeps Runner central-pressure cards above off-plan economy when doctrine supports pressure", () => {
-    const doctrine = runnerDoctrineForTest(
-      "discard-hq-pressure",
-      ["hq_pressure"],
-      { pressure_hq: 24, build_rig: 2 },
-    );
+  it("keeps Runner central-pressure cards above off-plan economy when strategy supports pressure", () => {
     const input = discardDecisionInputForTest("runner", {
       credits: 5,
       cards: ["simple_run_event", "simple_economy_event"],
       rig: ["simple_fracter"],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["runner.hq_pressure"],
     });
     const decision = chooseRunnerAction(input);
 
@@ -3239,22 +3254,17 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "discard_keep:pressure_hq",
-        "discard_keep:doctrine_hq_pressure",
+        "discard_keep:strategy_runner.hq_pressure",
       ]),
     );
   });
 
-  it("keeps discard safety above doctrine pressure bias under Runner credit stress", () => {
-    const doctrine = runnerDoctrineForTest(
-      "discard-pressure-safety",
-      ["hq_pressure"],
-      { pressure_hq: 24 },
-    );
+  it("keeps discard safety above strategy pressure bias under Runner credit stress", () => {
     const input = discardDecisionInputForTest("runner", {
       credits: 1,
       cards: ["simple_economy_event", "simple_run_event"],
       rig: ["simple_fracter"],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["runner.hq_pressure"],
     });
     const decision = chooseRunnerAction(input);
 
@@ -3264,7 +3274,7 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
-  it("adds Corp glacier doctrine and score-next-turn planfit to discard keep values", () => {
+  it("adds Corp scoreline strategy and score-next-turn planfit to discard keep values", () => {
     DEMO_CARDS_BY_ID.test_planless_corp_operation = {
       id: "test_planless_corp_operation",
       title: "Planless Corp Operation",
@@ -3276,10 +3286,6 @@ describe("MVP 0.3 AI controller contract", () => {
       rulesText: "Discard doctrine fixture with no AI roles.",
       mechanics: ["test_fixture"],
     } satisfies CardDefinition;
-    const doctrine = corpDoctrineForTest("discard-glacier", ["glacier"], {
-      score_next_turn: 18,
-      build_scoring_remote: 24,
-    });
     const input = discardDecisionInputForTest("corp", {
       credits: 4,
       cards: [
@@ -3288,7 +3294,7 @@ describe("MVP 0.3 AI controller contract", () => {
         "simple_upgrade",
         "test_planless_corp_operation",
       ],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["corp.remote_scoring"],
     });
     const decision = chooseCorpAction(input);
 
@@ -3300,9 +3306,9 @@ describe("MVP 0.3 AI controller contract", () => {
       expect.arrayContaining([
         "discard_score:base",
         "discard_score:planfit",
-        "discard_score:doctrinefit",
+        "discard_score:strategic_intent_fit",
         "discard_keep:score_next_turn",
-        "discard_keep:doctrine_glacier",
+        "discard_keep:strategy_corp.remote_scoring",
       ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -3310,16 +3316,11 @@ describe("MVP 0.3 AI controller contract", () => {
     );
   });
 
-  it("keeps discard choices deterministic for repeated Runner doctrine inputs", () => {
-    const doctrine = runnerDoctrineForTest(
-      "discard-determinism",
-      ["rig_builder"],
-      { build_rig: 24 },
-    );
+  it("keeps discard choices deterministic for repeated Runner strategy inputs", () => {
     const input = discardDecisionInputForTest("runner", {
       credits: 5,
       cards: ["simple_fracter", "simple_run_event"],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["runner.rig_first"],
     });
 
     const first = chooseRunnerAction(input);
@@ -3368,16 +3369,11 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("keeps discard evidence and debug output abstract and side-safe", () => {
-    const doctrine = runnerDoctrineForTest(
-      "discard-redaction",
-      ["hq_pressure"],
-      { pressure_hq: 24 },
-    );
     const input = discardDecisionInputForTest("runner", {
       credits: 5,
       cards: ["simple_run_event", "simple_economy_event"],
       rig: ["simple_fracter"],
-      ownDeckDoctrine: doctrine,
+      strategyIds: ["runner.hq_pressure"],
     });
     const decision = chooseRunnerAction(input);
 
@@ -3391,7 +3387,7 @@ describe("MVP 0.3 AI controller contract", () => {
       expect.arrayContaining([
         "discard_score:base",
         "discard_score:planfit",
-        "discard_score:doctrinefit",
+        "discard_score:strategic_intent_fit",
       ]),
     );
   });
@@ -22527,11 +22523,6 @@ describe("V1.4.2 belief state and opponent model", () => {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const legacyDecision = chooseRunnerAction(input);
-    const legacyActionType = input.legalActions.find(
-      (action) => action.actionId === legacyDecision.actionId,
-    )?.type;
-
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     const decision = chooseRunnerAction(input);
     const actualAction = input.legalActions.find(
@@ -22606,11 +22597,12 @@ describe("V1.4.2 belief state and opponent model", () => {
       selectedActionType: actualAction?.type,
       whyNot: ["selected_action"],
     });
-    if (legacyActionType && legacyActionType !== actualAction?.type) {
-      expect(decision.decisionDebug?.warnings).toContain(
-        "semantic_runtime_actual_differs_from_legacy_debug",
-      );
-    }
+    expect(decision.decisionDebug?.warnings ?? []).not.toContain(
+      "semantic_runtime_actual_differs_from_legacy_debug",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "legacy_reference",
+    );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i,
     );
@@ -31389,6 +31381,7 @@ function discardDecisionInputForTest(
     cards: string[];
     discardCount?: number;
     ownDeckDoctrine?: AiDeckDoctrineProfile;
+    strategyIds?: string[];
     rig?: string[];
   },
 ): AiDecisionInput {
@@ -31436,8 +31429,45 @@ function discardDecisionInputForTest(
     visibility: "private_to_actor",
     expiresAtStateVersion: base.playerView.stateVersion + 1,
   };
+  const semanticBase = base as AiDecisionInputWithDeckCapabilities;
+  const strategyId = config.strategyIds?.[0];
+  const semanticStrategyExtras =
+    strategyId && semanticBase.ownStrategicIntentState
+      ? {
+          ownDeckStrategyProfile: {
+            ...semanticBase.ownDeckStrategyProfile!,
+            primaryStrategies: config.strategyIds ?? [strategyId],
+            secondaryStrategies: [],
+            warnings: [],
+          },
+          ownStrategicIntentState: {
+            ...semanticBase.ownStrategicIntentState,
+            primaryStrategy: {
+              ...semanticBase.ownStrategicIntentState.primaryStrategy,
+              strategyId,
+              family: strategyFamilyForDiscardTest(strategyId),
+              confidence: "high" as const,
+              completeness: "partial" as const,
+              score: { anchor: 70, support: 55, final: 70 },
+              evidence: [`test_strategy:${strategyId}`],
+            },
+            phase: "enable" as const,
+            targetVector: {
+              kind: strategyTargetKindForDiscardTest(strategyId),
+              ...(strategyId === "runner.hq_pressure"
+                ? { targetId: "hq" }
+                : {}),
+              ...(strategyId === "runner.rnd_pressure"
+                ? { targetId: "rd" }
+                : {}),
+              evidence: [`test_strategy_target:${strategyId}`],
+            },
+          },
+        }
+      : {};
   return {
     ...base,
+    ...semanticStrategyExtras,
     playerView: {
       ...base.playerView,
       phase: side === "corp" ? "corp_discard_phase" : "runner_discard_phase",
@@ -31454,6 +31484,50 @@ function discardDecisionInputForTest(
       ? { ownDeckDoctrine: config.ownDeckDoctrine }
       : {}),
   };
+}
+
+function strategyFamilyForDiscardTest(
+  strategyId: string,
+): NonNullable<
+  AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+>["primaryStrategy"]["family"] {
+  if (strategyId.startsWith("runner.rig") || strategyId.includes("search.breaker")) {
+    return "runner_setup";
+  }
+  if (strategyId === "runner.hq_pressure" || strategyId === "runner.rnd_pressure") {
+    return "runner_central_pressure";
+  }
+  if (strategyId === "runner.remote_contest") return "runner_remote_contest";
+  if (strategyId === "corp.ice_tax_glacier") return "corp_ice_tax";
+  if (
+    strategyId === "corp.remote_scoring" ||
+    strategyId === "corp.rush_score" ||
+    strategyId === "corp.fast_advance"
+  ) {
+    return "corp_scoreline";
+  }
+  if (strategyId === "corp.asset_economy") return "corp_asset_economy";
+  return "neutral";
+}
+
+function strategyTargetKindForDiscardTest(
+  strategyId: string,
+): NonNullable<
+  AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+>["targetVector"]["kind"] {
+  if (strategyId === "runner.hq_pressure" || strategyId === "runner.rnd_pressure") {
+    return "central";
+  }
+  if (strategyId === "runner.remote_contest") return "remote";
+  if (
+    strategyId === "corp.remote_scoring" ||
+    strategyId === "corp.rush_score" ||
+    strategyId === "corp.fast_advance"
+  ) {
+    return "scoreline";
+  }
+  if (strategyId === "corp.asset_economy") return "economy";
+  return "coverage";
 }
 
 function discardVisibleCardForTest(

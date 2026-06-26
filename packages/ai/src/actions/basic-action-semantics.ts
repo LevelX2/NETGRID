@@ -10,6 +10,7 @@ import type {
 
 export type BasicActionSemanticClassification = {
   semanticActionType: string;
+  tacticSignals?: readonly string[];
   primaryProjectionStatus: ActionPrimaryProjectionStatus;
   confidence: Exclude<ActionSemanticConfidence, "none">;
   projectionIssues?: ActionProjectionIssue[];
@@ -21,31 +22,37 @@ const BASIC_ACTION_SEMANTICS: Record<
 > = {
   mandatory_draw: {
     semanticActionType: "draw.mandatory",
+    tacticSignals: ["draw.mandatory", "setup.draw"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
   gain_credit: {
     semanticActionType: "economy.gain_credit",
+    tacticSignals: ["economy.basic", "economy.recover"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
   draw_card: {
     semanticActionType: "draw.card",
+    tacticSignals: ["draw.basic", "setup.draw"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
   start_run: {
     semanticActionType: "run.start",
+    tacticSignals: ["run.start", "access_attempt"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
   continue_run: {
     semanticActionType: "run.continue",
+    tacticSignals: ["run.continue", "access_attempt"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
   jack_out: {
     semanticActionType: "run.jack_out",
+    tacticSignals: ["run.abort", "risk_control"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
@@ -56,6 +63,7 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   steal_agenda: {
     semanticActionType: "access.steal_agenda",
+    tacticSignals: ["access.steal", "closeout.agenda_points"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
@@ -78,6 +86,7 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   rez_ice: {
     semanticActionType: "corp_window.rez",
+    tacticSignals: ["corp.ice_activation", "corp.protection", "rez.reserve_spend"],
     primaryProjectionStatus: "partial_projected",
     confidence: "medium",
     projectionIssues: ["target_context_unavailable"],
@@ -99,6 +108,7 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   remove_tag: {
     semanticActionType: "tag.remove",
+    tacticSignals: ["survival.tag_clear", "tag.remove"],
     primaryProjectionStatus: "projected",
     confidence: "high",
   },
@@ -120,6 +130,7 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   install_card: {
     semanticActionType: "install.card",
+    tacticSignals: ["install.card", "setup.install"],
     primaryProjectionStatus: "partial_projected",
     confidence: "low",
     projectionIssues: ["target_context_unavailable"],
@@ -136,12 +147,14 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   advance_card: {
     semanticActionType: "score.advance_card",
+    tacticSignals: ["corp.score_progress", "advance.card"],
     primaryProjectionStatus: "partial_projected",
     confidence: "medium",
     projectionIssues: ["target_context_unavailable"],
   },
   score_agenda: {
     semanticActionType: "score.agenda",
+    tacticSignals: ["corp.score_closeout", "closeout.agenda_score"],
     primaryProjectionStatus: "partial_projected",
     confidence: "medium",
     projectionIssues: ["target_context_unavailable"],
@@ -201,6 +214,7 @@ export function applyBasicActionSemantics(
 
   const sourceKind = basicSourceKindForAction(action);
   const projectionIssues = classification.projectionIssues ?? [];
+  const dynamicSignals = dynamicBasicActionSignals(action);
 
   return {
     ...candidate,
@@ -208,13 +222,64 @@ export function applyBasicActionSemantics(
     semanticActionType: classification.semanticActionType,
     confidence: classification.confidence,
     primaryProjectionStatus: classification.primaryProjectionStatus,
+    actionTacticSignals: [
+      ...candidate.actionTacticSignals,
+      ...(classification.tacticSignals ?? []),
+      ...dynamicSignals,
+    ],
     projectionIssues,
     hardGates: updateBasicActionGates(candidate.hardGates, action, sourceKind),
     evidence: [
       ...candidate.evidence,
       `AI037 basic action semantic: ${classification.semanticActionType}`,
+      ...dynamicSignals.map((signal) => `AI037 basic action signal: ${signal}`),
     ],
   };
+}
+
+function dynamicBasicActionSignals(action: LegalAction): string[] {
+  const signals: string[] = [];
+  const serverId = stringPayload(action, "serverId");
+  const placement = stringPayload(action, "placement");
+  const destination = stringPayload(action, "destination");
+  if (
+    (action.type === "start_run" || action.type === "continue_run") &&
+    serverId !== undefined
+  ) {
+    signals.push(`run.server:${serverId}`);
+    if (serverId === "hq" || serverId === "rd" || serverId === "archives") {
+      signals.push("run.target:central");
+    } else if (serverId.startsWith("remote_")) {
+      signals.push("run.target:remote");
+    }
+  }
+  if (action.type === "install_card") {
+    if (placement !== undefined) signals.push(`install.placement:${placement}`);
+    if (destination !== undefined) signals.push(`install.destination:${destination}`);
+    if (placement === "ice") signals.push("install.ice", "corp.protection");
+    if (placement === "remote" || serverId === "new_remote") {
+      signals.push("install.remote", "corp.remote_build");
+    }
+    if (placement === "program" || destination === "install_program") {
+      signals.push("install.program", "runner.rig_setup");
+    }
+    if (placement === "resource") signals.push("install.resource", "runner.setup");
+    if (placement === "hardware") signals.push("install.hardware", "runner.setup");
+  }
+  if (
+    (action.type === "rez_ice" ||
+      action.type === "advance_card" ||
+      action.type === "score_agenda") &&
+    serverId !== undefined
+  ) {
+    signals.push(`corp.server:${serverId}`);
+  }
+  return [...new Set(signals)];
+}
+
+function stringPayload(action: LegalAction, key: string): string | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function basicSourceKindForAction(

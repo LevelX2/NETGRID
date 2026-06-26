@@ -222,7 +222,12 @@ describe("buildActionSemanticCandidates", () => {
       expect(candidate.semanticActionType).not.toBe("unknown");
       expect(candidate.confidence).not.toBe("none");
       expect(candidate.strategySupport).toEqual([]);
-      expect(candidate.actionTacticSignals).toEqual([]);
+      expect(candidate.actionTacticSignals).not.toEqual(
+        expect.arrayContaining([
+          expect.stringContaining("planWeight"),
+          expect.stringContaining("strategy_anchor"),
+        ]),
+      );
       expect(candidate.cardContextSignals).toEqual([]);
       expect(candidate.hardGates).toEqual(
         expect.arrayContaining([
@@ -238,6 +243,14 @@ describe("buildActionSemanticCandidates", () => {
     expect(serialized).not.toContain("planWeight");
     expect(serialized).not.toContain("scoringWeight");
     expect(serialized).not.toContain("selectedActionId");
+    expect(
+      candidates.find((candidate) => candidate.actionType === "gain_credit")
+        ?.actionTacticSignals,
+    ).toEqual(expect.arrayContaining(["economy.basic"]));
+    expect(
+      candidates.find((candidate) => candidate.actionType === "score_agenda")
+        ?.actionTacticSignals,
+    ).toEqual(expect.arrayContaining(["corp.score_closeout"]));
   });
 
   it("binds card source and ability only from side-safe LegalAction evidence", () => {

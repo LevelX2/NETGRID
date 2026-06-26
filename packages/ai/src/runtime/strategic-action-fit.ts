@@ -63,7 +63,9 @@ function semanticRuntimeStrategicActionFit(
   if (state.blockers.some((blocker) => blocker.severity === "hard")) {
     return undefined;
   }
-  if (!strategicIntentPhaseAllowsAction(input, state, action)) return undefined;
+  if (!strategicIntentPhaseAllowsAction(input, state, action, actionSemanticCandidate)) {
+    return undefined;
+  }
   const baseValue =
     input.side === "runner"
       ? runnerStrategicActionFitValue(action, scopeId, state)
@@ -76,7 +78,12 @@ function semanticRuntimeStrategicActionFit(
         );
   if (baseValue <= 0) return undefined;
   const phaseBonus = strategicIntentPhaseActionBonus(state.phase);
-  const targetMatch = strategicIntentActionTargetMatch(state, action);
+  const targetMatch = strategicIntentActionTargetMatch(
+    input,
+    state,
+    action,
+    actionSemanticCandidate,
+  );
   const targetBonus =
     targetMatch === "exact" ? 75 : targetMatch === "kind" ? 25 : 0;
   const value = Math.min(260, baseValue + phaseBonus + targetBonus);
@@ -178,8 +185,13 @@ function corpStrategicActionFitValue(
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":
-      return strategicIntentActionTargetMatch(state, action) !== "none" ||
-        corpStrategicPunishAction(action, scopeId, actionSemanticCandidate)
+      return strategicIntentActionTargetMatch(
+        input,
+        state,
+        action,
+        actionSemanticCandidate,
+      ) !== "none" ||
+        corpStrategicPunishAction(input, action, scopeId, actionSemanticCandidate)
         ? 180
         : 0;
     default:
@@ -202,22 +214,57 @@ function runnerStrategicSetupAction(
 }
 
 function corpStrategicPunishAction(
+  input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
-  if (scopeId === "corp_tag_punish") return true;
-  const joinedSignals = [
-    actionSemanticCandidate?.semanticActionType,
-    ...(actionSemanticCandidate?.actionTacticSignals ?? []),
-    ...(actionSemanticCandidate?.cardContextSignals ?? []),
-  ].join("|");
-  return (
-    action.type === "play_operation" ||
-    action.type === "trash_resource" ||
-    action.type === "trigger_ability" ||
-    action.type === "activated_card_ability"
-  ) && /tag\.|trace\.|damage|punish|flatline/.test(joinedSignals);
+  if (
+    !(
+      action.type === "play_operation" ||
+      action.type === "trash_resource" ||
+      action.type === "trigger_ability" ||
+      action.type === "activated_card_ability"
+    )
+  ) {
+    return false;
+  }
+  const signals = semanticSignals(actionSemanticCandidate);
+  const hasTagSource =
+    signals.has("tag.source") ||
+    signals.has("trace.source") ||
+    signals.has("corp_tag_source_legal_action_classified_by_ontology:true");
+  const hasPunishPayoff =
+    signals.has("tag.payoff") ||
+    signals.has("punish.payoff") ||
+    signals.has("damage.corp_tagged_meat_payoff") ||
+    signals.has("access.corp_ambush") ||
+    signals.has("access.corp_access_punish") ||
+    signals.has("target.runner_resource_trash") ||
+    signals.has("target.runner_hardware_trash") ||
+    signals.has("target.runner_program_trash") ||
+    signals.has("corp_punish_legal_action_classified_by_ontology:true");
+  const requiresRunnerTagged = actionSemanticCandidate?.conditions.some(
+    (condition) => condition.kind === "requires_runner_tagged",
+  );
+  const runnerTagged = input.playerView.opponent.tags > 0;
+  if (hasPunishPayoff && (!requiresRunnerTagged || runnerTagged)) return true;
+  if (hasTagSource && (scopeId === "corp_tag_punish" || scopeId.includes("tag"))) {
+    return true;
+  }
+  return false;
+}
+
+function semanticSignals(
+  candidate: ActionSemanticCandidate | undefined,
+): Set<string> {
+  return new Set([
+    ...(candidate?.semanticActionType ? [candidate.semanticActionType] : []),
+    ...(candidate?.actionTacticSignals ?? []),
+    ...(candidate?.cardContextSignals ?? []),
+    ...(candidate?.conditions ?? []).map((condition) => condition.kind),
+    ...(candidate?.evidence ?? []),
+  ]);
 }
 
 function strategicIntentPhaseActionBonus(
@@ -243,16 +290,14 @@ function strategicIntentPhaseAllowsAction(
     AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
   >,
   action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   if (state.phase === "recover") return false;
   if (state.phase !== "fund") return true;
   if (
     state.targetVector.kind === "tag" &&
     input.playerView.opponent.tags > 0 &&
-    (action.type === "play_operation" ||
-      action.type === "trash_resource" ||
-      action.type === "trigger_ability" ||
-      action.type === "activated_card_ability")
+    corpStrategicPunishAction(input, action, "corp_tag_punish", actionSemanticCandidate)
   ) {
     return true;
   }
@@ -268,10 +313,12 @@ function strategicIntentPhaseAllowsAction(
 }
 
 function strategicIntentActionTargetMatch(
+  input: AiDecisionInput,
   state: NonNullable<
     AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
   >,
   action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): "exact" | "kind" | "none" {
   const target = state.targetVector;
   const serverId = semanticRuntimeServerId(action);
@@ -292,12 +339,14 @@ function strategicIntentActionTargetMatch(
     return action.type === "gain_credit" ? "kind" : "none";
   }
   if (target.kind === "tag" || target.kind === "damage") {
-    return (
-      action.type === "play_operation" ||
-      action.type === "trash_resource" ||
-      action.type === "trigger_ability" ||
-      action.type === "activated_card_ability"
-    ) ? "kind" : "none";
+    return corpStrategicPunishAction(
+      input,
+      action,
+      target.kind === "tag" ? "corp_tag_punish" : "corp_damage_kill",
+      actionSemanticCandidate,
+    )
+      ? "kind"
+      : "none";
   }
   return "none";
 }

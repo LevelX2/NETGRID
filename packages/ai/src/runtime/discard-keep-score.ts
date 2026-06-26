@@ -1,8 +1,8 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import {
-  discardDoctrineFitBonus,
   discardPlanFitBonus,
+  discardStrategicFitBonus,
 } from "./discard-fit-bonus";
 import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
@@ -11,7 +11,7 @@ export type DiscardCandidateScore = {
   total: number;
   baseValue: number;
   planFit: number;
-  doctrineFit: number;
+  strategicFit: number;
   evidence: string[];
 };
 
@@ -41,7 +41,7 @@ export function discardKeepScore(
       total: 0,
       baseValue: 0,
       planFit: 0,
-      doctrineFit: 0,
+      strategicFit: 0,
       evidence: ["discard_score:base"],
     };
   }
@@ -131,16 +131,16 @@ export function discardKeepScore(
     definitionTypeForCardId: dependencies.definitionTypeForCardId,
   });
   const planFit = discardPlanFitBonus(input, roles, type, currentPlan);
-  const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
+  const strategicFit = discardStrategicFitBonus(input, roles, type, cost);
   return {
-    total: baseValue + planFit + doctrineFit,
+    total: baseValue + planFit + strategicFit,
     baseValue,
     planFit,
-    doctrineFit,
+    strategicFit,
     evidence: sortedUnique([
       "discard_score:base",
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
-      ...(doctrineFit > 0 ? ["discard_score:doctrinefit"] : []),
+      ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
 }

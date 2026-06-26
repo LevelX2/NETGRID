@@ -675,6 +675,7 @@ function phaseFor(params: {
   );
   if (params.primaryStrategy.family === "neutral" || hardBlocked) return "recover";
   if (!params.reserve.satisfied) return "fund";
+  if (hasLegalCloseoutWindow(params)) return "closeout";
   if (
     params.roleStatuses.some(
       (role) => role.status === "active" || role.status === "visible",
@@ -696,6 +697,32 @@ function phaseFor(params: {
     return "enable";
   }
   return "assemble";
+}
+
+function hasLegalCloseoutWindow(params: {
+  roleStatuses: readonly StrategicRoleStatusSnapshot[];
+  targetVector: StrategicTargetVector;
+}): boolean {
+  if (
+    params.targetVector.kind === "scoreline" &&
+    roleEvidenceIncludes(params.roleStatuses, "legal_score:true")
+  ) {
+    return true;
+  }
+  if (
+    params.targetVector.kind === "damage" &&
+    roleEvidenceIncludes(params.roleStatuses, "legal_punish_payoff:true")
+  ) {
+    return true;
+  }
+  return roleEvidenceIncludes(params.roleStatuses, "legal_closeout_action:true");
+}
+
+function roleEvidenceIncludes(
+  roles: readonly StrategicRoleStatusSnapshot[],
+  evidence: string,
+): boolean {
+  return roles.some((role) => role.evidence.includes(evidence));
 }
 
 function sortedRoleStatuses(

@@ -1,5 +1,4 @@
 import type {
-  AiDecision,
   AiDecisionDebug,
   AiDecisionInput,
   LegalAction,
@@ -34,8 +33,6 @@ export type SemanticRuntimeDebugContext = {
     input: AiDecisionInput,
     selected: SemanticRuntimeChoice,
     rankedChoices: SemanticRuntimeChoice[],
-    legacyDecision: AiDecision,
-    legacyActionType: LegalAction["type"] | undefined,
     planRuntime: TacticalPlanRuntimeResult,
   ) => AiDecisionDebug;
   semanticRuntimeCoverageSelectionDebug: (
@@ -115,8 +112,6 @@ export function createSemanticRuntimeDebugContext(
       input,
       selected,
       rankedChoices,
-      legacyDecision,
-      legacyActionType,
       planRuntime,
     ) => {
       const coverageSelection = coverageSelectionDebug(
@@ -132,8 +127,6 @@ export function createSemanticRuntimeDebugContext(
       return buildSemanticRuntimeDecisionDebug({
         input,
         selected,
-        legacyDecision,
-        ...(legacyActionType ? { legacyActionType } : {}),
         planRuntime,
         ...(coverageSelection ? { coverageSelection } : {}),
         selectedScoreBreakdown,

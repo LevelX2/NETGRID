@@ -35,14 +35,20 @@ export function applyTargetContextProjection(
     hiddenTargetRequirement === true
       ? []
       : selectedLegalTargetsForAction(action, selectedTargets);
+  const requirementTargets = hiddenTargetRequirement
+    ? []
+    : requirementTargetsForAction(action);
   const choiceOptionTargets = choiceOptionTargetsForAction(action);
   const sideSafeAvailableTargets =
-    availableTargets !== undefined || choiceOptionTargets.length > 0
+    availableTargets !== undefined ||
+    requirementTargets.length > 0 ||
+    choiceOptionTargets.length > 0
       ? [
           ...(availableTargets?.map((target) => ({
             ...target,
             evidence: [...target.evidence],
           })) ?? []),
+          ...requirementTargets,
           ...choiceOptionTargets,
         ]
       : undefined;
@@ -197,6 +203,34 @@ function choiceOptionTargetsForAction(
       targetSide: action.side,
       evidence: ["AI039 legal ChoiceRequirement option id"],
     }));
+}
+
+function requirementTargetsForAction(action: LegalAction): LegalTargetSummary[] {
+  return action.targetRequirements.flatMap((requirement): LegalTargetSummary[] => {
+    if (requirement.visibility === "engine_only") return [];
+    if (requirement.kind === "server") {
+      return (requirement.allowedServers ?? []).map((serverId) => ({
+        targetId: serverId,
+        targetKind: "server" as const,
+        targetSide: "corp" as const,
+        evidence: [`AI039 legal target server from requirement ${requirement.id}`],
+      }));
+    }
+    if (requirement.sourceIceRef !== undefined) {
+      return [
+        {
+          targetId: requirement.sourceIceRef,
+          targetKind: "ice" as const,
+          targetSide: requirement.side ?? ("corp" as const),
+          ...(requirement.zoneScope?.[0] !== undefined
+            ? { targetZone: requirement.zoneScope[0] }
+            : {}),
+          evidence: [`AI039 legal target ice from requirement ${requirement.id}`],
+        },
+      ];
+    }
+    return [];
+  });
 }
 
 function targetContextForAction(

@@ -457,6 +457,36 @@ export function buildDeckStrategyProfile(
   });
 }
 
+export function buildNeutralDeckStrategyProfile(
+  side: Side,
+  deckId = `${side}:missing-deck-snapshot`,
+  warnings: readonly string[] = [
+    "deck_context:missing_explicit_neutral",
+    "strategy_profile:neutral_missing_snapshot",
+  ],
+): AiDeckStrategyProfile {
+  return {
+    schemaVersion: "ai-deck-strategy-profile-v1",
+    taskId: "AI006",
+    deckId,
+    side,
+    cardCount: 0,
+    strategyScores: {},
+    primaryStrategies: [],
+    secondaryStrategies: [],
+    functionSignalCounts: {},
+    legacySignalCounts: {},
+    warnings: [...warnings],
+    source: {
+      mode: "ai_internal_strategy_profile",
+      strategyGoals: "data/ai/strategy-goals-v1.json",
+      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
+      plannerEffect: "strategic_intent_input",
+    },
+  };
+}
+
 export function buildDeckDoctrineV2Diagnostic(
   snapshot?: AiDeckDoctrineDeckSnapshot,
 ): DeckDoctrineV2Diagnostic {
