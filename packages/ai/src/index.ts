@@ -573,7 +573,7 @@ import type {
   AiMatchProgressionMetrics,
 } from "./simulation/ai-match-progression-types";
 import {
-  attributeNormalizedHandSizeSkip,
+  attributeHandSizeSkip,
   attributeNormalizedMemorySkip,
   attributeNormalizedSearchRecoverySkip,
   attributeRunnerSetupSupportWindows,
@@ -10425,36 +10425,6 @@ function attributeMemorySkip(
     noProgress,
     actionLimit,
   });
-}
-
-function attributeHandSizeSkip(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: AiSimulationActionSequenceEntry[],
-  index: number,
-): void {
-  const entry = sequence[index]!;
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
-  metrics.runnerHandSizeFixGateWindows += 1;
-  metrics.runnerSetupAttributionByKindHandSize += 1;
-  metrics.runnerHandSizeFixGateLegalSupport += 1;
-  metrics.runnerHandSizeFixGateSkipped += 1;
-  metrics.runnerHandSizeAttributionSkipped += 1;
-  metrics.runnerHandSizeSkipThenDamageRiskWindow += 1;
-  metrics.runnerHandSizeFixGateAttributionEligible += 1;
-  const blocked =
-    entry.runnerEconomyTaken === true ||
-    entry.runnerPressureActionTaken === true ||
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
-  if (blocked) metrics.runnerHandSizeFixGateAttributionBlocked += 1;
-  const suspicious = next.some(
-    (candidate) =>
-      candidate.runnerDiscardChoice === true ||
-      candidate.runnerHandSizeSupportSkippedWhileDamageRiskVisible === true,
-  );
-  if (suspicious) metrics.runnerHandSizeSkipThenDiscardOrDamagePressure += 1;
-  if (suspicious) metrics.runnerHandSizeFixGateAttributionSuspicious += 1;
-  attributeNormalizedHandSizeSkip(metrics, entry, { blocked, suspicious });
 }
 
 function summarizeBreakerOntologyMetrics(
