@@ -78,6 +78,7 @@ import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-
 import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
+import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runner-remote-threat-targeting-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -448,9 +449,6 @@ import {
   visibleRootIsKnownAgendaForMetrics,
 } from "./simulation/visible-root-agenda-metrics";
 import {
-  createRunnerCentralRunPressureJustificationContext,
-} from "./simulation/central-run-pressure-justification";
-import {
   createTrueCentralCloseoutProfileContext,
 } from "./simulation/no-fresh-central";
 import {
@@ -458,8 +456,6 @@ import {
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
 import {
-  createRunnerRemoteThreatProfile,
-  createRunnerRemoteThreatTargetingDiagnosticsForAction,
   hasRunnerRemoteTrashAction,
   remoteServerHasScoreThreat,
   runnerAdvancedRemoteContestContext,
@@ -485,9 +481,6 @@ import {
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
-import {
-  createRunnerPostRunReserveTargetForRemoteInput,
-} from "./simulation/runner-credit-reserve";
 import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
   createQualityTagsForAction,
@@ -994,16 +987,6 @@ const {
   encounterHasImmediateUnbrokenThreat,
 });
 
-const runnerPostRunReserveTargetForRemoteInput =
-  createRunnerPostRunReserveTargetForRemoteInput({
-    remoteServerHasScoreThreat,
-    rolesForCardId,
-  });
-
-const runnerRemoteThreatProfile = createRunnerRemoteThreatProfile({
-  runnerPostRunReserveTargetForRemoteInput,
-});
-
 const {
   runnerRunKnownPathCost,
   runnerHasKnownUnaffordableLegalRun,
@@ -1029,30 +1012,16 @@ const {
 });
 
 const {
-  runnerCentralRunHasClearPressureJustification:
-    runnerCentralRunHasClearPressureJustificationForInput,
-  runnerCentralRunPressureJustificationReasons:
-    runnerCentralRunPressureJustificationReasonsForInput,
-  runnerCentralRunBurnsRemoteContestReserve:
-    runnerCentralRunBurnsRemoteContestReserveForInput,
-} = createRunnerCentralRunPressureJustificationContext({
+  runnerRemoteThreatProfile,
+  runnerRemoteThreatTargetingDiagnosticsForAction,
+} = createRunnerRemoteThreatTargetingComposition({
   assessKnownRezzedIcePath,
   recentCentralRunSameTargetWithoutRefresh,
+  remoteServerHasScoreThreat,
   rolesForCardId,
   runnerCreditReserveTargetForInput,
   trueCentralCloseoutProfileForMetrics,
 });
-
-const runnerRemoteThreatTargetingDiagnosticsForAction =
-  createRunnerRemoteThreatTargetingDiagnosticsForAction({
-    runnerRemoteThreatProfile,
-    runnerCentralRunHasClearPressureJustification:
-      runnerCentralRunHasClearPressureJustificationForInput,
-    runnerCentralRunPressureJustificationReasons:
-      runnerCentralRunPressureJustificationReasonsForInput,
-    runnerCentralRunBurnsRemoteContestReserve:
-      runnerCentralRunBurnsRemoteContestReserveForInput,
-  });
 
 const {
   runnerRemoteTrashAccessContext,
