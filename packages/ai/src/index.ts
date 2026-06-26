@@ -642,6 +642,15 @@ import {
   SCORCHED_EARTH_LIKE_PUNISH_IDS,
   URBAN_RENEWAL_LIKE_PUNISH_IDS,
 } from "./simulation/tag-punish-card-sets";
+import {
+  ALL_NIGHTER_CARD_ID,
+  BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
+  FAKED_HIT_CARD_ID,
+  JUNKYARD_BBS_CARD_ID,
+  JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
+  LOAN_FROM_CHIBA_CARD_ID,
+  TEAM_RESTRUCTURING_CARD_ID,
+} from "./runtime/runner-semantic-card-ids";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
   remoteTrashRoleForVisibleCard,
@@ -1243,10 +1252,6 @@ export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
   });
 }
 
-const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
-const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
-const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
-const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
 const {
   runnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice,
@@ -1355,7 +1360,6 @@ const {
   shouldAvoidRun: (assessment) =>
     blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
 });
-const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
   highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
   hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
@@ -2304,10 +2308,6 @@ function encounterRemotePayoffAfterBreakAssessment(
   };
 }
 
-const JUNKYARD_BBS_CARD_ID = "onr_v1_165_junkyard-bbs";
-const FULL_BODY_CONVERSION_CARD_ID = "onr_v1_127_full-body-conversion";
-const DERMATECH_BODYPLATING_CARD_ID = "onr_v1_125_dermatech-bodyplating";
-const JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY = "junkyard_bbs_return_top_heap";
 const {
   semanticRuntimeRunnerRunTargetGuidanceComponent,
 } = createRunnerRunTargetGuidanceContext({
