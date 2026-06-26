@@ -574,9 +574,7 @@ import {
   isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
 import {
-  runnerCentralRunBurnsRemoteContestReserve as runnerCentralRunBurnsRemoteContestReserveWithDeps,
-  runnerCentralRunHasClearPressureJustification as runnerCentralRunHasClearPressureJustificationWithDeps,
-  runnerCentralRunPressureJustificationReasons as runnerCentralRunPressureJustificationReasonsWithDeps,
+  createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
 import {
   bestTrueCentralCloseoutProfile as bestTrueCentralCloseoutProfileWithDeps,
@@ -602,7 +600,6 @@ import {
   runnerRemoteHasKnownRelevantTrashTarget,
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
-  type RunnerRemoteThreatProfile,
 } from "./simulation/remote-server-threat";
 import {
   finalAdvanceAssessmentForSimulationAction,
@@ -1193,6 +1190,21 @@ const runnerPostRunReserveTargetForRemoteInput =
 
 const runnerRemoteThreatProfile = createRunnerRemoteThreatProfile({
   runnerPostRunReserveTargetForRemoteInput,
+});
+
+const {
+  runnerCentralRunHasClearPressureJustification:
+    runnerCentralRunHasClearPressureJustificationForInput,
+  runnerCentralRunPressureJustificationReasons:
+    runnerCentralRunPressureJustificationReasonsForInput,
+  runnerCentralRunBurnsRemoteContestReserve:
+    runnerCentralRunBurnsRemoteContestReserveForInput,
+} = createRunnerCentralRunPressureJustificationContext({
+  assessKnownRezzedIcePath,
+  recentCentralRunSameTargetWithoutRefresh,
+  rolesForCardId,
+  runnerCreditReserveTargetForInput,
+  trueCentralCloseoutProfileForMetrics,
 });
 
 const runnerRemoteThreatTargetingDiagnosticsForAction =
@@ -17543,55 +17555,4 @@ function runnerReserveDiagnosticsForSimulationAction(
     ...runDiagnostics,
     ...remoteThreatTargeting,
   };
-}
-
-function runnerCentralRunHasClearPressureJustificationForInput(
-  input: AiDecisionInput,
-  targetServerId: string,
-  contestableRemoteThreatVisible: boolean,
-): boolean {
-  return runnerCentralRunHasClearPressureJustificationWithDeps(
-    input,
-    targetServerId,
-    contestableRemoteThreatVisible,
-    {
-      assessKnownRezzedIcePath,
-      recentCentralRunSameTargetWithoutRefresh,
-      rolesForCardId,
-      runnerCreditReserveTargetForInput,
-      trueCentralCloseoutProfileForMetrics,
-    },
-  );
-}
-
-function runnerCentralRunPressureJustificationReasonsForInput(
-  input: AiDecisionInput,
-  targetServerId: string,
-  contestableRemoteThreatVisible: boolean,
-): string[] {
-  return runnerCentralRunPressureJustificationReasonsWithDeps(
-    input,
-    targetServerId,
-    contestableRemoteThreatVisible,
-    {
-      assessKnownRezzedIcePath,
-      recentCentralRunSameTargetWithoutRefresh,
-      rolesForCardId,
-      runnerCreditReserveTargetForInput,
-      trueCentralCloseoutProfileForMetrics,
-    },
-  );
-}
-
-function runnerCentralRunBurnsRemoteContestReserveForInput(
-  input: AiDecisionInput,
-  targetServerId: string,
-  contestableProfiles: RunnerRemoteThreatProfile[],
-): boolean {
-  return runnerCentralRunBurnsRemoteContestReserveWithDeps(
-    input,
-    targetServerId,
-    contestableProfiles,
-    { assessKnownRezzedIcePath },
-  );
 }

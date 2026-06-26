@@ -26,6 +26,62 @@ type CentralRunPressureJustificationDependencies = {
   ) => { opportunity: boolean };
 };
 
+export function createRunnerCentralRunPressureJustificationContext(
+  dependencies: CentralRunPressureJustificationDependencies,
+): {
+  runnerCentralRunHasClearPressureJustification: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableRemoteThreatVisible: boolean,
+  ) => boolean;
+  runnerCentralRunPressureJustificationReasons: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableRemoteThreatVisible: boolean,
+  ) => string[];
+  runnerCentralRunBurnsRemoteContestReserve: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableProfiles: Array<{ postRunReserveTarget: number }>,
+  ) => boolean;
+} {
+  return {
+    runnerCentralRunHasClearPressureJustification: (
+      input,
+      targetServerId,
+      contestableRemoteThreatVisible,
+    ) =>
+      runnerCentralRunHasClearPressureJustification(
+        input,
+        targetServerId,
+        contestableRemoteThreatVisible,
+        dependencies,
+      ),
+    runnerCentralRunPressureJustificationReasons: (
+      input,
+      targetServerId,
+      contestableRemoteThreatVisible,
+    ) =>
+      runnerCentralRunPressureJustificationReasons(
+        input,
+        targetServerId,
+        contestableRemoteThreatVisible,
+        dependencies,
+      ),
+    runnerCentralRunBurnsRemoteContestReserve: (
+      input,
+      targetServerId,
+      contestableProfiles,
+    ) =>
+      runnerCentralRunBurnsRemoteContestReserve(
+        input,
+        targetServerId,
+        contestableProfiles,
+        dependencies,
+      ),
+  };
+}
+
 export function runnerCentralRunHasClearPressureJustification(
   input: AiDecisionInput,
   targetServerId: string,
