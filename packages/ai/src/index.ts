@@ -489,7 +489,6 @@ import {
 import type {
   SimulationBenchmarkProfile,
   SimulationBenchmarkProfileId,
-  SimulationControllerMode,
   SimulationWorld,
 } from "./simulation/simulation-types";
 import type {
@@ -517,7 +516,6 @@ import type {
 import { REAL_SCENE_BENCHMARK_DECKS } from "./simulation/benchmark-local-deck-data";
 import {
   createSimulationRng,
-  type SimulationRng,
 } from "./simulation/simulation-rng";
 import {
   DOCTRINE_QUALITY_METRIC_NAMES,
@@ -686,7 +684,6 @@ import {
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
 import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
-import { chooseRandomLegalDecision } from "./simulation/random-legal-decision";
 import {
   createRunnerCreditReserveTargetForInput,
   createRunnerPostRunReserveTargetForRemoteInput,
@@ -756,11 +753,13 @@ import {
 } from "./simulation/v143-data";
 import { SOAK_SEEDS, SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
 import {
-  controllerModeForSide,
   deckSnapshotForSimulation,
   profileIdForMode,
   simulationDeckConfig,
 } from "./simulation/simulation-config-helpers";
+import {
+  createSimulationDecisionContext,
+} from "./simulation/simulation-decision-context";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2353,6 +2352,17 @@ const qualityTagsForAction = createQualityTagsForAction({
   findVisibleCard,
   rolesForAction,
 });
+const {
+  chooseDecisionForSimulation,
+  simulationSideUsesSemanticRuntime,
+} = createSimulationDecisionContext({
+  chooseAiAction,
+  chooseRunnerAction,
+  chooseCorpAction,
+  chooseRunnerBaselineAction,
+  chooseCorpBaselineAction,
+  selectedChoicesForDecision,
+});
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2467,7 +2477,7 @@ export function simulateAiGame(
             `runner-ai-v0.9-${config.runnerDifficulty ?? "normal"}`)
           : (config.corpProfileId ??
             `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`),
-      ...(simulationModeUsesSemanticRuntime(controllerModeForSide(side, config))
+      ...(simulationSideUsesSemanticRuntime(side, config)
         ? { ownDeckSnapshot: deckSnapshots[side] }
         : {}),
     });
@@ -3317,47 +3327,6 @@ function runV143Profile(
     notableExploitRefs: sortedUnique(exploitRefs),
     summaries,
   };
-}
-
-function chooseDecisionForSimulation(
-  side: Side,
-  input: AiDecisionInput,
-  config: AiSimulationConfig,
-  simulationRng: SimulationRng,
-): AiDecision {
-  const mode = controllerModeForSide(side, config);
-  switch (mode) {
-    case "random_legal_bot":
-      return chooseRandomLegalDecision(input, simulationRng, {
-        selectedChoicesForDecision,
-      });
-    case "basic_runner_ai":
-      return side === "runner"
-        ? chooseRunnerBaselineAction(input)
-        : chooseCorpBaselineAction(input);
-    case "basic_corp_ai":
-      return side === "corp"
-        ? chooseCorpBaselineAction(input)
-        : chooseRunnerBaselineAction(input);
-    case "plan_corp_v1_4_0":
-      return side === "corp"
-        ? chooseCorpAction(input, config.aiDecisionRuntimeOptions)
-        : chooseRunnerBaselineAction(input);
-    case "plan_runner_v1_4_1":
-      return side === "runner"
-        ? chooseRunnerAction(input, config.aiDecisionRuntimeOptions)
-        : chooseCorpBaselineAction(input);
-    case "belief_ai_v1_4_2":
-      return chooseAiAction(input, config.aiDecisionRuntimeOptions);
-    case "current_candidate":
-      return chooseAiAction(input, config.aiDecisionRuntimeOptions);
-  }
-}
-
-function simulationModeUsesSemanticRuntime(
-  mode: SimulationControllerMode,
-): boolean {
-  return mode === "belief_ai_v1_4_2" || mode === "current_candidate";
 }
 
 // Legacy baseline decision assembly for fallback and reference decisions.
