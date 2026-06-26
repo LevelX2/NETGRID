@@ -217,15 +217,6 @@ export function icebreakerEncounterStrengthBonus(...args: any[]): any {
   )(...args);
 }
 
-export function canOverlayProgramOnInstalledProgramHost(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "canOverlayProgramOnInstalledProgramHost",
-  )(...args);
-}
-
 export function rezzedCorpRootCardIds(...args: any[]): any {
   return runtimeDelegate(
     "stateRuntimeServices",

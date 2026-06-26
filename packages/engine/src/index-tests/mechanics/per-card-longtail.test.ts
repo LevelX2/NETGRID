@@ -3005,15 +3005,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(validateGameState(state).ok).toBe(true);
   });
 
-  it("overlays a program on Zetatech Software Installer without extra MU", () => {
+  it("installs a program by overwriting Zetatech Software Installer", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1922-zetatech-overlay-install",
+        seed: "v1922-zetatech-overwrite-install",
         baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1922_zetatech_overlay",
-          name: "O:NR V1.9.22 Zetatech Overlay",
+          id: "onr_v1_runner_v1922_zetatech_overwrite",
+          name: "O:NR V1.9.22 Zetatech Overwrite",
           cards: [
             { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
             { id: "onr_v1_031_hammer", quantity: 1 },
@@ -3042,6 +3042,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.runner.memoryUsed).toBe(1);
     expect(cardCounterAmount(state, installerId, "bit")).toBe(2);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          action.source === hammerId &&
+          action.payload?.hostOnCardId === installerId,
+      ),
+    ).toBe(false);
 
     const legal = mustAction(
       state,
@@ -3049,14 +3057,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === hammerId &&
-        action.payload?.programOverlayInstallRequested === true,
+        action.payload?.runnerProgramTrashBeforeInstall === true,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
       actionId: legal.actionId,
       clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: "v1922-zetatech-overlay-wrong-side",
+      idempotencyKey: "v1922-zetatech-overwrite-wrong-side",
     });
     expect(wrongSide.ok).toBe(false);
     if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
@@ -3065,7 +3073,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       side: "runner",
       actionId: legal.actionId,
       clientKnownStateVersion: state.stateVersion - 1,
-      idempotencyKey: "v1922-zetatech-overlay-stale",
+      idempotencyKey: "v1922-zetatech-overwrite-stale",
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
@@ -3077,21 +3085,33 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) => action.actionId === legal.actionId,
     );
+    expect(state.pendingChoice?.source).toContain(
+      "runner_program_trash_before_install",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const installerOption = state.pendingChoice?.options.find(
+      (option) => option.value === installerId,
+    );
+    expect(installerOption).toBeDefined();
+
+    state = applyChoice(state, "runner", installerOption?.id ?? "");
 
     expect(state.runner.rig.programs).toContain(hammerId);
-    expect(state.cardInstances[hammerId]?.hostedOn).toBe(installerId);
+    expect(state.runner.rig.programs).not.toContain(installerId);
+    expect(state.runner.heap).toContain(installerId);
+    expect(state.cardInstances[hammerId]?.hostedOn).toBeUndefined();
     expect(state.runner.memoryUsed).toBe(1);
     expect(cardCounterAmount(state, installerId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "install_card",
-      cardDefinitionId: "onr_v1_031_hammer",
-      v1922RunnerProgramAbility: "program_overlay_install",
-      programOverlayInstall: true,
-      hostDefinitionId: "onr_v1_075_zetatech-software-installer",
-      hostedRecurringCreditsSpent: 2,
-      runnerCreditsAfter: 0,
+      actionType: "resolve_choice",
+      trashedCount: 1,
+      trashedCardDefinitionIds: "onr_v1_075_zetatech-software-installer",
+      installed: true,
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /hostOnCardId|hostDefinitionId|hostedRecurringCreditsSpent/,
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
     );

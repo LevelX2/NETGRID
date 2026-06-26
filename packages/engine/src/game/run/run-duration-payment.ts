@@ -18,7 +18,7 @@ import {
 } from "../../compatibility/runtime-compatibility";
 import {
   RUN_STRENGTH_HARDWARE_SOURCE,
-  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
+  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -241,7 +241,7 @@ export function runnerRunRecurringCreditSourceIds(
       );
     }
     if (
-      definition.id === PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE ||
+      definition.id === ZETATECH_SOFTWARE_INSTALLER_SOURCE ||
       TAG_REMOVAL_RECURRING_CREDIT_SOURCES.has(definition.id)
     ) {
       return false;

@@ -8,7 +8,7 @@ Scope: reiner Architektur-Audit nach ENGINE-ARCH-6/7. Keine Produktionscodeaende
 
 ENGINE-ARCH-6 hat die einfachen direkten Runner-Install-LegalActions fuer Program, Hardware und Resource sauber nach `packages/engine/src/game/turn/runner-install-actions.ts` extrahiert. Die verbliebenen Runner-Install-Sonderfaelle sind aber keine homogene Restgruppe. Sie teilen sich in vier Risikoklassen:
 
-1. Grip-nahe Sonder-LegalActions in `runnerMainActions`: Programmtrash-before-install, Daemon-Hosting, Zetatech Overlay, Agenda-Punkt-Kosten, Code Viral Cache und Data-Fort-Zielserver.
+1. Grip-nahe Sonder-LegalActions in `runnerMainActions`: Programmtrash-before-install, Daemon-Hosting, Zetatech Overwrite, Agenda-Punkt-Kosten, Code Viral Cache und Data-Fort-Zielserver.
 2. Restricted action sequence: Valu-Pak Software Bundle mit temporaeren Install-Credits und eigener End-Turn-Route.
 3. Special-/Hidden-Zone-Installpfade: Shell Traders, Sneak Preview, Self-Modifying Code und CardImplementation-Such-/Install-Choices.
 4. Ausfuehrungsmonolith: `installCard`, das Runner- und Corp-Install, Payment, MU, Hosting, Hidden Resource Redaction, Lifecycle Effects, Region/Root-Logik und Spezialmarker zusammenhaelt.
@@ -66,7 +66,7 @@ Der verbliebene direkte Runner-Grip-Installbereich in `runnerMainActions` liegt 
 - 2 CardImplementation-Agenda-Cost-Helper-Callsites (`cardImplementationAgendaPointInstallCost`).
 - 0 SpecialZone-Helper-Callsites im direkten Grip-Installblock.
 - 5 Payment-/Cost-nahe Helper-Callsites, wenn `availableRunnerProgramInstallCredits` und `pickRunnerAgendaForAgendaPointCost` als Installkosten-/Forfeit-Helfer gezaehlt werden.
-- 2 Hosting-Helper-Callsites (`canOverlayProgramOnZetatechSoftwareInstaller`, `canHostProgramOnDaemon`).
+- 1 Hosting-Helper-Callsite (`canHostProgramOnDaemon`) und der separate Zetatech-Overwrite-Zahlungspfad.
 - 4 Data-Fort-Target-Referenzen.
 - 2 Code-Viral-Cache-Gating-Referenzen.
 
@@ -98,7 +98,7 @@ Die bestehenden Modulgrenzen sind deshalb korrekt konservativ: `runner-install-a
 |-------------|--------------------|------------------|-------------|--------------|-------------|------------|----------------------------------|--------|------------|
 | Programmtrash-before-install | `runnerMainActions` `index.ts:3587-3606`; Choice `index.ts:9867-9992`; `installCard` `index.ts:10020-10031` | einzelner `install_card` mit `runnerProgramTrashBeforeInstall: true` | oeffnet erst PendingChoice, resolved danach wieder ueber `installCard` | ja, Choice ist `hidden_info_barrier`, Auswahl installierter Programme ist aber Runner-seitig | ja, Installkosten plus MU-Freimachung | keine SpecialZone; nur Rig/Grip | ja, action-building-seitig klein | mittel: PendingChoice-IDs und Payloadmarker duerfen nicht driften | Naechster Schnitt: Builder fuer Action-Objekt extrahieren, Choice/Execution in `index.ts` lassen |
 | Hosting/Daemon | `runnerMainActions` `index.ts:3607-3669`; `canHostProgramOnDaemon` `index.ts:4555-4583`; `installCard` `index.ts:10035-10069`, `10183-10185`, `10222-10227` | `install_card` mit `hostOnCardId` und TargetRequirement `hostProgram` | normale Install-Ausfuehrung mit `hostedOn`, ohne MU fuer gehostetes Programm | niedrig, Host ist public installed Runner program | hoch: Daemon-Kapazitaet, MU, install_programs Credits | ja, Hostbindung an installed Daemon | spaeter ja, aber nicht zuerst | mittel bis hoch: Hosted-MU und Payment muessen exakt bleiben | Nach Programtrash als eigener Hosted-Install-Schnitt |
-| Zetatech Overlay | `runnerMainActions` `index.ts:3614-3644`; `canOverlayProgramOnZetatechSoftwareInstaller` `index.ts:4609-4624`; `installCard` `index.ts:10039-10068`, `10097-10100`, `10232-10248` | `install_card` mit `hostOnCardId` und `v1922ZetatechOverlayInstall: true` | normale Install-Ausfuehrung plus Overlay-Payload und recurring-credit-spent Marker | niedrig | hoch: recurring/hosted payment credit accounting | ja, Host/Overlay | nicht isoliert vom Hosted-Install schneiden | hoch: Source-removal/Stale-Revalidation und Recurring-Credit-Payload | Mit Hosted-Install-Schnitt zusammen behandeln |
+| Zetatech Overwrite | Trash-vor-Install-Pfad plus Zetatech-Recurring-Credits; keine eigene Host-Action | normales `install_card` mit `runnerProgramTrashBeforeInstall: true` | zahlt Zetatech-Credits vor dem Trash, trasht Zetatech, installiert das neue Programm normal ohne Hostbindung | ja, Choice bleibt Runner-privat | hoch: Recurring-Credit-Zahlung muss vor Source-removal passieren | nein, kein Host/Overlay | ja, getrennt vom Hosted-Install schneiden | hoch: Source-removal/Stale-Revalidation und Doppelzahlungs-Vermeidung | Nicht mit Hosted-Install vermischen; als Trash-vor-Install-Zahlungsspezialfall behandeln |
 | Agenda-Punkt-Kosten | `runnerMainActions` `index.ts:3671-3710`, `3725-3758`; Cost Helper `index.ts:17461`; Forfeit Helper `index.ts:19768-19782`; `installCard` `index.ts:10103-10128` | Hardware/Resource `install_card` mit `installAgendaPointCost`, `forfeitAgendaCardId`, `installCostReason` | `installCard` validiert deklarierte Kosten und forfeitet Agenda | nein, ScoreArea ist public | ja, nicht Credit-Payment, aber Zusatzkosten/Revalidation | `removed_from_game` SpecialZone-Marker fuer forfeited Agenda | ja, aber nur als Install-Cost-Context | mittel: Action-Payload und specialZoneReason muessen stabil bleiben | Nach Hosted-Install als Cost-Target-Context schneiden |
 | Code Viral Cache | `runnerMainActions` `index.ts:3719-3724`; `installCard` `index.ts:10075-10082`; weitere Runtime bei `index.ts:8614-8621`, `29838`, `29910`, `30025` | Resource-Install wird nur nach erfolgreichem HQ-Run angeboten | normale Resource-Installation; weitere Kartenlogik ausserhalb Install | nein | niedrig bis mittel: Timing-/Run-Flag statt Payment | nein | ja, aber nur als Teil von Resource eligibility | niedrig bis mittel: HQ-run flag darf nicht anders interpretiert werden | Bei Resource-Install-Eligibility-Context mitnehmen, nicht als eigener Schnitt |
 | Data-Fort-Zielserver | `requiresDataFortInstallTarget` `index.ts:1171-1175`; `runnerMainActions` `index.ts:3759-3785`; `installCard` `index.ts:10070-10095`, `10228-10230` | pro Corp-Server ein `install_card` mit `selectedServerId` und `selectedServerLabel` | normale Resource-Installation mit `selectedServerId` auf CardInstance | ja mittel: Server ist public, aber Zielbindung darf keine hidden Carddaten leaken | niedrig bis mittel: Installkosten normal, aber Revalidation benoetigt Serverexistenz | Serverbindung, keine SpecialZone | ja, aber nur mit Target-Context | mittel: ActionID-Reihenfolge und Label muessen pro Server stabil bleiben | Mit Agenda-Punkt-Kosten als Install-Cost/Target-Context schneiden |
@@ -110,7 +110,7 @@ Die bestehenden Modulgrenzen sind deshalb korrekt konservativ: `runner-install-a
 
 ## 6. Risiken
 
-ActionID-/Payload-Risiko: Die Sonderactions nutzen bestehende `action(...)`/`buildLegalAction(...)`-Semantik. Jede Extraktion muss exakt dieselben `actionId`, Labels, Costs, Payloads und `targetRequirements` erzeugen. Besonders kritisch sind `runnerProgramTrashBeforeInstall`, `hostOnCardId`, `v1922ZetatechOverlayInstall`, `installAgendaPointCost`, `forfeitAgendaCardId`, `selectedServerId`, `selectedServerLabel` und Valu-Pak-Marker.
+ActionID-/Payload-Risiko: Die Sonderactions nutzen bestehende `action(...)`/`buildLegalAction(...)`-Semantik. Jede Extraktion muss exakt dieselben `actionId`, Labels, Costs, Payloads und `targetRequirements` erzeugen. Besonders kritisch sind `runnerProgramTrashBeforeInstall`, `runnerProgramTrashBeforeInstallCostsPrepaid`, `hostOnCardId`, `installAgendaPointCost`, `forfeitAgendaCardId`, `selectedServerId`, `selectedServerLabel` und Valu-Pak-Marker.
 
 PendingChoice-Risiko: Programtrash, Sneak Preview, SMC und CardImplementation-Stack/Heap-Installpfade erzeugen oder konsumieren Choices mit stabilen `choiceId`-/`source`-Mustern. Diese duerfen nicht nebenbei veraendert werden.
 
@@ -130,7 +130,7 @@ Nicht als naechster Schritt verschieben:
 - Sneak Preview, Self-Modifying Code und CardImplementation-Stack/Heap-Installpfade.
 - Shell Traders als Teil der normalen Runner-Install-LegalActions.
 - Valu-Pak als Teil des normalen Grip-Installblocks.
-- Daemon-Hosting und Zetatech Overlay zusammen mit Programtrash.
+- Daemon-Hosting zusammen mit Programtrash; Zetatech Overwrite darf nur als Programtrash-Zahlungsspezialfall mitgenommen werden.
 - Payment-Ausfuehrung, Hosted-Credit-Spending oder temporaere Valu-Pak-Credits.
 - Hidden-Zone-Choices oder `cardSearchPresentation`-Objekte.
 - Runner-Install-Ausfuehrung oder MU-Mutation.
@@ -151,7 +151,7 @@ Begruendung:
 
 Nicht empfohlen als naechster Schritt:
 
-- Option B (`runner-hosted-install-boundary`) ist sinnvoll, aber Hosting und Zetatech haengen bereits an hosted credits, MU-Ausnahmen und Overlay-Payloads.
+- Option B (`runner-hosted-install-boundary`) ist sinnvoll, aber Daemon-Hosting und Zetatech Overwrite duerfen nicht vermischt werden: Zetatech ist kein Host-/MU-Ausnahme-Pfad, sondern ein Trash-vor-Install-Zahlungsspezialfall.
 - Option C (`runner-install-cost-target-context`) ist sinnvoll, aber Agenda-Punkt-Kosten und Data-Fort-Zielserver mischen Cost- und Target-Revalidation.
 - Option D (`special-zone-install-audit`) ist fachlich wichtig, sollte aber erst nach dem kleinen Programtrash-Schnitt kommen.
 - Option E (`install-card-internal-map`) wird spaeter noetig, ist aber fuer den naechsten Produktionsschnitt breiter als erforderlich.

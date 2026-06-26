@@ -18,7 +18,6 @@ import {
   ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
 } from "../../mechanics/damage-prevention";
-import { PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE } from "../../mechanics/longtail-card-effects";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import {
@@ -105,10 +104,6 @@ export type InstallCardHost = {
   };
   hosting: {
     canHostProgramOnDaemon: (
-      hostCardId: CardInstanceId,
-      definition: CardDefinition,
-    ) => boolean;
-    canOverlayProgramOnInstalledProgramHost: (
       hostCardId: CardInstanceId,
       definition: CardDefinition,
     ) => boolean;
@@ -202,7 +197,9 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
   ) {
     host.servers.assertCorpCanCreateNewDataFort();
   }
-  if (legalAction.side === "runner") {
+  const runnerInstallCostsPrepaid =
+    legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid === true;
+  if (legalAction.side === "runner" && !runnerInstallCostsPrepaid) {
     const installCost = definition.installCost ?? 0;
     if (!host.payment.runnerCanPayInstallCost(installCost, definition.type)) {
       if (
@@ -241,8 +238,6 @@ function installRunnerCard(
     typeof legalAction.payload?.hostOnCardId === "string"
       ? (String(legalAction.payload.hostOnCardId) as CardInstanceId)
       : undefined;
-  const programOverlayInstall =
-    legalAction.payload?.programOverlayInstallRequested === true;
   const selectedServerId =
     typeof legalAction.payload?.selectedServerId === "string"
       ? String(legalAction.payload.selectedServerId)
@@ -272,14 +267,7 @@ function installRunnerCard(
   if (
     definition.type === "program" &&
     hostOnCardId &&
-    !(
-      programOverlayInstall
-        ? host.hosting.canOverlayProgramOnInstalledProgramHost(
-            hostOnCardId,
-            definition,
-          )
-        : host.hosting.canHostProgramOnDaemon(hostOnCardId, definition)
-    )
+    !host.hosting.canHostProgramOnDaemon(hostOnCardId, definition)
   ) {
     throw new Error("Der angegebene Program-Host ist ungueltig.");
   }
@@ -326,10 +314,6 @@ function installRunnerCard(
         host.servers.serverChoiceDisplayLabel(restrictiveTargetServerId),
     };
   }
-  const hostedRecurringCreditsBefore =
-    programOverlayInstall && hostOnCardId
-      ? host.hosting.hostedPaymentCredits(hostOnCardId)
-      : 0;
   const concealedHiddenRunnerResource =
     definition.type === "resource" &&
     host.cards.cardHasSubtype(definition, "hidden");
@@ -357,10 +341,11 @@ function installRunnerCard(
       specialZoneReason: "agenda_point_cost_card_implementation_install",
     };
   }
-  host.payment.spendRunnerInstallCredits(
-    definition.installCost ?? 0,
-    definition.type,
-  );
+  if (legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid !== true)
+    host.payment.spendRunnerInstallCredits(
+      definition.installCost ?? 0,
+      definition.type,
+    );
   host.zones.removeFromAllZones(cardId);
   if (definition.type === "hardware") {
     installRunnerHardware(host, legalAction, cardId, definition);
@@ -403,23 +388,6 @@ function installRunnerCard(
       ? { selectedSubtype }
       : {}),
   };
-  if (programOverlayInstall) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "program_overlay_install",
-      programOverlayInstall: true,
-      hostDefinitionId: PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
-      hostedRecurringCreditsSpent:
-        programOverlayInstall && hostOnCardId
-          ? Math.max(
-              0,
-              hostedRecurringCreditsBefore -
-                host.hosting.hostedPaymentCredits(hostOnCardId),
-            )
-          : 0,
-      runnerCreditsAfter: state.runner.credits,
-    };
-  }
   host.runner.consumeValuPakProgramInstallAction(legalAction);
   if (host.cards.shouldLoadLegacyRecurringCredits(definition)) {
     legalAction.payload = {

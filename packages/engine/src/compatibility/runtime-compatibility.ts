@@ -76,7 +76,7 @@ export const PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE =
   "onr_v1_117_valu-pak-software-bundle";
 export const BREAKER_DISABLE_PROGRAM_SOURCE =
   "onr_v1_037_japanese-water-torture";
-export const PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE =
+export const ZETATECH_SOFTWARE_INSTALLER_SOURCE =
   "onr_v1_075_zetatech-software-installer";
 export const HQ_INTERFACE_PROGRAM_SOURCE = "onr_v1_051_rabbit";
 export const UPGRADE_TRASH_PROGRAM_SOURCE = "onr_v1_057_scatter-shot";

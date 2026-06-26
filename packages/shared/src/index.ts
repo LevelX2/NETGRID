@@ -6703,13 +6703,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     recurringCredits: 2,
     rulesText:
-      "2 recurring credits. Use these credits to install programs. You may install a program over Zetatech Software Installer; overlay programs use no additional MU.",
+      "2 recurring credits. Use these credits to install programs. You may use these credits while installing a program that overwrites Zetatech Software Installer itself.",
     mechanics: [
       "install_program",
       "memory",
       "recurring_credit",
       "program_install_support",
-      "overlay_program_install",
+      "program_install_overwrite_source",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],

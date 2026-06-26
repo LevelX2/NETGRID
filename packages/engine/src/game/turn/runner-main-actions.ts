@@ -18,7 +18,6 @@ export type RunnerMainActionGenerationHost = {
     buildRunnerDrawCardActions: HostFn<LegalAction[]>;
     buildRunnerProgramInstallAction: HostFn<LegalAction>;
     buildRunnerProgramTrashBeforeInstallAction: HostFn<LegalAction>;
-    buildRunnerZetatechOverlayInstallAction: HostFn<LegalAction>;
     buildRunnerHostedProgramInstallAction: HostFn<LegalAction>;
     buildRunnerAgendaPointInstallAction: HostFn<LegalAction>;
     buildRunnerHardwareInstallAction: HostFn<LegalAction>;
@@ -66,7 +65,6 @@ export type RunnerMainActionGenerationHost = {
   };
   install: {
     shouldOfferRunnerProgramTrashBeforeInstall: HostFn<boolean>;
-    canOverlayProgramOnInstalledProgramHost: HostFn<boolean>;
     canHostProgramOnDaemon: HostFn<boolean>;
     cardImplementationAgendaPointInstallCost: HostFn<number>;
     pickRunnerAgendaForAgendaPointCost: HostFn<string | undefined>;
@@ -161,8 +159,6 @@ export function buildRunnerMainActions(
     host.actions.buildRunnerProgramInstallAction;
   const buildRunnerProgramTrashBeforeInstallAction =
     host.actions.buildRunnerProgramTrashBeforeInstallAction;
-  const buildRunnerZetatechOverlayInstallAction =
-    host.actions.buildRunnerZetatechOverlayInstallAction;
   const buildRunnerHostedProgramInstallAction =
     host.actions.buildRunnerHostedProgramInstallAction;
   const buildRunnerAgendaPointInstallAction =
@@ -229,8 +225,6 @@ export function buildRunnerMainActions(
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
-  const canOverlayProgramOnInstalledProgramHost =
-    host.install.canOverlayProgramOnInstalledProgramHost;
   const canHostProgramOnDaemon = host.install.canHostProgramOnDaemon;
   const cardImplementationAgendaPointInstallCost =
     host.install.cardImplementationAgendaPointInstallCost;
@@ -546,24 +540,6 @@ export function buildRunnerMainActions(
         ...state.runner.rig.programs,
         ...state.runner.rig.hardware,
       ]) {
-        if (
-          canOverlayProgramOnInstalledProgramHost(
-            state,
-            hostId,
-            definition,
-          )
-        ) {
-          const hostDefinition = definitionFor(state, hostId);
-          actions.push(
-            buildRunnerZetatechOverlayInstallAction(state, {
-              cardId: id,
-              definition,
-              hostCardId: hostId,
-              hostTitle: hostDefinition.title,
-            }),
-          );
-          continue;
-        }
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
         actions.push(

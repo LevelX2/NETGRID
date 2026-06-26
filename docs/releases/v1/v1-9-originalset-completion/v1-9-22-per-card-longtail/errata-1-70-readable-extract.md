@@ -21,7 +21,7 @@ Dieses Artefakt ist keine Vollabschrift der PDF. Es ist eine gezielte, lesbare A
 | `Tutor` | Tutor veraendert nicht den aktuellen eigenen Encounter; der Zusatz wirkt erst auf spaetere Encounters im selben Run, auch auf dasselbe Tutor, falls es erneut encountered wird. | Guter Kandidat fuer einen engen Runtime-Schnitt: beim erfolgreichen Ausloesen entsteht ein run-weiter ICE-Modifier fuer kuenftige Encounters. | Lokaler Vertrag muss festlegen, wie der zusaetzliche End-the-run-Subroutine-Eintrag in PublicView, Replay und StateHash modelliert wird. |
 | `Viral 15` | Der Runner waehlt die zu trashenden Programme. | Keine Korp-Auswahl und keine automatische Engine-Auswahl. Der Resolver braucht eine Runner-private Programmauswahl. | Timing bleibt zu klaeren: nach Passieren, vor/waehrend Jack-out-Fenster und wie bei weniger als drei Programmen verfahren wird. |
 | `Hammer` | Noisy-Karten koennen genutzt werden, auch wenn keine Stealth-Karten im Spiel sind. Der Stealth-Credit-Verlust ist eine Straf-/Folgewirkung, keine Nutzungskostenbedingung. | Nutzerentscheidung 2026-05-14: Installkosten 2, MU 1, Stärke 2, `1: Break Wall subroutine`, `1: +1 Strength`; beim Hammer-Break verliert der Runner insgesamt bis zu 2 von Stealth-Karten, Verteilung nach Runner-Wahl. | Runtime-Umsetzung, PublicPayload, Replay/StateHash und AI-Fallback. |
-| `Zetatech Software Installer` | Die Karte fuehrt zwei wiederkehrende Credits von der Bank und refreshte genutzte Credits zu Beginn des naechsten Runner-Zugs. | Recurring-Credit-Hoehe und Refresh-Timing sind bestaetigt. Nutzerentscheidung 2026-05-14: Installkosten 0, MU 1. | Programminstallations-Zahlungsfenster und Overlay-Vertrag bleiben als technische Implementierungsvertraege offen. |
+| `Zetatech Software Installer` | Die Karte fuehrt zwei wiederkehrende Credits von der Bank und refreshte genutzte Credits zu Beginn des naechsten Runner-Zugs. | Recurring-Credit-Hoehe und Refresh-Timing sind bestaetigt. Nutzerentscheidung 2026-05-14: Installkosten 0, MU 1. | Programminstallations-Zahlungsfenster und Overwrite-Vertrag bleiben als technische Implementierungsvertraege offen. |
 
 ## Kein direkter Kartentreffer
 
@@ -50,7 +50,7 @@ Dieses Artefakt ist keine Vollabschrift der PDF. Es ist eine gezielte, lesbare A
 
 `Hammer` verliert den falschen Stealth-Vorblocker und ist fachlich geschlossen. Es bleibt als Runtime-/Testumsetzung offen.
 
-`Zetatech Software Installer` ist fuer recurring Credits, Installkosten 0 und MU 1 geklaert. Offen bleibt der technische Zahlungs- und Overlay-Vertrag.
+`Zetatech Software Installer` ist fuer recurring Credits, Installkosten 0 und MU 1 geklaert. Offen bleibt der technische Zahlungs- und Overwrite-Vertrag.
 
 ## Weiterhin zu klaerende Projektvertraege
 
@@ -59,7 +59,7 @@ Dieses Artefakt ist keine Vollabschrift der PDF. Es ist eine gezielte, lesbare A
 3. `Viral 15`: genaues Runner-Choice-Fenster fuer Programm-Trash.
 4. `Haunting Inquisition`: Action-Lock-Lebensdauer und Bonus-Run-Ausnahmen.
 5. `Flak`, `Japanese Water Torture`, `Reflector`, `Hammer`: gemeinsamer Icebreaker-/Subroutine-Vertrag.
-6. `Zetatech Software Installer`: Restricted-Credit-Zahlungsfenster und Overlay-Vertrag.
+6. `Zetatech Software Installer`: Restricted-Credit-Zahlungsfenster und Overwrite-Vertrag.
 
 ## Empfohlener naechster Schnitt
 

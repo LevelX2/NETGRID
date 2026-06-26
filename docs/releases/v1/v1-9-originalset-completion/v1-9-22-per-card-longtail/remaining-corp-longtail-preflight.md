@@ -5,7 +5,7 @@ Status: Historischer WIP-Preflight mit Errata-1.70-Klaerung; Runtime-WIPs umgese
 
 ## Ziel
 
-Nach dem Haunting-Inquisition-WIP waren noch zwei Corp-Longtail-Zielkarten ohne engen Runtime-Resolver offen. Dieser historische Befund ist durch die spaeteren `Data Fort Reclamation`- und `Viral 15`-WIP-Schnitte ueberholt; offen bleiben Zetatech-Overlay und Promotion-Gates.
+Nach dem Haunting-Inquisition-WIP waren noch zwei Corp-Longtail-Zielkarten ohne engen Runtime-Resolver offen. Dieser historische Befund ist durch die spaeteren `Data Fort Reclamation`- und `Viral 15`-WIP-Schnitte ueberholt; offen bleiben Zetatech-Overwrite und Promotion-Gates.
 
 ## Kartenbefund
 
@@ -20,4 +20,4 @@ Nach dem Haunting-Inquisition-WIP waren noch zwei Corp-Longtail-Zielkarten ohne 
 
 ## Naechste konkrete Entfernung
 
-Der naechste Code-Schnitt sollte `Zetatech Software Installer` Overlay-Vertrag adressieren. Danach bleiben finale AI-/Catalog-/Webclient-/Review-Gates.
+Der naechste Code-Schnitt sollte `Zetatech Software Installer` Overwrite-Vertrag adressieren. Danach bleiben finale AI-/Catalog-/Webclient-/Review-Gates.

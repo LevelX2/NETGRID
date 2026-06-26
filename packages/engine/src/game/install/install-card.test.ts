@@ -476,7 +476,6 @@ function testHost(
     },
     hosting: {
       canHostProgramOnDaemon: () => true,
-      canOverlayProgramOnInstalledProgramHost: () => true,
       hostedPaymentCredits: () => 0,
     },
     payment: {
