@@ -615,7 +615,12 @@ import { runMatchProgressionBenchmarkSlot } from "./simulation/benchmark-deck-sl
 import { benchmarkProfileById } from "./simulation/benchmark-profile-lookup";
 import {
   averageFinalAdvanceNumber,
+  averageFirstProgressionTurn,
   averageRunnerContestRisk,
+  averageTurnsFromFirstAdvanceToScore,
+  countFinalAdvancesResolvedBySameTurnCorpScore,
+  countFinalAdvancesStolenBeforeCorpScore,
+  countRunnerDrawThenDiscardSameTurn,
 } from "./simulation/match-progression-average-metrics";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
@@ -10006,117 +10011,6 @@ function diffMatchProgressionMetrics(
     delta[key] = round(candidate[key] - baseline[key]);
     return delta;
   }, {} as AiMatchProgressionMetrics);
-}
-
-function averageFirstProgressionTurn(
-  summaries: AiSimulationSummary[],
-  predicate: (entry: AiSimulationSummary["actionSequence"][number]) => boolean,
-): number {
-  const observedTurns = summaries
-    .map(
-      (summary) =>
-        progressionEntriesWithRunTargets(summary.actionSequence).find(predicate)
-          ?.turnNumber ?? 0,
-    )
-    .filter((turn) => turn > 0);
-  if (observedTurns.length === 0) return 0;
-  return round(
-    observedTurns.reduce((sum, turn) => sum + turn, 0) / observedTurns.length,
-  );
-}
-
-function averageTurnsFromFirstAdvanceToScore(
-  summaries: AiSimulationSummary[],
-): number {
-  const deltas = summaries
-    .map((summary) => {
-      const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-      const firstAdvance = sequence.find(
-        (entry) =>
-          isCorpRemoteAdvancementProgress(entry) &&
-          (entry.advancementTargetTypes?.includes("agenda") ||
-            entry.targetCardType === "agenda"),
-      );
-      if (!firstAdvance?.turnNumber) return undefined;
-      const firstScore = sequence.find(
-        (entry) =>
-          entry.side === "corp" &&
-          entry.actionType === "score_agenda" &&
-          (entry.turnNumber ?? 0) >= firstAdvance.turnNumber!,
-      );
-      if (!firstScore?.turnNumber) return undefined;
-      return Math.max(0, firstScore.turnNumber - firstAdvance.turnNumber);
-    })
-    .filter((value): value is number => typeof value === "number");
-  if (deltas.length === 0) return 0;
-  return round(deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length);
-}
-
-function countFinalAdvancesResolvedBySameTurnCorpScore(
-  summaries: AiSimulationSummary[],
-): number {
-  return summaries.reduce((count, summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return (
-      count +
-      sequence.filter((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true) return false;
-        return sequence
-          .slice(index + 1)
-          .some(
-            (later) =>
-              later.side === "corp" &&
-              later.actionType === "score_agenda" &&
-              later.turnNumber === entry.turnNumber,
-          );
-      }).length
-    );
-  }, 0);
-}
-
-function countFinalAdvancesStolenBeforeCorpScore(
-  summaries: AiSimulationSummary[],
-): number {
-  return summaries.reduce((count, summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return (
-      count +
-      sequence.filter((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true) return false;
-        const later = sequence
-          .slice(index + 1)
-          .find(
-            (candidate) =>
-              candidate.actionType === "score_agenda" ||
-              candidate.actionType === "steal_agenda",
-          );
-        return later?.actionType === "steal_agenda";
-      }).length
-    );
-  }, 0);
-}
-
-function countRunnerDrawThenDiscardSameTurn(
-  summaries: AiSimulationSummary[],
-): number {
-  return summaries.reduce((count, summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return (
-      count +
-      sequence.filter((entry, index) => {
-        if (entry.side !== "runner" || entry.runnerDrawAction !== true)
-          return false;
-        return sequence
-          .slice(index + 1)
-          .some(
-            (later) =>
-              later.side === "runner" &&
-              later.runnerDiscardChoice === true &&
-              later.turnNumber === entry.turnNumber,
-          );
-      }).length
-    );
-  }, 0);
 }
 
 function summarizeRunnerRepeatRemoteNoTrashMetrics(
