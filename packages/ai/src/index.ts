@@ -551,10 +551,9 @@ import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/cor
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
-import { runnerHqMemoryDiagnosticsForMetrics } from "./simulation/runner-hq-memory-diagnostics";
+import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./simulation/runner-central-pressure-diagnostics";
 import { createRunnerEconomySetupDiagnosticsForSimulationAction } from "./simulation/runner-economy-setup-diagnostics";
 import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/runner-hand-use-diagnostics";
-import { runnerKnownCardPositionDiagnosticsForMetrics } from "./simulation/runner-known-card-position-diagnostics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
@@ -597,8 +596,6 @@ import {
 } from "./simulation/card-metric-lookup";
 import {
   centralPressureTargetIsGoodForMetrics,
-  centralPressureTargetsForCard,
-  isCentralPressureCardForMetrics,
 } from "./simulation/central-pressure-card";
 import {
   createRunnerCentralRunPressureJustificationContext,
@@ -611,8 +608,6 @@ import {
 } from "./simulation/no-fresh-central";
 import {
   centralRunStreakWithoutValueForMetrics,
-  centralRepeatHasFreshValueForMetrics,
-  isRepeatedLowValueCentralRunForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
 import {
@@ -1406,6 +1401,18 @@ const runnerNoFreshCentralContextForMetrics = createRunnerNoFreshCentralContext(
   runnerRemoteThreatProfile,
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
 });
+
+const runnerCentralPressureDiagnosticsForSimulationAction =
+  createRunnerCentralPressureDiagnosticsForSimulationAction({
+    rolesForCardId,
+    sourceDefinitionIdForSimulationAction,
+    bestTrueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfileForMetrics,
+    runnerNoFreshCentralContextForMetrics,
+    noFreshCentralSubstitutionTypeForAction,
+    runnerCreditReserveTargetForInput,
+    assessKnownRezzedIcePath,
+  });
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -11941,226 +11948,5 @@ function assessRunnerCoveragePressureForMetrics(
     searchActionIds,
     recoveryActionIds,
     heapMatchingBreakerCount,
-  };
-}
-
-function runnerCentralPressureDiagnosticsForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (input.side !== "runner" || action.side !== "runner") return {};
-  const centralTarget = centralServerId(
-    targetServerId ?? input.playerView.run?.attackedServerId,
-  );
-  const installedInterfaceTargets = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) =>
-        isCentralPressureCardForMetrics(card.definitionId, true),
-      )
-      .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
-  );
-  const hasAnyInstalledInterface = installedInterfaceTargets.size > 0;
-  const sourceDefinitionId = sourceDefinitionIdForSimulationAction(
-    input,
-    action,
-  );
-  const eventTargets =
-    action.type === "play_event"
-      ? centralPressureTargetsForCard(sourceDefinitionId)
-      : [];
-  const eventGoodTarget = eventTargets.some((target) =>
-    centralPressureTargetIsGoodForMetrics(input, target),
-  );
-  const interfaceInstallOpportunity = input.legalActions.some((candidate) => {
-    if (candidate.type !== "install_card") return false;
-    const definitionId = sourceDefinitionIdForSimulationAction(
-      input,
-      candidate,
-    );
-    return isCentralPressureCardForMetrics(definitionId, true);
-  });
-  const interfaceInstallTaken =
-    action.type === "install_card" &&
-    isCentralPressureCardForMetrics(sourceDefinitionId, true);
-  const closeoutOpportunityRaw =
-    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <=
-      2 &&
-    (centralTarget !== undefined ||
-      (["hq", "rd"] as const).some((target) =>
-        centralPressureTargetIsGoodForMetrics(input, target),
-      ));
-  const trueCloseout = centralTarget
-    ? trueCentralCloseoutProfileForMetrics(input, centralTarget)
-    : bestTrueCentralCloseoutProfileForMetrics(input);
-  const centralRun = action.type === "start_run" && centralTarget !== undefined;
-  const matchingInterface =
-    centralTarget !== undefined && installedInterfaceTargets.has(centralTarget);
-  const anyMultiaccessInstalled = (input.playerView.own.rig ?? []).some(
-    (card) =>
-      rolesForCardId(card.definitionId).some((role) =>
-        role.includes("multiaccess"),
-      ),
-  );
-  const repeatedLowValue =
-    centralTarget !== undefined &&
-    centralRun &&
-    isRepeatedLowValueCentralRunForMetrics(input, centralTarget) &&
-    !centralRepeatHasFreshValueForMetrics(input, centralTarget, {
-      matchingInterface,
-      anyMultiaccessInstalled,
-      eventGoodTarget,
-      trueCloseout: trueCloseout.opportunity,
-    });
-  const repeatWindow =
-    centralTarget !== undefined &&
-    centralRun &&
-    centralRunStreakWithoutValueForMetrics(input, centralTarget) > 0;
-  const repeatWithFreshValue =
-    centralTarget !== undefined &&
-    centralRun &&
-    repeatWindow &&
-    centralRepeatHasFreshValueForMetrics(input, centralTarget, {
-      matchingInterface,
-      anyMultiaccessInstalled,
-      eventGoodTarget,
-      trueCloseout: trueCloseout.opportunity,
-    });
-  const noFresh = runnerNoFreshCentralContextForMetrics(input);
-  const noFreshRunTaken =
-    centralRun &&
-    centralTarget !== undefined &&
-    noFresh.targets.includes(centralTarget);
-  const substitutionType =
-    noFresh.targets.length > 0 && !noFreshRunTaken
-      ? noFreshCentralSubstitutionTypeForAction(input, action)
-      : undefined;
-  const streakWithoutValue =
-    centralTarget !== undefined && centralRun
-      ? centralRunStreakWithoutValueForMetrics(input, centralTarget)
-      : 0;
-  const reserveTarget = runnerCreditReserveTargetForInput(input);
-  const server = centralTarget
-    ? input.playerView.servers.find(
-        (candidate) => candidate.id === centralTarget,
-      )
-    : undefined;
-  const visibleBreakCost =
-    centralTarget && server
-      ? (assessKnownRezzedIcePath(
-          server.ice,
-          input.playerView.own.rig ?? [],
-          input.playerView.own.credits,
-          server.root,
-        ).visibleBreakCost ?? 0)
-      : 0;
-  const insufficientReserve =
-    centralRun &&
-    input.playerView.own.credits - visibleBreakCost < reserveTarget;
-  const hqMemoryDiagnostics = runnerHqMemoryDiagnosticsForMetrics(
-    input,
-    centralRun,
-    centralTarget,
-  );
-  const knownCardPositionDiagnostics =
-    runnerKnownCardPositionDiagnosticsForMetrics(input, action, targetServerId);
-  return {
-    ...hqMemoryDiagnostics,
-    ...knownCardPositionDiagnostics,
-    ...(centralRun && (matchingInterface || anyMultiaccessInstalled)
-      ? { runnerCentralRunWithMultiaccess: true }
-      : {}),
-    ...(centralRun && hasAnyInstalledInterface
-      ? { runnerCentralRunWithInterfaceInstalled: true }
-      : {}),
-    ...(centralRun &&
-    centralTarget === "hq" &&
-    installedInterfaceTargets.has("hq")
-      ? { runnerHqRunWithHqInterface: true }
-      : {}),
-    ...(centralRun &&
-    centralTarget === "rd" &&
-    installedInterfaceTargets.has("rd")
-      ? { runnerRndRunWithRndInterface: true }
-      : {}),
-    ...(action.type === "play_event" && eventTargets.length > 0
-      ? { runnerCentralRunEventPlayed: true }
-      : {}),
-    ...(action.type === "play_event" && eventGoodTarget
-      ? { runnerCentralRunEventWithGoodTarget: true }
-      : {}),
-    ...(repeatedLowValue ? { runnerRepeatedLowValueCentralRun: true } : {}),
-    ...(repeatWindow ? { runnerCentralRunRepeatWindow: true } : {}),
-    ...(repeatWithFreshValue
-      ? { runnerRepeatedCentralRunWithFreshValue: true }
-      : {}),
-    ...(repeatWindow && !repeatWithFreshValue
-      ? { runnerRepeatedCentralRunWithoutFreshValue: true }
-      : {}),
-    ...(repeatedLowValue ? { runnerCentralRunStalePenaltyApplied: true } : {}),
-    ...(streakWithoutValue > 0
-      ? { runnerCentralRunStreakWithoutValue: streakWithoutValue }
-      : {}),
-    ...(insufficientReserve
-      ? { runnerCentralRunStartedWithInsufficientPostRunReserve: true }
-      : {}),
-    ...(closeoutOpportunityRaw
-      ? { runnerCentralCloseoutOpportunityRaw: true }
-      : {}),
-    ...(trueCloseout.opportunity
-      ? {
-          runnerTrueCentralCloseoutOpportunity: true,
-          runnerCentralCloseoutOpportunity: true,
-          runnerCentralCloseoutReason: trueCloseout.reasons[0],
-        }
-      : {}),
-    ...(closeoutOpportunityRaw && !trueCloseout.opportunity && !centralRun
-      ? { runnerCentralCloseoutSkippedWithGoodReason: true }
-      : {}),
-    ...(closeoutOpportunityRaw && trueCloseout.opportunity && !centralRun
-      ? { runnerCentralCloseoutSkippedWithoutReason: true }
-      : {}),
-    ...(centralRun && trueCloseout.opportunity
-      ? { runnerCentralCloseoutRunTaken: true }
-      : {}),
-    ...(action.type === "steal_agenda" &&
-    centralTarget &&
-    trueCloseout.opportunity
-      ? { runnerCentralCloseoutSuccess: true }
-      : {}),
-    ...(input.playerView.activeSide === "runner" &&
-    input.playerView.phase === "runner_action_phase" &&
-    !centralRun &&
-    closeoutOpportunityRaw &&
-    !trueCloseout.opportunity
-      ? { runnerCentralPressureNoopDecision: true }
-      : {}),
-    ...(noFresh.targets.length > 0
-      ? { runnerNoFreshCentralServerIds: noFresh.targets }
-      : {}),
-    ...(noFresh.betterAlternatives.length > 0
-      ? {
-          runnerNoFreshCentralBetterAlternativeTypes:
-            noFresh.betterAlternatives,
-        }
-      : {}),
-    ...(noFreshRunTaken ? { runnerNoFreshCentralRunTaken: true } : {}),
-    ...(substitutionType
-      ? { runnerNoFreshCentralSubstitutionType: substitutionType }
-      : {}),
-    ...(noFreshRunTaken && noFresh.allowedReasons[0]
-      ? { runnerStaleCentralAllowedReason: noFresh.allowedReasons[0] }
-      : {}),
-    ...(interfaceInstallOpportunity
-      ? { runnerInterfaceInstallOpportunity: true }
-      : {}),
-    ...(interfaceInstallTaken ? { runnerInterfaceInstallTaken: true } : {}),
-    ...(hasAnyInstalledInterface &&
-    input.playerView.activeSide === "runner" &&
-    input.playerView.phase === "runner_action_phase" &&
-    !centralRun &&
-    action.type === "end_turn"
-      ? { runnerInterfaceInstalledButUnusedTurn: true }
-      : {}),
   };
 }
