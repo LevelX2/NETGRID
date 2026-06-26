@@ -167,9 +167,7 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
-import {
-  createSemanticRuntimeRunnerEvidenceContext,
-} from "./runtime/semantic-runtime-runner-evidence-context";
+import { createSemanticRuntimeRunnerEvidenceComposition } from "./runtime/semantic-runtime-runner-evidence-composition";
 import {
   createSemanticRuntimeCorpEvidenceContext,
 } from "./runtime/semantic-runtime-corp-evidence-context";
@@ -1300,7 +1298,7 @@ const {
   actionCreditCost,
   rolesForAction,
 });
-const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
+const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceComposition({
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
   programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
