@@ -306,6 +306,9 @@ import {
   createCorpTaggedPayoffWindowContext,
 } from "./runtime/corp-tagged-payoff-window";
 import {
+  createCorpTaggedRunnerPayoffPressureContext,
+} from "./runtime/corp-tagged-runner-payoff-pressure";
+import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
@@ -1872,6 +1875,15 @@ const {
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
+});
+const {
+  corpTaggedRunnerPayoffPressure,
+} = createCorpTaggedRunnerPayoffPressureContext({
+  immediateTagSourceVisiblePayoffProfile:
+    corpImmediateTagSourceVisiblePayoffProfile,
+  installedEconomyActionProfile: corpInstalledEconomyActionProfile,
+  tagPunishPayoffFundingProfile: corpTagPunishPayoffFundingProfile,
+  taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -5645,57 +5657,6 @@ function corpTagPunishOntologyAssessmentForAction(
             : undefined,
     },
   );
-}
-
-function corpTaggedRunnerPayoffPressure(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  const immediateTagSource = corpImmediateTagSourceVisiblePayoffProfile(
-    input,
-    action,
-  );
-  if (immediateTagSource) {
-    return {
-      key: "corp_tag_source_visible_payoff_pressure",
-      label: "Sofortiger Tag-Source",
-      value: immediateTagSource.value,
-      reason: immediateTagSource.evidence.join("|"),
-    };
-  }
-  const installedEconomy = corpInstalledEconomyActionProfile(input, action);
-  if (installedEconomy) {
-    return {
-      key: "corp_card_action_economy_gain",
-      label: "Installierte Corp-Economy",
-      value: installedEconomy.value,
-      reason: installedEconomy.evidence.join("|"),
-    };
-  }
-  const funding = corpTagPunishPayoffFundingProfile(input, action);
-  if (funding) {
-    return {
-      key: "corp_tag_punish_payoff_funding",
-      label: "Tag-Punish-Funding",
-      value: funding.value,
-      reason: funding.evidence.join("|"),
-    };
-  }
-  const profile = corpTaggedRunnerPayoffProfile(input, action);
-  if (!profile) return undefined;
-  return {
-    key:
-      profile.kind === "damage"
-        ? "corp_tagged_meat_damage_payoff_pressure"
-        : "corp_tagged_runner_payoff_pressure",
-    label: "Tagged-Runner-Payoff",
-    value: profile.value,
-    reason: [
-      "corp_tagged_runner_payoff:true",
-      "corp_tagged_payoff_followup_plan:active",
-      ...profile.evidence,
-    ].join("|"),
-  };
 }
 
 function corpTaggedRunnerPayoffProfile(
