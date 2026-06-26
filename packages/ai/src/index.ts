@@ -549,7 +549,10 @@ import type {
   RunnerPressureReadyForMetrics,
   RunnerPressureReadyTargetForMetrics,
 } from "./simulation/runner-pressure-metric-types";
-import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
+import {
+  runnerEconomySkipReasonForDiagnostics,
+  type RunnerEconomySetupActionClass,
+} from "./simulation/runner-economy-setup-types";
 import {
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
@@ -16694,41 +16697,6 @@ function runnerEconomySetupActionClass(
           (role) => role.includes("delayed") || role.includes("penalty"),
         )),
   };
-}
-
-function runnerEconomySkipReasonForDiagnostics(context: {
-  action: LegalAction;
-  draw: boolean;
-  runAction: boolean;
-  setupAction: boolean;
-  installableBreaker: boolean;
-  remoteTrashAvailable: boolean;
-  advancedRemoteContestSkipped: boolean;
-  freshPressureAvailable: boolean;
-}):
-  | "pressure"
-  | "remote_contest"
-  | "setup"
-  | "draw"
-  | "run"
-  | "install_breaker"
-  | "trash"
-  | "end_turn"
-  | "unknown_higher_priority" {
-  if (context.advancedRemoteContestSkipped) return "remote_contest";
-  if (
-    context.action.type === "trash_accessed_card" ||
-    context.remoteTrashAvailable
-  )
-    return "trash";
-  if (context.installableBreaker && context.action.type === "install_card")
-    return "install_breaker";
-  if (context.setupAction) return "setup";
-  if (context.draw) return "draw";
-  if (context.runAction && context.freshPressureAvailable) return "pressure";
-  if (context.runAction) return "run";
-  if (context.action.type === "end_turn") return "end_turn";
-  return "unknown_higher_priority";
 }
 
 function runnerHasKnownUnaffordableLegalRun(input: AiDecisionInput): boolean {
