@@ -89,7 +89,6 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { createRunnerBaselineSupportComposition } from "./runtime/runner-baseline-support-composition";
-import { createRunnerVisibleCardDiscardComposition } from "./runtime/runner-visible-card-discard-composition";
 import { createAiActionEntrypointsComposition } from "./runtime/ai-action-entrypoints-composition";
 import { compareAction } from "./runtime/action-order";
 import {
@@ -1022,24 +1021,19 @@ const {
   runnerStrategicIntentForInput,
   isVisibleIcebreakerProgram,
   runnerRunOnlyActionAdjustedSemanticChoice,
-} = createRunnerBaselineSupportComposition({
-  delayedInstallAbilityForAction: shellTradersAbility,
-  runnerHasInstalledPrograms,
-  visibleBreakerRolesForAi,
-  compareAction,
-});
-const {
   visibleCardPlayOrInstallCostForAi,
   runnerCardLooksLikeCreditPayout,
   runnerBadPublicityOrTraceTechCard,
   runnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce,
   discardKeepScore,
-} = createRunnerVisibleCardDiscardComposition({
-  visibleCardDefinition,
-  isVisibleIcebreakerProgram,
-  assessKnownRezzedIcePath,
+} = createRunnerBaselineSupportComposition({
+  delayedInstallAbilityForAction: shellTradersAbility,
+  runnerHasInstalledPrograms,
   visibleBreakerRolesForAi,
+  compareAction,
+  visibleCardDefinition,
+  assessKnownRezzedIcePath,
   rolesForCardId,
   cardDefinitionTypeForAi,
   isRunnerEconomyRole,

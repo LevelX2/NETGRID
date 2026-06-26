@@ -6,6 +6,10 @@ import {
   type RunnerBaselinePlanGuardContextDependencies,
 } from "./runner-baseline-plan-guard-context";
 import {
+  createRunnerVisibleCardDiscardComposition,
+  type RunnerVisibleCardDiscardCompositionDependencies,
+} from "./runner-visible-card-discard-composition";
+import {
   createRunnerRunOnlyActionContext,
   type RunnerRunOnlyActionAdjustmentDependencies,
 } from "./runner-run-only-action-adjustment";
@@ -16,7 +20,11 @@ export type RunnerBaselineSupportCompositionDependencies =
   RunnerBaselinePlanGuardContextDependencies &
     RunnerRunOnlyActionAdjustmentDependencies & {
       visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-    };
+    } &
+    Omit<
+      RunnerVisibleCardDiscardCompositionDependencies,
+      "isVisibleIcebreakerProgram"
+    >;
 
 export function createRunnerBaselineSupportComposition(
   dependencies: RunnerBaselineSupportCompositionDependencies,
@@ -42,6 +50,23 @@ export function createRunnerBaselineSupportComposition(
       compareAction: dependencies.compareAction,
     });
 
+  const {
+    visibleCardPlayOrInstallCostForAi,
+    runnerCardLooksLikeCreditPayout,
+    runnerBadPublicityOrTraceTechCard,
+    runnerCardAddressesVisibleBreakerNeed,
+    visibleBreakerCardCanAddressIce,
+    discardKeepScore,
+  } = createRunnerVisibleCardDiscardComposition({
+    visibleCardDefinition: dependencies.visibleCardDefinition,
+    isVisibleIcebreakerProgram,
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    visibleBreakerRolesForAi: dependencies.visibleBreakerRolesForAi,
+    rolesForCardId: dependencies.rolesForCardId,
+    cardDefinitionTypeForAi: dependencies.cardDefinitionTypeForAi,
+    isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
+  });
+
   return {
     runnerHasConditionalPaymentContinueDecision,
     baselineShellTradersPlanIsVisible,
@@ -49,5 +74,11 @@ export function createRunnerBaselineSupportComposition(
     runnerStrategicIntentForInput,
     isVisibleIcebreakerProgram,
     runnerRunOnlyActionAdjustedSemanticChoice,
+    visibleCardPlayOrInstallCostForAi,
+    runnerCardLooksLikeCreditPayout,
+    runnerBadPublicityOrTraceTechCard,
+    runnerCardAddressesVisibleBreakerNeed,
+    visibleBreakerCardCanAddressIce,
+    discardKeepScore,
   };
 }
