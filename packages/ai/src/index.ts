@@ -398,8 +398,7 @@ import {
 import { SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
 import { createAiSimulationComposition } from "./simulation/ai-simulation-composition";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
-import { createLegacyCorpActionScorer } from "./legacy/corp-baseline-action-score";
-import { createLegacyRunnerActionScorer } from "./legacy/runner-baseline-action-score";
+import { createLegacyActionScoringComposition } from "./legacy/legacy-action-scoring-composition";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -1751,7 +1750,7 @@ export {
 };
 
 
-const { scoreRunnerAction } = createLegacyRunnerActionScorer({
+const { scoreRunnerAction, scoreCorpAction } = createLegacyActionScoringComposition({
   rolesForAction,
   rolesForCardId,
   runnerProgramInstallTrashAssessment,
@@ -1764,11 +1763,6 @@ const { scoreRunnerAction } = createLegacyRunnerActionScorer({
   runnerMuPressureFundingPriorityBonus,
   runnerPersistentInstallEvaluationForAction,
   runnerPersistentInstallLegacyScoreDelta,
-});
-
-const { scoreCorpAction } = createLegacyCorpActionScorer({
-  rolesForAction,
-  rolesForCardId,
   corpTagPunishOntologyAssessmentForAction,
   corpOntologyPayoffAvailableForTagSource,
 });
