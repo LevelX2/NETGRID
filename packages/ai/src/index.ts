@@ -175,7 +175,6 @@ import { createRunnerDevelopmentSupportComposition } from "./runtime/runner-deve
 import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
-import { createRunnerEconomyCommitmentComposition } from "./runtime/runner-economy-commitment-composition";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
   createRunnerScoringSupportComposition,
@@ -1031,6 +1030,12 @@ const {
   runnerLoanLiabilityAssessment,
   runnerViral15JackOutScoreComponent,
   runnerHandFundingTarget,
+  runnerBankInvestmentCommitmentScoreComponents,
+  runnerBankInvestmentCommitmentEvidence,
+  runnerBankHasConcreteFundingNeed,
+  runnerNoRunEconomyCommitmentScoreComponents,
+  runnerNoRunEconomyCommitmentEvidence,
+  semanticRuntimePlanMemoryActionExclusion,
   runnerPersistentInstallFitScoreComponent,
   runnerPersistentInstallLegacyScoreDelta,
   runnerPersistentInstallEvidenceForAction,
@@ -1060,24 +1065,10 @@ const {
   rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
   deckCapabilities: deckCapabilitiesForInput,
   strategicIntent: runnerStrategicIntentForInput,
-});
-const {
-  runnerBankInvestmentCommitmentScoreComponents,
-  runnerBankInvestmentCommitmentEvidence,
-  runnerBankHasConcreteFundingNeed,
-  runnerNoRunEconomyCommitmentScoreComponents,
-  runnerNoRunEconomyCommitmentEvidence,
-  semanticRuntimePlanMemoryActionExclusion,
-} = createRunnerEconomyCommitmentComposition({
   previousPlan: getTacticalPlanMemorySnapshot,
-  runnerHandFundingTarget,
   findVisibleCard,
-  sourceDefinitionIdForAction,
-  rolesForCardId,
   definitionForCardId: (definitionId) =>
     RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId],
-  actionCreditCost,
-  rolesForAction,
   serverId: semanticRuntimeServerId,
   definitionType: definitionTypeForMetrics,
   runnerRunTargetEvaluation: runnerMultiRunTargetEvaluation,

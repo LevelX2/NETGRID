@@ -6,6 +6,10 @@ import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandFundingTargetDependencies } from "./runner-hand-funding-target";
 import {
+  createRunnerEconomyCommitmentComposition,
+  type RunnerEconomyCommitmentCompositionDependencies,
+} from "./runner-economy-commitment-composition";
+import {
   createRunnerLoanContext,
   type RunnerLoanContextDependencies,
 } from "./runner-loan-context";
@@ -29,6 +33,10 @@ export type RunnerDevelopmentSupportCompositionDependencies =
     RunnerPersistentInstallContextDependencies<
       DeckCapabilityProfile,
       RunnerStrategicIntentProfile
+    > &
+    Omit<
+      RunnerEconomyCommitmentCompositionDependencies,
+      "runnerHandFundingTarget"
     >;
 
 export function createRunnerDevelopmentSupportComposition(
@@ -91,10 +99,42 @@ export function createRunnerDevelopmentSupportComposition(
       dependencies.handDevelopmentEvaluations,
   });
 
+  const {
+    runnerBankInvestmentCommitmentScoreComponents,
+    runnerBankInvestmentCommitmentEvidence,
+    runnerBankHasConcreteFundingNeed,
+    runnerNoRunEconomyCommitmentScoreComponents,
+    runnerNoRunEconomyCommitmentEvidence,
+    semanticRuntimePlanMemoryActionExclusion,
+  } = createRunnerEconomyCommitmentComposition({
+    previousPlan: dependencies.previousPlan,
+    runnerHandFundingTarget,
+    findVisibleCard: dependencies.findVisibleCard,
+    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    rolesForCardId: dependencies.rolesForCardId,
+    definitionForCardId: dependencies.definitionForCardId,
+    actionCreditCost: dependencies.actionCreditCost,
+    rolesForAction: dependencies.rolesForAction,
+    serverId: dependencies.serverId,
+    definitionType: dependencies.definitionType,
+    runnerRunTargetEvaluation: dependencies.runnerRunTargetEvaluation,
+    runnerRunTargetHighPayoff: dependencies.runnerRunTargetHighPayoff,
+    hintEffectsForDefinition: dependencies.hintEffectsForDefinition,
+    mechanicsForDefinition: dependencies.mechanicsForDefinition,
+    rulesTextForDefinition: dependencies.rulesTextForDefinition,
+    isRunnerRigInstallAction: dependencies.isRunnerRigInstallAction,
+  });
+
   return {
     runnerLoanLiabilityAssessment,
     runnerViral15JackOutScoreComponent,
     runnerHandFundingTarget,
+    runnerBankInvestmentCommitmentScoreComponents,
+    runnerBankInvestmentCommitmentEvidence,
+    runnerBankHasConcreteFundingNeed,
+    runnerNoRunEconomyCommitmentScoreComponents,
+    runnerNoRunEconomyCommitmentEvidence,
+    semanticRuntimePlanMemoryActionExclusion,
     runnerPersistentInstallFitScoreComponent,
     runnerPersistentInstallLegacyScoreDelta,
     runnerPersistentInstallEvidenceForAction,
