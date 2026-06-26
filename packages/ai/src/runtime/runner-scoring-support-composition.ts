@@ -9,6 +9,10 @@ import { createRunnerRunComponentsContext } from "./runner-run-components-contex
 import {
   createRunnerRunTargetGuidanceContext,
 } from "./runner-run-target-guidance-context";
+import {
+  createRunnerScoreComponentsContext,
+  type RunnerScoreComponentsDependencies,
+} from "./runner-score-components";
 
 export type RunnerScoringSupportCompositionDependencies =
   Parameters<typeof createRunnerRunTargetGuidanceContext>[0] &
@@ -21,7 +25,32 @@ export type RunnerScoringSupportCompositionDependencies =
     Omit<
       Parameters<typeof createRunnerRecoveryContext>[0],
       "recentBasicCreditActions" | "safeProgressTargets"
-    >;
+    > &
+    Omit<
+      RunnerScoreComponentsDependencies,
+      "recoveryCommitment" | "startRun" | "followup"
+    > & {
+      recoveryCommitment: Omit<
+        RunnerScoreComponentsDependencies["recoveryCommitment"],
+        | "blinkRecoveryScoreComponent"
+        | "junkyardRecoveryScoreComponent"
+        | "lowValueRecoveryRepeatScoreComponent"
+        | "lateNoFundingCreditRepeatScoreComponent"
+      >;
+      startRun: Omit<
+        RunnerScoreComponentsDependencies["startRun"],
+        | "hqMemoryComponents"
+        | "rndMemoryComponents"
+        | "archivesComponents"
+        | "remoteComponents"
+        | "knownIcePathComponents"
+        | "repeatedRunTargetComponents"
+      >;
+      followup: Omit<
+        RunnerScoreComponentsDependencies["followup"],
+        "runTargetGuidanceComponent" | "accessTrashComponents"
+      >;
+    };
 
 export function createRunnerScoringSupportComposition(
   dependencies: RunnerScoringSupportCompositionDependencies,
@@ -108,18 +137,34 @@ export function createRunnerScoringSupportComposition(
       dependencies.junkyardBbsReturnTopHeapAbility,
   });
 
-  return {
-    semanticRuntimeRunnerRunTargetGuidanceComponent,
-    semanticRuntimeRunnerRndMemoryComponents,
-    semanticRuntimeRunnerHqMemoryComponents,
-    semanticRuntimeRunnerAccessTrashComponents,
-    semanticRuntimeRunnerArchivesComponents,
-    semanticRuntimeRunnerKnownIcePathComponents,
-    semanticRuntimeRunnerRemoteComponents,
-    semanticRuntimeRepeatedRunTargetComponents,
-    runnerBlinkRecoveryScoreComponent,
-    runnerLowValueRecoveryRepeatScoreComponent,
-    runnerLateNoFundingCreditRepeatScoreComponent,
-    runnerJunkyardBbsRecoveryScoreComponent,
-  };
+  return createRunnerScoreComponentsContext({
+    loanLiabilityAssessment: dependencies.loanLiabilityAssessment,
+    goalFit: dependencies.goalFit,
+    handFundingTarget: dependencies.handFundingTarget,
+    recoveryCommitment: {
+      ...dependencies.recoveryCommitment,
+      blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
+      junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
+      lowValueRecoveryRepeatScoreComponent:
+        runnerLowValueRecoveryRepeatScoreComponent,
+      lateNoFundingCreditRepeatScoreComponent:
+        runnerLateNoFundingCreditRepeatScoreComponent,
+    },
+    install: dependencies.install,
+    startRun: {
+      ...dependencies.startRun,
+      hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
+      rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
+      archivesComponents: semanticRuntimeRunnerArchivesComponents,
+      remoteComponents: semanticRuntimeRunnerRemoteComponents,
+      knownIcePathComponents: semanticRuntimeRunnerKnownIcePathComponents,
+      repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
+    },
+    followup: {
+      ...dependencies.followup,
+      runTargetGuidanceComponent:
+        semanticRuntimeRunnerRunTargetGuidanceComponent,
+      accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
+    },
+  });
 }

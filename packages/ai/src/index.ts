@@ -180,9 +180,6 @@ import { createSemanticRuntimeActionExclusionComposition } from "./runtime/seman
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { createRunnerDevelopmentSupportComposition } from "./runtime/runner-development-support-composition";
 import {
-  createRunnerScoreComponentsContext,
-} from "./runtime/runner-score-components";
-import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
 import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
@@ -1507,18 +1504,7 @@ export {
 };
 
 const {
-  semanticRuntimeRunnerRunTargetGuidanceComponent,
-  semanticRuntimeRunnerRndMemoryComponents,
-  semanticRuntimeRunnerHqMemoryComponents,
-  semanticRuntimeRunnerAccessTrashComponents,
-  semanticRuntimeRunnerArchivesComponents,
-  semanticRuntimeRunnerKnownIcePathComponents,
-  semanticRuntimeRunnerRemoteComponents,
-  semanticRuntimeRepeatedRunTargetComponents,
-  runnerBlinkRecoveryScoreComponent,
-  runnerLowValueRecoveryRepeatScoreComponent,
-  runnerLateNoFundingCreditRepeatScoreComponent,
-  runnerJunkyardBbsRecoveryScoreComponent,
+  semanticRuntimeRunnerScoreComponents,
 } = createRunnerScoringSupportComposition({
   evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
@@ -1572,11 +1558,6 @@ const {
   actionCreditCost,
   junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
   junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
-});
-
-const {
-  semanticRuntimeRunnerScoreComponents,
-} = createRunnerScoreComponentsContext({
   loanLiabilityAssessment: runnerLoanLiabilityAssessment,
   goalFit: {
     sourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
@@ -1584,17 +1565,10 @@ const {
     runTargetEvaluationForAction:
       semanticRuntimeRunnerRunTargetEvaluationForAction,
   },
-  handFundingTarget: runnerHandFundingTarget,
   recoveryCommitment: {
     muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
     handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
-    blinkRecoveryScoreComponent: runnerBlinkRecoveryScoreComponent,
-    junkyardRecoveryScoreComponent: runnerJunkyardBbsRecoveryScoreComponent,
-    lowValueRecoveryRepeatScoreComponent:
-      runnerLowValueRecoveryRepeatScoreComponent,
     viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
-    lateNoFundingCreditRepeatScoreComponent:
-      runnerLateNoFundingCreditRepeatScoreComponent,
     multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
     bankInvestmentCommitmentScoreComponents:
       runnerBankInvestmentCommitmentScoreComponents,
@@ -1616,18 +1590,9 @@ const {
   },
   startRun: {
     serverId: semanticRuntimeServerId,
-    hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
-    rndMemoryComponents: semanticRuntimeRunnerRndMemoryComponents,
-    archivesComponents: semanticRuntimeRunnerArchivesComponents,
     isRemoteServerTarget,
-    remoteComponents: semanticRuntimeRunnerRemoteComponents,
-    knownIcePathComponents: semanticRuntimeRunnerKnownIcePathComponents,
-    repeatedRunTargetComponents: semanticRuntimeRepeatedRunTargetComponents,
   },
   followup: {
-    runTargetGuidanceComponent:
-      semanticRuntimeRunnerRunTargetGuidanceComponent,
-    accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
     badPublicityRelevanceScoreComponent:
       runnerBadPublicityRelevanceScoreComponent,
   },
