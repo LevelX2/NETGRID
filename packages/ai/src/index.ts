@@ -80,6 +80,7 @@ import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
 import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runner-remote-threat-targeting-composition";
 import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
+import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -484,9 +485,6 @@ import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
   createQualityTagsForAction,
 } from "./simulation/simulation-quality-adapters";
-import {
-  createRunnerInstallClassificationContext,
-} from "./simulation/runner-install-classification";
 import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
@@ -1040,10 +1038,10 @@ const {
   runnerDiscardChoiceRoles,
   isRunnerDuplicateInstall,
   isRunnerLowValueDuplicateInstall,
-} = createRunnerInstallClassificationContext({
+} = createRunnerInstallClassificationComposition({
   rolesForAction,
   rolesForCardId,
-  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  sourceDefinitionIdForSimulationAction,
   isSearchChoice,
 });
 
