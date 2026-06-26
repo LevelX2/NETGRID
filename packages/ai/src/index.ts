@@ -77,6 +77,7 @@ import {
 import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
 import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
+import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -410,7 +411,6 @@ import {
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { createRunnerBreakerCoverageDiagnosticsForSimulationAction } from "./simulation/runner-breaker-coverage-diagnostics";
-import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./simulation/runner-central-pressure-diagnostics";
 import { createRunnerEconomySetupDiagnosticsForSimulationAction } from "./simulation/runner-economy-setup-diagnostics";
 import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/runner-hand-use-diagnostics";
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
@@ -451,8 +451,6 @@ import {
   createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
 import {
-  createNoFreshCentralSubstitutionTypeForAction,
-  createRunnerNoFreshCentralContext,
   createTrueCentralCloseoutProfileContext,
 } from "./simulation/no-fresh-central";
 import {
@@ -1154,35 +1152,22 @@ const runnerEconomySetupDiagnosticsForSimulationAction =
     runnerSetupChosenFamilyForEntry,
   });
 
-const noFreshCentralSubstitutionTypeForAction =
-  createNoFreshCentralSubstitutionTypeForAction({
-    isRunnerEconomyAction,
-    rolesForAction,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
-
-const runnerNoFreshCentralContextForMetrics = createRunnerNoFreshCentralContext({
-  assessKnownRezzedIcePath,
-  centralRunStreakWithoutValueForMetrics,
+const {
+  noFreshCentralSubstitutionTypeForAction,
+  runnerNoFreshCentralContextForMetrics,
+  runnerCentralPressureDiagnosticsForSimulationAction,
+} = createRunnerCentralPressureDiagnosticsComposition({
   isRunnerEconomyAction,
   rolesForAction,
   rolesForCardId,
+  sourceDefinitionIdForSimulationAction,
+  assessKnownRezzedIcePath,
+  centralRunStreakWithoutValueForMetrics,
   runnerCreditReserveTargetForInput,
   runnerRemoteThreatProfile,
-  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  bestTrueCentralCloseoutProfileForMetrics,
+  trueCentralCloseoutProfileForMetrics,
 });
-
-const runnerCentralPressureDiagnosticsForSimulationAction =
-  createRunnerCentralPressureDiagnosticsForSimulationAction({
-    rolesForCardId,
-    sourceDefinitionIdForSimulationAction,
-    bestTrueCentralCloseoutProfileForMetrics,
-    trueCentralCloseoutProfileForMetrics,
-    runnerNoFreshCentralContextForMetrics,
-    noFreshCentralSubstitutionTypeForAction,
-    runnerCreditReserveTargetForInput,
-    assessKnownRezzedIcePath,
-  });
 
 const {
   assessRunnerPressureReadyForMetrics,
