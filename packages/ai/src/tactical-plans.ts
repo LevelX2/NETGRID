@@ -58,6 +58,11 @@ import {
   redactedRunnerStrategicIntentFacts,
   redactedStrategicIntentStateFacts,
 } from "./plans/tactical-plan-redaction";
+import {
+  planCanMapToCurrentAction,
+  progressTacticalPlans,
+  rankTacticalPlans,
+} from "./plans/tactical-plan-progression";
 import type {
   PlanLifecycle,
   TacticalPlanType,
@@ -90,6 +95,7 @@ export {
   rememberTacticalPlanRuntime,
   resetTacticalPlanMemory,
 } from "./plans/plan-memory";
+export { rankTacticalPlans } from "./plans/tactical-plan-progression";
 export type {
   PlanLifecycle,
   TacticalPlanType,
@@ -114,8 +120,6 @@ export type {
   PlanStepMappingResult,
   TacticalPlanRuntimeResult
 } from "./plans/tactical-plan-types";
-
-const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
 
 // TacticalPlans are a mapping layer: they organize TacticalGoals, capabilities,
 // memory and ActionSemanticCandidates onto existing LegalActions. New card
@@ -239,111 +243,6 @@ export function evaluateTacticalPlans(
       ? { whyPlanAbandoned: progression.whyPlanAbandoned }
       : {}),
   };
-}
-
-function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
-  return (
-    plan.status !== "abandoned" &&
-    plan.status !== "expired" &&
-    plan.status !== "failed" &&
-    plan.status !== "satisfied"
-  );
-}
-
-function progressTacticalPlans(
-  plans: readonly TacticalPlan[],
-  previousPlan: TacticalPlanMemorySnapshot | undefined,
-): {
-  plans: TacticalPlan[];
-  planProgressionReason?: string;
-  whyPlanAbandoned?: string;
-} {
-  if (!previousPlan) return { plans: [...plans] };
-  const previousCentralProbeSatisfied =
-    previousPlan.type === "runner.opportunistic_central_run" &&
-    previousPlan.status === "satisfied" &&
-    previousPlan.ttlDecisionsRemaining <= 0;
-  const continued = plans.map((plan) => {
-    if (!samePlanLine(plan, previousPlan)) return plan;
-    if (previousCentralProbeSatisfied) {
-      return {
-        ...plan,
-        evidence: [
-          ...plan.evidence,
-          `previous_plan:${previousPlan.planId}`,
-          `plan_progression:${previousPlan.status}->new_plan_required`,
-        ],
-        scoreBreakdown: [
-          ...plan.scoreBreakdown,
-          {
-            key: "previous_probe_satisfied",
-            label: "Previous probe satisfied",
-            value: 0,
-            reason: previousPlan.planId,
-          },
-        ],
-      } satisfies TacticalPlan;
-    }
-    return {
-      ...plan,
-      status: plan.status === "active" ? "progressing" : plan.status,
-      priority: plan.priority + PLAN_CONTINUITY_PRIORITY_BONUS,
-      evidence: [
-        ...plan.evidence,
-        `previous_plan:${previousPlan.planId}`,
-        `plan_progression:${previousPlan.status}->${plan.status}`,
-      ],
-      scoreBreakdown: [
-        ...plan.scoreBreakdown,
-        {
-          key: "previous_plan_continuity",
-          label: "Planfortschreibung",
-          value: PLAN_CONTINUITY_PRIORITY_BONUS,
-          reason: previousPlan.planId,
-        },
-      ],
-    } satisfies TacticalPlan;
-  });
-  if (
-    previousPlan.type === "runner.opportunistic_central_run" &&
-    previousPlan.ttlDecisionsRemaining <= 0 &&
-    continued.some((plan) => plan.type === "runner.obtain_breaker_coverage")
-  ) {
-    return {
-      plans: continued.map((plan) =>
-        plan.type === "runner.opportunistic_central_run"
-          ? {
-              ...plan,
-              status: "abandoned",
-              priority: plan.priority - 600,
-              evidence: [...plan.evidence, "central_probe_ttl_expired"],
-            }
-          : plan,
-      ),
-      planProgressionReason: "previous_central_probe_ttl_expired",
-      whyPlanAbandoned: "opportunistic central run was a one-decision probe; returning to blocker plan",
-    };
-  }
-  if (previousCentralProbeSatisfied) {
-    return {
-      plans: continued,
-      planProgressionReason: "previous_central_probe_satisfied",
-    };
-  }
-  return {
-    plans: continued,
-    planProgressionReason: "previous_plan_considered",
-  };
-}
-
-function samePlanLine(
-  plan: TacticalPlan,
-  previousPlan: TacticalPlanMemorySnapshot,
-): boolean {
-  if (plan.type !== previousPlan.type) return false;
-  if (!plan.target && !previousPlan.target) return true;
-  return plan.target?.kind === previousPlan.target?.kind &&
-    plan.target?.id === previousPlan.target?.id;
 }
 
 export function mapPlanStepToLegalActions(
@@ -4234,34 +4133,4 @@ export function createTacticalPlan(params: {
     createdAtStateVersion: params.stateVersion,
     updatedAtStateVersion: params.stateVersion,
   };
-}
-
-export function rankTacticalPlans(plans: readonly TacticalPlan[]): TacticalPlan[] {
-  return [...plans].sort(
-    (left, right) =>
-      planStatusRank(right.status) - planStatusRank(left.status) ||
-      right.priority - left.priority ||
-      left.planId.localeCompare(right.planId),
-  );
-}
-
-function planStatusRank(status: PlanLifecycle): number {
-  switch (status) {
-    case "progressing":
-      return 6;
-    case "active":
-      return 6;
-    case "proposed":
-      return 4;
-    case "blocked":
-      return 3;
-    case "satisfied":
-      return 2;
-    case "expired":
-      return 1;
-    case "failed":
-      return 0;
-    case "abandoned":
-      return -1;
-  }
 }

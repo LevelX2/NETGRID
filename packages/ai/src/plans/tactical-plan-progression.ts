@@ -1,0 +1,147 @@
+import type {
+  PlanLifecycle,
+  TacticalPlan,
+  TacticalPlanMemorySnapshot,
+} from "./tactical-plan-types";
+
+const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
+
+export function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
+  return (
+    plan.status !== "abandoned" &&
+    plan.status !== "expired" &&
+    plan.status !== "failed" &&
+    plan.status !== "satisfied"
+  );
+}
+
+export function progressTacticalPlans(
+  plans: readonly TacticalPlan[],
+  previousPlan: TacticalPlanMemorySnapshot | undefined,
+): {
+  plans: TacticalPlan[];
+  planProgressionReason?: string;
+  whyPlanAbandoned?: string;
+} {
+  if (!previousPlan) return { plans: [...plans] };
+  const previousCentralProbeSatisfied =
+    previousPlan.type === "runner.opportunistic_central_run" &&
+    previousPlan.status === "satisfied" &&
+    previousPlan.ttlDecisionsRemaining <= 0;
+  const continued = plans.map((plan) => {
+    if (!samePlanLine(plan, previousPlan)) return plan;
+    if (previousCentralProbeSatisfied) {
+      return {
+        ...plan,
+        evidence: [
+          ...plan.evidence,
+          `previous_plan:${previousPlan.planId}`,
+          `plan_progression:${previousPlan.status}->new_plan_required`,
+        ],
+        scoreBreakdown: [
+          ...plan.scoreBreakdown,
+          {
+            key: "previous_probe_satisfied",
+            label: "Previous probe satisfied",
+            value: 0,
+            reason: previousPlan.planId,
+          },
+        ],
+      } satisfies TacticalPlan;
+    }
+    return {
+      ...plan,
+      status: plan.status === "active" ? "progressing" : plan.status,
+      priority: plan.priority + PLAN_CONTINUITY_PRIORITY_BONUS,
+      evidence: [
+        ...plan.evidence,
+        `previous_plan:${previousPlan.planId}`,
+        `plan_progression:${previousPlan.status}->${plan.status}`,
+      ],
+      scoreBreakdown: [
+        ...plan.scoreBreakdown,
+        {
+          key: "previous_plan_continuity",
+          label: "Planfortschreibung",
+          value: PLAN_CONTINUITY_PRIORITY_BONUS,
+          reason: previousPlan.planId,
+        },
+      ],
+    } satisfies TacticalPlan;
+  });
+  if (
+    previousPlan.type === "runner.opportunistic_central_run" &&
+    previousPlan.ttlDecisionsRemaining <= 0 &&
+    continued.some((plan) => plan.type === "runner.obtain_breaker_coverage")
+  ) {
+    return {
+      plans: continued.map((plan) =>
+        plan.type === "runner.opportunistic_central_run"
+          ? {
+              ...plan,
+              status: "abandoned",
+              priority: plan.priority - 600,
+              evidence: [...plan.evidence, "central_probe_ttl_expired"],
+            }
+          : plan,
+      ),
+      planProgressionReason: "previous_central_probe_ttl_expired",
+      whyPlanAbandoned:
+        "opportunistic central run was a one-decision probe; returning to blocker plan",
+    };
+  }
+  if (previousCentralProbeSatisfied) {
+    return {
+      plans: continued,
+      planProgressionReason: "previous_central_probe_satisfied",
+    };
+  }
+  return {
+    plans: continued,
+    planProgressionReason: "previous_plan_considered",
+  };
+}
+
+export function rankTacticalPlans(
+  plans: readonly TacticalPlan[],
+): TacticalPlan[] {
+  return [...plans].sort(
+    (left, right) =>
+      planStatusRank(right.status) - planStatusRank(left.status) ||
+      right.priority - left.priority ||
+      left.planId.localeCompare(right.planId),
+  );
+}
+
+function samePlanLine(
+  plan: TacticalPlan,
+  previousPlan: TacticalPlanMemorySnapshot,
+): boolean {
+  if (plan.type !== previousPlan.type) return false;
+  if (!plan.target && !previousPlan.target) return true;
+  return (
+    plan.target?.kind === previousPlan.target?.kind &&
+    plan.target?.id === previousPlan.target?.id
+  );
+}
+
+function planStatusRank(status: PlanLifecycle): number {
+  switch (status) {
+    case "progressing":
+      return 6;
+    case "active":
+      return 6;
+    case "proposed":
+      return 4;
+    case "blocked":
+      return 3;
+    case "satisfied":
+      return 2;
+    case "expired":
+      return 1;
+    case "failed":
+      return 0;
+    case "abandoned":
+      return -1;
+  }
+}

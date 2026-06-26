@@ -52,7 +52,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
-| AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `PENDING` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
+| AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `IN_PROGRESS` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `PENDING` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
@@ -5882,6 +5882,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - `packages/ai/src/tactical-plans.ts` importiert diese Helper statt sie lokal zu implementieren und entfernt die dadurch überflüssigen Type-Imports.
   - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 4.267 Zeilen; das neue Redaction-Modul liegt bei 178 Zeilen.
   - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping-, Progression-, Ranking- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` zweiter Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-progression.ts` kapselt Planfortschreibung, Continuity-Bonus, Abbruchlogik für zentrale Probe-Pläne und Plan-Ranking.
+  - `packages/ai/src/tactical-plans.ts` nutzt diese Progression-/Ranking-Helper und re-exportiert `rankTacticalPlans` weiter für den bestehenden Public Contract.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 4.136 Zeilen; das neue Progression-Modul liegt bei 147 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
