@@ -176,7 +176,6 @@ import {
 } from "./runtime/tag-punish-payoff-priority";
 import {
   corpPunishKindFromOntologyPayoff,
-  corpVisibleTagPayoffCategoryFromOntology,
 } from "./runtime/tag-punish-payoff-mapping";
 import { corpTagPunishSkipReason } from "./runtime/corp-tag-punish-skip-reason";
 import {
@@ -548,6 +547,9 @@ import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import { summarizeTagPunishWindowMetrics } from "./simulation/tag-punish-window-metrics";
+import {
+  createCorpVisibleTagPayoffCategoryContext,
+} from "./simulation/corp-visible-tag-payoff-category";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
@@ -1143,6 +1145,11 @@ const {
   findVisibleCard,
   rolesForAction,
 });
+const { corpVisibleTagPayoffCategoryForAction } =
+  createCorpVisibleTagPayoffCategoryContext({
+    tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
+    rolesForAction,
+  });
 
 const {
   bestTrueCentralCloseoutProfile: bestTrueCentralCloseoutProfileForMetrics,
@@ -3781,31 +3788,6 @@ function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
         cardId: string | undefined;
       } => opportunity !== undefined,
     );
-}
-
-function corpVisibleTagPayoffCategoryForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  kind: CorpPunishKind,
-): CorpVisibleTagPayoffCategory {
-  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
-  if (ontology?.payoffKind)
-    return corpVisibleTagPayoffCategoryFromOntology(ontology.payoffKind);
-  if (
-    kind === "scorched_earth_like" ||
-    kind === "urban_renewal_like" ||
-    kind === "punitive_counterstrike_like" ||
-    kind === "scored_agenda_damage_like"
-  )
-    return "damage";
-  if (kind === "closed_accounts_like" || kind === "datapool_like")
-    return "economic";
-  if (kind === "resource_trash_like" || kind === "power_grid_overload_like")
-    return "trash";
-  const roles = rolesForAction(input, action);
-  if (roles.some((role) => role.includes("run_lock"))) return "run_lock";
-  if (roles.some((role) => role.includes("ambush"))) return "ambush";
-  return "unknown";
 }
 
 function applyCorpVisibleTagPunishTakenWindowDiagnostics(
