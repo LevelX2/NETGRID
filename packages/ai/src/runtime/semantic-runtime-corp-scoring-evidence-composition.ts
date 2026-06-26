@@ -36,7 +36,13 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
     > &
     Omit<
       SemanticRuntimeCorpEvidenceDependencies<VisibleCorpServer>,
-      "advancementCounterPlacementAssessment" | "passiveScoreLinePenalty"
+      | "advancementCounterPlacementAssessment"
+      | "passiveScoreLinePenalty"
+      | "hasContestableRemoteScoreAction"
+      | "hasRemoteInstability"
+      | "hasRemoteRezFloorFundingNeed"
+      | "hasCentralRezFloorFundingNeed"
+      | "remoteRezFloorAssessment"
     >;
 
 export function createSemanticRuntimeCorpScoringEvidenceComposition<
@@ -75,15 +81,20 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
   const { semanticRuntimeCorpEvidence } =
     createSemanticRuntimeCorpEvidenceContext({
       emptyRemoteCount: dependencies.emptyRemoteCount,
-      hasRemoteInstability: dependencies.hasRemoteInstability,
+      hasRemoteInstability: dependencies.corpHasRemoteInstability,
       hasNakedScoreLine: dependencies.hasNakedScoreLine,
       hasUnsafeRemoteScoreAction: dependencies.hasUnsafeRemoteScoreAction,
-      hasContestableRemoteScoreAction:
-        dependencies.hasContestableRemoteScoreAction,
+      hasContestableRemoteScoreAction: (input) =>
+        input.legalActions.some((action) =>
+          Boolean(
+            dependencies.corpRemoteScoreContestabilityAssessment(input, action)
+              ?.contestable,
+          ),
+        ),
       hasRemoteRezFloorFundingNeed:
-        dependencies.hasRemoteRezFloorFundingNeed,
+        dependencies.corpHasRemoteRezFloorFundingNeed,
       hasCentralRezFloorFundingNeed:
-        dependencies.hasCentralRezFloorFundingNeed,
+        dependencies.corpHasCentralRezFloorFundingNeed,
       advancementCounterPlacementAssessment:
         semanticRuntimeCorpAdvancementCounterPlacementAssessment,
       passiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
@@ -96,7 +107,7 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       actionWouldCreateUnsafeRemoteScoreLine:
         dependencies.actionWouldCreateUnsafeRemoteScoreLine,
       advanceCompletesScore: dependencies.advanceCompletesScore,
-      remoteRezFloorAssessment: dependencies.remoteRezFloorAssessment,
+      remoteRezFloorAssessment: dependencies.corpRemoteRezFloorAssessment,
     });
 
   const {

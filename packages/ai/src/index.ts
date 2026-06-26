@@ -1130,19 +1130,8 @@ const {
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   rolesForAction,
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
   hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
   hasUnsafeRemoteScoreAction: semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-  hasContestableRemoteScoreAction: (input) =>
-    input.legalActions.some((action) =>
-      Boolean(
-        semanticRuntimeCorpRemoteScoreContestabilityAssessment(input, action)
-          ?.contestable,
-      ),
-    ),
-  hasRemoteRezFloorFundingNeed: semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-  hasCentralRezFloorFundingNeed:
-    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
   actionServerId: semanticRuntimeCorpActionServerId,
   server: semanticRuntimeCorpServer,
   remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
@@ -1152,7 +1141,6 @@ const {
   actionWouldCreateUnsafeRemoteScoreLine:
     semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
   corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
   corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
   corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
