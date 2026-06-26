@@ -973,38 +973,18 @@ const {
   runnerBlinkRunExclusion,
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
-  badPublicityRelevance: {
-    sourceDefinitionIdForAction,
-    actionCreditCost,
-    fakedHitCardId: FAKED_HIT_CARD_ID,
-  },
-  goalFit: {
-    runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
-    runTargetEvaluationForAction:
-      semanticRuntimeRunnerRunTargetEvaluationForAction,
-  },
-  recoveryCommitment: {
-    muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
-    handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
-    viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
-    multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
-    bankInvestmentCommitmentScoreComponents:
-      runnerBankInvestmentCommitmentScoreComponents,
-    noRunEconomyCommitmentScoreComponents:
-      runnerNoRunEconomyCommitmentScoreComponents,
-  },
-  install: {
-    rolesForAction,
-    muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
-    persistentInstallFitScoreComponent:
-      runnerPersistentInstallFitScoreComponent,
-    isRunnerEconomyRole,
-    isRunnerPressureRole,
-    badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
-    programInstallTrashAssessmentForAction:
-      runnerProgramInstallTrashAssessmentForAction,
-    programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
-  },
+  runActionSpendingCapAssessment: runnerRunActionSpendingCapAssessment,
+  muPressureFundingScoreComponent: runnerMuPressureFundingScoreComponent,
+  handBufferNeedScoreComponent: runnerHandBufferNeedScoreComponent,
+  viral15JackOutScoreComponent: runnerViral15JackOutScoreComponent,
+  multiRunEventScoreComponent: runnerMultiRunEventScoreComponent,
+  bankInvestmentCommitmentScoreComponents:
+    runnerBankInvestmentCommitmentScoreComponents,
+  noRunEconomyCommitmentScoreComponents:
+    runnerNoRunEconomyCommitmentScoreComponents,
+  muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
+  persistentInstallFitScoreComponent:
+    runnerPersistentInstallFitScoreComponent,
   startRun: {
     serverId: semanticRuntimeServerId,
     isRemoteServerTarget,
