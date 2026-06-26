@@ -191,7 +191,9 @@ import {
   createRunnerBadPublicityRelevanceContext,
 } from "./runtime/runner-bad-publicity-relevance-context";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
-import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
+import {
+  createRunnerScoringSupportComposition,
+} from "./runtime/runner-scoring-support-composition";
 import {
   safeNonNegativeInteger,
   visibleCardsByInstanceId as visibleCardsByInstanceIdForAi,
@@ -204,9 +206,6 @@ import {
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
 import { createRunnerProgramPressureComposition } from "./runtime/runner-program-pressure-composition";
-import {
-  createRunnerRunTargetGuidanceContext,
-} from "./runtime/runner-run-target-guidance-context";
 import {
   actionClickCost,
   actionCreditCost,
@@ -233,15 +232,8 @@ import {
 } from "./runtime/search-choice-option";
 import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
-  createRunnerCentralMemoryContext,
-} from "./runtime/runner-central-memory-context";
-import { createRunnerRunComponentsContext } from "./runtime/runner-run-components-context";
-import {
   runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason,
 } from "./runtime/runner-known-ice-path-score";
-import {
-  createRunnerRecentHistoryContext,
-} from "./runtime/runner-recent-history-context";
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
@@ -1516,17 +1508,22 @@ export {
 
 const {
   semanticRuntimeRunnerRunTargetGuidanceComponent,
-} = createRunnerRunTargetGuidanceContext({
+  semanticRuntimeRunnerRndMemoryComponents,
+  semanticRuntimeRunnerHqMemoryComponents,
+  semanticRuntimeRunnerAccessTrashComponents,
+  semanticRuntimeRunnerArchivesComponents,
+  semanticRuntimeRunnerKnownIcePathComponents,
+  semanticRuntimeRunnerRemoteComponents,
+  semanticRuntimeRepeatedRunTargetComponents,
+  runnerBlinkRecoveryScoreComponent,
+  runnerLowValueRecoveryRepeatScoreComponent,
+  runnerLateNoFundingCreditRepeatScoreComponent,
+  runnerJunkyardBbsRecoveryScoreComponent,
+} = createRunnerScoringSupportComposition({
   evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   isRemoteServerTarget,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
-});
-
-const {
-  semanticRuntimeRunnerRndMemoryComponents,
-  semanticRuntimeRunnerHqMemoryComponents,
-} = createRunnerCentralMemoryContext({
   rndTopFreshness: (input: AiDecisionInput) =>
     reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
   staleKnownRndRepeatRunPenalty,
@@ -1535,31 +1532,13 @@ const {
     reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
   definitionType: definitionTypeForMetrics,
   staleKnownHqRepeatRunPenalty,
-});
-
-const {
-  runnerLateNoFundingCreditSafeProgressTargets,
-  semanticRuntimeRecentRunnerBasicCreditActions,
-  semanticRuntimeRecentRunnerStartRunsOnServer,
-} = createRunnerRecentHistoryContext({
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,
   closeout: bestTrueCentralCloseoutProfileForMetrics,
   pressureReadyTargets: (input: AiDecisionInput) =>
     assessRunnerPressureReadyForMetrics(input).readyTargets,
-});
-
-const {
-  semanticRuntimeRunnerAccessTrashComponents,
-  semanticRuntimeRunnerArchivesComponents,
-  semanticRuntimeRunnerKnownIcePathComponents,
-  semanticRuntimeRunnerRemoteComponents,
-  semanticRuntimeRepeatedRunTargetComponents,
-} = createRunnerRunComponentsContext({
   trashAccessContext: runnerRemoteTrashAccessContext,
-  evaluationForAction: semanticRuntimeRunnerRunTargetEvaluationForAction,
-  definitionType: definitionTypeForMetrics,
   knownIcePathAssessment: (input, server) =>
     assessKnownRezzedIcePath(
       server.ice,
@@ -1576,30 +1555,13 @@ const {
           .find((entry) => entry.serverId === server.id)
       : undefined;
   },
-  recentStartRunsOnServer: semanticRuntimeRecentRunnerStartRunsOnServer,
-  isRemoteServerTarget,
-});
-
-const {
-  runnerBlinkRecoveryScoreComponent,
-  runnerLowValueRecoveryRepeatScoreComponent,
-  runnerLateNoFundingCreditRepeatScoreComponent,
-  runnerJunkyardBbsRecoveryScoreComponent,
-  runnerActionLooksLikeRecovery,
-  runnerRecoveryFundingNeedContext,
-  semanticRuntimeRecentRunnerRecoveryActions,
-} = createRunnerRecoveryContext({
   targetServerId: semanticRuntimeServerId,
   blinkAssessment: runnerBlinkRecoveryAssessment,
   rolesForAction,
   sourceDefinitionIdForAction,
-  recentBasicCreditActions: semanticRuntimeRecentRunnerBasicCreditActions,
-  safeProgressTargets: runnerLateNoFundingCreditSafeProgressTargets,
   handFundingTarget: runnerHandFundingTarget,
   bankHasConcreteFundingNeed: runnerBankHasConcreteFundingNeed,
   hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
-  publicHistory: mergedAiPublicHistory,
-  eventVersion: aiEventVersion,
   findVisibleCard,
   rolesForCardId,
   cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
