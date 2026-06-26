@@ -491,7 +491,6 @@ import type {
 } from "./simulation/v143-fixture-types";
 import type {
   AiBenchmarkDeckReference,
-  AiBenchmarkDeckSlotDefinition,
   AiBenchmarkDeckSlotStatus,
   AiBenchmarkDeckSlotType,
   AiBenchmarkLocalEditableDeckResult,
@@ -619,7 +618,6 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
-import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./simulation/benchmark-deck-slots";
 import {
   averageFinalAdvanceNumber,
   averageFirstProgressionTurn,
@@ -782,6 +780,7 @@ export {
   analyzeDoctrineQualityCases,
   summarizeDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
+export { listMatchProgressionBenchmarkDeckSlots } from "./simulation/benchmark-deck-slot-list";
 export type {
   AiDoctrineQualityCaseAnalysis,
   AiDoctrineQualityCaseExample,
@@ -2739,10 +2738,6 @@ export function simulateAiGame(
       isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
     ),
   };
-}
-
-export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
-  return MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) => ({ ...slot }));
 }
 
 // Legacy baseline scorer implementation. The public entrypoint lives in
