@@ -667,10 +667,7 @@ import {
   createRunnerCreditReserveTargetForInput,
   createRunnerPostRunReserveTargetForRemoteInput,
 } from "./simulation/runner-credit-reserve";
-import {
-  type AiQualityMetrics,
-  type AiSoakResult,
-} from "./simulation/quality-metrics";
+import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
   createQualityTagsForAction,
   metricsFor,
@@ -744,6 +741,7 @@ import {
 import {
   createAiSelfplayTraceMiningRunner,
 } from "./simulation/ai-selfplay-trace-mining-runner";
+import { createAiSoakRunner } from "./simulation/ai-soak-runner";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2394,6 +2392,10 @@ const { runAiSelfplayTraceMining } = createAiSelfplayTraceMiningRunner({
   summarizeMatchProgressionMetrics,
 });
 export { runAiSelfplayTraceMining };
+const { simulateAiSoak } = createAiSoakRunner({
+  simulateAiGame,
+});
+export { simulateAiSoak };
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2736,63 +2738,6 @@ export function simulateAiGame(
       replay.ok,
       isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
     ),
-  };
-}
-
-export function simulateAiSoak(
-  config: Partial<AiSimulationConfig> = {},
-): AiSoakResult {
-  const summaries = [
-    ...SOAK_SEEDS.tuningSeeds,
-    ...SOAK_SEEDS.holdoutSeeds,
-  ].flatMap((seed) =>
-    SOAK_SEEDS.matrix.difficulties.map((difficulty) =>
-      simulateAiGame({
-        seed,
-        runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS.matrix.runnerDeckId,
-        corpDeckId: config.corpDeckId ?? SOAK_SEEDS.matrix.corpDeckId,
-        agendaPointsToWin:
-          config.agendaPointsToWin ?? SOAK_SEEDS.matrix.agendaPointsToWin,
-        maxActions: config.maxActions ?? SOAK_SEEDS.matrix.maxActions,
-        runnerDifficulty: config.runnerDifficulty ?? difficulty,
-        corpDifficulty: config.corpDifficulty ?? difficulty,
-      }),
-    ),
-  );
-  const totalActions =
-    summaries.reduce(
-      (sum, summary) => sum + summary.actionSequence.length,
-      0,
-    ) || 1;
-  const fallbacks = summaries.reduce(
-    (sum, summary) =>
-      sum + summary.actionSequence.filter((entry) => entry.fallbackUsed).length,
-    0,
-  );
-  const timeouts = summaries.reduce(
-    (sum, summary) =>
-      sum + summary.actionSequence.filter((entry) => entry.timeoutUsed).length,
-    0,
-  );
-  return {
-    summaries,
-    aggregate: {
-      seeds: summaries.length,
-      illegalActions: summaries.reduce(
-        (sum, summary) => sum + summary.metrics.illegalActions,
-        0,
-      ),
-      replayFailures: summaries.filter((summary) => !summary.replayOk).length,
-      fallbackRate: round(fallbacks / totalActions),
-      timeoutRate: round(timeouts / totalActions),
-      reasonCodeCoverage: sortedUnique(
-        summaries.flatMap((summary) => summary.metrics.reasonCodeCoverage),
-      ),
-      actionTypeCoverage: sortedUnique(
-        summaries.flatMap((summary) => summary.metrics.actionTypeCoverage),
-      ),
-      holdoutSeeds: SOAK_SEEDS.holdoutSeeds,
-    },
   };
 }
 
