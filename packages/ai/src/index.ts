@@ -273,10 +273,7 @@ import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
-import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
-import {
-  createRunnerProgramInstallTrashContext,
-} from "./runtime/runner-program-install-trash-context";
+import { createRunnerProgramPressureComposition } from "./runtime/runner-program-pressure-composition";
 import {
   createRunnerRunTargetGuidanceContext,
 } from "./runtime/runner-run-target-guidance-context";
@@ -1283,8 +1280,14 @@ const {
   runnerProgramInstallTrashAssessmentForAction,
   runnerProgramInstallDisplacementPenalty,
   runnerProgramSacrificeExclusion,
-} = createRunnerProgramInstallTrashContext({
+  runnerMuPressureInstallScoreComponent,
+  runnerMuPressureFundingScoreComponent,
+  runnerMuPressureInstallPriorityBonus,
+  runnerMuPressureFundingPriorityBonus,
+  runnerMuPressureActionEvidence,
+} = createRunnerProgramPressureComposition({
   safeNonNegativeInteger,
+  findVisibleCard,
   visibleMemoryCost: visibleMemoryCostForAi,
   visibleCardsByInstanceId: visibleCardsByInstanceIdForAi,
   visibleBreakerRoleCounts: visibleBreakerRoleCountsForAi,
@@ -1294,25 +1297,8 @@ const {
   isRunnerEconomyRole,
   visibleCounterValue: visibleCounterValueForAi,
   visibleInstallCost: visibleInstallCostForAi,
-});
-const {
-  runnerMuPressureInstallScoreComponent,
-  runnerMuPressureFundingScoreComponent,
-  runnerMuPressureInstallPriorityBonus,
-  runnerMuPressureFundingPriorityBonus,
-  runnerMuPressureActionEvidence,
-} = createRunnerMuPressureContext({
-  safeNonNegativeInteger,
-  findVisibleCard,
-  visibleMemoryCost: visibleMemoryCostForAi,
-  visibleInstallCost: visibleInstallCostForAi,
-  programInstallTrashAssessmentForAction:
-    runnerProgramInstallTrashAssessmentForAction,
   actionCreditCost,
-  rolesForCardId,
   rolesForAction,
-  isRunnerPressureRole,
-  isRunnerEconomyRole,
 });
 const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceContext({
   programInstallTrashAssessmentForAction:
