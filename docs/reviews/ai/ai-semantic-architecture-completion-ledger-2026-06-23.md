@@ -5742,6 +5742,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
+- `AI-COMPLETE-03` sechshunderterster Struktur-Schnitt:
+  - `packages/ai/src/runtime/runner-semantic-support-composition.ts` fasst Runner-Baseline-Support, Blink-Risk und Runner-Development-Support zusammen.
+  - `packages/ai/src/index.ts` ersetzt drei aufeinanderfolgende Runner-Semantic-Wiring-Blöcke durch `createRunnerSemanticSupportComposition`.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 1.152 Zeilen und enthält weiterhin keine inline `=>`-/Funktionsadapter.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch weiter auf eine dünne Public-/Composition-Fassade verdichtet werden soll.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
