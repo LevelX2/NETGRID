@@ -175,9 +175,6 @@ import {
   createSemanticRuntimeEvidenceContext,
 } from "./runtime/semantic-runtime-evidence-context";
 import {
-  createSemanticRuntimeCorpRiskContext,
-} from "./runtime/semantic-runtime-corp-risk-context";
-import {
   createSemanticRuntimeCorpRezFloorContext,
 } from "./runtime/semantic-runtime-corp-rez-floor-context";
 import {
@@ -202,17 +199,12 @@ import {
   createCorpTaggedRunnerPayoffProfileContext,
 } from "./runtime/corp-tagged-runner-payoff-profile";
 import {
-  createSemanticRuntimeCorpRemoteScoreContext,
-} from "./runtime/semantic-runtime-corp-remote-score-context";
-import {
   createSemanticRuntimeCorpPassiveScoreLineContext,
 } from "./runtime/semantic-runtime-corp-passive-scoreline-context";
 import {
   createSemanticRuntimeCorpAdvancementCounterContext,
 } from "./runtime/semantic-runtime-corp-advancement-counter-context";
-import {
-  createSemanticRuntimeCorpBoardContext,
-} from "./runtime/semantic-runtime-corp-board-context";
+import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
 import {
   createSemanticRuntimeCorpScoreSafetyContext,
 } from "./runtime/semantic-runtime-corp-score-safety-context";
@@ -1321,43 +1313,21 @@ const {
   semanticRuntimeCorpRemoteIsProtected,
   semanticRuntimeCorpRemoteHasScoreLine,
   semanticRuntimeCorpEmptyRemoteCount,
-} = createSemanticRuntimeCorpBoardContext({
-  serverId: semanticRuntimeServerId,
-  findVisibleCard,
-  findVisibleCorpServerCard,
-  rolesForAction,
-  isRemoteServerTarget,
-});
-const {
   semanticRuntimeCorpHasRemoteInstability,
   semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
   semanticRuntimeCorpHasStabilizingAlternative,
   semanticRuntimeCorpHasNakedScoreLine,
   semanticRuntimeCorpHasUnsafeRemoteScoreAction,
-} = createSemanticRuntimeCorpRiskContext({
-  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  isRemoteServerTarget,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  actionServerId: semanticRuntimeCorpActionServerId,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  server: semanticRuntimeCorpServer,
-});
-const {
   semanticRuntimeCorpInstallRemoteScore,
   semanticRuntimeCorpShouldBuildProtectedScoreRemote,
   semanticRuntimeCorpAdvanceRemoteScore,
-} = createSemanticRuntimeCorpRemoteScoreContext({
-  actionServerId: semanticRuntimeCorpActionServerId,
-  server: semanticRuntimeCorpServer,
-  hasStabilizingAlternative: semanticRuntimeCorpHasStabilizingAlternative,
+} = createSemanticRuntimeCorpBoardScoreComposition({
+  serverId: semanticRuntimeServerId,
+  findVisibleCard,
+  findVisibleCorpServerCard,
+  rolesForAction,
   isRemoteServerTarget,
-  emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   actionCreditCost,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
 });
 const {
   normalizedRulesTextForDefinition,
