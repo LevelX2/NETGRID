@@ -554,6 +554,7 @@ import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ont
 import { runnerHqMemoryDiagnosticsForMetrics } from "./simulation/runner-hq-memory-diagnostics";
 import { runnerKnownCardPositionDiagnosticsForMetrics } from "./simulation/runner-known-card-position-diagnostics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
+import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
 import { summarizeStrategicPlanConversionMetrics } from "./simulation/strategic-plan-conversion-metrics";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
@@ -1327,6 +1328,20 @@ const {
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   isSearchChoice,
 });
+
+const runnerReserveDiagnosticsForSimulationAction =
+  createRunnerReserveDiagnosticsForSimulationAction({
+    runnerCreditReserveTargetForInput,
+    isRunnerEconomyAction,
+    runnerKnownPathDiagnosticsForAction,
+    runnerRemoteThreatTargetingDiagnosticsForAction,
+    isRunnerLowValueDuplicateInstall,
+    runnerHasVisibleRemoteScoreThreat,
+    runnerRemoteTrashAccessContext,
+    runnerTrashBlockedByCredits,
+    runnerStealBlockedByCredits,
+    runnerContestBlockedByCredits,
+  });
 
 const runnerEconomySetupActionClass =
   createRunnerEconomySetupActionClassContext({
@@ -12743,107 +12758,5 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
     action.type === "end_turn"
       ? { runnerInterfaceInstalledButUnusedTurn: true }
       : {}),
-  };
-}
-
-function runnerReserveDiagnosticsForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-  stateAfterAction: GameState,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (input.side !== "runner" || action.side !== "runner") return {};
-  const creditsBefore = input.playerView.own.credits;
-  const creditsAfter = stateAfterAction.runner.credits;
-  const creditDelta = creditsAfter - creditsBefore;
-  const reserveTarget = runnerCreditReserveTargetForInput(input);
-  const belowBefore = creditsBefore < reserveTarget;
-  const belowAfter = creditsAfter < reserveTarget;
-  const economyAction = isRunnerEconomyAction(input, action);
-  const economyGain = economyAction && creditDelta > 0 ? creditDelta : 0;
-  const economySpend =
-    economyAction && creditDelta < 0 ? Math.abs(creditDelta) : 0;
-  const runDiagnostics = runnerKnownPathDiagnosticsForAction(
-    input,
-    action,
-    targetServerId,
-    reserveTarget,
-  );
-  const remoteThreatTargeting = runnerRemoteThreatTargetingDiagnosticsForAction(
-    input,
-    action,
-    targetServerId,
-  );
-  const spendBelowReserve =
-    creditDelta < 0 &&
-    belowAfter &&
-    !runDiagnostics.probeRunWithPositiveInfoValue;
-  const installCost =
-    action.type === "install_card" ? actionCreditCost(action) : 0;
-  const lowValueSpendBelowReserve =
-    spendBelowReserve &&
-    (isRunnerLowValueDuplicateInstall(input, action) ||
-      (action.type === "start_run" &&
-        (runDiagnostics.lowValueUnaffordableRun ||
-          (runDiagnostics.runnerCentralRunStartedBelowReserve &&
-            runnerHasVisibleRemoteScoreThreat(input)))) ||
-      (action.type === "trash_accessed_card" &&
-        runnerRemoteTrashAccessContext(input, action).role === "low_value"));
-  const expensiveInstallBelowReserve =
-    action.type === "install_card" && installCost >= 3 && belowAfter;
-  const trashBlockedByCredits = runnerTrashBlockedByCredits(input);
-  const stealBlockedByCredits = runnerStealBlockedByCredits(
-    input,
-    reserveTarget,
-  );
-  const contestBlockedByCredits =
-    runnerContestBlockedByCredits(input, reserveTarget) ||
-    runDiagnostics.runStartedAgainstKnownUnaffordablePath === true;
-  const reserveAfterAccess = [
-    "access_card",
-    "steal_agenda",
-    "trash_accessed_card",
-    "decline_trash",
-  ].includes(action.type)
-    ? creditsAfter - reserveTarget
-    : undefined;
-  const accessTarget = targetServerId ?? input.playerView.run?.attackedServerId;
-
-  return {
-    runnerCreditsBefore: creditsBefore,
-    runnerCreditsAfter: creditsAfter,
-    runnerCreditDelta: creditDelta,
-    runnerReserveTarget: reserveTarget,
-    ...(belowBefore ? { runnerBelowReserveBefore: true } : {}),
-    ...(belowAfter ? { runnerBelowReserveAfter: true } : {}),
-    ...(economyGain > 0 ? { runnerEconomyCreditsGained: economyGain } : {}),
-    ...(economySpend > 0 ? { runnerEconomyCreditsSpent: economySpend } : {}),
-    ...(economyAction && economyGain > 0 && belowBefore
-      ? { runnerReservePreservingEconomy: true }
-      : {}),
-    ...(contestBlockedByCredits ? { runnerContestBlockedByCredits: true } : {}),
-    ...(trashBlockedByCredits ? { runnerTrashBlockedByCredits: true } : {}),
-    ...(stealBlockedByCredits ? { runnerStealBlockedByCredits: true } : {}),
-    ...(spendBelowReserve ? { runnerSpendBelowReserve: true } : {}),
-    ...(lowValueSpendBelowReserve
-      ? { runnerLowValueSpendBelowReserve: true }
-      : {}),
-    ...(expensiveInstallBelowReserve
-      ? { runnerExpensiveInstallBelowReserve: true }
-      : {}),
-    ...(reserveAfterAccess !== undefined
-      ? { runnerReserveAfterSuccessfulRun: reserveAfterAccess }
-      : {}),
-    ...(reserveAfterAccess !== undefined && isRemoteServerTarget(accessTarget)
-      ? { runnerReserveAfterRemoteAccess: reserveAfterAccess }
-      : {}),
-    ...(reserveAfterAccess !== undefined &&
-    (accessTarget === "hq" ||
-      accessTarget === "rd" ||
-      accessTarget === "archives")
-      ? { runnerReserveAfterCentralRun: reserveAfterAccess }
-      : {}),
-    ...runDiagnostics,
-    ...remoteThreatTargeting,
   };
 }
