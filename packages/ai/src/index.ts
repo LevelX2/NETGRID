@@ -303,6 +303,9 @@ import {
   createCorpTagSourcePayoffContext,
 } from "./runtime/corp-tag-source-payoff-context";
 import {
+  createCorpTaggedPayoffWindowContext,
+} from "./runtime/corp-tagged-payoff-window";
+import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
@@ -1859,6 +1862,16 @@ const {
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
   tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
+});
+const {
+  corpTaggedPayoffWindowPassiveActionPenalty,
+} = createCorpTaggedPayoffWindowContext({
+  immediateTagSourceAvailable: corpImmediateTagSourceAvailable,
+  unprotectedPersistentTagAssetSetup: corpUnprotectedPersistentTagAssetSetup,
+  taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
+  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -5683,103 +5696,6 @@ function corpTaggedRunnerPayoffPressure(
       ...profile.evidence,
     ].join("|"),
   };
-}
-
-function corpTaggedPayoffWindowPassiveActionPenalty(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent | undefined {
-  if (input.side !== "corp" || action.side !== "corp") return undefined;
-  const tagSourceAvailable = corpImmediateTagSourceAvailable(input, action);
-  if (tagSourceAvailable && corpUnprotectedPersistentTagAssetSetup(input, action)) {
-    return {
-      key: "corp_unprotected_tag_asset_setup_penalty",
-      label: "Ungeschuetzter Tag-Asset-Aufbau",
-      value: -1800,
-      reason: [
-        "immediate_operation_tag_source_available:true",
-        "unprotected_tag_asset_setup:true",
-      ].join("|"),
-    };
-  }
-  if (input.playerView.opponent.tags <= 0) return undefined;
-  if (corpTaggedRunnerPayoffProfile(input, action)) return undefined;
-  if (
-    action.type === "score_agenda" ||
-    semanticRuntimeCorpAdvanceCompletesScore(input, action)
-  )
-    return undefined;
-  const availablePayoff = corpBestTaggedRunnerPayoffProfile(
-    input,
-    action.actionId,
-  );
-  const visibleMeatPayoff = corpVisibleMeatDamagePayoff(input);
-  if (!availablePayoff && !visibleMeatPayoff) return undefined;
-  let passiveKind: string | undefined;
-  let value = 0;
-  let key = "corp_tagged_payoff_window_passive_penalty";
-  if (action.type === "gain_credit") {
-    passiveKind = "basic_economy";
-    value = -1100;
-  } else if (
-    action.type === "activated_card_ability" &&
-    Number(action.payload?.cardImplementationCreditAmount ?? 0) > 0
-  ) {
-    passiveKind = "card_economy";
-    value = -1050;
-  } else if (action.type === "draw_card") {
-    passiveKind = "draw";
-    value = -900;
-  } else if (action.type === "install_card") {
-    if (semanticRuntimeCorpActionIsScoreLine(input, action)) return undefined;
-    passiveKind = "install_setup";
-    value = input.playerView.opponent.tags >= 7 ? -1800 : -800;
-    key =
-      input.playerView.opponent.tags >= 7 || visibleMeatPayoff
-        ? "corp_tag_punish_endgame_slow_setup_penalty"
-        : key;
-  } else if (action.type === "rez_ice") {
-    passiveKind = "rez_setup";
-    value = tagSourceAvailable ? -1800 : -650;
-    key = tagSourceAvailable ? "corp_unprotected_tag_asset_setup_penalty" : key;
-  } else if (action.type === "end_turn") {
-    passiveKind = "end_turn";
-    value = -1200;
-  }
-  if (!passiveKind || value >= 0) return undefined;
-  return {
-    key,
-    label: "Tagged-Payoff-Fenster nicht verpassen",
-    value,
-    reason: [
-      `passive_kind:${passiveKind}`,
-      `runner_tags:${input.playerView.opponent.tags}`,
-      ...(availablePayoff
-        ? [
-            `available_tagged_payoff_kind:${availablePayoff.kind}`,
-            ...availablePayoff.evidence,
-          ]
-        : []),
-      ...(visibleMeatPayoff ? ["corp_visible_meat_damage_payoff:true"] : []),
-      ...(tagSourceAvailable
-        ? ["immediate_operation_tag_source_available:true"]
-        : []),
-    ].join("|"),
-  };
-}
-
-function corpBestTaggedRunnerPayoffProfile(
-  input: AiDecisionInput,
-  excludedActionId?: string,
-): CorpTaggedRunnerPayoffActionProfile | undefined {
-  return input.legalActions
-    .filter((action) => action.actionId !== excludedActionId)
-    .map((action) => corpTaggedRunnerPayoffProfile(input, action))
-    .filter(
-      (profile): profile is CorpTaggedRunnerPayoffActionProfile =>
-        profile !== undefined,
-    )
-    .sort((left, right) => right.value - left.value)[0];
 }
 
 function corpTaggedRunnerPayoffProfile(
