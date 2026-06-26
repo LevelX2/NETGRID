@@ -7,22 +7,52 @@ import {
   type RunnerBlinkRiskContext,
 } from "./runner-blink-risk-context";
 import type { RunnerBlinkRiskEvidenceDependencies } from "./runner-blink-run-exclusion";
+import {
+  createRunnerMultiRunContext,
+  type RunnerMultiRunContext,
+  type RunnerMultiRunContextDependencies,
+} from "./runner-multi-run-context";
 
-export type RunnerBlinkRiskCompositionDependencies =
+export type RunnerBlinkRiskCompositionDependencies<
+  TDeckCapabilities,
+  TStrategicIntent,
+> =
   RunnerBlinkEncounterBreakContextDependencies &
-    Omit<RunnerBlinkRiskEvidenceDependencies, "breakRiskAssessment"> & {
+    RunnerMultiRunContextDependencies<TDeckCapabilities, TStrategicIntent> &
+    Omit<
+      RunnerBlinkRiskEvidenceDependencies,
+      "breakRiskAssessment" | "multiRunTargetEvaluation"
+    > & {
       shouldAvoidRun: Parameters<
         typeof createRunnerBlinkRiskContext
       >[0]["shouldAvoidRun"];
     };
 
-export function createRunnerBlinkRiskComposition(
-  dependencies: RunnerBlinkRiskCompositionDependencies,
+export function createRunnerBlinkRiskComposition<
+  TDeckCapabilities,
+  TStrategicIntent,
+>(
+  dependencies: RunnerBlinkRiskCompositionDependencies<
+    TDeckCapabilities,
+    TStrategicIntent
+  >,
 ): RunnerBlinkRiskContext & {
   blinkRiskAssessmentForEncounterBreak: ReturnType<
     typeof createRunnerBlinkEncounterBreakContext
   >["blinkRiskAssessmentForEncounterBreak"];
-} {
+} & RunnerMultiRunContext {
+  const multiRunContext = createRunnerMultiRunContext({
+    allNighterDefinitionId: dependencies.allNighterDefinitionId,
+    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    targetServerId: dependencies.targetServerId,
+    payoffClass: dependencies.payoffClass,
+    canTakeRun: dependencies.canTakeRun,
+    scoreValue: dependencies.scoreValue,
+    deckCapabilitiesForInput: dependencies.deckCapabilitiesForInput,
+    strategicIntentForInput: dependencies.strategicIntentForInput,
+    runTargets: dependencies.runTargets,
+  });
+
   const { blinkRiskAssessmentForEncounterBreak } =
     createRunnerBlinkEncounterBreakContext({
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
@@ -40,13 +70,15 @@ export function createRunnerBlinkRiskComposition(
 
   const { runnerBlinkRiskEvidenceForAction, runnerBlinkRunExclusion } =
     createRunnerBlinkRiskContext({
-      multiRunTargetEvaluation: dependencies.multiRunTargetEvaluation,
+      multiRunTargetEvaluation:
+        multiRunContext.runnerMultiRunTargetEvaluation,
       runRiskAssessment: dependencies.runRiskAssessment,
       breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
       shouldAvoidRun: dependencies.shouldAvoidRun,
     });
 
   return {
+    ...multiRunContext,
     blinkRiskAssessmentForEncounterBreak,
     runnerBlinkRiskEvidenceForAction,
     runnerBlinkRunExclusion,

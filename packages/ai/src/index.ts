@@ -179,7 +179,6 @@ import { createRunnerDevelopmentSupportComposition } from "./runtime/runner-deve
 import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
-import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
 import { createRunnerEconomyCommitmentComposition } from "./runtime/runner-economy-commitment-composition";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import {
@@ -1035,7 +1034,10 @@ const {
   runnerMultiRunTargetEvaluation,
   semanticRuntimeRunnerRunTargetEvaluation,
   semanticRuntimeRunnerRunTargetEvaluationForAction,
-} = createRunnerMultiRunContext({
+  blinkRiskAssessmentForEncounterBreak,
+  runnerBlinkRiskEvidenceForAction,
+  runnerBlinkRunExclusion,
+} = createRunnerBlinkRiskComposition({
   allNighterDefinitionId: ALL_NIGHTER_CARD_ID,
   sourceDefinitionIdForAction,
   targetServerId: semanticRuntimeServerId,
@@ -1045,13 +1047,6 @@ const {
   deckCapabilitiesForInput,
   strategicIntentForInput: runnerStrategicIntentForInput,
   runTargets: evaluateRunnerRunTargets,
-});
-const {
-  blinkRiskAssessmentForEncounterBreak,
-  runnerBlinkRiskEvidenceForAction,
-  runnerBlinkRunExclusion,
-} = createRunnerBlinkRiskComposition({
-  sourceDefinitionIdForAction,
   randomBreakOrDamageRiskProfileForDefinitionId,
   breakSubroutineIndexesForAction,
   encounteredSubroutines: (input) =>
@@ -1060,7 +1055,6 @@ const {
   isImmediateSafetyThreatSubroutine,
   isRemoteServerTarget,
   visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
-  multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runRiskAssessment: assessBlinkRiskForRunAction,
   shouldAvoidRun: (assessment) =>
     blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
