@@ -220,7 +220,6 @@ import { rolesMatch as discardRolesMatch } from "./runtime/role-match";
 import {
   runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason,
 } from "./runtime/runner-known-ice-path-score";
-import { createSemanticRuntimeCorpScoreComposition } from "./runtime/semantic-runtime-corp-score-composition";
 import {
   bestSemanticRuntimeChoice,
   bestSemanticRuntimeChoiceForTacticalPlanOverride,
@@ -1216,9 +1215,9 @@ const {
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  semanticRuntimeCorpPassiveScoreLinePenalty,
-  semanticRuntimeCorpScoreNowSafetyGate,
   semanticRuntimeCorpEvidence,
+  semanticRuntimeCorpScore,
+  semanticRuntimeCorpScoreComponents,
 } = createSemanticRuntimeCorpScoringEvidenceComposition({
   sourceDefinitionIdForAction,
   normalizedRulesTextForDefinition,
@@ -1255,6 +1254,21 @@ const {
     semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
+  corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
+  corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
+  corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
+  corpRemoteScoreContestabilityAssessment:
+    semanticRuntimeCorpRemoteScoreContestabilityAssessment,
+  corpActionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+  corpInstallRemoteScore: semanticRuntimeCorpInstallRemoteScore,
+  corpHasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
+  corpHasRemoteRezFloorFundingNeed:
+    semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
+  corpHasCentralRezFloorFundingNeed:
+    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
+  corpTaggedRunnerPayoffPressure,
+  corpTaggedPayoffWindowPassiveActionPenalty,
+  scoreFromComponents: semanticRuntimeScoreFromComponents,
 });
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
@@ -1528,33 +1542,6 @@ const {
     serverId: semanticRuntimeServerId,
     isRemoteServerTarget,
   },
-});
-
-const {
-  semanticRuntimeCorpScore,
-  semanticRuntimeCorpScoreComponents,
-} = createSemanticRuntimeCorpScoreComposition({
-  actionCreditCost,
-  rolesForAction,
-  corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
-  corpAdvanceRemoteScore: semanticRuntimeCorpAdvanceRemoteScore,
-  corpRemoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
-  corpCentralRezReserveAssessment: semanticRuntimeCorpCentralRezReserveAssessment,
-  corpRemoteScoreContestabilityAssessment:
-    semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-  corpActionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  corpInstallRemoteScore: semanticRuntimeCorpInstallRemoteScore,
-  corpAdvancementCounterPlacementAssessment:
-    semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  corpHasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
-  corpHasRemoteRezFloorFundingNeed:
-    semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-  corpHasCentralRezFloorFundingNeed:
-    semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-  corpTaggedRunnerPayoffPressure,
-  corpTaggedPayoffWindowPassiveActionPenalty,
-  corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
-  scoreFromComponents: semanticRuntimeScoreFromComponents,
 });
 
 const {

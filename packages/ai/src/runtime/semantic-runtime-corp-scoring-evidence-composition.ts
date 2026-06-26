@@ -15,20 +15,34 @@ import {
   createSemanticRuntimeCorpScoreSafetyContext,
 } from "./semantic-runtime-corp-score-safety-context";
 import type { SemanticRuntimeCorpScoreSafetyDependencies } from "./semantic-runtime-corp-score-safety";
+import {
+  createSemanticRuntimeCorpScoreComposition,
+  type SemanticRuntimeCorpScoreCompositionDependencies,
+} from "./semantic-runtime-corp-score-composition";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
-export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies =
+export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
+  TConsumer extends string,
+> =
   SemanticRuntimeCorpAdvancementCounterDependencies &
     SemanticRuntimeCorpPassiveScoreLineDependencies &
     SemanticRuntimeCorpScoreSafetyDependencies &
+    Omit<
+      SemanticRuntimeCorpScoreCompositionDependencies<TConsumer>,
+      | "corpScoreNowSafetyGate"
+      | "corpAdvancementCounterPlacementAssessment"
+      | "corpPassiveScoreLinePenalty"
+    > &
     Omit<
       SemanticRuntimeCorpEvidenceDependencies<VisibleCorpServer>,
       "advancementCounterPlacementAssessment" | "passiveScoreLinePenalty"
     >;
 
-export function createSemanticRuntimeCorpScoringEvidenceComposition(
-  dependencies: SemanticRuntimeCorpScoringEvidenceCompositionDependencies,
+export function createSemanticRuntimeCorpScoringEvidenceComposition<
+  TConsumer extends string,
+>(
+  dependencies: SemanticRuntimeCorpScoringEvidenceCompositionDependencies<TConsumer>,
 ) {
   const {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -85,10 +99,43 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition(
       remoteRezFloorAssessment: dependencies.remoteRezFloorAssessment,
     });
 
+  const {
+    semanticRuntimeCorpScore,
+    semanticRuntimeCorpScoreComponents,
+  } = createSemanticRuntimeCorpScoreComposition({
+    actionCreditCost: dependencies.actionCreditCost,
+    rolesForAction: dependencies.rolesForAction,
+    corpScoreNowSafetyGate: semanticRuntimeCorpScoreNowSafetyGate,
+    corpAdvanceRemoteScore: dependencies.corpAdvanceRemoteScore,
+    corpRemoteRezFloorAssessment:
+      dependencies.corpRemoteRezFloorAssessment,
+    corpCentralRezReserveAssessment:
+      dependencies.corpCentralRezReserveAssessment,
+    corpRemoteScoreContestabilityAssessment:
+      dependencies.corpRemoteScoreContestabilityAssessment,
+    corpActionIsScoreLine: dependencies.corpActionIsScoreLine,
+    corpInstallRemoteScore: dependencies.corpInstallRemoteScore,
+    corpAdvancementCounterPlacementAssessment:
+      semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+    corpHasRemoteInstability: dependencies.corpHasRemoteInstability,
+    corpHasRemoteRezFloorFundingNeed:
+      dependencies.corpHasRemoteRezFloorFundingNeed,
+    corpHasCentralRezFloorFundingNeed:
+      dependencies.corpHasCentralRezFloorFundingNeed,
+    corpTaggedRunnerPayoffPressure:
+      dependencies.corpTaggedRunnerPayoffPressure,
+    corpTaggedPayoffWindowPassiveActionPenalty:
+      dependencies.corpTaggedPayoffWindowPassiveActionPenalty,
+    corpPassiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
+    scoreFromComponents: dependencies.scoreFromComponents,
+  });
+
   return {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
     semanticRuntimeCorpPassiveScoreLinePenalty,
     semanticRuntimeCorpScoreNowSafetyGate,
     semanticRuntimeCorpEvidence,
+    semanticRuntimeCorpScore,
+    semanticRuntimeCorpScoreComponents,
   };
 }
