@@ -528,19 +528,13 @@ import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./simulation/corp-eff
 import { summarizeCorpIcePortfolioMetrics } from "./simulation/corp-ice-portfolio-metrics";
 import { summarizeCentralCloseoutRepeatMetrics } from "./simulation/central-closeout-repeat-metrics";
 import { corpScoreTerminalFollowupMetrics } from "./simulation/corp-score-terminal-followup-metrics";
-import { createCorpEconomyBeforeScoreDiagnosticsForSimulationAction } from "./simulation/corp-economy-before-score-diagnostics";
 import { summarizeCorpEconomyBeforeScoreMetrics } from "./simulation/corp-economy-before-score-metrics";
 import { summarizeCorpUnsafeRemoteScoreConversionMetrics } from "./simulation/corp-unsafe-remote-score-conversion-metrics";
-import {
-  createCorpScoreTerminalChosenFamily,
-  createCorpScoreTerminalDiagnosticsForSimulationAction,
-} from "./simulation/corp-score-terminal-diagnostics";
 import {
   corpVisibleMeatDamagePayoff,
   corpVisibleRunnerDamagePreventionEvidence,
   corpVisibleRunnerResourceTrashEvidence,
 } from "./simulation/corp-tag-punish-visible-payoff";
-import { createCorpFutureRunIceDiagnosticsForSimulationAction } from "./simulation/corp-future-run-ice-diagnostics";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { summarizePlanConversionMetrics } from "./simulation/plan-conversion-metrics";
@@ -591,7 +585,6 @@ import {
   createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
 import {
-  createCentralRunEventGoodForTarget,
   createNoFreshCentralSubstitutionTypeForAction,
   createRunnerNoFreshCentralContext,
   createTrueCentralCloseoutProfileContext,
@@ -669,9 +662,8 @@ import {
   metricsFor,
 } from "./simulation/simulation-quality-adapters";
 import {
-  createDefinitionForSimulationAction,
-  createSourceDefinitionIdForSimulationAction,
-} from "./simulation/simulation-action-source-definition";
+  createSimulationActionDiagnosticsContext,
+} from "./simulation/simulation-action-diagnostics-context";
 import {
   createRunnerInstallClassificationContext,
 } from "./simulation/runner-install-classification";
@@ -1139,33 +1131,16 @@ const { extractAiFeatures } = createAiFeatureExtractorContext({
   visibleCitySurveillanceSourceCount,
 });
 
-const sourceDefinitionIdForSimulationAction =
-  createSourceDefinitionIdForSimulationAction(findVisibleCard);
-
-const corpFutureRunIceDiagnosticsForSimulationAction =
-  createCorpFutureRunIceDiagnosticsForSimulationAction(
-    sourceDefinitionIdForSimulationAction,
-  );
-
-const corpScoreTerminalChosenFamily =
-  createCorpScoreTerminalChosenFamily(rolesForAction);
-
-const corpScoreTerminalDiagnosticsForSimulationAction =
-  createCorpScoreTerminalDiagnosticsForSimulationAction(
-    corpScoreTerminalChosenFamily,
-  );
-
-const corpEconomyBeforeScoreDiagnosticsForSimulationAction =
-  createCorpEconomyBeforeScoreDiagnosticsForSimulationAction(
-    corpScoreTerminalChosenFamily,
-  );
-
-const definitionForSimulationAction = createDefinitionForSimulationAction(
+const {
   sourceDefinitionIdForSimulationAction,
-);
-
-const centralRunEventGoodForTarget = createCentralRunEventGoodForTarget({
-  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  corpFutureRunIceDiagnosticsForSimulationAction,
+  corpScoreTerminalDiagnosticsForSimulationAction,
+  corpEconomyBeforeScoreDiagnosticsForSimulationAction,
+  definitionForSimulationAction,
+  centralRunEventGoodForTarget,
+} = createSimulationActionDiagnosticsContext({
+  findVisibleCard,
+  rolesForAction,
 });
 
 const {
