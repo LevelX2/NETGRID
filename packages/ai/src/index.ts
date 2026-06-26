@@ -559,6 +559,7 @@ import {
 import {
   createCorpTagCreationDiagnosticsContext,
 } from "./simulation/corp-tag-creation-diagnostics";
+import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
@@ -643,9 +644,6 @@ import {
   DATAPOOL_LIKE_PUNISH_IDS,
   POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS,
   PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS,
-  RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS,
-  RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS,
-  RUNNER_TRACE_DEFENSE_CONTEXT_IDS,
   SCORCHED_EARTH_LIKE_PUNISH_IDS,
   URBAN_RENEWAL_LIKE_PUNISH_IDS,
 } from "./simulation/tag-punish-card-sets";
@@ -3808,38 +3806,6 @@ function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
         cardId: string | undefined;
       } => opportunity !== undefined,
     );
-}
-
-function runnerSurvivalCounterContextForInput(input: AiDecisionInput): {
-  any: boolean;
-  trace: boolean;
-  damage: boolean;
-  flatline: boolean;
-  link: boolean;
-} {
-  const visibleRunnerCards = input.playerView.opponent.rig ?? [];
-  const definitionIds = new Set(
-    visibleRunnerCards
-      .filter((card) => card.known)
-      .map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)),
-  );
-  const trace = [...definitionIds].some((definitionId) =>
-    RUNNER_TRACE_DEFENSE_CONTEXT_IDS.has(definitionId),
-  );
-  const damage = [...definitionIds].some((definitionId) =>
-    RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS.has(definitionId),
-  );
-  const flatline = [...definitionIds].some((definitionId) =>
-    RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS.has(definitionId),
-  );
-  return {
-    any: trace || damage || flatline,
-    trace,
-    damage,
-    flatline,
-    link: trace,
-  };
 }
 
 function strongestCorpTagSourceOpportunity(
