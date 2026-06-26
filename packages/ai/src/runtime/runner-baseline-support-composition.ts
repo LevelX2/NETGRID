@@ -1,5 +1,9 @@
 import type { VisibleCard } from "@netgrid/shared";
 
+import {
+  createLegacyDecisionContext,
+  type LegacyDecisionContextDependencies,
+} from "../legacy/legacy-decision-context";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import {
   createRunnerBaselinePlanGuardContext,
@@ -21,6 +25,10 @@ export type RunnerBaselineSupportCompositionDependencies =
     RunnerRunOnlyActionAdjustmentDependencies & {
       visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
     } &
+    Omit<
+      LegacyDecisionContextDependencies,
+      "discardKeepScore" | "rolesForCardId"
+    > &
     Omit<
       RunnerVisibleCardDiscardCompositionDependencies,
       "isVisibleIcebreakerProgram"
@@ -67,9 +75,26 @@ export function createRunnerBaselineSupportComposition(
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
   });
 
+  const { decisionFromChoices, selectedChoicesForDecision } =
+    createLegacyDecisionContext({
+      evaluateCorpOpeningHand: dependencies.evaluateCorpOpeningHand,
+      evaluateRunnerOpeningHand:
+        dependencies.evaluateRunnerOpeningHand,
+      discardKeepScore: (input, card) => discardKeepScore(input, card),
+      selectedRunnerProgramInstallTrashOptionIds:
+        dependencies.selectedRunnerProgramInstallTrashOptionIds,
+      selectedRunnerForcedProgramTrashOptionIds:
+        dependencies.selectedRunnerForcedProgramTrashOptionIds,
+      extractAiFeatures: dependencies.extractAiFeatures,
+      rolesForCardId: dependencies.rolesForCardId,
+      scrubEvidence: dependencies.scrubEvidence,
+    });
+
   return {
     runnerHasConditionalPaymentContinueDecision,
     baselineShellTradersPlanIsVisible,
+    decisionFromChoices,
+    selectedChoicesForDecision,
     deckCapabilitiesForInput,
     runnerStrategicIntentForInput,
     isVisibleIcebreakerProgram,

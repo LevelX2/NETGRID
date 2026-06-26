@@ -360,9 +360,6 @@ import {
   ownStrategicWindow,
   serverTargetsMatch,
 } from "./simulation/plan-conversion-predicates";
-import {
-  createLegacyDecisionContext,
-} from "./legacy/legacy-decision-context";
 import { scoreActionsForLegacy } from "./legacy/legacy-action-scorer";
 import {
   BENCHMARK_PROFILES_143,
@@ -969,43 +966,11 @@ const {
   isRunnerRigInstallAction,
 });
 
-const { decisionFromChoices, selectedChoicesForDecision } =
-  createLegacyDecisionContext({
-    evaluateCorpOpeningHand,
-    evaluateRunnerOpeningHand,
-    discardKeepScore: (input, card) => discardKeepScore(input, card),
-    selectedRunnerProgramInstallTrashOptionIds: (input, choice, options) =>
-      selectedRunnerProgramInstallTrashOptionIds(input, choice, options),
-    selectedRunnerForcedProgramTrashOptionIds: (input, options) =>
-      selectedRunnerForcedProgramTrashOptionIds(input, options),
-    extractAiFeatures,
-    rolesForCardId,
-    scrubEvidence,
-  });
-
-const {
-  runnerSelfDamageGuardedDecision,
-  runnerSelfDamageImmediateWinSemanticChoice,
-  runnerSelfDamageSurvivalAssessment,
-  runnerSelfDamageSurvivalExclusion,
-} = createRunnerSelfDamageContext({
-  sourceDefinitionIdForAction,
-  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
-  fakedHitCardId: FAKED_HIT_CARD_ID,
-  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  scoreRunnerActions: (input: AiDecisionInput) =>
-    scoreActionsForLegacy(input, "runner", {
-      extractAiFeatures,
-      scoreRunnerAction,
-      scoreCorpAction,
-    }),
-  compareAction,
-  selectedChoicesForDecision,
-  scrubEvidence,
-});
 const {
   runnerHasConditionalPaymentContinueDecision,
   baselineShellTradersPlanIsVisible,
+  decisionFromChoices,
+  selectedChoicesForDecision,
   deckCapabilitiesForInput,
   runnerStrategicIntentForInput,
   isVisibleIcebreakerProgram,
@@ -1026,6 +991,34 @@ const {
   rolesForCardId,
   cardDefinitionTypeForAi,
   isRunnerEconomyRole,
+  evaluateCorpOpeningHand,
+  evaluateRunnerOpeningHand,
+  selectedRunnerProgramInstallTrashOptionIds: (input, choice, options) =>
+    selectedRunnerProgramInstallTrashOptionIds(input, choice, options),
+  selectedRunnerForcedProgramTrashOptionIds: (input, options) =>
+    selectedRunnerForcedProgramTrashOptionIds(input, options),
+  extractAiFeatures,
+  scrubEvidence,
+});
+const {
+  runnerSelfDamageGuardedDecision,
+  runnerSelfDamageImmediateWinSemanticChoice,
+  runnerSelfDamageSurvivalAssessment,
+  runnerSelfDamageSurvivalExclusion,
+} = createRunnerSelfDamageContext({
+  sourceDefinitionIdForAction,
+  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
+  fakedHitCardId: FAKED_HIT_CARD_ID,
+  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
+  scoreRunnerActions: (input: AiDecisionInput) =>
+    scoreActionsForLegacy(input, "runner", {
+      extractAiFeatures,
+      scoreRunnerAction,
+      scoreCorpAction,
+    }),
+  compareAction,
+  selectedChoicesForDecision,
+  scrubEvidence,
 });
 const {
   semanticRuntimeRunnerMultiRunEventExclusion,
