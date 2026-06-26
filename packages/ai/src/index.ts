@@ -670,16 +670,7 @@ import {
   metricsFor,
 } from "./simulation/simulation-quality-adapters";
 import {
-  hasRunnerInstallableBreakerActionForSimulation,
-  hasRunnerPlayableEconomyActionForSimulation,
-  hasRunnerRunnablePressureActionForSimulation,
-  isRunnerDuplicateInstallForSimulation,
-  isRunnerEconomyActionForSimulation,
-  isRunnerLowValueDuplicateInstallForSimulation,
-  isRunnerPressureActionForSimulation,
-  isRunnerRigInstallActionForSimulation,
-  runnerDiscardChoiceRolesForSimulation,
-  runnerDrawKindForSimulationAction as runnerDrawKindForSimulationActionWithDeps,
+  createRunnerInstallClassificationContext,
 } from "./simulation/runner-install-classification";
 import {
   runnerHasRecentRunOnServer,
@@ -1187,6 +1178,24 @@ export {
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 
 const AI_HINTS = createAiHintsByCard();
+
+const {
+  runnerDrawKindForSimulationAction,
+  hasRunnerPlayableEconomyAction,
+  hasRunnerInstallableBreakerAction,
+  hasRunnerRunnablePressureAction,
+  isRunnerEconomyAction,
+  isRunnerRigInstallAction,
+  isRunnerPressureAction,
+  runnerDiscardChoiceRoles,
+  isRunnerDuplicateInstall,
+  isRunnerLowValueDuplicateInstall,
+} = createRunnerInstallClassificationContext({
+  rolesForAction,
+  rolesForCardId,
+  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  isSearchChoice,
+});
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -17635,102 +17644,6 @@ function runnerRemoteTrashAccessContext(
     action,
     runnerCreditReserveTargetForInput(input),
   );
-}
-
-function runnerDrawKindForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): { draw: boolean; click: boolean; cardEffect: boolean } {
-  return runnerDrawKindForSimulationActionWithDeps(input, action, {
-    rolesForAction,
-    isSearchChoice,
-  });
-}
-
-function hasRunnerPlayableEconomyAction(
-  input: AiDecisionInput,
-  excludeActionId?: string,
-): boolean {
-  return hasRunnerPlayableEconomyActionForSimulation(
-    input,
-    excludeActionId,
-    isRunnerEconomyAction,
-  );
-}
-
-function hasRunnerInstallableBreakerAction(
-  input: AiDecisionInput,
-  excludeActionId?: string,
-): boolean {
-  return hasRunnerInstallableBreakerActionForSimulation(input, excludeActionId, {
-    rolesForAction,
-  });
-}
-
-function hasRunnerRunnablePressureAction(
-  input: AiDecisionInput,
-  excludeActionId?: string,
-): boolean {
-  return hasRunnerRunnablePressureActionForSimulation(
-    input,
-    excludeActionId,
-    isRunnerPressureAction,
-  );
-}
-
-function isRunnerEconomyAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return isRunnerEconomyActionForSimulation(input, action, { rolesForAction });
-}
-
-function isRunnerRigInstallAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return isRunnerRigInstallActionForSimulation(input, action, {
-    rolesForAction,
-  });
-}
-
-function isRunnerPressureAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return isRunnerPressureActionForSimulation(input, action, { rolesForAction });
-}
-
-function runnerDiscardChoiceRoles(
-  input: AiDecisionInput,
-  decision: AiDecision,
-): string[] {
-  return runnerDiscardChoiceRolesForSimulation(
-    input,
-    decision,
-    rolesForCardId,
-  );
-}
-
-function isRunnerDuplicateInstall(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return isRunnerDuplicateInstallForSimulation(
-    input,
-    action,
-    sourceDefinitionIdForSimulationAction,
-  );
-}
-
-function isRunnerLowValueDuplicateInstall(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return isRunnerLowValueDuplicateInstallForSimulation(input, action, {
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-    rolesForCardId,
-  });
 }
 
 function sourceDefinitionIdForSimulationAction(

@@ -229,3 +229,98 @@ export function runnerDiscardChoiceRolesForSimulation(
     .filter((option) => selectedIds.has(option.id))
     .flatMap((option) => discardRolesForCardId(option.card?.definitionId));
 }
+
+export function createRunnerInstallClassificationContext(dependencies: {
+  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+  rolesForCardId: (cardId: string | undefined) => string[];
+  sourceDefinitionIdForAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => string | undefined;
+  isSearchChoice: (
+    choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  ) => boolean;
+}) {
+  const isRunnerEconomyAction = (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): boolean =>
+    isRunnerEconomyActionForSimulation(input, action, {
+      rolesForAction: dependencies.rolesForAction,
+    });
+  const isRunnerPressureAction = (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): boolean =>
+    isRunnerPressureActionForSimulation(input, action, {
+      rolesForAction: dependencies.rolesForAction,
+    });
+
+  return {
+    runnerDrawKindForSimulationAction: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) =>
+      runnerDrawKindForSimulationAction(input, action, {
+        rolesForAction: dependencies.rolesForAction,
+        isSearchChoice: dependencies.isSearchChoice,
+      }),
+    hasRunnerPlayableEconomyAction: (
+      input: AiDecisionInput,
+      excludeActionId?: string,
+    ) =>
+      hasRunnerPlayableEconomyActionForSimulation(
+        input,
+        excludeActionId,
+        isRunnerEconomyAction,
+      ),
+    hasRunnerInstallableBreakerAction: (
+      input: AiDecisionInput,
+      excludeActionId?: string,
+    ) =>
+      hasRunnerInstallableBreakerActionForSimulation(input, excludeActionId, {
+        rolesForAction: dependencies.rolesForAction,
+      }),
+    hasRunnerRunnablePressureAction: (
+      input: AiDecisionInput,
+      excludeActionId?: string,
+    ) =>
+      hasRunnerRunnablePressureActionForSimulation(
+        input,
+        excludeActionId,
+        isRunnerPressureAction,
+      ),
+    isRunnerEconomyAction,
+    isRunnerRigInstallAction: (input: AiDecisionInput, action: LegalAction) =>
+      isRunnerRigInstallActionForSimulation(input, action, {
+        rolesForAction: dependencies.rolesForAction,
+      }),
+    isRunnerPressureAction,
+    runnerDiscardChoiceRoles: (
+      input: AiDecisionInput,
+      decision: { selectedChoices?: unknown },
+    ) =>
+      runnerDiscardChoiceRolesForSimulation(
+        input,
+        decision,
+        dependencies.rolesForCardId,
+      ),
+    isRunnerDuplicateInstall: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) =>
+      isRunnerDuplicateInstallForSimulation(
+        input,
+        action,
+        dependencies.sourceDefinitionIdForAction,
+      ),
+    isRunnerLowValueDuplicateInstall: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) =>
+      isRunnerLowValueDuplicateInstallForSimulation(input, action, {
+        sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+        rolesForCardId: dependencies.rolesForCardId,
+      }),
+  };
+}
