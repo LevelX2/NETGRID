@@ -554,6 +554,7 @@ import {
   type RunnerEconomySetupActionClass,
 } from "./simulation/runner-economy-setup-types";
 import {
+  createRunnerSetupCoverageContext,
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
@@ -1225,6 +1226,15 @@ const {
   runnerHasKnownUnaffordableLegalRun,
 } = createRunnerKnownPathCostContext({
   assessKnownRezzedIcePath,
+});
+
+const {
+  runnerVisibleMissingBreakerCoverage,
+  runnerMissingCoverageTypesForInput,
+  runnerHasKnownBlockedPathByCoverage,
+} = createRunnerSetupCoverageContext({
+  assessKnownRezzedIcePath,
+  rolesForCardId,
 });
 
 const {
@@ -16705,69 +16715,6 @@ function runnerEconomySetupActionClass(
           (role) => role.includes("delayed") || role.includes("penalty"),
         )),
   };
-}
-
-function runnerVisibleMissingBreakerCoverage(input: AiDecisionInput): boolean {
-  const rigRoles = new Set(
-    (input.playerView.own.rig ?? []).flatMap((card) =>
-      rolesForCardId(card.definitionId),
-    ),
-  );
-  return input.playerView.servers.some((server) =>
-    server.ice
-      .filter(
-        (ice): ice is typeof ice & { definitionId: string } =>
-          ice.known && typeof ice.definitionId === "string",
-      )
-      .flatMap((ice) => runnerMissingBreakerRolesForMetrics(ice.definitionId))
-      .some((role) => !rigRoles.has(role)),
-  );
-}
-
-function runnerMissingCoverageTypesForInput(
-  input: AiDecisionInput,
-): RunnerSetupMissingCoverageType[] {
-  const rigRoles = new Set(
-    (input.playerView.own.rig ?? []).flatMap((card) =>
-      rolesForCardId(card.definitionId),
-    ),
-  );
-  const missing = new Set<RunnerSetupMissingCoverageType>();
-  for (const server of input.playerView.servers) {
-    for (const ice of server.ice) {
-      if (!ice.known || typeof ice.definitionId !== "string") continue;
-      for (const role of runnerMissingBreakerRolesForMetrics(
-        ice.definitionId,
-      )) {
-        if (rigRoles.has(role)) continue;
-        if (role === "breaker_fracter") missing.add("wall");
-        else if (role === "breaker_decoder") missing.add("code_gate");
-        else if (role === "breaker_killer") missing.add("sentry");
-        else missing.add("universal");
-      }
-      if (
-        ice.effectiveRunQuote?.subroutines.some(
-          (subroutine) =>
-            String(subroutine.type).includes("trace") ||
-            String(subroutine.type).includes("damage"),
-        ) === true
-      )
-        missing.add("special");
-    }
-  }
-  return [...missing].sort();
-}
-
-function runnerHasKnownBlockedPathByCoverage(input: AiDecisionInput): boolean {
-  return input.playerView.servers.some(
-    (server) =>
-      assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
-        server.root,
-      ).blocked,
-  );
 }
 
 function runnerCentralPressureDiagnosticsForSimulationAction(
