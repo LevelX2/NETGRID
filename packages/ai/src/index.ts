@@ -245,7 +245,6 @@ import type {
   CorpVisibleTagPayoffCategory,
 } from "./runtime/corp-tag-punish-types";
 import type {
-  CorpCentralRezReserveAssessment,
   CorpRemoteContestabilityAssessment,
   CorpTaggedRunnerPayoffActionProfile,
 } from "./runtime/corp-scoring-assessment-types";
@@ -293,6 +292,9 @@ import {
 import {
   createSemanticRuntimeCorpRezFloorContext,
 } from "./runtime/semantic-runtime-corp-rez-floor-context";
+import {
+  createSemanticRuntimeCorpCentralRezContext,
+} from "./runtime/semantic-runtime-corp-central-rez-context";
 import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
@@ -1810,6 +1812,15 @@ const {
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
   visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
+});
+const {
+  semanticRuntimeCorpCentralRezReserveAssessment,
+  semanticRuntimeCorpHasCentralRezFloorFundingNeed,
+} = createSemanticRuntimeCorpCentralRezContext({
+  actionCreditCost,
+  actionServerId: semanticRuntimeCorpActionServerId,
+  actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  sourceDefinitionIdForAction,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -5655,77 +5666,6 @@ function semanticRuntimeCorpRemoteContestabilityAssessment(
         : []),
     ],
   };
-}
-
-function semanticRuntimeCorpCentralRezReserveAssessment(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpCentralRezReserveAssessment | undefined {
-  if (input.side !== "corp" || action.side !== "corp") return undefined;
-  if (action.type !== "install_card" || action.payload?.placement !== "ice")
-    return undefined;
-  const serverId = semanticRuntimeCorpActionServerId(input, action);
-  if (serverId !== "hq") return undefined;
-  if (!semanticRuntimeCorpHasAgendaInHq(input)) return undefined;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (!sourceDefinitionId) return undefined;
-  const rezFloor = semanticRuntimeCorpActionIceRezCost(input, action);
-  if (rezFloor <= 0) return undefined;
-  const creditsAfterAction =
-    input.playerView.own.credits - actionCreditCost(action);
-  const blockedByFloor = creditsAfterAction < rezFloor;
-  return {
-    serverId: "hq",
-    sourceDefinitionId,
-    rezFloor,
-    creditsAfterAction,
-    blockedByFloor,
-    evidence: [
-      "corp_central_rez_floor:true",
-      "corp_hq_agenda_exposure:true",
-      `central_rez_floor_server:${serverId}`,
-      `source_definition:${sourceDefinitionId}`,
-      `central_rez_floor:${rezFloor}`,
-      `credits_after_action:${creditsAfterAction}`,
-      `central_rez_reserve_below_floor:${blockedByFloor}`,
-    ],
-  };
-}
-
-function semanticRuntimeCorpActionIceRezCost(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number {
-  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
-  const sourceDefinitionId =
-    sourceCard?.definitionId ?? sourceDefinitionIdForAction(input, action);
-  return (
-    sourceCard?.rezCost ??
-    (sourceDefinitionId
-      ? (RUNTIME_CARDS[sourceDefinitionId]?.numeric.rezCost ??
-        DEMO_CARDS_BY_ID[sourceDefinitionId]?.rezCost)
-      : undefined) ??
-    0
-  );
-}
-
-function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {
-  return input.playerView.own.gripOrHq.some(
-    (card) => card.known && card.type === "agenda",
-  );
-}
-
-function semanticRuntimeCorpHasCentralRezFloorFundingNeed(
-  input: AiDecisionInput,
-): boolean {
-  if (input.side !== "corp") return false;
-  return input.legalActions.some((action) => {
-    const assessment = semanticRuntimeCorpCentralRezReserveAssessment(
-      input,
-      action,
-    );
-    return assessment?.blockedByFloor === true;
-  });
 }
 
 function corpTaggedRunnerPayoffPressure(
