@@ -76,6 +76,7 @@ import {
 } from "./runtime/ai-feature-server";
 import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
 import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
+import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -486,7 +487,6 @@ import {
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
-import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
 import {
   createRunnerPostRunReserveTargetForRemoteInput,
 } from "./simulation/runner-credit-reserve";
@@ -502,10 +502,7 @@ import {
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
 import {
-  createRunnerCoverageRepairDiagnostic,
   createRunnerKnownPathCostContext,
-  createRunnerKnownPathDiagnosticsForAction,
-  createRunnerKnownNoAccessLegalRunTargets,
 } from "./simulation/runner-known-no-access";
 import {
   isCorpProtectionScoreConversionAction,
@@ -1059,36 +1056,24 @@ const runnerRemoteThreatTargetingDiagnosticsForAction =
       runnerCentralRunBurnsRemoteContestReserveForInput,
   });
 
-const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
-  runnerCreditReserveTargetForInput,
-});
-
-const runnerKnownNoAccessLegalRunTargets =
-  createRunnerKnownNoAccessLegalRunTargets({
-    assessKnownRezzedIcePath,
-    runnerKnownPathAssessmentIsKnownNoAccess,
-    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  });
-
-const runnerCoverageRepairDiagnostic = createRunnerCoverageRepairDiagnostic({
+const {
+  runnerRemoteTrashAccessContext,
   runnerKnownNoAccessLegalRunTargets,
+  runnerCoverageRepairDiagnostic,
+  runnerKnownPathDiagnosticsForAction,
+} = createRunnerKnownPathDiagnosticsComposition({
+  runnerCreditReserveTargetForInput,
+  assessKnownRezzedIcePath,
+  runnerKnownPathAssessmentIsKnownNoAccess,
+  runnerKnownPathAssessmentIsUnbreakableNoAccess,
+  runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
   findVisibleCard,
+  rolesForAction,
   rolesForCardId,
+  remoteServerHasScoreThreat,
+  runnerHasRecentRunOnServer,
+  runnerRemoteHasKnownRelevantTrashTarget,
 });
-
-const runnerKnownPathDiagnosticsForAction =
-  createRunnerKnownPathDiagnosticsForAction({
-    assessKnownRezzedIcePath,
-    remoteServerHasScoreThreat,
-    rolesForAction,
-    rolesForCardId,
-    runnerCoverageRepairDiagnostic,
-    runnerHasRecentRunOnServer,
-    runnerKnownPathAssessmentIsKnownNoAccess,
-    runnerKnownPathAssessmentIsUnbreakableNoAccess,
-    runnerRemoteHasKnownRelevantTrashTarget,
-    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  });
 
 const {
   runnerDrawKindForSimulationAction,
