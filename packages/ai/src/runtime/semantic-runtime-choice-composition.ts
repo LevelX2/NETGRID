@@ -3,13 +3,21 @@ import {
 } from "./semantic-runtime-choice-builder-context";
 import type { SemanticRuntimeChoiceBuilderDependencies } from "./semantic-runtime-choice-builder";
 import {
+  createSemanticRuntimeEvidenceContext,
+} from "./semantic-runtime-evidence-context";
+import type { SemanticRuntimeEvidenceDependencies } from "./semantic-runtime-evidence";
+import {
   createSemanticRuntimeScoreBreakdownContext,
   type SemanticRuntimeScoreBreakdownContextDependencies,
 } from "./semantic-runtime-score-breakdown";
 
 export type SemanticRuntimeChoiceCompositionDependencies =
   SemanticRuntimeScoreBreakdownContextDependencies &
-    Omit<SemanticRuntimeChoiceBuilderDependencies, "scoreBreakdown">;
+    SemanticRuntimeEvidenceDependencies &
+    Omit<
+      SemanticRuntimeChoiceBuilderDependencies,
+      "scoreBreakdown" | "evidence"
+    >;
 
 export function createSemanticRuntimeChoiceComposition(
   dependencies: SemanticRuntimeChoiceCompositionDependencies,
@@ -21,12 +29,18 @@ export function createSemanticRuntimeChoiceComposition(
       actionCreditCost: dependencies.actionCreditCost,
     });
 
+  const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
+    serverId: dependencies.serverId,
+    runnerEvidence: dependencies.runnerEvidence,
+    corpEvidence: dependencies.corpEvidence,
+  });
+
   const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
     scope: dependencies.scope,
     actionExclusion: dependencies.actionExclusion,
     scoreBreakdown: semanticRuntimeScoreBreakdown,
     actionCreditCost: dependencies.actionCreditCost,
-    evidence: dependencies.evidence,
+    evidence: semanticRuntimeEvidence,
     explanation: dependencies.explanation,
     compareAction: dependencies.compareAction,
   });

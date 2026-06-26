@@ -161,9 +161,6 @@ import {
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
 import { createSemanticRuntimeRunnerEvidenceComposition } from "./runtime/semantic-runtime-runner-evidence-composition";
-import {
-  createSemanticRuntimeEvidenceContext,
-} from "./runtime/semantic-runtime-evidence-context";
 import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
 import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
 import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
@@ -1376,11 +1373,6 @@ const {
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteRezFloorAssessment: semanticRuntimeCorpRemoteRezFloorAssessment,
 });
-const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
-  serverId: semanticRuntimeServerId,
-  runnerEvidence: semanticRuntimeRunnerEvidence,
-  corpEvidence: semanticRuntimeCorpEvidence,
-});
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
   semanticRuntimeActionExclusion,
@@ -1436,10 +1428,12 @@ const {
       componentAction,
       componentScopeId,
     ),
+  serverId: semanticRuntimeServerId,
+  runnerEvidence: semanticRuntimeRunnerEvidence,
+  corpEvidence: semanticRuntimeCorpEvidence,
   scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
   actionExclusion: semanticRuntimeActionExclusion,
   actionCreditCost,
-  evidence: semanticRuntimeEvidence,
   explanation: semanticRuntimeExplanation,
   compareAction,
 });
