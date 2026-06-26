@@ -26,7 +26,7 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
   TConsumer extends string,
 > =
   SemanticRuntimeCorpAdvancementCounterDependencies &
-    SemanticRuntimeCorpPassiveScoreLineDependencies &
+    Omit<SemanticRuntimeCorpPassiveScoreLineDependencies, "actionIsScoreLine"> &
     SemanticRuntimeCorpScoreSafetyDependencies &
     Omit<
       SemanticRuntimeCorpScoreCompositionDependencies<TConsumer>,
@@ -68,7 +68,7 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpPassiveScoreLinePenalty,
   } = createSemanticRuntimeCorpPassiveScoreLineContext({
     scoreTerminalWindow: dependencies.scoreTerminalWindow,
-    actionIsScoreLine: dependencies.actionIsScoreLine,
+    actionIsScoreLine: dependencies.corpActionIsScoreLine,
     rolesForAction: dependencies.rolesForAction,
   });
 

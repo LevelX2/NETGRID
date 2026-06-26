@@ -1127,7 +1127,6 @@ const {
   cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
   teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   rolesForAction,
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
