@@ -573,6 +573,7 @@ import type {
   AiMatchProgressionMetrics,
 } from "./simulation/ai-match-progression-types";
 import {
+  attributeNormalizedHandSizeSkip,
   incrementChosenFamily,
   incrementCoverageTypes,
   RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS,
@@ -10623,36 +10624,6 @@ function attributeHandSizeSkip(
   if (suspicious) metrics.runnerHandSizeSkipThenDiscardOrDamagePressure += 1;
   if (suspicious) metrics.runnerHandSizeFixGateAttributionSuspicious += 1;
   attributeNormalizedHandSizeSkip(metrics, entry, { blocked, suspicious });
-}
-
-function attributeNormalizedHandSizeSkip(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: AiSimulationActionSequenceEntry,
-  context: { blocked: boolean; suspicious: boolean },
-): void {
-  if (entry.runnerHandSizeBottleneckDecisionWindow !== true)
-    metrics.runnerHandSizeNormalizedWindows += 1;
-  if (entry.runnerHandSizeSupportTaken === true)
-    metrics.runnerHandSizeNormalizedTaken += 1;
-  else metrics.runnerHandSizeNormalizedSkipped += 1;
-
-  const legalHandSizeSupport = (entry.runnerLegalHandSizeActions ?? 0) > 0;
-  if (!legalHandSizeSupport) {
-    metrics.runnerHandSizeNormalizedMetricArtifact += 1;
-    return;
-  }
-
-  if (context.blocked) {
-    metrics.runnerHandSizeNormalizedBlocked += 1;
-    return;
-  }
-
-  if (context.suspicious) {
-    metrics.runnerHandSizeNormalizedSuspicious += 1;
-    return;
-  }
-
-  metrics.runnerHandSizeNormalizedMetricArtifact += 1;
 }
 
 function summarizeBreakerOntologyMetrics(
