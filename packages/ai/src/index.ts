@@ -66,10 +66,7 @@ import {
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
 import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
-import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
-import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
-import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
-import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
+import { createRunnerAiDiagnosticsComposition } from "./simulation/runner-ai-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
   demoCardDefinitionForAi,
@@ -706,20 +703,24 @@ const {
 });
 
 const {
-  runnerCreditReserveTargetForInput,
   encounterBreakReserveContext,
   breakAccessPathAssessment,
   pumpViabilityAssessment,
-  runnerRunKnownPathCost,
   runnerHasKnownUnaffordableLegalRun,
-  runnerVisibleMissingBreakerCoverage,
-  runnerMissingCoverageTypesForInput,
-  runnerHasKnownBlockedPathByCoverage,
   runnerCoverageSearchActionForMetrics,
   runnerCoverageRecoveryActionForMetrics,
   runnerRemoteTrashAccessContext,
-  runnerKnownPathDiagnosticsForAction,
-} = createRunnerKnownPathDiagnosticsComposition({
+  isRunnerEconomyAction,
+  isRunnerRigInstallAction,
+  isRunnerPressureAction,
+  bestTrueCentralCloseoutProfileForMetrics,
+  runnerCentralPressureDiagnosticsForSimulationAction,
+  runnerReserveDiagnosticsForSimulationAction,
+  runnerHandUseDiagnosticsForSimulationAction,
+  runnerEconomySetupDiagnosticsForSimulationAction,
+  assessRunnerPressureReadyForMetrics,
+  runnerBreakerCoverageDiagnosticsForSimulationAction,
+} = createRunnerAiDiagnosticsComposition({
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
@@ -739,82 +740,19 @@ const {
   remoteServerHasScoreThreat,
   runnerHasRecentRunOnServer,
   runnerRemoteHasKnownRelevantTrashTarget,
-});
-
-const {
-  runnerDrawKindForSimulationAction,
-  hasRunnerPlayableEconomyAction,
-  hasRunnerInstallableBreakerAction,
-  hasRunnerRunnablePressureAction,
-  isRunnerEconomyAction,
-  isRunnerRigInstallAction,
-  isRunnerPressureAction,
-  runnerDiscardChoiceRoles,
-  isRunnerDuplicateInstall,
-  isRunnerLowValueDuplicateInstall,
-} = createRunnerInstallClassificationComposition({
-  rolesForAction,
-  rolesForCardId,
   sourceDefinitionIdForSimulationAction,
   isSearchChoice,
-});
-
-const {
-  bestTrueCentralCloseoutProfileForMetrics,
-  runnerRemoteThreatTargetingDiagnosticsForAction,
-  runnerCentralPressureDiagnosticsForSimulationAction,
-} = createRunnerCentralPressureDiagnosticsComposition({
-  isRunnerEconomyAction,
-  rolesForAction,
-  rolesForCardId,
-  sourceDefinitionIdForSimulationAction,
-  assessKnownRezzedIcePath,
   centralRunStreakWithoutValueForMetrics,
-  runnerCreditReserveTargetForInput,
   recentCentralRunSameTargetWithoutRefresh,
-  remoteServerHasScoreThreat,
-});
-
-const {
-  runnerReserveDiagnosticsForSimulationAction,
-  runnerHandUseDiagnosticsForSimulationAction,
-  runnerEconomySetupDiagnosticsForSimulationAction,
-  assessRunnerPressureReadyForMetrics,
-  runnerBreakerCoverageDiagnosticsForSimulationAction,
-} = createRunnerSimulationDiagnosticsComposition({
-  runnerCreditReserveTargetForInput,
-  isRunnerEconomyAction,
-  runnerKnownPathDiagnosticsForAction,
-  runnerRemoteThreatTargetingDiagnosticsForAction,
-  isRunnerLowValueDuplicateInstall,
   runnerHasVisibleRemoteScoreThreat,
-  runnerRemoteTrashAccessContext,
   runnerTrashBlockedByCredits,
   runnerStealBlockedByCredits,
   runnerContestBlockedByCredits,
-  runnerDrawKindForSimulationAction,
-  hasRunnerPlayableEconomyAction,
-  hasRunnerInstallableBreakerAction,
-  hasRunnerRunnablePressureAction,
   hasRunnerRemoteTrashAction,
-  runnerDiscardChoiceRoles,
-  isRunnerDuplicateInstall,
-  isRunnerRigInstallAction,
-  isRunnerPressureAction,
-  sourceDefinitionIdForSimulationAction,
   runnerAdvancedRemoteContestContext,
   definitionForSimulationAction,
-  rolesForAction,
-  runnerCoverageRecoveryActionForMetrics,
-  runnerCoverageSearchActionForMetrics,
-  runnerHasKnownUnaffordableLegalRun,
-  runnerVisibleMissingBreakerCoverage,
-  runnerHasKnownBlockedPathByCoverage,
-  runnerMissingCoverageTypesForInput,
-  runnerRunKnownPathCost,
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
-  assessKnownRezzedIcePath,
   definitionTypeForMetrics,
   remoteRootTrashCostForMetrics,
   canBreakerDefinitionBreakIce,
