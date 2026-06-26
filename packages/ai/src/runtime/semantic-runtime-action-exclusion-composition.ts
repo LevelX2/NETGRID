@@ -48,7 +48,7 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
 export function createSemanticRuntimeActionExclusionComposition(
   dependencies: SemanticRuntimeActionExclusionCompositionDependencies,
 ): RunnerSourceCardAnswerRoleContext &
-  RunnerSelfDamageContext &
+  Omit<RunnerSelfDamageContext, "runnerSelfDamageSurvivalExclusion"> &
   ReturnType<typeof createSemanticRuntimeActionExclusionContext> {
   const {
     semanticRuntimeRunnerSourceCardAnswerRole,
@@ -128,7 +128,6 @@ export function createSemanticRuntimeActionExclusionComposition(
     runnerSelfDamageGuardedDecision,
     runnerSelfDamageImmediateWinSemanticChoice,
     runnerSelfDamageSurvivalAssessment,
-    runnerSelfDamageSurvivalExclusion,
     semanticRuntimeActionExclusion,
   };
 }

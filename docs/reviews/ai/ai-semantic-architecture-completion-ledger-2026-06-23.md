@@ -5528,6 +5528,18 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
+- `AI-COMPLETE-03` fünfhundertachtundsiebzigster Struktur-Schnitt:
+  - `packages/ai/src/index.ts` entfernt weitere nur noch lokal definierte Foundation-, Tag-Punish-, Corp-Score- und Self-Damage-Bindings.
+  - `packages/ai/src/runtime/ai-facade-foundation-context.ts` gibt interne Central-Run-/Tag-Punish-Helfer nicht mehr aus der Foundation-Oberfläche zurück.
+  - `packages/ai/src/simulation/corp-tag-punish-window-composition.ts` gibt interne Payoff-Profile und das nicht mehr konsumierte Tagged-Runner-Payoff-Profil nicht mehr aus der Composition-Oberfläche zurück.
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts` gibt den internen Corp-Score-Helfer nicht mehr zurück; die Score-Components bleiben die konsumierte Fassade.
+  - `packages/ai/src/runtime/semantic-runtime-action-exclusion-composition.ts` gibt die interne Self-Damage-Survival-Exclusion nicht mehr aus der Composition-Oberfläche zurück.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 1.486 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

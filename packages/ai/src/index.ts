@@ -768,13 +768,8 @@ const {
   corpScoreTerminalDiagnosticsForSimulationAction,
   corpEconomyBeforeScoreDiagnosticsForSimulationAction,
   definitionForSimulationAction,
-  centralRunEventGoodForTarget,
   strongestCorpTagSourceOpportunity,
-  corpPunishKindForAction,
-  isCorpTagSourceAction,
-  isCorpTraceTagSourceAction,
   corpTagPunishOntologyAssessmentForAction,
-  corpVisibleTagPayoffCategoryForAction,
   applyCorpVisibleTagPunishUnknownSkipDiagnostics,
   corpVisibleTagPunishOpportunities,
   applyCorpTagSourceWindowDiagnostics,
@@ -1087,11 +1082,6 @@ const {
   sourceDefinitionIdForAction,
 });
 const {
-  corpInstalledEconomyActionProfile,
-  corpTagPunishPayoffFundingProfile,
-  corpImmediateTagSourceVisiblePayoffProfile,
-  corpImmediateTagSourceAvailable,
-  corpUnprotectedPersistentTagAssetSetup,
   corpOntologyPayoffAvailableForTagSource,
   tagPunishWindowDiagnosticsForSimulationAction,
   corpTaggedPayoffWindowPassiveActionPenalty,
@@ -1126,7 +1116,6 @@ const {
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
   semanticRuntimeCorpEvidence,
-  semanticRuntimeCorpScore,
   semanticRuntimeCorpScoreComponents,
 } = createSemanticRuntimeCorpScoringEvidenceComposition({
   sourceDefinitionIdForAction,
@@ -1185,7 +1174,6 @@ const {
   runnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalAssessment,
-  runnerSelfDamageSurvivalExclusion,
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,

@@ -84,7 +84,6 @@ export function createCorpTagPunishWindowComposition(
     });
 
   const {
-    corpTaggedRunnerPayoffProfile,
     corpTaggedPayoffWindowPassiveActionPenalty,
     corpTaggedRunnerPayoffPressure,
   } = createCorpTaggedRunnerPayoffComposition({
@@ -115,14 +114,8 @@ export function createCorpTagPunishWindowComposition(
   });
 
   return {
-    corpInstalledEconomyActionProfile,
-    corpTagPunishPayoffFundingProfile,
-    corpImmediateTagSourceVisiblePayoffProfile,
-    corpImmediateTagSourceAvailable,
-    corpUnprotectedPersistentTagAssetSetup,
     corpOntologyPayoffAvailableForTagSource,
     tagPunishWindowDiagnosticsForSimulationAction,
-    corpTaggedRunnerPayoffProfile,
     corpTaggedPayoffWindowPassiveActionPenalty,
     corpTaggedRunnerPayoffPressure,
   };

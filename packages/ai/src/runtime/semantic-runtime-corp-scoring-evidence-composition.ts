@@ -100,7 +100,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     });
 
   const {
-    semanticRuntimeCorpScore,
     semanticRuntimeCorpScoreComponents,
   } = createSemanticRuntimeCorpScoreComposition({
     actionCreditCost: dependencies.actionCreditCost,
@@ -135,7 +134,6 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpPassiveScoreLinePenalty,
     semanticRuntimeCorpScoreNowSafetyGate,
     semanticRuntimeCorpEvidence,
-    semanticRuntimeCorpScore,
     semanticRuntimeCorpScoreComponents,
   };
 }
