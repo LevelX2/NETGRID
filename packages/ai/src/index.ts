@@ -556,6 +556,9 @@ import {
 import {
   createCorpVisibleTagPunishUnknownSkipDiagnosticsContext,
 } from "./simulation/corp-visible-tag-punish-unknown-skip-diagnostics";
+import {
+  createCorpTagCreationDiagnosticsContext,
+} from "./simulation/corp-tag-creation-diagnostics";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
@@ -1161,6 +1164,12 @@ const { applyCorpVisibleTagPunishUnknownSkipDiagnostics } =
     sourceDefinitionIdForAction,
     isCorpTraceTagSourceAction,
   });
+const {
+  applyCorpTagSourceWindowDiagnostics,
+  applyActualTagCreationDiagnostics,
+} = createCorpTagCreationDiagnosticsContext({
+  sourceDefinitionIdForAction,
+});
 
 const {
   bestTrueCentralCloseoutProfile: bestTrueCentralCloseoutProfileForMetrics,
@@ -3799,59 +3808,6 @@ function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
         cardId: string | undefined;
       } => opportunity !== undefined,
     );
-}
-
-function applyCorpTagSourceWindowDiagnostics(
-  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
-  input: AiDecisionInput,
-  action: LegalAction,
-): void {
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  const sourceType =
-    RUNTIME_CARDS[sourceDefinitionId]?.type ??
-    DEMO_CARDS_BY_ID[sourceDefinitionId]?.type;
-  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-  if (scoredAgenda?.kind === "scored_agenda_trace_tag")
-    diagnostics.corpTagCreatedByScoredAgendaAction = true;
-  else if (action.type === "play_operation")
-    diagnostics.corpTagCreatedByOperation = true;
-  else if (sourceType === "asset")
-    diagnostics.corpTagCreatedByAssetOrNode = true;
-  else if (sourceType === "ice" || action.type === "rez_ice")
-    diagnostics.corpTagCreatedByIce = true;
-  if (action.type === "trigger_ability")
-    diagnostics.corpTagCreatedByPersistentEffect = true;
-}
-
-function applyActualTagCreationDiagnostics(
-  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
-  input: AiDecisionInput,
-  action: LegalAction,
-  decision: AiDecision,
-  stateBeforeAction: GameState,
-): void {
-  if (input.side === "runner") {
-    diagnostics.corpTagCreatedDuringRunnerTurn = true;
-    if (
-      stateBeforeAction.run ||
-      action.type === "resolve_choice" ||
-      decision.reasonCode.includes("trace")
-    ) {
-      diagnostics.corpTagCreatedDuringEncounter = true;
-      diagnostics.corpTagCreatedByTraceSuccess = true;
-    }
-    if (
-      action.type === "access_card" ||
-      action.type === "steal_agenda" ||
-      action.type === "trash_accessed_card" ||
-      action.type === "decline_trash"
-    )
-      diagnostics.corpTagCreatedByAccessOrSteal = true;
-    return;
-  }
-  if (input.side !== "corp") return;
-  diagnostics.corpTagCreatedDuringCorpTurn = true;
-  applyCorpTagSourceWindowDiagnostics(diagnostics, input, action);
 }
 
 function runnerSurvivalCounterContextForInput(input: AiDecisionInput): {
