@@ -90,7 +90,7 @@ import {
 } from "./runtime/card-definition-lookup";
 import { createRunnerBaselineSupportComposition } from "./runtime/runner-baseline-support-composition";
 import { createRunnerVisibleCardDiscardComposition } from "./runtime/runner-visible-card-discard-composition";
-import { createAiActionEntrypoints } from "./runtime/ai-action-entrypoints";
+import { createAiActionEntrypointsComposition } from "./runtime/ai-action-entrypoints-composition";
 import { compareAction } from "./runtime/action-order";
 import {
   remoteTrashCostBucket,
@@ -382,7 +382,6 @@ import {
 import { SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
 import { createAiSimulationComposition } from "./simulation/ai-simulation-composition";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
-import { createLegacyActionScoringComposition } from "./legacy/legacy-action-scoring-composition";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -1474,14 +1473,11 @@ const {
   chooseCorpBaselineAction,
   chooseRunnerAction,
   chooseRunnerBaselineAction,
-} = createAiActionEntrypoints({
+  scoreRunnerAction,
+  scoreCorpAction,
+} = createAiActionEntrypointsComposition({
   chooseSemanticRuntimeAction,
-  scoreActions: (input, side) =>
-    scoreActionsForLegacy(input, side, {
-      extractAiFeatures,
-      scoreRunnerAction,
-      scoreCorpAction,
-    }),
+  extractAiFeatures,
   decisionFromChoices,
   hasCorpPlanAction,
   isCorpReactiveBaselineDecision,
@@ -1492,6 +1488,20 @@ const {
   runnerHasConditionalPaymentContinueDecision,
   chooseRunnerPlanAction,
   runnerSelfDamageGuardedDecision,
+  rolesForAction,
+  rolesForCardId,
+  runnerProgramInstallTrashAssessment,
+  runnerProgramInstallTrashAssessmentForAction,
+  runnerProgramInstallDisplacementPenalty,
+  runnerRemoteTrashAccessContext,
+  encounterBreakReserveContext,
+  pumpViabilityAssessment,
+  runnerMuPressureInstallPriorityBonus,
+  runnerMuPressureFundingPriorityBonus,
+  runnerPersistentInstallEvaluationForAction,
+  runnerPersistentInstallLegacyScoreDelta,
+  corpTagPunishOntologyAssessmentForAction,
+  corpOntologyPayoffAvailableForTagSource,
 });
 export {
   chooseAiAction,
@@ -1665,21 +1675,3 @@ export {
   runAiSelfplayTraceMining,
   simulateAiSoak,
 };
-
-
-const { scoreRunnerAction, scoreCorpAction } = createLegacyActionScoringComposition({
-  rolesForAction,
-  rolesForCardId,
-  runnerProgramInstallTrashAssessment,
-  runnerProgramInstallTrashAssessmentForAction,
-  runnerProgramInstallDisplacementPenalty,
-  runnerRemoteTrashAccessContext,
-  encounterBreakReserveContext,
-  pumpViabilityAssessment,
-  runnerMuPressureInstallPriorityBonus,
-  runnerMuPressureFundingPriorityBonus,
-  runnerPersistentInstallEvaluationForAction,
-  runnerPersistentInstallLegacyScoreDelta,
-  corpTagPunishOntologyAssessmentForAction,
-  corpOntologyPayoffAvailableForTagSource,
-});
