@@ -41,7 +41,6 @@ import {
   randomBreakOrDamageRiskProfileForDefinitionId,
   runnerBlinkRecoveryAssessment,
   type BlinkRiskAssessment,
-  type BlinkRiskPayoffOverride,
   type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import {
@@ -141,7 +140,6 @@ import {
 import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
-  type VisibleEncounterSubroutine,
 } from "./runtime/encounter-subroutine";
 import {
   currentEncounteredIceCard,
@@ -350,6 +348,9 @@ import {
 import {
   createRunnerBlinkRiskContext,
 } from "./runtime/runner-blink-risk-context";
+import {
+  createRunnerBlinkEncounterBreakContext,
+} from "./runtime/runner-blink-encounter-break-context";
 import {
   createRunnerBlinkBreakExclusionContext,
 } from "./runtime/runner-blink-break-exclusion";
@@ -1644,6 +1645,18 @@ const {
   strategicIntentForInput: runnerStrategicIntentForInput,
   runTargets: evaluateRunnerRunTargets,
 });
+const { blinkRiskAssessmentForEncounterBreak } =
+  createRunnerBlinkEncounterBreakContext({
+    sourceDefinitionIdForAction,
+    randomBreakOrDamageRiskProfileForDefinitionId,
+    breakSubroutineIndexesForAction,
+    encounteredSubroutines: (input) =>
+      currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
+    buildBlinkRiskAssessment,
+    isImmediateSafetyThreatSubroutine,
+    isRemoteServerTarget,
+    visibleRootIsKnownAgenda,
+  });
 const {
   runnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion,
@@ -2148,112 +2161,6 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
   semanticRuntimeDecisionDebug,
   practicalMicroRuntimeCandidates,
 });
-
-function blinkRiskAssessmentForEncounterBreak(
-  input: AiDecisionInput,
-  action: LegalAction,
-): BlinkRiskAssessment | undefined {
-  if (input.side !== "runner" || action.type !== "break_subroutine") {
-    return undefined;
-  }
-  const riskProfile = randomBreakOrDamageRiskProfileForDefinitionId(
-    sourceDefinitionIdForAction(input, action),
-  );
-  if (!riskProfile) return undefined;
-  const breakIndexes = breakSubroutineIndexesForAction(action);
-  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
-  const targetSubroutines = [...breakIndexes]
-    .map((index) => quote?.subroutines[index])
-    .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
-      Boolean(subroutine),
-    );
-  const currentHandCount = input.playerView.own.gripOrHq.length;
-  const visibleSubroutinesLikely = Math.max(
-    1,
-    breakIndexes.size || targetSubroutines.length,
-  );
-  const stableCoverageAvailable = stableBreakAlternativeForBlinkAction(
-    input,
-    action,
-  );
-  const payoffOverride = blinkEncounterPayoffOverride(input, targetSubroutines);
-
-  return buildBlinkRiskAssessment({
-    currentHandCount,
-    handAfterActionCost: currentHandCount,
-    blinkUsesLikely: visibleSubroutinesLikely,
-    visibleSubroutinesLikely,
-    payoffOverride,
-    stableCoverageAvailable,
-    context: "encounter_break",
-    riskProfile,
-    evidence: [
-      "blinkBreakAction:true",
-      `blinkBreakSubroutineCount:${visibleSubroutinesLikely}`,
-      `blinkBreakStableAlternative:${stableCoverageAvailable}`,
-      `blinkBreakPayoffOverride:${payoffOverride}`,
-      ...(input.playerView.run?.position?.serverId
-        ? [`blinkBreakServer:${input.playerView.run.position.serverId}`]
-        : []),
-    ],
-  });
-}
-
-function stableBreakAlternativeForBlinkAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  const targetIceId =
-    typeof action.payload?.iceId === "string" ? action.payload.iceId : "";
-  const targetIndexes = breakSubroutineIndexesForAction(action);
-  return input.legalActions.some((candidate) => {
-    if (
-      candidate.actionId === action.actionId ||
-      candidate.type !== "break_subroutine" ||
-      randomBreakOrDamageRiskProfileForDefinitionId(
-        sourceDefinitionIdForAction(input, candidate),
-      ) !== undefined
-    ) {
-      return false;
-    }
-    if (
-      targetIceId &&
-      typeof candidate.payload?.iceId === "string" &&
-      candidate.payload.iceId !== targetIceId
-    ) {
-      return false;
-    }
-    const candidateIndexes = breakSubroutineIndexesForAction(candidate);
-    if (targetIndexes.size === 0 || candidateIndexes.size === 0) return true;
-    return [...targetIndexes].some((index) => candidateIndexes.has(index));
-  });
-}
-
-function blinkEncounterPayoffOverride(
-  input: AiDecisionInput,
-  targetSubroutines: VisibleEncounterSubroutine[],
-): BlinkRiskPayoffOverride {
-  if (targetSubroutines.some(isImmediateSafetyThreatSubroutine)) {
-    return "survival";
-  }
-  const run = input.playerView.run;
-  const server =
-    run?.position?.kind === "ice"
-      ? input.playerView.servers.find(
-          (candidate) => candidate.id === run.position?.serverId,
-        )
-      : undefined;
-  if (!server || !isRemoteServerTarget(server.id)) return "none";
-  if (server.root.some(visibleRootIsKnownAgenda)) return "known_agenda";
-  if (
-    server.root.some(
-      (card) => card.known && (card.advancementCounters ?? 0) > 0,
-    )
-  ) {
-    return "remote_score_threat";
-  }
-  return "none";
-}
 
 const {
   semanticRuntimeRunnerRunTargetGuidanceComponent,
