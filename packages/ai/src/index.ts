@@ -677,7 +677,7 @@ import {
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
 import {
-  runnerCoverageRepairDiagnostic as runnerCoverageRepairDiagnosticWithDeps,
+  createRunnerCoverageRepairDiagnostic,
   runnerKnownPathDiagnosticsForAction as runnerKnownPathDiagnosticsForActionWithDeps,
   runnerKnownNoAccessLegalRunTargets as runnerKnownNoAccessLegalRunTargetsWithDeps,
   type RunnerKnownNoAccessTarget,
@@ -1184,6 +1184,12 @@ const sourceDefinitionIdForSimulationAction =
 
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
+});
+
+const runnerCoverageRepairDiagnostic = createRunnerCoverageRepairDiagnostic({
+  runnerKnownNoAccessLegalRunTargets,
+  findVisibleCard,
+  rolesForCardId,
 });
 
 const {
@@ -17624,20 +17630,5 @@ function runnerKnownNoAccessLegalRunTargets(
     assessKnownRezzedIcePath,
     runnerKnownPathAssessmentIsKnownNoAccess,
     runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  });
-}
-
-function runnerCoverageRepairDiagnostic(
-  input: AiDecisionInput,
-  action: LegalAction,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  return runnerCoverageRepairDiagnosticWithDeps(input, action, {
-    runnerKnownNoAccessLegalRunTargets,
-    sourceDefinitionIdForAction: (diagnosticInput, diagnosticAction) =>
-      typeof diagnosticAction.source === "string"
-        ? findVisibleCard(diagnosticInput, diagnosticAction.source)
-            ?.definitionId
-        : undefined,
-    rolesForCardId,
   });
 }

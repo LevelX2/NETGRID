@@ -2,6 +2,11 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 
+type VisibleCardDefinitionLookup = (
+  input: AiDecisionInput,
+  cardId: string,
+) => { definitionId?: string } | undefined;
+
 export type RunnerKnownNoAccessTarget = {
   serverId: string;
   assessment: KnownRezzedIcePathAssessment;
@@ -525,4 +530,29 @@ export function runnerCoverageRepairDiagnostic(
       ? { runnerCoverageRepairIntentSatisfied: true }
       : { runnerCoverageRepairIntentNoFollowup: true }),
   };
+}
+
+export function createRunnerCoverageRepairDiagnostic(dependencies: {
+  runnerKnownNoAccessLegalRunTargets: (
+    input: AiDecisionInput,
+  ) => RunnerKnownNoAccessTarget[];
+  findVisibleCard: VisibleCardDefinitionLookup;
+  rolesForCardId: (definitionId: string | undefined) => string[];
+}): (
+  input: AiDecisionInput,
+  action: LegalAction,
+) => RunnerCoverageRepairDiagnostic {
+  return (input, action) =>
+    runnerCoverageRepairDiagnostic(input, action, {
+      runnerKnownNoAccessLegalRunTargets:
+        dependencies.runnerKnownNoAccessLegalRunTargets,
+      sourceDefinitionIdForAction: (diagnosticInput, diagnosticAction) =>
+        typeof diagnosticAction.source === "string"
+          ? dependencies.findVisibleCard(
+              diagnosticInput,
+              diagnosticAction.source,
+            )?.definitionId
+          : undefined,
+      rolesForCardId: dependencies.rolesForCardId,
+    });
 }
