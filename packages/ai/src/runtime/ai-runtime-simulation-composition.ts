@@ -74,6 +74,10 @@ type AiContextDiagnosticsOutputs = ReturnType<
   typeof createAiContextDiagnosticsComposition
 >;
 
+type SemanticRuntimeCorpScoringOutputs = ReturnType<
+  typeof createSemanticRuntimeCorpScoringComposition<string>
+>;
+
 type RuntimeContextDiagnosticsDependencyKeys =
   | keyof AiContextDiagnosticsOutputs
   | "closeout"
@@ -120,13 +124,11 @@ export type AiRuntimeSimulationCompositionDependencies =
     > &
     AiRuntimeSimulationScoringDependencies;
 
-export function createAiRuntimeSimulationComposition(
+function createRuntimeComposedDependencies(
   dependencies: AiRuntimeSimulationCompositionDependencies,
+  contextDiagnostics: AiContextDiagnosticsOutputs,
 ) {
-  const contextDiagnostics =
-    createAiContextDiagnosticsComposition(dependencies);
-
-  const composedDependencies = {
+  return {
     ...dependencies,
     ...contextDiagnostics,
     closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
@@ -139,6 +141,117 @@ export function createAiRuntimeSimulationComposition(
       contextDiagnostics.corpTagPunishOntologyAssessmentForAction,
     trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
   };
+}
+
+function createSemanticRuntimeDependencies(
+  dependencies: AiRuntimeSimulationCompositionDependencies,
+  contextDiagnostics: AiContextDiagnosticsOutputs,
+  runnerSupport: RunnerSemanticSupportOutputs,
+  corpScoring: SemanticRuntimeCorpScoringOutputs,
+): SemanticRuntimeOrchestrationCompositionDependencies {
+  return {
+    ...dependencies,
+    ...contextDiagnostics,
+    ...runnerSupport,
+    closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
+    hasKnownUnaffordableLegalRun:
+      contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
+    remoteTrashAccessContext:
+      contextDiagnostics.runnerRemoteTrashAccessContext,
+    trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
+    riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
+    planMemoryActionExclusion:
+      runnerSupport.semanticRuntimePlanMemoryActionExclusion,
+    evaluationForAction:
+      runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
+    handFundingTarget: runnerSupport.runnerHandFundingTarget,
+    bankHasConcreteFundingNeed:
+      runnerSupport.runnerBankHasConcreteFundingNeed,
+    cardAddressesVisibleBreakerNeed:
+      runnerSupport.runnerCardAddressesVisibleBreakerNeed,
+    badPublicityOrTraceTechCard:
+      runnerSupport.runnerBadPublicityOrTraceTechCard,
+    loanLiabilityAssessment: runnerSupport.runnerLoanLiabilityAssessment,
+    runnerMultiRunEventExclusion:
+      runnerSupport.semanticRuntimeRunnerMultiRunEventExclusion,
+    runnerRunTargetEvaluationForAction:
+      runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
+    programInstallTrashAssessmentForAction:
+      runnerSupport.runnerProgramInstallTrashAssessmentForAction,
+    programInstallDisplacementPenalty:
+      runnerSupport.runnerProgramInstallDisplacementPenalty,
+    muPressureActionEvidence: runnerSupport.runnerMuPressureActionEvidence,
+    bankInvestmentCommitmentEvidence:
+      runnerSupport.runnerBankInvestmentCommitmentEvidence,
+    noRunEconomyCommitmentEvidence:
+      runnerSupport.runnerNoRunEconomyCommitmentEvidence,
+    blinkRiskEvidenceForAction:
+      runnerSupport.runnerBlinkRiskEvidenceForAction,
+    persistentInstallEvidenceForAction:
+      runnerSupport.runnerPersistentInstallEvidenceForAction,
+    badPublicityRelevance: {
+      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+      actionCreditCost: dependencies.actionCreditCost,
+      fakedHitCardId: dependencies.fakedHitCardId,
+    },
+    goalFit: {
+      runActionSpendingCapAssessment:
+        dependencies.runActionSpendingCapAssessment,
+      runTargetEvaluationForAction:
+        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
+    },
+    recoveryCommitment: {
+      muPressureFundingScoreComponent:
+        runnerSupport.runnerMuPressureFundingScoreComponent,
+      handBufferNeedScoreComponent:
+        dependencies.handBufferNeedScoreComponent,
+      viral15JackOutScoreComponent:
+        runnerSupport.runnerViral15JackOutScoreComponent,
+      multiRunEventScoreComponent:
+        runnerSupport.runnerMultiRunEventScoreComponent,
+      bankInvestmentCommitmentScoreComponents:
+        runnerSupport.runnerBankInvestmentCommitmentScoreComponents,
+      noRunEconomyCommitmentScoreComponents:
+        runnerSupport.runnerNoRunEconomyCommitmentScoreComponents,
+    },
+    install: {
+      rolesForAction: contextDiagnostics.rolesForAction,
+      muPressureInstallScoreComponent:
+        runnerSupport.runnerMuPressureInstallScoreComponent,
+      persistentInstallFitScoreComponent:
+        runnerSupport.runnerPersistentInstallFitScoreComponent,
+      isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
+      isRunnerPressureRole: dependencies.isRunnerPressureRole,
+      badPublicityOrTraceTechCard:
+        runnerSupport.runnerBadPublicityOrTraceTechCard,
+      programInstallTrashAssessmentForAction:
+        runnerSupport.runnerProgramInstallTrashAssessmentForAction,
+      programInstallDisplacementPenalty:
+        runnerSupport.runnerProgramInstallDisplacementPenalty,
+    },
+    startRun: {
+      serverId: dependencies.serverId,
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+    },
+    corpAdvancementCounterPlacementAssessment:
+      corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+    corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
+    corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
+    corpOntologyPayoffAvailableForTagSource:
+      corpScoring.corpOntologyPayoffAvailableForTagSource,
+  };
+}
+
+export function createAiRuntimeSimulationComposition(
+  dependencies: AiRuntimeSimulationCompositionDependencies,
+) {
+  const contextDiagnostics =
+    createAiContextDiagnosticsComposition(dependencies);
+
+  const composedDependencies = createRuntimeComposedDependencies(
+    dependencies,
+    contextDiagnostics,
+  );
 
   const runnerSupport =
     createRunnerSemanticSupportComposition(composedDependencies);
@@ -146,99 +259,12 @@ export function createAiRuntimeSimulationComposition(
   const corpScoring =
     createSemanticRuntimeCorpScoringComposition(composedDependencies);
 
-  const semanticRuntimeDependencies: SemanticRuntimeOrchestrationCompositionDependencies =
-    {
-      ...dependencies,
-      ...contextDiagnostics,
-      ...runnerSupport,
-      closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
-      hasKnownUnaffordableLegalRun:
-        contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
-      remoteTrashAccessContext:
-        contextDiagnostics.runnerRemoteTrashAccessContext,
-      trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
-      riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
-      planMemoryActionExclusion:
-        runnerSupport.semanticRuntimePlanMemoryActionExclusion,
-      evaluationForAction:
-        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-      handFundingTarget: runnerSupport.runnerHandFundingTarget,
-      bankHasConcreteFundingNeed:
-        runnerSupport.runnerBankHasConcreteFundingNeed,
-      cardAddressesVisibleBreakerNeed:
-        runnerSupport.runnerCardAddressesVisibleBreakerNeed,
-      badPublicityOrTraceTechCard:
-        runnerSupport.runnerBadPublicityOrTraceTechCard,
-      loanLiabilityAssessment: runnerSupport.runnerLoanLiabilityAssessment,
-      runnerMultiRunEventExclusion:
-        runnerSupport.semanticRuntimeRunnerMultiRunEventExclusion,
-      runnerRunTargetEvaluationForAction:
-        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-      programInstallTrashAssessmentForAction:
-        runnerSupport.runnerProgramInstallTrashAssessmentForAction,
-      programInstallDisplacementPenalty:
-        runnerSupport.runnerProgramInstallDisplacementPenalty,
-      muPressureActionEvidence: runnerSupport.runnerMuPressureActionEvidence,
-      bankInvestmentCommitmentEvidence:
-        runnerSupport.runnerBankInvestmentCommitmentEvidence,
-      noRunEconomyCommitmentEvidence:
-        runnerSupport.runnerNoRunEconomyCommitmentEvidence,
-      blinkRiskEvidenceForAction:
-        runnerSupport.runnerBlinkRiskEvidenceForAction,
-      persistentInstallEvidenceForAction:
-        runnerSupport.runnerPersistentInstallEvidenceForAction,
-      badPublicityRelevance: {
-        sourceDefinitionIdForAction:
-          dependencies.sourceDefinitionIdForAction,
-        actionCreditCost: dependencies.actionCreditCost,
-        fakedHitCardId: dependencies.fakedHitCardId,
-      },
-      goalFit: {
-        runActionSpendingCapAssessment:
-          dependencies.runActionSpendingCapAssessment,
-        runTargetEvaluationForAction:
-          runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
-      },
-      recoveryCommitment: {
-        muPressureFundingScoreComponent:
-          runnerSupport.runnerMuPressureFundingScoreComponent,
-        handBufferNeedScoreComponent:
-          dependencies.handBufferNeedScoreComponent,
-        viral15JackOutScoreComponent:
-          runnerSupport.runnerViral15JackOutScoreComponent,
-        multiRunEventScoreComponent:
-          runnerSupport.runnerMultiRunEventScoreComponent,
-        bankInvestmentCommitmentScoreComponents:
-          runnerSupport.runnerBankInvestmentCommitmentScoreComponents,
-        noRunEconomyCommitmentScoreComponents:
-          runnerSupport.runnerNoRunEconomyCommitmentScoreComponents,
-      },
-      install: {
-        rolesForAction: contextDiagnostics.rolesForAction,
-        muPressureInstallScoreComponent:
-          runnerSupport.runnerMuPressureInstallScoreComponent,
-        persistentInstallFitScoreComponent:
-          runnerSupport.runnerPersistentInstallFitScoreComponent,
-        isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
-        isRunnerPressureRole: dependencies.isRunnerPressureRole,
-        badPublicityOrTraceTechCard:
-          runnerSupport.runnerBadPublicityOrTraceTechCard,
-        programInstallTrashAssessmentForAction:
-          runnerSupport.runnerProgramInstallTrashAssessmentForAction,
-        programInstallDisplacementPenalty:
-          runnerSupport.runnerProgramInstallDisplacementPenalty,
-      },
-      startRun: {
-        serverId: dependencies.serverId,
-        isRemoteServerTarget: dependencies.isRemoteServerTarget,
-      },
-      corpAdvancementCounterPlacementAssessment:
-        corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-      corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
-      corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
-      corpOntologyPayoffAvailableForTagSource:
-        corpScoring.corpOntologyPayoffAvailableForTagSource,
-    };
+  const semanticRuntimeDependencies = createSemanticRuntimeDependencies(
+    dependencies,
+    contextDiagnostics,
+    runnerSupport,
+    corpScoring,
+  );
 
   const runtimeEntrypoints =
     createSemanticRuntimeOrchestrationComposition(
