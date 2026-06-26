@@ -236,12 +236,7 @@ import {
 import {
   createRunnerSelfDamageContext,
 } from "./runtime/runner-self-damage-context";
-import {
-  createRunnerBlinkRiskContext,
-} from "./runtime/runner-blink-risk-context";
-import {
-  createRunnerBlinkEncounterBreakContext,
-} from "./runtime/runner-blink-encounter-break-context";
+import { createRunnerBlinkRiskComposition } from "./runtime/runner-blink-risk-composition";
 import {
   createRunnerBlinkBreakExclusionContext,
 } from "./runtime/runner-blink-break-exclusion";
@@ -1201,25 +1196,22 @@ const {
   strategicIntentForInput: runnerStrategicIntentForInput,
   runTargets: evaluateRunnerRunTargets,
 });
-const { blinkRiskAssessmentForEncounterBreak } =
-  createRunnerBlinkEncounterBreakContext({
-    sourceDefinitionIdForAction,
-    randomBreakOrDamageRiskProfileForDefinitionId,
-    breakSubroutineIndexesForAction,
-    encounteredSubroutines: (input) =>
-      currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
-    buildBlinkRiskAssessment,
-    isImmediateSafetyThreatSubroutine,
-    isRemoteServerTarget,
-    visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
-  });
 const {
+  blinkRiskAssessmentForEncounterBreak,
   runnerBlinkRiskEvidenceForAction,
   runnerBlinkRunExclusion,
-} = createRunnerBlinkRiskContext({
+} = createRunnerBlinkRiskComposition({
+  sourceDefinitionIdForAction,
+  randomBreakOrDamageRiskProfileForDefinitionId,
+  breakSubroutineIndexesForAction,
+  encounteredSubroutines: (input) =>
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
+  buildBlinkRiskAssessment,
+  isImmediateSafetyThreatSubroutine,
+  isRemoteServerTarget,
+  visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
   multiRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runRiskAssessment: assessBlinkRiskForRunAction,
-  breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
   shouldAvoidRun: (assessment) =>
     blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
 });
