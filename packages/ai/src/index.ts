@@ -845,8 +845,6 @@ const {
 
 const {
   bestTrueCentralCloseoutProfileForMetrics,
-  trueCentralCloseoutProfileForMetrics,
-  runnerRemoteThreatProfile,
   runnerRemoteThreatTargetingDiagnosticsForAction,
   runnerCentralPressureDiagnosticsForSimulationAction,
 } = createRunnerCentralPressureDiagnosticsComposition({
@@ -1063,11 +1061,9 @@ const {
   semanticRuntimeCorpActionIsScoreLine,
   semanticRuntimeCorpAdvanceCompletesScore,
   semanticRuntimeCorpRemoteIsProtected,
-  semanticRuntimeCorpRemoteHasScoreLine,
   semanticRuntimeCorpEmptyRemoteCount,
   semanticRuntimeCorpHasRemoteInstability,
   semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine,
-  semanticRuntimeCorpHasStabilizingAlternative,
   semanticRuntimeCorpHasNakedScoreLine,
   semanticRuntimeCorpHasUnsafeRemoteScoreAction,
   semanticRuntimeCorpInstallRemoteScore,
