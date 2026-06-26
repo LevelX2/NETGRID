@@ -552,6 +552,7 @@ import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/cor
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
+import { runnerHqMemoryDiagnosticsForMetrics } from "./simulation/runner-hq-memory-diagnostics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
 import { summarizeStrategicPlanConversionMetrics } from "./simulation/strategic-plan-conversion-metrics";
@@ -12743,91 +12744,6 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
     !centralRun &&
     action.type === "end_turn"
       ? { runnerInterfaceInstalledButUnusedTurn: true }
-      : {}),
-  };
-}
-
-function runnerHqMemoryDiagnosticsForMetrics(
-  input: AiDecisionInput,
-  centralRun: boolean,
-  centralTarget: "hq" | "rd" | "archives" | undefined,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  const memory =
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
-  if (!memory) return {};
-  const knownAgendaDefinitions = memory.knownDefinitions.filter(
-    (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
-  );
-  const knownAgendaPoints = knownAgendaDefinitions.reduce(
-    (sum, definitionId) => sum + agendaPointsForMetrics(definitionId),
-    0,
-  );
-  const knownNonAgendaCount =
-    memory.knownDefinitions.length - knownAgendaDefinitions.length;
-  const unknownCount = Math.max(0, memory.handCount - memory.knownCount);
-  const knownFraction =
-    memory.handCount > 0 ? round(memory.knownCount / memory.handCount) : 0;
-  const fullyKnownNoAgenda =
-    memory.allCardsKnown &&
-    memory.knownCount > 0 &&
-    knownAgendaDefinitions.length === 0 &&
-    memory.knownDefinitions.every((definitionId) =>
-      isLowValueKnownAccessCard(definitionId, input.playerView.own.credits),
-    );
-  const knownCardValue =
-    centralRun && centralTarget === "hq"
-      ? knownAgendaDefinitions.length * 520 + knownAgendaPoints * 80
-      : 0;
-  const unknownCardValue =
-    centralRun && centralTarget === "hq" ? Math.min(140, unknownCount * 55) : 0;
-  const invalidationText = memory.invalidationReasons.join("|");
-  return {
-    hqKnownCards: memory.knownCount,
-    hqUnknownCards: unknownCount,
-    hqKnownFraction: knownFraction,
-    ...(memory.allCardsKnown ? { hqFullyKnown: true } : {}),
-    hqKnownAgendaCount: knownAgendaDefinitions.length,
-    hqKnownNonAgendaCount: knownNonAgendaCount,
-    hqKnownAgendaPoints: knownAgendaPoints,
-    ...(invalidationText.includes("corp_draw_added_unknown_hq_card")
-      ? { hqMemoryInvalidatedByDraw: true }
-      : {}),
-    ...(invalidationText.includes("known_hq_card_installed") ||
-    invalidationText.includes("corp_installed_hidden_hq_card")
-      ? { hqMemoryInvalidatedByInstall: true }
-      : {}),
-    ...(invalidationText.includes("known_hq_card_played") ||
-    invalidationText.includes("corp_played_unknown_hq_card")
-      ? { hqMemoryInvalidatedByPlay: true }
-      : {}),
-    ...(invalidationText.includes("corp_discarded_hq_card")
-      ? { hqMemoryInvalidatedByDiscard: true }
-      : {}),
-    ...(invalidationText.includes("shuffle_changed_hq_hand") ||
-    invalidationText.includes("arrange_changed_hq_hand") ||
-    invalidationText.includes("swap_changed_hq_hand")
-      ? { hqMemoryInvalidatedByShuffleOrReorder: true }
-      : {}),
-    ...(knownCardValue > 0 ? { hqRunValueFromKnownCards: knownCardValue } : {}),
-    ...(unknownCardValue > 0
-      ? { hqRunValueFromUnknownCards: unknownCardValue }
-      : {}),
-    ...(centralRun && centralTarget === "hq" && fullyKnownNoAgenda
-      ? { hqRunSuppressedBecauseFullyKnownNoAgenda: true }
-      : {}),
-    ...(centralRun &&
-    centralTarget === "hq" &&
-    knownAgendaDefinitions.length > 0
-      ? { hqRunBoostedBecauseKnownAgenda: true }
-      : {}),
-    ...(centralRun && centralTarget === "hq" && unknownCount > 0
-      ? { hqRunBoostedBecauseUnknownCardsRemain: true }
-      : {}),
-    ...(centralRun &&
-    centralTarget === "hq" &&
-    isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
-    !input.eventTail.some(aiEventMayChangeHqPressure)
-      ? { hqRunRepeatedWithoutNewHqInfo: true }
       : {}),
   };
 }
