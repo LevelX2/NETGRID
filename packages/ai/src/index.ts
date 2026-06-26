@@ -149,7 +149,6 @@ import { isBlockedByKnownRezzedIce } from "./runtime/runner-known-rezzed-ice-blo
 import type {
   CorpTagPunishSkipReason,
 } from "./runtime/corp-tag-punish-types";
-import type { RankedChoice } from "./runtime/ranked-choice";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
@@ -556,6 +555,7 @@ import {
 import {
   createLegacyDecisionContext,
 } from "./legacy/legacy-decision-context";
+import { scoreActionsForLegacy } from "./legacy/legacy-action-scorer";
 import {
   BENCHMARK_PROFILES_143,
   listV143BenchmarkProfiles,
@@ -587,7 +587,6 @@ import {
   type GameState,
   type LegalAction,
   type PlayerView,
-  type Side,
   type VisibleCard,
 } from "@netgrid/shared";
 export {
@@ -1332,7 +1331,12 @@ const {
   hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  scoreRunnerActions: (input: AiDecisionInput) => scoreActions(input, "runner"),
+  scoreRunnerActions: (input: AiDecisionInput) =>
+    scoreActionsForLegacy(input, "runner", {
+      extractAiFeatures,
+      scoreRunnerAction,
+      scoreCorpAction,
+    }),
   compareAction,
   selectedChoicesForDecision,
   scrubEvidence,
@@ -1957,7 +1961,12 @@ const {
   chooseRunnerBaselineAction,
 } = createAiActionEntrypoints({
   chooseSemanticRuntimeAction,
-  scoreActions,
+  scoreActions: (input, side) =>
+    scoreActionsForLegacy(input, side, {
+      extractAiFeatures,
+      scoreRunnerAction,
+      scoreCorpAction,
+    }),
   decisionFromChoices,
   hasCorpPlanAction,
   isCorpReactiveBaselineDecision,
@@ -2241,14 +2250,3 @@ const { scoreCorpAction } = createLegacyCorpActionScorer({
   corpTagPunishOntologyAssessmentForAction,
   corpOntologyPayoffAvailableForTagSource,
 });
-
-// Legacy baseline scorer implementation. The public entrypoint lives in
-// legacy/legacy-baseline.ts; this scorer stays colocated with its helper graph.
-function scoreActions(input: AiDecisionInput, side: Side): RankedChoice[] {
-  const features = extractAiFeatures(input);
-  return input.legalActions.map((action) =>
-    side === "runner"
-      ? scoreRunnerAction(input, features, action)
-      : scoreCorpAction(input, features, action),
-  );
-}
