@@ -923,8 +923,6 @@ const {
   runnerBadPublicityOrTraceTechCard,
   runnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce,
-  selectedRunnerProgramInstallTrashOptionIds,
-  selectedRunnerForcedProgramTrashOptionIds,
   runnerProgramInstallTrashAssessment,
   runnerProgramInstallTrashAssessmentForAction,
   runnerProgramInstallDisplacementPenalty,
