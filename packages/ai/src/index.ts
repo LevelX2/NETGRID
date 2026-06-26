@@ -159,9 +159,7 @@ import {
 import {
   createPracticalMicroCandidatesContext,
 } from "./runtime/practical-micro-candidates-context";
-import {
-  createSemanticRuntimeVisibleCardContext,
-} from "./runtime/semantic-runtime-visible-card-context";
+import { createSemanticRuntimeCorpFundingContestabilityComposition } from "./runtime/semantic-runtime-corp-funding-contestability-composition";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -174,15 +172,6 @@ import {
 import {
   createSemanticRuntimeEvidenceContext,
 } from "./runtime/semantic-runtime-evidence-context";
-import {
-  createSemanticRuntimeCorpRezFloorContext,
-} from "./runtime/semantic-runtime-corp-rez-floor-context";
-import {
-  createSemanticRuntimeCorpCentralRezContext,
-} from "./runtime/semantic-runtime-corp-central-rez-context";
-import {
-  createSemanticRuntimeCorpRemoteContestabilityContext,
-} from "./runtime/semantic-runtime-corp-remote-contestability-context";
 import {
   createCorpTagPunishPayoffProfileContext,
 } from "./runtime/corp-tag-punish-payoff-profiles";
@@ -1334,39 +1323,22 @@ const {
   semanticRuntimeVisibleCardType,
   semanticRuntimeVisibleCardAdvancementRequirement,
   semanticRuntimeVisibleIceRezCost,
-} = createSemanticRuntimeVisibleCardContext({
-  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
-  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
-});
-const {
   semanticRuntimeCorpRemoteRezFloorAssessment,
   semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
-} = createSemanticRuntimeCorpRezFloorContext({
-  actionServerId: semanticRuntimeCorpActionServerId,
-  isRemoteServerTarget,
-  server: semanticRuntimeCorpServer,
-  actionCreditCost,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
-});
-const {
   semanticRuntimeCorpCentralRezReserveAssessment,
   semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-} = createSemanticRuntimeCorpCentralRezContext({
-  actionCreditCost,
-  actionServerId: semanticRuntimeCorpActionServerId,
-  actionSourceCard: semanticRuntimeCorpActionSourceCard,
-  sourceDefinitionIdForAction,
-});
-const {
   semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-} = createSemanticRuntimeCorpRemoteContestabilityContext({
+} = createSemanticRuntimeCorpFundingContestabilityComposition({
+  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
+  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
   actionServerId: semanticRuntimeCorpActionServerId,
   server: semanticRuntimeCorpServer,
+  actionCreditCost,
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+  actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  sourceDefinitionIdForAction,
   remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
   isRemoteServerTarget,
 });
