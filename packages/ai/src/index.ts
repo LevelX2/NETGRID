@@ -251,9 +251,7 @@ import {
   createRunnerSourceCardAnswerRoleContext,
 } from "./runtime/runner-source-card-answer-role-context";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
-import {
-  createRunnerHandFundingContext,
-} from "./runtime/runner-hand-funding-context";
+import { createRunnerDevelopmentSupportComposition } from "./runtime/runner-development-support-composition";
 import {
   createRunnerScoreComponentsContext,
 } from "./runtime/runner-score-components";
@@ -266,11 +264,7 @@ import { createRunnerNoRunEconomyContext } from "./runtime/runner-no-run-economy
 import {
   createRunnerBadPublicityRelevanceContext,
 } from "./runtime/runner-bad-publicity-relevance-context";
-import { createRunnerLoanContext } from "./runtime/runner-loan-context";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
-import {
-  createRunnerViral15JackOutContext,
-} from "./runtime/runner-viral15-jack-out-context";
 import { createRunnerRecoveryContext } from "./runtime/runner-recovery-context";
 import {
   safeNonNegativeInteger,
@@ -283,7 +277,6 @@ import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
-import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
 import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
 import {
   createRunnerProgramInstallTrashContext,
@@ -1215,7 +1208,15 @@ const {
   shouldAvoidRun: (assessment) =>
     blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
 });
-const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
+const {
+  runnerLoanLiabilityAssessment,
+  runnerViral15JackOutScoreComponent,
+  runnerHandFundingTarget,
+  runnerPersistentInstallFitScoreComponent,
+  runnerPersistentInstallLegacyScoreDelta,
+  runnerPersistentInstallEvidenceForAction,
+  runnerPersistentInstallEvaluationForAction,
+} = createRunnerDevelopmentSupportComposition({
   highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
   hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
   sourceDefinitionIdForAction,
@@ -1234,31 +1235,12 @@ const { runnerLoanLiabilityAssessment } = createRunnerLoanContext({
   isRunnerPressureRole,
   rolesForAction,
   hasKnownUnaffordableLegalRun: runnerHasKnownUnaffordableLegalRun,
-});
-const {
-  runnerViral15JackOutScoreComponent,
-} = createRunnerViral15JackOutContext({
-  actionCreditCost,
   isVisibleIcebreakerProgram,
-});
-const { runnerHandFundingTarget } = createRunnerHandFundingContext({
-  rolesForCardId,
-  visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-  cardAddressesVisibleBreakerNeed: runnerCardAddressesVisibleBreakerNeed,
-  isRunnerEconomyRole,
   cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
   badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
   rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
-});
-const {
-  runnerPersistentInstallFitScoreComponent,
-  runnerPersistentInstallLegacyScoreDelta,
-  runnerPersistentInstallEvidenceForAction,
-  runnerPersistentInstallEvaluationForAction,
-} = createRunnerPersistentInstallContext({
   deckCapabilities: deckCapabilitiesForInput,
   strategicIntent: runnerStrategicIntentForInput,
-  handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
 });
 const {
   runnerBankInvestmentCommitmentScoreComponents,
