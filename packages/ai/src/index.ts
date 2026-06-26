@@ -132,7 +132,6 @@ import {
 import {
   advancedAgendaStealSourceForAction,
   cardTargetTypeForInstance,
-  sourceDefinitionIdForSimulationAction as sourceDefinitionIdForSimulationSource,
 } from "./runtime/simulation-card-target";
 import {
   remoteTrashCostBucket,
@@ -669,6 +668,7 @@ import {
   createQualityTagsForAction,
   metricsFor,
 } from "./simulation/simulation-quality-adapters";
+import { createSourceDefinitionIdForSimulationAction } from "./simulation/simulation-action-source-definition";
 import {
   createRunnerInstallClassificationContext,
 } from "./simulation/runner-install-classification";
@@ -1178,6 +1178,9 @@ export {
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 
 const AI_HINTS = createAiHintsByCard();
+
+const sourceDefinitionIdForSimulationAction =
+  createSourceDefinitionIdForSimulationAction(findVisibleCard);
 
 const {
   runnerDrawKindForSimulationAction,
@@ -17643,14 +17646,5 @@ function runnerRemoteTrashAccessContext(
     input,
     action,
     runnerCreditReserveTargetForInput(input),
-  );
-}
-
-function sourceDefinitionIdForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string | undefined {
-  return sourceDefinitionIdForSimulationSource(action, (id) =>
-    findVisibleCard(input, id),
   );
 }
