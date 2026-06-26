@@ -5904,6 +5904,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` vierter Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-action-values.ts` kapselt Kreditkosten, Credit-Gain-Auswertung, Label-/Payload-Beträge und AI-Hint-basierte Economy-Gains für TacticalPlan-Mapping.
+  - `packages/ai/src/tactical-plans.ts` injiziert dafür `AI_HINTS_BY_CARD` und `visibleCardForAction` über ein schmales Dependency-Objekt, statt die Auswertung lokal zu halten.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 4.040 Zeilen; das neue Action-Values-Modul liegt bei 96 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
