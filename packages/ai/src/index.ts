@@ -372,9 +372,6 @@ import {
 } from "./simulation/remote-trash-role";
 import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
-  createQualityTagsForAction,
-} from "./simulation/simulation-quality-adapters";
-import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
@@ -399,11 +396,7 @@ import {
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
 import { SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
-import {
-  createSimulationDecisionContext,
-} from "./simulation/simulation-decision-context";
-import { createAiSimulationEntrypoints } from "./simulation/ai-simulation-entrypoints";
-import { createAiGameSimulator } from "./simulation/ai-game-simulator";
+import { createAiSimulationComposition } from "./simulation/ai-simulation-composition";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 import { createLegacyCorpActionScorer } from "./legacy/corp-baseline-action-score";
 import { createLegacyRunnerActionScorer } from "./legacy/runner-baseline-action-score";
@@ -1714,25 +1707,25 @@ const {
   semanticRuntimeScoreFromComponents,
 );
 
-const qualityTagsForAction = createQualityTagsForAction({
+const {
+  simulateAiGame,
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
+  runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
+  runMatchProgressionBenchmarkSuite,
+  runAiSelfplayTraceMining,
+  simulateAiSoak,
+} = createAiSimulationComposition({
   extractFeatures: extractAiFeatures,
   findVisibleCard,
   rolesForAction,
-});
-const {
-  chooseDecisionForSimulation,
-  simulationSideUsesSemanticRuntime,
-} = createSimulationDecisionContext({
   chooseAiAction,
   chooseRunnerAction,
   chooseCorpAction,
   chooseRunnerBaselineAction,
   chooseCorpBaselineAction,
   selectedChoicesForDecision,
-});
-const { simulateAiGame } = createAiGameSimulator({
-  chooseDecisionForSimulation,
-  simulationSideUsesSemanticRuntime,
   runnerHandUseDiagnosticsForSimulationAction,
   runnerReserveDiagnosticsForSimulationAction,
   runnerCentralPressureDiagnosticsForSimulationAction,
@@ -1743,23 +1736,10 @@ const { simulateAiGame } = createAiGameSimulator({
   corpIcePortfolioDiagnosticsForSimulationAction,
   corpScoreTerminalDiagnosticsForSimulationAction,
   corpEconomyBeforeScoreDiagnosticsForSimulationAction,
-  qualityTagsForAction,
+  summarizeMatchProgressionMetrics,
 });
 export { simulateAiGame };
 export { summarizeMatchProgressionMetrics };
-const {
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
-  runDoctrineQualityBenchmark,
-  runMatchProgressionBenchmark,
-  runMatchProgressionBenchmarkSuite,
-  runAiSelfplayTraceMining,
-  simulateAiSoak,
-} = createAiSimulationEntrypoints({
-  simulateAiGame,
-  summarizeMatchProgressionMetrics,
-  chooseRunnerAction,
-});
 export {
   runV143ExploitRegressionFixtures,
   runV143SimulationLeague,
